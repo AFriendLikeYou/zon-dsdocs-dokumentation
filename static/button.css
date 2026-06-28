@@ -10,11 +10,19 @@
 	align-items: center;
 	cursor: pointer;
 	border: none;
+	transition:
+		background-color var(--ds-dur, 160ms) var(--ds-ease, ease),
+		transform var(--ds-dur, 160ms) var(--ds-ease-out, ease-out);
 }
 
 .zon-button:hover {
 	background-color: var(--z-ds-color-text-70);
 	/* color: var(--z-ds-color-general-white-100); */
+}
+
+/* Press-Feedback (Emil-Skill): jedes drückbare Element reagiert auf den Druck */
+.zon-button:active {
+	transform: scale(0.97);
 }
 
 .zon-button:focus {

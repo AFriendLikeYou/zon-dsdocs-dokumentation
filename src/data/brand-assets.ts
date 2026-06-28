@@ -1,3 +1,5 @@
+import type { IconPre } from '../global';
+
 export const BRAND_ASSETS_LIST: IconPre[] = [
 	{
 		name: 'Die Zeit New',

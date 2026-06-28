@@ -5,6 +5,42 @@
 
 	--sidebar-offset: 300px;
 	--sidebar-width: 300px;
+
+	/* Motion-Tokens (nach Emil Kowalskis Animations-Skill) */
+	--ds-dur: 160ms; /* Hover / Press */
+	--ds-dur-slow: 240ms; /* Dropdowns / Panels */
+	--ds-ease: ease; /* Hover- & Color-Changes */
+	--ds-ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* Enter/Exit, UI — starke ease-out */
+	--ds-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* On-Screen-Movement / Morph */
+
+	/* Weiche Oberflächen */
+	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
+	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
+	--ds-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.07), 0 8px 24px rgba(0, 0, 0, 0.09);
+	--ds-reading-width: 72ch;
+}
+
+/* Schatten im Dark-Mode kräftiger + dezenter Light-Ring, sonst verschwinden sie auf #121212 */
+@media (prefers-color-scheme: dark) {
+	html:not(.color-scheme-light) {
+		--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+		--ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+	}
+}
+html.color-scheme-dark {
+	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+	--ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
 }
 
 *,
@@ -89,7 +125,8 @@ h4,
 h5 {
 	margin-top: 1.5em;
 	margin-bottom: 0.5em;
-	line-height: 1.2;
+	line-height: 1.15;
+	letter-spacing: -0.014em;
 	display: flex;
 	align-items: center;
 	hyphens: auto;
@@ -144,7 +181,8 @@ code {
 
 pre {
 	background-color: var(--z-ds-color-background-10);
-	border-radius: 3px;
+	border: 1px solid var(--ds-border-soft);
+	border-radius: var(--z-ds-border-radius-8);
 	padding: 16px;
 	overflow: auto;
 }
@@ -158,15 +196,26 @@ main p {
 	font-size: var(--z-ds-fontsize-18);
 	color: var(--z-ds-color-text-70);
 	margin-bottom: 1em;
+	max-width: var(--ds-reading-width);
+}
+
+/* Lesespalte gilt nur für Text — Bild-Absätze (mdsvex wrappt ![]() in <p>) volle Breite */
+main p:has(> img) {
+	max-width: none;
 }
 
 main a {
 	color: var(--z-ds-color-text-100);
 	text-decoration: underline;
+	text-decoration-color: var(--ds-border-soft);
+	text-underline-offset: 0.15em;
+	transition:
+		color var(--ds-dur) var(--ds-ease),
+		text-decoration-color var(--ds-dur) var(--ds-ease);
 }
 
 main a:hover {
-	opacity: 0.8;
+	text-decoration-color: currentColor;
 }
 
 main blockquote {
@@ -188,14 +237,22 @@ main hr {
 
 main img {
 	max-width: 100%;
+	height: auto;
 	border-radius: var(--z-ds-border-radius-8);
-	aspect-ratio: 16 / 9;
 	border: 1px solid var(--z-ds-color-border-70);
+}
+
+main h2,
+main h3,
+main h4,
+main blockquote {
+	max-width: var(--ds-reading-width);
 }
 
 main ol,
 main ul {
 	padding: 0rem 1.5rem;
+	max-width: var(--ds-reading-width);
 }
 
 main ol li,
@@ -241,10 +298,14 @@ main ul li {
 /* // style a without class  */
 a[href]:not([class]) {
 	color: inherit;
+	transition: opacity var(--ds-dur) var(--ds-ease);
 }
 
-a[href]:not([class]):hover {
-	opacity: 0.8;
+/* Hinweis: keine opacity-Abdunklung mehr für main-Links — die übernehmen den
+   text-decoration-color-Hover (siehe `main a`). Nur klassen-lose Links außerhalb
+   von main (z. B. Footer) erhalten weiterhin ein dezentes Feedback. */
+:not(main) a[href]:not([class]):hover {
+	opacity: 0.7;
 }
 
 .flex {

@@ -2,8 +2,66 @@
 title: Components
 ---
 
+<script lang="ts">
+	import CardGrid from '$components/ui/card/CardGrid.svelte';
+
+	// Komponenten-Übersicht aus den Routen ableiten — driftet nicht von der Realität.
+	const STATUS_LABEL: Record<string, string> = {
+		ready_for_dev: 'Ready for dev',
+		completed: 'Completed',
+		changed: 'Geändert'
+	};
+	const STATUS_VARIANT: Record<string, 'ready' | 'done' | 'warn' | 'neutral'> = {
+		ready_for_dev: 'ready',
+		completed: 'done',
+		changed: 'warn'
+	};
+
+	const specMods = import.meta.glob('./*/spec.generated.ts', { eager: true });
+	const contentMods = import.meta.glob('./*/content.ts', { eager: true });
+	const pageMods = import.meta.glob('./*/+page.svx');
+
+	const titleCase = (slug: string) =>
+		slug
+			.split('-')
+			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+			.join(' ');
+
+	const slugs = Object.keys(pageMods).map((p) => p.split('/')[1]);
+
+	const cards = slugs
+		.map((slug) => {
+			const spec = (specMods[`./${slug}/spec.generated.ts`] as { generated?: any } | undefined)
+				?.generated;
+			const content =
+				(contentMods[`./${slug}/content.ts`] as { content?: any } | undefined)?.content ?? {};
+			if (spec) {
+				const status = content.status ?? spec.status;
+				return {
+					url: `/product/components/${slug}`,
+					title: spec.name ?? titleCase(slug),
+					description: content.zweck ?? spec.zweck ?? '',
+					badge: STATUS_LABEL[status] ?? status ?? '',
+					badgeVariant: STATUS_VARIANT[status] ?? 'neutral'
+				};
+			}
+			return {
+				url: `/product/components/${slug}`,
+				title: titleCase(slug),
+				description: 'Noch nicht dokumentiert.',
+				badge: 'In Arbeit',
+				badgeVariant: 'neutral' as const
+			};
+		})
+		.sort((a, b) => a.title.localeCompare(b.title));
+</script>
+
 <svelte:head>
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
 # {title}
+
+Übersicht aller dokumentierten Komponenten. Die Liste wird automatisch aus den Component-Routen erzeugt.
+
+<CardGrid {cards} />

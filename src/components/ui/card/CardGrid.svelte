@@ -1,43 +1,37 @@
 <script lang="ts">
 	import Card from './Card.svelte';
 
-	const cards = [
-		{
-			url: '/foundations/brand-assets',
-			title: 'Brand Assets',
-			description:
-				'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-		},
-		{
-			url: '/foundations/colors',
-			title: 'Colors',
-			description:
-				'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-		},
-		{
-			url: '/foundations/icons',
-			title: 'Icons',
-			description:
-				'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-		},
-		{
-			url: '/foundations/fonts',
-			title: 'Fonts',
-			description:
-				'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-		},
-		{
-			url: '/foundations/typography',
-			title: 'Typography',
-			description:
-				'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
-		}
+	type CardItem = {
+		url: string;
+		title: string;
+		description: string;
+		badge?: string;
+		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+	};
+
+	const PLACEHOLDER =
+		'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
+
+	const DEFAULT_CARDS: CardItem[] = [
+		{ url: '/foundations/brand-assets', title: 'Brand Assets', description: PLACEHOLDER },
+		{ url: '/foundations/colors', title: 'Colors', description: PLACEHOLDER },
+		{ url: '/foundations/icons', title: 'Icons', description: PLACEHOLDER },
+		{ url: '/foundations/fonts', title: 'Fonts', description: PLACEHOLDER },
+		{ url: '/foundations/typography', title: 'Typography', description: PLACEHOLDER }
 	];
+
+	let { cards = DEFAULT_CARDS }: { cards?: CardItem[] } = $props();
 </script>
 
 <div class="grid">
 	{#each cards as card}
-		<Card url={card.url} title={card.title} description={card.description} />
+		<Card
+			url={card.url}
+			title={card.title}
+			description={card.description}
+			badge={card.badge}
+			badgeVariant={card.badgeVariant}
+		/>
 	{/each}
 </div>
 

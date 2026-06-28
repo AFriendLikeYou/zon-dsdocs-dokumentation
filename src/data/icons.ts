@@ -1,3 +1,5 @@
+import type { IconPre } from '../global';
+
 export const SVG_LIST: IconPre[] = [
 	{
 		name: 'Audio',

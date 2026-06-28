@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { MenuItem } from '$data/navigation';
-	// import { onMount } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import Badge from '$components/ui/badge/Badge.svelte';
 
 	type Props = {
 		title: string;
@@ -34,11 +33,6 @@
 	const isActive = (linkHref: string) => {
 		return page.url.pathname === linkHref;
 	};
-
-	function cubicOut(t: number) {
-		const f = t - 1.0;
-		return f * f * f + 1.0;
-	}
 </script>
 
 <div class="collapsible-group">
@@ -59,7 +53,7 @@
 				<span class="collapsible-title-content">
 					{title}
 					{#if badge}
-						<span class="badge">{badge}</span>
+						<Badge variant="ready">{badge}</Badge>
 					{/if}
 				</span>
 				{#if items.length > 0}
@@ -89,7 +83,7 @@
 				<span class="collapsible-title-content">
 					{title}
 					{#if badge}
-						<span class="badge">{badge}</span>
+						<Badge variant="ready">{badge}</Badge>
 					{/if}
 				</span>
 				{#if items.length > 0}
@@ -113,8 +107,8 @@
 		{/if}
 	</div>
 
-	{#if items.length > 0 && isOpen}
-		<div class="collapsible-content" transition:slide={{ duration: 300, easing: cubicOut }}>
+	{#if items.length > 0}
+		<div class="collapsible-content" class:open={isOpen} inert={!isOpen}>
 			<div class="submenu-container">
 				<ul class="submenu-list">
 					{#each items as item}
@@ -135,11 +129,11 @@
 							>
 								{item.label}
 								{#if item.badge}
-									<span class="badge">{item.badge}</span>
+									<Badge variant="ready">{item.badge}</Badge>
 								{/if}
 								{#if item.locked}
 									{#if isUserLoggedIn}
-										<span class="badge">
+										<span class="lock-icon">
 											<svg
 												aria-hidden="true"
 												height="16"
@@ -156,14 +150,14 @@
 											>
 										</span>
 									{:else}
-										<span class="badge locked">
+										<span class="lock-icon">
 											<svg
 												aria-hidden="true"
 												height="16"
 												stroke-linejoin="round"
 												viewBox="0 0 16 16"
 												width="16"
-												style="color: var(--ds-gray-600);"
+												style="color: var(--z-ds-color-text-55);"
 												><path
 													fill-rule="evenodd"
 													clip-rule="evenodd"
@@ -209,52 +203,75 @@
 	.collapsible-link,
 	.collapsible-title {
 		flex-grow: 1;
-		padding: 8px 12px;
-		border-radius: 6px;
+		padding: 7px 12px;
+		border-radius: var(--z-ds-border-radius-8);
 		font-size: var(--z-ds-fontsize-16);
 		text-decoration: none;
-		color: var(--z-ds-color-text-100);
+		color: var(--z-ds-color-text-70); /* gedämpft — wird beim Aktiv-/Hover-Zustand kräftig */
 		transition:
-			background-color 0.2s,
-			color 0.2s;
+			background-color var(--ds-dur) var(--ds-ease),
+			color var(--ds-dur) var(--ds-ease);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 8px;
 		cursor: pointer;
 		border: none;
+		background: none;
 	}
 
-	.collapsible-link:hover,
-	.collapsible-title:hover {
-		background-color: var(--z-ds-color-background-10);
+	@media (hover: hover) and (pointer: fine) {
+		.collapsible-link:hover,
+		.collapsible-title:hover {
+			background-color: var(--z-ds-color-background-10);
+			color: var(--z-ds-color-text-100);
+		}
 	}
 
 	.collapsible-link.active {
 		background-color: var(--z-ds-color-background-10);
+		color: var(--z-ds-color-text-100);
+		font-weight: 500;
 	}
 
 	.collapsible-title-content {
 		display: flex;
 		align-items: center;
+		gap: 8px;
 	}
 
 	.chevron-icon {
 		margin-left: 8px;
-		transition: transform 0.3s ease;
-		transform: rotate(90deg);
+		flex: none;
+		color: var(--z-ds-color-text-55);
+		transition: transform var(--ds-dur) var(--ds-ease-out);
+		transform: rotate(0deg);
 	}
 
 	.chevron-icon.rotate {
-		transform: rotate(-90deg);
+		transform: rotate(90deg);
 	}
 
+	/* Smoothe Akkordeon-Animation via grid-template-rows (keine Höhenmessung → kein Springen) */
 	.collapsible-content {
-		overflow: hidden;
+		display: grid;
+		grid-template-rows: 0fr;
+		transition: grid-template-rows var(--ds-dur-slow) var(--ds-ease-out);
+	}
+
+	.collapsible-content.open {
+		grid-template-rows: 1fr;
 	}
 
 	.submenu-container {
-		position: relative;
-		padding-left: 0;
+		overflow: hidden;
+		min-height: 0;
+		opacity: 0;
+		transition: opacity var(--ds-dur) var(--ds-ease);
+	}
+
+	.collapsible-content.open .submenu-container {
+		opacity: 1;
 	}
 
 	.submenu-list {
@@ -264,30 +281,34 @@
 	}
 
 	.submenu-item {
-		margin: 4px 0;
+		margin: 2px 0;
 	}
 
 	.submenu-link {
 		display: flex;
 		align-items: center;
+		gap: 8px;
 		padding: 6px 24px;
-		border-radius: 6px;
+		border-radius: var(--z-ds-border-radius-8);
 		font-size: var(--z-ds-fontsize-16);
 		text-decoration: none;
-		color: var(--z-ds-color-text-70);
+		color: var(--z-ds-color-text-55);
 		transition:
-			background-color 0.2s,
-			color 0.2s;
+			background-color var(--ds-dur) var(--ds-ease),
+			color var(--ds-dur) var(--ds-ease);
 	}
 
-	.submenu-link:hover {
-		background-color: var(--z-ds-color-background-10);
-		color: var(--z-ds-color-text-100);
+	@media (hover: hover) and (pointer: fine) {
+		.submenu-link:hover {
+			background-color: var(--z-ds-color-background-10);
+			color: var(--z-ds-color-text-100);
+		}
 	}
 
 	.submenu-link.active {
 		background-color: var(--z-ds-color-background-10);
 		color: var(--z-ds-color-text-100);
+		font-weight: 500;
 	}
 
 	.submenu-link.locked {
@@ -295,16 +316,12 @@
 		opacity: 0.6;
 		pointer-events: auto; /* required so onclick still fires */
 	}
-	.badge {
+
+	.lock-icon {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		font-weight: 700;
 		margin-left: 8px;
-		padding: 2px 8px;
-		font-size: 10px;
-		border-radius: 12px;
-		background-color: var(--z-ds-color-focus-100);
-		color: var(--z-ds-color-background-0);
+		color: var(--z-ds-color-text-55);
 	}
 </style>

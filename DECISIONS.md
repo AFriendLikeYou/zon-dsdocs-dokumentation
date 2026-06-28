@@ -127,6 +127,24 @@ sonst auf `+page.svx`. Genau **ein** Stift pro Seite.
 im Browser → PR, ohne lokales Setup.
 **Status:** Aktiv.
 
+## ADR-010 — Look-and-Feel: ruhig/raffiniert + Motion-Standard
+**Kontext:** Die Seite soll sich mehr nach [animations.dev](https://animations.dev/)
+anfühlen (ruhig, weiche Borders, tasteful Motion), die ZEIT-Marke bleibt.
+**Entscheidung:** Zentrale **Motion-Tokens** (`--ds-dur`, `--ds-ease`,
+`--ds-ease-out`, `--ds-ease-in-out`) + weiche Oberflächen (`--ds-border-soft`,
+`--ds-shadow-*`) + Lesespalte (`--ds-reading-width`) in `global.css`. **Alle
+Animationen folgen dem installierten Skill `emilkowalski/skill`** (`.agents/skills/`):
+starke `ease-out` (`cubic-bezier(0.23,1,0.32,1)`), nie `ease-in` für UI, < 300 ms,
+frequenz-basiert (keine Animation auf Keyboard-/High-Frequency-Aktionen),
+`:active`-Press-Feedback (`scale(0.97)`), Hover hinter `@media (hover:hover)`,
+`prefers-reduced-motion` respektiert. Der `review-animations`-Skill ist das
+**Final-Gate** (Before/After-Tabelle, Approval ist verdient).
+**Konsequenzen:** Wiederverwendbare **`Badge`-Komponente** (konsolidiert die
+Status-Pills, AA-Kontrast via `text-100`+Tint+Dot); Sidebar-Akkordeon via
+`grid-template-rows` (smooth, interruptierbar) statt Svelte-`slide`; Components-Index
+als Karten-Grid. Reading-Width nur für Text (Bild-Absätze ausgenommen).
+**Status:** Aktiv.
+
 ---
 
 ## Workflow-Plan (beschlossen, in Umsetzung)

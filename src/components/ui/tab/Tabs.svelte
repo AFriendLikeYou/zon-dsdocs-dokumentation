@@ -119,12 +119,17 @@
 		padding: var(--z-ds-space-xs) var(--z-ds-space-s);
 		color: var(--z-ds-color-text-70);
 		white-space: nowrap;
+		transition: color var(--ds-dur) var(--ds-ease);
 	}
 
 	button.active {
 		color: var(--z-ds-color-text-100);
 	}
 
+	/* Unterstrich erscheint instant — Tab-Wechsel ist tastatur-initiiert/-wiederholbar
+	   (Pfeiltasten), darf also nicht bei jedem Schritt eine Keyframe-Animation neu
+	   abspielen (Emil-Skill: keine Animation auf Keyboard-/High-Frequency-Aktionen).
+	   Das smoothe, interruptierbare Color-Transition auf dem Button bleibt. */
 	button.active::after {
 		content: '';
 		position: absolute;
