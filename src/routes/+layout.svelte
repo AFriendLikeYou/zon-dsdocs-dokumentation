@@ -104,6 +104,8 @@
 
 	main {
 		width: 100%;
+		max-width: var(--ds-content-width);
+		margin-inline: auto;
 		padding: var(--z-ds-space-s) var(--z-ds-space-m);
 	}
 

@@ -17,7 +17,9 @@
 	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
 	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
 	--ds-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.07), 0 8px 24px rgba(0, 0, 0, 0.09);
-	--ds-reading-width: 72ch;
+
+	/* Zentrierte, responsive Lesespalte/Content-Breite (auf <main> angewandt) */
+	--ds-content-width: 56rem;
 }
 
 /* Schatten im Dark-Mode kräftiger + dezenter Light-Ring, sonst verschwinden sie auf #121212 */
@@ -196,12 +198,6 @@ main p {
 	font-size: var(--z-ds-fontsize-18);
 	color: var(--z-ds-color-text-70);
 	margin-bottom: 1em;
-	max-width: var(--ds-reading-width);
-}
-
-/* Lesespalte gilt nur für Text — Bild-Absätze (mdsvex wrappt ![]() in <p>) volle Breite */
-main p:has(> img) {
-	max-width: none;
 }
 
 main a {
@@ -242,17 +238,9 @@ main img {
 	border: 1px solid var(--z-ds-color-border-70);
 }
 
-main h2,
-main h3,
-main h4,
-main blockquote {
-	max-width: var(--ds-reading-width);
-}
-
 main ol,
 main ul {
 	padding: 0rem 1.5rem;
-	max-width: var(--ds-reading-width);
 }
 
 main ol li,
