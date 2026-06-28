@@ -1,0 +1,77 @@
+---
+title: "brand/typografie"
+description: "Documentation for brand/typografie"
+category: "brand"
+date: "2025-12-07T17:11:01.539Z"
+---
+<script lang="ts">
+
+    import Alert from '$components/ui/alert/Alert.svelte';
+
+</script>
+
+<img src="/assets/images/brand/typografie-image-0.png" alt="Image from brand/typografie" style="max-width: 100%; height: auto; border-radius: 8px;" />
+
+<img src="/assets/images/brand/typografie-image-1.png" alt="Image from brand/typografie" style="max-width: 100%; height: auto; border-radius: 8px;" />
+
+# DAS IST ANDERS
+
+This is some subline with example text.
+
+This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline
+
+<img src="/assets/images/brand/typografie-image-2.png" alt="Image from brand/typografie" style="max-width: 100%; height: auto; border-radius: 8px;" />
+
+## Headline H2 This should be new
+
+This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline
+
+### Headline H3
+
+<Alert variant="warning">
+  <AlertTitle>Headline H3</AlertTitle>
+  <AlertDescription>This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline</AlertDescription>
+</Alert>
+
+# Headline H3
+
+This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline
+
+<Alert variant="default">
+  <AlertTitle>Headline H3</AlertTitle>
+  <AlertDescription>This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline</AlertDescription>
+</Alert>
+
+# Headline H3
+
+This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline
+
+This is some subline
+
+#### Headline H4
+
+This is some subline
+
+##### Headline H5
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+  <div style="padding: 1.5rem; border: 2px solid #4caf50; border-radius: 8px; background-color: #f1f8f4;">
+    <strong style="color: #2e7d32; margin-bottom: 1rem; display: block;">✓ Do</strong>
+    <img src="/assets/images/brand/typografie-do-3.png" alt="Do: Do" style="max-width: 100%; height: auto; border-radius: 4px; margin-bottom: 0.5rem;" />
+    <h4 style="margin: 0.5rem 0;">Do</h4>
+    <p style="margin: 0.5rem 0;">This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline</p>
+  </div>
+  <div style="padding: 1.5rem; border: 2px solid #f44336; border-radius: 8px; background-color: #fef1f0;">
+    <strong style="color: #c62828; margin-bottom: 1rem; display: block;">✗ Don't</strong>
+    <img src="/assets/images/brand/typografie-dont-4.png" alt="Don't: Dont" style="max-width: 100%; height: auto; border-radius: 4px; margin-bottom: 0.5rem;" />
+    <h4 style="margin: 0.5rem 0;">Dont</h4>
+    <p style="margin: 0.5rem 0;">This is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some sublineThis is some subline</p>
+  </div>
+</div>
+
+<img src="/assets/images/brand/typografie-image-5.png" alt="Image from brand/typografie" style="max-width: 100%; height: auto; border-radius: 8px;" />
+
+<img src="/assets/images/brand/typografie-image-6.png" alt="Image from brand/typografie" style="max-width: 100%; height: auto; border-radius: 8px;" />
+
+This is some subline
+

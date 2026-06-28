@@ -1,0 +1,65 @@
+.zon-button {
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-background-0);
+	padding-inline: var(--z-ds-space-s);
+	padding-block: var(--z-ds-space-xxs);
+	background-color: var(--z-ds-color-text-100);
+	font-size: calc(var(--z-ds-fontsize-14));
+	gap: var(--z-ds-space-xs);
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	border: none;
+}
+
+.zon-button:hover {
+	background-color: var(--z-ds-color-text-70);
+	/* color: var(--z-ds-color-general-white-100); */
+}
+
+.zon-button:focus {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 4px;
+	background-color: var(--z-ds-color-text-70);
+	color: var(--z-ds-color-general-white-100);
+}
+
+.zon-button:disabled {
+	pointer-events: none;
+	color: var(--z-ds-color-text-40);
+}
+
+.zon-button--transparent:not(:is(:hover, :focus)) {
+	color: var(--z-ds-color-black-100);
+	background-color: transparent;
+}
+
+.zon-button--outline {
+	background-color: transparent;
+	border: 1px solid var(--z-ds-color-text-100);
+	color: var(--z-ds-color-text-100);
+}
+
+.footer-nav__button {
+	font-size: var(--z-ds-fontsize-16);
+	color: var(--z-ds-color-text-70);
+	border-radius: var(--z-ds-border-radius-8);
+	padding-inline: var(--z-ds-space-l);
+	padding-block: var(--z-ds-space-m) var(--z-ds-space-m);
+	background-color: var(--z-ds-color-background-10);
+}
+
+.footer-nav__button:hover {
+	background-color: var(--z-ds-color-background-20);
+	color: var(--z-ds-color-text-100);
+}
+
+.footer-nav__button:focus {
+	background-color: var(--z-ds-color-background-20);
+	color: var(--z-ds-color-text-100);
+}
+
+.footer-nav__button:disabled {
+	color: var(--z-ds-color-text-40);
+	cursor: not-allowed;
+}

@@ -1,0 +1,22 @@
+---
+title: Assets
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+<script lang="ts">
+	import BrandAssetsGrid from '$components/brand-assets/BrandAssetsGrid.svelte';
+
+	const { data } = $props();
+	const { brandAssets } = data;
+</script>
+
+
+
+# {title}
+
+
+<BrandAssetsGrid {brandAssets} />

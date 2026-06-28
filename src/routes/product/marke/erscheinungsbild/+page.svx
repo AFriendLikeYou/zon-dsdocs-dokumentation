@@ -1,0 +1,13 @@
+---
+title: Markenstratgie
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+<script lang="ts">
+</script>
+
+# {title}

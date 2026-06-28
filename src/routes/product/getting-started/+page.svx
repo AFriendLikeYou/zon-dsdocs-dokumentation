@@ -1,0 +1,47 @@
+---
+title: Getting started
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+Der ZEIT-Brandguide hilft Mitarbeitern, Partnern und Kollaborateuren bei der Erstellung von Inhalten und Materialien, die unsere Marke konsistent und sicher repräsentieren.
+
+## Für wen ist das Marken-Toolkit gedacht?
+
+Dieses Toolkit richtet sich an eine Vielzahl von Personen mit unterschiedlichen Aufgaben, Zielen und unterschiedlichen Kenntnissen über Institutionen. Hier ist eine Liste von Rollen, die das Hauptpublikum darstellen:
+
+#### Externe Mitarbeiter:innen
+
+- Gestalter
+- Werbetexter
+- Strategen
+- Produzenten
+- Art Director der Agentur
+- Event-Planer
+
+#### DIE ZEIT-Mitarbeiter:innen
+
+- Unternehmensmarketing
+- Produktmarketing
+- DevRel
+- Kundenerfolg
+- Design/Produkt
+- Werbetexter
+
+## Wie man den Brandguide verwendet
+
+Hier ist die Schritt-für-Schritt-Checkliste, die wir vorschlagen, um das meiste über die Marke GitHub zu erfahren:
+
+1. Bestimmen Sie die Art der Kreation, die Sie erstellen möchten, um herauszufinden, welche Überlegungen Sie dabei anstellen müssen. (Mehr dazu weiter unten)
+2. Informieren Sie sich über die Grundsätze, die DIE ZEIT als Marke ausmachen, im Abschnitt zur Markenidentität.
+3. Machen Sie sich mit den Grundlagen von DIE ZEIT vertraut.
+4. Entdecken Sie, wie Sie unsere grafischen Elemente verwenden können.
+5. Finden Sie Beispiele für die Art von Inhalten, die Sie erstellen möchten.
+
+## Bestimmen Sie Ihre Art von Kreativität
+
+Für den Anfang ist es hilfreich, wenn Sie sich selbst einige Fragen stellen, um die Art des von Ihnen zu erstellenden Materials zu bestimmen.

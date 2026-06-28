@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="0" errors="0" time="0.033318709">
+    <testsuite name="src/demo.spec.ts" timestamp="2025-07-18T11:29:40.373Z" hostname="ZV-CVFK39WVKK" tests="1" failures="0" errors="0" skipped="0" time="0.001089292">
+        <testcase classname="src/demo.spec.ts" name="sum test &gt; adds 1 + 2 to equal 3" time="0.000518458">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/fonts/Font.test.ts" timestamp="2025-07-18T11:29:40.373Z" hostname="ZV-CVFK39WVKK" tests="2" failures="0" errors="0" skipped="0" time="0.032229417">
+        <testcase classname="src/components/fonts/Font.test.ts" name="Font Component &gt; renders a &lt;p&gt; when style=&quot;label&quot;" time="0.028587459">
+        </testcase>
+        <testcase classname="src/components/fonts/Font.test.ts" name="Font Component &gt; renders a &lt;h2&gt; when style=&quot;heading&quot;" time="0.00317675">
+        </testcase>
+    </testsuite>
+</testsuites>

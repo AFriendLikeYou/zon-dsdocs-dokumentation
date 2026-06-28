@@ -1,0 +1,10 @@
+---
+title: Marke
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+Unser Markenzeichen ist das Herzstück unserer Marke. Es ist ein Symbol für unsere Identität und hilft uns, uns auf dem Markt zu differenzieren. Die konsistente Verwendung unseres Markenzeichens sorgt für Wiedererkennung und Vertrautheit.

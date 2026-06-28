@@ -1,0 +1,14 @@
+---
+title: Product
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import CardGrid from '$components/ui/card/CardGrid.svelte';
+	import Alert from '$components/ui/alert/Alert.svelte';
+</script>
+
+# {title}

@@ -1,0 +1,371 @@
+#!/usr/bin/env node
+/**
+ * zeit-de exporter — ziel="zeit-de"
+ * ----------------------------------
+ * Bildet das render-unabhängige Doku-Modell (siehe SKILL/references/doku-modell.md,
+ * identisch zur `spec`-Prop von SpecSheet.svelte) auf das konkrete zeit.de-Repo-Format ab:
+ *
+ *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx
+ *   - Datenfile (Doku-Modell):   src/routes/product/components/<kebab>/spec.ts
+ *
+ * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
+ * Der Renderer (SpecSheet.svelte) und das Modell bleiben stabil; hier liegt die ganze
+ * zeit.de-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Slot-Verdrahtung).
+ *
+ * Nutzung:
+ *   node tooling/zeit-de-exporter/export.mjs <model.json> [--root <repoRoot>] [--dry]
+ *
+ * Beispiel:
+ *   node tooling/zeit-de-exporter/export.mjs tooling/zeit-de-exporter/examples/button.json
+ */
+
+import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
+import { dirname, resolve, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const TARGET = 'zeit-de';
+const ROUTE_BASE = 'src/routes/product/components';
+const SPEC_COMPONENT_IMPORT = "$components/ui/specsheet";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** "Date Picker" / "date_picker" -> "date-picker" */
+function kebabCase(name) {
+	return String(name)
+		.trim()
+		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+		.replace(/[\s_]+/g, '-')
+		.replace(/[^a-zA-Z0-9-]/g, '')
+		.replace(/-+/g, '-')
+		.toLowerCase();
+}
+
+/** "date-picker" -> "datePicker" (used for the exported const name) */
+function camelCase(kebab) {
+	return kebab.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
+
+/** Add a `slot="…"` attribute to the first/root element of a markup string. */
+function withSlot(html, slotName) {
+	return String(html).trim().replace(/^(<[a-zA-Z][\w-]*)/, `$1 slot="${slotName}"`);
+}
+
+/** Escape a value for a single-line YAML frontmatter scalar. */
+function yamlScalar(value) {
+	const s = String(value);
+	// Quote when YAML could misread it (colons, leading specials, …).
+	if (/^[\w./:#?&=+%-]+$/.test(s) && !/^[#&*!|>@`"'%-]/.test(s)) return s;
+	return JSON.stringify(s);
+}
+
+// ---------------------------------------------------------------------------
+// Mapping: Doku-Modell -> zeit.de
+// ---------------------------------------------------------------------------
+
+/**
+ * Frontmatter-Mapping (Doku-Modell -> zeit.de `.svx`-Frontmatter).
+ * Hier — und NUR hier — leben die repo-spezifischen Key-Namen.
+ */
+function toFrontmatter(model) {
+	const fm = [['title', model.name]]; // zeit.de nutzt `title`, das Modell `name`
+	if (model.status) fm.push(['status', model.status]);
+	if (model.figma) fm.push(['figma', model.figma]);
+	if (model.aktualisiertAm) fm.push(['aktualisiert_am', model.aktualisiertAm]);
+	if (model.kategorie) fm.push(['kategorie', model.kategorie]);
+	return fm;
+}
+
+function renderFrontmatter(model) {
+	const lines = toFrontmatter(model).map(([k, v]) => `${k}: ${yamlScalar(v)}`);
+	return `---\n${lines.join('\n')}\n---`;
+}
+
+// Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont'];
+
+/** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
+function renderGenerated(model) {
+	// `render` ist Repo-Verdrahtung (Slot-Markup/CSS), gehört nicht ins Datenmodell.
+	const { render: _render, ...spec } = model;
+	const json = JSON.stringify(spec, null, '\t');
+	return (
+		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
+		`// Redaktionelle Texte gehören in content.ts (überschreibt diese Defaults).\n` +
+		`// Neu erzeugen: node tooling/zeit-de-exporter/export.mjs <model.json>\n` +
+		`export const generated = ${json};\n`
+	);
+}
+
+/** content.ts — redaktioneller Stub. Wird nur erzeugt, wenn noch nicht vorhanden (nie überschrieben). */
+function renderContentStub(model) {
+	const render = model.render ?? {};
+	/** @type {Record<string, unknown>} */
+	const content = {};
+	for (const k of EDITORIAL) if (model[k] !== undefined) content[k] = model[k];
+	if (render.version !== undefined) content.version = render.version;
+	if (render.variantInfo !== undefined) content.variantInfo = render.variantInfo;
+	const json = JSON.stringify(content, null, '\t');
+	return (
+		`// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.\n` +
+		`// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).\n` +
+		`// Die Felder überschreiben die generierten Werte aus spec.generated.ts.\n` +
+		`//\n` +
+		`//   zweck       – Beschreibung im Hero\n` +
+		`//   status      – ready_for_dev | completed | changed\n` +
+		`//   version     – Snapshot-/Versions-Label im Hero\n` +
+		`//   variantInfo – Wann welche Variante nutzen (Label → Text)\n` +
+		`//   callouts    – Anatomie-Beschriftungen ({ nr, text })\n` +
+		`//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
+		`//   doDont      – { do: [...], dont: [...] }\n` +
+		`export const content = ${json};\n`
+	);
+}
+
+/** Für Template-Literals im generierten Script escapen. */
+function tl(s) {
+	return String(s)
+		.replace(/\\/g, '\\\\')
+		.replace(/`/g, '\\`')
+		.replace(/\$\{/g, '\\${')
+		// Verhindert, dass ein </script> oder </style> im String-Inhalt den
+		// umschließenden <script>/<style>-Block der .svx-Seite vorzeitig schließt.
+		.replace(/<\/(script|style)>/gi, '<\\/$1>');
+}
+
+/**
+ * +page.svx — getabbte mdsvex-Seite (eBay-Stil): Hero + Tabs
+ * Design / Develop / Barrierefreiheit / Specs. Komponiert die nativen,
+ * adaptiven Spec-UI-Komponenten ($components/ui/specsheet) — keine
+ * verschachtelten weißen Container, Styling wie die übrige Doku-Seite.
+ */
+function renderPage(model, constName) {
+	const render = model.render ?? {};
+	const S = 'spec'; // lokale, zusammengeführte Konstante (generated + content)
+	const previewSlot = render.preview ? `\t\t${withSlot(render.preview, 'preview')}\n` : '';
+	const variantSlot = render.variant ? `\t\t${withSlot(render.variant, 'variant')}\n` : '';
+
+	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
+	const matrixCells = matrix
+		.map((m) => `\t\t<div class="cell"><span class="cell-label">${m.label}</span>${m.html}</div>`)
+		.join('\n');
+
+	const anchors = Array.isArray(render.calloutAnchors) ? render.calloutAnchors : [];
+	const anchorsProp = anchors.length ? ` {calloutAnchors}` : '';
+	// variantInfo + version sind redaktionell → kommen aus content.ts (nicht generated).
+	const hasVariantInfo = Boolean(render.variantInfo && typeof render.variantInfo === 'object');
+	const variantInfoProp = hasVariantInfo ? ` info={content.variantInfo ?? {}}` : '';
+
+	// CSS für die Live-Specimens (gegen .spec-canvas gescopt).
+	const css = Array.isArray(render.css) ? render.css.join('\n') : render.css ?? '';
+	const styleBlock = css ? `\n<style>\n${css}\n</style>\n` : '';
+
+	// Code-Beispiele (Develop): HTML/Svelte-Snippet + entscoptes CSS.
+	const note = render.codeNote ? `<!-- ${render.codeNote} -->\n` : '';
+	const htmlBody = [render.preview, render.variant].filter(Boolean).join('\n');
+	const htmlCode = htmlBody ? note + htmlBody : '';
+	const svelteCode = Array.isArray(render.codeSvelte)
+		? render.codeSvelte.join('\n')
+		: typeof render.codeSvelte === 'string'
+			? render.codeSvelte
+			: '';
+	const cssForCode = css.replace(/:global\(\.[\w-]+\s+([^)]+)\)/g, '$1');
+	const props = Array.isArray(render.props) ? render.props : [];
+	const hasVersion = typeof render.version === 'string';
+	const versionProp = hasVersion ? ` version={content.version}` : '';
+
+	// Verfügbarkeit je Abschnitt.
+	const hasAnatomy = Boolean(render.preview || model.callouts?.length || model.masse);
+	const hasMatrix = matrix.length > 0;
+	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
+	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
+	const hasDoDont = Boolean(model.doDont);
+	const anyCode = Boolean(htmlCode || svelteCode || cssForCode);
+	const hasProps = props.length > 0;
+	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
+	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
+	const hasMasse = Boolean(model.masse);
+	const hasDevelop = anyCode || hasProps;
+	const hasSpecs = hasTokens || hasMasse;
+
+	// Nur tatsächlich genutzte Komponenten importieren.
+	const used = new Set(['ComponentHero']);
+	if (hasAnatomy) used.add('Anatomy');
+	if (hasMatrix) used.add('VariantMatrix');
+	if (hasVariants) used.add('VariantList');
+	if (hasStates) used.add('StateList');
+	if (hasDoDont) used.add('DoDontList');
+	if (anyCode) used.add('CodeBlock');
+	if (hasProps) used.add('PropsTable');
+	if (hasA11y) used.add('A11yList');
+	if (hasMasse) used.add('MeasureTable');
+	if (hasTokens) used.add('TokenTable');
+
+	const tabs = [{ label: 'Design', name: 'designTab' }];
+	if (hasDevelop) tabs.push({ label: 'Develop', name: 'developTab' });
+	if (hasA11y) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
+	if (hasSpecs) tabs.push({ label: 'Specs', name: 'specsTab' });
+
+	const imports =
+		`\timport { Tabs } from '$components/ui/tab';\n` +
+		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
+		`\timport { generated } from './spec.generated';\n` +
+		`\timport { content } from './content';\n`;
+
+	const decls =
+		`\t// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.\n` +
+		`\tconst ${S} = { ...generated, ...content };\n` +
+		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
+		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
+		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
+		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
+		(hasProps ? `\tconst propsData = ${JSON.stringify(props)};\n` : '');
+
+	// ---- Design-Tab ----
+	let design = '';
+	if (hasAnatomy) {
+		design +=
+			`\t<Anatomy masse={${S}.masse} callouts={${S}.callouts}${anchorsProp}>\n` +
+			previewSlot +
+			variantSlot +
+			`\t</Anatomy>\n`;
+	}
+	if (hasVariants || hasMatrix) {
+		design += `\n\t<h2>Varianten</h2>\n`;
+		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
+		if (hasMatrix) design += `\t<VariantMatrix>\n${matrixCells}\n\t</VariantMatrix>\n`;
+	}
+	if (hasStates) design += `\n\t<h2>Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
+	if (hasDoDont) design += `\n\t<h2>Verwendung</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+
+	// ---- Develop-Tab ----
+	let develop = '';
+	if (hasProps) develop += `\t<h2>Properties</h2>\n\t<PropsTable props={propsData} />\n`;
+	if (anyCode) {
+		develop += `\n\t<h2>Code</h2>\n`;
+		if (htmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
+		if (svelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
+		if (cssForCode) develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
+	}
+
+	// ---- Barrierefreiheit-Tab ----
+	const a11y = `\t<A11yList items={${S}.a11y} />\n`;
+
+	// ---- Specs-Tab ----
+	let specs = '';
+	if (hasMasse) specs += `\t<h2>Maße</h2>\n\t<MeasureTable masse={${S}.masse} />\n`;
+	if (hasTokens) specs += `\n\t<h2>Tokens</h2>\n\t<TokenTable tokens={${S}.tokens} />\n`;
+
+	const bodies = { designTab: design, developTab: develop, a11yTab: a11y, specsTab: specs };
+	const snippets = tabs.map((t) => `{#snippet ${t.name}()}\n${bodies[t.name]}{/snippet}`).join('\n\n');
+	const tabsItems = tabs.map((t) => `\t\t{ label: '${t.label}', component: ${t.name} }`).join(',\n');
+
+	return (
+		`${renderFrontmatter(model)}\n` +
+		`\n` +
+		`<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->\n` +
+		`\n` +
+		`<script lang="ts">\n` +
+		imports +
+		decls +
+		`</script>\n` +
+		`\n` +
+		`<svelte:head>\n` +
+		`\t<title>{title} - Die Zeit Design System</title>\n` +
+		`</svelte:head>\n` +
+		`\n` +
+		`# {title}\n` +
+		`\n` +
+		`<ComponentHero spec={${S}}${versionProp} />\n` +
+		`\n` +
+		`<Tabs items={[\n${tabsItems}\n]} sticky />\n` +
+		`\n` +
+		snippets +
+		`\n` +
+		styleBlock
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Run
+// ---------------------------------------------------------------------------
+
+function parseArgs(argv) {
+	const args = { input: null, root: process.cwd(), dry: false };
+	for (let i = 0; i < argv.length; i++) {
+		const a = argv[i];
+		if (a === '--dry') args.dry = true;
+		else if (a === '--root') args.root = argv[++i];
+		else if (a === '--target') {
+			const t = argv[++i];
+			if (t !== TARGET) throw new Error(`Unbekanntes Ziel "${t}" — dieser Exporter kann nur "${TARGET}".`);
+		} else if (!a.startsWith('-')) args.input = a;
+	}
+	if (!args.input) throw new Error('Eingabe fehlt. Nutzung: export.mjs <model.json> [--root <repoRoot>] [--dry]');
+	return args;
+}
+
+function validate(model) {
+	const missing = ['name'].filter((k) => !model[k]);
+	if (missing.length) throw new Error(`Pflichtfeld(er) fehlen im Doku-Modell: ${missing.join(', ')}`);
+}
+
+function main() {
+	const { input, root, dry } = parseArgs(process.argv.slice(2));
+	const model = JSON.parse(readFileSync(input, 'utf8'));
+	validate(model);
+
+	const kebab = kebabCase(model.name);
+	const constName = `${camelCase(kebab)}Spec`;
+	const outDir = resolve(root, ROUTE_BASE, kebab);
+	const contentPath = resolve(outDir, 'content.ts');
+	const contentExists = existsSync(contentPath);
+
+	// Maschinen-Dateien werden immer geschrieben; content.ts nur beim ersten Mal (Stub).
+	const machineFiles = [
+		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, constName) },
+		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
+	];
+
+	console.log(`zeit-de-Exporter · "${model.name}" -> ${ROUTE_BASE}/${kebab}/`);
+	if (dry) {
+		for (const f of machineFiles) console.log(`\n--- ${relative(root, f.path)} ---\n${f.body}`);
+		console.log(
+			`\n--- ${relative(root, contentPath)} ${contentExists ? '(existiert — bliebe unangetastet)' : '(neu)'} ---\n${renderContentStub(model)}`
+		);
+		console.log('\n(dry run — nichts geschrieben)');
+		return;
+	}
+
+	mkdirSync(outDir, { recursive: true });
+	for (const f of machineFiles) {
+		writeFileSync(f.path, f.body);
+		console.log(`  geschrieben: ${relative(root, f.path)}`);
+	}
+	if (contentExists) {
+		console.log(`  übersprungen (von Hand gepflegt): ${relative(root, contentPath)}`);
+	} else {
+		writeFileSync(contentPath, renderContentStub(model));
+		console.log(`  Stub erzeugt: ${relative(root, contentPath)}`);
+	}
+
+	// Altes, monolithisches spec.ts aufräumen (durch spec.generated.ts + content.ts ersetzt).
+	const legacySpec = resolve(outDir, 'spec.ts');
+	if (existsSync(legacySpec)) {
+		unlinkSync(legacySpec);
+		console.log(`  entfernt (veraltet): ${relative(root, legacySpec)}`);
+	}
+}
+
+// Nur ausführen, wenn direkt aufgerufen (nicht beim Import).
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+	try {
+		main();
+	} catch (err) {
+		console.error(`✗ ${err.message}`);
+		process.exit(1);
+	}
+}
+
+export { kebabCase, camelCase, toFrontmatter, renderPage, renderGenerated, renderContentStub };

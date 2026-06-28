@@ -1,0 +1,11 @@
+---
+title: Prike-Kommunikation
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+...

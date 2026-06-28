@@ -1,0 +1,54 @@
+---
+title: Brand
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+# {title}
+
+<div class="zds-container">
+    <a href="/brand/marke">
+        Marke
+    </a>
+
+    <a href="/brand/logo">
+        Logo
+    </a>
+
+     <a href="/brand/farbe">
+        Farbe
+    </a>
+    
+</div>
+
+<style>
+    .zds-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); 
+        gap: var(--z-ds-space-l);
+    }
+
+    .zds-container a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: var(--z-ds-space-l);
+        border: 1px solid var(--z-ds-color-border-70);
+        border-radius: var(--z-ds-border-radius-8);
+        padding: 1.5rem;
+        transition: transform 0.2s ease;
+        background-color: var(--z-ds-color-background-0);
+        text-decoration: none;
+    }
+
+    .zds-container a:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: scale(1.025);
+    }
+</style>
+
+
+ 

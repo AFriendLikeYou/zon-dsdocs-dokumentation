@@ -1,0 +1,24 @@
+---
+title: Markenarchitektur
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+# {title}
+
+<p>Die Markenarchitektur der ZEIT-Gruppe ordnet und strukturiert die Vielfalt unserer Angebote unter der starken Dachmarke <strong>DIE ZEIT</strong>. Sie stellt sicher, dass alle Produkte und Submarken konsistent auftreten und dennoch ihre eigene Identität und Funktion klar vermitteln können.</p>
+
+<p>Im Zentrum steht die Dachmarke DIE ZEIT. Sie verkörpert die Werte, die seit 1946 unser Selbstverständnis prägen: journalistische Exzellenz, Glaubwürdigkeit, Tiefgang und eine offene Debattenkultur. Unter dieser Klammer entfalten sich verschiedene Submarken und Produkte, die auf unterschiedliche Zielgruppen und Bedürfnisse ausgerichtet sind.</p>
+
+<ul>
+	<li><strong>DIE ZEIT (Wochenzeitung)</strong> – das publizistische Herzstück, gedruckt und digital.</li>
+	<li><strong>Die Zeit</strong> – das digitale Nachrichtenangebot, seit Juli 2025 voll in die Dachmarke integriert.</li>
+	<li><strong>ZEIT Verlagsangebote</strong> – Magazine, Newsletter und Podcasts wie <em>ZEIT Wissen</em>, <em>ZEIT Geschichte</em> oder <em>ZEIT Verbrechen</em>.</li>
+	<li><strong>ZEIT Veranstaltungen</strong> – Events und Konferenzen, die Dialog und Austausch fördern, wie <em>ZEIT für Bildung</em> oder <em>ZEIT Konferenzen</em>.</li>
+	<li><strong>ZEIT Produkte & Services</strong> – Angebote wie <em>ZEIT Studienführer</em>, <em>ZEIT Karriere</em> oder <em>ZEIT Reisen</em>, die Lesern konkrete Mehrwerte bieten.</li>
+</ul>
+
+<p>Die Architektur folgt einem klaren Prinzip: <em>One Brand – Many Voices</em>. Alle Submarken tragen die Werte der Dachmarke in sich und verstärken sie, ohne die eigene Ausprägung zu verlieren. So entsteht eine kohärente Markenwelt, die Orientierung schafft und die Identität von DIE ZEIT über alle Kanäle hinweg stärkt.</p>

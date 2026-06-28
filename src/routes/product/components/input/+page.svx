@@ -1,0 +1,9 @@
+---
+title: Input
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}

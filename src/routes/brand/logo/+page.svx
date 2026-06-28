@@ -1,0 +1,147 @@
+---
+title: Logo
+---
+
+<script lang="ts">
+	import ImageGallery from '$components/ui/imagegallery/ImageGallery.svelte';
+  import DoDontGroup from '$components/ui/dodont/DoDontGroup.svelte';
+  import DoDont from '$components/ui/dodont/DoDont.svelte';
+  import DownloadSpecimen from '$components/ui/downloadspecimen/DownloadSpecimen.svelte';
+	import VideoPlayer from '$components/ui/videoplayer/VideoPlayer.svelte';
+  import BrandAssetsGrid from '$components/brand-assets/BrandAssetsGrid.svelte';
+
+  const catalog = {
+    publicPath: '/assets'
+  };
+
+	const { data } = $props();
+	const { brandAssets } = data;
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+# { title }
+
+Unser Logo stellt unsere Marke visuell dar und hilft uns, uns auf dem Markt zu unterscheiden. Die konsequente Verwendung sorgt für Wiedererkennung und Vertrautheit.
+
+<VideoPlayer 
+  src="../../assets/brand/logo/img/logo.mp4"
+/>
+
+## Warum das ZEIT-Logo nicht verändert werden darf
+
+### Rechtliche Grundlage
+Das ZEIT-Logo integriert das Bremer Wappen, das ein offizielles Staatssymbol ist. Staatssymbole dürfen grundsätzlich nicht für gewerbliche Zwecke genutzt werden. Die Freie Hansestadt Bremen hat dem Zeitverlag bei der Gründung der ZEIT ausnahmsweise die Nutzung gestattet, nachdem Hamburg die Verwendung seines Wappens untersagt hatte. Sollten das Bremer Wappen nun zu stark verändert und weiterhin kommerziell eingesetzt werden, besteht theoretisch die Möglichkeit, dass Bremen seine Zustimmung überdenkt.
+
+### Markenschutz
+Unsere Wort-/Bildmarke, in der das Bremer Wappen von »DIE« und »ZEIT« eingerahmt wird, ist als Marke geschützt. Bei Veränderungen dieses Logos verliert die abgewandelte Version den Schutz der bestehenden Marke. Um Abwandlungen zu schützen, müssen diese einzeln angemeldet werden, was mit erheblichem Aufwand und Kosten verbunden ist. Daher melden wir nur solche Varianten an, die langfristig im Einsatz bleiben.
+
+
+## Logogrößen und Anwendung
+
+
+### General-Version
+
+![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
+*A single track trail outside of Albuquerque, New Mexico.*
+
+Das ZEIT-Logo General ist ausschließlich für Printmedien vorgesehen.
+
+Anwendung: Anzeigen, Plakate, Broschüren und andere gedruckte Medien, bei denen das Logo breiter als 55 mm ist.
+
+> :warning: **Warning:** Do not push the big red button.
+
+
+### Small-Version
+
+![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
+
+Das ZEIT-Logo Small ist für digitale Medien sowie für Printmedien mit geringerem Platzbedarf bestimmt.
+
+Anwendung: Webseiten, Social Media, Newsletter sowie Printformate mit sehr begrenztem Platz, bei denen die Breite des Logos unter 55 mm liegt.
+
+## Versionen
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+
+### Wordmark
+
+The wordmark is used in contexts where the audience might not already know GitHub and recognize the invertocat logo. GitHub is always one word with a capitalized G and H. When referring to GitHub the product, company, or service, keep it simple—GitHub.
+
+![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
+
+![DIE ZEIT Logo Safespace](../../assets/brand/logo/img/wordmark-2.webp)
+
+### Pictorgramm
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+![DIE ZEIT Logo](../../assets/brand/logo/img/pictogram-1.png)
+![DIE ZEIT Logo](../../assets/brand/logo/img/pictogram-2.png)
+
+## Varianten
+
+<ImageGallery title="">
+  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Beautiful beach sunset" />
+  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Mountain landscape with snow" />
+</ImageGallery>
+
+<ImageGallery title="">
+  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Beautiful beach sunset" />
+  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Mountain landscape with snow" />
+</ImageGallery>
+
+## Do and Don't
+<DoDontGroup columns={2}>
+  <DoDont 
+    type="dont"
+    caption="Das Logo darf nicht verzerrt werden."
+    imgSrc="../../assets/brand/logo/img/dont-1.png"
+    strikeThrough={true}
+  />
+
+  <DoDont 
+    type="dont"
+    caption="Das Logo darf nicht gedreht werden."
+    imgSrc="../../assets/brand/logo/img/dont-2.png"
+  />
+
+    <DoDont 
+    type="do"
+    caption="Das Logo darf nicht gedreht werden."
+    imgSrc="../../assets/brand/logo/img/dont-2.png"
+  />
+</DoDontGroup>
+
+### Anwendungen
+
+- Social Media
+- App-Icons
+- Live-Veranstaltungen / Video
+
+## Resources
+<BrandAssetsGrid {brandAssets} />
+
+
+## Todos
+Was brauchen wir?
+
+- Minimum und Max Size Print und Online
+- Logo in Farbe und Schwarz-Weiß
+- App Icon
+- Aufbau und Clearspace
+- Logo auf Backgrounds
+- Dos and Donts
+- Partnerships?
+Unser Logo und unser Claim stärken unsere internationale Markenpositionierung. 
+
+<DownloadSpecimen
+  catalog={catalog}
+  title="User Manual"
+  subtitle="PDF, 3.2MB"
+  url="docs/user-manual.pdf"
+  filename="user-manual.pdf"
+/>

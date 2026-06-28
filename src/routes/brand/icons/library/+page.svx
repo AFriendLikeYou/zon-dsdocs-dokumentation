@@ -1,0 +1,16 @@
+<script lang="ts">
+	import IconGridWithSearch from '$components/icons/IconGridWithSearch.svelte';
+	
+	const { data } = $props();
+	const { icons } = data;
+</script>
+
+<svelte:head>
+	<title>Icons - Die Zeit Design System</title>
+</svelte:head>
+
+<h1>Icons</h1>
+
+<p>Hier findest du ein paar Iconchen vom Design System.</p>
+
+<IconGridWithSearch {icons} />

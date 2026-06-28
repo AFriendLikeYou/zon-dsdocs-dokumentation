@@ -1,0 +1,161 @@
+---
+title: "Icon Button"
+status: ready_for_dev
+figma: https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=11-11508&m=dev
+aktualisiert_am: 2026-06-28
+kategorie: Aktionen
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
+	const htmlCode = `<!-- Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label) -->
+<button class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
+<button class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>`;
+	const svelteCode = `<script>
+  // 'primary' | 'neutral' | 'subtle'
+  export let variant = 'primary';
+  export let label; // aria-label — Pflicht
+<\/script>
+
+<button class="sds-iconbtn sds-iconbtn--{variant}" type="button" aria-label={label}>
+  <!-- Icon 20×20, z. B. <Star /> -->
+</button>`;
+	const cssCode = `.sds-iconbtn{
+  --sds-color-background-brand-default:#2c2c2c;
+  --sds-color-background-brand-hover:#1e1e1e;
+  --sds-color-icon-brand-on-brand:#f5f5f5;
+  --sds-color-background-default-secondary:#f5f5f5;
+  --sds-color-background-default-secondary-hover:#e6e6e6;
+  --sds-color-background-default-default-hover:#f5f5f5;
+  --sds-color-border-default-default:#d9d9d9;
+  --sds-color-icon-default-default:#1e1e1e;
+  --sds-color-background-disabled-default:#d9d9d9;
+  --sds-color-icon-disabled-on-disabled:#b3b3b3;
+  --sds-color-border-disabled-default:#b3b3b3;
+  --sds-size-stroke-border:1px;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; padding:0;
+  border-radius:999px;
+  border:var(--sds-size-stroke-border) solid transparent;
+  background:transparent; cursor:pointer;
+}
+.sds-iconbtn svg{ width:20px; height:20px; }
+.sds-iconbtn--small{ width:36px; height:36px; }
+.sds-iconbtn--primary{ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-icon-brand-on-brand); }
+.sds-iconbtn--primary:hover{ background:var(--sds-color-background-brand-hover); }
+.sds-iconbtn--neutral{ background:var(--sds-color-background-default-secondary); border-color:var(--sds-color-border-default-default); color:var(--sds-color-icon-default-default); }
+.sds-iconbtn--neutral:hover{ background:var(--sds-color-background-default-secondary-hover); }
+.sds-iconbtn--subtle{ background:transparent; border-color:transparent; color:var(--sds-color-icon-default-default); }
+.sds-iconbtn--subtle:hover{ background:var(--sds-color-background-default-default-hover); }
+.sds-iconbtn:disabled{ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-icon-disabled-on-disabled); cursor:not-allowed; }
+.sds-iconbtn--primary.sds-iconbtn--hover{ background:var(--sds-color-background-brand-hover); }
+.sds-iconbtn--neutral.sds-iconbtn--hover{ background:var(--sds-color-background-default-secondary-hover); }
+.sds-iconbtn--subtle.sds-iconbtn--hover{ background:var(--sds-color-background-default-default-hover); }`;
+	const propsData = [{"name":"variant","typ":"\"Primary\" | \"Neutral\" | \"Subtle\"","default":"\"Primary\"","beschreibung":"Visuelle Gewichtung der Aktion."},{"name":"size","typ":"\"Medium\" | \"Small\"","default":"\"Medium\"","beschreibung":"Box-Größe (40 bzw. 36 px)."},{"name":"state","typ":"\"Default\" | \"Hover\" | \"Disabled\"","default":"\"Default\"","beschreibung":"Interaktionszustand."},{"name":"icon","typ":"Snippet / ReactNode","default":"—","beschreibung":"Das anzuzeigende Icon (20×20)."},{"name":"aria-label","typ":"string (Pflicht)","default":"—","beschreibung":"Beschreibt die Aktion — Pflicht, da kein sichtbares Label."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab },
+		{ label: 'Barrierefreiheit', component: a11yTab },
+		{ label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
+		<button slot="preview" class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
+		<button slot="variant" class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
+	</Anatomy>
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
+	<VariantMatrix>
+		<div class="cell"><span class="cell-label">Primary · Default</span><button class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Primary · Hover</span><button class="sds-iconbtn sds-iconbtn--primary sds-iconbtn--hover" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Primary · Disabled</span><button class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Neutral · Default</span><button class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Neutral · Hover</span><button class="sds-iconbtn sds-iconbtn--neutral sds-iconbtn--hover" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Neutral · Disabled</span><button class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Subtle · Default</span><button class="sds-iconbtn sds-iconbtn--subtle" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Subtle · Hover</span><button class="sds-iconbtn sds-iconbtn--subtle sds-iconbtn--hover" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+		<div class="cell"><span class="cell-label">Subtle · Disabled</span><button class="sds-iconbtn sds-iconbtn--subtle" type="button" aria-label="Favorit" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
+	</VariantMatrix>
+
+	<h2>Zustände</h2>
+	<StateList states={spec.zustaende} />
+
+	<h2>Verwendung</h2>
+	<DoDontList doDont={spec.doDont} />
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
+	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
+	<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />
+{/snippet}
+
+{#snippet a11yTab()}
+	<A11yList items={spec.a11y} />
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .sds-iconbtn){
+  --sds-color-background-brand-default:#2c2c2c;
+  --sds-color-background-brand-hover:#1e1e1e;
+  --sds-color-icon-brand-on-brand:#f5f5f5;
+  --sds-color-background-default-secondary:#f5f5f5;
+  --sds-color-background-default-secondary-hover:#e6e6e6;
+  --sds-color-background-default-default-hover:#f5f5f5;
+  --sds-color-border-default-default:#d9d9d9;
+  --sds-color-icon-default-default:#1e1e1e;
+  --sds-color-background-disabled-default:#d9d9d9;
+  --sds-color-icon-disabled-on-disabled:#b3b3b3;
+  --sds-color-border-disabled-default:#b3b3b3;
+  --sds-size-stroke-border:1px;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; padding:0;
+  border-radius:999px;
+  border:var(--sds-size-stroke-border) solid transparent;
+  background:transparent; cursor:pointer;
+}
+:global(.spec-canvas .sds-iconbtn svg){ width:20px; height:20px; }
+:global(.spec-canvas .sds-iconbtn--small){ width:36px; height:36px; }
+:global(.spec-canvas .sds-iconbtn--primary){ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-icon-brand-on-brand); }
+:global(.spec-canvas .sds-iconbtn--primary:hover){ background:var(--sds-color-background-brand-hover); }
+:global(.spec-canvas .sds-iconbtn--neutral){ background:var(--sds-color-background-default-secondary); border-color:var(--sds-color-border-default-default); color:var(--sds-color-icon-default-default); }
+:global(.spec-canvas .sds-iconbtn--neutral:hover){ background:var(--sds-color-background-default-secondary-hover); }
+:global(.spec-canvas .sds-iconbtn--subtle){ background:transparent; border-color:transparent; color:var(--sds-color-icon-default-default); }
+:global(.spec-canvas .sds-iconbtn--subtle:hover){ background:var(--sds-color-background-default-default-hover); }
+:global(.spec-canvas .sds-iconbtn:disabled){ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-icon-disabled-on-disabled); cursor:not-allowed; }
+:global(.spec-canvas .sds-iconbtn--primary.sds-iconbtn--hover){ background:var(--sds-color-background-brand-hover); }
+:global(.spec-canvas .sds-iconbtn--neutral.sds-iconbtn--hover){ background:var(--sds-color-background-default-secondary-hover); }
+:global(.spec-canvas .sds-iconbtn--subtle.sds-iconbtn--hover){ background:var(--sds-color-background-default-default-hover); }
+</style>

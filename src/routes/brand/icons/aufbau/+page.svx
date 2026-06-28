@@ -1,0 +1,20 @@
+---
+title: Icon Aufbau
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+Lorem ipsum
+
+Lorem
+
+![Icon Auswahl](../../assets/brand/icons/img/icon-uebersicht.png)
+
+![Icon Aufbau 1](../../assets/brand/icons/img/icon-anatomy-1.png)
+
+![Icon Aufbau 2](../../assets/brand/icons/img/icon-anatomy-2.png)
+

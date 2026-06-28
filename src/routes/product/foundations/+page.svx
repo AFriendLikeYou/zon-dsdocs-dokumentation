@@ -1,0 +1,44 @@
+---
+title: Foundations
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import CardGrid from '$components/ui/card/CardGrid.svelte';
+	import Alert from '$components/ui/alert/Alert.svelte';
+</script>
+
+
+# {title}
+
+Foundations are the visual elements needed to create engaging end-to-end user experiences. This includes guidance on iconography, typography, layout, and structure.
+
+<Alert 
+	variant="default"
+	title="Hinweis Default" 
+	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
+/>
+
+<Alert 
+	variant="warning"
+	title="Hinweis Default" 
+	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
+/>
+
+<Alert 
+	variant="danger"
+	title="Hinweis Default" 
+	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
+/>
+
+<Alert 
+	variant="success"
+	title="Hinweis Default" 
+	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
+/>
+
+
+<CardGrid />

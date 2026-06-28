@@ -1,0 +1,214 @@
+/**
+ * Dual Mode Prism.js Theme
+ * Supports both light and dark modes via CSS variables
+ */
+
+:root {
+	/* Light mode colors */
+	--prism-bg: #f5f7fa;
+	--prism-text: #2a2a2a;
+	--prism-comment: #6e7781;
+	--prism-punctuation: #24292e;
+	--prism-keyword: #cf222e;
+	--prism-function: #8250df;
+	--prism-string: #0a3069;
+	--prism-number: #0550ae;
+	--prism-tag: #116329;
+	--prism-attr-name: #953800;
+	--prism-attr-value: #0a3069;
+	--prism-operator: #0550ae;
+	--prism-boolean: #0550ae;
+	--prism-regex: #116329;
+	--prism-important: #cf222e;
+	--prism-class-name: #953800;
+	--prism-selector: #116329;
+	--prism-property: #8250df;
+	--prism-line-highlight: rgba(234, 238, 242, 0.5);
+	--prism-line-number: #8c959f;
+	--prism-line-number-gutter: #e1e4e8;
+}
+
+/* Dark mode colors - applied when .dark class is present or when system prefers dark mode */
+@media (prefers-color-scheme: dark) {
+	:root:not(.light) {
+		--prism-bg: #0d1117;
+		--prism-text: #e6edf3;
+		--prism-comment: #8b949e;
+		--prism-punctuation: #c9d1d9;
+		--prism-keyword: #ff7b72;
+		--prism-function: #d2a8ff;
+		--prism-string: #a5d6ff;
+		--prism-number: #79c0ff;
+		--prism-tag: #7ee787;
+		--prism-attr-name: #ffa657;
+		--prism-attr-value: #a5d6ff;
+		--prism-operator: #79c0ff;
+		--prism-boolean: #79c0ff;
+		--prism-regex: #7ee787;
+		--prism-important: #ff7b72;
+		--prism-class-name: #ffa657;
+		--prism-selector: #7ee787;
+		--prism-property: #d2a8ff;
+		--prism-line-highlight: rgba(110, 118, 129, 0.1);
+		--prism-line-number: #6e7681;
+		--prism-line-number-gutter: #161b22;
+	}
+}
+
+/* Base styles for code blocks */
+code[class*='language-'],
+pre[class*='language-'] {
+	color: var(--prism-text);
+	background: none;
+	font-family: 'Fira Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 0.9em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+	tab-size: 4;
+	hyphens: none;
+}
+
+/* Code blocks */
+pre[class*='language-'] {
+	padding: 1em;
+	margin: 0.5em 0;
+	overflow: auto;
+	border-radius: 0.3em;
+	background: var(--prism-bg);
+}
+
+:not(pre) > code[class*='language-'],
+pre[class*='language-'] {
+	background: var(--prism-bg);
+}
+
+/* Inline code */
+:not(pre) > code[class*='language-'] {
+	padding: 0.1em;
+	border-radius: 0.3em;
+	white-space: normal;
+}
+
+/* Token styles */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: var(--prism-comment);
+}
+
+.token.punctuation {
+	color: var(--prism-punctuation);
+}
+
+.token.namespace {
+	opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: var(--prism-tag);
+}
+
+.token.boolean,
+.token.number {
+	color: var(--prism-number);
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: var(--prism-string);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: var(--prism-operator);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: var(--prism-keyword);
+}
+
+.token.function,
+.token.class-name {
+	color: var(--prism-function);
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: var(--prism-regex);
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+
+/* Line highlighting */
+pre[data-line] {
+	position: relative;
+	padding: 1em 0 1em 3em;
+}
+
+.line-highlight {
+	position: absolute;
+	left: 0;
+	right: 0;
+	padding: inherit 0;
+	margin-top: 1em;
+	background: var(--prism-line-highlight);
+	pointer-events: none;
+	line-height: inherit;
+	white-space: pre;
+}
+
+/* Line numbers */
+.line-numbers .line-numbers-rows {
+	position: absolute;
+	pointer-events: none;
+	top: 0;
+	font-size: 100%;
+	left: -3.8em;
+	width: 3em;
+	letter-spacing: -1px;
+	border-right: 1px solid var(--prism-line-number-gutter);
+	user-select: none;
+}
+
+.line-numbers-rows > span {
+	display: block;
+	counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+	content: counter(linenumber);
+	color: var(--prism-line-number);
+	display: block;
+	padding-right: 0.8em;
+	text-align: right;
+}

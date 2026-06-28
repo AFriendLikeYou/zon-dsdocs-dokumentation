@@ -1,0 +1,121 @@
+---
+title: Contributions
+---
+
+<script>
+
+	import { blur } from "svelte/transition";
+
+	const contributions = [
+		{
+			name: "Zeit Design System Tokens",
+			description: "A collection of design tokens for the Die Zeit Design System",
+			svg: `<svg viewBox="0 0 780 250" aria-hidden="true"><path fill="#231F20" d="M240,250h100v-50h100V0H240V250z M340,50h50v100h-50V50z M480,0v200h100V50h50v150h50V50h50v150h50V0H480z M0,200h100V50h50v150h50V0H0V200z" stroke-width="5" stroke="#f7f7f7"></path></svg>`,
+			url: "https://www.npmjs.com/package/@zeitonline/design-system",
+		},
+		{
+			name: "Zeit Design System Icons",
+			description: "A collection of icons for the Die Zeit Design System",
+			svg: `<svg viewBox="0 0 780 250" aria-hidden="true"><path fill="#231F20" d="M240,250h100v-50h100V0H240V250z M340,50h50v100h-50V50z M480,0v200h100V50h50v150h50V50h50v150h50V0H480z M0,200h100V50h50v150h50V0H0V200z" stroke-width="5" stroke="#f7f7f7"></path></svg>`,
+			url: "https://www.npmjs.com/package/@zeitonline/icons",
+		}
+	]
+</script>
+
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<div class="grid">
+    {#each contributions as icon (icon.name)}
+        <div transition:blur class="zon-icon__container">
+            <div class="bg-grid"></div>
+            <div class="zon__icon">
+                {@html icon.svg}
+                <span class="zon__icon__name">{icon.name}</span>
+                <span>{icon.description}</span>
+            </div>
+
+            <div class="zon-icon__actions">
+                <a
+					class="zon-button"
+					rel="noopener noreferrer"
+					target="_blank"
+                    aria-label={`${icon.name} Seite öffnen`}
+					href={icon.url}
+                >
+					<svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M4 1L10 7L4 13" stroke="currentColor" stroke-width="1.5"/>
+					</svg>
+				</a>
+				
+            </div>
+        </div>
+    {/each}
+</div>
+
+<style>
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: var(--z-ds-space-8);
+		margin-block: var(--z-ds-space-16);
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.zon-icon__container {
+		cursor: pointer;
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--z-ds-space-16);
+		padding: var(--z-ds-space-16);
+		border-radius: var(--z-ds-border-radius-4);
+		border: 1px solid var(--z-ds-color-border-70);
+		background-color: var(--z-ds-color-background-0);
+
+		span {
+			font-size: calc(var(--z-ds-fontsize-14) / 1.5);
+			opacity: 0.7;
+			text-wrap: nowrap;
+		}
+
+		.zon__icon {
+			display: flex;
+			text-align: center;
+			align-items: center;
+			flex-direction: column;
+			gap: var(--z-ds-space-8);
+		}
+
+		.zon__icon__name {
+			font-size: var(--z-ds-fontsize-16);
+			font-weight: 700;
+		}
+
+		:global(.zon__icon svg) {
+			width: 48px;
+			height: auto;
+		}
+
+		.zon-icon__actions {
+			display: flex;
+			gap: var(--z-ds-space-8);
+			z-index: 1;
+		}
+
+	}
+
+	@media screen and (min-width: 1024px) {
+		.grid {
+			max-width: 768px;
+		}
+	}
+
+</style>

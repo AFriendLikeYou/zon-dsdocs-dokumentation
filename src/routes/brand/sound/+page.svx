@@ -1,0 +1,16 @@
+---
+title: Sound
+---
+
+<script lang="ts">
+
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+# { title }
+
+DIE ZEIT hat keine Tonmarke. Einzelne redaktionelle Formate hingegen schon (Jingle der Podcasts, wiederkehrende Musik bei Audio-Timelines).

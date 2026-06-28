@@ -1,0 +1,75 @@
+---
+title: Fonts
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+    import Font from '$components/fonts/Font.svelte';
+</script>
+
+# { title }
+
+## Label
+
+<div class="grid">
+	<Font title="Regular/12px/1" weight="regular" size="12" lineheight="1" style="label" />
+	<Font title="Regular/12px/1.5" weight="regular" size="12" lineheight="1.5" style="label" />
+
+	<Font title="Regular/14px/1" weight="regular" size="14" lineheight="1" style="label" />
+	<Font title="Regular/14px/1.5" weight="regular" size="14" lineheight="1.5" style="label" />
+
+	<Font title="Regular/16px/1" weight="regular" size="16" lineheight="1" style="label" />
+	<Font title="Regular/16px/1.5" weight="regular" size="16" lineheight="1.5" style="label" />
+
+	<Font title="Bold/12px/1" weight="bold" size="12" lineheight="1" style="label" />
+	<Font title="Bold/12px/1.5" weight="bold" size="12" lineheight="1.5" style="label" />
+
+	<Font title="Bold/14px/1" weight="bold" size="14" lineheight="1" style="label" />
+	<Font title="Bold/14px/1.5" weight="bold" size="14" lineheight="1.5" style="label" />
+
+	<Font title="Bold/16px/1" weight="bold" size="16" lineheight="1" style="label" />
+	<Font title="Bold/16px/1.5" weight="bold" size="16" lineheight="1.5" style="label" />
+</div>
+
+## Überschriften
+<div class="grid">
+	<Font title="Bold/16px/1" weight="bold" size="16" lineheight="1" style="headline" />
+	<Font title="Bold/16px/1.2" weight="bold" size="16" lineheight="1.2" style="headline" />
+
+	<Font title="Bold/20px/1" weight="bold" size="20" lineheight="1" style="headline" />
+	<Font title="Bold/20px/1.2" weight="bold" size="20" lineheight="1.2" style="headline" />
+
+	<Font title="Bold/22px/1" weight="bold" size="22" lineheight="1" style="headline" />
+	<Font title="Bold/22px/1.2" weight="bold" size="22" lineheight="1.2" style="headline" />
+
+	<Font title="Bold/24px/1" weight="bold" size="24" lineheight="1" style="headline" />
+	<Font title="Bold/24px/1.2" weight="bold" size="24" lineheight="1.2" style="headline" />
+
+	<Font title="Bold/26px/1" weight="bold" size="26" lineheight="1" style="headline" />
+	<Font title="Bold/26px/1.2" weight="bold" size="26" lineheight="1.2" style="headline" />
+</div>
+
+## CAPS
+<div class="grid">
+	<Font title="CAPS/12px/1" weight="regular" size="12" lineheight="1" style="headline" />
+	<Font title="CAPS BOLD/12px/1" weight="bold" size="12" lineheight="1" style="headline" />
+</div>
+
+<style>
+    .grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.5rem;
+		margin-bottom: 2rem;
+        max-width: 700px;
+	}
+
+    @media (min-width: 700px) {
+        .grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
