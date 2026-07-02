@@ -28,7 +28,12 @@ export type SpecState = { label: string; vorhanden?: boolean };
 export type TokenItem = { name: string; wert: string; swatch?: string; translucent?: boolean };
 export type TokenGroup = { kategorie: string; beschreibung?: string; items: TokenItem[] };
 
-export type VariantGroup = { prop: string; werte: { label: string; default?: boolean }[] };
+export type VariantGroup = {
+	prop: string;
+	/** cssClass = explizite Modifier-Klasse der Variante (Registry-Schema; Drift-Check
+	    prüft sie 1:1 gegen pattern.css statt der Label-Heuristik). */
+	werte: { label: string; cssClass?: string; default?: boolean }[];
+};
 
 export type DoDont = { do?: string[]; dont?: string[] };
 

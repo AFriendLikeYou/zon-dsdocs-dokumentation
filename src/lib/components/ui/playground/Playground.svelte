@@ -1,22 +1,30 @@
 <!--
   Playground.svelte — wiederverwendbarer interaktiver Component-Specimen.
 
-  Der Harness liefert die Chrome (Bühne, Prop-Controls als Pills, mitlaufender Code-Block);
-  die Komponenten-Doku liefert nur ihre „Daten": eine Controls-Spec, ein `preview`-Snippet
-  (rendert das echte Specimen aus dem State) und eine `code`-Funktion (Code-String aus State).
-  So lässt sich derselbe Playground für die meisten DS-Komponenten wiederverwenden.
+  Zwei Betriebsarten:
 
-  Beispiel:
-    <Playground
-      controls={[{ key: 'variant', label: 'Variant', type: 'select', options: [...] },
-                 { key: 'disabled', label: 'Disabled', type: 'toggle' }]}
-      code={(s) => `<button class="...">…</button>`}
-    >
-      {#snippet preview(s)}<button class={cls(s)}>Label</button>{/snippet}
-    </Playground>
+  1) TEMPLATE-MODUS (datengetrieben, Registry/model.json — der Normalfall):
+     Controls tragen ihre Klassen-/Attribut-Payloads, ein logikfreies HTML-Template
+     mit {classes}/{attrs}-Platzhaltern liefert Live-Preview UND Code-Block aus
+     denselben Daten. Vollständig aus JSON serialisierbar → neue Patterns brauchen
+     nur einen Registry-Eintrag, keine Komponente.
+
+       <Playground
+         template={'<button class="z-button{classes}"{attrs}>Click me</button>'}
+         controls={[
+           { key:'variant', label:'Variant', type:'select', default:'primary',
+             options:[{value:'default',label:'Default'},
+                      {value:'primary',label:'Primary',cssClass:'z-button--primary'}] },
+           { key:'fullwidth', label:'Fullwidth', type:'toggle', cssClass:'z-button--fullwidth' },
+           { key:'disabled',  label:'Disabled',  type:'attr',   attr:'disabled' }
+         ]} />
+
+  2) SNIPPET-MODUS (Escape-Hatch für Loops/Interaktion, z. B. Button-Group):
+     `preview`-Snippet rendert das Specimen aus dem State, `code`-Funktion liefert
+     den Code-String. Lebt co-located als Specimen.svelte neben der Route.
 -->
 <script lang="ts" module>
-	export type PlaygroundOption = { value: string; label: string };
+	export type PlaygroundOption = { value: string; label: string; cssClass?: string };
 	export type PlaygroundControl =
 		| {
 				key: string;
@@ -25,8 +33,32 @@
 				options: PlaygroundOption[];
 				default?: string;
 		  }
-		| { key: string; label: string; type: 'toggle'; default?: boolean };
+		| { key: string; label: string; type: 'toggle'; cssClass?: string; default?: boolean }
+		| { key: string; label: string; type: 'attr'; attr: string; default?: boolean };
 	export type PlaygroundState = Record<string, string | number | boolean>;
+
+	/** Template + Controls + State → fertiges Markup (Preview UND Code — eine Quelle). */
+	export function instantiate(
+		template: string,
+		controls: PlaygroundControl[],
+		state: PlaygroundState
+	): string {
+		const classes: string[] = [];
+		let attrs = '';
+		for (const c of controls) {
+			if (c.type === 'select') {
+				const opt = c.options.find((o) => o.value === state[c.key]);
+				if (opt?.cssClass) classes.push(opt.cssClass);
+			} else if (c.type === 'toggle') {
+				if (c.cssClass && state[c.key]) classes.push(c.cssClass);
+			} else if (c.type === 'attr') {
+				if (state[c.key]) attrs += ` ${c.attr}`;
+			}
+		}
+		return template
+			.replaceAll('{classes}', classes.length ? ` ${classes.join(' ')}` : '')
+			.replaceAll('{attrs}', attrs);
+	}
 </script>
 
 <script lang="ts">
@@ -41,10 +73,12 @@
 		lang?: 'html' | 'css' | 'svelte';
 		/** Hinweistext statt Controls (z. B. „keine Varianten"). */
 		hint?: string;
-		/** Rendert den Live-Specimen; bekommt den aktuellen State. */
-		preview: Snippet<[PlaygroundState]>;
-		/** Erzeugt den Code-String aus dem State. */
-		code: (state: PlaygroundState) => string;
+		/** TEMPLATE-MODUS: HTML mit {classes}/{attrs}-Platzhaltern (aus der Registry). */
+		template?: string;
+		/** SNIPPET-MODUS: rendert den Live-Specimen; bekommt den aktuellen State. */
+		preview?: Snippet<[PlaygroundState]>;
+		/** SNIPPET-MODUS: erzeugt den Code-String aus dem State. */
+		code?: (state: PlaygroundState) => string;
 		class?: string;
 	};
 	let {
@@ -52,6 +86,7 @@
 		darkKey,
 		lang = 'html',
 		hint,
+		template,
 		preview,
 		code,
 		class: className = ''
@@ -67,7 +102,8 @@
 
 	let state = $state<PlaygroundState>(initialState());
 	const isDark = $derived(!!(darkKey && state[darkKey]));
-	const codeStr = $derived(code(state));
+	const html = $derived(template ? instantiate(template, controls, state) : '');
+	const codeStr = $derived(template ? html : (code?.(state) ?? ''));
 
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
 	const defaults = initialState();
@@ -79,7 +115,15 @@
 
 <div class="pg {className}">
 	<div class="pg-stage" class:is-dark={isDark}>
-		<div class="pg-preview">{@render preview(state)}</div>
+		<div class="pg-preview">
+			{#if template}
+				<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html html}
+			{:else}
+				{@render preview?.(state)}
+			{/if}
+		</div>
 	</div>
 
 	{#if hint}
@@ -97,6 +141,7 @@
 						>
 					{/each}
 				{:else}
+					<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
 					<Chip
 						variant={state[c.key] ? 'accent' : 'neutral'}
 						onclick={() => (state[c.key] = !state[c.key])}>{c.label}</Chip

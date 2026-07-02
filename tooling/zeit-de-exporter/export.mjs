@@ -127,6 +127,40 @@ function renderContentStub(model) {
 	);
 }
 
+/**
+ * Unscoped Pattern-CSS (pattern.css) gegen die Vorschau-Flächen scopen:
+ * jede Regel wird auf `.spec-canvas SEL` UND `.pg-preview SEL` präfixiert (als
+ * :global, weil die Klassen auf Kind-Komponenten landen). V1-Beschränkung:
+ * flache Regeln ohne At-Rules — bewusst simpel statt CSS-Parser.
+ */
+function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
+	const clean = String(css).replace(/\/\*[\s\S]*?\*\//g, '').trim();
+	if (/^\s*@/m.test(clean)) {
+		throw new Error(
+			'pattern.css: At-Rules (@media, @keyframes, …) werden im v1-Scoping nicht unterstützt — flache Regeln verwenden.'
+		);
+	}
+	return clean
+		.split('}')
+		.map((chunk) => chunk.trim())
+		.filter(Boolean)
+		.map((chunk) => {
+			const idx = chunk.indexOf('{');
+			if (idx === -1) return '';
+			const selectors = chunk.slice(0, idx).trim();
+			const body = chunk.slice(idx + 1).trim();
+			const scoped = selectors
+				.split(',')
+				.map((s) => s.trim())
+				.filter(Boolean)
+				.flatMap((sel) => prefixes.map((p) => `:global(${p} ${sel})`))
+				.join(',\n');
+			return `${scoped} {\n  ${body}\n}`;
+		})
+		.filter(Boolean)
+		.join('\n');
+}
+
 /** Für Template-Literals im generierten Script escapen. */
 function tl(s) {
 	return String(s)
@@ -144,7 +178,7 @@ function tl(s) {
  * adaptiven Spec-UI-Komponenten ($components/ui/specsheet) — keine
  * verschachtelten weißen Container, Styling wie die übrige Doku-Seite.
  */
-function renderPage(model) {
+function renderPage(model, { patternCss = null } = {}) {
 	const render = model.render ?? {};
 	const S = 'spec'; // lokale, zusammengeführte Konstante (generated + content)
 	const previewSlot = render.preview ? `\t\t${asSnippet(render.preview, 'preview')}\n` : '';
@@ -163,7 +197,9 @@ function renderPage(model) {
 
 	// CSS für die Live-Specimens (gegen .spec-canvas gescopt).
 	const css = Array.isArray(render.css) ? render.css.join('\n') : render.css ?? '';
-	const styleBlock = css ? `\n<style>\n${css}\n</style>\n` : '';
+	const scopedPattern = patternCss ? scopeCss(patternCss) : '';
+	const allCss = [css, scopedPattern].filter(Boolean).join('\n\n');
+	const styleBlock = allCss ? `\n<style>\n${allCss}\n</style>\n` : '';
 
 	// Code-Beispiele (Develop): HTML/Svelte-Snippet + entscoptes CSS.
 	const note = render.codeNote ? `<!-- ${render.codeNote} -->\n` : '';
@@ -187,13 +223,26 @@ function renderPage(model) {
 	const hasVersion = typeof render.version === 'string';
 	const versionProp = hasVersion ? ` version={content.version}` : '';
 
-	// Interim bis zum datengetriebenen Registry-Schema (STRUKTUR-PLAN Stufe 4):
-	// optionaler Playground als ERSTE Design-Sektion (Live-Vorschau; Nutzer-Entscheid
-	// 2026-07-02: Playground → Anatomy → Usage/Content-Guidelines → Do/Don'ts).
-	//   "render": { "playground": { "import": "$components/ui/…", "component": "Xyz" } }
-	const playground =
-		render.playground && typeof render.playground === 'object' ? render.playground : null;
-	const hasPlayground = Boolean(playground?.import && playground?.component);
+	// Datengetriebener Playground (Registry-Schema, Stufe 4) — erste Design-Sektion:
+	//   "render": {
+	//     "controls":  [ { key, label, type: "select"|"toggle"|"attr", … } ],
+	//     "template":  "<button class=\"z-button{classes}\"{attrs}>Click me</button>",
+	//     "cssFile":   "./pattern.css",      // UNSCOPED, co-located → wird gescoped eingebettet
+	//     "specimen":  "./Specimen.svelte",  // Escape-Hatch (Loops/Interaktion)
+	//     "hint":      "…",                  // Hinweiszeile statt Controls
+	//     "stage":     { "darkKey": "onImage" }
+	//   }
+	// template+controls sind reine Daten (JSON) — Preview UND Code kommen aus derselben
+	// Instanziierung im Playground-Harness. specimen ist die Ausnahme für Patterns mit
+	// Loop/Interaktion und darf nur Registry-Daten konsumieren.
+	const pgControls = Array.isArray(render.controls) ? render.controls : [];
+	const pgTemplate = typeof render.template === 'string' ? render.template : null;
+	const pgSpecimen = typeof render.specimen === 'string' ? render.specimen : null;
+	const pgHint = typeof render.hint === 'string' ? render.hint : null;
+	const pgDarkKey = typeof render.stage?.darkKey === 'string' ? render.stage.darkKey : null;
+	const hasTemplatePg = Boolean(pgTemplate) && !pgSpecimen;
+	const hasSpecimenPg = Boolean(pgSpecimen);
+	const hasPlayground = hasTemplatePg || hasSpecimenPg;
 
 	// Verfügbarkeit je Abschnitt.
 	const hasAnatomy = Boolean(render.preview || model.callouts?.length || model.masse);
@@ -201,7 +250,7 @@ function renderPage(model) {
 	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
 	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
 	const hasDoDont = Boolean(model.doDont);
-	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode);
+	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
@@ -234,7 +283,8 @@ function renderPage(model) {
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
-		(hasPlayground ? `\timport { ${playground.component} } from '${playground.import}';\n` : '') +
+		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
+		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
 		`\timport { content } from './content';\n`;
 
@@ -242,10 +292,15 @@ function renderPage(model) {
 		`\t// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.\n` +
 		`\tconst ${S} = { ...generated, ...content };\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
+		(hasTemplatePg
+			? `\tconst playgroundControls = ${JSON.stringify(pgControls)};\n` +
+				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n`
+			: '') +
 		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
 		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
 		(repoCode ? `\tconst repoCode = \`${tl(repoCode)}\`;\n` : '') +
 		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
+		(patternCss ? `\tconst patternCssCode = \`${tl(patternCss)}\`;\n` : '') +
 		(hasProps ? `\tconst propsData = ${JSON.stringify(props)};\n` : '');
 
 	// ---- Design-Tab ----
@@ -253,7 +308,13 @@ function renderPage(model) {
 	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
 	// Zustände) · 4) Do/Don'ts.
 	let design = '';
-	if (hasPlayground) design += `\t<${playground.component} />\n`;
+	if (hasSpecimenPg) {
+		design += `\t<Specimen spec={${S}} />\n`;
+	} else if (hasTemplatePg) {
+		const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
+		const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
+		design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} />\n`;
+	}
 	if (hasAnatomy) {
 		design +=
 			`\n\t<h2>Anatomie</h2>\n` +
@@ -289,6 +350,8 @@ function renderPage(model) {
 			develop += `\t<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />\n`;
 		}
 		if (cssForCode) develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
+		if (patternCss)
+			develop += `\t<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />\n`;
 	}
 
 	// ---- Barrierefreiheit-Tab ----
@@ -377,9 +440,21 @@ function main() {
 	const contentPath = resolve(outDir, 'content.ts');
 	const contentExists = existsSync(contentPath);
 
+	// Pattern-CSS (unscoped, co-located) lesen, falls das Modell es referenziert.
+	let patternCss = null;
+	if (typeof model.render?.cssFile === 'string') {
+		const cssPath = resolve(outDir, model.render.cssFile);
+		if (!existsSync(cssPath)) {
+			throw new Error(
+				`render.cssFile nicht gefunden: ${relative(root, cssPath)} — pattern.css neben model.json anlegen.`
+			);
+		}
+		patternCss = readFileSync(cssPath, 'utf8');
+	}
+
 	// Maschinen-Dateien werden immer geschrieben; content.ts nur beim ersten Mal (Stub).
 	const machineFiles = [
-		{ path: resolve(outDir, '+page.svx'), body: renderPage(model) },
+		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss }) },
 		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
 	];
 

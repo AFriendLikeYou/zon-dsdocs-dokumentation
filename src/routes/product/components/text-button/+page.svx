@@ -1,0 +1,159 @@
+---
+title: "Text Button"
+status: ready_for_dev
+aktualisiert_am: 2026-07-02
+kategorie: Aktionen
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, VariantList, CodeBlock } from '$components/ui/specsheet';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const playgroundControls = [{"key":"size","label":"Size","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"slim","label":"Slim","cssClass":"z-text-button--slim"},{"value":"large","label":"Large","cssClass":"z-text-button--large"}]},{"key":"bold","label":"Bold","type":"toggle","cssClass":"z-text-button--bold"},{"key":"active","label":"Active","type":"toggle","cssClass":"z-text-button--active"},{"key":"onImage","label":"On Image","type":"toggle","cssClass":"z-text-button--on-image"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
+	const playgroundTemplate = `<button type="button" class="z-text-button{classes}"{attrs}>Mehr anzeigen</button>`;
+	const patternCssCode = `/* z-text-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
+.z-text-button {
+  align-items: center;
+  background-color: transparent;
+  border-radius: var(--z-ds-border-radius-4);
+  border-width: 0;
+  color: var(--z-ds-color-text-70);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--z-ds-fontsize-14);
+  gap: var(--z-ds-space-xxxs);
+  line-height: 1.125rem;
+  margin: 0;
+  padding: var(--z-ds-space-xs);
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+  white-space: nowrap;
+}
+.z-text-button--slim {
+  padding-bottom: var(--z-ds-space-6);
+  padding-top: var(--z-ds-space-6);
+}
+.z-text-button--large {
+  font-size: var(--z-ds-fontsize-16);
+}
+.z-text-button--bold {
+  font-weight: bold;
+}
+.z-text-button--active {
+  background-color: var(--z-ds-color-background-10);
+  color: var(--z-ds-color-text-100);
+}
+.z-text-button:hover {
+  background-color: var(--z-ds-color-background-10);
+  color: var(--z-ds-color-text-100);
+}
+.z-text-button:focus-visible {
+  outline: 2px solid var(--z-ds-color-focus-100);
+}
+.z-text-button:disabled {
+  background-color: transparent;
+  color: var(--z-ds-color-text-55);
+  cursor: default;
+}
+.z-text-button--on-image {
+  color: rgba(255, 255, 255, 0.6);
+}
+.z-text-button--on-image:hover {
+  background-color: var(--z-ds-color-general-black-60);
+  color: var(--z-ds-color-general-white-100);
+}
+`;
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" />
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} />
+{/snippet}
+
+{#snippet developTab()}
+
+	<h2>Code</h2>
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-text-button),
+:global(.pg-preview .z-text-button) {
+  align-items: center;
+  background-color: transparent;
+  border-radius: var(--z-ds-border-radius-4);
+  border-width: 0;
+  color: var(--z-ds-color-text-70);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--z-ds-fontsize-14);
+  gap: var(--z-ds-space-xxxs);
+  line-height: 1.125rem;
+  margin: 0;
+  padding: var(--z-ds-space-xs);
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+  white-space: nowrap;
+}
+:global(.spec-canvas .z-text-button--slim),
+:global(.pg-preview .z-text-button--slim) {
+  padding-bottom: var(--z-ds-space-6);
+  padding-top: var(--z-ds-space-6);
+}
+:global(.spec-canvas .z-text-button--large),
+:global(.pg-preview .z-text-button--large) {
+  font-size: var(--z-ds-fontsize-16);
+}
+:global(.spec-canvas .z-text-button--bold),
+:global(.pg-preview .z-text-button--bold) {
+  font-weight: bold;
+}
+:global(.spec-canvas .z-text-button--active),
+:global(.pg-preview .z-text-button--active) {
+  background-color: var(--z-ds-color-background-10);
+  color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-text-button:hover),
+:global(.pg-preview .z-text-button:hover) {
+  background-color: var(--z-ds-color-background-10);
+  color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-text-button:focus-visible),
+:global(.pg-preview .z-text-button:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+}
+:global(.spec-canvas .z-text-button:disabled),
+:global(.pg-preview .z-text-button:disabled) {
+  background-color: transparent;
+  color: var(--z-ds-color-text-55);
+  cursor: default;
+}
+:global(.spec-canvas .z-text-button--on-image),
+:global(.pg-preview .z-text-button--on-image) {
+  color: rgba(255, 255, 255, 0.6);
+}
+:global(.spec-canvas .z-text-button--on-image:hover),
+:global(.pg-preview .z-text-button--on-image:hover) {
+  background-color: var(--z-ds-color-general-black-60);
+  color: var(--z-ds-color-general-white-100);
+}
+</style>

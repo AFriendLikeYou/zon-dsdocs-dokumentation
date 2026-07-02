@@ -12,12 +12,14 @@ kategorie: Aktionen
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { ButtonPlayground } from '$components/ui/button-playground';
+	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
 	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
+	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
+	const playgroundTemplate = `<button type="submit" class="z-button{classes}"{attrs}>Click me</button>`;
 	const htmlCode = `<!-- Button-Styles global einbinden (z. B. button.css) -->
 <button class="sds-btn sds-btn--primary" type="button">Button</button>
 <button class="sds-btn sds-btn--neutral" type="button">Button</button>`;
@@ -70,6 +72,59 @@ kategorie: Aktionen
 .sds-btn--primary.sds-btn--hover{ background:var(--sds-color-background-brand-hover); }
 .sds-btn--neutral.sds-btn--hover{ background:var(--sds-color-background-neutral-tertiary-hover); }
 .sds-btn--subtle.sds-btn--hover{ border-color:var(--sds-color-border-default-default); }`;
+	const patternCssCode = `/* z-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert).
+   Wird vom Exporter gegen die Vorschau-Flächen gescoped und im Develop-Tab
+   verbatim gezeigt. Flache Regeln (v1-Scoping, keine At-Rules). */
+.z-button {
+  background-color: var(--z-ds-color-background-10);
+  border: none;
+  border-radius: var(--z-ds-border-radius-4);
+  color: var(--z-ds-color-text-100);
+  display: inline-block;
+  font-size: var(--z-ds-fontsize-16);
+  font-weight: bold;
+  line-height: 1.25rem;
+  margin: 0;
+  padding: var(--z-ds-space-10) var(--z-ds-space-16);
+  text-align: center;
+  transition: background-color 200ms ease-out;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.z-button:hover,
+.z-button:focus {
+  background-color: var(--z-ds-color-background-20);
+}
+.z-button--fullwidth {
+  width: 100%;
+}
+.z-button--primary {
+  background-color: var(--z-ds-color-text-100);
+  color: var(--z-ds-color-background-0);
+}
+.z-button--primary:hover,
+.z-button--primary:focus {
+  background-color: var(--z-ds-color-text-70);
+  color: var(--z-ds-color-background-0);
+}
+.z-button--zplus {
+  background-color: var(--z-ds-color-accent-100);
+  color: var(--z-ds-color-general-white-100);
+}
+.z-button--zplus:hover,
+.z-button--zplus:focus {
+  background-color: var(--z-ds-color-accent-70);
+  color: var(--z-ds-color-general-white-100);
+}
+.z-button:focus-visible {
+  outline: 2px solid var(--z-ds-color-focus-100);
+  outline-offset: 2px;
+}
+.z-button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+`;
 	const propsData = [{"name":"variant","typ":"\"Primary\" | \"Neutral\" | \"Subtle\"","default":"\"Primary\"","beschreibung":"Visuelle Gewichtung der Aktion."},{"name":"size","typ":"\"Medium\" | \"Small\"","default":"\"Medium\"","beschreibung":"Steuert Padding und Touch-Fläche."},{"name":"state","typ":"\"Default\" | \"Hover\" | \"Disabled\"","default":"\"Default\"","beschreibung":"Interaktionszustand — im Code i. d. R. über CSS-Pseudoklassen bzw. das disabled-Attribut."},{"name":"label","typ":"string","default":"\"Button\"","beschreibung":"Sichtbarer Button-Text."},{"name":"hasIconStart","typ":"boolean","default":"false","beschreibung":"Zeigt ein führendes Icon (Slot iconStart)."},{"name":"hasIconEnd","typ":"boolean","default":"false","beschreibung":"Zeigt ein nachgestelltes Icon (Slot iconEnd)."}];
 </script>
 
@@ -89,7 +144,7 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
-	<ButtonPlayground />
+	<Playground controls={playgroundControls} template={playgroundTemplate} />
 
 	<h2>Anatomie</h2>
 	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
@@ -131,6 +186,7 @@ kategorie: Aktionen
 	<p>Die sds-btn-Doku oben ist die Figma-/Simple-Design-System-Referenz. Im Repo heißt die Komponente Button.svelte (Klasse .app-button) mit den Varianten default / transparent / outline auf --z-ds-Tokens. Für reine Navigation nutzt du einen Link im Button-Look (Link-Button) statt eines Buttons.</p>
 	<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />
 	<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
 {/snippet}
 
 {#snippet a11yTab()}
@@ -177,4 +233,66 @@ kategorie: Aktionen
 :global(.spec-canvas .sds-btn--primary.sds-btn--hover){ background:var(--sds-color-background-brand-hover); }
 :global(.spec-canvas .sds-btn--neutral.sds-btn--hover){ background:var(--sds-color-background-neutral-tertiary-hover); }
 :global(.spec-canvas .sds-btn--subtle.sds-btn--hover){ border-color:var(--sds-color-border-default-default); }
+
+:global(.spec-canvas .z-button),
+:global(.pg-preview .z-button) {
+  background-color: var(--z-ds-color-background-10);
+  border: none;
+  border-radius: var(--z-ds-border-radius-4);
+  color: var(--z-ds-color-text-100);
+  display: inline-block;
+  font-size: var(--z-ds-fontsize-16);
+  font-weight: bold;
+  line-height: 1.25rem;
+  margin: 0;
+  padding: var(--z-ds-space-10) var(--z-ds-space-16);
+  text-align: center;
+  transition: background-color 200ms ease-out;
+  white-space: nowrap;
+  cursor: pointer;
+}
+:global(.spec-canvas .z-button:hover),
+:global(.pg-preview .z-button:hover),
+:global(.spec-canvas .z-button:focus),
+:global(.pg-preview .z-button:focus) {
+  background-color: var(--z-ds-color-background-20);
+}
+:global(.spec-canvas .z-button--fullwidth),
+:global(.pg-preview .z-button--fullwidth) {
+  width: 100%;
+}
+:global(.spec-canvas .z-button--primary),
+:global(.pg-preview .z-button--primary) {
+  background-color: var(--z-ds-color-text-100);
+  color: var(--z-ds-color-background-0);
+}
+:global(.spec-canvas .z-button--primary:hover),
+:global(.pg-preview .z-button--primary:hover),
+:global(.spec-canvas .z-button--primary:focus),
+:global(.pg-preview .z-button--primary:focus) {
+  background-color: var(--z-ds-color-text-70);
+  color: var(--z-ds-color-background-0);
+}
+:global(.spec-canvas .z-button--zplus),
+:global(.pg-preview .z-button--zplus) {
+  background-color: var(--z-ds-color-accent-100);
+  color: var(--z-ds-color-general-white-100);
+}
+:global(.spec-canvas .z-button--zplus:hover),
+:global(.pg-preview .z-button--zplus:hover),
+:global(.spec-canvas .z-button--zplus:focus),
+:global(.pg-preview .z-button--zplus:focus) {
+  background-color: var(--z-ds-color-accent-70);
+  color: var(--z-ds-color-general-white-100);
+}
+:global(.spec-canvas .z-button:focus-visible),
+:global(.pg-preview .z-button:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+  outline-offset: 2px;
+}
+:global(.spec-canvas .z-button:disabled),
+:global(.pg-preview .z-button:disabled) {
+  pointer-events: none;
+  opacity: 0.5;
+}
 </style>

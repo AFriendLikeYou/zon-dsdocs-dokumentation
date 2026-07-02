@@ -1,0 +1,141 @@
+---
+title: "Button Group"
+status: ready_for_dev
+aktualisiert_am: 2026-07-02
+kategorie: Aktionen
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, CodeBlock } from '$components/ui/specsheet';
+	import Specimen from './Specimen.svelte';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const patternCssCode = `/* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
+.buttongroup {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+}
+.buttongroup-item {
+  background: var(--z-ds-color-background-10);
+  border: 0.125rem var(--z-ds-color-background-10) solid;
+  color: var(--z-ds-color-text-55);
+  display: inline-block;
+  font-size: var(--z-ds-fontsize-16);
+  line-height: 1.25rem;
+  position: relative;
+}
+.buttongroup-item--active .buttongroup-button {
+  background: var(--z-ds-color-background-0);
+  color: var(--z-ds-color-text-100);
+  cursor: default;
+}
+.buttongroup-item:first-child {
+  border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
+}
+.buttongroup-item:last-child {
+  border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
+}
+button.buttongroup-button {
+  background-color: transparent;
+  border-width: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+  border-radius: var(--z-ds-border-radius-4);
+  display: inline-block;
+  padding: var(--z-ds-space-xs) var(--z-ds-space-m);
+  transition: background-color 300ms ease-out;
+}
+.buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover {
+  background-color: var(--z-ds-color-background-20);
+  color: var(--z-ds-color-text-100);
+}
+`;
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Specimen spec={spec} />
+{/snippet}
+
+{#snippet developTab()}
+
+	<h2>Code</h2>
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .buttongroup),
+:global(.pg-preview .buttongroup) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+}
+:global(.spec-canvas .buttongroup-item),
+:global(.pg-preview .buttongroup-item) {
+  background: var(--z-ds-color-background-10);
+  border: 0.125rem var(--z-ds-color-background-10) solid;
+  color: var(--z-ds-color-text-55);
+  display: inline-block;
+  font-size: var(--z-ds-fontsize-16);
+  line-height: 1.25rem;
+  position: relative;
+}
+:global(.spec-canvas .buttongroup-item--active .buttongroup-button),
+:global(.pg-preview .buttongroup-item--active .buttongroup-button) {
+  background: var(--z-ds-color-background-0);
+  color: var(--z-ds-color-text-100);
+  cursor: default;
+}
+:global(.spec-canvas .buttongroup-item:first-child),
+:global(.pg-preview .buttongroup-item:first-child) {
+  border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
+}
+:global(.spec-canvas .buttongroup-item:last-child),
+:global(.pg-preview .buttongroup-item:last-child) {
+  border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
+}
+:global(.spec-canvas button.buttongroup-button),
+:global(.pg-preview button.buttongroup-button) {
+  background-color: transparent;
+  border-width: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+  border-radius: var(--z-ds-border-radius-4);
+  display: inline-block;
+  padding: var(--z-ds-space-xs) var(--z-ds-space-m);
+  transition: background-color 300ms ease-out;
+}
+:global(.spec-canvas .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover),
+:global(.pg-preview .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover) {
+  background-color: var(--z-ds-color-background-20);
+  color: var(--z-ds-color-text-100);
+}
+</style>

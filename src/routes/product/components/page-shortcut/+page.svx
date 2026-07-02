@@ -1,0 +1,100 @@
+---
+title: "Page Shortcut"
+status: ready_for_dev
+aktualisiert_am: 2026-07-02
+kategorie: Aktionen
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, CodeBlock } from '$components/ui/specsheet';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const playgroundControls = [];
+	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>
+  <span>Zur Startseite</span>
+</button>`;
+	const patternCssCode = `/* z-page-shortcut — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
+.z-page-shortcut {
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid var(--z-ds-color-border-70);
+  border-radius: var(--z-ds-border-radius-4);
+  color: var(--z-ds-color-text-100);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--z-ds-fontsize-16);
+  gap: var(--z-ds-space-xs);
+  line-height: 1rem;
+  margin: 0;
+  padding: var(--z-ds-space-xs);
+  transition: background-color 200ms ease-out, border-color 200ms ease-out;
+  white-space: nowrap;
+}
+.z-page-shortcut:hover,
+.z-page-shortcut:focus {
+  border-color: var(--z-ds-color-border-100);
+}
+.z-page-shortcut:focus-visible {
+  outline: 2px solid var(--z-ds-color-focus-100);
+}
+`;
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." />
+{/snippet}
+
+{#snippet developTab()}
+
+	<h2>Code</h2>
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-page-shortcut),
+:global(.pg-preview .z-page-shortcut) {
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid var(--z-ds-color-border-70);
+  border-radius: var(--z-ds-border-radius-4);
+  color: var(--z-ds-color-text-100);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--z-ds-fontsize-16);
+  gap: var(--z-ds-space-xs);
+  line-height: 1rem;
+  margin: 0;
+  padding: var(--z-ds-space-xs);
+  transition: background-color 200ms ease-out, border-color 200ms ease-out;
+  white-space: nowrap;
+}
+:global(.spec-canvas .z-page-shortcut:hover),
+:global(.pg-preview .z-page-shortcut:hover),
+:global(.spec-canvas .z-page-shortcut:focus),
+:global(.pg-preview .z-page-shortcut:focus) {
+  border-color: var(--z-ds-color-border-100);
+}
+:global(.spec-canvas .z-page-shortcut:focus-visible),
+:global(.pg-preview .z-page-shortcut:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+}
+</style>

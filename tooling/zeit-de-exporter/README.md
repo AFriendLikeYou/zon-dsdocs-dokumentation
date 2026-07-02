@@ -74,6 +74,35 @@ Vanilla-HTML/CSS ist der zeit.de-Default. Die Figma-Tokens werden als CSS Custom
 Das `css` wird gegen `.sheet` gescopt (`:global(.sheet …)`), damit es nicht in die übrige
 Doku-Seite leakt.
 
+### `render` — datengetriebener Playground (Registry-Schema, ADR-023)
+
+Der interaktive Playground (erste Design-Sektion) entsteht aus **Daten**, nicht aus einer
+Komponente — neue Patterns brauchen nur einen Registry-Eintrag:
+
+```jsonc
+"render": {
+  "controls": [                                   // reine JSON-Daten
+    { "key": "variant", "label": "Variant", "type": "select", "default": "primary",
+      "options": [ { "value": "primary", "label": "Primary", "cssClass": "z-button--primary" } ] },
+    { "key": "fullwidth", "label": "Fullwidth", "type": "toggle", "cssClass": "z-button--fullwidth" },
+    { "key": "disabled",  "label": "Disabled",  "type": "attr",   "attr": "disabled" }
+  ],
+  "template": "<button class=\"z-button{classes}\"{attrs}>Click me</button>", // logikfrei;
+                                                  // EINE Instanziierung → Preview UND Code
+  "cssFile": "./pattern.css",   // UNSCOPED, co-located; Exporter scoped es gegen die
+                                // Vorschau-Flächen (v1: flache Regeln, keine At-Rules)
+                                // und zeigt es verbatim im Develop-Tab
+  "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion (statt template);
+                                   // darf NUR Registry-Daten konsumieren
+  "hint": "…",                     // Hinweiszeile statt Controls
+  "stage": { "darkKey": "onImage" }
+}
+```
+
+Zusätzlich: `varianten[].werte[].cssClass` deklariert die Modifier-Klasse explizit —
+`check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:
+Component-Route ohne `model.json` wird geflaggt).
+
 ## Benutzung
 
 ```bash

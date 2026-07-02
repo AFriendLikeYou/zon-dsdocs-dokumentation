@@ -154,6 +154,32 @@ export const generated = {
 					"label": "Small"
 				}
 			]
+		},
+		{
+			"prop": "z-button Variante",
+			"werte": [
+				{
+					"label": "Default",
+					"default": true
+				},
+				{
+					"label": "Primary",
+					"cssClass": "z-button--primary"
+				},
+				{
+					"label": "Z+",
+					"cssClass": "z-button--zplus"
+				}
+			]
+		},
+		{
+			"prop": "z-button Layout",
+			"werte": [
+				{
+					"label": "Fullwidth",
+					"cssClass": "z-button--fullwidth"
+				}
+			]
 		}
 	],
 	"zustaende": [

@@ -510,6 +510,39 @@ Komponenten nutzen NUR Rollen-Tokens, nie rohe z-ds-Farben/-Größen.
 
 ---
 
+## ADR-023 — Stufe 4: Datengetriebenes Registry-Schema (controls/template/pattern.css)
+**Kontext:** Produktvision „Content + Registry statt Komponenten-Library": Der Playground
+jeder Component-Seite soll aus DATEN entstehen — neue Patterns brauchen nur einen
+Registry-Eintrag, keine bespoke Svelte-Komponente. Interim war `render.playground`
+(Import einer handgebauten ButtonPlayground-Komponente).
+**Schema (model.json → render):**
+- `controls`: `select` (Optionen mit `cssClass`) · `toggle` (`cssClass`) · `attr`
+  (HTML-Attribut, z. B. `disabled`) — reine JSON-Daten.
+- `template`: logikfreies HTML mit `{classes}`/`{attrs}`-Platzhaltern. **Eine**
+  Instanziierung (`instantiate()` im Playground-Harness) liefert Live-Preview UND
+  Code-Block — per Konstruktion niemals auseinander.
+- `cssFile`: co-located, UNSCOPED `pattern.css` (originalgetreues DS-CSS) — der Exporter
+  scoped es via `scopeCss()` gegen `.spec-canvas`/`.pg-preview` (v1: flache Regeln, keine
+  At-Rules) und zeigt es verbatim im Develop-Tab.
+- `specimen`: Escape-Hatch (`./Specimen.svelte`) für Loops/Interaktion; Regel: darf nur
+  Registry-Daten konsumieren. `hint`, `stage.darkKey` ergänzend.
+- `varianten[].werte[].cssClass`: explizite Modifier-Klasse (zentraler Typ erweitert).
+**Abnahme an den 4 echten z-*-Familien:** `button` (select/toggle/attr, datengetrieben),
+`text-button` (Größen-Select + 3 Toggles + darkKey), `page-shortcut` (statisches Template
++ hint), `button-group` (Specimen-Escape mit Loop + Klick-Interaktion) — je eigene Route
+mit co-located model.json + pattern.css. **`ui/button-playground` ersatzlos abgelöst**;
+`render.playground` (Interim) entfernt.
+**Drift-Check erweitert:** explizites `cssClass` wird 1:1 gegen den CSS-Korpus geprüft
+(statt Label-Heuristik), `pattern.css` fließt in den Korpus, Meldungen nennen die echte
+Basis, und **invers**: Component-Route ohne model.json = Warnung (flaggt aktuell ehrlich
+die zwei „Geplant"-Platzhalter date-picker/input).
+**Konsequenzen:** check 0/0 · Build EXIT 0 · Tests 10/10 (instantiate() + Template-Modus
+end-to-end getestet). Neue Patterns (zon-teaser, cp-region, …) = model.json + pattern.css
++ Export — Stufe 5 ergänzt den generierten Katalog-Index.
+**Status:** Aktiv.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

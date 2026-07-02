@@ -14,6 +14,13 @@ export const CHANGELOG: ChangelogVersion[] = [
 		version: 'Doku-Ausbau',
 		dates: [
 			{
+				date: '2026-07-03',
+				notes: [
+					'Drei neue Komponenten-Seiten mit interaktivem Playground: <a href="/product/components/text-button">Text Button</a>, <a href="/product/components/page-shortcut">Page Shortcut</a> und <a href="/product/components/button-group">Button Group</a>.',
+					'Komponenten-Playgrounds entstehen jetzt vollständig aus Katalog-Daten — Live-Vorschau und Code-Beispiel kommen aus derselben Quelle und können nicht mehr auseinanderlaufen.'
+				]
+			},
+			{
 				date: '2026-07-02',
 				notes: [
 					'Die Button-Doku hat jetzt eine <a href="/product/components/button">interaktive Live-Vorschau</a> direkt auf der Komponenten-Seite (Playground an erster Stelle).',

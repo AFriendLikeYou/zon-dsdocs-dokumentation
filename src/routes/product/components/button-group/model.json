@@ -1,0 +1,11 @@
+{
+	"name": "Button Group",
+	"status": "ready_for_dev",
+	"kategorie": "Aktionen",
+	"aktualisiertAm": "2026-07-02",
+	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
+	"render": {
+		"specimen": "./Specimen.svelte",
+		"cssFile": "./pattern.css"
+	}
+}

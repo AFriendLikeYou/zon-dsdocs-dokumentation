@@ -149,6 +149,32 @@
 					"label": "Small"
 				}
 			]
+		},
+		{
+			"prop": "z-button Variante",
+			"werte": [
+				{
+					"label": "Default",
+					"default": true
+				},
+				{
+					"label": "Primary",
+					"cssClass": "z-button--primary"
+				},
+				{
+					"label": "Z+",
+					"cssClass": "z-button--zplus"
+				}
+			]
+		},
+		{
+			"prop": "z-button Layout",
+			"werte": [
+				{
+					"label": "Fullwidth",
+					"cssClass": "z-button--fullwidth"
+				}
+			]
 		}
 	],
 	"zustaende": [
@@ -227,10 +253,6 @@
 		]
 	},
 	"render": {
-		"playground": {
-			"import": "$components/ui/button-playground",
-			"component": "ButtonPlayground"
-		},
 		"css": [
 			":global(.spec-canvas .sds-btn){",
 			"  --sds-color-background-brand-default:#2c2c2c;",
@@ -385,6 +407,44 @@
 			"",
 			"<!-- Navigation: Link im Button-Look (Link-Button) -->",
 			"<a class=\"app-button\" href=\"/pfad\">Weiter</a>"
-		]
+		],
+		"controls": [
+			{
+				"key": "variant",
+				"label": "Variant",
+				"type": "select",
+				"default": "primary",
+				"options": [
+					{
+						"value": "default",
+						"label": "Default"
+					},
+					{
+						"value": "primary",
+						"label": "Primary",
+						"cssClass": "z-button--primary"
+					},
+					{
+						"value": "zplus",
+						"label": "Z+",
+						"cssClass": "z-button--zplus"
+					}
+				]
+			},
+			{
+				"key": "fullwidth",
+				"label": "Fullwidth",
+				"type": "toggle",
+				"cssClass": "z-button--fullwidth"
+			},
+			{
+				"key": "disabled",
+				"label": "Disabled",
+				"type": "attr",
+				"attr": "disabled"
+			}
+		],
+		"template": "<button type=\"submit\" class=\"z-button{classes}\"{attrs}>Click me</button>",
+		"cssFile": "./pattern.css"
 	}
 }

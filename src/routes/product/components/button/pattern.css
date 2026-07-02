@@ -1,0 +1,52 @@
+/* z-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert).
+   Wird vom Exporter gegen die Vorschau-Flächen gescoped und im Develop-Tab
+   verbatim gezeigt. Flache Regeln (v1-Scoping, keine At-Rules). */
+.z-button {
+  background-color: var(--z-ds-color-background-10);
+  border: none;
+  border-radius: var(--z-ds-border-radius-4);
+  color: var(--z-ds-color-text-100);
+  display: inline-block;
+  font-size: var(--z-ds-fontsize-16);
+  font-weight: bold;
+  line-height: 1.25rem;
+  margin: 0;
+  padding: var(--z-ds-space-10) var(--z-ds-space-16);
+  text-align: center;
+  transition: background-color 200ms ease-out;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.z-button:hover,
+.z-button:focus {
+  background-color: var(--z-ds-color-background-20);
+}
+.z-button--fullwidth {
+  width: 100%;
+}
+.z-button--primary {
+  background-color: var(--z-ds-color-text-100);
+  color: var(--z-ds-color-background-0);
+}
+.z-button--primary:hover,
+.z-button--primary:focus {
+  background-color: var(--z-ds-color-text-70);
+  color: var(--z-ds-color-background-0);
+}
+.z-button--zplus {
+  background-color: var(--z-ds-color-accent-100);
+  color: var(--z-ds-color-general-white-100);
+}
+.z-button--zplus:hover,
+.z-button--zplus:focus {
+  background-color: var(--z-ds-color-accent-70);
+  color: var(--z-ds-color-general-white-100);
+}
+.z-button:focus-visible {
+  outline: 2px solid var(--z-ds-color-focus-100);
+  outline-offset: 2px;
+}
+.z-button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}

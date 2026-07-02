@@ -1,0 +1,98 @@
+{
+	"name": "Text Button",
+	"status": "ready_for_dev",
+	"kategorie": "Aktionen",
+	"aktualisiertAm": "2026-07-02",
+	"zweck": "Dezenter, flächenloser Text-Button für sekundäre Aktionen — mit Größen- und Betonungs-Modifiern sowie einer On-Image-Variante für Flächen auf Bildern.",
+	"varianten": [
+		{
+			"prop": "Größe",
+			"werte": [
+				{
+					"label": "Default",
+					"default": true
+				},
+				{
+					"label": "Slim",
+					"cssClass": "z-text-button--slim"
+				},
+				{
+					"label": "Large",
+					"cssClass": "z-text-button--large"
+				}
+			]
+		},
+		{
+			"prop": "Betonung",
+			"werte": [
+				{
+					"label": "Bold",
+					"cssClass": "z-text-button--bold"
+				},
+				{
+					"label": "Active",
+					"cssClass": "z-text-button--active"
+				},
+				{
+					"label": "On Image",
+					"cssClass": "z-text-button--on-image"
+				}
+			]
+		}
+	],
+	"render": {
+		"controls": [
+			{
+				"key": "size",
+				"label": "Size",
+				"type": "select",
+				"default": "default",
+				"options": [
+					{
+						"value": "default",
+						"label": "Default"
+					},
+					{
+						"value": "slim",
+						"label": "Slim",
+						"cssClass": "z-text-button--slim"
+					},
+					{
+						"value": "large",
+						"label": "Large",
+						"cssClass": "z-text-button--large"
+					}
+				]
+			},
+			{
+				"key": "bold",
+				"label": "Bold",
+				"type": "toggle",
+				"cssClass": "z-text-button--bold"
+			},
+			{
+				"key": "active",
+				"label": "Active",
+				"type": "toggle",
+				"cssClass": "z-text-button--active"
+			},
+			{
+				"key": "onImage",
+				"label": "On Image",
+				"type": "toggle",
+				"cssClass": "z-text-button--on-image"
+			},
+			{
+				"key": "disabled",
+				"label": "Disabled",
+				"type": "attr",
+				"attr": "disabled"
+			}
+		],
+		"template": "<button type=\"button\" class=\"z-text-button{classes}\"{attrs}>Mehr anzeigen</button>",
+		"cssFile": "./pattern.css",
+		"stage": {
+			"darkKey": "onImage"
+		}
+	}
+}

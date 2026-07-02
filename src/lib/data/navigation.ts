@@ -212,6 +212,24 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Text Button',
+		href: '/product/components/text-button',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Page Shortcut',
+		href: '/product/components/page-shortcut',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Button Group',
+		href: '/product/components/button-group',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Icon Button',
 		href: '/product/components/icon-button',
 		badge: 'Neu',
