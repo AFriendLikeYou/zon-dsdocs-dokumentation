@@ -4,8 +4,10 @@ title: Components
 
 <script lang="ts">
 	import { CardGrid } from '$components/ui/card';
+	// Zentraler, generierter Katalog-Index (Stufe 5, ADR-023/024) — Discovery über
+	// die co-locateten model.json, redaktionelle Overrides bereits eingemerged.
+	import { CATALOG } from '$data/catalog';
 
-	// Komponenten-Übersicht aus den Routen ableiten — driftet nicht von der Realität.
 	const STATUS_LABEL: Record<string, string> = {
 		ready_for_dev: 'Ready for dev',
 		completed: 'Completed',
@@ -17,50 +19,39 @@ title: Components
 		changed: 'warn'
 	};
 
-	const specMods = import.meta.glob('./*/spec.generated.ts', { eager: true });
-	const contentMods = import.meta.glob('./*/content.ts', { eager: true });
-	const pageMods = import.meta.glob('./*/+page.svx');
-
 	const titleCase = (slug: string) =>
 		slug
 			.split('-')
 			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
 			.join(' ');
 
-	const slugs = Object.keys(pageMods).map((p) => p.split('/')[1]);
+	// Katalog-Einträge (Registry) …
+	const catalogCards = CATALOG.map((e) => ({
+		url: `/product/components/${e.slug}`,
+		title: e.spec.name ?? titleCase(e.slug),
+		description: e.spec.zweck ?? '',
+		badge: STATUS_LABEL[e.spec.status ?? ''] ?? e.spec.status ?? '',
+		badgeVariant: STATUS_VARIANT[e.spec.status ?? ''] ?? ('neutral' as const)
+	}));
 
-	// Editoriale Angaben für Routen OHNE Exporter-Spec (Fallback-Karten).
-	const META: Record<
-		string,
-		{ title?: string; description: string; badge?: string; badgeVariant?: 'ready' | 'done' | 'warn' | 'neutral' | 'accent' }
-	> = {};
+	// … plus ehrliche Platzhalter-Karten für Routen OHNE Registry-Entry
+	// (der inverse Drift-Check flaggt sie zusätzlich in `npm run check`).
+	const pageMods = import.meta.glob('./*/+page.svx');
+	const catalogSlugs = new Set(CATALOG.map((e) => e.slug));
+	const placeholderCards = Object.keys(pageMods)
+		.map((p) => p.split('/')[1])
+		.filter((slug) => !catalogSlugs.has(slug))
+		.map((slug) => ({
+			url: `/product/components/${slug}`,
+			title: titleCase(slug),
+			description: 'Noch nicht dokumentiert.',
+			badge: 'In Arbeit',
+			badgeVariant: 'neutral' as const
+		}));
 
-	const cards = slugs
-		.map((slug) => {
-			const spec = (specMods[`./${slug}/spec.generated.ts`] as { generated?: any } | undefined)
-				?.generated;
-			const content =
-				(contentMods[`./${slug}/content.ts`] as { content?: any } | undefined)?.content ?? {};
-			if (spec) {
-				const status = content.status ?? spec.status;
-				return {
-					url: `/product/components/${slug}`,
-					title: spec.name ?? titleCase(slug),
-					description: content.zweck ?? spec.zweck ?? '',
-					badge: STATUS_LABEL[status] ?? status ?? '',
-					badgeVariant: STATUS_VARIANT[status] ?? 'neutral'
-				};
-			}
-			const meta = META[slug];
-			return {
-				url: `/product/components/${slug}`,
-				title: meta?.title ?? titleCase(slug),
-				description: meta?.description ?? 'Noch nicht dokumentiert.',
-				badge: meta?.badge ?? 'In Arbeit',
-				badgeVariant: meta?.badgeVariant ?? ('neutral' as const)
-			};
-		})
-		.sort((a, b) => a.title.localeCompare(b.title));
+	const cards = [...catalogCards, ...placeholderCards].sort((a, b) =>
+		a.title.localeCompare(b.title)
+	);
 </script>
 
 <svelte:head>

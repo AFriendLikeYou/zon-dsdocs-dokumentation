@@ -543,6 +543,25 @@ end-to-end getestet). Neue Patterns (zon-teaser, cp-region, …) = model.json + 
 
 ---
 
+## ADR-024 — Stufe 5a: Generierter Katalog-Index (`$data/catalog`)
+**Kontext:** Der Zwei-Schichten-Ansatz aus ADR-018/023 braucht eine zentrale, typisierte
+Sicht auf alle Patterns — ohne Handliste und ohne die Co-Location aufzugeben.
+**Entscheidung:** `src/lib/data/catalog.ts` = Build-Zeit-Glob über die co-locateten
+`model.json` + `content.ts` (eager, kein Laufzeit-Fetch, kein gen-Skript nötig):
+`CATALOG: CatalogEntry[]` mit gemergtem Spec (`{...modell-ohne-render, ...content}`)
+und Override-Map nur für Kuratierung (Reihenfolge, Ausschlüsse). Neues Pattern =
+model.json + Export → erscheint automatisch im Katalog. Die Components-Übersicht
+konsumiert `CATALOG` (+ ehrliche Platzhalter-Karten für Routen ohne Registry-Entry,
+die der inverse Drift-Check zusätzlich flaggt). Durch 3 Tests abgesichert
+(Discovery, Merge/render-Strip, Sortierung).
+**Stufe 5b (offen):** Die echten Patterns zon-teaser, cp-region, headed-meta, pager
+brauchen die ORIGINALEN zeit.de-Quellen (Markup + CSS) — bewusst nicht aus dem
+Gedächtnis fabriziert (Originaltreue-Prinzip wie bei den z-*-Familien, die aus dem
+Nutzer-Playground kamen). Material angefragt.
+**Status:** Aktiv.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können
