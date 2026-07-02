@@ -21,6 +21,13 @@ export default ts.config(
 				...globals.node,
 				NodeListOf: 'readonly'
 			}
+		},
+		rules: {
+			// `_`-Präfix = bewusster Discard (z. B. `const { render: _render, ...spec } = …`).
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
+			]
 		}
 	},
 	{

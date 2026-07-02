@@ -8,7 +8,7 @@ title: Assets
 
 
 <script lang="ts">
-	import BrandAssetsGrid from '$components/brand-assets/BrandAssetsGrid.svelte';
+	import { BrandAssetsGrid } from '$components/ui/brand-assets';
 
 	const { data } = $props();
 	const { brandAssets } = data;

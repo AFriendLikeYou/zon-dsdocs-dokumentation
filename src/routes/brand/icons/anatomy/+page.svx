@@ -1,0 +1,20 @@
+---
+title: Icon Aufbau
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+Die ZEIT-Icons folgen einem einheitlichen Aufbau, damit sie über das ganze Set
+konsistent wirken — gleiche Strichstärke, gleiches Raster, gleiche optische Größe.
+Die folgenden Beispiele zeigen Auswahl und Anatomie.
+
+![Icon Auswahl](/media/brand/icons/icon-uebersicht.png)
+
+![Icon Aufbau 1](/media/brand/icons/icon-anatomy-1.png)
+
+![Icon Aufbau 2](/media/brand/icons/icon-anatomy-2.png)
+

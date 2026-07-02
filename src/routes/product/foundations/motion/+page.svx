@@ -1,0 +1,55 @@
+---
+title: Motion & Elevation
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { MotionDemo } from '$components/ui/motion-demo';
+	import { ElevationDemo } from '$components/ui/elevation-demo';
+
+	const easings = [
+		{ label: 'ease — Hover & Farbwechsel', cssVar: '--ds-ease' },
+		{ label: 'ease-out — Enter/Exit, UI', cssVar: '--ds-ease-out' },
+		{ label: 'ease-in-out — On-Screen-Bewegung', cssVar: '--ds-ease-in-out' }
+	];
+	const durations = [
+		{ label: 'dur — Hover / Press', cssVar: '--ds-dur' },
+		{ label: 'dur-slow — Dropdowns / Panels', cssVar: '--ds-dur-slow' }
+	];
+	const shadows = [
+		{ label: 'shadow-sm', cssVar: '--ds-shadow-sm', usage: 'ruhende Karten' },
+		{ label: 'shadow-md', cssVar: '--ds-shadow-md', usage: 'Overlays / Hover-Lift' }
+	];
+</script>
+
+# {title}
+
+Bewegung dient der Orientierung, nie der Show. Unsere Animationen folgen einem festen
+Standard (nach dem [emilkowalski/skill](https://animations.dev/)): **starke ease-out**,
+unter **300 ms**, Druck-Feedback (`:active`), und immer respektiert
+`prefers-reduced-motion`. Die Werte sind **Tokens** — unten live aus dem Stylesheet
+gelesen.
+
+## Easing-Kurven
+
+Zum Abspielen klicken — so wird der Unterschied zwischen den Kurven fühlbar.
+
+<MotionDemo tokens={easings} type="easing" />
+
+## Dauer
+
+<MotionDemo tokens={durations} type="duration" />
+
+## Elevation / Schatten
+
+Schatten heben Flächen ab — sparsam einsetzen. Die Tokens sind theme-adaptiv (eigene
+Werte im Dark Mode, damit sie auf dunklem Grund nicht verschwinden).
+
+<ElevationDemo tokens={shadows} />
+
+---
+
+*Hintergrund und Regeln: DECISIONS.md ADR-010 (Motion-Standard).*

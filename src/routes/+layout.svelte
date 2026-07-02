@@ -1,11 +1,11 @@
 <script lang="ts">
-	import AnchorLinks from '$components/AnchorLinks.svelte';
-	import BreadCrumbs from '$components/BreadCrumbs.svelte';
-	import FooterNavigation from '$components/FooterNavigation.svelte';
-	import SkipToMainContentLink from '$components/SkipToMainContentLink.svelte';
-	import Toaster from '$components/toast/toaster.svelte';
+	import AnchorLinks from '$components/layout/AnchorLinks.svelte';
+	import BreadCrumbs from '$components/layout/BreadCrumbs.svelte';
+	import FooterNavigation from '$components/layout/FooterNavigation.svelte';
+	import SkipToMainContentLink from '$components/layout/SkipToMainContentLink.svelte';
+	import Toaster from '$components/layout/toast/toaster.svelte';
 	import { setToastState } from '$lib/toast-state.svelte';
-	import Navbar from '$components/Navbar.svelte';
+	import Navbar from '$components/layout/Navbar.svelte';
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import {
@@ -14,7 +14,7 @@
 		FLAT_MENU_ITEMS_PRODUCT,
 		MENU_ITEMS_PRODUCT
 	} from '$data/navigation';
-	import Sidebar from '$components/Sidebar.svelte';
+	import Sidebar from '$components/layout/Sidebar.svelte';
 
 	let url = $state(page.url.pathname);
 
@@ -22,14 +22,20 @@
 		url = page.url.pathname;
 	});
 
-	// Menü nach Bereich wählen: /product zeigt das Product-Menü, sonst Brand.
-	const isProduct = $derived(url?.startsWith('/product') ?? false);
+	// Eine Quelle für die Bereichszuordnung — Menü, Footer-Navigation und TOC
+	// leiten sich daraus ab (statt drei verschiedener Routen-Checks).
+	const section = $derived(
+		url?.startsWith('/product') ? 'product' : url?.startsWith('/brand') ? 'brand' : 'root'
+	);
+	const isProduct = $derived(section === 'product');
 	const menuItems = $derived(isProduct ? MENU_ITEMS_PRODUCT : MENU_ITEMS_BRAND);
 	const flatMenuItems = $derived(isProduct ? FLAT_MENU_ITEMS_PRODUCT : FLAT_MENU_ITEMS_BRAND);
+	const showFooterNav = $derived(section !== 'root');
+	const showTOC = $derived(section === 'brand');
 
-	import TableOfContents from '$components/TableOfContents.svelte';
-	import Footer from '$components/Footer.svelte';
-	import type { Theme } from '../global';
+	import TableOfContents from '$components/layout/TableOfContents.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import type { Theme } from '$types/global';
 
 	type Props = {
 		data: { theme: Theme; isUserLoggedIn: boolean };
@@ -39,15 +45,6 @@
 	const { data, children }: Props = $props();
 
 	const currentTheme = $state(data.theme);
-
-	// Define routes that should show TableOfContents
-	const routesWithTOC = ['brand/'];
-
-	// Function to check if current path should show TableOfContents
-	function shouldShowTOC() {
-		const path = page.url.pathname;
-		return routesWithTOC.some((route) => path.includes(route));
-	}
 
 	setToastState();
 </script>
@@ -66,22 +63,20 @@
 				{@render children()}
 
 			</main>
-			{#if isProduct || url?.includes('brand')}
+			{#if showFooterNav}
 				<FooterNavigation items={flatMenuItems} />
 			{/if}
-
-			<Footer items={menuItems} {currentTheme} />
 		</div>
 
-		{#if shouldShowTOC()}
+		{#if showTOC}
 			<TableOfContents />
 		{/if}
-
-		
 	</div>
 	<AnchorLinks />
 </div>
 
+<!-- Footer als Full-Width-Band unter Sidebar + Content + TOC (nicht in der Content-Spalte). -->
+<Footer items={menuItems} {currentTheme} />
 
 <Toaster />
 

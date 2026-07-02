@@ -7,38 +7,94 @@ title: Foundations
 </svelte:head>
 
 <script lang="ts">
-	import CardGrid from '$components/ui/card/CardGrid.svelte';
-	import Alert from '$components/ui/alert/Alert.svelte';
-</script>
+	import { CardGrid } from '$components/ui/card';
 
+	type BadgeVariant = 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+	type CardMeta = {
+		title: string;
+		description: string;
+		order: number;
+		badge?: string;
+		badgeVariant?: BadgeVariant;
+	};
+
+	// Auto-Discovery der Foundation-Sub-Routen (Drift-frei): jede neue
+	// src/routes/product/foundations/<slug>/+page.svx erscheint hier automatisch als Karte.
+	// Die editoriellen, nicht ableitbaren Felder (Titel, Beschreibung, Badge, Reihenfolge)
+	// stehen in META. Fehlt ein Eintrag, greift ein Fallback (Title-Case des Slugs, ans Ende).
+	const routeModules = import.meta.glob('./*/+page.svx');
+	const slugs = Object.keys(routeModules).map((p) => p.split('/')[1]);
+
+	const META: Record<string, CardMeta> = {
+		tokens: {
+			order: 1,
+			title: 'Tokens',
+			description:
+				'Die geteilten Grundwerte — Farbe, Abstand, Radius, Schriftgröße. Quelle der Konsistenz jeder Komponente.',
+			badge: 'Neu',
+			badgeVariant: 'accent'
+		},
+		typography: {
+			order: 2,
+			title: 'Typography',
+			description: 'Schrift-Hierarchie, Größen und Zeilenführung für lesbare, ruhige Texte.'
+		},
+		motion: {
+			order: 3,
+			title: 'Motion & Elevation',
+			description:
+				'Bewegung und Elevation — Easings, Dauern und Schatten für lebendige, ruhige Interfaces.',
+			badge: 'Neu',
+			badgeVariant: 'accent'
+		},
+		icons: {
+			order: 4,
+			title: 'Icons',
+			description: 'Das Icon-Set des Design Systems samt Suche und Nutzung.'
+		},
+		fonts: {
+			order: 5,
+			title: 'Fonts',
+			description: 'Die Hausschriften und wie sie eingebunden werden.'
+		},
+		assets: {
+			order: 6,
+			title: 'Assets',
+			description: 'Wiederkehrende grafische Bausteine zum Download.'
+		},
+		accessibility: {
+			order: 7,
+			title: 'Accessibility',
+			description: 'Grundlagen zu Kontrast, Fokus und Tastaturbedienung.'
+		}
+	};
+
+	const titleCase = (slug: string) =>
+		slug
+			.split('-')
+			.map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+			.join(' ');
+
+	const cards = slugs
+		.map((slug) => {
+			const meta = META[slug];
+			return {
+				order: meta?.order ?? 999,
+				url: `/product/foundations/${slug}`,
+				title: meta?.title ?? titleCase(slug),
+				description: meta?.description ?? '',
+				badge: meta?.badge,
+				badgeVariant: meta?.badgeVariant
+			};
+		})
+		.sort((a, b) => a.order - b.order)
+		.map(({ order: _order, ...card }) => card);
+</script>
 
 # {title}
 
-Foundations are the visual elements needed to create engaging end-to-end user experiences. This includes guidance on iconography, typography, layout, and structure.
+Foundations sind die visuellen Grundlagen für durchgängige Nutzererlebnisse — Tokens,
+Typografie, Icons und Struktur. Sie bilden die Schicht unter den Komponenten: Wer hier
+sauber arbeitet, bekommt Konsistenz in allem, was darauf aufbaut, geschenkt.
 
-<Alert 
-	variant="default"
-	title="Hinweis Default" 
-	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
-/>
-
-<Alert 
-	variant="warning"
-	title="Hinweis Default" 
-	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
-/>
-
-<Alert 
-	variant="danger"
-	title="Hinweis Default" 
-	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
-/>
-
-<Alert 
-	variant="success"
-	title="Hinweis Default" 
-	description="Die Cards und auch die Alerts sind noch WIP - beides ganz praktisch. Aber wir müssen noch einmal schauen wie wir das dynamisch hinbekommen."
-/>
-
-
-<CardGrid />
+<CardGrid {cards} />

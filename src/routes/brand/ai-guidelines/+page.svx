@@ -1,0 +1,45 @@
+---
+title: KI-Richtlinien
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { Alert } from '$components/ui/alert';
+</script>
+
+# {title}
+
+Generative KI eröffnet neue Möglichkeiten für Inhalte und Gestaltung — und braucht
+klare Leitplanken, damit Markenidentität, Glaubwürdigkeit und rechtliche Vorgaben
+gewahrt bleiben. Diese Seite hält fest, wie wir KI im Sinne der Marke DIE ZEIT
+einsetzen.
+
+<Alert
+	variant="default"
+	title="Diese Seite ist im Aufbau"
+	description="Die verbindlichen KI-Richtlinien werden vom Brand-/Rechts-Team gepflegt. Unten steht die Struktur, die hier mit ZEIT-spezifischem Inhalt gefüllt wird."
+/>
+
+## Prinzipien
+
+Die Grundsätze für den KI-Einsatz (z. B. Transparenz, Sorgfalt, Verantwortung) —
+jeweils mit einem Satz, was sie konkret bedeuten.
+
+## Was KI nicht verändert
+
+Zentrale Markenelemente bleiben menschlich kuratiert und werden **nicht** KI-generiert
+verändert: Logos, Hausschriften, Icons, Bildsprache. Verweise auf die jeweiligen
+Brand-Seiten kommen hier hin.
+
+## Kennzeichnung von KI-Inhalten
+
+Wann und wie KI-generierte Texte, Bilder und Videos gekennzeichnet werden
+(direkt am Inhalt vs. im Impressum/Disclaimer).
+
+## KI-generierter Text & Bild
+
+Rahmen für den Umgang mit generierten Texten und Bildern — inkl. Datenschutz
+(keine vertraulichen Daten in externe Tools) und Freigabewege.

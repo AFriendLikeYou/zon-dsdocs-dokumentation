@@ -3,7 +3,7 @@ title: Components
 ---
 
 <script lang="ts">
-	import CardGrid from '$components/ui/card/CardGrid.svelte';
+	import { CardGrid } from '$components/ui/card';
 
 	// Komponenten-Übersicht aus den Routen ableiten — driftet nicht von der Realität.
 	const STATUS_LABEL: Record<string, string> = {
@@ -29,6 +29,12 @@ title: Components
 
 	const slugs = Object.keys(pageMods).map((p) => p.split('/')[1]);
 
+	// Editoriale Angaben für Routen OHNE Exporter-Spec (Fallback-Karten).
+	const META: Record<
+		string,
+		{ title?: string; description: string; badge?: string; badgeVariant?: 'ready' | 'done' | 'warn' | 'neutral' | 'accent' }
+	> = {};
+
 	const cards = slugs
 		.map((slug) => {
 			const spec = (specMods[`./${slug}/spec.generated.ts`] as { generated?: any } | undefined)
@@ -45,12 +51,13 @@ title: Components
 					badgeVariant: STATUS_VARIANT[status] ?? 'neutral'
 				};
 			}
+			const meta = META[slug];
 			return {
 				url: `/product/components/${slug}`,
-				title: titleCase(slug),
-				description: 'Noch nicht dokumentiert.',
-				badge: 'In Arbeit',
-				badgeVariant: 'neutral' as const
+				title: meta?.title ?? titleCase(slug),
+				description: meta?.description ?? 'Noch nicht dokumentiert.',
+				badge: meta?.badge ?? 'In Arbeit',
+				badgeVariant: meta?.badgeVariant ?? ('neutral' as const)
 			};
 		})
 		.sort((a, b) => a.title.localeCompare(b.title));

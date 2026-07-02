@@ -1,0 +1,28 @@
+---
+title: Markenstrategie
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+
+<script lang="ts">
+	import { Grid } from '$components/ui/grid';
+	import { VideoPlayer } from '$components/ui/videoplayer';
+</script>
+
+# {title}
+
+<p>Unsere Markenstrategie bei Die Zeit fußt auf der Verbindung von Tradition und Transformation. Seit der Zusammenführung von Print und Online unter einer Dachmarke zum 1. Juli 2025 tragen wir unsere Grundwerte—Verlässlichkeit, Meinungsbildung, Tiefgang—crossmedial sichtbar und erlebbar weiter.</p>
+
+<p>Die Marke Die Zeit steht für journalistische Qualität, Debattenkultur und Vertrauen. Sie wurzelt in der langjährigen Tradition seit 1946 und zeugt gleichzeitig von digitaler Innovationskraft und Reichweite im digitalen Raum.</p>
+
+<VideoPlayer 
+	title="Markenstrategie DIE ZEIT. One Brand - Many Voices"
+	src="/media/brand/identity/main.mp4"
+/>
+
+<p>Mit der einheitlichen Marke schaffen wir Wiedererkennbarkeit, Konsistenz und Identität—in allen Kanälen und für alle Zielgruppen. Sie dient als symbolischer und visueller Anker für alle Inhalte, mehr als nur ein Logo: Als Verheißung für gehaltvollen Journalismus und als Ausdruck eines offenen, liberalen Diskurses.</p>
+
+<p>Diese Strategie unterstützt die Markenpositionierung als Denk- und Leitmedium—differenziert gegenüber Tageszeitungen, aber verbunden in der Haltung und Qualität. Sie stärkt die Markenwahrnehmung, fördert Glaubwürdigkeit und sichert langfristige Identifikation bei Leser:innen wie Mitarbeitenden.</p>

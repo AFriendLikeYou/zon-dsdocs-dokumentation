@@ -3,15 +3,16 @@ title: Logo
 ---
 
 <script lang="ts">
-	import ImageGallery from '$components/ui/imagegallery/ImageGallery.svelte';
-  import DoDontGroup from '$components/ui/dodont/DoDontGroup.svelte';
-  import DoDont from '$components/ui/dodont/DoDont.svelte';
-  import DownloadSpecimen from '$components/ui/downloadspecimen/DownloadSpecimen.svelte';
-	import VideoPlayer from '$components/ui/videoplayer/VideoPlayer.svelte';
-  import BrandAssetsGrid from '$components/brand-assets/BrandAssetsGrid.svelte';
+	import { ImageGallery } from '$components/ui/imagegallery';
+  import { Lightbox } from '$components/ui/lightbox';
+  import { DoDontGroup } from '$components/ui/dodont';
+  import { DoDont } from '$components/ui/dodont';
+  import { DownloadSpecimen } from '$components/ui/downloadspecimen';
+	import { VideoPlayer } from '$components/ui/videoplayer';
+  import { BrandAssetsGrid } from '$components/ui/brand-assets';
 
   const catalog = {
-    publicPath: '/assets'
+    publicPath: '/downloads'
   };
 
 	const { data } = $props();
@@ -28,7 +29,7 @@ title: Logo
 Unser Logo stellt unsere Marke visuell dar und hilft uns, uns auf dem Markt zu unterscheiden. Die konsequente Verwendung sorgt für Wiedererkennung und Vertrautheit.
 
 <VideoPlayer 
-  src="../../assets/brand/logo/img/logo.mp4"
+  src="/media/brand/logo/logo.mp4"
 />
 
 ## Warum das ZEIT-Logo nicht verändert werden darf
@@ -45,19 +46,17 @@ Unsere Wort-/Bildmarke, in der das Bremer Wappen von »DIE« und »ZEIT« einger
 
 ### General-Version
 
-![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
-*A single track trail outside of Albuquerque, New Mexico.*
+![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
+*ZEIT-Logo General — die Wortmarke für Printmedien.*
 
 Das ZEIT-Logo General ist ausschließlich für Printmedien vorgesehen.
 
 Anwendung: Anzeigen, Plakate, Broschüren und andere gedruckte Medien, bei denen das Logo breiter als 55 mm ist.
 
-> :warning: **Warning:** Do not push the big red button.
-
 
 ### Small-Version
 
-![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
+![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
 
 Das ZEIT-Logo Small ist für digitale Medien sowie für Printmedien mit geringerem Platzbedarf bestimmt.
 
@@ -65,33 +64,33 @@ Anwendung: Webseiten, Social Media, Newsletter sowie Printformate mit sehr begre
 
 ## Versionen
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+Das ZEIT-Logo gibt es in mehreren Versionen für unterschiedliche Kontexte und
+Platzverhältnisse. Wähle stets die Version, die bei der jeweiligen Größe am besten
+lesbar bleibt.
 
 ### Wordmark
 
-The wordmark is used in contexts where the audience might not already know GitHub and recognize the invertocat logo. GitHub is always one word with a capitalized G and H. When referring to GitHub the product, company, or service, keep it simple—GitHub.
+Die Wortmarke „DIE ZEIT" ist die primäre Form des Logos und wird überall dort
+eingesetzt, wo der volle Markenname stehen soll. Auf den Schutzraum um die Wortmarke
+(Safespace) ist immer zu achten.
 
-![DIE ZEIT Logo](../../assets/brand/logo/img/wordmark-1.webp)
+![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
 
-![DIE ZEIT Logo Safespace](../../assets/brand/logo/img/wordmark-2.webp)
+![DIE ZEIT Logo Safespace](/media/brand/logo/wordmark-2.webp)
 
-### Pictorgramm
+### Pictogramm
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Das Pictogramm ist die kompakte Bildmarke für Kontexte mit wenig Platz oder dort, wo
+die Marke bereits etabliert ist — etwa als App-Icon oder Avatar.
 
-![DIE ZEIT Logo](../../assets/brand/logo/img/pictogram-1.png)
-![DIE ZEIT Logo](../../assets/brand/logo/img/pictogram-2.png)
+![DIE ZEIT Logo](/media/brand/logo/pictogram-1.png)
+![DIE ZEIT Logo](/media/brand/logo/pictogram-2.png)
 
 ## Varianten
 
 <ImageGallery title="">
-  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Beautiful beach sunset" />
-  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Mountain landscape with snow" />
-</ImageGallery>
-
-<ImageGallery title="">
-  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Beautiful beach sunset" />
-  <img src="../../assets/brand/logo/img/wordmark-1.webp" alt="Mountain landscape with snow" />
+  <Lightbox src="/media/brand/logo/wordmark-1.webp" alt="DIE ZEIT Wortmarke" caption="Wortmarke" />
+  <Lightbox src="/media/brand/logo/wordmark-2.webp" alt="DIE ZEIT Wortmarke mit Schutzraum" caption="Schutzraum" />
 </ImageGallery>
 
 ## Do and Don't
@@ -99,20 +98,20 @@ Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod 
   <DoDont 
     type="dont"
     caption="Das Logo darf nicht verzerrt werden."
-    imgSrc="../../assets/brand/logo/img/dont-1.png"
+    imgSrc="/media/brand/logo/dont-1.png"
     strikeThrough={true}
   />
 
   <DoDont 
     type="dont"
     caption="Das Logo darf nicht gedreht werden."
-    imgSrc="../../assets/brand/logo/img/dont-2.png"
+    imgSrc="/media/brand/logo/dont-2.png"
   />
 
     <DoDont 
     type="do"
     caption="Das Logo darf nicht gedreht werden."
-    imgSrc="../../assets/brand/logo/img/dont-2.png"
+    imgSrc="/media/brand/logo/dont-2.png"
   />
 </DoDontGroup>
 
@@ -138,10 +137,11 @@ Was brauchen wir?
 - Partnerships?
 Unser Logo und unser Claim stärken unsere internationale Markenpositionierung. 
 
+<!-- Zeigte vorher auf ein nicht existentes user-manual.pdf (404) — jetzt aufs echte PDF. -->
 <DownloadSpecimen
   catalog={catalog}
-  title="User Manual"
-  subtitle="PDF, 3.2MB"
-  url="docs/user-manual.pdf"
-  filename="user-manual.pdf"
+  title="Brand Guidelines"
+  subtitle="PDF, 1,4 MB"
+  url="docs/brandguidelines.pdf"
+  filename="brandguidelines.pdf"
 />

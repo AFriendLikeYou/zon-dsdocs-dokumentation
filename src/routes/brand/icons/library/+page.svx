@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconGridWithSearch from '$components/icons/IconGridWithSearch.svelte';
+	import { IconGridWithSearch } from '$components/ui/icons';
 	
 	const { data } = $props();
 	const { icons } = data;

@@ -1,0 +1,19 @@
+---
+title: Changelog
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { Changelog } from '$components/ui/changelog';
+	import { CHANGELOG } from '$data/changelog';
+</script>
+
+# {title}
+
+Was sich an dieser Design-System-Dokumentation zuletzt geändert hat. Die Entscheidungen
+hinter den größeren Änderungen sind in den ADRs (`DECISIONS.md`) festgehalten.
+
+<Changelog changelog={CHANGELOG} />

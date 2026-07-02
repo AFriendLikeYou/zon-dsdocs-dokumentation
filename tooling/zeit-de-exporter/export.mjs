@@ -5,22 +5,25 @@
  * Bildet das render-unabhängige Doku-Modell (siehe SKILL/references/doku-modell.md,
  * identisch zur `spec`-Prop von SpecSheet.svelte) auf das konkrete zeit.de-Repo-Format ab:
  *
- *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx
- *   - Datenfile (Doku-Modell):   src/routes/product/components/<kebab>/spec.ts
+ *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx   (immer neu)
+ *   - Maschinen-Modell:          src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
+ *   - Redaktioneller Stub:       src/routes/product/components/<kebab>/content.ts  (nur beim ersten Mal)
+ *   - Eingabe-Modell co-locatet: src/routes/product/components/<kebab>/model.json  (neben dem Output)
  *
  * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
  * Der Renderer (SpecSheet.svelte) und das Modell bleiben stabil; hier liegt die ganze
- * zeit.de-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Slot-Verdrahtung).
+ * zeit.de-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Snippet-Verdrahtung).
  *
  * Nutzung:
- *   node tooling/zeit-de-exporter/export.mjs <model.json> [--root <repoRoot>] [--dry]
+ *   node tooling/zeit-de-exporter/export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]
  *
- * Beispiel:
+ * Beispiele:
  *   node tooling/zeit-de-exporter/export.mjs tooling/zeit-de-exporter/examples/button.json
+ *   node tooling/zeit-de-exporter/export.mjs src/routes/product/components/button   # liest <dir>/model.json
  */
 
-import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
-import { dirname, resolve, relative } from 'node:path';
+import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSync } from 'node:fs';
+import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const TARGET = 'zeit-de';
@@ -47,9 +50,9 @@ function camelCase(kebab) {
 	return kebab.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 }
 
-/** Add a `slot="…"` attribute to the first/root element of a markup string. */
-function withSlot(html, slotName) {
-	return String(html).trim().replace(/^(<[a-zA-Z][\w-]*)/, `$1 slot="${slotName}"`);
+/** Wrap markup as a named Svelte-5-Snippet (Anatomy nutzt Snippet-Props preview/variant). */
+function asSnippet(html, name) {
+	return `{#snippet ${name}()}${String(html).trim()}{/snippet}`;
 }
 
 /** Escape a value for a single-line YAML frontmatter scalar. */
@@ -83,7 +86,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -94,7 +97,8 @@ function renderGenerated(model) {
 		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
 		`// Redaktionelle Texte gehören in content.ts (überschreibt diese Defaults).\n` +
 		`// Neu erzeugen: node tooling/zeit-de-exporter/export.mjs <model.json>\n` +
-		`export const generated = ${json};\n`
+		`import type { ComponentSpec } from '$types/spec';\n\n` +
+		`export const generated = ${json} satisfies Partial<ComponentSpec>;\n`
 	);
 }
 
@@ -140,11 +144,11 @@ function tl(s) {
  * adaptiven Spec-UI-Komponenten ($components/ui/specsheet) — keine
  * verschachtelten weißen Container, Styling wie die übrige Doku-Seite.
  */
-function renderPage(model, constName) {
+function renderPage(model) {
 	const render = model.render ?? {};
 	const S = 'spec'; // lokale, zusammengeführte Konstante (generated + content)
-	const previewSlot = render.preview ? `\t\t${withSlot(render.preview, 'preview')}\n` : '';
-	const variantSlot = render.variant ? `\t\t${withSlot(render.variant, 'variant')}\n` : '';
+	const previewSlot = render.preview ? `\t\t${asSnippet(render.preview, 'preview')}\n` : '';
+	const variantSlot = render.variant ? `\t\t${asSnippet(render.variant, 'variant')}\n` : '';
 
 	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
 	const matrixCells = matrix
@@ -170,10 +174,26 @@ function renderPage(model, constName) {
 		: typeof render.codeSvelte === 'string'
 			? render.codeSvelte
 			: '';
+	// Optionale Repo-Brücke: zeigt zusätzlich, wie die ECHTE Repo-Komponente heißt
+	// (z. B. Button.svelte / .app-button), nicht nur die Figma-/sds-Referenz.
+	const repoCode = Array.isArray(render.repoCodeSvelte)
+		? render.repoCodeSvelte.join('\n')
+		: typeof render.repoCodeSvelte === 'string'
+			? render.repoCodeSvelte
+			: '';
+	const repoNote = typeof render.repoNote === 'string' ? render.repoNote : '';
 	const cssForCode = css.replace(/:global\(\.[\w-]+\s+([^)]+)\)/g, '$1');
 	const props = Array.isArray(render.props) ? render.props : [];
 	const hasVersion = typeof render.version === 'string';
 	const versionProp = hasVersion ? ` version={content.version}` : '';
+
+	// Interim bis zum datengetriebenen Registry-Schema (STRUKTUR-PLAN Stufe 4):
+	// optionaler Playground als ERSTE Design-Sektion (Live-Vorschau; Nutzer-Entscheid
+	// 2026-07-02: Playground → Anatomy → Usage/Content-Guidelines → Do/Don'ts).
+	//   "render": { "playground": { "import": "$components/ui/…", "component": "Xyz" } }
+	const playground =
+		render.playground && typeof render.playground === 'object' ? render.playground : null;
+	const hasPlayground = Boolean(playground?.import && playground?.component);
 
 	// Verfügbarkeit je Abschnitt.
 	const hasAnatomy = Boolean(render.preview || model.callouts?.length || model.masse);
@@ -181,11 +201,14 @@ function renderPage(model, constName) {
 	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
 	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
 	const hasDoDont = Boolean(model.doDont);
-	const anyCode = Boolean(htmlCode || svelteCode || cssForCode);
+	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
 	const hasMasse = Boolean(model.masse);
+	const hasUsage = Boolean(
+		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
+	);
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse;
 
@@ -210,6 +233,8 @@ function renderPage(model, constName) {
 	const imports =
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
+		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
+		(hasPlayground ? `\timport { ${playground.component} } from '${playground.import}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
 		`\timport { content } from './content';\n`;
 
@@ -219,25 +244,32 @@ function renderPage(model, constName) {
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
 		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
+		(repoCode ? `\tconst repoCode = \`${tl(repoCode)}\`;\n` : '') +
 		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
 		(hasProps ? `\tconst propsData = ${JSON.stringify(props)};\n` : '');
 
 	// ---- Design-Tab ----
+	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02):
+	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
+	// Zustände) · 4) Do/Don'ts.
 	let design = '';
+	if (hasPlayground) design += `\t<${playground.component} />\n`;
 	if (hasAnatomy) {
 		design +=
+			`\n\t<h2>Anatomie</h2>\n` +
 			`\t<Anatomy masse={${S}.masse} callouts={${S}.callouts}${anchorsProp}>\n` +
 			previewSlot +
 			variantSlot +
 			`\t</Anatomy>\n`;
 	}
+	if (hasUsage) design += `\n\t<h2>Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
 	if (hasVariants || hasMatrix) {
 		design += `\n\t<h2>Varianten</h2>\n`;
 		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
 		if (hasMatrix) design += `\t<VariantMatrix>\n${matrixCells}\n\t</VariantMatrix>\n`;
 	}
 	if (hasStates) design += `\n\t<h2>Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
-	if (hasDoDont) design += `\n\t<h2>Verwendung</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+	if (hasDoDont) design += `\n\t<h2>Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
 
 	// ---- Develop-Tab ----
 	let develop = '';
@@ -246,6 +278,16 @@ function renderPage(model, constName) {
 		develop += `\n\t<h2>Code</h2>\n`;
 		if (htmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
 		if (svelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
+		if (repoCode) {
+			if (repoNote) {
+				const escNote = repoNote
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;');
+				develop += `\t<p>${escNote}</p>\n`;
+			}
+			develop += `\t<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />\n`;
+		}
 		if (cssForCode) develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
 	}
 
@@ -302,8 +344,21 @@ function parseArgs(argv) {
 			if (t !== TARGET) throw new Error(`Unbekanntes Ziel "${t}" — dieser Exporter kann nur "${TARGET}".`);
 		} else if (!a.startsWith('-')) args.input = a;
 	}
-	if (!args.input) throw new Error('Eingabe fehlt. Nutzung: export.mjs <model.json> [--root <repoRoot>] [--dry]');
+	if (!args.input) throw new Error('Eingabe fehlt. Nutzung: export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]');
 	return args;
+}
+
+/**
+ * Löst die Eingabe zur model.json-Datei auf. Erlaubt ist eine Datei ODER ein
+ * Component-Ordner, der ein co-locatetes model.json enthält (Re-Export).
+ */
+function resolveModelPath(input) {
+	if (existsSync(input) && statSync(input).isDirectory()) {
+		const co = resolve(input, 'model.json');
+		if (!existsSync(co)) throw new Error(`Kein model.json im Ordner: ${input}`);
+		return co;
+	}
+	return input;
 }
 
 function validate(model) {
@@ -313,18 +368,18 @@ function validate(model) {
 
 function main() {
 	const { input, root, dry } = parseArgs(process.argv.slice(2));
-	const model = JSON.parse(readFileSync(input, 'utf8'));
+	const modelPath = resolveModelPath(input);
+	const model = JSON.parse(readFileSync(modelPath, 'utf8'));
 	validate(model);
 
 	const kebab = kebabCase(model.name);
-	const constName = `${camelCase(kebab)}Spec`;
 	const outDir = resolve(root, ROUTE_BASE, kebab);
 	const contentPath = resolve(outDir, 'content.ts');
 	const contentExists = existsSync(contentPath);
 
 	// Maschinen-Dateien werden immer geschrieben; content.ts nur beim ersten Mal (Stub).
 	const machineFiles = [
-		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, constName) },
+		{ path: resolve(outDir, '+page.svx'), body: renderPage(model) },
 		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
 	];
 
@@ -356,6 +411,11 @@ function main() {
 		unlinkSync(legacySpec);
 		console.log(`  entfernt (veraltet): ${relative(root, legacySpec)}`);
 	}
+
+	// Eingabe-Modell neben den Output legen (Co-Location) — Re-Export via Ordner möglich.
+	const coModelPath = resolve(outDir, 'model.json');
+	writeFileSync(coModelPath, JSON.stringify(model, null, '\t') + '\n');
+	console.log(`  Modell co-locatet: ${relative(root, coModelPath)}`);
 }
 
 // Nur ausführen, wenn direkt aufgerufen (nicht beim Import).

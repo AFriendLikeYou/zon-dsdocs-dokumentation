@@ -1,258 +1,86 @@
-<script>
-  // Define card data
-  let cards = [
-    {
-      title: 'Accessibility',
-      description: 'Alle Menschen sollen die Produkte der ZEIT nutzen können, egal welche Fähigkeiten sie haben.',
-      link: '/brand/accessibility'
-    },
-    {
-      title: 'Guidelines',
-      description: 'Entdecke hier die wichtigsten Guidelines, die unsere Marke einzigartig machen – von Logo über Farben bis hin zur Bildsprache.',
-      link: '/brand/marke/voiceandtone'
-    },
-    {
-      title: 'Primitives',
-      description: 'Designtokens unserer Farben, Spacings und Typografie.',
-      link: '/brand/bildsprache'
-    }
-  ];
+<script lang="ts">
+	import { CardGrid } from '$components/ui/card';
 
-  let largeCards = [
-    {
-      title: 'Brand Guidelines',
-      description: 'Erfahre hier, was unsere Marke ausmacht – von unseren Werten, die unsere Marke prägen und uns voranbringen.',
-      link: '/brand',
-      backgroundImage: 'url(/assets/images/brand.png)'
-    },
-    // { 
-    // title: 'Product Designsystem',
-    // description: 'Tauche ein in unser digitales Designsystem – die zentrale Anlaufstelle für alle Design-Richtlinien, Komponenten und Best Practices für ein konsistentes digitales Markenerlebnis.',
-    //  link: '/brand/guidelines',
-    //  backgroundImage: 'url(/assets/images/product.png)'
-    // }
-  ];
+	// Zwei gleichwertige Welten — Brand und Product.
+	const worlds = [
+		{
+			url: '/brand',
+			title: 'Brand',
+			description:
+				'Alles, was unsere Marke ausmacht — von Markenstrategie über Logo, Farbe und Typografie bis zu Bildsprache und Barrierefreiheit.'
+		},
+		{
+			url: '/product',
+			title: 'Product',
+			description:
+				'Unser digitales Designsystem — Design Principles, Foundations, Tokens und Components für konsistente, barrierearme Interfaces.'
+		}
+	];
 
-  export function load() {
-    return {
-      showTableOfContents: true
-    };
-  }
+	const brandQuick = [
+		{ url: '/brand/identity', title: 'Marke', description: 'Werte, Strategie und Tonalität hinter DIE ZEIT.' },
+		{ url: '/brand/logo', title: 'Logo', description: 'Das Wortmarken-Logo und seine korrekte Verwendung.' },
+		{
+			url: '/brand/color',
+			title: 'Farbe',
+			description: 'Markenfarben und ihre Bedeutung.',
+			badge: 'Neu',
+			badgeVariant: 'accent' as const
+		},
+		{ url: '/brand/typography', title: 'Typografie', description: 'Schrift-Hierarchie für lesbare, ruhige Texte.' },
+		{
+			url: '/brand/accessibility',
+			title: 'Accessibility',
+			description: 'Damit alle Menschen unsere Produkte nutzen können.'
+		}
+	];
+
+	const productQuick = [
+		{
+			url: '/product/design-principles',
+			title: 'Design Principles',
+			description: 'Die Prinzipien hinter jeder Komponente und Entscheidung.'
+		},
+		{
+			url: '/product/foundations',
+			title: 'Foundations',
+			description: 'Die visuellen Grundlagen — Tokens, Typografie, Icons.'
+		},
+		{
+			url: '/product/foundations/tokens',
+			title: 'Tokens',
+			description: 'Farbe, Abstand, Radius und Schriftgröße als geteilte Werte.',
+			badge: 'Neu',
+			badgeVariant: 'accent' as const
+		},
+		{
+			url: '/product/components',
+			title: 'Components',
+			description: 'Dokumentierte, wiederverwendbare UI-Komponenten.'
+		}
+	];
 </script>
 
-<div class="container">
-  <!-- Header Section -->
-  <header class="header">
-    <div class="header-content">
-      <h1>Willkommen im ZEIT Branding- und Designsystem</h1>
-      <p>Unser Brand Portal bietet dir einen direkten und unkomplizierten Zugang für den kreativen Umgang mit unserer Marke und wird kontinuierlich über alle Touchpoints hinweg aktualisiert.</p>
-    </div>
-  </header>
+<svelte:head>
+	<title>Die Zeit Design System</title>
+</svelte:head>
 
-  <!-- Large Card Section -->
-  <div class="large-card-grid">
-    {#each largeCards as card}
-      <div class="large-card">
+# Willkommen im ZEIT Branding- und Designsystem
 
-        <div class="large-card-content">
-          <h2>{card.title}</h2>
-          <p>{card.description}</p>
-          <a href={card.link} class="learn-more">
-            Mehr erfahren
-          </a>
-        </div>
-      </div>
-    {/each}
-  </div>
+Unser Portal bündelt zwei Welten: die **Marke** — visuelle Identität, Tonalität und Prinzipien —
+und das **Product Designsystem** — Komponenten, Tokens und Code. Wähle deinen Einstieg.
 
-  <!-- Card Grid Section -->
-  <h3>Hier findest du einen Schnelleinstieg</h3>
-  <div class="card-grid">
-    {#each cards as card}
-      <div class="card">
-        <h2>{card.title}</h2>
-        <p>{card.description}</p>
-        <a href={card.link} class="learn-more">
-          Mehr erfahren
-        </a>
-      </div>
-    {/each}
-  </div>
+<CardGrid cards={worlds} />
 
-  <!-- Footer Section -->
-  <footer class="footer">
-    <p>
-      <strong>Du hast Fragen?</strong> Wenn du einen Bug gefunden hast oder Verbesserungsvorschläge hast, 
-      <a href="https://github.com/ZeitOnline/zon-dsdocs/issues/new?template=Blank+issue">öffne hier ein Ticket</a>.
-    </p>
-  </footer>
-</div>
+## Schnelleinstieg Brand
 
-<style>
-  /* Container */
-  .container {
-    margin: 0 auto;
-  }
+<CardGrid cards={brandQuick} />
 
-  /* Header */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
+## Schnelleinstieg Product
 
-  .header-content {
-    max-width: 80ch;
-  }
+<CardGrid cards={productQuick} />
 
-  h1 {
-    font-size: var(--z-ds-fontsize-54);
-    font-weight: 600;
-    margin: 1rem 0 1rem 0;
-  }
+---
 
-  .header p {
-    font-size: var(--z-ds-fontsize-20);
-    color: var(--z-ds-color-text-70);
-    margin: 0;
-  }
-
-  /* Large Card Grid */
-  .large-card-grid {
-    display: grid;
-    grid-template-columns: 5fr;
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-
-  @media (max-width: 640px) {
-    .large-card-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .large-card {
-    border: 1px solid var(--z-ds-color-border-70);
-    overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    border-radius: var(--z-ds-border-radius-8);
-    padding: 1.5rem;
-    transition: transform 0.2s ease, filter 0.2s ease;
-
-  }
-
-  .large-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  .large-card-content {
-    border-radius: var(--z-ds-border-radius-8);
-    min-height: 320px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .large-card h2 {
-    font-size: var(--z-ds-fontsize-26);
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-  }
-
-  .large-card p {
-    font-size: var(--z-ds-fontsize-16);
-    max-width: 40ch;
-    margin: 0 0 1rem 0;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .large-card {
-      background-blend-mode: overlay;
-    }
-  }
-
-  /* Card Grid */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-
-  @media (max-width: 1024px) {
-    .card-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 640px) {
-    .card-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Card */
-  .card {
-    border: 1px solid var(--z-ds-color-border-70);
-    border-radius: var(--z-ds-border-radius-8);
-    padding: 1.5rem;
-    transition: transform 0.2s ease;
-    background-color: var(--z-ds-color-background-0);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  .card h2 {
-    font-size: var(--z-ds-fontsize-22);
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-  }
-
-  .card p {
-    color: var(--z-ds-color-text-70);
-    margin: 0 0 1.5rem 0;
-    font-size: var(--z-ds-fontsize-16);
-  }
-
-  /* Learn more link */
-  .learn-more {
-    display: flex;
-    align-items: center;
-    color: #0969da;
-    text-decoration: none;
-    font-size: var(--z-ds-fontsize-16);
-    font-weight: 800;
-    margin-top: auto;
-  }
-
-  .learn-more:hover {
-    text-decoration: underline;
-  }
-
-  /* Footer */
-  .footer {
-    margin-top: 1rem;
-    padding-top: 1rem;
-  }
-
-  .footer p {
-    color: var(--z-ds-color-text-55);
-    font-size: var(--z-ds-fontsize-16);
-  }
-
-  .footer a {
-    color: #0969da;
-    text-decoration: none;
-  }
-
-  .footer a:hover {
-    text-decoration: underline;
-  }
-</style>
+**Du hast Fragen?** Wenn du einen Bug gefunden hast oder Verbesserungsvorschläge hast,
+[öffne hier ein Ticket](https://github.com/ZeitOnline/zon-dsdocs/issues/new?template=Blank+issue).

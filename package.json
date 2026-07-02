@@ -8,19 +8,25 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && node tooling/check-nav.mjs && node tooling/check-tokens.mjs && node tooling/check-assets.mjs && node tooling/check-component-drift.mjs",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"check:nav": "node tooling/check-nav.mjs",
+		"check:tokens": "node tooling/check-tokens.mjs",
+		"check:assets": "node tooling/check-assets.mjs",
+		"check:component-drift": "node tooling/check-component-drift.mjs",
+		"gen:icons": "node tooling/gen-icons.mjs",
+		"gen:brand-assets": "node tooling/gen-brand-assets.mjs",
+		"gen:assets": "npm run gen:icons && npm run gen:brand-assets",
 		"format": "prettier --write .",
 		"lint": "eslint .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run",
-		"copy:zds": "cp node_modules/@zeitonline/design-system/design-system.css ./src/lib/styles/styles-zds.css",
-		"copy:icons": "cp -R node_modules/@zeitonline/icons/svg ./static/svg"
+		"copy:zds": "cp node_modules/@zeitonline/design-system/design-system.css ./static/styles-zds.css",
+		"copy:icons": "mkdir -p static/downloads/icons && cp node_modules/@zeitonline/icons/svg/*.svg static/downloads/icons/ && node tooling/gen-icons.mjs"
 	},
 	"dependencies": {
 		"@zeitonline/design-system": "*",
-		"@zeitonline/icons": "*",
-		"remark-heading-id": "^1.0.0"
+		"@zeitonline/icons": "*"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

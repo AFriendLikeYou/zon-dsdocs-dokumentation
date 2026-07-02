@@ -1,10 +1,24 @@
-.zon-button {
-	border-radius: var(--z-ds-border-radius-4);
-	color: var(--z-ds-color-background-0);
+/*
+ * Globale Utility-Schicht — bewusst NICHT in eine Komponente gekapselt.
+ * (siehe DECISIONS.md ADR-011, Styling-Schichten)
+ *
+ * `.app-button` wird sowohl von der Komponente `Button.svelte` (<button>) als
+ * auch von echten Links (<a>) verwendet — z. B. GitHubEdit.svelte, der
+ * Login-Link und Prosa in .svx-Seiten —, die kein <button>-Component einsetzen
+ * können, aber dieselbe Button-Optik brauchen. Deshalb lebt das Styling als
+ * dokumentierte globale Klasse hier und nicht im Component-Scope.
+ *
+ * Diese Datei ist global via app.html (<link ... /button.css>) eingebunden.
+ * Komponenten-spezifisches Styling gehört dagegen in den scoped <style>-Block
+ * der jeweiligen Komponente.
+ */
+.app-button {
+	border-radius: var(--ds-radius-sm);
+	color: var(--ds-surface);
 	padding-inline: var(--z-ds-space-s);
 	padding-block: var(--z-ds-space-xxs);
-	background-color: var(--z-ds-color-text-100);
-	font-size: calc(var(--z-ds-fontsize-14));
+	background-color: var(--ds-text);
+	font-size: calc(var(--ds-text-sm));
 	gap: var(--z-ds-space-xs);
 	display: inline-flex;
 	align-items: center;
@@ -15,59 +29,38 @@
 		transform var(--ds-dur, 160ms) var(--ds-ease-out, ease-out);
 }
 
-.zon-button:hover {
-	background-color: var(--z-ds-color-text-70);
-	/* color: var(--z-ds-color-general-white-100); */
+.app-button:hover {
+	background-color: var(--ds-text-body);
+	/* color: var(--ds-static-white); */
 }
 
 /* Press-Feedback (Emil-Skill): jedes drückbare Element reagiert auf den Druck */
-.zon-button:active {
+.app-button:active {
 	transform: scale(0.97);
 }
 
-.zon-button:focus {
-	outline: 2px solid var(--z-ds-color-focus-100);
+.app-button:focus {
+	outline: 2px solid var(--ds-focus-ring);
 	outline-offset: 4px;
-	background-color: var(--z-ds-color-text-70);
-	color: var(--z-ds-color-general-white-100);
+	background-color: var(--ds-text-body);
+	color: var(--ds-static-white);
 }
 
-.zon-button:disabled {
+.app-button:disabled {
 	pointer-events: none;
-	color: var(--z-ds-color-text-40);
+	color: var(--ds-text-faint);
 }
 
-.zon-button--transparent:not(:is(:hover, :focus)) {
-	color: var(--z-ds-color-black-100);
+.app-button--transparent:not(:is(:hover, :focus)) {
+	color: var(--ds-static-black);
 	background-color: transparent;
 }
 
-.zon-button--outline {
+.app-button--outline {
 	background-color: transparent;
-	border: 1px solid var(--z-ds-color-text-100);
-	color: var(--z-ds-color-text-100);
+	border: 1px solid var(--ds-text);
+	color: var(--ds-text);
 }
 
-.footer-nav__button {
-	font-size: var(--z-ds-fontsize-16);
-	color: var(--z-ds-color-text-70);
-	border-radius: var(--z-ds-border-radius-8);
-	padding-inline: var(--z-ds-space-l);
-	padding-block: var(--z-ds-space-m) var(--z-ds-space-m);
-	background-color: var(--z-ds-color-background-10);
-}
-
-.footer-nav__button:hover {
-	background-color: var(--z-ds-color-background-20);
-	color: var(--z-ds-color-text-100);
-}
-
-.footer-nav__button:focus {
-	background-color: var(--z-ds-color-background-20);
-	color: var(--z-ds-color-text-100);
-}
-
-.footer-nav__button:disabled {
-	color: var(--z-ds-color-text-40);
-	cursor: not-allowed;
-}
+/* Hinweis: Das `.footer-nav__button`-Styling wurde nach FooterNavigation.svelte
+   (scoped) verschoben — es gehört zu genau einer Komponente. (ADR-011) */

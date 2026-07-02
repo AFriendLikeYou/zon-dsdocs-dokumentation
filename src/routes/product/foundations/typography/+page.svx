@@ -7,114 +7,51 @@ title: Typography
 </svelte:head>
 
 <script lang="ts">
-        import DoDontGroup from '$components/ui/dodont/DoDontGroup.svelte';
-        import DoDont from '$components/ui/dodont/DoDont.svelte';
+	import { DoDont, DoDontGroup } from '$components/ui/dodont';
 </script>
 
-# { title }
+# {title}
 
-![font](/assets/foundation/fonts/fonts.webp)
+Typografie trägt bei DIE ZEIT den Großteil der Gestaltung — klare Hierarchie und
+ruhige Lesbarkeit gehen vor Schmuck. Die Schriftgrößen sind **Tokens** (`--z-ds-fontsize-*`),
+nicht feste Werte; so bleibt die Skala konsistent und theme-unabhängig.
 
-Die Wahl der richtigen Schriftart für eine Nachrichtenplattform wie Die Zeit ist von entscheidender Bedeutung, um Lesbarkeit, Ästhetik und Markenidentität zu optimieren. Gothic Tablet könnte eine interessante Option sein, die sowohl moderne als auch traditionelle Designaspekte miteinander verbindet. Hier sind einige der wichtigsten Vorteile dieser Schriftart für Die Zeit:
+## Schrift
 
-1. Moderne Ästhetik mit klassischem Touch:
-Gothic Tablet kombiniert die Klarheit einer serifenlosen Schrift mit subtilen Details, die an klassische Druckschrift erinnern. Dies verleiht dem Online-Auftritt eine zeitgemäße, aber dennoch seriöse Anmutung – eine wichtige Eigenschaft für eine renommierte Nachrichtenplattform wie Die Zeit.
+- **TabletGothic** — die serifenlose Hausschrift für UI und Überschriften. Klare,
+  ausgewogene Formen, gut lesbar über alle Bildschirmgrößen.
+- **FranziskaWebPro** — die Serifenschrift für lange, redaktionelle Fließtexte.
 
-2. Exzellente Lesbarkeit auf digitalen Endgeräten:
-In der digitalen Welt ist eine gute Lesbarkeit essenziell, insbesondere auf Smartphones und Tablets. Gothic Tablet zeichnet sich durch klare Buchstabenformen, ausgewogene Proportionen und eine angenehme Laufweite aus, was das Lesen von Nachrichtenartikeln auf allen Bildschirmgrößen erleichtert.
+## Größen-Skala
 
-3. Starke visuelle Identität:
-Eine unverwechselbare Schrift [trägt zur Markenidentität](https://www.google.de) bei. Die Zeit könnte mit Gothic Tablet eine moderne, aber dennoch charakteristische Typografie etablieren, die sich von anderen Nachrichtenseiten abhebt. Dies fördert den Wiedererkennungswert und stärkt die Corporate Identity.
+Die vollständige Skala steht als Token-Referenz unter
+**[Foundations → Tokens](/product/foundations/tokens)** (Gruppe „Schriftgröße").
+Für Inhaltsseiten gilt diese Hierarchie:
 
-4. Gute Skalierbarkeit für verschiedene Textgrößen:
-Von Schlagzeilen bis hin zu Fließtext – Gothic Tablet funktioniert gut in unterschiedlichen Größen und bleibt stets gut lesbar. Dies ist besonders wichtig für eine Nachrichtenseite, die sowohl großformatige Überschriften als auch kompakte Infotexte benötigt.
+# Überschrift 1 · fontsize-34
 
-5. Zeitgemäßes Design ohne Ablenkung:
-Die reduzierte, aber markante Gestaltung von Gothic Tablet fügt sich harmonisch in ein modernes, minimalistisches Webdesign ein, ohne den Leser vom eigentlichen Inhalt abzulenken. Gerade für eine journalistische Plattform ist es wichtig, dass die Typografie nicht überladen wirkt, sondern die Lesbarkeit und Nutzerführung unterstützt.
+## Überschrift 2 · fontsize-30
 
-6. Anpassungsfähigkeit für verschiedene Rubriken:
-Die Zeit deckt ein breites Themenspektrum ab – von Politik über Kultur bis hin zu Wissenschaft. Gothic Tablet ist eine vielseitige Schrift, die sich gut für verschiedene redaktionelle Sektionen anpassen lässt, ohne an Kohärenz zu verlieren.
+### Überschrift 3 · fontsize-24
 
-![Screenshot of a comment on a GitHub issue showing an image, added in the Markdown, of an Octocat smiling and raising a tentacle.](https://myoctocat.com/assets/images/base-octocat.svg)
+#### Überschrift 4 · fontsize-20
 
-# Headline 1
+##### Überschrift 5 · fontsize-18
 
-## Headline 2
+Fließtext steht auf `--z-ds-fontsize-18` mit `line-height: 1.7` und gedämpfter
+Textfarbe (`--z-ds-color-text-70`) für ruhigen Lesefluss. Die Lesespalte ist auf eine
+angenehme Breite begrenzt und zentriert.
 
-### Headline 3
+## Grundregeln
 
----
-
-# Headline 1
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-## Headline 2
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
-
-### Headline 3
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Some of these words *are emphasized*. Some of these words _are emphasized also_.
-
-#### Headline 4
-
-==Now is the time== for all good men to come to the aid of their country. This is just a regular paragraph. The quick brown fox jumped over the lazy dog's back.
-
-> Das hier ist ein Zitat. Es ist sehr wichtig. Und schreib noch weitere schlaue Dinge.
-
-##### Headline 5
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Some of these words *are emphasized*. Some of these words _are emphasized also_.
-
-### Tabelle
-
-| Item              | State    | Ready |
-| :---------------- | :------: | ----: |
-| Item 1            | True     | Yes   |
-| Item 2            | True     | No    |
-| Item 3            | False    | Yes   |
-| Item 4            | False    | Yes   |
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Some of these words *are emphasized*. Some of these words _are emphasized also_.
-
-When `x = 3`, that means `x + 2 = 5`
-
-``
-foo
-bar  
-baz
-``
-
-```js
-console.log('Hello world');
-```
-
----
-
-### Do and Don't
-<DoDontGroup columns={3}>
-  <DoDont 
-    caption="Do this, it is good!"
-    content="This is an example of *bad* practice."
-  />
-
-  <DoDont 
-    type="dont"
-    caption="Don't do this, it is not good!"
-    content="hello"
-  />
-
-  <DoDont 
-    caption="Do this, it is good!"
-    content="This is an example of *bad* practice."
-  />
-
-  <DoDont 
-    type="dont"
-    caption="Don't do this, it is not good!"
-    imgSrc="/assets/foundation/fonts/fonts.webp"
-  />
+<DoDontGroup columns={2}>
+	<DoDont
+		caption="Hierarchie über Größe und Gewicht aufbauen — eine klare Stufung von H1 bis Fließtext."
+		content="<strong style='font-size:24px'>Überschrift</strong><br/><span style='color:var(--ds-text-body)'>Fließtext darunter</span>"
+	/>
+	<DoDont
+		type="dont"
+		caption="Hierarchie nicht über Farbe statt Größe erzwingen oder zu viele Größen mischen."
+		content="<span style='color:var(--ds-accent-brand)'>Bunter</span> <span style='font-size:20px'>Größen-</span><span style='font-size:13px'>wirrwarr</span>"
+	/>
 </DoDontGroup>

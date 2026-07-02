@@ -116,7 +116,19 @@
     ]
   },
 
+  "verwendung": {
+    "nutzen": [
+      "Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).",
+      "Für klar auslösende Aktionen: Speichern, Senden, Bestätigen."
+    ],
+    "nichtNutzen": [
+      "Für reine Navigation / Seitenwechsel — dafür einen Link (Link-Button).",
+      "Mehrere gleichwertige Primary-Buttons nebeneinander."
+    ]
+  },
+
   "render": {
+		"playground": { "import": "$components/ui/button-playground", "component": "ButtonPlayground" },
     "css": [
       ":global(.spec-canvas .sds-btn){",
       "  --sds-color-background-brand-default:#2c2c2c;",
@@ -197,6 +209,22 @@
       "</script>",
       "",
       "<button class=\"sds-btn sds-btn--{variant}\" type=\"button\">{label}</button>"
+    ],
+
+    "repoNote": "Die sds-btn-Doku oben ist die Figma-/Simple-Design-System-Referenz. Im Repo heißt die Komponente Button.svelte (Klasse .app-button) mit den Varianten default / transparent / outline auf --z-ds-Tokens. Für reine Navigation nutzt du einen Link im Button-Look (Link-Button) statt eines Buttons.",
+
+    "repoCodeSvelte": [
+      "<script>",
+      "  import { Button } from '$components/ui/button';",
+      "</script>",
+      "",
+      "<!-- Aktion: native <button> über die Komponente -->",
+      "<Button variant=\"default\">Speichern</Button>",
+      "<Button variant=\"transparent\">Abbrechen</Button>",
+      "<Button variant=\"outline\">Mehr</Button>",
+      "",
+      "<!-- Navigation: Link im Button-Look (Link-Button) -->",
+      "<a class=\"app-button\" href=\"/pfad\">Weiter</a>"
     ]
   }
 }

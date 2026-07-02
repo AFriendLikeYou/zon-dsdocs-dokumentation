@@ -1,0 +1,31 @@
+---
+title: Erscheinungsbild
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { Alert } from '$components/ui/alert';
+</script>
+
+# {title}
+
+Das Erscheinungsbild bündelt die visuellen Bausteine der Marke DIE ZEIT — Logo,
+Farbe, Typografie, Bildsprache und Icons — zu einem konsistenten Gesamtbild über alle
+Touchpoints.
+
+<Alert
+	variant="default"
+	title="Diese Seite ist im Aufbau"
+	description="Die ausführliche Beschreibung des Erscheinungsbilds folgt. Die einzelnen Bausteine sind bereits dokumentiert — siehe die Links unten."
+/>
+
+## Bausteine
+
+- **[Logo](/brand/logo)** — Wortmarke, Pictogramm und ihre Verwendung.
+- **[Farbe](/brand/color)** — Markenfarben und ihre Bedeutung.
+- **[Typografie](/brand/typography)** — Hausschriften und Schrifthierarchie.
+- **[Bildsprache](/brand/imagery)** — Bildwelt und Bildauswahl.
+- **[Icons](/brand/icons/anatomy)** — das Icon-Set und sein Aufbau.

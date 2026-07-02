@@ -1,6 +1,8 @@
 // AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).
 // Redaktionelle Texte gehören in content.ts (überschreibt diese Defaults).
 // Neu erzeugen: node tooling/zeit-de-exporter/export.mjs <model.json>
+import type { ComponentSpec } from '$types/spec';
+
 export const generated = {
 	"name": "Button",
 	"status": "ready_for_dev",
@@ -218,5 +220,15 @@ export const generated = {
 			"Nicht mehrere Primary-Buttons nebeneinander.",
 			"Buttons nicht für reine Navigation verwenden — dafür Links."
 		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).",
+			"Für klar auslösende Aktionen: Speichern, Senden, Bestätigen."
+		],
+		"nichtNutzen": [
+			"Für reine Navigation / Seitenwechsel — dafür einen Link (Link-Button).",
+			"Mehrere gleichwertige Primary-Buttons nebeneinander."
+		]
 	}
-};
+} satisfies Partial<ComponentSpec>;

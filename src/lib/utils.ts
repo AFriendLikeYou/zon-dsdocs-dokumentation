@@ -1,4 +1,4 @@
-import type { Icon } from '../global';
+import type { Icon } from '$types/global';
 
 export const uppercaseFirstLetter = (str: string) => {
 	return str.charAt(0).toUpperCase() + str.slice(1);
@@ -18,14 +18,6 @@ export async function copySVGToClipboard(icon: Icon) {
 	try {
 		const svg = icon.svg;
 		await navigator.clipboard.writeText(svg as string);
-	} catch (err) {
-		console.error('Fehler beim Kopieren:', err);
-	}
-}
-
-export async function copyStringToClipboard(str: string) {
-	try {
-		await navigator.clipboard.writeText(str);
 	} catch (err) {
 		console.error('Fehler beim Kopieren:', err);
 	}

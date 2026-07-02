@@ -78,9 +78,11 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
+
+	<h2>Anatomie</h2>
 	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
-		<button slot="preview" class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
-		<button slot="variant" class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
+		{#snippet preview()}<button class="sds-iconbtn sds-iconbtn--primary" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>{/snippet}
+		{#snippet variant()}<button class="sds-iconbtn sds-iconbtn--neutral" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>{/snippet}
 	</Anatomy>
 
 	<h2>Varianten</h2>
@@ -100,7 +102,7 @@ kategorie: Aktionen
 	<h2>Zustände</h2>
 	<StateList states={spec.zustaende} />
 
-	<h2>Verwendung</h2>
+	<h2>Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
 {/snippet}
 

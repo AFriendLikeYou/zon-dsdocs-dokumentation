@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Willkommen - Zeit Online Design System</title>
+	<title>Willkommen - Die Zeit Design System</title>
 </svelte:head>
 
 <h1>Willkommen</h1> 
@@ -90,22 +90,22 @@
 	}
 
 	.tables-wrapper th {
-		border: 1px solid var(--z-ds-color-border-70);
-		background-color: var(--z-ds-color-background-10);
-		color: var(--z-ds-color-text-90);
-		font-size: var(--z-ds-fontsize-16);
+		border: 1px solid var(--ds-border);
+		background-color: var(--ds-surface-raised);
+		color: var(--ds-text);
+		font-size: var(--ds-text-base);
 		font-weight: 600;
 		padding: 0.75rem;
-		border-bottom: 1px solid var(--z-ds-color-border-70);
+		border-bottom: 1px solid var(--ds-border);
 		text-align: left;
 	}
 
 	.tables-wrapper td {
-		border: 1px solid var(--z-ds-color-border-70);
+		border: 1px solid var(--ds-border);
 		padding: 0.75rem;
 		text-align: left;
-		font-size: var(--z-ds-fontsize-14);
-		color: var(--z-ds-color-text-80);
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-body);
 	}
 
 	@media (min-width: 768px) {

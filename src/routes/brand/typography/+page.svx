@@ -1,0 +1,52 @@
+---
+title: Typografie
+description: Schrift und Typografie der Marke DIE ZEIT
+category: brand
+---
+
+<script lang="ts">
+	import { Alert } from '$components/ui/alert';
+	import { DoDont, DoDontGroup } from '$components/ui/dodont';
+	import { ExampleStage } from '$components/ui/example-stage';
+</script>
+
+# Typografie
+
+Typografie ist ein zentrales Markenelement der ZEIT — sie trägt Haltung, Hierarchie
+und Lesbarkeit. Auf dieser Seite stehen die Grundlagen der Marken-Typografie.
+
+<Alert variant="info" title="Diese Seite ist im Aufbau">
+	Die ausführlichen Marken-Typografie-Regeln werden vom Brand-Team gepflegt. Die
+	technische Schrift-Skala der Produkte steht unter <a href="/product/foundations/typography">Foundations → Typography</a>.
+</Alert>
+
+![Typografie der Marke DIE ZEIT](/media/brand/typography/typografie-image-0.png)
+
+## Schriften
+
+Die Marke nutzt zwei Schriftfamilien: eine **Serifenschrift** für lange, redaktionelle
+Texte (Editorial) und eine **serifenlose** Schrift für UI, Auszeichnungen und kurze
+Texte. Welche Schrift in welchem Kontext zum Einsatz kommt, ist Teil der Markenführung.
+
+<ExampleStage label="Schrift-Beispiel" background="grid">
+	<img src="/media/brand/typography/typografie-image-2.png" alt="Schrift-Beispiele der Marke DIE ZEIT" />
+</ExampleStage>
+
+<Alert variant="tip" title="Hierarchie zuerst">
+	Baue Hierarchie über Größe und Gewicht auf, nicht über Farbe — das hält Texte ruhig
+	und gut lesbar.
+</Alert>
+
+## Do & Don't
+
+<DoDontGroup columns={2}>
+	<DoDont
+		caption="Klare Hierarchie und großzügige Zeilenführung für ruhigen Lesefluss."
+		imgSrc="/media/brand/typography/typografie-do-3.png"
+	/>
+	<DoDont
+		type="dont"
+		caption="Keine zu vielen Schriftgrößen mischen oder Hierarchie über Farbe erzwingen."
+		imgSrc="/media/brand/typography/typografie-dont-4.png"
+	/>
+</DoDontGroup>

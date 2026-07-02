@@ -12,13 +12,13 @@ const config = {
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
+		// Aliase = Kurzformen auf src/lib/* (SvelteKit-Standardort; $lib ist eingebaut).
 		alias: {
-			$components: './src/components',
-			$lib: './src/lib',
-			$stores: './src/stores',
-			$data: './src/data',
-			$config: './src/config',
-			$types: './src/types'
+			$components: './src/lib/components',
+			$stores: './src/lib/stores',
+			$data: './src/lib/data',
+			$config: './src/lib/config',
+			$types: './src/lib/types'
 		}
 	},
 	extensions: ['.svelte', '.svx']

@@ -1,0 +1,52 @@
+---
+title: Tokens
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { TokenTable } from '$components/ui/specsheet';
+	import { FOUNDATION_TOKENS } from '$data/foundation-tokens';
+
+	type Item = { name: string; wert: string; swatch?: string };
+	type Group = { kategorie: string; beschreibung?: string; items: Item[] };
+
+	let groups = $state<Group[]>([]);
+
+	// Werte zur Laufzeit aus dem geladenen styles-zds.css lesen — so weichen sie
+	// nie vom Upstream-Paket ab. Läuft nur im Browser (nach Mount).
+	$effect(() => {
+		const root = getComputedStyle(document.documentElement);
+		groups = FOUNDATION_TOKENS.map((g) => ({
+			kategorie: g.kategorie,
+			beschreibung: g.beschreibung,
+			items: g.tokens.map((name) => {
+				const wert = root.getPropertyValue(name).trim();
+				return g.isColor ? { name, wert, swatch: wert } : { name, wert };
+			})
+		}));
+	});
+</script>
+
+# {title}
+
+Die globalen **Design-Tokens** des ZEIT Design Systems — Farbe, Abstand, Radius und
+Schriftgröße. Sie sind die kleinste, geteilte Einheit jeder Komponente: statt feste
+Werte zu schreiben, referenzierst du Tokens (`var(--z-ds-space-m)`), damit Light/Dark
+und Marken-Änderungen automatisch greifen.
+
+Quelle der Werte ist das Paket `@zeitonline/design-system`. Die Tabelle liest die
+Werte **live** aus dem geladenen Stylesheet — sie zeigt also immer den aktuell
+gültigen Stand des aktiven Themes.
+
+## Abstände: semantisch vor numerisch
+
+Für Abstände gibt es zwei Skalen. Nutze **zuerst die semantischen Stufen**
+(`--z-ds-space-m`): sie halten Abstände über Komponenten hinweg konsistent und passen
+sich Theme- oder Density-Änderungen an, ohne dass du einzelne Pixelwerte nachziehen musst.
+Die **numerische Skala** (`--z-ds-space-16`) ist für Feinabstimmung gedacht, wenn keine
+semantische Stufe passt. Kurz: **semantisch zuerst, numerisch nur als Ausnahme.**
+
+<TokenTable tokens={groups} />

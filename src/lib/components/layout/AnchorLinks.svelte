@@ -1,0 +1,75 @@
+<script lang="ts">
+	import { afterNavigate } from '$app/navigation';
+
+	const COPY_LINK_SVG = `
+        <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.8243 9.68919L14.8581 8.65541C16.3806 7.13289 16.3806 4.6644 14.8581 3.14189C13.3356 1.61937 10.8671 1.61937 9.34459 3.14189L7.13969 5.34679C5.18905 7.29743 6.27513 10.6373 9 11.0676M4.17567 8.31081L3.14189 9.34459C1.61937 10.8671 1.61937 13.3356 3.14189 14.8581C4.6644 16.3806 7.13289 16.3806 8.65541 14.8581L10.8603 12.6532C12.811 10.7026 11.7249 7.36267 9 6.93243" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+    `;
+
+	const TICK_SVG = `
+        <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 5L7 13L3 9" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+    `;
+
+	// Function to create an anchor button
+	function createAnchorButton(header: HTMLElement) {
+		const id =
+			header.id ||
+			header.textContent
+				?.toLowerCase()
+				.replace(/\s+/g, '-')
+				.replace(/[^\w-]/g, '');
+		if (!id) return;
+
+		header.id = id; // Ensure the header has an ID
+		header.style.position = 'relative';
+
+		// Create a button element
+		const button = document.createElement('button');
+
+		button.innerHTML = COPY_LINK_SVG;
+		button.setAttribute('aria-label', 'Copy link');
+		button.style.border = 'none';
+		button.style.background = 'transparent';
+		button.style.color = 'var(--ds-text)';
+		button.style.cursor = 'pointer';
+		button.style.padding = '0.35rem';
+		button.style.marginLeft = '0.25rem';
+		button.style.opacity = '0'; // Initially hidden
+		button.style.transition = 'opacity var(--ds-dur) var(--ds-ease)'; // Hover-Fade → 160ms ease
+		button.style.minHeight = '1.75rem';
+		button.style.display = 'inline-flex';
+		button.style.alignItems = 'center';
+		button.style.justifyContent = 'center';
+		button.style.borderRadius = '50%';
+		button.style.width = '1.75rem';
+		button.style.height = '1.75rem';
+
+		// Copy to clipboard on click
+		button.addEventListener('click', async () => {
+			const url = `${window.location.origin}${window.location.pathname}#${id}`;
+			await navigator.clipboard.writeText(url);
+			button.innerHTML = TICK_SVG;
+
+			setTimeout(() => (button.innerHTML = COPY_LINK_SVG), 1200);
+		});
+
+		// Show button on hover
+		header.addEventListener('mouseenter', () => (button.style.opacity = '1'));
+		header.addEventListener('mouseleave', () => (button.style.opacity = '0'));
+
+		// Append button to header
+		header.appendChild(button);
+	}
+
+	afterNavigate(() => {
+		document.querySelectorAll<HTMLElement>('h2, h3').forEach((header) => {
+			// ✅ only process headers NOT inside `.accordion`
+			if (!header.closest('.accordion') && !header.closest('.dialog__content')) {
+				createAnchorButton(header);
+			}
+		});
+	});
+</script>

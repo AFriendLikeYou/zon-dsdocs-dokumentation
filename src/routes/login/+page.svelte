@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LoginForm from '$components/login/LoginForm.svelte';
+	import LoginForm from './LoginForm.svelte';
 	import type { ActionData } from './$types';
 
 	let { form, data }: { form: ActionData; data: { isUserLoggedIn: boolean } } = $props();
@@ -18,7 +18,7 @@
 {#if isLoggedIn || data.isUserLoggedIn}
 	<p>You are already logged in.</p>
 
-	<a class="zon-button zon-button--primary" href="/">Go to Dashboard</a>
+	<a class="app-button" href="/">Go to Dashboard</a>
 {:else}
 	<LoginForm {form} />
 {/if}

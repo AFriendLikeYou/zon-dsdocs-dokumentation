@@ -2,7 +2,7 @@
 title: Animation
 ---
 <script lang="ts">
-	import VideoPlayer from '$components/ui/videoplayer/VideoPlayer.svelte';
+	import { VideoPlayer } from '$components/ui/videoplayer';
 </script>
 
 <svelte:head>
@@ -15,5 +15,5 @@ DIE ZEIT ist in bewegter Form flüssig, optimistisch und unverkünstelt.
 Logos, Titel oder Bauchbinden erscheinen nicht aus dem Nichts oder faden ein und aus, sondern bauen sich fließend auf und ab.
 
 <VideoPlayer 
-	src="../../assets/brand/animation/img/motion.mp4"
+	src="/media/brand/animation/motion.mp4"
 />

@@ -7,3 +7,50 @@ title: Design Principles
 </svelte:head>
 
 # {title}
+
+Diese Prinzipien sind der gemeinsame Nenner hinter jeder Komponente, jedem Token und
+jeder Entscheidung im ZEIT Design System. Sie sind keine Deko, sondern ein Maßstab:
+Wenn ein Entwurf gegen ein Prinzip arbeitet, ist das ein Signal zum Innehalten.
+
+## 1. Klarheit vor Schmuck
+
+Inhalt führt. Wir bauen ruhige Flächen mit klarer Hierarchie und verzichten auf
+dekoratives Rauschen. Jedes Element verdient seinen Platz, indem es eine Aufgabe
+erfüllt — nicht, weil es gut aussieht. Im Zweifel: weniger.
+
+## 2. Konsistenz durch Tokens
+
+Ein Wert, eine Quelle. Komponenten referenzieren **[Design-Tokens](/product/foundations/tokens)**
+(`var(--z-ds-space-m)`) statt fester Werte. So greifen Theme- und Marken-Änderungen
+automatisch überall — niemand muss Hunderte Stellen von Hand nachziehen.
+
+## 3. Adaptiv von Haus aus
+
+Light/Dark-Modus und responsives Verhalten sind Standard, kein Zusatz. Jede
+Komponente erbt das aktive Theme über semantische Tokens und passt sich der Fläche
+an, in der sie steht. Wir gestalten keine zwei getrennten Welten, sondern eine, die
+sich anpasst.
+
+## 4. Barrierefreiheit ist Grundrecht
+
+Zugänglichkeit ist Pflicht, kein Feature. Das heißt: semantisches HTML, sichtbarer
+Fokus, ausreichender Kontrast und vollständige Tastaturbedienung — in jeder
+Komponente, von Anfang an. Mehr dazu unter **[Accessibility](/brand/accessibility)**.
+
+## 5. Bewegung mit Bedacht
+
+Animation dient der Orientierung, nie der Show. Wir nutzen starke `ease-out`-Kurven,
+halten Übergänge unter 300 ms, geben Druck-Feedback und respektieren immer
+`prefers-reduced-motion`. Bewegung darf nie zwischen Nutzer und Ziel stehen.
+
+## 6. Wiederverwendbar by default
+
+Jedes UI-Element ist eine gekapselte, dokumentierte Komponente: einmal bauen, überall
+nutzen. Styling lebt im Komponenten-Scope, geteilt wird nur über Tokens. Das hält das
+System wartbar und wachsen es konsistent — siehe die
+**[Component-Übersicht](/product/components)**.
+
+---
+
+*Diese Prinzipien sind bewusst knapp. Wie sie konkret umgesetzt sind, steht in den
+Architektur-Entscheidungen (`DECISIONS.md`) und den einzelnen Component-Seiten.*

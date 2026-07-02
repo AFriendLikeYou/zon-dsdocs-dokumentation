@@ -4,10 +4,6 @@ import { fail, type Actions } from '@sveltejs/kit';
 export const actions: Actions = {
 	login: async ({ request, cookies }) => {
 		const data = await request.formData();
-		const loginCookie = cookies.get(LOGIN_COOKIE_NAME) || 'false';
-
-		console.log('Login action triggered with data:', Object.fromEntries(data.entries()));
-		console.log('Current login cookie:', loginCookie);
 
 		const email = data.get('email')?.toString().trim();
 		const isZeitEmail = email?.endsWith('@zeit.de');
@@ -28,7 +24,6 @@ export const actions: Actions = {
 			});
 		}
 
-		console.log('Login successful for email:', email);
 		cookies.set(LOGIN_COOKIE_NAME, email, { path: '/' });
 		return {
 			success: true,

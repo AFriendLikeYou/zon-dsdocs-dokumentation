@@ -7,8 +7,8 @@ title: Resources
 </svelte:head>
 
 <script lang="ts">
-	import CardGrid from '$components/ui/card/CardGrid.svelte';
-	import Alert from '$components/ui/alert/Alert.svelte';
+	import { CardGrid } from '$components/ui/card';
+	import { Alert } from '$components/ui/alert';
 
 	import { blur } from "svelte/transition";
 
@@ -50,7 +50,7 @@ title: Resources
 
             <div class="zon-icon__actions">
                 <a
-					class="zon-button"
+					class="app-button"
 					rel="noopener noreferrer"
 					target="_blank"
                     aria-label={`${icon.name} Seite öffnen`}
@@ -85,12 +85,12 @@ title: Resources
 		justify-content: center;
 		gap: var(--z-ds-space-16);
 		padding: var(--z-ds-space-16);
-		border-radius: var(--z-ds-border-radius-4);
-		border: 1px solid var(--z-ds-color-border-70);
-		background-color: var(--z-ds-color-background-0);
+		border-radius: var(--ds-radius-sm);
+		border: 1px solid var(--ds-border);
+		background-color: var(--ds-surface);
 
 		span {
-			font-size: calc(var(--z-ds-fontsize-14) / 1.5);
+			font-size: calc(var(--ds-text-sm) / 1.5);
 			opacity: 0.7;
 			text-wrap: nowrap;
 		}
@@ -104,7 +104,7 @@ title: Resources
 		}
 
 		.zon__icon__name {
-			font-size: var(--z-ds-fontsize-16);
+			font-size: var(--ds-text-base);
 			font-weight: 700;
 		}
 

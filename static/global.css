@@ -13,6 +13,68 @@
 	--ds-ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* Enter/Exit, UI — starke ease-out */
 	--ds-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* On-Screen-Movement / Morph */
 
+	/* Monospace-Stack (Code, Token-Namen, Maße) — bewusst site-lokal, kein z-ds-Token. */
+	--ds-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+	/* ── Semantische Doku-Tokens ──────────────────────────────────────────────
+	   Sprechende Rollen-Namen für die Doku-UI, gemappt auf z-ds-Tokens (Werte
+	   kommen weiter aus @zeitonline/design-system → theme-adaptiv). Komponenten
+	   nutzen NUR diese Rollen. Rohe --z-ds-* erscheinen nur noch: hier (Mapping),
+	   in den originalgetreuen DS-Kopien (Playground-Specimens) und bei Abständen/
+	   Zeilenhöhen (--z-ds-space-*/-lineheight-* sind bereits semantisch). */
+
+	/* Flächen */
+	--ds-surface: var(--z-ds-color-background-0); /* Seite, Karten, Navbar */
+	--ds-surface-raised: var(--z-ds-color-background-10); /* Pills, Hover, Code, Bühnen */
+	--ds-surface-sunken: var(--z-ds-color-background-20); /* aktive/dritte Ebene */
+
+	/* Text */
+	--ds-text: var(--z-ds-color-text-100); /* Überschriften, primäre UI */
+	--ds-text-body: var(--z-ds-color-text-70); /* Fließtext, sekundäre UI */
+	--ds-text-muted: var(--z-ds-color-text-55); /* Labels, Meta, Platzhalter */
+	--ds-text-faint: var(--z-ds-color-text-40); /* tertiär, disabled */
+
+	/* Linien (—ds-border-soft: siehe „Weiche Oberflächen" unten) */
+	--ds-border: var(--z-ds-color-border-70);
+	--ds-border-strong: var(--z-ds-color-border-100);
+
+	/* Interaktion */
+	--ds-accent: var(--z-ds-color-focus-100); /* Link-/Aktiv-Akzent */
+	--ds-focus-ring: var(--z-ds-color-focus-100); /* :focus-visible-Outline */
+	--ds-accent-brand: var(--z-ds-color-accent-100); /* ZEIT-Rot (Badges, Tips) */
+
+	/* Status */
+	--ds-positive: var(--z-ds-color-background-success); /* Do, pass */
+	--ds-negative: var(--z-ds-color-error-70); /* Don't, fail */
+	--ds-warning: var(--z-ds-color-background-warning); /* warn */
+
+	/* Sonderflächen */
+	--ds-surface-inverse: var(--z-ds-color-background-100); /* dunkle Fläche (z. B. Login-Karte) */
+	--ds-stage-dark: var(--z-ds-color-general-black-80); /* On-Image-Bühne im Playground */
+	--ds-static-white: var(--z-ds-color-general-white-100); /* theme-invariant (app-button) */
+	--ds-static-black: var(--z-ds-color-black-100); /* theme-invariant (app-button) */
+	--ds-border-hover: var(--z-ds-color-border-hover);
+
+	/* Typo-Rollen */
+	--ds-heading-1: var(--z-ds-fontsize-30);
+	--ds-heading-2: var(--z-ds-fontsize-22);
+	--ds-heading-3: var(--z-ds-fontsize-18);
+	--ds-text-2xl: var(--z-ds-fontsize-24);
+	--ds-text-xl: var(--z-ds-fontsize-20);
+	--ds-text-lg: var(--z-ds-fontsize-18);
+	--ds-text-base: var(--z-ds-fontsize-16);
+	--ds-text-sm: var(--z-ds-fontsize-14);
+	--ds-text-xs: var(--z-ds-fontsize-12);
+
+	/* Feine Uppercase-Labels (Sidebar-/Footer-/TOC-Kategorien) */
+	--ds-label-size: var(--z-ds-fontsize-12);
+	--ds-label-tracking: 0.07em;
+
+	/* Radius */
+	--ds-radius: var(--z-ds-border-radius-8);
+	--ds-radius-sm: var(--z-ds-border-radius-4);
+	--ds-radius-xs: var(--z-ds-border-radius-2);
+
 	/* Weiche Oberflächen */
 	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
 	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -55,21 +117,21 @@ html.color-scheme-dark {
 
 @font-face {
 	font-family: 'FranziskaWebPro';
-	src: url('/assets/fonts/FranziskaWebProFont.woff') format('woff');
+	src: url('/fonts/FranziskaWebProFont.woff') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'TabletGothic';
-	src: url('/assets/fonts/TabletGothic-Regular.woff2') format('woff2');
+	src: url('/fonts/TabletGothic-Regular.woff2') format('woff2');
 	font-weight: normal;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'TabletGothic';
-	src: url('/assets/fonts/TabletGothic-Bold.woff2') format('woff2');
+	src: url('/fonts/TabletGothic-Bold.woff2') format('woff2');
 	font-weight: bold;
 	font-style: normal;
 }
@@ -95,8 +157,8 @@ html {
 
 body {
 	font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, FreeSans, sans-serif;
-	background-color: var(--z-ds-color-background-0);
-	color: var(--z-ds-color-text-100);
+	background-color: var(--ds-surface);
+	color: var(--ds-text);
 }
 
 p {
@@ -120,14 +182,16 @@ p {
 	line-height: 1.5;
 }
 
+/* Ruhige, redaktionelle Typo-Skala (Vorbild animations.dev / OpenAI-Brand):
+   kleinere Grade, engeres Tracking — Hierarchie über Weißraum statt Größe. */
 h1,
 h2,
 h3,
 h4,
 h5 {
-	margin-top: 1.5em;
-	margin-bottom: 0.5em;
-	line-height: 1.15;
+	margin-top: 2.2em;
+	margin-bottom: 0.6em;
+	line-height: 1.2;
 	letter-spacing: -0.014em;
 	display: flex;
 	align-items: center;
@@ -135,33 +199,37 @@ h5 {
 }
 
 h1 {
-	font-size: var(--z-ds-fontsize-42);
+	font-size: var(--ds-heading-1);
 	font-weight: 700;
+	letter-spacing: -0.02em;
 	padding-bottom: 0.5rem;
 	margin-top: 0.5em;
 }
 
 h2 {
-	font-size: var(--z-ds-fontsize-30);
-	margin-bottom: 1rem;
-	padding-bottom: 0.25rem;
+	font-size: var(--ds-heading-2);
+	font-weight: 650;
+	margin-bottom: 0.75rem;
 }
 
 h3 {
-	font-size: var(--z-ds-fontsize-24);
+	font-size: var(--ds-heading-3);
+	font-weight: 600;
 }
 
 h4 {
-	font-size: var(--z-ds-fontsize-20);
+	font-size: var(--ds-text-base);
+	font-weight: 600;
 }
 
 h5 {
-	font-size: var(--z-ds-fontsize-18);
+	font-size: var(--ds-text-sm);
+	font-weight: 600;
 }
 
 img + em {
-	font-size: var(--z-ds-fontsize-14);
-	color: var(--z-ds-color-text-70);
+	font-size: var(--ds-text-sm);
+	color: var(--ds-text-body);
 	font-style: normal;
 }
 
@@ -176,15 +244,15 @@ em {
 code {
 	font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 	font-size: 85%;
-	background-color: var(--z-ds-color-background-10);
+	background-color: var(--ds-surface-raised);
 	padding: 0.2em 0.4em;
 	border-radius: 3px;
 }
 
 pre {
-	background-color: var(--z-ds-color-background-10);
+	background-color: var(--ds-surface-raised);
 	border: 1px solid var(--ds-border-soft);
-	border-radius: var(--z-ds-border-radius-8);
+	border-radius: var(--ds-radius);
 	padding: 16px;
 	overflow: auto;
 }
@@ -195,13 +263,14 @@ pre code {
 }
 
 main p {
-	font-size: var(--z-ds-fontsize-18);
-	color: var(--z-ds-color-text-70);
+	font-size: var(--ds-text-base);
+	line-height: 1.7;
+	color: var(--ds-text-body);
 	margin-bottom: 1em;
 }
 
 main a {
-	color: var(--z-ds-color-text-100);
+	color: var(--ds-text);
 	text-decoration: underline;
 	text-decoration-color: var(--ds-border-soft);
 	text-underline-offset: 0.15em;
@@ -217,25 +286,25 @@ main a:hover {
 main blockquote {
 	margin: 0;
 	padding: 0 1em;
-	color: var(--z-ds-color-text-55);
-	border-left: 0.25em solid var(--z-ds-color-border-100);
+	color: var(--ds-text-muted);
+	border-left: 2px solid var(--ds-border-soft);
 }
 
 main hr {
-	margin-top: var(--z-ds-space-24);
-	margin-bottom: var(--z-ds-space-24);
+	margin-top: var(--z-ds-space-32);
+	margin-bottom: var(--z-ds-space-32);
 	max-width: 100%;
 	height: 1px;
 	padding: 0;
-	background-color: var(--z-ds-color-border-100);
+	background-color: var(--ds-border-soft);
 	border: 0;
 }
 
 main img {
 	max-width: 100%;
 	height: auto;
-	border-radius: var(--z-ds-border-radius-8);
-	border: 1px solid var(--z-ds-color-border-70);
+	border-radius: var(--ds-radius);
+	border: 1px solid var(--ds-border-soft);
 }
 
 main ol,
@@ -245,8 +314,10 @@ main ul {
 
 main ol li,
 main ul li {
-	margin-bottom: 1rem;
-	font-size: var(--z-ds-fontsize-18);
+	margin-bottom: 0.5rem;
+	font-size: var(--ds-text-base);
+	line-height: 1.7;
+	color: var(--ds-text-body);
 }
 
 .bg-grid {

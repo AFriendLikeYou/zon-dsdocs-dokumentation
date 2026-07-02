@@ -11,6 +11,8 @@ kategorie: Aktionen
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { ButtonPlayground } from '$components/ui/button-playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
 	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
@@ -26,6 +28,17 @@ kategorie: Aktionen
 <\/script>
 
 <button class="sds-btn sds-btn--{variant}" type="button">{label}</button>`;
+	const repoCode = `<script>
+  import { Button } from '$components/ui/button';
+<\/script>
+
+<!-- Aktion: native <button> über die Komponente -->
+<Button variant="default">Speichern</Button>
+<Button variant="transparent">Abbrechen</Button>
+<Button variant="outline">Mehr</Button>
+
+<!-- Navigation: Link im Button-Look (Link-Button) -->
+<a class="app-button" href="/pfad">Weiter</a>`;
 	const cssCode = `.sds-btn{
   --sds-color-background-brand-default:#2c2c2c;
   --sds-color-background-brand-hover:#1e1e1e;
@@ -76,10 +89,16 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
+	<ButtonPlayground />
+
+	<h2>Anatomie</h2>
 	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
-		<button slot="preview" class="sds-btn sds-btn--primary" type="button">Button</button>
-		<button slot="variant" class="sds-btn sds-btn--neutral" type="button">Button</button>
+		{#snippet preview()}<button class="sds-btn sds-btn--primary" type="button">Button</button>{/snippet}
+		{#snippet variant()}<button class="sds-btn sds-btn--neutral" type="button">Button</button>{/snippet}
 	</Anatomy>
+
+	<h2>Verwendung</h2>
+	<UsageBlock verwendung={spec.verwendung} />
 
 	<h2>Varianten</h2>
 	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
@@ -98,7 +117,7 @@ kategorie: Aktionen
 	<h2>Zustände</h2>
 	<StateList states={spec.zustaende} />
 
-	<h2>Verwendung</h2>
+	<h2>Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
 {/snippet}
 
@@ -109,6 +128,8 @@ kategorie: Aktionen
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
+	<p>Die sds-btn-Doku oben ist die Figma-/Simple-Design-System-Referenz. Im Repo heißt die Komponente Button.svelte (Klasse .app-button) mit den Varianten default / transparent / outline auf --z-ds-Tokens. Für reine Navigation nutzt du einen Link im Button-Look (Link-Button) statt eines Buttons.</p>
+	<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />
 	<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />
 {/snippet}
 

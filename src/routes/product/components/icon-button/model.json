@@ -1,0 +1,349 @@
+{
+	"name": "Icon Button",
+	"status": "ready_for_dev",
+	"kategorie": "Aktionen",
+	"zweck": "Löst eine Aktion ohne sichtbares Label aus — kompakt und ikonografisch. Da kein Text sichtbar ist, braucht jeder Icon Button ein aria-label, das die Aktion beschreibt.",
+	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=11-11508&m=dev",
+	"aktualisiertAm": "2026-06-28",
+	"masse": {
+		"hoehe": "40",
+		"breite": "40",
+		"padding": "12",
+		"radius": "32"
+	},
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — quadratisch, voll abgerundet (border-radius 32 = Kreis), Icon zentriert"
+		},
+		{
+			"nr": 2,
+			"text": "Icon — 20×20, zentriert; KEIN sichtbares Label → aria-label Pflicht"
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe · Primary",
+			"items": [
+				{
+					"name": "--sds-color-background-brand-default",
+					"wert": "#2c2c2c",
+					"swatch": "#2c2c2c"
+				},
+				{
+					"name": "--sds-color-icon-brand-on-brand",
+					"wert": "#f5f5f5",
+					"swatch": "#f5f5f5"
+				},
+				{
+					"name": "--sds-color-background-brand-hover",
+					"wert": "#1e1e1e",
+					"swatch": "#1e1e1e"
+				}
+			]
+		},
+		{
+			"kategorie": "Farbe · Neutral / Subtle",
+			"items": [
+				{
+					"name": "--sds-color-background-default-secondary",
+					"wert": "#f5f5f5",
+					"swatch": "#f5f5f5"
+				},
+				{
+					"name": "--sds-color-background-default-secondary-hover",
+					"wert": "#e6e6e6",
+					"swatch": "#e6e6e6"
+				},
+				{
+					"name": "--sds-color-border-default-default",
+					"wert": "#d9d9d9",
+					"swatch": "#d9d9d9"
+				},
+				{
+					"name": "--sds-color-icon-default-default",
+					"wert": "#1e1e1e",
+					"swatch": "#1e1e1e"
+				}
+			]
+		},
+		{
+			"kategorie": "Farbe · Disabled",
+			"items": [
+				{
+					"name": "--sds-color-background-disabled-default",
+					"wert": "#d9d9d9",
+					"swatch": "#d9d9d9"
+				},
+				{
+					"name": "--sds-color-icon-disabled-on-disabled",
+					"wert": "#b3b3b3",
+					"swatch": "#b3b3b3"
+				}
+			]
+		},
+		{
+			"kategorie": "Größe & Form",
+			"items": [
+				{
+					"name": "--sds-typography-scale-07",
+					"wert": "40px · Box Medium"
+				},
+				{
+					"name": "--sds-typography-scale-06",
+					"wert": "32px · Radius (rund)"
+				},
+				{
+					"name": "--sds-size-space-300",
+					"wert": "12px · Padding Medium"
+				},
+				{
+					"name": "--sds-size-space-200",
+					"wert": "8px · Padding Small"
+				}
+			]
+		},
+		{
+			"kategorie": "Border",
+			"items": [
+				{
+					"name": "--sds-size-stroke-border",
+					"wert": "1px"
+				}
+			]
+		}
+	],
+	"varianten": [
+		{
+			"prop": "Variant",
+			"werte": [
+				{
+					"label": "Primary",
+					"default": true
+				},
+				{
+					"label": "Neutral"
+				},
+				{
+					"label": "Subtle"
+				}
+			]
+		},
+		{
+			"prop": "Größe",
+			"werte": [
+				{
+					"label": "Medium",
+					"default": true
+				},
+				{
+					"label": "Small"
+				}
+			]
+		}
+	],
+	"zustaende": [
+		{
+			"label": "default",
+			"vorhanden": true
+		},
+		{
+			"label": "hover",
+			"vorhanden": true
+		},
+		{
+			"label": "disabled",
+			"vorhanden": true
+		},
+		{
+			"label": "focus"
+		},
+		{
+			"label": "active"
+		},
+		{
+			"label": "loading"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Label",
+			"wert": "aria-label PFLICHT — kein sichtbarer Text",
+			"status": "warn"
+		},
+		{
+			"label": "Rolle",
+			"wert": "als natives <button> umsetzen (Figma: Frame)",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter / Leertaste nativ",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": "kein Fokus-Stil im Design — :focus-visible ergänzen",
+			"status": "warn"
+		},
+		{
+			"label": "Kontrast",
+			"wert": "Icon #f5f5f5 auf #2c2c2c ≈ 13:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Touch-Target",
+			"wert": "Medium 40px · Small 36px < 44px",
+			"status": "warn"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Immer ein aria-label setzen, das die Aktion beschreibt (z. B. „Favorit hinzufügen“).",
+			"Nur für allgemein verständliche Icons verwenden."
+		],
+		"dont": [
+			"Icon Button nie ohne aria-label ausliefern.",
+			"Keine mehrdeutigen Icons ohne zusätzlichen Tooltip nutzen."
+		]
+	},
+	"render": {
+		"css": [
+			":global(.spec-canvas .sds-iconbtn){",
+			"  --sds-color-background-brand-default:#2c2c2c;",
+			"  --sds-color-background-brand-hover:#1e1e1e;",
+			"  --sds-color-icon-brand-on-brand:#f5f5f5;",
+			"  --sds-color-background-default-secondary:#f5f5f5;",
+			"  --sds-color-background-default-secondary-hover:#e6e6e6;",
+			"  --sds-color-background-default-default-hover:#f5f5f5;",
+			"  --sds-color-border-default-default:#d9d9d9;",
+			"  --sds-color-icon-default-default:#1e1e1e;",
+			"  --sds-color-background-disabled-default:#d9d9d9;",
+			"  --sds-color-icon-disabled-on-disabled:#b3b3b3;",
+			"  --sds-color-border-disabled-default:#b3b3b3;",
+			"  --sds-size-stroke-border:1px;",
+			"  display:inline-flex; align-items:center; justify-content:center;",
+			"  width:40px; height:40px; padding:0;",
+			"  border-radius:999px;",
+			"  border:var(--sds-size-stroke-border) solid transparent;",
+			"  background:transparent; cursor:pointer;",
+			"}",
+			":global(.spec-canvas .sds-iconbtn svg){ width:20px; height:20px; }",
+			":global(.spec-canvas .sds-iconbtn--small){ width:36px; height:36px; }",
+			":global(.spec-canvas .sds-iconbtn--primary){ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-icon-brand-on-brand); }",
+			":global(.spec-canvas .sds-iconbtn--primary:hover){ background:var(--sds-color-background-brand-hover); }",
+			":global(.spec-canvas .sds-iconbtn--neutral){ background:var(--sds-color-background-default-secondary); border-color:var(--sds-color-border-default-default); color:var(--sds-color-icon-default-default); }",
+			":global(.spec-canvas .sds-iconbtn--neutral:hover){ background:var(--sds-color-background-default-secondary-hover); }",
+			":global(.spec-canvas .sds-iconbtn--subtle){ background:transparent; border-color:transparent; color:var(--sds-color-icon-default-default); }",
+			":global(.spec-canvas .sds-iconbtn--subtle:hover){ background:var(--sds-color-background-default-default-hover); }",
+			":global(.spec-canvas .sds-iconbtn:disabled){ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-icon-disabled-on-disabled); cursor:not-allowed; }",
+			":global(.spec-canvas .sds-iconbtn--primary.sds-iconbtn--hover){ background:var(--sds-color-background-brand-hover); }",
+			":global(.spec-canvas .sds-iconbtn--neutral.sds-iconbtn--hover){ background:var(--sds-color-background-default-secondary-hover); }",
+			":global(.spec-canvas .sds-iconbtn--subtle.sds-iconbtn--hover){ background:var(--sds-color-background-default-default-hover); }"
+		],
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "left",
+				"y": 50
+			},
+			{
+				"nr": 2,
+				"side": "top",
+				"x": 50
+			}
+		],
+		"matrix": [
+			{
+				"label": "Primary · Default",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Primary · Hover",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Primary · Disabled",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Neutral · Default",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Neutral · Hover",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Neutral · Disabled",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Subtle · Default",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Subtle · Hover",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			},
+			{
+				"label": "Subtle · Disabled",
+				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+			}
+		],
+		"props": [
+			{
+				"name": "variant",
+				"typ": "\"Primary\" | \"Neutral\" | \"Subtle\"",
+				"default": "\"Primary\"",
+				"beschreibung": "Visuelle Gewichtung der Aktion."
+			},
+			{
+				"name": "size",
+				"typ": "\"Medium\" | \"Small\"",
+				"default": "\"Medium\"",
+				"beschreibung": "Box-Größe (40 bzw. 36 px)."
+			},
+			{
+				"name": "state",
+				"typ": "\"Default\" | \"Hover\" | \"Disabled\"",
+				"default": "\"Default\"",
+				"beschreibung": "Interaktionszustand."
+			},
+			{
+				"name": "icon",
+				"typ": "Snippet / ReactNode",
+				"default": "—",
+				"beschreibung": "Das anzuzeigende Icon (20×20)."
+			},
+			{
+				"name": "aria-label",
+				"typ": "string (Pflicht)",
+				"default": "—",
+				"beschreibung": "Beschreibt die Aktion — Pflicht, da kein sichtbares Label."
+			}
+		],
+		"version": "Figma-Node 11:11508",
+		"variantInfo": {
+			"Primary": "Wichtigste ikonografische Aktion — gefüllt, hoher Kontrast.",
+			"Neutral": "Sekundäre Aktion auf heller Fläche mit Rahmen.",
+			"Subtle": "Geringe Betonung — transparent bis zum Hover.",
+			"Medium": "Standardgröße, 40px Box.",
+			"Small": "Kompakt, 36px Box."
+		},
+		"codeNote": "Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label)",
+		"codeSvelte": [
+			"<script>",
+			"  // 'primary' | 'neutral' | 'subtle'",
+			"  export let variant = 'primary';",
+			"  export let label; // aria-label — Pflicht",
+			"</script>",
+			"",
+			"<button class=\"sds-iconbtn sds-iconbtn--{variant}\" type=\"button\" aria-label={label}>",
+			"  <!-- Icon 20×20, z. B. <Star /> -->",
+			"</button>"
+		],
+		"preview": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>",
+		"variant": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+	}
+}

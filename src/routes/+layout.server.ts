@@ -1,7 +1,7 @@
 import { BRAND_ASSETS_LIST } from '$data/brand-assets';
 import { SVG_LIST } from '$data/icons';
 import type { LayoutServerLoad } from './$types';
-import type { Theme } from '../global';
+import type { Theme } from '$types/global';
 import { LOGIN_COOKIE_NAME } from '$config';
 
 const fetchIcons = async (fetchFn: typeof fetch) => {
@@ -36,10 +36,21 @@ const fetchBrandAssets = async (fetchFn: typeof fetch) => {
 	return brandAssets;
 };
 
+// Modul-Cache: Icons/Assets sind zur Laufzeit statisch — einmal pro Server-Instanz laden
+// statt ~70 Fetches pro SSR-Request. Nur vollständig geladene Ergebnisse werden gecacht,
+// damit ein Fetch-Hiccup beim Boot nicht bis zum Neustart festhängt.
+let iconsCache: Awaited<ReturnType<typeof fetchIcons>> | null = null;
+let brandAssetsCache: Awaited<ReturnType<typeof fetchBrandAssets>> | null = null;
+
 export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 	const theme = cookies.get('theme') || ('system' as Theme);
-	const icons = await fetchIcons(fetch);
-	const brandAssets = await fetchBrandAssets(fetch);
+
+	const icons = iconsCache ?? (await fetchIcons(fetch));
+	if (!iconsCache && icons.every((i) => i.svg !== null)) iconsCache = icons;
+
+	const brandAssets = brandAssetsCache ?? (await fetchBrandAssets(fetch));
+	if (!brandAssetsCache && brandAssets.every((a) => a.svg !== null)) brandAssetsCache = brandAssets;
+
 	const isUserLoggedIn = cookies.get(LOGIN_COOKIE_NAME) !== undefined;
 
 	return { theme, icons, brandAssets, isUserLoggedIn };
