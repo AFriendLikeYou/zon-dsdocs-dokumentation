@@ -1,0 +1,279 @@
+---
+title: Stepper
+status: ready_for_dev
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=4153-1351&m=dev
+aktualisiert_am: 2026-07-03
+kategorie: Formulare
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"bottom","x":50},{"nr":2,"side":"top","x":50},{"nr":3,"side":"right","y":50}];
+	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-stepper--hover"},{"value":"focus","label":"Focus","cssClass":"z-stepper--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-stepper--disabled"}]}];
+	const playgroundTemplate = `<div class="z-stepper{classes}">
+  <button class="z-stepper__minus" type="button" aria-label="Weniger"></button>
+  <span class="z-stepper__val">2</span>
+  <button class="z-stepper__plus" type="button" aria-label="Mehr"></button>
+</div>`;
+	const playgroundPresets = [{"label":"Standard","state":{"state":"default"}},{"label":"Fokus","state":{"state":"focus"}},{"label":"Deaktiviert","state":{"state":"disabled"}}];
+	const htmlCode = `<div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div>
+<div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div>`;
+	const patternCssCode = `/* z-stepper — Zahl-Stepper (−/Wert/+), originalgetreu aus Figma ❖ ZDS
+   (node 4153:1351). Zustands-Modifier für die Doku; im Produkt aus Interaktion.
+   Icons als CSS-Balken (kein Asset). Echte --z-ds-Tokens. */
+.z-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--z-ds-space-xxs);
+  box-sizing: border-box;
+  width: 112px;
+  padding: var(--z-ds-space-xxs);
+  border: 1px solid var(--z-ds-color-border-100);
+  border-radius: var(--z-ds-border-radius-4);
+  background-color: var(--z-ds-color-background-0);
+  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+}
+
+.z-stepper__val {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1;
+  color: var(--z-ds-color-text-100);
+}
+
+.z-stepper__minus,
+.z-stepper__plus {
+  position: relative;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--z-ds-border-radius-4);
+  background: transparent;
+  color: var(--z-ds-color-text-100);
+  cursor: pointer;
+}
+/* Minus + Plus teilen den horizontalen Balken; Plus bekommt zusätzlich den vertikalen. */
+.z-stepper__minus::before,
+.z-stepper__plus::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 1.6px;
+  background-color: currentColor;
+  transform: translate(-50%, -50%);
+}
+.z-stepper__plus::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1.6px;
+  height: 12px;
+  background-color: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.z-stepper__minus:hover,
+.z-stepper__plus:hover {
+  background-color: var(--z-ds-color-background-10);
+}
+.z-stepper__minus:focus-visible,
+.z-stepper__plus:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+}
+
+/* Zustands-Modifier (Doku/Matrix) — bilden Hover/Focus am Plus-Button ab. */
+.z-stepper--hover .z-stepper__plus {
+  background-color: var(--z-ds-color-background-10);
+}
+.z-stepper--focus .z-stepper__plus {
+  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+}
+.z-stepper--disabled .z-stepper__val,
+.z-stepper--disabled .z-stepper__minus,
+.z-stepper--disabled .z-stepper__plus {
+  color: var(--z-ds-color-text-40);
+  cursor: default;
+}
+`;
+	const propsData = [{"name":"value","typ":"number","default":"0","beschreibung":"Aktueller Wert."},{"name":"min","typ":"number","default":"—","beschreibung":"Untere Grenze (− wird deaktiviert)."},{"name":"max","typ":"number","default":"—","beschreibung":"Obere Grenze (+ wird deaktiviert)."},{"name":"step","typ":"number","default":"1","beschreibung":"Schrittweite."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt beide Buttons."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab },
+		{ label: 'Barrierefreiheit', component: a11yTab },
+		{ label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+
+	<h2>Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div>{/snippet}
+		{#snippet variant()}<div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div>{/snippet}
+	</Anatomy>
+
+	<h2>Verwendung</h2>
+	<UsageBlock verwendung={spec.verwendung} />
+
+	<h2>Texte &amp; Wording</h2>
+	<WordingList items={spec.wording} />
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
+	<VariantMatrix>
+		<div class="cell"><span class="cell-label">Default</span><div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
+		<div class="cell"><span class="cell-label">Hover</span><div class="z-stepper z-stepper--hover"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
+		<div class="cell"><span class="cell-label">Focus</span><div class="z-stepper z-stepper--focus"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
+		<div class="cell"><span class="cell-label">Disabled</span><div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div></div>
+	</VariantMatrix>
+
+	<h2>Zustände</h2>
+	<StateList states={spec.zustaende} />
+
+	<h2>Do & Don't</h2>
+	<DoDontList doDont={spec.doDont} />
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+{#snippet a11yTab()}
+	<A11yList items={spec.a11y} />
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-stepper),
+:global(.pg-preview .z-stepper) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--z-ds-space-xxs);
+  box-sizing: border-box;
+  width: 112px;
+  padding: var(--z-ds-space-xxs);
+  border: 1px solid var(--z-ds-color-border-100);
+  border-radius: var(--z-ds-border-radius-4);
+  background-color: var(--z-ds-color-background-0);
+  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+}
+:global(.spec-canvas .z-stepper__val),
+:global(.pg-preview .z-stepper__val) {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1;
+  color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-stepper__minus),
+:global(.pg-preview .z-stepper__minus),
+:global(.spec-canvas .z-stepper__plus),
+:global(.pg-preview .z-stepper__plus) {
+  position: relative;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--z-ds-border-radius-4);
+  background: transparent;
+  color: var(--z-ds-color-text-100);
+  cursor: pointer;
+}
+:global(.spec-canvas .z-stepper__minus::before),
+:global(.pg-preview .z-stepper__minus::before),
+:global(.spec-canvas .z-stepper__plus::before),
+:global(.pg-preview .z-stepper__plus::before) {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 1.6px;
+  background-color: currentColor;
+  transform: translate(-50%, -50%);
+}
+:global(.spec-canvas .z-stepper__plus::after),
+:global(.pg-preview .z-stepper__plus::after) {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1.6px;
+  height: 12px;
+  background-color: currentColor;
+  transform: translate(-50%, -50%);
+}
+:global(.spec-canvas .z-stepper__minus:hover),
+:global(.pg-preview .z-stepper__minus:hover),
+:global(.spec-canvas .z-stepper__plus:hover),
+:global(.pg-preview .z-stepper__plus:hover) {
+  background-color: var(--z-ds-color-background-10);
+}
+:global(.spec-canvas .z-stepper__minus:focus-visible),
+:global(.pg-preview .z-stepper__minus:focus-visible),
+:global(.spec-canvas .z-stepper__plus:focus-visible),
+:global(.pg-preview .z-stepper__plus:focus-visible) {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+}
+:global(.spec-canvas .z-stepper--hover .z-stepper__plus),
+:global(.pg-preview .z-stepper--hover .z-stepper__plus) {
+  background-color: var(--z-ds-color-background-10);
+}
+:global(.spec-canvas .z-stepper--focus .z-stepper__plus),
+:global(.pg-preview .z-stepper--focus .z-stepper__plus) {
+  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+}
+:global(.spec-canvas .z-stepper--disabled .z-stepper__val),
+:global(.pg-preview .z-stepper--disabled .z-stepper__val),
+:global(.spec-canvas .z-stepper--disabled .z-stepper__minus),
+:global(.pg-preview .z-stepper--disabled .z-stepper__minus),
+:global(.spec-canvas .z-stepper--disabled .z-stepper__plus),
+:global(.pg-preview .z-stepper--disabled .z-stepper__plus) {
+  color: var(--z-ds-color-text-40);
+  cursor: default;
+}
+</style>

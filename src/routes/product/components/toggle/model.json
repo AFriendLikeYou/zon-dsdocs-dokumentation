@@ -1,0 +1,223 @@
+{
+	"$schema": "../../../../../tooling/zeit-de-exporter/model.schema.json",
+	"name": "Toggle",
+	"status": "ready_for_dev",
+	"kategorie": "Formulare",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=2845-5966&m=dev",
+	"aktualisiertAm": "2026-07-03",
+	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
+	"masse": {
+		"hoehe": "16",
+		"breite": "26",
+		"radius": "999 (voll)"
+	},
+	"spacing": [
+		{
+			"label": "Thumb-Abstand zum Rand",
+			"px": "2 px"
+		},
+		{
+			"label": "Thumb-Weg (Off → On)",
+			"px": "10 px"
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Track — 26×16, voll gerundet; Farbe signalisiert On (Text-100) bzw. Off (Background-20)."
+		},
+		{
+			"nr": 2,
+			"text": "Thumb — weißer 12px-Kreis, wandert im On-Zustand nach rechts."
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe",
+			"items": [
+				{
+					"name": "--z-ds-color-background-20",
+					"wert": "#dfdfe1 · Track Off",
+					"swatch": "#dfdfe1"
+				},
+				{
+					"name": "--z-ds-color-text-100",
+					"wert": "#252525 · Track On",
+					"swatch": "#252525"
+				},
+				{
+					"name": "--z-ds-color-general-white-100",
+					"wert": "#ffffff · Thumb",
+					"swatch": "#ffffff"
+				},
+				{
+					"name": "--z-ds-color-focus-100",
+					"wert": "#005fcc · Fokus-Ring",
+					"swatch": "#005fcc"
+				}
+			]
+		}
+	],
+	"varianten": [
+		{
+			"prop": "Zustand",
+			"werte": [
+				{
+					"label": "Off",
+					"default": true
+				},
+				{
+					"label": "On",
+					"cssClass": "z-switch--on"
+				}
+			]
+		}
+	],
+	"zustaende": [
+		{
+			"label": "off",
+			"vorhanden": true
+		},
+		{
+			"label": "on",
+			"vorhanden": true
+		},
+		{
+			"label": "focus",
+			"vorhanden": true
+		},
+		{
+			"label": "disabled"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "Als <button role=switch> mit aria-checked umsetzen.",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Leertaste/Enter schaltet um.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": "Sichtbarer Fokus-Ring in Focus-100.",
+			"status": "pass"
+		},
+		{
+			"label": "Zustand",
+			"wert": "On/Off nicht allein über Farbe — aria-checked + ggf. Text.",
+			"status": "warn"
+		},
+		{
+			"label": "Plattform",
+			"wert": "iOS nutzt das native Switch-Control (nicht diese Web-Variante).",
+			"status": "todo"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Für Einstellungen, die sofort greifen (kein Speichern nötig).",
+			"Mit klarem Label, das den Ein-Zustand beschreibt."
+		],
+		"dont": [
+			"Nicht in Formularen, die erst per Absenden gespeichert werden — dafür Checkbox.",
+			"Nicht ohne Label allein stehen lassen."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Sofort wirksame Ein/Aus-Einstellungen (Dark Mode, Benachrichtigungen).",
+			"Binäre Zustände mit unmittelbarer Wirkung."
+		],
+		"nichtNutzen": [
+			"Mehrfachauswahl oder Zustimmung im Formular — dafür Checkbox.",
+			"Mehr als zwei Zustände — dafür Segmented Control/Radio."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "Modus",
+			"gut": "Dunkles Design",
+			"hinweis": "Das Label beschreibt, was eingeschaltet wird — nicht nur die Kategorie."
+		}
+	],
+	"render": {
+		"controls": [
+			{
+				"key": "on",
+				"label": "An",
+				"type": "toggle",
+				"cssClass": "z-switch--on"
+			}
+		],
+		"template": "<button class=\"z-switch{classes}\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>",
+		"cssFile": "./pattern.css",
+		"presets": [
+			{
+				"label": "Aus",
+				"state": {
+					"on": false
+				}
+			},
+			{
+				"label": "An",
+				"state": {
+					"on": true
+				}
+			}
+		],
+		"preview": "<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>",
+		"variant": "<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>",
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "bottom",
+				"x": 50
+			},
+			{
+				"nr": 2,
+				"side": "top",
+				"x": 70
+			}
+		],
+		"matrix": [
+			{
+				"label": "Off",
+				"html": "<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>"
+			},
+			{
+				"label": "On",
+				"html": "<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>"
+			}
+		],
+		"props": [
+			{
+				"name": "checked",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "On/Off-Zustand (aria-checked)."
+			},
+			{
+				"name": "disabled",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Sperrt den Schalter."
+			},
+			{
+				"name": "label",
+				"typ": "string",
+				"default": "—",
+				"beschreibung": "Beschreibt, was ein-/ausgeschaltet wird."
+			}
+		],
+		"repoNote": "Erst-Import aus Figma (❖ ZDS, node 2845:5966), Web-Variante. Im Produkt als <button role=switch aria-checked> umsetzen; iOS nutzt das native Control. Modifier z-switch--on bildet den On-Zustand ab.",
+		"version": "Figma-Node 2845:5966",
+		"variantInfo": {
+			"Off": "Ausgeschaltet — Track in Background-20, Thumb links.",
+			"On": "Eingeschaltet — Track in Text-100, Thumb rechts."
+		}
+	}
+}

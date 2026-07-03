@@ -248,6 +248,24 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Checkbox',
+		href: '/product/components/checkbox',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Toggle',
+		href: '/product/components/toggle',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Stepper',
+		href: '/product/components/stepper',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Date Picker',
 		href: '/product/components/date-picker',
 		badge: 'Geplant',

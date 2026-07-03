@@ -1,0 +1,214 @@
+---
+title: Checkbox
+status: ready_for_dev
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=973-945&m=dev
+aktualisiert_am: 2026-07-03
+kategorie: Formulare
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"right","y":50}];
+	const playgroundControls = [{"key":"checked","label":"Checked","type":"toggle","cssClass":"z-checkbox--checked"},{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-checkbox--hover"},{"value":"focus","label":"Focus","cssClass":"z-checkbox--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-checkbox--disabled"}]}];
+	const playgroundTemplate = `<span class="z-checkbox{classes}"><span class="z-checkbox__check"></span></span>`;
+	const playgroundPresets = [{"label":"Aus","state":{"checked":false,"state":"default"}},{"label":"An","state":{"checked":true,"state":"default"}},{"label":"Fokus","state":{"checked":false,"state":"focus"}},{"label":"Deaktiviert","state":{"checked":true,"state":"disabled"}}];
+	const htmlCode = `<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>
+<span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span>`;
+	const patternCssCode = `/* z-checkbox — Auswahlkästchen (Checkbox), originalgetreu aus Figma ❖ ZDS
+   (node 973:945). Zwei Achsen: checked + Interaktionszustand. Echte --z-ds-Tokens. */
+.z-checkbox {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--z-ds-color-border-100);
+  border-radius: var(--z-ds-border-radius-2);
+  background-color: var(--z-ds-color-background-0);
+}
+.z-checkbox--hover {
+  background-color: var(--z-ds-color-background-10);
+}
+.z-checkbox--focus {
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+.z-checkbox--disabled {
+  border-color: var(--z-ds-color-border-70);
+}
+.z-checkbox--checked {
+  background-color: var(--z-ds-color-text-100);
+  border-color: var(--z-ds-color-text-100);
+}
+.z-checkbox--checked.z-checkbox--hover {
+  background-color: var(--z-ds-color-text-70);
+  border-color: var(--z-ds-color-text-70);
+}
+.z-checkbox--checked.z-checkbox--focus {
+  background-color: var(--z-ds-color-text-100);
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+.z-checkbox--checked.z-checkbox--disabled {
+  background-color: var(--z-ds-color-text-40);
+  border-color: var(--z-ds-color-text-40);
+}
+
+/* Haken — nur im checked-Zustand (CSS-Häkchen in Weiß). */
+.z-checkbox__check {
+  display: none;
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--z-ds-color-general-white-100);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.z-checkbox--checked .z-checkbox__check {
+  display: block;
+}
+`;
+	const propsData = [{"name":"checked","typ":"boolean","default":"false","beschreibung":"Ausgewählt-Zustand."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt die Auswahl."},{"name":"label","typ":"string","default":"—","beschreibung":"Sichtbares, klickbares Label."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab },
+		{ label: 'Barrierefreiheit', component: a11yTab },
+		{ label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+
+	<h2>Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>{/snippet}
+		{#snippet variant()}<span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span>{/snippet}
+	</Anatomy>
+
+	<h2>Verwendung</h2>
+	<UsageBlock verwendung={spec.verwendung} />
+
+	<h2>Texte &amp; Wording</h2>
+	<WordingList items={spec.wording} />
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
+	<VariantMatrix>
+		<div class="cell"><span class="cell-label">Unchecked · Default</span><span class="z-checkbox"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Unchecked · Hover</span><span class="z-checkbox z-checkbox--hover"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Unchecked · Focus</span><span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Unchecked · Disabled</span><span class="z-checkbox z-checkbox--disabled"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Checked · Default</span><span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Checked · Hover</span><span class="z-checkbox z-checkbox--checked z-checkbox--hover"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Checked · Focus</span><span class="z-checkbox z-checkbox--checked z-checkbox--focus"><span class="z-checkbox__check"></span></span></div>
+		<div class="cell"><span class="cell-label">Checked · Disabled</span><span class="z-checkbox z-checkbox--checked z-checkbox--disabled"><span class="z-checkbox__check"></span></span></div>
+	</VariantMatrix>
+
+	<h2>Zustände</h2>
+	<StateList states={spec.zustaende} />
+
+	<h2>Do & Don't</h2>
+	<DoDontList doDont={spec.doDont} />
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+{#snippet a11yTab()}
+	<A11yList items={spec.a11y} />
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-checkbox),
+:global(.pg-preview .z-checkbox) {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--z-ds-color-border-100);
+  border-radius: var(--z-ds-border-radius-2);
+  background-color: var(--z-ds-color-background-0);
+}
+:global(.spec-canvas .z-checkbox--hover),
+:global(.pg-preview .z-checkbox--hover) {
+  background-color: var(--z-ds-color-background-10);
+}
+:global(.spec-canvas .z-checkbox--focus),
+:global(.pg-preview .z-checkbox--focus) {
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+:global(.spec-canvas .z-checkbox--disabled),
+:global(.pg-preview .z-checkbox--disabled) {
+  border-color: var(--z-ds-color-border-70);
+}
+:global(.spec-canvas .z-checkbox--checked),
+:global(.pg-preview .z-checkbox--checked) {
+  background-color: var(--z-ds-color-text-100);
+  border-color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-checkbox--checked.z-checkbox--hover),
+:global(.pg-preview .z-checkbox--checked.z-checkbox--hover) {
+  background-color: var(--z-ds-color-text-70);
+  border-color: var(--z-ds-color-text-70);
+}
+:global(.spec-canvas .z-checkbox--checked.z-checkbox--focus),
+:global(.pg-preview .z-checkbox--checked.z-checkbox--focus) {
+  background-color: var(--z-ds-color-text-100);
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+:global(.spec-canvas .z-checkbox--checked.z-checkbox--disabled),
+:global(.pg-preview .z-checkbox--checked.z-checkbox--disabled) {
+  background-color: var(--z-ds-color-text-40);
+  border-color: var(--z-ds-color-text-40);
+}
+:global(.spec-canvas .z-checkbox__check),
+:global(.pg-preview .z-checkbox__check) {
+  display: none;
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--z-ds-color-general-white-100);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+:global(.spec-canvas .z-checkbox--checked .z-checkbox__check),
+:global(.pg-preview .z-checkbox--checked .z-checkbox__check) {
+  display: block;
+}
+</style>

@@ -1,0 +1,53 @@
+/* z-checkbox — Auswahlkästchen (Checkbox), originalgetreu aus Figma ❖ ZDS
+   (node 973:945). Zwei Achsen: checked + Interaktionszustand. Echte --z-ds-Tokens. */
+.z-checkbox {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--z-ds-color-border-100);
+  border-radius: var(--z-ds-border-radius-2);
+  background-color: var(--z-ds-color-background-0);
+}
+.z-checkbox--hover {
+  background-color: var(--z-ds-color-background-10);
+}
+.z-checkbox--focus {
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+.z-checkbox--disabled {
+  border-color: var(--z-ds-color-border-70);
+}
+.z-checkbox--checked {
+  background-color: var(--z-ds-color-text-100);
+  border-color: var(--z-ds-color-text-100);
+}
+.z-checkbox--checked.z-checkbox--hover {
+  background-color: var(--z-ds-color-text-70);
+  border-color: var(--z-ds-color-text-70);
+}
+.z-checkbox--checked.z-checkbox--focus {
+  background-color: var(--z-ds-color-text-100);
+  border: 2px solid var(--z-ds-color-focus-100);
+}
+.z-checkbox--checked.z-checkbox--disabled {
+  background-color: var(--z-ds-color-text-40);
+  border-color: var(--z-ds-color-text-40);
+}
+
+/* Haken — nur im checked-Zustand (CSS-Häkchen in Weiß). */
+.z-checkbox__check {
+  display: none;
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--z-ds-color-general-white-100);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.z-checkbox--checked .z-checkbox__check {
+  display: block;
+}

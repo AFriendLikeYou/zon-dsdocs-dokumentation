@@ -1,0 +1,172 @@
+---
+title: Toggle
+status: ready_for_dev
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=2845-5966&m=dev
+aktualisiert_am: 2026-07-03
+kategorie: Formulare
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"bottom","x":50},{"nr":2,"side":"top","x":70}];
+	const playgroundControls = [{"key":"on","label":"An","type":"toggle","cssClass":"z-switch--on"}];
+	const playgroundTemplate = `<button class="z-switch{classes}" type="button" role="switch" aria-checked="false" aria-label="Beispiel-Schalter"><span class="z-switch__thumb"></span></button>`;
+	const playgroundPresets = [{"label":"Aus","state":{"on":false}},{"label":"An","state":{"on":true}}];
+	const htmlCode = `<button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>
+<button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>`;
+	const patternCssCode = `/* z-switch — Umschalter (Toggle, Web-Variante), aus Figma ❖ ZDS (node 2845:5966).
+   iOS nutzt das native Plattform-Control; hier die Web-Variante. Echte --z-ds-Tokens.
+   (Reduced-Motion wird global in global.css abgefangen.) */
+.z-switch {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 26px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background-color: var(--z-ds-color-background-20);
+  cursor: pointer;
+  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.z-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background-color: var(--z-ds-color-general-white-100);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.z-switch--on {
+  background-color: var(--z-ds-color-text-100);
+}
+.z-switch--on .z-switch__thumb {
+  transform: translateX(10px);
+}
+.z-switch:focus-visible {
+  outline: 2px solid var(--z-ds-color-focus-100);
+  outline-offset: 2px;
+}
+`;
+	const propsData = [{"name":"checked","typ":"boolean","default":"false","beschreibung":"On/Off-Zustand (aria-checked)."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Schalter."},{"name":"label","typ":"string","default":"—","beschreibung":"Beschreibt, was ein-/ausgeschaltet wird."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab },
+		{ label: 'Barrierefreiheit', component: a11yTab },
+		{ label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+
+	<h2>Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>{/snippet}
+		{#snippet variant()}<button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>{/snippet}
+	</Anatomy>
+
+	<h2>Verwendung</h2>
+	<UsageBlock verwendung={spec.verwendung} />
+
+	<h2>Texte &amp; Wording</h2>
+	<WordingList items={spec.wording} />
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
+	<VariantMatrix>
+		<div class="cell"><span class="cell-label">Off</span><button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button></div>
+		<div class="cell"><span class="cell-label">On</span><button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button></div>
+	</VariantMatrix>
+
+	<h2>Zustände</h2>
+	<StateList states={spec.zustaende} />
+
+	<h2>Do & Don't</h2>
+	<DoDontList doDont={spec.doDont} />
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+{#snippet a11yTab()}
+	<A11yList items={spec.a11y} />
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-switch),
+:global(.pg-preview .z-switch) {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 26px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background-color: var(--z-ds-color-background-20);
+  cursor: pointer;
+  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+:global(.spec-canvas .z-switch__thumb),
+:global(.pg-preview .z-switch__thumb) {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background-color: var(--z-ds-color-general-white-100);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+:global(.spec-canvas .z-switch--on),
+:global(.pg-preview .z-switch--on) {
+  background-color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-switch--on .z-switch__thumb),
+:global(.pg-preview .z-switch--on .z-switch__thumb) {
+  transform: translateX(10px);
+}
+:global(.spec-canvas .z-switch:focus-visible),
+:global(.pg-preview .z-switch:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+  outline-offset: 2px;
+}
+</style>

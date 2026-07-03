@@ -22,7 +22,10 @@ const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
 	'button-group': { order: 4 },
 	'icon-button': { order: 5 },
 	cell: { order: 6 },
-	input: { order: 7 }
+	input: { order: 7 },
+	checkbox: { order: 8 },
+	toggle: { order: 9 },
+	stepper: { order: 10 }
 };
 
 export type CatalogEntry = {
