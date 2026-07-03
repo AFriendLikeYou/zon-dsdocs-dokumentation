@@ -236,6 +236,12 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Cell',
+		href: '/product/components/cell',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Input',
 		href: '/product/components/input',
 		badge: 'Geplant',

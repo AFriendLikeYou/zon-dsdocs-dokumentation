@@ -1,0 +1,97 @@
+// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.
+// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).
+// Die Felder überschreiben die generierten Werte aus spec.generated.ts.
+//
+//   zweck       – Beschreibung im Hero
+//   status      – ready_for_dev | completed | changed
+//   version     – Snapshot-/Versions-Label im Hero
+//   variantInfo – Wann welche Variante nutzen (Label → Text)
+//   callouts    – Anatomie-Beschriftungen ({ nr, text })
+//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
+//   doDont      – { do: [...], dont: [...] }
+export const content = {
+	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Fläche — Bild bzw. Podcast-Cover, 84×84 (Small 72), Radius 4; beim Author ein runder Avatar."
+		},
+		{
+			"nr": 2,
+			"text": "Spitzmarke (Kicker) — redaktionelle Kategorie in Akzentrot (#b91109), Tablet Gothic 14."
+		},
+		{
+			"nr": 3,
+			"text": "Titel — Tablet Gothic Bold 20/1.2 (Small 18; Pinned/Anzeige 16)."
+		},
+		{
+			"nr": 4,
+			"text": "Byline / Meta — Zeitstempel und Autor in Text-55 (#69696c), 14/1.5."
+		}
+	],
+	"a11y": [
+		{
+			"label": "Struktur",
+			"wert": "Pro Teaser ein <article>; die gesamte Zelle als ein Link (a) umsetzen, nicht mehrere.",
+			"status": "warn"
+		},
+		{
+			"label": "Überschrift",
+			"wert": "Titel je Kontext als <h2>/<h3> — nicht optisch fälschen.",
+			"status": "warn"
+		},
+		{
+			"label": "Spitzmarke",
+			"wert": "Kicker ist redaktionelle Kategorie, keine Überschrift — als <p>/<span> auszeichnen.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Titel",
+			"wert": "#252525 auf #ffffff ≈ 15:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Meta",
+			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
+			"status": "pass"
+		},
+		{
+			"label": "Fläche",
+			"wert": "Cover/Avatar brauchen alt-Text; rein dekorative Flächen aria-hidden.",
+			"status": "warn"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Bei Pinned Spitzmarke und Headline kurz halten — der Platz ist begrenzt.",
+			"Bei Article möglichst einen Zeitstempel zeigen (Aktualität)."
+		],
+		"dont": [
+			"Nicht mehrere Links pro Zelle — die gesamte Zelle ist ein Ziel.",
+			"Spitzmarke nicht als Überschrift auszeichnen."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"In Navigations-Menüs für regelmäßig aktualisierte Inhalte (Pinned): Dashboards, Karten, empfohlene Center-Pages.",
+			"Für aktuelle Schlagzeilen, die gerade eintreffen (Article) — mit Zeitstempel."
+		],
+		"nichtNutzen": [
+			"Nicht für einzelne Aktionen — dafür Button / Text Button.",
+			"Pinned nicht mit langen Titeln überfrachten (begrenzter Platz)."
+		]
+	},
+	"version": "Figma-Node 33137:39890",
+	"variantInfo": {
+		"Pinned": "In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt.",
+		"Article": "Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt.",
+		"Headline": "Reduziert auf den Titel, oben mit Trennlinie.",
+		"Artikel": "Standard-Teaser mit Bild, Spitzmarke, Titel und Byline.",
+		"Author": "Autor/Autorin mit rundem Avatar, Name und Funktion.",
+		"Podcast Series": "Podcast-Serie mit farbigem Cover, Titel und Abo-Hinweis.",
+		"Anzeige": "Werblicher Teaser auf getönter Fläche mit Versal-Label.",
+		"Wide": "Standardbreite (343).",
+		"Small": "Kompakt — kleinerer Titel und kleinere Fläche."
+	}
+};

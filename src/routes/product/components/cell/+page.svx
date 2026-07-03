@@ -1,0 +1,556 @@
+---
+title: Cell
+status: ready_for_dev
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=33137-39890&m=dev
+aktualisiert_am: 2026-07-03
+kategorie: Inhalte
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Playground } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import { content } from './content';
+	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":55},{"nr":3,"side":"right","y":45},{"nr":4,"side":"bottom","x":55}];
+	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}];
+	const playgroundTemplate = `<article class="z-cell{classes}">
+  <div class="z-cell__media" aria-hidden="true"></div>
+  <div class="z-cell__body">
+    <p class="z-cell__kicker">Politik</p>
+    <h3 class="z-cell__title">Artikel Überschrift</h3>
+    <p class="z-cell__byline">Von Vorname Nachname</p>
+    <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
+  </div>
+</article>`;
+	const htmlCode = `<!-- Cell-Styles global einbinden (z. B. cell.css) -->
+<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
+<article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
+	const svelteCode = `<script>
+  // 'article' | 'headline' | 'artikel' | 'author' | 'podcast-series' | 'anzeige' | 'pinned'
+  export let type = 'article';
+  export let size = 'wide';
+<\/script>
+
+<article class="z-cell z-cell--{type}" class:z-cell--small={size === 'small'}>
+  <div class="z-cell__media" aria-hidden="true"></div>
+  <div class="z-cell__body">
+    <p class="z-cell__kicker">Politik</p>
+    <h3 class="z-cell__title">Artikel Überschrift</h3>
+    <p class="z-cell__byline">Von Vorname Nachname</p>
+    <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
+  </div>
+</article>`;
+	const patternCssCode = `/* z-cell — Teaser-Zelle (Cell), originalgetreu aus Figma ❖ ZDS portiert
+   (node 33137:39890). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+
+   Ein Markup, viele Typen: die gemeinsame Struktur (Media · Kicker · Titel ·
+   Byline · Meta) wird pro Typ-Modifier ein-/ausgeblendet und umgelegt — so wie
+   eine echte CSS-Komponente es täte. Media/Avatar sind hier neutrale Flächen
+   (im Produkt: Bild bzw. Podcast-Cover). */
+.z-cell {
+  background-color: var(--z-ds-color-background-0);
+  color: var(--z-ds-color-text-100);
+  display: flex;
+  flex-direction: column;
+  gap: var(--z-ds-space-m);
+  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+  width: 343px;
+  max-width: 100%;
+}
+
+/* Flächen (Bild / Cover / Avatar) — je Typ eingeblendet. */
+.z-cell__media {
+  display: none;
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--z-ds-border-radius-4);
+  background-color: var(--z-ds-color-background-10);
+}
+
+.z-cell__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--z-ds-space-xs);
+  min-width: 0;
+}
+
+.z-cell__kicker {
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.2;
+  color: var(--z-ds-color-accent-100);
+}
+
+.z-cell__title {
+  margin: 0;
+  font-size: var(--z-ds-fontsize-20);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--z-ds-color-text-100);
+}
+
+.z-cell__byline {
+  display: none;
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.5;
+  color: var(--z-ds-color-text-55);
+}
+
+.z-cell__meta {
+  display: none;
+  gap: var(--z-ds-space-s);
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.5;
+  color: var(--z-ds-color-text-55);
+}
+
+/* Typ: Article — Spitzmarke + Titel + Meta (Zeitstempel · Autor). */
+.z-cell--article {
+  gap: var(--z-ds-space-s);
+}
+.z-cell--article .z-cell__meta {
+  display: flex;
+}
+
+/* Typ: Headline — nur Titel, oben mit feiner Trennlinie. */
+.z-cell--headline {
+  border-top: 1px solid var(--z-ds-color-border-70);
+  padding-top: var(--z-ds-space-m);
+}
+.z-cell--headline .z-cell__kicker,
+.z-cell--headline .z-cell__byline,
+.z-cell--headline .z-cell__meta {
+  display: none;
+}
+
+/* Typ: Artikel — Bild links, Spitzmarke + Titel + Byline rechts. */
+.z-cell--artikel {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: flex-start;
+}
+.z-cell--artikel .z-cell__media {
+  display: block;
+}
+.z-cell--artikel .z-cell__body {
+  flex: 1 1 0;
+}
+.z-cell--artikel .z-cell__byline {
+  display: block;
+}
+
+/* Typ: Author — runder Avatar, Name + Funktion, oben mit Trennlinie. */
+.z-cell--author {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+  border-top: 1px solid var(--z-ds-color-border-70);
+  padding-top: var(--z-ds-space-m);
+}
+.z-cell--author .z-cell__media {
+  display: block;
+  border-radius: 999px;
+}
+.z-cell--author .z-cell__body {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+.z-cell--author .z-cell__kicker,
+.z-cell--author .z-cell__meta {
+  display: none;
+}
+.z-cell--author .z-cell__byline {
+  display: block;
+}
+
+/* Typ: Podcast Series — farbiges Cover, Titel + Subline. */
+.z-cell--podcast-series {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+}
+.z-cell--podcast-series .z-cell__media {
+  display: block;
+  background-color: #8e8cf7;
+}
+.z-cell--podcast-series .z-cell__body {
+  flex: 1 1 0;
+}
+.z-cell--podcast-series .z-cell__kicker,
+.z-cell--podcast-series .z-cell__meta {
+  display: none;
+}
+.z-cell--podcast-series .z-cell__byline {
+  display: block;
+}
+
+/* Typ: Anzeige — getönte Fläche, Label in Versalien statt Spitzmarke. */
+.z-cell--anzeige {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+  background-color: var(--z-ds-color-background-10);
+  padding: var(--z-ds-space-m);
+}
+.z-cell--anzeige .z-cell__media {
+  display: block;
+  width: 108px;
+  height: 72px;
+}
+.z-cell--anzeige .z-cell__body {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+.z-cell--anzeige .z-cell__kicker {
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1;
+  letter-spacing: 0.24px;
+  text-transform: uppercase;
+  color: var(--z-ds-color-text-55);
+}
+.z-cell--anzeige .z-cell__title {
+  font-size: var(--z-ds-fontsize-16);
+}
+.z-cell--anzeige .z-cell__byline,
+.z-cell--anzeige .z-cell__meta {
+  display: none;
+}
+
+/* Typ: Pinned — kleines Bild links, kompakter Titel. */
+.z-cell--pinned {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+}
+.z-cell--pinned .z-cell__media {
+  display: block;
+  width: 108px;
+  height: 72px;
+}
+.z-cell--pinned .z-cell__body {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+.z-cell--pinned .z-cell__title {
+  font-size: var(--z-ds-fontsize-16);
+}
+.z-cell--pinned .z-cell__byline,
+.z-cell--pinned .z-cell__meta {
+  display: none;
+}
+
+/* Größe: Small — kleinere Titel und Flächen. */
+.z-cell--small .z-cell__title {
+  font-size: var(--z-ds-fontsize-18);
+}
+.z-cell--small .z-cell__media {
+  width: 72px;
+  height: 72px;
+}
+`;
+	const propsData = [{"name":"type","typ":"\"Pinned\" | \"Article\" | \"Headline\" | \"Artikel\" | \"Author\" | \"Podcast Series\" | \"Anzeige\"","default":"\"Article\"","beschreibung":"Teaser-Typ — steuert Struktur (Fläche/Meta) und Layout."},{"name":"size","typ":"\"Wide\" | \"Small\"","default":"\"Wide\"","beschreibung":"Kompakte Variante mit kleinerem Titel und kleinerer Fläche."},{"name":"kicker","typ":"string","default":"—","beschreibung":"Spitzmarke / redaktionelle Kategorie (nicht bei Headline/Author)."},{"name":"title","typ":"string","default":"—","beschreibung":"Teaser-Titel; beim Author der Name."},{"name":"byline","typ":"string","default":"—","beschreibung":"Autor/Subline; beim Author die Funktion."},{"name":"showKicker","typ":"boolean","default":"true","beschreibung":"Spitzmarke ein-/ausblenden."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs items={[
+		{ label: 'Design', component: designTab },
+		{ label: 'Develop', component: developTab },
+		{ label: 'Barrierefreiheit', component: a11yTab },
+		{ label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<Playground controls={playgroundControls} template={playgroundTemplate} />
+
+	<h2>Anatomie</h2>
+	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>{/snippet}
+		{#snippet variant()}<article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>{/snippet}
+	</Anatomy>
+
+	<h2>Verwendung</h2>
+	<UsageBlock verwendung={spec.verwendung} />
+
+	<h2>Varianten</h2>
+	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
+	<VariantMatrix>
+		<div class="cell"><span class="cell-label">Pinned · Wide</span><article class="z-cell z-cell--pinned"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3></div></article></div>
+		<div class="cell"><span class="cell-label">Article · Wide</span><article class="z-cell z-cell--article"><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div></div></article></div>
+		<div class="cell"><span class="cell-label">Headline · Wide</span><article class="z-cell z-cell--headline"><div class="z-cell__body"><h3 class="z-cell__title">Artikel Überschrift</h3></div></article></div>
+		<div class="cell"><span class="cell-label">Artikel · Wide</span><article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article></div>
+		<div class="cell"><span class="cell-label">Author · Wide</span><article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article></div>
+		<div class="cell"><span class="cell-label">Podcast Series · Wide</span><article class="z-cell z-cell--podcast-series"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Podcast Titel</h3><p class="z-cell__byline">Abonnieren</p></div></article></div>
+		<div class="cell"><span class="cell-label">Anzeige · Wide</span><article class="z-cell z-cell--anzeige"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Verlagsangebot</p><h3 class="z-cell__title">Überschrift</h3></div></article></div>
+	</VariantMatrix>
+
+	<h2>Zustände</h2>
+	<StateList states={spec.zustaende} />
+
+	<h2>Do & Don't</h2>
+	<DoDontList doDont={spec.doDont} />
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
+	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+{#snippet a11yTab()}
+	<A11yList items={spec.a11y} />
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas .z-cell),
+:global(.pg-preview .z-cell) {
+  background-color: var(--z-ds-color-background-0);
+  color: var(--z-ds-color-text-100);
+  display: flex;
+  flex-direction: column;
+  gap: var(--z-ds-space-m);
+  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+  width: 343px;
+  max-width: 100%;
+}
+:global(.spec-canvas .z-cell__media),
+:global(.pg-preview .z-cell__media) {
+  display: none;
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--z-ds-border-radius-4);
+  background-color: var(--z-ds-color-background-10);
+}
+:global(.spec-canvas .z-cell__body),
+:global(.pg-preview .z-cell__body) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--z-ds-space-xs);
+  min-width: 0;
+}
+:global(.spec-canvas .z-cell__kicker),
+:global(.pg-preview .z-cell__kicker) {
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.2;
+  color: var(--z-ds-color-accent-100);
+}
+:global(.spec-canvas .z-cell__title),
+:global(.pg-preview .z-cell__title) {
+  margin: 0;
+  font-size: var(--z-ds-fontsize-20);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--z-ds-color-text-100);
+}
+:global(.spec-canvas .z-cell__byline),
+:global(.pg-preview .z-cell__byline) {
+  display: none;
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.5;
+  color: var(--z-ds-color-text-55);
+}
+:global(.spec-canvas .z-cell__meta),
+:global(.pg-preview .z-cell__meta) {
+  display: none;
+  gap: var(--z-ds-space-s);
+  margin: 0;
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1.5;
+  color: var(--z-ds-color-text-55);
+}
+:global(.spec-canvas .z-cell--article),
+:global(.pg-preview .z-cell--article) {
+  gap: var(--z-ds-space-s);
+}
+:global(.spec-canvas .z-cell--article .z-cell__meta),
+:global(.pg-preview .z-cell--article .z-cell__meta) {
+  display: flex;
+}
+:global(.spec-canvas .z-cell--headline),
+:global(.pg-preview .z-cell--headline) {
+  border-top: 1px solid var(--z-ds-color-border-70);
+  padding-top: var(--z-ds-space-m);
+}
+:global(.spec-canvas .z-cell--headline .z-cell__kicker),
+:global(.pg-preview .z-cell--headline .z-cell__kicker),
+:global(.spec-canvas .z-cell--headline .z-cell__byline),
+:global(.pg-preview .z-cell--headline .z-cell__byline),
+:global(.spec-canvas .z-cell--headline .z-cell__meta),
+:global(.pg-preview .z-cell--headline .z-cell__meta) {
+  display: none;
+}
+:global(.spec-canvas .z-cell--artikel),
+:global(.pg-preview .z-cell--artikel) {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: flex-start;
+}
+:global(.spec-canvas .z-cell--artikel .z-cell__media),
+:global(.pg-preview .z-cell--artikel .z-cell__media) {
+  display: block;
+}
+:global(.spec-canvas .z-cell--artikel .z-cell__body),
+:global(.pg-preview .z-cell--artikel .z-cell__body) {
+  flex: 1 1 0;
+}
+:global(.spec-canvas .z-cell--artikel .z-cell__byline),
+:global(.pg-preview .z-cell--artikel .z-cell__byline) {
+  display: block;
+}
+:global(.spec-canvas .z-cell--author),
+:global(.pg-preview .z-cell--author) {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+  border-top: 1px solid var(--z-ds-color-border-70);
+  padding-top: var(--z-ds-space-m);
+}
+:global(.spec-canvas .z-cell--author .z-cell__media),
+:global(.pg-preview .z-cell--author .z-cell__media) {
+  display: block;
+  border-radius: 999px;
+}
+:global(.spec-canvas .z-cell--author .z-cell__body),
+:global(.pg-preview .z-cell--author .z-cell__body) {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+:global(.spec-canvas .z-cell--author .z-cell__kicker),
+:global(.pg-preview .z-cell--author .z-cell__kicker),
+:global(.spec-canvas .z-cell--author .z-cell__meta),
+:global(.pg-preview .z-cell--author .z-cell__meta) {
+  display: none;
+}
+:global(.spec-canvas .z-cell--author .z-cell__byline),
+:global(.pg-preview .z-cell--author .z-cell__byline) {
+  display: block;
+}
+:global(.spec-canvas .z-cell--podcast-series),
+:global(.pg-preview .z-cell--podcast-series) {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+}
+:global(.spec-canvas .z-cell--podcast-series .z-cell__media),
+:global(.pg-preview .z-cell--podcast-series .z-cell__media) {
+  display: block;
+  background-color: #8e8cf7;
+}
+:global(.spec-canvas .z-cell--podcast-series .z-cell__body),
+:global(.pg-preview .z-cell--podcast-series .z-cell__body) {
+  flex: 1 1 0;
+}
+:global(.spec-canvas .z-cell--podcast-series .z-cell__kicker),
+:global(.pg-preview .z-cell--podcast-series .z-cell__kicker),
+:global(.spec-canvas .z-cell--podcast-series .z-cell__meta),
+:global(.pg-preview .z-cell--podcast-series .z-cell__meta) {
+  display: none;
+}
+:global(.spec-canvas .z-cell--podcast-series .z-cell__byline),
+:global(.pg-preview .z-cell--podcast-series .z-cell__byline) {
+  display: block;
+}
+:global(.spec-canvas .z-cell--anzeige),
+:global(.pg-preview .z-cell--anzeige) {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+  background-color: var(--z-ds-color-background-10);
+  padding: var(--z-ds-space-m);
+}
+:global(.spec-canvas .z-cell--anzeige .z-cell__media),
+:global(.pg-preview .z-cell--anzeige .z-cell__media) {
+  display: block;
+  width: 108px;
+  height: 72px;
+}
+:global(.spec-canvas .z-cell--anzeige .z-cell__body),
+:global(.pg-preview .z-cell--anzeige .z-cell__body) {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+:global(.spec-canvas .z-cell--anzeige .z-cell__kicker),
+:global(.pg-preview .z-cell--anzeige .z-cell__kicker) {
+  font-size: var(--z-ds-fontsize-14);
+  line-height: 1;
+  letter-spacing: 0.24px;
+  text-transform: uppercase;
+  color: var(--z-ds-color-text-55);
+}
+:global(.spec-canvas .z-cell--anzeige .z-cell__title),
+:global(.pg-preview .z-cell--anzeige .z-cell__title) {
+  font-size: var(--z-ds-fontsize-16);
+}
+:global(.spec-canvas .z-cell--anzeige .z-cell__byline),
+:global(.pg-preview .z-cell--anzeige .z-cell__byline),
+:global(.spec-canvas .z-cell--anzeige .z-cell__meta),
+:global(.pg-preview .z-cell--anzeige .z-cell__meta) {
+  display: none;
+}
+:global(.spec-canvas .z-cell--pinned),
+:global(.pg-preview .z-cell--pinned) {
+  flex-direction: row;
+  gap: var(--z-ds-space-m);
+  align-items: center;
+}
+:global(.spec-canvas .z-cell--pinned .z-cell__media),
+:global(.pg-preview .z-cell--pinned .z-cell__media) {
+  display: block;
+  width: 108px;
+  height: 72px;
+}
+:global(.spec-canvas .z-cell--pinned .z-cell__body),
+:global(.pg-preview .z-cell--pinned .z-cell__body) {
+  flex: 1 1 0;
+  gap: var(--z-ds-space-xxxs);
+}
+:global(.spec-canvas .z-cell--pinned .z-cell__title),
+:global(.pg-preview .z-cell--pinned .z-cell__title) {
+  font-size: var(--z-ds-fontsize-16);
+}
+:global(.spec-canvas .z-cell--pinned .z-cell__byline),
+:global(.pg-preview .z-cell--pinned .z-cell__byline),
+:global(.spec-canvas .z-cell--pinned .z-cell__meta),
+:global(.pg-preview .z-cell--pinned .z-cell__meta) {
+  display: none;
+}
+:global(.spec-canvas .z-cell--small .z-cell__title),
+:global(.pg-preview .z-cell--small .z-cell__title) {
+  font-size: var(--z-ds-fontsize-18);
+}
+:global(.spec-canvas .z-cell--small .z-cell__media),
+:global(.pg-preview .z-cell--small .z-cell__media) {
+  width: 72px;
+  height: 72px;
+}
+</style>
