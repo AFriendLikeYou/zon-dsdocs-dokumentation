@@ -65,6 +65,7 @@
 	import type { Snippet } from 'svelte';
 	import { Chip } from '$components/ui/chip';
 	import { CodeBlock } from '$components/ui/specsheet';
+	import { StageToggle } from '$components/ui/stage-toggle';
 
 	type Props = {
 		controls?: PlaygroundControl[];
@@ -100,28 +101,44 @@
 		return s;
 	}
 
-	let state = $state<PlaygroundState>(initialState());
-	const isDark = $derived(!!(darkKey && state[darkKey]));
-	const html = $derived(template ? instantiate(template, controls, state) : '');
-	const codeStr = $derived(template ? html : (code?.(state) ?? ''));
+	let values = $state<PlaygroundState>(initialState());
+	const html = $derived(template ? instantiate(template, controls, values) : '');
+	const codeStr = $derived(template ? html : (code?.(values) ?? ''));
+
+	// Vorschau-Hintergrund: 'auto' folgt dem darkKey-Control (z. B. on-image),
+	// 'light'/'dark' überschreiben es manuell (Schalter auf der Bühne). Die Bühne
+	// pinnt in global.css die z-ds-Farbtoken je Modus → das Specimen rendert sein
+	// echtes Light/Dark. (String-Default statt Union-Generic — svelte2tsx-freundlich.)
+	let themeMode = $state('auto');
+	const autoDark = $derived(!!(darkKey && values[darkKey]));
+	const isDark = $derived(themeMode === 'dark' || (themeMode === 'auto' && autoDark));
 
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
 	const defaults = initialState();
-	const isDirty = $derived(controls.some((c) => state[c.key] !== defaults[c.key]));
+	const isDirty = $derived(
+		themeMode !== 'auto' || controls.some((c) => values[c.key] !== defaults[c.key])
+	);
+	function setTheme(theme: 'light' | 'dark') {
+		themeMode = theme;
+	}
 	function reset() {
-		for (const c of controls) state[c.key] = defaults[c.key];
+		for (const c of controls) values[c.key] = defaults[c.key];
+		themeMode = 'auto';
 	}
 </script>
 
 <div class="pg {className}">
-	<div class="pg-stage" class:is-dark={isDark}>
+	<div class="pg-stage ds-stage" class:is-dark={isDark}>
+		<div class="pg-toolbar">
+			<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
+		</div>
 		<div class="pg-preview">
 			{#if template}
 				<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html html}
 			{:else}
-				{@render preview?.(state)}
+				{@render preview?.(values)}
 			{/if}
 		</div>
 	</div>
@@ -135,16 +152,16 @@
 					<span class="pg-label">{c.label}</span>
 					{#each c.options as o (o.value)}
 						<Chip
-							variant={state[c.key] === o.value ? 'accent' : 'neutral'}
-							emphasis={state[c.key] === o.value}
-							onclick={() => (state[c.key] = o.value)}>{o.label}</Chip
+							variant={values[c.key] === o.value ? 'accent' : 'neutral'}
+							emphasis={values[c.key] === o.value}
+							onclick={() => (values[c.key] = o.value)}>{o.label}</Chip
 						>
 					{/each}
 				{:else}
 					<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
 					<Chip
-						variant={state[c.key] ? 'accent' : 'neutral'}
-						onclick={() => (state[c.key] = !state[c.key])}>{c.label}</Chip
+						variant={values[c.key] ? 'accent' : 'neutral'}
+						onclick={() => (values[c.key] = !values[c.key])}>{c.label}</Chip
 					>
 				{/if}
 			{/each}
@@ -183,16 +200,23 @@
 		background: var(--ds-surface);
 	}
 	.pg-stage {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: var(--z-ds-space-32) var(--z-ds-space-16);
 		min-height: 96px;
+		/* Fläche flippt mit den in global.css je Bühne gepinnten z-ds-Token. */
 		background: var(--ds-surface-raised);
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
-	.pg-stage.is-dark {
-		background: var(--ds-stage-dark);
+
+	/* Light/Dark-Schalter (StageToggle) — dezent oben rechts auf der Bühne. */
+	.pg-toolbar {
+		position: absolute;
+		top: var(--z-ds-space-8);
+		right: var(--z-ds-space-8);
+		z-index: 1;
 	}
 	.pg-preview {
 		display: flex;

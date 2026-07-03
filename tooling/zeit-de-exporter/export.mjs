@@ -242,7 +242,6 @@ function renderPage(model, { patternCss = null } = {}) {
 	const pgDarkKey = typeof render.stage?.darkKey === 'string' ? render.stage.darkKey : null;
 	const hasTemplatePg = Boolean(pgTemplate) && !pgSpecimen;
 	const hasSpecimenPg = Boolean(pgSpecimen);
-	const hasPlayground = hasTemplatePg || hasSpecimenPg;
 
 	// Verfügbarkeit je Abschnitt.
 	const hasAnatomy = Boolean(render.preview || model.callouts?.length || model.masse);

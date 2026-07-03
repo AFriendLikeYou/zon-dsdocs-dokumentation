@@ -6,6 +6,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import type { Masse, Callout, CalloutAnchor } from '$types/spec';
+  import { StageToggle } from '$components/ui/stage-toggle';
 
   let {
     masse = null,
@@ -27,16 +28,39 @@
 
   let active = $state<number | null>(null);
 
+  // Artboard-Hintergrund: startet hell (Blueprint-Konvention), manuell umschaltbar.
+  // Die Bühne (.ds-stage) pinnt die z-ds-Token je Modus → Specimen + Blueprint-Farben
+  // (Maßlinien, Raster) adaptieren automatisch.
+  let themeMode = $state('light');
+  const isDark = $derived(themeMode === 'dark');
+  function setTheme(theme: 'light' | 'dark') {
+    themeMode = theme;
+  }
+
+  // Beschriftung „Term — Beschreibung" in Lead + Rest zerlegen (präzisere Legende).
+  function splitLabel(text: string): { lead: string; rest: string } {
+    const m = text.match(/^(.+?)\s+[—–]\s+(.+)$/);
+    return m ? { lead: m[1], rest: m[2] } : { lead: '', rest: text };
+  }
+
   const cs = $derived(
     callouts.map((c, i) => {
       const nr = c.nr ?? i + 1;
-      return { ...c, nr, anchor: calloutAnchors.find((a) => a.nr === nr) ?? null };
+      return {
+        ...c,
+        nr,
+        anchor: calloutAnchors.find((a) => a.nr === nr) ?? null,
+        ...splitLabel(c.text)
+      };
     })
   );
 </script>
 
-<div class="art spec-canvas">
+<div class="art spec-canvas ds-stage" class:is-dark={isDark}>
   <div class="grid" aria-hidden="true"></div>
+  <div class="art-toolbar">
+    <StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
+  </div>
   <div class="specimen" style="--zoom:{zoom}">
     {#each cs as c, i}
       <!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
@@ -85,7 +109,10 @@
         onmouseenter={() => (active = c.nr)}
         onmouseleave={() => (active = null)}
       >
-        <span class="n">{c.nr}</span> {c.text}
+        <span class="n">{c.nr}</span>
+        <span class="t">
+          {#if c.lead}<strong>{c.lead}</strong> — {/if}{c.rest}
+        </span>
       </li>
     {/each}
   </ol>
@@ -93,19 +120,25 @@
 
 <style>
   .art {
-    /* Bewusst FIXE helle Artboard-Palette (kein Theme-Mapping): die Specimen-Farben
-       kommen 1:1 aus dem dokumentierten DS und brauchen eine neutrale, helle Fläche —
-       wie die Anatomie-Diagramme bei Spectrum/Material. Messfarbe = eigener Kanal,
-       damit Maße nie mit Komponentenfarben verwechselt werden. */
-    --art: #f6f7f8; /* Artboard-Fläche */
-    --measure: #2563c9; /* Maßlinien + Callouts */
-    --gl: rgba(0, 0, 0, 0.05); /* Rasterlinien */
+    /* Fläche = dieselbe Bühne wie der Playground (.ds-stage, Light/Dark umschaltbar).
+       Blueprint-Kanäle leiten sich aus den gepinnten Token ab und adaptieren so mit:
+       Maßlinien/Callouts = --ds-accent (Blueprint-Blau, eigener Kanal, damit Maße nie
+       mit Komponentenfarben verwechselt werden), Raster = feiner text-100-Mix. */
+    --measure: var(--ds-accent);
+    --gl: color-mix(in srgb, var(--z-ds-color-text-100) 6%, transparent);
     position: relative;
-    background: var(--art);
+    background: var(--ds-surface-raised);
     border: 1px solid var(--ds-border-soft);
     border-radius: var(--ds-radius);
     padding: 80px 64px 44px;
     overflow: hidden;
+    transition: background-color var(--ds-dur) var(--ds-ease);
+  }
+  .art-toolbar {
+    position: absolute;
+    top: var(--z-ds-space-8);
+    right: var(--z-ds-space-8);
+    z-index: 6; /* über Raster + Callouts */
   }
   .grid {
     position: absolute;
@@ -165,7 +198,7 @@
     position: absolute;
     font-family: var(--ds-font-mono);
     font-size: 11px;
-    background: var(--art);
+    background: var(--ds-surface-raised);
     padding: 0 4px;
     color: var(--measure);
     white-space: nowrap;
@@ -208,30 +241,38 @@
     display: flex;
     align-items: baseline;
     gap: 9px;
-    padding: 4px 6px;
+    padding: 5px 6px;
     margin: 0 -6px;
     border-radius: var(--ds-radius-sm);
     font-size: var(--ds-text-sm);
-    color: var(--ds-text-body);
+    line-height: 1.45;
+    color: var(--ds-text-muted);
     cursor: default;
     transition: background var(--ds-dur) var(--ds-ease);
   }
   .legend li.on {
     background: var(--ds-surface-raised);
   }
+  /* Nummer im Blueprint-Blau — bindet die Legende sichtbar an die Callouts im Artboard. */
   .legend .n {
     flex: none;
     width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: var(--ds-text);
-    color: var(--ds-surface);
+    background: var(--ds-accent);
+    color: var(--ds-static-white);
     font-family: var(--ds-font-mono);
     font-size: 11px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(2px); /* optisch auf die erste Textzeile ausrichten */
+  }
+  /* Lead-Begriff (vor dem —) kräftig + in Primärfarbe → präzisere Beschriftung. */
+  .legend .t strong {
+    font-weight: 600;
+    color: var(--ds-text);
   }
 
   @media (max-width: 560px) {
