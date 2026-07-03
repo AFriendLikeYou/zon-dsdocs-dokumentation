@@ -13,8 +13,33 @@ export const generated = {
 	"masse": {
 		"breite": "343 (Wide) · Cover 84 (Small 72)",
 		"padding": "Anzeige 16 · sonst 0",
-		"radius": "4"
+		"radius": {
+			"px": "4",
+			"token": "--z-ds-border-radius-4"
+		}
 	},
+	"spacing": [
+		{
+			"label": "Spitzmarke ↔ Titel",
+			"px": "4 px",
+			"token": "--z-ds-space-xxxs"
+		},
+		{
+			"label": "Titel ↔ Byline (Body-Gap)",
+			"px": "8 px",
+			"token": "--z-ds-space-xs"
+		},
+		{
+			"label": "Meta-Gap (Zeitstempel · Autor)",
+			"px": "12 px",
+			"token": "--z-ds-space-s"
+		},
+		{
+			"label": "Fläche ↔ Body",
+			"px": "16 px",
+			"token": "--z-ds-space-m"
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

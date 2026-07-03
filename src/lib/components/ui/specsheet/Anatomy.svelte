@@ -5,11 +5,12 @@
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import type { Masse, Callout, CalloutAnchor } from '$types/spec';
+  import type { Masse, MasseValue, SpacingSpec, Callout, CalloutAnchor } from '$types/spec';
   import { StageToggle } from '$components/ui/stage-toggle';
 
   let {
     masse = null,
+    spacing = [],
     callouts = [],
     calloutAnchors = [],
     /** Vergrößerung des Specimens. 1.3 passt für kleine Bausteine (Button);
@@ -19,6 +20,7 @@
     variant
   }: {
     masse?: Masse | null;
+    spacing?: SpacingSpec[];
     callouts?: Callout[];
     calloutAnchors?: CalloutAnchor[];
     zoom?: number;
@@ -36,6 +38,15 @@
   function setTheme(theme: 'light' | 'dark') {
     themeMode = theme;
   }
+
+  // Artboard-Maße zeigen IMMER px (Blueprint-Konvention + wenig Platz in den Ecken).
+  const apx = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
+
+  // px ↔ Token nur für die Innenabstände-Liste (Best Practice: Token-Namen bauen die
+  // Brücke Design↔Eng; dort ist Platz). Der Specs-Tab zeigt zusätzlich beide.
+  let tokenMode = $state(false);
+  const sval = (s: SpacingSpec) => (tokenMode && s.token ? s.token : s.px);
+  const spacingHasTokens = $derived(spacing.some((s) => s.token));
 
   // Beschriftung „Term — Beschreibung" in Lead + Rest zerlegen (präzisere Legende).
   function splitLabel(text: string): { lead: string; rest: string } {
@@ -89,10 +100,10 @@
     <div class="slot">{@render preview?.()}</div>
 
     {#if masse}
-      {#if masse.hoehe}<div class="dim dim-h" aria-hidden="true"><span class="dl">{masse.hoehe}</span></div>{/if}
-      {#if masse.breite}<div class="dim dim-w" aria-hidden="true"><span class="dl">{masse.breite}</span></div>{/if}
-      {#if masse.padding}<div class="dim dim-pad" aria-hidden="true"><span class="dl">{masse.padding}</span></div>{/if}
-      {#if masse.radius}<div class="rad" aria-hidden="true"><span>r {masse.radius}</span></div>{/if}
+      {#if masse.hoehe}<div class="dim dim-h" aria-hidden="true"><span class="dl">{apx(masse.hoehe)}</span></div>{/if}
+      {#if masse.breite}<div class="dim dim-w" aria-hidden="true"><span class="dl">{apx(masse.breite)}</span></div>{/if}
+      {#if masse.padding}<div class="dim dim-pad" aria-hidden="true"><span class="dl">{apx(masse.padding)}</span></div>{/if}
+      {#if masse.radius}<div class="rad" aria-hidden="true"><span>r {apx(masse.radius)}</span></div>{/if}
     {/if}
   </div>
 
@@ -118,6 +129,30 @@
   </ol>
 {/if}
 
+{#if spacing.length}
+  <!-- Innenabstände (Spacing-Redlines): Gaps zwischen den Teilen, nicht nur Außenmaße. -->
+  <div class="sp">
+    <div class="sp-head">
+      <span class="sp-cap">Innenabstände</span>
+      {#if spacingHasTokens}
+        <div class="unit-toggle" role="group" aria-label="Maßeinheit">
+          <button type="button" class="unit-btn" aria-pressed={!tokenMode} onclick={() => (tokenMode = false)}>px</button>
+          <button type="button" class="unit-btn" aria-pressed={tokenMode} onclick={() => (tokenMode = true)}>Token</button>
+        </div>
+      {/if}
+    </div>
+    <ul class="sp-list">
+      {#each spacing as s}
+        <li class="sp-row">
+          <span class="sp-bar" aria-hidden="true"></span>
+          <span class="sp-name">{s.label}</span>
+          <span class="sp-val">{sval(s)}</span>
+        </li>
+      {/each}
+    </ul>
+  </div>
+{/if}
+
 <style>
   .art {
     /* Fläche = dieselbe Bühne wie der Playground (.ds-stage, Light/Dark umschaltbar).
@@ -141,6 +176,45 @@
     top: var(--z-ds-space-8);
     right: var(--z-ds-space-8);
     z-index: 6; /* über Raster + Callouts */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* px ↔ Token — Segmented-Control, adaptiert (wie StageToggle) an das Bühnen-Theme. */
+  .unit-toggle {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+  }
+  .unit-btn {
+    border: none;
+    background: none;
+    border-radius: 999px;
+    padding: 3px 10px;
+    height: 26px;
+    font-family: var(--ds-font-mono);
+    font-size: 11px;
+    color: var(--z-ds-color-text-55);
+    cursor: pointer;
+    transition:
+      color var(--ds-dur) var(--ds-ease),
+      background-color var(--ds-dur) var(--ds-ease);
+  }
+  .unit-btn[aria-pressed='true'] {
+    background: var(--z-ds-color-background-0);
+    color: var(--z-ds-color-text-100);
+    box-shadow: var(--ds-shadow-sm);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .unit-btn:hover {
+      color: var(--z-ds-color-text-100);
+    }
+  }
+  .unit-btn:focus-visible {
+    outline: 2px solid var(--ds-focus-ring);
+    outline-offset: 2px;
   }
   .grid {
     position: absolute;
@@ -275,6 +349,70 @@
   .legend .t strong {
     font-weight: 600;
     color: var(--ds-text);
+  }
+
+  /* Innenabstände — Redline-Spec: kleine Maßbalken (Blueprint-Blau) + Label + Wert. */
+  .sp {
+    margin: 18px 2px 0;
+  }
+  .sp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .sp-cap {
+    font-size: var(--ds-label-size);
+    text-transform: uppercase;
+    letter-spacing: var(--ds-label-tracking);
+    font-weight: 600;
+    color: var(--ds-text-muted);
+  }
+  .sp-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .sp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--ds-text-sm);
+  }
+  .sp-bar {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 1px;
+    background: var(--ds-accent);
+  }
+  .sp-bar::before,
+  .sp-bar::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    width: 1px;
+    height: 7px;
+    background: var(--ds-accent);
+  }
+  .sp-bar::before {
+    left: 0;
+  }
+  .sp-bar::after {
+    right: 0;
+  }
+  .sp-name {
+    flex: 1 1 auto;
+    color: var(--ds-text-body);
+  }
+  .sp-val {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-accent);
+    white-space: nowrap;
   }
 
   @media (max-width: 560px) {

@@ -306,7 +306,7 @@ kategorie: Inhalte
 	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
 
 	<h2>Anatomie</h2>
-	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>{/snippet}
 		{#snippet variant()}<article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>{/snippet}
 	</Anatomy>

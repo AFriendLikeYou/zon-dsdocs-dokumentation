@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * zeit-de exporter — ziel="zeit-de"
+ * zeit-de exporter
  * ----------------------------------
- * Bildet das render-unabhängige Doku-Modell (siehe SKILL/references/doku-modell.md,
- * identisch zur `spec`-Prop von SpecSheet.svelte) auf das konkrete zeit.de-Repo-Format ab:
+ * Bildet das render-unabhängige Doku-Modell (Typ `ComponentSpec` in
+ * src/lib/types/spec.ts; Schema-Referenz + Import-Flow in README.md / IMPORT.md)
+ * auf das konkrete Repo-Format ab:
  *
  *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx   (immer neu)
  *   - Maschinen-Modell:          src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
@@ -11,8 +12,8 @@
  *   - Eingabe-Modell co-locatet: src/routes/product/components/<kebab>/model.json  (neben dem Output)
  *
  * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
- * Der Renderer (SpecSheet.svelte) und das Modell bleiben stabil; hier liegt die ganze
- * zeit.de-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Snippet-Verdrahtung).
+ * Das Spec-UI-Kit (src/lib/components/ui/specsheet) und das Modell bleiben stabil; hier
+ * liegt die ganze Repo-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Snippet-Verdrahtung).
  *
  * Nutzung:
  *   node tooling/zeit-de-exporter/export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]
@@ -245,7 +246,9 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasSpecimenPg = Boolean(pgSpecimen);
 
 	// Verfügbarkeit je Abschnitt.
-	const hasAnatomy = Boolean(render.preview || model.callouts?.length || model.masse);
+	const hasAnatomy = Boolean(
+		render.preview || model.callouts?.length || model.masse || model.spacing?.length
+	);
 	const hasMatrix = matrix.length > 0;
 	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
 	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
@@ -322,7 +325,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasAnatomy) {
 		design +=
 			`\n\t<h2>Anatomie</h2>\n` +
-			`\t<Anatomy masse={${S}.masse} callouts={${S}.callouts}${anchorsProp}>\n` +
+			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
 			previewSlot +
 			variantSlot +
 			`\t</Anatomy>\n`;
@@ -429,9 +432,67 @@ function resolveModelPath(input) {
 	return input;
 }
 
+/**
+ * Modell-Validierung: harte Fehler werfen (Export bricht ab), weiche Hinweise warnen.
+ * Fängt die häufigen Registry-Fehler früh ab, statt sie erst zur Laufzeit zu zeigen.
+ */
 function validate(model) {
-	const missing = ['name'].filter((k) => !model[k]);
-	if (missing.length) throw new Error(`Pflichtfeld(er) fehlen im Doku-Modell: ${missing.join(', ')}`);
+	const errors = [];
+	const warnings = [];
+
+	if (!model.name) errors.push('Pflichtfeld fehlt: name');
+
+	const render = model.render ?? {};
+	const controls = Array.isArray(render.controls) ? render.controls : [];
+	const keys = new Set();
+
+	for (const [i, c] of controls.entries()) {
+		const at = `render.controls[${i}]${c?.key ? ` "${c.key}"` : ''}`;
+		if (!c || typeof c !== 'object') { errors.push(`${at}: kein Objekt`); continue; }
+		if (!c.key) errors.push(`${at}: key fehlt`);
+		else keys.add(c.key);
+		if (!['select', 'toggle', 'attr'].includes(c.type))
+			errors.push(`${at}: type muss select | toggle | attr sein (ist "${c.type}")`);
+		if (c.type === 'select') {
+			if (!Array.isArray(c.options) || !c.options.length)
+				errors.push(`${at}: select braucht options[]`);
+			else
+				for (const [j, o] of c.options.entries())
+					if (!o || o.value == null || o.label == null)
+						errors.push(`${at}.options[${j}]: value und label nötig`);
+		}
+		if (c.type === 'toggle' && !c.cssClass)
+			warnings.push(`${at}: toggle ohne cssClass bewirkt nichts`);
+		if (c.type === 'attr' && !c.attr) errors.push(`${at}: attr-Control braucht attr`);
+	}
+
+	// controls brauchen ein Ziel (template ODER specimen), sonst sind sie wirkungslos.
+	if (controls.length && typeof render.template !== 'string' && typeof render.specimen !== 'string')
+		errors.push('render.controls gesetzt, aber weder template noch specimen vorhanden');
+	if (typeof render.template === 'string' && !/\{classes\}|\{attrs\}/.test(render.template))
+		warnings.push('render.template hat weder {classes} noch {attrs} — Controls greifen nicht');
+
+	// presets müssen bekannte control-keys setzen.
+	if (Array.isArray(render.presets))
+		for (const [i, p] of render.presets.entries()) {
+			if (!p?.label) errors.push(`render.presets[${i}]: label fehlt`);
+			if (!p?.state || typeof p.state !== 'object')
+				errors.push(`render.presets[${i}]: state-Objekt fehlt`);
+			else
+				for (const k of Object.keys(p.state))
+					if (keys.size && !keys.has(k))
+						warnings.push(`render.presets[${i}].state: "${k}" ist kein control-key`);
+		}
+
+	// wording: schlecht + gut sind Pflicht.
+	if (Array.isArray(model.wording))
+		for (const [i, w] of model.wording.entries())
+			if (!w?.schlecht || !w?.gut)
+				errors.push(`wording[${i}]: schlecht und gut sind nötig`);
+
+	for (const w of warnings) console.warn(`  ⚠️  ${w}`);
+	if (errors.length)
+		throw new Error(`Modell-Validierung fehlgeschlagen:\n   - ${errors.join('\n   - ')}`);
 }
 
 function main() {

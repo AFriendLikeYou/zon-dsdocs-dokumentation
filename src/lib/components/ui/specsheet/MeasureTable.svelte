@@ -1,16 +1,20 @@
 <!-- MeasureTable.svelte — Maße als native, adaptive Tabelle (Specs-Tab). -->
 <script lang="ts">
-  import type { Masse } from '$types/spec';
+  import type { Masse, MasseValue } from '$types/spec';
   let { masse = null }: { masse?: Masse | null } = $props();
+
+  // Werte können string (nur px) ODER { px, token } sein → beides unterstützen.
+  const px = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
+  const tok = (m?: MasseValue) => (m && typeof m !== 'string' ? m.token : undefined);
 </script>
 
 {#if masse}
   <table class="m">
     <tbody>
-      {#if masse.hoehe}<tr><th>Höhe</th><td>{masse.hoehe} px</td></tr>{/if}
-      {#if masse.breite}<tr><th>Breite</th><td>{masse.breite} px</td></tr>{/if}
-      {#if masse.padding}<tr><th>Padding</th><td>{masse.padding}</td></tr>{/if}
-      {#if masse.radius}<tr><th>Radius</th><td>{masse.radius} px</td></tr>{/if}
+      {#if masse.hoehe}<tr><th>Höhe</th><td>{px(masse.hoehe)} px{#if tok(masse.hoehe)}<span class="tok">{tok(masse.hoehe)}</span>{/if}</td></tr>{/if}
+      {#if masse.breite}<tr><th>Breite</th><td>{px(masse.breite)} px{#if tok(masse.breite)}<span class="tok">{tok(masse.breite)}</span>{/if}</td></tr>{/if}
+      {#if masse.padding}<tr><th>Padding</th><td>{px(masse.padding)}{#if tok(masse.padding)}<span class="tok">{tok(masse.padding)}</span>{/if}</td></tr>{/if}
+      {#if masse.radius}<tr><th>Radius</th><td>{px(masse.radius)} px{#if tok(masse.radius)}<span class="tok">{tok(masse.radius)}</span>{/if}</td></tr>{/if}
     </tbody>
   </table>
 {/if}
@@ -35,5 +39,10 @@
     padding: 9px 0; /* bewusstes Zell-Padding ohne passendes z-ds-Token */
     border-bottom: 1px solid var(--ds-border);
     font-size: var(--ds-text-sm);
+  }
+  .tok {
+    display: block;
+    color: var(--ds-text-muted);
+    font-size: var(--ds-text-xs);
   }
 </style>

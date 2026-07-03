@@ -10,12 +10,19 @@ export type BadgeVariant = 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
 /** Bekannte Component-Status; offen für redaktionelle Sonderwerte (Fallback im Hero). */
 export type SpecStatus = 'ready_for_dev' | 'completed' | 'changed';
 
+/** Ein Maß: einfacher px-String ODER { px, token } für den px↔Token-Umschalter. */
+export type Measure = { px: string; token?: string };
+export type MasseValue = string | Measure;
+
 export type Masse = {
-	hoehe?: string;
-	breite?: string;
-	padding?: string;
-	radius?: string;
+	hoehe?: MasseValue;
+	breite?: MasseValue;
+	padding?: MasseValue;
+	radius?: MasseValue;
 };
+
+/** Interner Abstand (Spacing-Redline): benannter Gap zwischen Teilen, mit Token. */
+export type SpacingSpec = { label: string; px: string; token?: string };
 
 export type Callout = { nr: number; text: string };
 
@@ -60,6 +67,7 @@ export type ComponentSpec = {
 	version?: string;
 	verwendung?: Verwendung | null;
 	masse?: Masse | null;
+	spacing?: SpacingSpec[];
 	callouts?: Callout[];
 	tokens?: TokenGroup[];
 	varianten?: VariantGroup[];

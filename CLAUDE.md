@@ -96,6 +96,9 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 3) Verwendung/Varianten/Zustände · 4) Do & Don't.
 
 ## Neue Component dokumentieren (Workflow)
+> Vollständiger Guide + Schema-Referenz: [`tooling/zeit-de-exporter/IMPORT.md`](tooling/zeit-de-exporter/IMPORT.md)
+> und [`README.md`](tooling/zeit-de-exporter/README.md). Kurzfassung:
+
 1. Figma-Node bestimmen. **Instanz immer zum Component-Set auflösen.**
 2. Figma-MCP: `get_design_context` / `get_context_for_code_connect` /
    `get_variable_defs` → Name, Varianten, Tokens, Maße.

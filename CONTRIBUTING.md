@@ -55,10 +55,11 @@ Seiten sind mdsvex-Routen (`+page.svx`) unter `src/routes/brand/…` oder `src/r
 
 ## 4. Eine dokumentierte Komponente hinzufügen (Exporter)
 
-Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — siehe
-`tooling/zeit-de-exporter/README.md`.
+Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Referenz in
+`tooling/zeit-de-exporter/README.md`, der komplette Figma→Seite-Flow in
+`tooling/zeit-de-exporter/IMPORT.md`.
 
-1. **Modell exportieren/anlegen** (aus Figma via Skill `zeit-de-component-docs` oder von Hand).
+1. **Modell anlegen** — aus Figma via Figma-MCP (siehe `IMPORT.md`) oder von Hand.
 2. **Exporter laufen lassen** —
    `node tooling/zeit-de-exporter/export.mjs <model.json>`. Erzeugt unter
    `src/routes/product/components/<kebab>/`: `+page.svx` + `spec.generated.ts` (beide **nie**
