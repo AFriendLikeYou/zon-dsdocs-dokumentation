@@ -82,6 +82,23 @@ export const content = {
 			"Pinned nicht mit langen Titeln überfrachten (begrenzter Platz)."
 		]
 	},
+	"wording": [
+		{
+			"schlecht": "Artikel",
+			"gut": "Streit ums Bürgergeld: Was die Reform wirklich ändert",
+			"hinweis": "Der Titel ist eine konkrete Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "NEWS",
+			"gut": "Wirtschaft",
+			"hinweis": "Die Spitzmarke ist die Ressort-/Kategorie — kurz, in normaler Schreibung, nicht in Versalien."
+		},
+		{
+			"schlecht": "Von der Redaktion",
+			"gut": "Von Anna Schmidt",
+			"hinweis": "Die Byline nennt Autor:innen namentlich, wenn möglich."
+		}
+	],
 	"version": "Figma-Node 33137:39890",
 	"variantInfo": {
 		"Pinned": "In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt.",

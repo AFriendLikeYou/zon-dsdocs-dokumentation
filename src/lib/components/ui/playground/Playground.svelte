@@ -36,6 +36,8 @@
 		| { key: string; label: string; type: 'toggle'; cssClass?: string; default?: boolean }
 		| { key: string; label: string; type: 'attr'; attr: string; default?: boolean };
 	export type PlaygroundState = Record<string, string | number | boolean>;
+	/** Benanntes Beispiel: ein Klick setzt (teilweise) den Control-State — „Rezept". */
+	export type PlaygroundPreset = { label: string; state: PlaygroundState };
 
 	/** Template + Controls + State → fertiges Markup (Preview UND Code — eine Quelle). */
 	export function instantiate(
@@ -80,6 +82,8 @@
 		preview?: Snippet<[PlaygroundState]>;
 		/** SNIPPET-MODUS: erzeugt den Code-String aus dem State. */
 		code?: (state: PlaygroundState) => string;
+		/** Benannte Beispiele/„Rezepte": ein Klick setzt den Control-State (Astryx-Idee). */
+		presets?: PlaygroundPreset[];
 		class?: string;
 	};
 	let {
@@ -90,6 +94,7 @@
 		template,
 		preview,
 		code,
+		presets = [],
 		class: className = ''
 	}: Props = $props();
 
@@ -125,6 +130,15 @@
 		for (const c of controls) values[c.key] = defaults[c.key];
 		themeMode = 'auto';
 	}
+
+	// Beispiel/„Rezept" anwenden: setzt (nur) die im Preset genannten Keys.
+	function applyPreset(p: PlaygroundPreset) {
+		for (const k in p.state) values[k] = p.state[k];
+	}
+	// Aktiv, wenn alle Preset-Keys dem aktuellen State entsprechen.
+	const activePreset = $derived(
+		presets.findIndex((p) => Object.keys(p.state).every((k) => values[k] === p.state[k]))
+	);
 </script>
 
 <div class="pg {className}">
@@ -142,6 +156,19 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if presets.length}
+		<div class="pg-presets">
+			<span class="pg-label">Beispiele</span>
+			{#each presets as p, i (p.label)}
+				<Chip
+					variant={activePreset === i ? 'accent' : 'neutral'}
+					emphasis={activePreset === i}
+					onclick={() => applyPreset(p)}>{p.label}</Chip
+				>
+			{/each}
+		</div>
+	{/if}
 
 	{#if hint}
 		<div class="pg-controls"><span class="pg-hint">{hint}</span></div>
@@ -225,13 +252,18 @@
 		justify-content: center;
 		max-width: 100%;
 	}
-	.pg-controls {
+	.pg-controls,
+	.pg-presets {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--z-ds-space-8);
 		padding: var(--z-ds-space-12) var(--z-ds-space-16);
 		border-bottom: 1px solid var(--ds-border-soft);
+	}
+	/* Beispiele/Rezepte sitzen zwischen Bühne und Controls — dezent abgesetzt. */
+	.pg-presets {
+		background: color-mix(in srgb, var(--ds-surface-raised) 45%, transparent);
 	}
 	.pg-label {
 		font-size: var(--ds-label-size);

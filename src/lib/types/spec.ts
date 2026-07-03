@@ -40,6 +40,9 @@ export type DoDont = { do?: string[]; dont?: string[] };
 /** „Wann verwenden / Wann nicht" — Entscheidungshilfe ganz oben in der Component-Doku. */
 export type Verwendung = { nutzen?: string[]; nichtNutzen?: string[] };
 
+/** Konkrete Formulierungs-Regel (UX-Writing): statt `schlecht` besser `gut`. */
+export type WordingRule = { schlecht: string; gut: string; hinweis?: string };
+
 export type PropRow = { name: string; typ: string; default?: string; beschreibung?: string };
 
 /**
@@ -63,5 +66,6 @@ export type ComponentSpec = {
 	zustaende?: SpecState[];
 	a11y?: A11yItem[];
 	doDont?: DoDont | null;
+	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
 };

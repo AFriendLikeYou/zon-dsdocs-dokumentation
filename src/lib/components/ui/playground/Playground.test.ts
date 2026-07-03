@@ -101,4 +101,20 @@ describe('Playground — Template-Modus (Registry)', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
 		expect(container.querySelector('.pg-preview button')!.hasAttribute('disabled')).toBe(true);
 	});
+
+	it('Preset-Chip setzt mehrere Control-Werte auf einmal (Astryx-Rezept)', async () => {
+		const presets = [{ label: 'Z+ Voll', state: { variant: 'zplus', fullwidth: true, disabled: false } }];
+		const { container } = render(Playground, {
+			props: { controls: tplControls, template: tpl, presets }
+		});
+
+		// Default: primary, kein fullwidth
+		expect(container.querySelector('.pg-preview button')!.className).toContain('z-button--primary');
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Z+ Voll' }));
+		const btn = container.querySelector('.pg-preview button')!;
+		expect(btn.className).toContain('z-button--zplus');
+		expect(btn.className).toContain('z-button--fullwidth');
+		expect(container.textContent).toContain('z-button--fullwidth');
+	});
 });

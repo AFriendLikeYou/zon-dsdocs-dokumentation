@@ -249,5 +249,22 @@ export const generated = {
 			"Nicht für einzelne Aktionen — dafür Button / Text Button.",
 			"Pinned nicht mit langen Titeln überfrachten (begrenzter Platz)."
 		]
-	}
+	},
+	"wording": [
+		{
+			"schlecht": "Artikel",
+			"gut": "Streit ums Bürgergeld: Was die Reform wirklich ändert",
+			"hinweis": "Der Titel ist eine konkrete Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "NEWS",
+			"gut": "Wirtschaft",
+			"hinweis": "Die Spitzmarke ist die Ressort-/Kategorie — kurz, in normaler Schreibung, nicht in Versalien."
+		},
+		{
+			"schlecht": "Von der Redaktion",
+			"gut": "Von Anna Schmidt",
+			"hinweis": "Die Byline nennt Autor:innen namentlich, wenn möglich."
+		}
+	]
 } satisfies Partial<ComponentSpec>;

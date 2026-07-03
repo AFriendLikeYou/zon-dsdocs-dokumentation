@@ -10,7 +10,7 @@ kategorie: Inhalte
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
@@ -28,6 +28,7 @@ kategorie: Inhalte
     <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
   </div>
 </article>`;
+	const playgroundPresets = [{"label":"Standard","state":{"type":"article","small":false}},{"label":"Schlagzeile","state":{"type":"headline","small":false}},{"label":"Mit Bild","state":{"type":"artikel","small":false}},{"label":"Kompakt","state":{"type":"artikel","small":true}}];
 	const htmlCode = `<!-- Cell-Styles global einbinden (z. B. cell.css) -->
 <article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
 <article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
@@ -302,7 +303,7 @@ kategorie: Inhalte
 ]} sticky />
 
 {#snippet designTab()}
-	<Playground controls={playgroundControls} template={playgroundTemplate} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
 
 	<h2>Anatomie</h2>
 	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
@@ -312,6 +313,9 @@ kategorie: Inhalte
 
 	<h2>Verwendung</h2>
 	<UsageBlock verwendung={spec.verwendung} />
+
+	<h2>Texte &amp; Wording</h2>
+	<WordingList items={spec.wording} />
 
 	<h2>Varianten</h2>
 	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />

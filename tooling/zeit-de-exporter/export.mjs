@@ -86,7 +86,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung', 'wording'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -236,6 +236,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Instanziierung im Playground-Harness. specimen ist die Ausnahme für Patterns mit
 	// Loop/Interaktion und darf nur Registry-Daten konsumieren.
 	const pgControls = Array.isArray(render.controls) ? render.controls : [];
+	const pgPresets = Array.isArray(render.presets) ? render.presets : [];
 	const pgTemplate = typeof render.template === 'string' ? render.template : null;
 	const pgSpecimen = typeof render.specimen === 'string' ? render.specimen : null;
 	const pgHint = typeof render.hint === 'string' ? render.hint : null;
@@ -257,6 +258,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasUsage = Boolean(
 		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
 	);
+	const hasWording = Array.isArray(model.wording) && model.wording.length > 0;
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse;
 
@@ -267,6 +269,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasVariants) used.add('VariantList');
 	if (hasStates) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
+	if (hasWording) used.add('WordingList');
 	if (anyCode) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
 	if (hasA11y) used.add('A11yList');
@@ -293,7 +296,8 @@ function renderPage(model, { patternCss = null } = {}) {
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
 			? `\tconst playgroundControls = ${JSON.stringify(pgControls)};\n` +
-				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n`
+				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n` +
+				(pgPresets.length ? `\tconst playgroundPresets = ${JSON.stringify(pgPresets)};\n` : '')
 			: '') +
 		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
 		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
@@ -312,7 +316,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	} else if (hasTemplatePg) {
 		const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
 		const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
-		design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} />\n`;
+		const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
+		design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n`;
 	}
 	if (hasAnatomy) {
 		design +=
@@ -323,6 +328,7 @@ function renderPage(model, { patternCss = null } = {}) {
 			`\t</Anatomy>\n`;
 	}
 	if (hasUsage) design += `\n\t<h2>Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
+	if (hasWording) design += `\n\t<h2>Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
 	if (hasVariants || hasMatrix) {
 		design += `\n\t<h2>Varianten</h2>\n`;
 		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
