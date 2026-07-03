@@ -206,8 +206,9 @@
 		justify-content: center;
 		padding: var(--z-ds-space-32) var(--z-ds-space-16);
 		min-height: 96px;
-		/* Fläche flippt mit den in global.css je Bühne gepinnten z-ds-Token. */
-		background: var(--ds-surface-raised);
+		/* RAW-Token, damit die Fläche mit den je Bühne gepinnten Werten flippt —
+		   ein abgeleitetes --ds-*-Token wäre schon auf :root-Ebene aufgelöst. */
+		background: var(--z-ds-color-background-10);
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
 

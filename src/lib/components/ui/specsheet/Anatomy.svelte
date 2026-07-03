@@ -111,7 +111,7 @@
       >
         <span class="n">{c.nr}</span>
         <span class="t">
-          {#if c.lead}<strong>{c.lead}</strong> — {/if}{c.rest}
+          {#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
         </span>
       </li>
     {/each}
@@ -122,12 +122,14 @@
   .art {
     /* Fläche = dieselbe Bühne wie der Playground (.ds-stage, Light/Dark umschaltbar).
        Blueprint-Kanäle leiten sich aus den gepinnten Token ab und adaptieren so mit:
-       Maßlinien/Callouts = --ds-accent (Blueprint-Blau, eigener Kanal, damit Maße nie
-       mit Komponentenfarben verwechselt werden), Raster = feiner text-100-Mix. */
-    --measure: var(--ds-accent);
+       Maßlinien/Callouts = focus-100 (Blueprint-Blau, eigener Kanal, damit Maße nie
+       mit Komponentenfarben verwechselt werden), Raster = feiner text-100-Mix.
+       RAW-Token, damit alles mit den je Bühne gepinnten Werten flippt (ein
+       abgeleitetes --ds-*-Token wäre schon auf :root-Ebene aufgelöst). */
+    --measure: var(--z-ds-color-focus-100);
     --gl: color-mix(in srgb, var(--z-ds-color-text-100) 6%, transparent);
     position: relative;
-    background: var(--ds-surface-raised);
+    background: var(--z-ds-color-background-10);
     border: 1px solid var(--ds-border-soft);
     border-radius: var(--ds-radius);
     padding: 80px 64px 44px;
@@ -198,7 +200,7 @@
     position: absolute;
     font-family: var(--ds-font-mono);
     font-size: 11px;
-    background: var(--ds-surface-raised);
+    background: var(--z-ds-color-background-10);
     padding: 0 4px;
     color: var(--measure);
     white-space: nowrap;
