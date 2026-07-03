@@ -1,16 +1,24 @@
 # CLAUDE.md — Projekt-Guide
 
-Leitfaden für die Arbeit in diesem Repo. Architektur- und Workflow-Begründungen
-stehen ausführlich in [`DECISIONS.md`](DECISIONS.md).
+Leitfaden für die Arbeit in diesem Repo. Ausführliche Begründungen (ADRs) stehen
+in [`DECISIONS.md`](DECISIONS.md), der Struktur-Plan in [`STRUKTUR-PLAN.md`](STRUKTUR-PLAN.md).
 
 ## Was ist das?
-**ZEIT Online Design System — Dokumentation.** SvelteKit + **mdsvex** (`.svx`),
-Deploy über `adapter-vercel`. Alle Routen sind per **Basic-Auth**
-(`src/hooks.server.ts`) geschützt. Doku-Ausgabe ist **Deutsch**.
+**ZEIT Online — Brandhub _und_ Design-System-Doku** in einer SvelteKit-App
+(mdsvex `.svx`, `adapter-vercel`). Alle Routen sind per **Basic-Auth**
+(`src/hooks.server.ts`) geschützt. Inhalte/Labels **Deutsch**, **Routen Englisch**
+(nur URLs; Schema-Keys, Content, Labels bleiben deutsch — Alt-URLs via 308 in
+`hooks.server.ts`).
 
-Kern ist ein **Component-Doku-System**: Aus einer in Figma auf *Ready for dev*
-markierten Component wird über einen **Exporter** eine getabbte Doku-Seite
-erzeugt (Hero + Design / Develop / Barrierefreiheit / Specs).
+Zwei Produkte, ein Repo:
+- **Brandhub** (`/brand/*`) — redaktionell gepflegte Markenrichtlinien, Logos,
+  Assets, Downloads (für Designer & PMs).
+- **DS-Doku** (`/product/*`) — dokumentiert das **bestehende ZEIT-Designsystem**
+  (Figma + HTML/CSS-Pattern-Katalog) mit Playgrounds.
+
+> **Prinzip:** Die UI der Doku-App ist **nicht** Teil des dokumentierten ZEIT-DS.
+> Neue Inhalte kommen über **Content + Registry/Metadaten**, nicht über eine
+> Pflicht-Komponentenbibliothek.
 
 ## Setup & Befehle
 ```bash
@@ -19,83 +27,116 @@ nvm use && npm install
 #   USERS=[{"username":"…","password":"…"}]
 npm run dev      # Dev-Server (Basic-Auth aktiv)
 npm run build    # Produktionsbuild (braucht USERS aus .env)
-npm run check    # svelte-check  (2 vorbestehende Fehler in data/icons.ts &
-                 #                data/brand-assets.ts: 'IconPre' — NICHT von uns)
-npm run lint     # eslint
-npm run format   # prettier
+npm run check    # svelte-check + Drift-Checks (nav/tokens/assets/component) → 0/0
+npm run lint     # eslint     ·     npm run format   # prettier
+npx vitest run   # Component-/Daten-Tests
 ```
-> **Wichtig:** Ohne `USERS` in `.env` bricht der Build ab (`$env/static/private`).
-> Für headless-Previews wurde früher die Auth in `hooks.server.ts` *temporär*
-> überbrückt — solche Bypässe **immer vor Commit/Push wieder entfernen**.
+> Ohne `USERS` in `.env` bricht der Build ab. Auth in `hooks.server.ts` **nie**
+> überbrücken; `.env` **nie** committen. Basic-Auth blockiert Browser-Preview →
+> Absicherung über Tests + Gate; visuelle Abnahme macht der Mensch.
+>
+> **Gate vor „fertig":** `npm run check` 0/0 · `build` EXIT 0 · `vitest` grün.
+> Die Drift-Checks (`tooling/check-*.mjs`) sind **warn/exit 0** (`--strict` für CI).
+
+## Dateistruktur (aktuell)
+```
+src/
+├─ routes/
+│  ├─ brand/…                    # Brandhub-Seiten (.svx)
+│  └─ product/
+│     ├─ foundations/ tokens/ motion/
+│     └─ components/<slug>/       # eine Component-Doku pro Ordner ↓
+│        ├─ model.json            # Eingabe-Modell (co-located, kanonisch)
+│        ├─ pattern.css           # unscoped Pattern-CSS (echte z-ds-Tokens)
+│        ├─ content.ts            # MENSCH — redaktionell, nie überschrieben
+│        ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
+│        └─ +page.svx             # MASCHINE — autogeneriert
+├─ lib/                          # Aliases: $components $data $stores $config $types
+│  ├─ components/
+│  │  ├─ layout/                  # App-Chrome (Sidebar, Navbar, Footer, …)
+│  │  └─ ui/                      # alles andere, je Ordner + Barrel (specsheet,
+│  │                             #   playground, card, tab, …)
+│  ├─ data/                       # navigation.ts · catalog.ts · foundation-tokens.ts …
+│  ├─ types/  actions/  stores/  config/  utils.ts
+└─ hooks.server.ts               # sequence(Basic-Auth, Redirects)
+static/                          # global.css (Token-Layer) · media/ downloads/ fonts/
+tooling/                         # zeit-de-exporter/ + check-*.mjs (Drift-Gate)
+```
+Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 
 ## Component-Doku-System
 
-### Exporter
-`tooling/zeit-de-exporter/export.mjs` bildet ein **Doku-Modell (JSON)** auf das
-zeit.de-Repo-Format ab. Eingaben liegen in `tooling/zeit-de-exporter/examples/`.
-
+**Exporter** `tooling/zeit-de-exporter/export.mjs` bildet das render-unabhängige
+**Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Das `model.json`
+liegt **co-located** neben der Ausgabe (Re-Export per Ordner):
 ```bash
-node tooling/zeit-de-exporter/export.mjs tooling/zeit-de-exporter/examples/<name>.json
+node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>
 ```
+Erzeugt `+page.svx` + `spec.generated.ts` (Maschine, immer neu) und einmalig den
+Stub `content.ts` (Mensch, nie überschrieben). Die Seite führt beides zusammen:
+`const spec = { ...generated, ...content }` — **content gewinnt**.
 
-Erzeugt pro Component unter `src/routes/product/components/<kebab>/`:
+**Registry-Index** `src/lib/data/catalog.ts` entsteht zur Build-Zeit per
+`import.meta.glob` über alle `model.json` — ein neues Pattern erscheint dort
+**automatisch**. Nur Reihenfolge/Ausschlüsse stehen in der Override-Map.
 
-| Datei | Besitzer | Regel |
-|---|---|---|
-| `+page.svx` | Maschine | AUTOGENERIERT — **nicht** von Hand editieren |
-| `spec.generated.ts` | Maschine (Figma) | wird bei jedem Sync überschrieben |
-| `content.ts` | **Mensch** | redaktionell — **nie** überschrieben (nur Stub einmalig) |
+**Datengetriebener Playground** (`render.controls` + `render.template` +
+`render.cssFile`): _eine_ Instanziierung (`instantiate()` in `Playground.svelte`)
+speist **Live-Vorschau und Code-Block** — kein Drift. Escape-Hatch für
+Loops/Interaktion: `render.specimen` (co-located `Specimen.svelte`, darf nur
+Registry-Daten konsumieren).
 
-Die Seite führt beides zusammen: `const spec = { ...generated, ...content }`
-(**content gewinnt**). Redaktion (Zweck, Varianten-Texte, Do/Don't, A11y-Notizen,
-Status, Version) gehört in `content.ts`; Tokens/Maße/Varianten-Achsen sind
-maschinenseitig.
+**Spec-UI-Kit** `src/lib/components/ui/specsheet/` — theme-adaptive Renderer, die
+die Seiten-Styles erben (keine verschachtelten weißen Cards): `ComponentHero ·
+Anatomy · VariantMatrix/List · StateList · TokenTable · MeasureTable · A11yList ·
+DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
+Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 
-### Spec-UI-Kit (Renderer)
-`src/components/ui/specsheet/` — native, **theme-adaptive** Komponenten, die die
-Seiten-Styles (z-ds-Tokens, semantische `h2`/`table`/`code`) erben — **keine**
-verschachtelten weißen Cards:
-`ComponentHero · Anatomy · VariantMatrix · VariantList · StateList · TokenTable ·
-MeasureTable · A11yList · DoDontList · PropsTable · CodeBlock` (Barrel: `index.ts`).
-Live-Specimens (Anatomy, Raster) sitzen bewusst auf einer **hellen Artboard-Fläche**
-(Komponentenfarben sind fix). CSS der Specimens wird gegen `.spec-canvas` gescopt.
-
-Tabs über `src/components/ui/tab/` (`<Tabs … sticky />`).
+**Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Anatomie ·
+3) Verwendung/Varianten/Zustände · 4) Do & Don't.
 
 ## Neue Component dokumentieren (Workflow)
-1. In Figma die Component bestimmen (Node-ID).
-2. Über den Figma-MCP extrahieren: `get_metadata` → `get_design_context` →
-   `get_variable_defs`. **Instanz immer zum Component-Set auflösen.**
-3. Doku-Modell als `tooling/zeit-de-exporter/examples/<kebab>.json` schreiben
-   (an `button.json` / `icon-button.json` orientieren). Tokens als CSS Custom
-   Properties; `render`-Block hält Specimens/CSS/Matrix/Props/Anchors/`variantInfo`.
+1. Figma-Node bestimmen. **Instanz immer zum Component-Set auflösen.**
+2. Figma-MCP: `get_design_context` / `get_context_for_code_connect` /
+   `get_variable_defs` → Name, Varianten, Tokens, Maße.
+3. `model.json` + `pattern.css` im Ordner `src/routes/product/components/<slug>/`
+   anlegen (an `button/` bzw. `cell/` orientieren). Tokens als echte `--z-ds-*`;
+   `render`-Block = Playground (`controls`/`template`/`cssFile`) + optional
+   `matrix`/`props`/`calloutAnchors`/`variantInfo`.
 4. Exporter laufen lassen (s. o.).
-5. Nav-Eintrag in `src/data/navigation.ts` → `MENU_ITEMS_PRODUCT` ergänzen
-   (`+layout.svelte` wählt das Menü nach Route: `/product` → Product-Menü).
-6. `npm run build` + Vorschau prüfen.
+5. Nav-Eintrag in `src/lib/data/navigation.ts` → `MENU_ITEMS_PRODUCT`; ggf.
+   Reihenfolge in `catalog.ts`.
+6. Gate ausführen; redaktionelle Texte in `content.ts` prüfen (klar trennen:
+   **aus Figma** vs. **Platzhalter/geschätzt**).
 
 ## Konventionen / Regeln
-- **Doku-Modell ist kanonisch** und render-unabhängig — nicht repo-spezifisch
-  verändern. Repo-spezifisches gehört in die **Exporter-Schicht** bzw. den
-  `render`-Block der Modell-Eingabe.
-- **Generierte Dateien nie von Hand editieren** — redaktionelle Inhalte in
-  `content.ts`. Der „Edit on GitHub"-Stift (Breadcrumb) zeigt auf
-  Component-Seiten deshalb auf `content.ts`.
-- **Vanilla HTML/CSS ist der Default** für Beispiele; Tokens als CSS Custom
-  Properties referenzieren. Svelte nur bei interaktiven Teilen.
-- Code-Beispiele in `content`-Strings, die `</script>`/`</style>` enthalten
-  können, werden vom Exporter escaped (`<\/script>`), damit sie den `.svx`-Block
-  nicht vorzeitig schließen.
-- Commits/Pushes nur auf Aufruf. Commit-Messages enden mit
+- **Semantische Token-Ebene** (`--ds-*` in `static/global.css`, auf z-ds-Tokens
+  gemappt) ist der Default für die **Doku-UI**; Komponenten nutzen nur Rollen-
+  Tokens. Ausnahmen: `--z-ds-space-*`/`-lineheight-*`, **originalgetreue
+  Pattern-CSS** (echte z-ds-Kopie) und generierte Seiten.
+- **Doku-Modell ist kanonisch** und render-unabhängig. Repo-Spezifisches gehört
+  in die Exporter-Schicht bzw. den `render`-Block.
+- **Generierte Dateien nie von Hand editieren** — Redaktion in `content.ts`
+  (der „Edit on GitHub"-Stift zeigt dorthin).
+- **Vanilla HTML/CSS ist der Default** für Beispiele; Svelte nur bei
+  interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.
+- **Animationen** folgen dem `emil-design-eng`-Skill (`.agents/skills/…`):
+  starke ease-out, nie ease-in, <300ms, Hover gated, `:active`-Feedback,
+  `prefers-reduced-motion`.
+- Neueste **Svelte-5-Syntax** (Runes/Snippets; kein `export let`/`$:`/`slot`/`on:`).
+- Wiederverwendbares immer als eigene `ui/`-Komponente bauen, nicht inline duplizieren.
+- Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 
 ## Stolperfallen
-- Lokales **git ist v2.23** → `git init -b <branch>` gibt es nicht; stattdessen
-  `git init` + `git symbolic-ref HEAD refs/heads/main`.
-- `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored
-  — vor dem Commit prüfen, dass keine Secrets gestaged sind.
-- Repo-Remote: `github.com/ZeitOnline/zon-dsdocs` (Original).
+- Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
+  `git symbolic-ref HEAD refs/heads/main`.
+- `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
+- `pattern.css`-Scoping (v1): **flache Regeln**, keine At-Rules (`@media`/
+  `@keyframes`) — der Exporter wirft sonst.
+- Push-Remote dieses Arbeits-Repos: `github.com/AFriendLikeYou/zon-dsdocs-dokumentation`.
 
 ## Weiterführend
-- [`DECISIONS.md`](DECISIONS.md) — Entscheidungs-Log (ADRs) + Workflow-Plan
-  (PR-Previews, `sync`-Action, Webhook, optional Git-CMS) + offene Punkte.
+- [`DECISIONS.md`](DECISIONS.md) — ADR-Log (u. a. ADR-018 Discovery/Drift,
+  ADR-021 Struktur, ADR-023 Registry-Schema, ADR-024 generierter Katalog).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`STRUKTUR-PLAN.md`](STRUKTUR-PLAN.md).
