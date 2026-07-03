@@ -1,0 +1,98 @@
+// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.
+// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).
+// Die Felder überschreiben die generierten Werte aus spec.generated.ts.
+//
+//   zweck       – Beschreibung im Hero
+//   status      – ready_for_dev | completed | changed
+//   version     – Snapshot-/Versions-Label im Hero
+//   variantInfo – Wann welche Variante nutzen (Label → Text)
+//   callouts    – Anatomie-Beschriftungen ({ nr, text })
+//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
+//   doDont      – { do: [...], dont: [...] }
+export const content = {
+	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — 40 hoch, Rahmen 1px, Radius 4; Rahmenfarbe signalisiert den Zustand."
+		},
+		{
+			"nr": 2,
+			"text": "Text/Platzhalter — Tablet Gothic Regular 16; Platzhalter Text-55, gefüllt Text-100."
+		},
+		{
+			"nr": 3,
+			"text": "Slots — optionales Icon links, Dropdown-Chevron oder Clear-Button rechts."
+		}
+	],
+	"a11y": [
+		{
+			"label": "Label",
+			"wert": "Immer ein sichtbares <label> mit for/id — der Platzhalter ist KEIN Label.",
+			"status": "warn"
+		},
+		{
+			"label": "Fehler",
+			"wert": "Error-Text via aria-describedby verknüpfen; Farbe allein reicht nicht.",
+			"status": "warn"
+		},
+		{
+			"label": "Fokus",
+			"wert": "Sichtbarer Fokus-Rahmen (Active) — :focus-visible zusätzlich absichern.",
+			"status": "warn"
+		},
+		{
+			"label": "Disabled",
+			"wert": "Echtes disabled-Attribut setzen, nicht nur optisch dimmen.",
+			"status": "warn"
+		},
+		{
+			"label": "Kontrast Platzhalter",
+			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
+			"status": "pass"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Immer ein sichtbares Label über dem Feld.",
+			"Fehler mit Text erklären, nicht nur mit rotem Rahmen."
+		],
+		"dont": [
+			"Den Platzhalter als Label missbrauchen (verschwindet beim Tippen).",
+			"Disabled-Felder ohne Erklärung, warum sie gesperrt sind."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für kurze, einzeilige Freitext-Eingaben (Name, Suche, E-Mail).",
+			"Mit Dropdown-Chevron als Auswahl-/Combobox-Trigger."
+		],
+		"nichtNutzen": [
+			"Für mehrzeiligen Text — dafür ein Textarea.",
+			"Für eine feste Auswahl weniger Optionen — dafür Radio/Select."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "E-Mail (als Platzhalter)",
+			"gut": "Label »E-Mail« + Platzhalter »name@beispiel.de«",
+			"hinweis": "Der Platzhalter zeigt ein Beispiel, das Label benennt das Feld."
+		},
+		{
+			"schlecht": "Ungültig",
+			"gut": "Bitte eine gültige E-Mail-Adresse eingeben.",
+			"hinweis": "Fehlermeldungen sagen konkret, was zu tun ist."
+		}
+	],
+	"version": "Figma-Node 477:3021",
+	"variantInfo": {
+		"Default": "Ruhezustand, leeres Feld.",
+		"Active": "Fokussiert — Rahmen in Text-55.",
+		"Filled": "Enthält eine Eingabe (Text-100).",
+		"Error": "Validierung fehlgeschlagen — Rahmen rot, dazu Fehlertext.",
+		"Disabled": "Gesperrt — gedämpft, nicht bedienbar.",
+		"Leading Icon": "Führendes Icon, z. B. Suche.",
+		"Dropdown": "Chevron als Auswahl-/Combobox-Trigger."
+	}
+};

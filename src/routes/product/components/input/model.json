@@ -1,0 +1,413 @@
+{
+	"$schema": "../../../../../tooling/zeit-de-exporter/model.schema.json",
+	"name": "Input",
+	"status": "ready_for_dev",
+	"kategorie": "Formulare",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=477-3021&m=dev",
+	"aktualisiertAm": "2026-07-03",
+	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
+	"masse": {
+		"hoehe": "40",
+		"breite": "292",
+		"padding": "0 · 12 horizontal",
+		"radius": {
+			"px": "4",
+			"token": "--z-ds-border-radius-4"
+		}
+	},
+	"spacing": [
+		{
+			"label": "Icon ↔ Text ↔ Chevron",
+			"px": "8 px",
+			"token": "--z-ds-space-xs"
+		},
+		{
+			"label": "Innenabstand links/rechts",
+			"px": "12 px",
+			"token": "--z-ds-space-s"
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — 40 hoch, Rahmen 1px, Radius 4; Rahmenfarbe signalisiert den Zustand."
+		},
+		{
+			"nr": 2,
+			"text": "Text/Platzhalter — Tablet Gothic Regular 16; Platzhalter Text-55, gefüllt Text-100."
+		},
+		{
+			"nr": 3,
+			"text": "Slots — optionales Icon links, Dropdown-Chevron oder Clear-Button rechts."
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe · Rahmen & Text",
+			"items": [
+				{
+					"name": "--z-ds-color-border-100",
+					"wert": "#cccccf · Rahmen (Default/Filled/Disabled)",
+					"swatch": "#cccccf"
+				},
+				{
+					"name": "--z-ds-color-text-55",
+					"wert": "#69696c · Platzhalter, Rahmen aktiv",
+					"swatch": "#69696c"
+				},
+				{
+					"name": "--z-ds-color-text-100",
+					"wert": "#252525 · gefüllter Text",
+					"swatch": "#252525"
+				},
+				{
+					"name": "--z-ds-color-text-40",
+					"wert": "#999999 · Disabled",
+					"swatch": "#999999"
+				},
+				{
+					"name": "--z-ds-color-error-70",
+					"wert": "#bf4040 · Rahmen Error",
+					"swatch": "#bf4040"
+				}
+			]
+		},
+		{
+			"kategorie": "Spacing",
+			"items": [
+				{
+					"name": "--z-ds-space-s",
+					"wert": "12px · Innenabstand"
+				},
+				{
+					"name": "--z-ds-space-xs",
+					"wert": "8px · Gap zu Icon/Chevron"
+				}
+			]
+		},
+		{
+			"kategorie": "Radius",
+			"items": [
+				{
+					"name": "--z-ds-border-radius-4",
+					"wert": "4px"
+				}
+			]
+		},
+		{
+			"kategorie": "Typografie",
+			"items": [
+				{
+					"name": "Label/Regular/16px",
+					"wert": "Tablet Gothic Regular 16/1"
+				}
+			]
+		}
+	],
+	"varianten": [
+		{
+			"prop": "Zustand",
+			"werte": [
+				{
+					"label": "Default",
+					"default": true
+				},
+				{
+					"label": "Active",
+					"cssClass": "z-input--active"
+				},
+				{
+					"label": "Filled",
+					"cssClass": "z-input--filled"
+				},
+				{
+					"label": "Error",
+					"cssClass": "z-input--error"
+				},
+				{
+					"label": "Disabled",
+					"cssClass": "z-input--disabled"
+				}
+			]
+		},
+		{
+			"prop": "Extras",
+			"werte": [
+				{
+					"label": "Leading Icon",
+					"cssClass": "z-input--lead"
+				},
+				{
+					"label": "Dropdown",
+					"cssClass": "z-input--dropdown"
+				}
+			]
+		}
+	],
+	"zustaende": [
+		{
+			"label": "default",
+			"vorhanden": true
+		},
+		{
+			"label": "active / focus",
+			"vorhanden": true
+		},
+		{
+			"label": "filled",
+			"vorhanden": true
+		},
+		{
+			"label": "error",
+			"vorhanden": true
+		},
+		{
+			"label": "disabled",
+			"vorhanden": true
+		},
+		{
+			"label": "hover"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Label",
+			"wert": "Immer ein sichtbares <label> mit for/id — der Platzhalter ist KEIN Label.",
+			"status": "warn"
+		},
+		{
+			"label": "Fehler",
+			"wert": "Error-Text via aria-describedby verknüpfen; Farbe allein reicht nicht.",
+			"status": "warn"
+		},
+		{
+			"label": "Fokus",
+			"wert": "Sichtbarer Fokus-Rahmen (Active) — :focus-visible zusätzlich absichern.",
+			"status": "warn"
+		},
+		{
+			"label": "Disabled",
+			"wert": "Echtes disabled-Attribut setzen, nicht nur optisch dimmen.",
+			"status": "warn"
+		},
+		{
+			"label": "Kontrast Platzhalter",
+			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
+			"status": "pass"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Immer ein sichtbares Label über dem Feld.",
+			"Fehler mit Text erklären, nicht nur mit rotem Rahmen."
+		],
+		"dont": [
+			"Den Platzhalter als Label missbrauchen (verschwindet beim Tippen).",
+			"Disabled-Felder ohne Erklärung, warum sie gesperrt sind."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für kurze, einzeilige Freitext-Eingaben (Name, Suche, E-Mail).",
+			"Mit Dropdown-Chevron als Auswahl-/Combobox-Trigger."
+		],
+		"nichtNutzen": [
+			"Für mehrzeiligen Text — dafür ein Textarea.",
+			"Für eine feste Auswahl weniger Optionen — dafür Radio/Select."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "E-Mail (als Platzhalter)",
+			"gut": "Label »E-Mail« + Platzhalter »name@beispiel.de«",
+			"hinweis": "Der Platzhalter zeigt ein Beispiel, das Label benennt das Feld."
+		},
+		{
+			"schlecht": "Ungültig",
+			"gut": "Bitte eine gültige E-Mail-Adresse eingeben.",
+			"hinweis": "Fehlermeldungen sagen konkret, was zu tun ist."
+		}
+	],
+	"render": {
+		"controls": [
+			{
+				"key": "state",
+				"label": "Zustand",
+				"type": "select",
+				"default": "default",
+				"options": [
+					{
+						"value": "default",
+						"label": "Default"
+					},
+					{
+						"value": "active",
+						"label": "Active",
+						"cssClass": "z-input--active"
+					},
+					{
+						"value": "filled",
+						"label": "Filled",
+						"cssClass": "z-input--filled"
+					},
+					{
+						"value": "error",
+						"label": "Error",
+						"cssClass": "z-input--error"
+					},
+					{
+						"value": "disabled",
+						"label": "Disabled",
+						"cssClass": "z-input--disabled"
+					}
+				]
+			},
+			{
+				"key": "lead",
+				"label": "Leading Icon",
+				"type": "toggle",
+				"cssClass": "z-input--lead"
+			},
+			{
+				"key": "dropdown",
+				"label": "Dropdown",
+				"type": "toggle",
+				"cssClass": "z-input--dropdown"
+			}
+		],
+		"template": "<div class=\"z-input{classes}\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>",
+		"cssFile": "./pattern.css",
+		"presets": [
+			{
+				"label": "Standard",
+				"state": {
+					"state": "default",
+					"lead": false,
+					"dropdown": false
+				}
+			},
+			{
+				"label": "Mit Icon",
+				"state": {
+					"state": "default",
+					"lead": true,
+					"dropdown": false
+				}
+			},
+			{
+				"label": "Auswahl (Dropdown)",
+				"state": {
+					"state": "default",
+					"lead": false,
+					"dropdown": true
+				}
+			},
+			{
+				"label": "Fehler",
+				"state": {
+					"state": "error",
+					"lead": false,
+					"dropdown": false
+				}
+			}
+		],
+		"preview": "<div class=\"z-input z-input--filled\"><span class=\"z-input__lead\" aria-hidden=\"true\"></span><input class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" aria-label=\"E-Mail\" /></div>",
+		"variant": "<div class=\"z-input z-input--error\"><input class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" aria-label=\"E-Mail\" /></div>",
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "left",
+				"y": 50
+			},
+			{
+				"nr": 2,
+				"side": "top",
+				"x": 40
+			},
+			{
+				"nr": 3,
+				"side": "right",
+				"y": 50
+			}
+		],
+		"matrix": [
+			{
+				"label": "Default",
+				"html": "<div class=\"z-input\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Active",
+				"html": "<div class=\"z-input z-input--active\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Filled",
+				"html": "<div class=\"z-input z-input--filled\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Eingegebener Text\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Error",
+				"html": "<div class=\"z-input z-input--error\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Disabled",
+				"html": "<div class=\"z-input z-input--disabled\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Leading Icon",
+				"html": "<div class=\"z-input z-input--lead\"><span class=\"z-input__lead\" aria-hidden=\"true\"></span><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"
+			},
+			{
+				"label": "Dropdown",
+				"html": "<div class=\"z-input z-input--dropdown\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Auswählen\" aria-label=\"Beispiel\" /><span class=\"z-input__chevron\" aria-hidden=\"true\"></span></div>"
+			}
+		],
+		"props": [
+			{
+				"name": "value",
+				"typ": "string",
+				"default": "\"\"",
+				"beschreibung": "Eingabewert."
+			},
+			{
+				"name": "placeholder",
+				"typ": "string",
+				"default": "—",
+				"beschreibung": "Beispieltext im leeren Feld (kein Ersatz fürs Label)."
+			},
+			{
+				"name": "state",
+				"typ": "\"default\" | \"active\" | \"filled\" | \"error\" | \"disabled\"",
+				"default": "\"default\"",
+				"beschreibung": "Visueller Zustand (meist aus Fokus/Validierung abgeleitet)."
+			},
+			{
+				"name": "leadingIcon",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Zeigt ein führendes Icon."
+			},
+			{
+				"name": "dropdown",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Zeigt den Dropdown-Chevron (Auswahl-Trigger)."
+			},
+			{
+				"name": "clearable",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Clear-Button bei gefülltem Feld."
+			}
+		],
+		"repoNote": "Erst-Import aus Figma (❖ ZDS, node 477:3021). Zustände hier als Modifier-Klassen; im Produkt aus Fokus/Validierung ableiten und Disabled als echtes disabled-Attribut setzen. Immer mit sichtbarem <label> kombinieren.",
+		"version": "Figma-Node 477:3021",
+		"variantInfo": {
+			"Default": "Ruhezustand, leeres Feld.",
+			"Active": "Fokussiert — Rahmen in Text-55.",
+			"Filled": "Enthält eine Eingabe (Text-100).",
+			"Error": "Validierung fehlgeschlagen — Rahmen rot, dazu Fehlertext.",
+			"Disabled": "Gesperrt — gedämpft, nicht bedienbar.",
+			"Leading Icon": "Führendes Icon, z. B. Suche.",
+			"Dropdown": "Chevron als Auswahl-/Combobox-Trigger."
+		}
+	}
+}

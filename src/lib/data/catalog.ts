@@ -21,7 +21,8 @@ const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
 	'page-shortcut': { order: 3 },
 	'button-group': { order: 4 },
 	'icon-button': { order: 5 },
-	cell: { order: 6 }
+	cell: { order: 6 },
+	input: { order: 7 }
 };
 
 export type CatalogEntry = {

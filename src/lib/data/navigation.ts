@@ -244,8 +244,7 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Input',
 		href: '/product/components/input',
-		badge: 'Geplant',
-		badgeVariant: 'neutral',
+		badge: 'Neu',
 		isInFooter: true
 	},
 	{
