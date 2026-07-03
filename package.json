@@ -17,6 +17,8 @@
 		"gen:icons": "node tooling/gen-icons.mjs",
 		"gen:brand-assets": "node tooling/gen-brand-assets.mjs",
 		"gen:assets": "npm run gen:icons && npm run gen:brand-assets",
+		"new-component": "node tooling/zeit-de-exporter/export.mjs --init",
+		"export-component": "node tooling/zeit-de-exporter/export.mjs",
 		"format": "prettier --write .",
 		"lint": "eslint .",
 		"test:unit": "vitest",

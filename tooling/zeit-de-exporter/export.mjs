@@ -92,7 +92,8 @@ const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung'
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
 	// `render` ist Repo-Verdrahtung (Slot-Markup/CSS), gehört nicht ins Datenmodell.
-	const { render: _render, ...spec } = model;
+	// `$schema` ist nur Editor-Komfort (Autocomplete) und darf nicht ins Modell leaken.
+	const { render: _render, $schema: _schema, ...spec } = model;
 	const json = JSON.stringify(spec, null, '\t');
 	return (
 		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
@@ -405,17 +406,23 @@ function renderPage(model, { patternCss = null } = {}) {
 // ---------------------------------------------------------------------------
 
 function parseArgs(argv) {
-	const args = { input: null, root: process.cwd(), dry: false };
+	const args = { input: null, root: process.cwd(), dry: false, init: false };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === '--dry') args.dry = true;
+		else if (a === '--init') args.init = true;
 		else if (a === '--root') args.root = argv[++i];
 		else if (a === '--target') {
 			const t = argv[++i];
 			if (t !== TARGET) throw new Error(`Unbekanntes Ziel "${t}" — dieser Exporter kann nur "${TARGET}".`);
 		} else if (!a.startsWith('-')) args.input = a;
 	}
-	if (!args.input) throw new Error('Eingabe fehlt. Nutzung: export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]');
+	if (!args.input)
+		throw new Error(
+			'Eingabe fehlt.\n' +
+				'  Neu anlegen:  export.mjs --init "<Name>"\n' +
+				'  Exportieren:  export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]'
+		);
 	return args;
 }
 
@@ -495,8 +502,89 @@ function validate(model) {
 		throw new Error(`Modell-Validierung fehlgeschlagen:\n   - ${errors.join('\n   - ')}`);
 }
 
+/**
+ * --init: legt ein neues Component-Gerüst an (Ordner + gültiges Start-model.json mit
+ * $schema-Verweis für Editor-Hilfe + pattern.css-Stub). Überschreibt nichts, exportiert
+ * NICHT (erst ausfüllen, dann exportieren).
+ */
+function scaffold(name, root) {
+	if (!name) throw new Error('Name fehlt. Nutzung: export.mjs --init "Text Button"');
+	const kebab = kebabCase(name);
+	const cls = `z-${kebab}`;
+	const outDir = resolve(root, ROUTE_BASE, kebab);
+	const modelPath = resolve(outDir, 'model.json');
+	const cssPath = resolve(outDir, 'pattern.css');
+	if (existsSync(modelPath))
+		throw new Error(`Existiert bereits: ${relative(root, modelPath)} — nichts überschrieben.`);
+
+	const schemaRel = relative(outDir, resolve(root, 'tooling/zeit-de-exporter/model.schema.json'));
+	const today = new Date().toISOString().slice(0, 10);
+
+	const model = {
+		$schema: schemaRel,
+		name,
+		kategorie: 'TODO',
+		figma: 'TODO: node-genauer Figma-Link (…?node-id=…&m=dev)',
+		aktualisiertAm: today,
+		zweck: 'TODO: In ein bis zwei Sätzen — wofür ist diese Komponente?',
+		varianten: [
+			{
+				prop: 'Variante',
+				werte: [
+					{ label: 'Default', default: true },
+					{ label: 'Beispiel', cssClass: `${cls}--beispiel` }
+				]
+			}
+		],
+		zustaende: [{ label: 'default', vorhanden: true }],
+		a11y: [{ label: 'Rolle', wert: 'TODO', status: 'todo' }],
+		doDont: { do: ['TODO'], dont: ['TODO'] },
+		verwendung: { nutzen: ['TODO'], nichtNutzen: ['TODO'] },
+		render: {
+			controls: [
+				{
+					key: 'variante',
+					label: 'Variante',
+					type: 'select',
+					default: 'default',
+					options: [
+						{ value: 'default', label: 'Default' },
+						{ value: 'beispiel', label: 'Beispiel', cssClass: `${cls}--beispiel` }
+					]
+				}
+			],
+			template: `<div class="${cls}{classes}">Beispiel</div>`,
+			cssFile: './pattern.css'
+		}
+	};
+
+	const css =
+		`/* ${cls} — Pattern-CSS: originalgetreu aus Figma, echte --z-ds-*-Token.\n` +
+		`   Flache Regeln, keine @media/@keyframes (v1-Scoping). */\n` +
+		`.${cls} {\n  /* TODO: Basis-Styles */\n}\n` +
+		`.${cls}--beispiel {\n  /* TODO: Modifier-Styles */\n}\n`;
+
+	mkdirSync(outDir, { recursive: true });
+	writeFileSync(modelPath, JSON.stringify(model, null, '\t') + '\n');
+	writeFileSync(cssPath, css);
+
+	console.log(`Gerüst erzeugt für "${name}" -> ${ROUTE_BASE}/${kebab}/`);
+	console.log(`  ${relative(root, modelPath)}`);
+	console.log(`  ${relative(root, cssPath)}`);
+	console.log('\nNächste Schritte:');
+	console.log('  1. model.json ausfüllen — der Editor zeigt Feld-Hilfe dank $schema.');
+	console.log('  2. pattern.css mit den echten z-*-Styles füllen.');
+	console.log(`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`);
+	console.log('  4. Menüeintrag in src/lib/data/navigation.ts ergänzen.');
+}
+
 function main() {
-	const { input, root, dry } = parseArgs(process.argv.slice(2));
+	const parsed = parseArgs(process.argv.slice(2));
+	if (parsed.init) {
+		scaffold(parsed.input, parsed.root);
+		return;
+	}
+	const { input, root, dry } = parsed;
 	const modelPath = resolveModelPath(input);
 	const model = JSON.parse(readFileSync(modelPath, 'utf8'));
 	validate(model);

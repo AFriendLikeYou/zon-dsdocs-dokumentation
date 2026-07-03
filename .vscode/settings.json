@@ -1,0 +1,8 @@
+{
+	"json.schemas": [
+		{
+			"fileMatch": ["/src/routes/product/components/*/model.json"],
+			"url": "./tooling/zeit-de-exporter/model.schema.json"
+		}
+	]
+}

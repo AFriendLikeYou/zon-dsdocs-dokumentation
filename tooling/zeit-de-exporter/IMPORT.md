@@ -17,6 +17,19 @@ model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──�
 Nav-Eintrag · Katalog-Order · Gate · redaktionelle Prüfung (content.ts)
 ```
 
+## Schnellstart
+
+```bash
+npm run new-component -- "Input"          # Gerüst anlegen (Ordner + Start-model.json + pattern.css)
+# … model.json ausfüllen (der Editor zeigt dank $schema Feld-Hilfe & Validierung) …
+npm run export-component -- src/routes/product/components/input   # Seite erzeugen
+```
+
+Das Start-`model.json` ist bereits gültig und exportierbar — einfach die `TODO`-Werte
+ersetzen. **Feld-Hilfe im Editor:** `.vscode/settings.json` verknüpft jedes
+`model.json` mit `model.schema.json` → Autovervollständigung, Feldbeschreibungen und
+rote Kringel bei Fehlern (VS Code; andere Editoren via `"$schema"`-Zeile).
+
 ## 1 · Aus Figma extrahieren (Figma MCP)
 
 Node-ID aus dem Figma-Link nehmen. **Instanz immer zum Component-Set auflösen**

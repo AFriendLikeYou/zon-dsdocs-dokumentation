@@ -1,0 +1,302 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://zeit.de/ds-doku/model.schema.json",
+	"title": "Component-Doku-Modell (Steckbrief)",
+	"description": "Eingabe für den zeit-de-Exporter. Ein Steckbrief pro Komponente — der Exporter baut daraus die fertige Doku-Seite. Redaktionelle Texte kann content.ts überschreiben.",
+	"type": "object",
+	"required": ["name"],
+	"additionalProperties": false,
+	"properties": {
+		"$schema": { "type": "string", "description": "Verweis auf dieses Schema (aktiviert Autovervollständigung im Editor). Optional." },
+		"name": { "type": "string", "description": "Anzeigename der Komponente, z. B. \"Text Button\". Pflicht. Der Ordner-/URL-Name entsteht daraus automatisch (kebab-case)." },
+		"status": { "enum": ["ready_for_dev", "completed", "changed"], "description": "Reifegrad — steuert das Badge im Hero. (Redaktionell: gehört idealerweise in content.ts.)" },
+		"kategorie": { "type": "string", "description": "Gruppe, z. B. \"Aktionen\", \"Inhalte\", \"Formulare\"." },
+		"zweck": { "type": "string", "description": "Ein bis zwei Sätze: Wofür ist die Komponente? Erscheint im Hero. (Redaktionell.)" },
+		"figma": { "type": "string", "description": "Node-genauer Figma-Link (…?node-id=…&m=dev)." },
+		"aktualisiertAm": { "type": "string", "description": "Datum JJJJ-MM-TT." },
+		"version": { "type": "string", "description": "Versions-/Snapshot-Label im Hero, z. B. \"Figma-Node 213:12\". (Redaktionell.)" },
+		"masse": {
+			"type": "object",
+			"description": "Außenmaße für die Anatomie-Maßlinien + Specs-Tabelle. Jeder Wert: einfacher Text ODER { px, token }.",
+			"additionalProperties": false,
+			"properties": {
+				"hoehe": { "$ref": "#/$defs/masseValue" },
+				"breite": { "$ref": "#/$defs/masseValue" },
+				"padding": { "$ref": "#/$defs/masseValue" },
+				"radius": { "$ref": "#/$defs/masseValue" }
+			}
+		},
+		"spacing": {
+			"type": "array",
+			"description": "Innenabstände (Gaps zwischen Teilen) → Anatomie-Redlines mit px↔Token-Umschalter.",
+			"items": { "$ref": "#/$defs/spacingSpec" }
+		},
+		"callouts": {
+			"type": "array",
+			"description": "Nummerierte Beschriftungen der Anatomie. Text \"Begriff — Beschreibung\": der Teil vor dem — wird fett.",
+			"items": { "$ref": "#/$defs/callout" }
+		},
+		"tokens": {
+			"type": "array",
+			"description": "Design-Tokens der Komponente, gruppiert (Farbe, Spacing, Radius, Typografie …) → Specs-Tab.",
+			"items": { "$ref": "#/$defs/tokenGroup" }
+		},
+		"varianten": {
+			"type": "array",
+			"description": "Varianten-Achsen wie in Figma (Typ, Größe …). cssClass verknüpft eine Variante mit ihrer Modifier-Klasse (Drift-Check).",
+			"items": { "$ref": "#/$defs/variantGroup" }
+		},
+		"zustaende": {
+			"type": "array",
+			"description": "Zustände (default, hover, focus, disabled …). vorhanden=true, wenn im Design abgedeckt.",
+			"items": { "$ref": "#/$defs/specState" }
+		},
+		"a11y": {
+			"type": "array",
+			"description": "Barrierefreiheit-Hinweise (eigener Tab). status: pass | warn | todo. (Redaktionell.)",
+			"items": { "$ref": "#/$defs/a11yItem" }
+		},
+		"doDont": { "$ref": "#/$defs/doDont" },
+		"verwendung": { "$ref": "#/$defs/verwendung" },
+		"wording": {
+			"type": "array",
+			"description": "UX-Writing: konkrete \"statt X → besser Y\"-Regeln. (Redaktionell.)",
+			"items": { "$ref": "#/$defs/wordingRule" }
+		},
+		"variantInfo": {
+			"type": "object",
+			"description": "Wann welche Variante nutzen (Label → Satz). (Redaktionell.)",
+			"additionalProperties": { "type": "string" }
+		},
+		"render": { "$ref": "#/$defs/render" }
+	},
+	"$defs": {
+		"measure": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["px"],
+			"properties": {
+				"px": { "type": "string", "description": "Wert in px, z. B. \"4 px\"." },
+				"token": { "type": "string", "description": "z-ds-Token-Name, z. B. \"--z-ds-space-xxxs\" (für den px↔Token-Umschalter)." }
+			}
+		},
+		"masseValue": {
+			"description": "Einfacher Text (nur px) ODER { px, token }.",
+			"oneOf": [{ "type": "string" }, { "$ref": "#/$defs/measure" }]
+		},
+		"spacingSpec": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["label", "px"],
+			"properties": {
+				"label": { "type": "string", "description": "Name des Abstands, z. B. \"Spitzmarke ↔ Titel\"." },
+				"px": { "type": "string", "description": "Wert in px." },
+				"token": { "type": "string", "description": "z-ds-Spacing-Token." }
+			}
+		},
+		"callout": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["nr", "text"],
+			"properties": {
+				"nr": { "type": "integer", "description": "Nummer des Callouts (1, 2, 3 …)." },
+				"text": { "type": "string", "description": "\"Begriff — Beschreibung\" (Begriff wird fett)." }
+			}
+		},
+		"tokenGroup": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["kategorie", "items"],
+			"properties": {
+				"kategorie": { "type": "string", "description": "Gruppentitel, z. B. \"Farbe\"." },
+				"beschreibung": { "type": "string", "description": "Optionaler Satz unter dem Gruppentitel." },
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["name", "wert"],
+						"properties": {
+							"name": { "type": "string", "description": "Token-Name." },
+							"wert": { "type": "string", "description": "Wert/Beschreibung." },
+							"swatch": { "type": "string", "description": "Farb-Hex für die Vorschau (optional)." },
+							"translucent": { "type": "boolean" }
+						}
+					}
+				}
+			}
+		},
+		"variantGroup": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["prop", "werte"],
+			"properties": {
+				"prop": { "type": "string", "description": "Name der Achse, z. B. \"Typ\" oder \"Größe\"." },
+				"werte": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["label"],
+						"properties": {
+							"label": { "type": "string" },
+							"cssClass": { "type": "string", "description": "Modifier-Klasse dieser Variante (wird gegen pattern.css geprüft)." },
+							"default": { "type": "boolean" }
+						}
+					}
+				}
+			}
+		},
+		"specState": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["label"],
+			"properties": {
+				"label": { "type": "string" },
+				"vorhanden": { "type": "boolean", "description": "true = im Design abgedeckt (grün), sonst gestrichelt." }
+			}
+		},
+		"a11yItem": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["label", "wert", "status"],
+			"properties": {
+				"label": { "type": "string" },
+				"wert": { "type": "string" },
+				"status": { "enum": ["pass", "warn", "todo"] }
+			}
+		},
+		"doDont": {
+			"type": "object",
+			"additionalProperties": false,
+			"description": "Do & Don't. (Redaktionell.)",
+			"properties": {
+				"do": { "type": "array", "items": { "type": "string" } },
+				"dont": { "type": "array", "items": { "type": "string" } }
+			}
+		},
+		"verwendung": {
+			"type": "object",
+			"additionalProperties": false,
+			"description": "Wann verwenden / Wann nicht. (Redaktionell.)",
+			"properties": {
+				"nutzen": { "type": "array", "items": { "type": "string" } },
+				"nichtNutzen": { "type": "array", "items": { "type": "string" } }
+			}
+		},
+		"wordingRule": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["schlecht", "gut"],
+			"properties": {
+				"schlecht": { "type": "string", "description": "Schlechtes Beispiel (wird durchgestrichen)." },
+				"gut": { "type": "string", "description": "Besseres Beispiel." },
+				"hinweis": { "type": "string", "description": "Kurze Begründung (optional)." }
+			}
+		},
+		"control": {
+			"type": "object",
+			"description": "Ein Playground-Bedienelement. type=select braucht options; toggle braucht cssClass; attr braucht attr.",
+			"additionalProperties": false,
+			"required": ["key", "label", "type"],
+			"properties": {
+				"key": { "type": "string", "description": "Eindeutiger Schlüssel (auch in presets referenziert)." },
+				"label": { "type": "string" },
+				"type": { "enum": ["select", "toggle", "attr"] },
+				"default": { "description": "Startwert (string für select, boolean für toggle/attr)." },
+				"options": {
+					"type": "array",
+					"description": "Nur für type=select.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["value", "label"],
+						"properties": {
+							"value": { "type": "string" },
+							"label": { "type": "string" },
+							"cssClass": { "type": "string", "description": "Modifier-Klasse für diese Option." }
+						}
+					}
+				},
+				"cssClass": { "type": "string", "description": "Für type=toggle: welche Klasse der Schalter setzt." },
+				"attr": { "type": "string", "description": "Für type=attr: welches HTML-Attribut gesetzt wird (z. B. disabled)." }
+			}
+		},
+		"preset": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["label", "state"],
+			"properties": {
+				"label": { "type": "string", "description": "Name des Beispiels, z. B. \"Mit Bild\"." },
+				"state": { "type": "object", "description": "Setzt Control-Werte auf einmal (Schlüssel = control.key)." }
+			}
+		},
+		"render": {
+			"type": "object",
+			"description": "Repo-Verdrahtung (Playground, CSS, Code) — wird beim Export vom Datenmodell abgezogen.",
+			"additionalProperties": false,
+			"properties": {
+				"controls": { "type": "array", "items": { "$ref": "#/$defs/control" }, "description": "Bedienelemente des Playgrounds." },
+				"template": { "type": "string", "description": "Logikfreies HTML mit {classes}/{attrs}-Platzhaltern — speist Vorschau UND Code." },
+				"cssFile": { "type": "string", "description": "Pfad zur co-locateten pattern.css (unscoped, echte --z-ds-*-Token)." },
+				"presets": { "type": "array", "items": { "$ref": "#/$defs/preset" }, "description": "Benannte Beispiele/„Rezepte\"." },
+				"specimen": { "type": "string", "description": "Escape-Hatch: Pfad zu einer Specimen.svelte (statt template, für Loops/Interaktion)." },
+				"hint": { "type": "string", "description": "Hinweiszeile statt Controls." },
+				"stage": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": { "darkKey": { "type": "string", "description": "Control-Key, bei dem die Bühne dunkel startet (z. B. onImage)." } }
+				},
+				"preview": { "type": "string", "description": "Haupt-Specimen-Markup für die Anatomie." },
+				"variant": { "type": "string", "description": "Zweites Specimen-Markup (Strip in der Anatomie)." },
+				"matrix": {
+					"type": "array",
+					"description": "Varianten-Raster.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["label", "html"],
+						"properties": { "label": { "type": "string" }, "html": { "type": "string" } }
+					}
+				},
+				"calloutAnchors": {
+					"type": "array",
+					"description": "Position der Callouts auf dem Specimen.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["nr", "side"],
+						"properties": {
+							"nr": { "type": "integer" },
+							"side": { "enum": ["top", "bottom", "left", "right"] },
+							"x": { "type": "number" },
+							"y": { "type": "number" }
+						}
+					}
+				},
+				"props": {
+					"type": "array",
+					"description": "Properties-Tabelle (Develop-Tab).",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["name", "typ"],
+						"properties": {
+							"name": { "type": "string" },
+							"typ": { "type": "string" },
+							"default": { "type": "string" },
+							"beschreibung": { "type": "string" }
+						}
+					}
+				},
+				"css": { "description": "Vanilla-CSS des Specimens (String oder Zeilen-Array)." },
+				"codeNote": { "type": "string" },
+				"codeSvelte": { "description": "Svelte-Code-Beispiel (String oder Zeilen-Array)." },
+				"repoNote": { "type": "string", "description": "Hinweis zur echten Repo-Komponente." },
+				"repoCodeSvelte": { "description": "Code der echten Repo-Komponente (String oder Zeilen-Array)." },
+				"variantInfo": { "type": "object", "additionalProperties": { "type": "string" } },
+				"version": { "type": "string" }
+			}
+		}
+	}
+}

@@ -47,8 +47,12 @@ const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
 export const CATALOG: CatalogEntry[] = Object.entries(models)
 	.map(([path, model]) => {
 		const slug = slugOf(path);
-		// `render` ist Repo-Verdrahtung (Template/CSS), gehört nicht in den Katalog.
-		const { render: _render, ...machine } = model;
+		// `render` ist Repo-Verdrahtung (Template/CSS), `$schema` nur Editor-Komfort —
+		// beides gehört nicht in den Katalog.
+		const { render: _render, $schema: _schema, ...machine } = model as Partial<ComponentSpec> & {
+			render?: unknown;
+			$schema?: unknown;
+		};
 		const content =
 			contents[`/src/routes/product/components/${slug}/content.ts`] ?? ({} as Partial<ComponentSpec>);
 		return {

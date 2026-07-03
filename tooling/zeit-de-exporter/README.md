@@ -115,6 +115,9 @@ Pflichtfeld `name`, gültige `controls` (key/type/options/attr), `template` mit
 ## Benutzung
 
 ```bash
+# Neu anlegen — Gerüst (Ordner + gültiges Start-model.json mit $schema + pattern.css-Stub):
+node tooling/zeit-de-exporter/export.mjs --init "<Name>"      # oder: npm run new-component -- "<Name>"
+
 # (a) Modell als Datei — schreibt Output UND legt model.json im Component-Ordner ab:
 node tooling/zeit-de-exporter/export.mjs <model.json> [--root <repoRoot>] [--dry]
 
@@ -123,6 +126,12 @@ node tooling/zeit-de-exporter/export.mjs src/routes/product/components/button
 ```
 
 `--dry` schreibt nichts, sondern gibt die generierten Dateien zur Kontrolle aus.
+`--init` exportiert nicht (erst ausfüllen, dann exportieren) und überschreibt nichts.
+
+**Editor-Hilfe:** `.vscode/settings.json` verknüpft jedes `model.json` mit
+[`model.schema.json`](./model.schema.json) → Autovervollständigung, Feldbeschreibungen
+und Inline-Validierung. Portabel auch via `"$schema"`-Zeile im `model.json` (wird beim
+Export ignoriert, landet nicht in `spec.generated.ts`).
 
 ## Verifikation
 
