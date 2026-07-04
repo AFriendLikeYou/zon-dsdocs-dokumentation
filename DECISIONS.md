@@ -587,6 +587,25 @@ Komponenten mit model.json; nur ein optionaler Badge-Override bleibt.
 
 ---
 
+## ADR-026 — Patterns als handkuratierte Kompositions-Ebene (`/product/patterns`)
+**Kontext:** Die Doku zeigt einzelne Komponenten, aber nicht, wie man sie **zusammensetzt**
+(Formular, Karte, …). Solche Rezepte sind keine Komponenten (kein `model.json`, kein
+Figma-Component-Set) — der Component-Exporter passt nicht.
+**Entscheidung:** Eine eigene Sektion `/product/patterns`: eine Übersichtsseite plus je
+eine handgeschriebene `.svx`-Seite pro Pattern (V1: „Formular"). Patterns laufen **nicht**
+über den Exporter (der bleibt Komponenten vorbehalten) — im Kopf jeder Pattern-Datei
+kommentiert. **Kein CSS-Duplikat:** die Pattern-Seite lädt die benötigten `pattern.css`
+der Komponenten via Vite `?raw` und bindet sie EINMAL seitenweit ein; nur das Layout-Glue
+(Stack-Abstände, Label-/Fehlertext) lebt co-located als `pattern.css` des Patterns. Die
+`z-`-Selektoren sind seitenweit eindeutig → bewusst **unscoped** eingebunden (spart eine
+Scope-Schicht); die Live-Vorschau sitzt zusätzlich auf `.ds-stage` (gepinnte Light-Token).
+**Navigation:** Neue statische Kategorie „Patterns" in `MENU_ITEMS_PRODUCT` zwischen
+Components und Resources — mit **literalen** hrefs, damit `check-nav.mjs` (Text-Scan) sie
+ohne Anpassung als verlinkt erkennt.
+**Status:** Aktiv (V1: Formular).
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

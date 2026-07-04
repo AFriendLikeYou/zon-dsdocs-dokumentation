@@ -244,6 +244,23 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	// Ab hier katalog-getrieben (ADR-025): dokumentierte Komponenten + geplante Stubs.
 	...COMPONENT_MENU_ITEMS,
 	{
+		title: 'Patterns',
+		isCategory: true
+	},
+	// Patterns sind handkuratiert (ADR-026), keine katalog-getriebene Sektion — daher
+	// literale hrefs (check-nav.mjs scannt navigation.ts als Text).
+	{
+		title: 'Übersicht',
+		href: '/product/patterns',
+		isInFooter: true
+	},
+	{
+		title: 'Formular',
+		href: '/product/patterns/form',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Resources',
 		isCategory: true
 	},

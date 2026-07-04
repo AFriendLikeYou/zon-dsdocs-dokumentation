@@ -1,0 +1,137 @@
+---
+title: Formular
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	// ── HANDKURATIERTES PATTERN ────────────────────────────────────────────────
+	// Patterns sind Kompositions-Rezepte und laufen NICHT über den Component-Exporter
+	// (der bleibt einzelnen Komponenten vorbehalten). Diese Seite ist von Hand
+	// geschrieben. Begründung: DECISIONS.md ADR-026.
+	//
+	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus den
+	// Component-Ordnern (Single Source of Truth). Nur das Layout-Glue (Stack-Abstände,
+	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns.
+	import { CodeBlock } from '$components/ui/specsheet';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { CardGrid } from '$components/ui/card';
+
+	import inputCss from '../../components/input/pattern.css?raw';
+	import checkboxCss from '../../components/checkbox/pattern.css?raw';
+	import buttonCss from '../../components/button/pattern.css?raw';
+	import glueCss from './pattern.css?raw';
+
+	// Die z-Selektoren sind seitenweit eindeutig (nichts sonst nutzt sie) → wir binden
+	// die pattern.css EINMAL UNSCOPED ein. Bewusste, dokumentierte Entscheidung (ADR-026):
+	// spart eine Scope-Schicht; die Live-Vorschau sitzt zusätzlich auf .ds-stage, damit
+	// die --z-ds-*-Token dort auf helle Artboard-Werte gepinnt sind.
+	const patternCss = [inputCss, checkboxCss, buttonCss, glueCss].join('\n');
+
+	// Komplettes Formular-Markup — EINE Quelle für Live-Vorschau UND Code-Block.
+	const formMarkup = `<form class="pf-form" novalidate>
+  <div class="pf-field">
+    <label class="pf-label" for="pf-name">Name</label>
+    <div class="z-input">
+      <input class="z-input__field" id="pf-name" type="text" placeholder="Vor- und Nachname" />
+    </div>
+  </div>
+
+  <div class="pf-field">
+    <label class="pf-label" for="pf-mail">E-Mail</label>
+    <div class="z-input z-input--error">
+      <input class="z-input__field" id="pf-mail" type="email" placeholder="name@beispiel.de"
+        aria-invalid="true" aria-describedby="pf-mail-error" />
+    </div>
+    <span class="pf-error" id="pf-mail-error">Bitte eine gültige E-Mail-Adresse eingeben.</span>
+  </div>
+
+  <label class="pf-check" for="pf-agree">
+    <span class="z-checkbox z-checkbox--checked">
+      <span class="z-checkbox__check"></span>
+    </span>
+    <input type="checkbox" id="pf-agree" checked hidden />
+    <span class="pf-label">Ich stimme den Datenschutzhinweisen zu.</span>
+  </label>
+
+  <button class="z-button z-button--primary" type="submit">Anmelden</button>
+</form>`;
+
+	const related = [
+		{
+			url: '/product/components/input',
+			title: 'Input',
+			description: 'Das Eingabefeld — Zustände, Fehler und Slots.'
+		},
+		{
+			url: '/product/components/checkbox',
+			title: 'Checkbox',
+			description: 'Das Auswahlkästchen für Zustimmungen und Optionen.'
+		},
+		{
+			url: '/product/components/button',
+			title: 'Button',
+			description: 'Die Aktion, die das Formular absendet.'
+		}
+	];
+
+	const regeln = {
+		nutzen: [
+			'Feste Reihenfolge: Label über dem Feld, Fehlertext darunter.',
+			'Pflichtfelder klar kennzeichnen und Fehler mit Text erklären.',
+			'Fehlertext per aria-describedby mit dem Feld verknüpfen (aria-invalid setzen).',
+			'Eine primäre Absende-Aktion (z-button--primary) am Ende.'
+		],
+		nichtNutzen: [
+			'Den Platzhalter als Label missbrauchen — er verschwindet beim Tippen.',
+			'Fehler nur über Farbe signalisieren (roter Rahmen ohne Text).',
+			'Mehrere Primary-Buttons nebeneinander.'
+		]
+	};
+</script>
+
+<!-- Komponenten-CSS (?raw, unscoped) + Glue EINMAL seitenweit. Via {@html}, weil ein
+     Svelte-<style>-Block kein JS interpoliert. Quelle = Component-Ordner (vertrauenswürdig). -->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>${patternCss}</style>`}
+
+# {title}
+
+Ein zugängliches Formular aus echten Design-System-Komponenten: Label, Eingabefeld,
+Checkbox, Button und Fehlertext. Kein neues CSS — die Styles kommen unverändert aus den
+Component-Ordnern.
+
+## Vorschau
+
+<div class="pf-stage spec-canvas ds-stage">
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html formMarkup}
+</div>
+
+## Code
+
+<CodeBlock title="HTML" lang="html" code={formMarkup} />
+
+## Regeln
+
+<UsageBlock verwendung={regeln} />
+
+## Beteiligte Komponenten
+
+<CardGrid cards={related} />
+
+<style>
+	.pf-stage {
+		display: flex;
+		justify-content: center;
+		padding: var(--z-ds-space-32) var(--z-ds-space-24);
+		border: 1px solid var(--ds-border-soft);
+		border-radius: var(--ds-radius);
+		box-shadow: var(--ds-shadow-sm);
+		/* RAW-Token wie die anderen Bühnen → Fläche bleibt eigenständig hell. */
+		background: var(--z-ds-color-background-10);
+		margin-block: var(--z-ds-space-16);
+	}
+</style>

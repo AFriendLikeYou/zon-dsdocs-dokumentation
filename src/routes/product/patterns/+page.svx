@@ -1,0 +1,34 @@
+---
+title: Patterns
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	// HANDKURATIERT: Patterns sind Kompositions-Rezepte, nicht einzelne Komponenten.
+	// Sie laufen NICHT über den Component-Exporter — die Übersicht wird hier von Hand
+	// gepflegt (bewusst, siehe DECISIONS.md ADR-026).
+	import { CardGrid } from '$components/ui/card';
+
+	const patterns = [
+		{
+			url: '/product/patterns/form',
+			title: 'Formular',
+			description:
+				'Label, Eingabefeld, Checkbox, Button und Fehlertext zu einem zugänglichen Formular zusammengesetzt.',
+			badge: 'Neu',
+			badgeVariant: 'accent' as const
+		}
+	];
+</script>
+
+# {title}
+
+Komponenten sind die Bausteine — Patterns zeigen, wie sie **zusammengesetzt** werden.
+Ein Pattern ist ein erprobtes Rezept für eine wiederkehrende Aufgabe: welche Komponenten
+in welcher Reihenfolge, mit welchen Abständen und welchen Regeln. Sie nutzen dieselben
+`z-`-Klassen wie die Component-Seiten, ohne CSS zu duplizieren.
+
+<CardGrid cards={patterns} />
