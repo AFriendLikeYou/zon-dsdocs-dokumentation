@@ -10,22 +10,29 @@
  * Override-Map. Redaktionelle Texte (content.ts) überschreiben das Maschinen-
  * Modell per Shallow-Merge — wie auf den Component-Seiten selbst.
  */
-import type { ComponentSpec } from '$types/spec';
+import type { BadgeVariant, ComponentSpec } from '$types/spec';
 
-type CatalogOverride = { order?: number; exclude?: boolean };
+type CatalogOverride = {
+	order?: number;
+	exclude?: boolean;
+	/** Kuratiertes Nav-/Übersichts-Badge (z. B. „Neu"). Bewusst redaktionell — keine Automatik. */
+	badge?: string;
+	badgeVariant?: BadgeVariant;
+};
 
-/** Nur Ausnahmen eintragen — Einträge ohne Override laufen ans Ende (order 999). */
+/** Nur Ausnahmen eintragen — Einträge ohne Override laufen ans Ende (order 999).
+    Badges sind kuratiert (nicht ableitbar) und wandern deshalb hierher (ADR-025). */
 const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
-	button: { order: 1 },
-	'text-button': { order: 2 },
-	'page-shortcut': { order: 3 },
-	'button-group': { order: 4 },
-	'icon-button': { order: 5 },
-	cell: { order: 6 },
-	input: { order: 7 },
-	checkbox: { order: 8 },
-	toggle: { order: 9 },
-	stepper: { order: 10 }
+	button: { order: 1, badge: 'Neu' },
+	'text-button': { order: 2, badge: 'Neu' },
+	'page-shortcut': { order: 3, badge: 'Neu' },
+	'button-group': { order: 4, badge: 'Neu' },
+	'icon-button': { order: 5, badge: 'Neu' },
+	cell: { order: 6, badge: 'Neu' },
+	input: { order: 7, badge: 'Neu' },
+	checkbox: { order: 8, badge: 'Neu' },
+	toggle: { order: 9, badge: 'Neu' },
+	stepper: { order: 10, badge: 'Neu' }
 };
 
 export type CatalogEntry = {
@@ -33,6 +40,9 @@ export type CatalogEntry = {
 	/** Maschinen-Modell (ohne render) + redaktionelle Overrides aus content.ts. */
 	spec: Partial<ComponentSpec>;
 	order: number;
+	/** Kuratiertes Nav-Badge (aus der Override-Map, nicht aus dem Modell). */
+	badge?: string;
+	badgeVariant?: BadgeVariant;
 };
 
 // Vite inlined beide Globs zur Build-Zeit (eager) — kein Laufzeit-Fetch.
@@ -63,6 +73,8 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 			slug,
 			spec: { ...machine, ...content },
 			order: CATALOG_OVERRIDES[slug]?.order ?? 999,
+			badge: CATALOG_OVERRIDES[slug]?.badge,
+			badgeVariant: CATALOG_OVERRIDES[slug]?.badgeVariant,
 			exclude: CATALOG_OVERRIDES[slug]?.exclude ?? false
 		};
 	})

@@ -562,6 +562,31 @@ Nutzer-Playground kamen). Material angefragt.
 
 ---
 
+## ADR-025 — Components-Nav aus dem Katalog ableiten (ersetzt Handpflege aus ADR-007)
+**Kontext:** Die Components-Sektion in `src/lib/data/navigation.ts` war die letzte
+handgepflegte Komponenten-Liste — jede neue Komponente (model.json + Export) erschien
+erst nach manuellem Nav-Eintrag. Das widerspricht der Kardinalregel „keine hartcodierten
+Komponenten-Listen im Seiten-Code" (Astryx-Vorbild) und dem Discovery-Prinzip (ADR-018/024).
+**Entscheidung:** Die Components-Sektion wird aus `CATALOG` generiert
+(`COMPONENT_MENU_ITEMS = CATALOG.map(...)`, Reihenfolge kommt bereits sortiert aus der
+Katalog-Override-Map). „Übersicht" bleibt statisch davor. **Badges bleiben kuratiert:**
+`CatalogOverride` trägt jetzt `badge?/badgeVariant?` (die „Neu"-Badges sind dorthin
+umgezogen) — bewusste Kuratierung, keine Automatik. **Geplante Stubs** (Route ohne
+model.json, aktuell `date-picker`) stehen explizit in einer `PLANNED_COMPONENTS`-Liste in
+navigation.ts (Badge „Geplant"/neutral) — ehrlich und lesbar.
+**Drift-Check:** `check-nav.mjs` scannt href-Literale; generierte Items hätten keine mehr
+und würden fälschlich als Drift gemeldet. Lösung: eine Route `/product/components/<slug>`
+gilt als verlinkt, wenn ihr `model.json` existiert (→ CATALOG → Nav, per Konstruktion) ODER
+der Slug in der PLANNED-Liste steht (bleibt als Literal lesbar). Der Check schlägt weiterhin
+an, wenn eine Component-Route weder model.json noch PLANNED-Eintrag hat (verifiziert); der
+inverse Check in `check-component-drift.mjs` bleibt unberührt. Durch `navigation.test.ts`
+abgesichert (Sektion enthält alle CATALOG-Slugs + PLANNED, Reihenfolge, Badges).
+**Konsequenz:** Der frühere Workflow-Schritt „Nav-Eintrag von Hand" entfällt für
+Komponenten mit model.json; nur ein optionaler Badge-Override bleibt.
+**Status:** Aktiv.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können
