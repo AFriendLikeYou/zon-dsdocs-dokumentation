@@ -34,6 +34,7 @@
 <div class="landing">
 	<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
 	<section class="hero">
+		<div class="hero__inner">
 		<div class="hero__copy">
 			<p class="eyebrow">DIE ZEIT · Design System</p>
 			<h1>Marke und Produkt,<br />an einem Ort.</h1>
@@ -119,8 +120,10 @@
 				</article>
 			</div>
 		</div>
+		</div>
 	</section>
 
+	<div class="container">
 	<!-- ── Zwei Welten ──────────────────────────────────────────────────────── -->
 	<section class="worlds">
 		<a class="world world--brand" href="/brand">
@@ -167,24 +170,39 @@
 			<p class="whatsnew__date">Stand {latest.date}</p>
 		</section>
 	{/if}
+	</div>
 </div>
 
 <style>
 	.landing {
-		max-width: 76rem;
-		margin-inline: auto;
-		padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 4vw, 2.5rem) 4rem;
+		/* Volle Breite — der Hero bricht bis an den Viewport-Rand aus. */
 	}
 
-	/* ── Hero ── */
+	/* Zentrierte Inhaltsspalte für Hero-Innenleben und Folgesektionen. */
+	.hero__inner,
+	.container {
+		max-width: 76rem;
+		margin-inline: auto;
+		padding-inline: clamp(1rem, 4vw, 2.5rem);
+	}
+	.container {
+		padding-block: clamp(3rem, 8vw, 5rem) 4rem;
+	}
+
+	/* ── Hero (vollbreites Band) ── */
 	.hero {
+		background: var(--ds-surface-raised);
+		border-bottom: 1px solid var(--ds-border-soft);
+		padding-block: clamp(3rem, 8vw, 6rem);
+	}
+	.hero__inner {
 		display: grid;
 		grid-template-columns: 1fr;
 		gap: clamp(2rem, 5vw, 4rem);
 		align-items: center;
 	}
 	@media (min-width: 900px) {
-		.hero {
+		.hero__inner {
 			grid-template-columns: 1.05fr 0.95fr;
 		}
 	}
@@ -297,7 +315,6 @@
 		display: grid;
 		grid-template-columns: 1fr;
 		gap: 1rem;
-		margin-top: clamp(3rem, 8vw, 6rem);
 	}
 	@media (min-width: 720px) {
 		.worlds {
