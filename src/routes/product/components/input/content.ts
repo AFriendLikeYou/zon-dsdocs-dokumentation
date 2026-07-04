@@ -77,6 +77,18 @@ export const content = {
 			"Disabled-Felder ohne Erklärung, warum sie gesperrt sind."
 		]
 	},
+	"doDontBeispiele": [
+		{
+			"gut": {
+				"html": "<div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start\"><label for=\"ddv-mail-good\" style=\"font-size:14px;color:var(--z-ds-color-text-100)\">E-Mail</label><div class=\"z-input z-input--filled\"><input id=\"ddv-mail-good\" class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" /></div></div>",
+				"text": "Sichtbares Label über dem Feld — bleibt beim Tippen stehen und ist mit for/id verknüpft."
+			},
+			"schlecht": {
+				"html": "<div class=\"z-input\"><input class=\"z-input__field\" type=\"text\" placeholder=\"E-Mail\" aria-label=\"E-Mail\" /></div>",
+				"text": "Platzhalter als Label — verschwindet bei der Eingabe, das Feld verliert seine Beschriftung."
+			}
+		}
+	],
 	"verwendung": {
 		"nutzen": [
 			"Für kurze, einzeilige Freitext-Eingaben (Name, Suche, E-Mail).",

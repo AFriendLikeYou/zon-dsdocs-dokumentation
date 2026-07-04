@@ -101,7 +101,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'verwendung', 'wording', 'verwandt'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'doDontBeispiele', 'verwendung', 'wording', 'verwandt'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -270,6 +270,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
 	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
 	const hasDoDont = Boolean(model.doDont);
+	const hasDoDontVisual = Array.isArray(model.doDontBeispiele) && model.doDontBeispiele.length > 0;
 	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
@@ -293,7 +294,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		(hasWording ? 1 : 0) +
 		(hasVariants || hasMatrix ? 1 : 0) +
 		(hasStates ? 1 : 0) +
-		(hasDoDont ? 1 : 0) +
+		(hasDoDont || hasDoDontVisual ? 1 : 0) +
 		(hasRelated ? 1 : 0);
 	const hasSectionNav = designSectionCount >= 4;
 
@@ -304,6 +305,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasVariants) used.add('VariantList');
 	if (hasStates) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
+	if (hasDoDontVisual) used.add('DoDontVisual');
 	if (hasWording) used.add('WordingList');
 	if (hasRelated) used.add('RelatedComponents');
 	if (anyCode) used.add('CodeBlock');
@@ -390,9 +392,11 @@ function renderPage(model, { patternCss = null } = {}) {
 		designSections.push({ label: 'Zustände', id: SECTION_IDS.Zustände });
 		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
 	}
-	if (hasDoDont) {
+	if (hasDoDont || hasDoDontVisual) {
 		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });
-		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n`;
+		if (hasDoDont) design += `\t<DoDontList doDont={${S}.doDont} />\n`;
+		if (hasDoDontVisual) design += `\t<DoDontVisual beispiele={${S}.doDontBeispiele} />\n`;
 	}
 	if (hasRelated) {
 		designSections.push({ label: 'Verwandte', id: SECTION_IDS['Verwandte Komponenten'] });
@@ -570,6 +574,20 @@ function validate(model, { root = process.cwd() } = {}) {
 		for (const [i, k] of model.tastatur.entries())
 			if (!k?.taste || !k?.aktion)
 				errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
+
+	// doDontBeispiele: je Paar gut+schlecht, je Seite html+text (Pflicht).
+	if (Array.isArray(model.doDontBeispiele))
+		for (const [i, b] of model.doDontBeispiele.entries()) {
+			for (const side of ['gut', 'schlecht']) {
+				const s = b?.[side];
+				if (!s || typeof s !== 'object')
+					errors.push(`doDontBeispiele[${i}].${side}: fehlt (braucht { html, text })`);
+				else {
+					if (!s.html) errors.push(`doDontBeispiele[${i}].${side}: html fehlt`);
+					if (!s.text) errors.push(`doDontBeispiele[${i}].${side}: text fehlt`);
+				}
+			}
+		}
 
 	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Component-Ordner hat.
 	if (Array.isArray(model.verwandt))
