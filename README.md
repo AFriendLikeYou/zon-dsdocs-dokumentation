@@ -76,3 +76,47 @@ npm run copy:icons         # Icons aus @zeitonline/icons ziehen (+ Registry-Rege
 ```
 
 Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site liegt hinter Basic Auth.
+
+## MCP-Endpoint (`/api/mcp`) — agent-ready
+
+Die Doku-Site ist selbst ein **MCP-Server**: KI-Agenten können die Komponenten-Registry
+abfragen und mit dem ZEIT-Designsystem UIs bauen (Vorbild: Astryx). Umgesetzt als
+minimaler, handgerollter Handler (MCP Streamable HTTP, **stateless**, JSON-RPC 2.0) — kein
+SDK, keine neue Abhängigkeit. Route: [`src/routes/api/mcp/+server.ts`](src/routes/api/mcp/+server.ts)
+(dünn), Logik in [`src/lib/server/mcp.ts`](src/lib/server/mcp.ts), Datenbasis
+[`src/lib/data/agent-catalog.ts`](src/lib/data/agent-catalog.ts) (Katalog inkl. `render`-Template
++ rohem `pattern.css`, nur serverseitig).
+
+**Tools:**
+
+- `search { query, limit? }` — sucht über Name, Slug, Zweck, Kategorie, Varianten- und
+  Token-Namen; liefert `{ slug, name, kategorie, zweck }` (Default-Limit 8).
+- `get { slug, section? }` — Doku einer Komponente als Text. Ohne `section` eine kompakte
+  Gesamtsicht; mit `section` gezielt `overview | markup | tokens | a11y | usage`. Antworten
+  sind auf ~4.000 Zeichen budgetiert (bei Kappung Hinweis auf die `section`-Parameter).
+
+**Auth:** Der Endpoint liegt wie alle Routen hinter Basic Auth (`hooks.server.ts`) —
+MCP-Clients senden den `Authorization: Basic …`-Header. Beispiel-Client-Config:
+
+```jsonc
+{
+  "mcpServers": {
+    "zeit-ds-doku": {
+      "url": "https://<deploy-host>/api/mcp",
+      "headers": { "Authorization": "Basic <base64(user:pass)>" }
+    }
+  }
+}
+```
+
+**Smoke-Test (curl, lokal hinter Basic Auth):**
+
+```bash
+curl -u <user>:<pass> -X POST http://localhost:5173/api/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
+
+curl -u <user>:<pass> -X POST http://localhost:5173/api/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"query":"formular"}}}'
+```

@@ -11,6 +11,29 @@ Tokens). Reihenfolge oben = empfohlene Abarbeitung.
 
 ---
 
+## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
+Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.
+- [x] **Paket 1 — Tastatur-Interaktionen** ✅ Redaktionelles Feld `tastatur`
+  ({ taste, aktion }[]) → `KeyboardList` (kbd-Pills) im Barrierefreiheit-Tab; Schema
+  dreifach (spec.ts/model.schema.json/README); Exporter-Gate `hasKeyboard` + A11yList-Guard
+  + validate. Inhalte für input/checkbox/toggle/stepper/button.
+- [x] **Paket 2 — Verwandte Komponenten** ✅ Redaktionelles Feld `verwandt` (Slugs) →
+  `RelatedComponents` (CardGrid-Reuse, DRY) am Ende des Design-Tabs; validate() warnt bei
+  Slug ohne model.json. Kuratiert: Aktions- + Formular-Familie.
+- [x] **Paket 3 — Components-Nav katalog-getrieben** ✅ (ADR-025) Sektion aus `CATALOG`
+  generiert; Badges als `CatalogOverride`-Kuratierung; geplante Stubs in `PLANNED_COMPONENTS`;
+  `check-nav.mjs` erkennt Component-Routen per model.json/PLANNED (negativ verifiziert:
+  Ghost-Route wird geflaggt); `navigation.test.ts` (6 Tests). Ersetzt Handpflege aus ADR-007.
+- [x] **Paket 4 — MCP-Endpoint `/api/mcp`** ✅ agent-ready: Tools `search` + `get` über die
+  Registry (JSON-RPC 2.0, stateless, **kein SDK** → Build/adapter-vercel clean); `agent-catalog`
+  (render + rohes pattern.css, server-only), `src/lib/server/mcp.ts` (pure, 18 Tests),
+  4.000-Zeichen-Budget. curl-Smoke: handshake/search/get/405/202 OK.
+  **Learning:** Vite serviert `.css` im **Vitest-Transform als leeren String** — die
+  `?raw`-CSS-Ladung ist im Build/Dev korrekt (curl-verifiziert), im Unit-Test nur als
+  „Schlüssel matcht" prüfbar.
+
+---
+
 ## 1. UI-Komponenten
 
 ### Inline-Duplikate zur Komponente heben

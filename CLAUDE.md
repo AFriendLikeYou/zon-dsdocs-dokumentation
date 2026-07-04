@@ -133,6 +133,15 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 - Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 
+## MCP-Endpoint (`/api/mcp`)
+Die Site ist selbst ein **MCP-Server** (agent-ready): Tools `search` + `get` über die
+Komponenten-Registry. Minimaler, handgerollter JSON-RPC-2.0-Handler (Streamable HTTP,
+stateless, **kein SDK**). Route `src/routes/api/mcp/+server.ts` (dünn) → Logik
+`src/lib/server/mcp.ts` (pure Funktionen, getestet) → Datenbasis
+`src/lib/data/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem `pattern.css`**,
+**nur serverseitig** importieren!). Liegt hinter Basic Auth wie alles. Details/Client-Config:
+[`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
+
 ## Stolperfallen
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
   `git symbolic-ref HEAD refs/heads/main`.
