@@ -1,0 +1,128 @@
+---
+title: Mitwirken
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { Badge } from '$components/ui/badge';
+</script>
+
+# {title}
+
+Das ZEIT Design System ist ein lebender Prozess, kein Museum. Es wächst, wenn Designer:innen
+und Entwickler:innen Abweichungen melden, neue Komponenten vorschlagen und mitentscheiden.
+Diese Seite erklärt, **wie** das geht — knapp und ohne Bürokratie. Der Grundsatz bleibt:
+Wir blockieren nicht, wir schlagen vor.
+
+## Abweichung oder Bug melden
+
+Etwas sieht falsch aus, ein Zustand fehlt, ein Token stimmt nicht? Melde es. Je konkreter
+die Meldung, desto schneller ist sie behoben. Eine gute Meldung enthält:
+
+- **Screenshot oder kurze Aufnahme** — zeigt mehr als jede Beschreibung.
+- **Seite bzw. Komponente** — welcher Doku-Pfad oder welche `z-`-Klasse betroffen ist.
+- **Erwartet vs. tatsächlich** — was du erwartet hast und was stattdessen passiert.
+- **Kontext** — Browser/Gerät und ob Light- oder Dark-Modus, falls relevant.
+
+> **Meldeweg:** _Platzhalter_ — der konkrete Kanal (Board/Ticket/Chat) wird vom Team
+> festgelegt und hier ergänzt. Bis dahin gilt der bekannte interne Weg.
+
+## Neue Komponente vorschlagen
+
+Nicht jedes Styling ist eine Komponente. Bevor du etwas vorschlägst, hilft ein kurzer
+Selbst-Check — passt eins der Kriterien nicht, ist es vermutlich ein Einzelfall:
+
+- **Wird mehrfach gebraucht** — dieselbe Sache taucht an mehreren Stellen auf.
+- **Existiert in Figma** — es gibt (oder entsteht) eine saubere Figma-Komponente dafür.
+- **Ist kein Einzelfall-Styling** — kein einmaliges Illustrations- oder Kampagnen-Element.
+
+Der Weg von der Idee zur Doku:
+
+1. **Vorschlag** — Bedarf und Kriterien kurz festhalten (siehe oben).
+2. **Figma „ready for dev"** — die Komponente wird in Figma sauber gebaut und freigegeben.
+3. **Steckbrief-Flow** — aus dem Figma-Node entsteht ein kurzes `model.json` (der „Steckbrief"),
+   der Exporter erzeugt daraus die Component-Seite. Details stehen im Import-Guide des Repos
+   (`tooling/zeit-de-exporter/IMPORT.md`).
+
+## Was die Status bedeuten
+
+Die Badges auf den Komponenten-Karten und -Seiten zeigen auf einen Blick, wie weit eine
+Komponente ist. Sie werden redaktionell gesetzt, nicht automatisch:
+
+<div class="status-defs">
+	<div class="status-def">
+		<Badge variant="neutral">Geplant</Badge>
+		<p>Die Komponente ist vorgesehen, aber noch nicht dokumentiert. Route existiert als
+		ehrlicher Platzhalter, es gibt noch kein <code>model.json</code>.</p>
+	</div>
+	<div class="status-def">
+		<Badge variant="ready">Ready for dev</Badge>
+		<p>Design und Doku stehen, die Komponente ist zur Umsetzung freigegeben. Gesetzt,
+		wenn Figma „ready for dev" ist und der Steckbrief exportiert wurde.</p>
+	</div>
+	<div class="status-def">
+		<Badge variant="done">Completed</Badge>
+		<p>Komponente ist umgesetzt und im Einsatz — Design, Code und Doku stimmen überein.</p>
+	</div>
+	<div class="status-def">
+		<Badge variant="warn">Geändert</Badge>
+		<p>Eine bestehende Komponente wurde überarbeitet. Der Hinweis macht auf Änderungen
+		aufmerksam, die betroffene Nutzung prüfen sollten.</p>
+	</div>
+</div>
+
+Wer den Status setzt, hängt am Lebenszyklus (siehe unten): „Geplant" beim Vorschlag,
+„Ready for dev" nach Freigabe und Export, „Completed" nach Umsetzung.
+
+## Rollen & Entscheidung
+
+Ein kleines Design-System bleibt nur konsistent, wenn klar ist, wer kuratiert und wer
+reviewt. Die konkreten Namen und Rollen füllt das Team:
+
+- **Kuratierung** — _Platzhalter_: entscheidet, was ins System gehört und was Einzelfall bleibt.
+- **Review** — _Platzhalter_: prüft neue Komponenten und größere Änderungen vor der Freigabe.
+- **Beiträge** — offen für alle Designer:innen und Entwickler:innen: melden, vorschlagen, mitdiskutieren.
+
+> Die Platzhalter-Rollen werden redaktionell mit konkreten Personen/Zuständigkeiten belegt.
+
+## Lebenszyklus einer Komponente
+
+So läuft der Weg — bewusst geradlinig:
+
+**Vorschlag → Design (Figma) → Doku (Steckbrief) → Ready for dev → Completed**
+
+Jeder Schritt hat ein sichtbares Ergebnis: der Vorschlag eine Notiz, das Design eine
+Figma-Komponente, die Doku eine Component-Seite, „ready for dev" das Badge, „completed"
+die produktive Nutzung. **Deprecation** — also das kontrollierte Ausmustern alter
+Komponenten — kommt als eigener Schritt hinzu, sobald das System größer ist; heute ist
+das noch _künftig_.
+
+<style>
+	.status-defs {
+		display: flex;
+		flex-direction: column;
+		gap: var(--z-ds-space-16);
+		margin-block: var(--z-ds-space-24);
+	}
+	.status-def {
+		display: grid;
+		grid-template-columns: 140px 1fr;
+		gap: var(--z-ds-space-16);
+		align-items: start;
+	}
+	.status-def p {
+		margin: 0;
+		font-size: var(--ds-text-base);
+		color: var(--ds-text-body);
+		line-height: 1.5;
+	}
+	@media (max-width: 520px) {
+		.status-def {
+			grid-template-columns: 1fr;
+			gap: var(--z-ds-space-6);
+		}
+	}
+</style>

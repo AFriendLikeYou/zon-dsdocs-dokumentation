@@ -248,6 +248,11 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isCategory: true
 	},
 	{
+		title: 'Mitwirken',
+		href: '/product/contribute',
+		isInFooter: true
+	},
+	{
 		title: 'Changelog',
 		href: '/product/changelog',
 		isInFooter: true
