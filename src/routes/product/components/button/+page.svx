@@ -12,6 +12,7 @@ kategorie: Aktionen
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
+	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -144,18 +145,21 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
-	<Playground controls={playgroundControls} template={playgroundTemplate} />
+	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
+	<div id="playground" class="section-anchor">
+		<Playground controls={playgroundControls} template={playgroundTemplate} />
+	</div>
 
-	<h2>Anatomie</h2>
+	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="sds-btn sds-btn--primary" type="button">Button</button>{/snippet}
 		{#snippet variant()}<button class="sds-btn sds-btn--neutral" type="button">Button</button>{/snippet}
 	</Anatomy>
 
-	<h2>Verwendung</h2>
+	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
 	<UsageBlock verwendung={spec.verwendung} />
 
-	<h2>Varianten</h2>
+	<h2 id="varianten" class="section-anchor">Varianten</h2>
 	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
 	<VariantMatrix>
 		<div class="cell"><span class="cell-label">Primary · Default</span><button class="sds-btn sds-btn--primary" type="button">Button</button></div>
@@ -169,13 +173,13 @@ kategorie: Aktionen
 		<div class="cell"><span class="cell-label">Subtle · Disabled</span><button class="sds-btn sds-btn--subtle" type="button" disabled>Button</button></div>
 	</VariantMatrix>
 
-	<h2>Zustände</h2>
+	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<StateList states={spec.zustaende} />
 
-	<h2>Do & Don't</h2>
+	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
 
-	<h2>Verwandte Komponenten</h2>
+	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 

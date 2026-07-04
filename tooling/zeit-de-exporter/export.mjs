@@ -51,6 +51,20 @@ function camelCase(kebab) {
 	return kebab.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 }
 
+/** Deutschen Sektions-Titel auf eine stabile Anker-id abbilden (SectionNav, Paket C).
+ *  Feste Map statt kebabCase(label), damit „Do & Don't"/„Texte & Wording" saubere,
+ *  URL-freundliche ids bekommen und über Re-Exports hinweg stabil bleiben. */
+const SECTION_IDS = {
+	Playground: 'playground',
+	Anatomie: 'anatomie',
+	Verwendung: 'verwendung',
+	Wording: 'wording',
+	Varianten: 'varianten',
+	Zustände: 'zustaende',
+	'Do & Don\'t': 'do-dont',
+	'Verwandte Komponenten': 'verwandte'
+};
+
 /** Wrap markup as a named Svelte-5-Snippet (Anatomy nutzt Snippet-Props preview/variant). */
 function asSnippet(html, name) {
 	return `{#snippet ${name}()}${String(html).trim()}{/snippet}`;
@@ -270,6 +284,19 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse;
 
+	// In-Page-Sprungleiste (SectionNav, Paket C) nur bei ≥ 4 Design-Tab-Sektionen.
+	// Zählung deckungsgleich mit dem Aufbau des Design-Tabs weiter unten.
+	const designSectionCount =
+		(hasSpecimenPg || hasTemplatePg ? 1 : 0) +
+		(hasAnatomy ? 1 : 0) +
+		(hasUsage ? 1 : 0) +
+		(hasWording ? 1 : 0) +
+		(hasVariants || hasMatrix ? 1 : 0) +
+		(hasStates ? 1 : 0) +
+		(hasDoDont ? 1 : 0) +
+		(hasRelated ? 1 : 0);
+	const hasSectionNav = designSectionCount >= 4;
+
 	// Nur tatsächlich genutzte Komponenten importieren.
 	const used = new Set(['ComponentHero']);
 	if (hasAnatomy) used.add('Anatomy');
@@ -295,6 +322,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
+		(hasSectionNav ? `\timport { SectionNav } from '$components/ui/section-nav';\n` : '') +
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
@@ -320,34 +348,62 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02):
 	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
 	// Zustände) · 4) Do/Don'ts.
+	// Nebenbei sammeln wir die vorhandenen Sektionen für die In-Page-Sprungleiste
+	// (SectionNav, Paket C): jede Sektion trägt eine stabile id + class="section-anchor".
+	const designSections = []; // [{ label, id }] in Erscheinungsreihenfolge
 	let design = '';
-	if (hasSpecimenPg) {
-		design += `\t<Specimen spec={${S}} />\n`;
-	} else if (hasTemplatePg) {
-		const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
-		const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
-		const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
-		design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n`;
+	if (hasSpecimenPg || hasTemplatePg) {
+		designSections.push({ label: 'Playground', id: SECTION_IDS.Playground });
+		if (hasSpecimenPg) {
+			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Specimen spec={${S}} />\n\t</div>\n`;
+		} else {
+			const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
+			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
+			const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
+			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n\t</div>\n`;
+		}
 	}
 	if (hasAnatomy) {
+		designSections.push({ label: 'Anatomie', id: SECTION_IDS.Anatomie });
 		design +=
-			`\n\t<h2>Anatomie</h2>\n` +
+			`\n\t<h2 id="${SECTION_IDS.Anatomie}" class="section-anchor">Anatomie</h2>\n` +
 			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
 			previewSlot +
 			variantSlot +
 			`\t</Anatomy>\n`;
 	}
-	if (hasUsage) design += `\n\t<h2>Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
-	if (hasWording) design += `\n\t<h2>Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
+	if (hasUsage) {
+		designSections.push({ label: 'Verwendung', id: SECTION_IDS.Verwendung });
+		design += `\n\t<h2 id="${SECTION_IDS.Verwendung}" class="section-anchor">Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
+	}
+	if (hasWording) {
+		designSections.push({ label: 'Wording', id: SECTION_IDS.Wording });
+		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
+	}
 	if (hasVariants || hasMatrix) {
-		design += `\n\t<h2>Varianten</h2>\n`;
+		designSections.push({ label: 'Varianten', id: SECTION_IDS.Varianten });
+		design += `\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n`;
 		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
 		if (hasMatrix) design += `\t<VariantMatrix>\n${matrixCells}\n\t</VariantMatrix>\n`;
 	}
-	if (hasStates) design += `\n\t<h2>Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
-	if (hasDoDont) design += `\n\t<h2>Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
-	if (hasRelated)
-		design += `\n\t<h2>Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
+	if (hasStates) {
+		designSections.push({ label: 'Zustände', id: SECTION_IDS.Zustände });
+		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
+	}
+	if (hasDoDont) {
+		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });
+		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+	}
+	if (hasRelated) {
+		designSections.push({ label: 'Verwandte', id: SECTION_IDS['Verwandte Komponenten'] });
+		design += `\n\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
+	}
+
+	// In-Page-Sprungleiste als erste Zeile des Tabs (hasSectionNav oben berechnet).
+	if (hasSectionNav) {
+		const navItems = designSections.map((s) => ({ label: s.label, href: `#${s.id}` }));
+		design = `\t<SectionNav items={${JSON.stringify(navItems)}} />\n` + design;
+	}
 
 	// ---- Develop-Tab ----
 	let develop = '';

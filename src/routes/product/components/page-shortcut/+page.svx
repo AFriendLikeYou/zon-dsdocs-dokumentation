@@ -60,7 +60,9 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
-	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." />
+	<div id="playground" class="section-anchor">
+		<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." />
+	</div>
 {/snippet}
 
 {#snippet developTab()}

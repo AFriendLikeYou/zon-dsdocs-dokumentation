@@ -84,12 +84,14 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
-	<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" />
+	<div id="playground" class="section-anchor">
+		<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" />
+	</div>
 
-	<h2>Varianten</h2>
+	<h2 id="varianten" class="section-anchor">Varianten</h2>
 	<VariantList varianten={spec.varianten} />
 
-	<h2>Verwandte Komponenten</h2>
+	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 
