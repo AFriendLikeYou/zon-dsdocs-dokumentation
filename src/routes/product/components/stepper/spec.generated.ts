@@ -10,6 +10,9 @@ export const generated = {
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=4153-1351&m=dev",
 	"aktualisiertAm": "2026-07-03",
 	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
+	"verwandt": [
+		"input"
+	],
 	"masse": {
 		"hoehe": "38",
 		"breite": "112",

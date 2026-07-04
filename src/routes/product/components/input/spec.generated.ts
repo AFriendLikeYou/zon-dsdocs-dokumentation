@@ -10,6 +10,10 @@ export const generated = {
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=477-3021&m=dev",
 	"aktualisiertAm": "2026-07-03",
 	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
+	"verwandt": [
+		"checkbox",
+		"stepper"
+	],
 	"masse": {
 		"hoehe": "40",
 		"breite": "292",

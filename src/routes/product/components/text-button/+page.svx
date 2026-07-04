@@ -9,7 +9,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, VariantList, CodeBlock } from '$components/ui/specsheet';
+	import { ComponentHero, VariantList, RelatedComponents, CodeBlock } from '$components/ui/specsheet';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -88,6 +88,9 @@ kategorie: Aktionen
 
 	<h2>Varianten</h2>
 	<VariantList varianten={spec.varianten} />
+
+	<h2>Verwandte Komponenten</h2>
+	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 
 {#snippet developTab()}

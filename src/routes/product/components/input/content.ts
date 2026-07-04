@@ -100,6 +100,7 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 477:3021",
+	"verwandt": ["checkbox", "stepper"],
 	"variantInfo": {
 		"Default": "Ruhezustand, leeres Feld.",
 		"Active": "Fokussiert — Rahmen in Text-55.",

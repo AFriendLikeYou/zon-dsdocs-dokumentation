@@ -87,6 +87,7 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 973:945",
+	"verwandt": ["toggle", "input"],
 	"variantInfo": {
 		"Unchecked": "Nicht ausgewählt.",
 		"Checked": "Ausgewählt — dunkle Füllung mit weißem Haken.",

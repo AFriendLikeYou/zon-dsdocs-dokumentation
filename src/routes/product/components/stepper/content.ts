@@ -95,6 +95,7 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 4153:1351",
+	"verwandt": ["input"],
 	"variantInfo": {
 		"Default": "Ruhezustand.",
 		"Hover": "Mauszeiger über einem Button — Background-10.",

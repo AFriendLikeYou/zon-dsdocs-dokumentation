@@ -65,6 +65,7 @@ export const content = {
 		]
 	},
 	"version": "Figma-Node 11:11508",
+	"verwandt": ["button", "text-button", "button-group"],
 	"variantInfo": {
 		"Primary": "Wichtigste ikonografische Aktion — gefüllt, hoher Kontrast.",
 		"Neutral": "Sekundäre Aktion auf heller Fläche mit Rahmen.",

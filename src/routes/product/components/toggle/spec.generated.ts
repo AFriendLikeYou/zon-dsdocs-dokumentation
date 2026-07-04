@@ -10,6 +10,10 @@ export const generated = {
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=2845-5966&m=dev",
 	"aktualisiertAm": "2026-07-03",
 	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
+	"verwandt": [
+		"checkbox",
+		"input"
+	],
 	"masse": {
 		"hoehe": "16",
 		"breite": "26",

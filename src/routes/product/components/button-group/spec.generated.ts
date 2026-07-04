@@ -8,5 +8,9 @@ export const generated = {
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"aktualisiertAm": "2026-07-02",
-	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter)."
+	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
+	"verwandt": [
+		"button",
+		"icon-button"
+	]
 } satisfies Partial<ComponentSpec>;

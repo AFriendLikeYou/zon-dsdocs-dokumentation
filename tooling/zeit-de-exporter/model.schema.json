@@ -73,6 +73,11 @@
 			"description": "Wann welche Variante nutzen (Label → Satz). (Redaktionell.)",
 			"additionalProperties": { "type": "string" }
 		},
+		"verwandt": {
+			"type": "array",
+			"description": "Kuratierte Querverweise auf verwandte Komponenten — Katalog-Slugs, z. B. [\"text-button\", \"icon-button\"]. Unbekannte Slugs werden still übersprungen. (Redaktionell.)",
+			"items": { "type": "string" }
+		},
 		"render": { "$ref": "#/$defs/render" }
 	},
 	"$defs": {

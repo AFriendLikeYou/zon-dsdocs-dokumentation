@@ -8,6 +8,11 @@ export const generated = {
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
+	"verwandt": [
+		"text-button",
+		"icon-button",
+		"button-group"
+	],
 	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=4185-3778&m=dev",
 	"aktualisiertAm": "2026-06-27",
 	"masse": {

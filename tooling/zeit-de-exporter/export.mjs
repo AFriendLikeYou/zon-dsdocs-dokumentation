@@ -87,7 +87,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'verwendung', 'wording'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'verwendung', 'wording', 'verwandt'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -126,6 +126,7 @@ function renderContentStub(model) {
 		`//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
 		`//   tastatur    – Tastatur-Bedienung ({ taste, aktion })\n` +
 		`//   doDont      – { do: [...], dont: [...] }\n` +
+		`//   verwandt    – Querverweise auf verwandte Komponenten (Katalog-Slugs)\n` +
 		`export const content = ${json};\n`
 	);
 }
@@ -265,6 +266,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
 	);
 	const hasWording = Array.isArray(model.wording) && model.wording.length > 0;
+	const hasRelated = Array.isArray(model.verwandt) && model.verwandt.length > 0;
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse;
 
@@ -276,6 +278,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasStates) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
 	if (hasWording) used.add('WordingList');
+	if (hasRelated) used.add('RelatedComponents');
 	if (anyCode) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
 	if (hasA11y) used.add('A11yList');
@@ -343,6 +346,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	}
 	if (hasStates) design += `\n\t<h2>Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
 	if (hasDoDont) design += `\n\t<h2>Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+	if (hasRelated)
+		design += `\n\t<h2>Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
 
 	// ---- Develop-Tab ----
 	let develop = '';
@@ -450,7 +455,7 @@ function resolveModelPath(input) {
  * Modell-Validierung: harte Fehler werfen (Export bricht ab), weiche Hinweise warnen.
  * Fängt die häufigen Registry-Fehler früh ab, statt sie erst zur Laufzeit zu zeigen.
  */
-function validate(model) {
+function validate(model, { root = process.cwd() } = {}) {
 	const errors = [];
 	const warnings = [];
 
@@ -509,6 +514,14 @@ function validate(model) {
 		for (const [i, k] of model.tastatur.entries())
 			if (!k?.taste || !k?.aktion)
 				errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
+
+	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Component-Ordner hat.
+	if (Array.isArray(model.verwandt))
+		for (const slug of model.verwandt) {
+			const target = resolve(root, ROUTE_BASE, String(slug), 'model.json');
+			if (!existsSync(target))
+				warnings.push(`verwandt: "${slug}" hat kein model.json (${ROUTE_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`);
+		}
 
 	for (const w of warnings) console.warn(`  ⚠️  ${w}`);
 	if (errors.length)
@@ -600,7 +613,7 @@ function main() {
 	const { input, root, dry } = parsed;
 	const modelPath = resolveModelPath(input);
 	const model = JSON.parse(readFileSync(modelPath, 'utf8'));
-	validate(model);
+	validate(model, { root });
 
 	const kebab = kebabCase(model.name);
 	const outDir = resolve(root, ROUTE_BASE, kebab);

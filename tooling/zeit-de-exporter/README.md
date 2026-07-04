@@ -32,7 +32,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
   `content.ts` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
-  `verwendung`, `wording`, `version`, `variantInfo`) → **`content.ts` von Hand**.
+  `verwendung`, `wording`, `verwandt`, `version`, `variantInfo`) → **`content.ts` von Hand**.
 - **Menüeintrag** → [`src/lib/data/navigation.ts`](../../src/lib/data/navigation.ts) von
   Hand (`MENU_ITEMS_PRODUCT`). `npm run check` (→ `check-nav.mjs`) warnt bei fehlendem
   Link. Reihenfolge im Katalog: `src/lib/data/catalog.ts` (Override-Map).
@@ -69,6 +69,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 | `doDont` | `{ do?: string[], dont?: string[] }` | `DoDontList` |
 | `verwendung` | `{ nutzen?: string[], nichtNutzen?: string[] }` | `UsageBlock` |
 | `wording` | `{ schlecht, gut, hinweis? }[]` | `WordingList` (Texte & Wording) |
+| `verwandt` | `string[]` (Katalog-Slugs) | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen) |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)
 

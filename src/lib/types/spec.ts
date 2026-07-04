@@ -80,4 +80,6 @@ export type ComponentSpec = {
 	doDont?: DoDont | null;
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
+	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
+	verwandt?: string[];
 };

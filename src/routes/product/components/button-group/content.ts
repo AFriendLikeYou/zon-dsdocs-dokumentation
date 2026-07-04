@@ -11,5 +11,6 @@
 //   doDont      – { do: [...], dont: [...] }
 export const content = {
 	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
-	"status": "ready_for_dev"
+	"status": "ready_for_dev",
+	"verwandt": ["button", "icon-button"]
 };

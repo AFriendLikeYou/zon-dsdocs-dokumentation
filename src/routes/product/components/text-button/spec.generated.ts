@@ -9,6 +9,10 @@ export const generated = {
 	"kategorie": "Aktionen",
 	"aktualisiertAm": "2026-07-02",
 	"zweck": "Dezenter, flächenloser Text-Button für sekundäre Aktionen — mit Größen- und Betonungs-Modifiern sowie einer On-Image-Variante für Flächen auf Bildern.",
+	"verwandt": [
+		"button",
+		"icon-button"
+	],
 	"varianten": [
 		{
 			"prop": "Größe",

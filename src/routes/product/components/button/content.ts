@@ -75,6 +75,7 @@ export const content = {
 		]
 	},
 	"version": "Figma-Node 4185:3778",
+	"verwandt": ["text-button", "icon-button", "button-group"],
 	"variantInfo": {
 		"Primary": "Wichtigste Aktion im Kontext — pro Aktionsgruppe nur einmal.",
 		"Neutral": "Sekundäre Aktion, gleichrangig neben Primary.",
