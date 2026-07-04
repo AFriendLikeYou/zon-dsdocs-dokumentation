@@ -606,6 +606,21 @@ ohne Anpassung als verlinkt erkennt.
 
 ---
 
+## ADR-027 — Bereichs-Differenzierung: Brandhub etwas markiger, DS-Doku nüchtern
+**Kontext:** Brandhub (`/brand/*`) und DS-Doku (`/product/*`) teilen sich eine App und
+ein Chrome. Der Brandhub darf etwas mehr Markenwärme zeigen, ohne dass es ein Redesign
+oder eine zweite Design-Sprache wird.
+**Entscheidung:** Ein **Bereichs-Scope** über `data-area` am `<main>` (im Root-Layout aus
+der bereits vorhandenen `section`-Ableitung gesetzt: `brand` | `product` | `root`). In
+`global.css` heben wenige Regeln nur innerhalb `[data-area='brand']` das Seiten-`h1` zu
+einem Display-Heading (FranziskaWebPro, `--z-ds-fontsize-42`). Zusätzlich eine schlanke
+`ui/brand-hero`-Komponente (Bild aus `static/media/brand` + Titel + Unterzeile), eingesetzt
+auf Brand-Top-Seiten (`/brand/getting-started`, `/brand/logo`). **Product bleibt unberührt**
+(kein Scope-Match → identische Optik). Keine Deko-Animation (emil-Regeln).
+**Status:** Aktiv.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

@@ -10,6 +10,7 @@ title: Logo
   import { DownloadSpecimen } from '$components/ui/downloadspecimen';
 	import { VideoPlayer } from '$components/ui/videoplayer';
   import { BrandAssetsGrid } from '$components/ui/brand-assets';
+  import { BrandHero } from '$components/ui/brand-hero';
 
   const catalog = {
     publicPath: '/downloads'
@@ -24,11 +25,14 @@ title: Logo
 </svelte:head>
 
 
-# { title }
+<BrandHero
+  title={title}
+  subtitle="Unser Logo stellt unsere Marke visuell dar und hilft uns, uns auf dem Markt zu unterscheiden. Die konsequente Verwendung sorgt für Wiedererkennung und Vertrautheit."
+  image="/media/brand/logo/logo.png"
+  imageAlt="Das ZEIT-Logo"
+/>
 
-Unser Logo stellt unsere Marke visuell dar und hilft uns, uns auf dem Markt zu unterscheiden. Die konsequente Verwendung sorgt für Wiedererkennung und Vertrautheit.
-
-<VideoPlayer 
+<VideoPlayer
   src="/media/brand/logo/logo.mp4"
 />
 

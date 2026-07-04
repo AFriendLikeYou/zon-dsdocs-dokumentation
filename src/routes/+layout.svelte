@@ -57,7 +57,7 @@
 	<Sidebar isUserLoggedIn={data.isUserLoggedIn} items={menuItems} />
 	<div class="layout">
 		<div class="layout__inner">
-			<main id="main-content">
+			<main id="main-content" data-area={section}>
 				<BreadCrumbs />
 
 				{@render children()}

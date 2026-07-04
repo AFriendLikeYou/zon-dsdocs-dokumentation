@@ -1,10 +1,17 @@
+<script lang="ts">
+	import { BrandHero } from '$components/ui/brand-hero';
+</script>
+
 <svelte:head>
 	<title>Willkommen - Die Zeit Design System</title>
 </svelte:head>
 
-<h1>Willkommen</h1> 
-
-<p>Der ZEIT-Brandguide hilft Mitarbeitern, Partnern und Kollaborateuren bei der Erstellung von Inhalten und Materialien, die unsere Marke konsistent und sicher repräsentieren.</p>
+<BrandHero
+	title="Willkommen"
+	subtitle="Der ZEIT-Brandguide hilft Mitarbeitern, Partnern und Kollaborateuren, unsere Marke konsistent und sicher zu repräsentieren."
+	image="/media/brand/typography/fonts.webp"
+	imageAlt="Schriftmuster der ZEIT-Hausschriften"
+/>
 
 <h2>Für wen ist das Marken-Toolkit gedacht?</h2>
 
