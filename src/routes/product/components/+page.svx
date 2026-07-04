@@ -3,10 +3,12 @@ title: Components
 ---
 
 <script lang="ts">
-	import { CardGrid } from '$components/ui/card';
+	import { Badge } from '$components/ui/badge';
 	// Zentraler, generierter Katalog-Index (Stufe 5, ADR-023/024) — Discovery über
 	// die co-locateten model.json, redaktionelle Overrides bereits eingemerged.
 	import { CATALOG } from '$data/catalog';
+	// Mini-Specimen je Komponente (render + gescoptes pattern.css, Build-Zeit-Daten).
+	import { CATALOG_PREVIEWS } from '$data/catalog-previews';
 
 	const STATUS_LABEL: Record<string, string> = {
 		ready_for_dev: 'Ready for dev',
@@ -25,13 +27,14 @@ title: Components
 			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
 			.join(' ');
 
-	// Katalog-Einträge (Registry) …
+	// Katalog-Einträge (Registry) — mit optionaler Mini-Vorschau.
 	const catalogCards = CATALOG.map((e) => ({
 		url: `/product/components/${e.slug}`,
 		title: e.spec.name ?? titleCase(e.slug),
 		description: e.spec.zweck ?? '',
 		badge: STATUS_LABEL[e.spec.status ?? ''] ?? e.spec.status ?? '',
-		badgeVariant: STATUS_VARIANT[e.spec.status ?? ''] ?? ('neutral' as const)
+		badgeVariant: STATUS_VARIANT[e.spec.status ?? ''] ?? ('neutral' as const),
+		preview: CATALOG_PREVIEWS[e.slug] ?? null
 	}));
 
 	// … plus ehrliche Platzhalter-Karten für Routen OHNE Registry-Entry
@@ -46,12 +49,22 @@ title: Components
 			title: titleCase(slug),
 			description: 'Noch nicht dokumentiert.',
 			badge: 'In Arbeit',
-			badgeVariant: 'neutral' as const
+			badgeVariant: 'neutral' as const,
+			preview: null
 		}));
 
 	const cards = [...catalogCards, ...placeholderCards].sort((a, b) =>
 		a.title.localeCompare(b.title)
 	);
+
+	// Alle Preview-CSS EINMAL gesammelt (gegen .spec-canvas gescoped, kollisionsfrei —
+	// jede Komponente hat eigene Klassennamen). Wird via <svelte:head> als <style>
+	// eingebunden, damit die :global-Regeln nicht von der mdsvex-Scope-Kapselung
+	// wegoptimiert werden.
+	const previewCss = Object.values(CATALOG_PREVIEWS)
+		.map((p) => p.css)
+		.filter(Boolean)
+		.join('\n');
 </script>
 
 <svelte:head>
@@ -60,6 +73,118 @@ title: Components
 
 # {title}
 
-Übersicht aller dokumentierten Komponenten. Die Liste wird automatisch aus den Component-Routen erzeugt.
+Übersicht aller dokumentierten Komponenten. Die Liste wird automatisch aus den
+Component-Routen erzeugt; die kleinen Vorschauen zeigen ein echtes Specimen mit den
+Design-System-Styles.
 
-<CardGrid {cards} />
+<!-- Preview-CSS EINMAL seitenweit als <style> im Body (gültiges HTML). Via {@html},
+     weil ein Svelte-<style>-Block kein JS interpoliert und die :global-Regeln sonst
+     von der Scope-Kapselung wegoptimiert würden. Registry-Daten = vertrauenswürdig. -->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>${previewCss}</style>`}
+
+<div class="cat-grid">
+	{#each cards as card (card.url)}
+		<a href={card.url} class="cat-card">
+			{#if card.preview}
+				<div class="cat-preview spec-canvas ds-stage" aria-hidden="true" inert>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html card.preview.html}
+				</div>
+			{:else}
+				<div class="cat-preview cat-preview--empty" aria-hidden="true">
+					<span>{card.title}</span>
+				</div>
+			{/if}
+			<div class="cat-card__head">
+				<h3 class="cat-card__title">{card.title}</h3>
+				{#if card.badge}<Badge variant={card.badgeVariant}>{card.badge}</Badge>{/if}
+			</div>
+			<p class="cat-card__desc">{card.description}</p>
+		</a>
+	{/each}
+</div>
+
+<style>
+	.cat-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: var(--z-ds-space-32) var(--z-ds-space-24);
+		margin-block: var(--z-ds-space-32);
+		width: 100%;
+		max-width: 100%;
+	}
+	.cat-card {
+		display: block;
+		text-decoration: none;
+		transition: transform var(--ds-dur) var(--ds-ease-out);
+	}
+	.cat-card:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 3px;
+		border-radius: var(--ds-radius);
+		transform: translateY(-3px);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.cat-card:hover {
+			transform: translateY(-3px);
+		}
+		.cat-card:hover .cat-preview {
+			box-shadow: var(--ds-shadow-md);
+		}
+	}
+	.cat-card:active {
+		transform: translateY(-1px) scale(0.99);
+	}
+
+	/* Mini-Bühne: feste Höhe, Specimen mittig, Überlauf abgeschnitten. Große Specimens
+	   (Cell) werden per transform: scale eingepasst, ohne das Kartenraster zu sprengen. */
+	.cat-preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 96px;
+		overflow: hidden;
+		border: 1px solid var(--ds-border-soft);
+		border-radius: var(--ds-radius);
+		box-shadow: var(--ds-shadow-sm);
+		/* RAW-Token wie die anderen Bühnen → Fläche bleibt eigenständig hell. */
+		background: var(--z-ds-color-background-10);
+		transition: box-shadow var(--ds-dur) var(--ds-ease);
+	}
+	/* Specimen mittig, damit breite Inhalte (Cell) links/rechts gleichmäßig abgeschnitten
+	   werden statt links anzukleben; leichte Skalierung hält typische Specimens im Rahmen. */
+	.cat-preview :global(> *) {
+		transform: scale(0.9);
+		max-width: 100%;
+	}
+	.cat-preview--empty {
+		background: color-mix(in srgb, var(--ds-accent) 8%, var(--ds-surface-raised));
+	}
+	.cat-preview--empty span {
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-muted);
+	}
+	.cat-card__head {
+		display: flex;
+		align-items: baseline;
+		gap: var(--z-ds-space-8);
+		padding-top: var(--z-ds-space-16);
+		flex-wrap: wrap;
+	}
+	.cat-card__title {
+		margin: 0 0 var(--z-ds-space-4);
+	}
+	.cat-card__desc {
+		font-size: var(--ds-text-base);
+		color: var(--ds-text-body);
+		max-width: none;
+		margin: 0;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.cat-card,
+		.cat-preview {
+			transition: none;
+		}
+	}
+</style>
