@@ -169,6 +169,16 @@ export const generated = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf die Checkbox."
+		},
+		{
+			"taste": "Leertaste",
+			"aktion": "Schaltet die Auswahl um (checked ↔ unchecked)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Immer mit klickbarem Label kombinieren.",

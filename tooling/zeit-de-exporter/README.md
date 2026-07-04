@@ -31,7 +31,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 - **Modell geändert** (Maße, Tokens, Varianten, Playground …) → `model.json` + Exporter
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
   `content.ts` bleibt unangetastet.
-- **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `doDont`,
+- **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
   `verwendung`, `wording`, `version`, `variantInfo`) → **`content.ts` von Hand**.
 - **Menüeintrag** → [`src/lib/data/navigation.ts`](../../src/lib/data/navigation.ts) von
   Hand (`MENU_ITEMS_PRODUCT`). `npm run check` (→ `check-nav.mjs`) warnt bei fehlendem
@@ -65,6 +65,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 | `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `VariantList` (Drift-Check prüft `cssClass` vs. `pattern.css`) |
 | `zustaende` | `{ label, vorhanden? }[]` | `StateList` |
 | `a11y` | `{ label, wert, status: pass\|warn\|todo }[]` | `A11yList` (eigener Tab) |
+| `tastatur` | `{ taste, aktion }[]` | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur") |
 | `doDont` | `{ do?: string[], dont?: string[] }` | `DoDontList` |
 | `verwendung` | `{ nutzen?: string[], nichtNutzen?: string[] }` | `UsageBlock` |
 | `wording` | `{ schlecht, gut, hinweis? }[]` | `WordingList` (Texte & Wording) |

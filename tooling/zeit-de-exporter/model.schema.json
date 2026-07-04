@@ -56,6 +56,11 @@
 			"description": "Barrierefreiheit-Hinweise (eigener Tab). status: pass | warn | todo. (Redaktionell.)",
 			"items": { "$ref": "#/$defs/a11yItem" }
 		},
+		"tastatur": {
+			"type": "array",
+			"description": "Tastatur-Bedienung (Barrierefreiheit-Tab): welche Taste löst welche Aktion aus. (Redaktionell.)",
+			"items": { "$ref": "#/$defs/keyboardRule" }
+		},
 		"doDont": { "$ref": "#/$defs/doDont" },
 		"verwendung": { "$ref": "#/$defs/verwendung" },
 		"wording": {
@@ -164,6 +169,15 @@
 				"label": { "type": "string" },
 				"wert": { "type": "string" },
 				"status": { "enum": ["pass", "warn", "todo"] }
+			}
+		},
+		"keyboardRule": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["taste", "aktion"],
+			"properties": {
+				"taste": { "type": "string", "description": "Taste(n), z. B. \"Leertaste\", \"Tab\", \"Enter\", \"Esc\", \"↑ / ↓\"." },
+				"aktion": { "type": "string", "description": "Was die Taste bewirkt (Deutsch)." }
 			}
 		},
 		"doDont": {

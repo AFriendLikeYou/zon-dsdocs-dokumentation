@@ -87,7 +87,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung', 'wording'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'verwendung', 'wording'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -124,6 +124,7 @@ function renderContentStub(model) {
 		`//   variantInfo – Wann welche Variante nutzen (Label → Text)\n` +
 		`//   callouts    – Anatomie-Beschriftungen ({ nr, text })\n` +
 		`//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
+		`//   tastatur    – Tastatur-Bedienung ({ taste, aktion })\n` +
 		`//   doDont      – { do: [...], dont: [...] }\n` +
 		`export const content = ${json};\n`
 	);
@@ -257,6 +258,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
+	const hasKeyboard = Array.isArray(model.tastatur) && model.tastatur.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
 	const hasMasse = Boolean(model.masse);
 	const hasUsage = Boolean(
@@ -277,12 +279,13 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (anyCode) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
 	if (hasA11y) used.add('A11yList');
+	if (hasKeyboard) used.add('KeyboardList');
 	if (hasMasse) used.add('MeasureTable');
 	if (hasTokens) used.add('TokenTable');
 
 	const tabs = [{ label: 'Design', name: 'designTab' }];
 	if (hasDevelop) tabs.push({ label: 'Develop', name: 'developTab' });
-	if (hasA11y) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
+	if (hasA11y || hasKeyboard) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
 	if (hasSpecs) tabs.push({ label: 'Specs', name: 'specsTab' });
 
 	const imports =
@@ -364,7 +367,11 @@ function renderPage(model, { patternCss = null } = {}) {
 	}
 
 	// ---- Barrierefreiheit-Tab ----
-	const a11y = `\t<A11yList items={${S}.a11y} />\n`;
+	// A11yList nur bei hasA11y (der Body ist sonst leer); Tastatur-Abschnitt danach.
+	let a11y = '';
+	if (hasA11y) a11y += `\t<A11yList items={${S}.a11y} />\n`;
+	if (hasKeyboard)
+		a11y += `\n\t<h2>Tastatur</h2>\n\t<KeyboardList items={${S}.tastatur} />\n`;
 
 	// ---- Specs-Tab ----
 	let specs = '';
@@ -496,6 +503,12 @@ function validate(model) {
 		for (const [i, w] of model.wording.entries())
 			if (!w?.schlecht || !w?.gut)
 				errors.push(`wording[${i}]: schlecht und gut sind nötig`);
+
+	// tastatur: taste + aktion sind Pflicht.
+	if (Array.isArray(model.tastatur))
+		for (const [i, k] of model.tastatur.entries())
+			if (!k?.taste || !k?.aktion)
+				errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
 
 	for (const w of warnings) console.warn(`  ⚠️  ${w}`);
 	if (errors.length)

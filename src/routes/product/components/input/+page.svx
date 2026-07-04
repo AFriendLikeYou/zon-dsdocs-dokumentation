@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
@@ -170,6 +170,9 @@ kategorie: Formulare
 
 {#snippet a11yTab()}
 	<A11yList items={spec.a11y} />
+
+	<h2>Tastatur</h2>
+	<KeyboardList items={spec.tastatur} />
 {/snippet}
 
 {#snippet specsTab()}

@@ -165,6 +165,20 @@ export const generated = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Wechselt den Fokus zwischen − und +."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst den fokussierten Button aus (erhöht bzw. verringert)."
+		},
+		{
+			"taste": "↑ / ↓",
+			"aktion": "Erhöht bzw. verringert den Wert (optional, bei role=spinbutton)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Für kleine, schrittweise Anpassungen (Menge, Anzahl).",

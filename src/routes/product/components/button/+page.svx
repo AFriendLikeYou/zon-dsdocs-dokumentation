@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
@@ -147,7 +147,7 @@ kategorie: Aktionen
 	<Playground controls={playgroundControls} template={playgroundTemplate} />
 
 	<h2>Anatomie</h2>
-	<Anatomy masse={spec.masse} callouts={spec.callouts} {calloutAnchors}>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="sds-btn sds-btn--primary" type="button">Button</button>{/snippet}
 		{#snippet variant()}<button class="sds-btn sds-btn--neutral" type="button">Button</button>{/snippet}
 	</Anatomy>
@@ -191,6 +191,9 @@ kategorie: Aktionen
 
 {#snippet a11yTab()}
 	<A11yList items={spec.a11y} />
+
+	<h2>Tastatur</h2>
+	<KeyboardList items={spec.tastatur} />
 {/snippet}
 
 {#snippet specsTab()}

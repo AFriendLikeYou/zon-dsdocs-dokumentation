@@ -52,6 +52,9 @@ export type WordingRule = { schlecht: string; gut: string; hinweis?: string };
 
 export type PropRow = { name: string; typ: string; default?: string; beschreibung?: string };
 
+/** Eine Tastatur-Regel: welche Taste löst welche Aktion aus (Barrierefreiheit-Tab). */
+export type KeyboardRule = { taste: string; aktion: string };
+
 /**
  * Das gemergte Spec-Objekt (generated + content), das jede Component-Seite an die
  * Renderer reicht. Alle Felder optional: `content.ts` überschreibt partiell, die
@@ -73,6 +76,7 @@ export type ComponentSpec = {
 	varianten?: VariantGroup[];
 	zustaende?: SpecState[];
 	a11y?: A11yItem[];
+	tastatur?: KeyboardRule[];
 	doDont?: DoDont | null;
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;

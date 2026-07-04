@@ -53,6 +53,20 @@ export const content = {
 			"status": "pass"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus ins Feld bzw. zum nächsten Bedienelement."
+		},
+		{
+			"taste": "Text",
+			"aktion": "Zeichen werden direkt ins Feld eingegeben."
+		},
+		{
+			"taste": "Esc",
+			"aktion": "Leert das Feld — nur wenn es als clearable markiert ist."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Immer ein sichtbares Label über dem Feld.",

@@ -121,6 +121,16 @@ export const generated = {
 			"status": "todo"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Umschalter."
+		},
+		{
+			"taste": "Leertaste / Enter",
+			"aktion": "Schaltet zwischen On und Off um."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Für Einstellungen, die sofort greifen (kein Speichern nötig).",

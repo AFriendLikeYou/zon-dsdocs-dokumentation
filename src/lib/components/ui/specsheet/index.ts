@@ -7,6 +7,7 @@ export { default as StateList } from './StateList.svelte';
 export { default as TokenTable } from './TokenTable.svelte';
 export { default as MeasureTable } from './MeasureTable.svelte';
 export { default as A11yList } from './A11yList.svelte';
+export { default as KeyboardList } from './KeyboardList.svelte';
 export { default as DoDontList } from './DoDontList.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';

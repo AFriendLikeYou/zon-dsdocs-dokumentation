@@ -237,6 +237,16 @@ export const generated = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Button."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst die Aktion aus (nativ)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Pro Aktionsgruppe nur eine Primary-Aktion.",
