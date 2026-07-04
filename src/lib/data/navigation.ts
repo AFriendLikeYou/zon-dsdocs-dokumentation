@@ -53,7 +53,8 @@ export const MENU_ITEMS_BRAND: MenuSection[] = [
 			{ label: 'Markenstrategie', href: '/brand/identity/strategy' },
 			{ label: 'Markenarchitektur', href: '/brand/identity/architecture', badge: 'Neu' },
 			{ label: 'Erscheinungsbild', href: '/brand/identity/appearance' },
-			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' }
+			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' },
+			{ label: 'Anwendungsbeispiele', href: '/brand/identity/examples', badge: 'Neu' }
 		],
 		isInFooter: true
 	},
