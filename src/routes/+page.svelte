@@ -1,23 +1,18 @@
 <script lang="ts">
-	// Landing der Doku-Site. Produkt-Showcase im Hero: echte z-Komponenten, live und
-	// interaktiv — kein Screenshot, kein CSS-Duplikat. Das Pattern-CSS kommt via ?raw
-	// direkt aus den Component-Ordnern (Single Source) und wird EINMAL eingebunden;
-	// die z-*-Klassen sind eindeutig, daher unscoped unbedenklich.
+	// Landing der Doku-Site. Astryx-inspirierter Hero: zentrierter Text + große,
+	// abgerundete „Bühne" mit abstraktem Docsite-Mockup (Platzhalter-Blöcke +
+	// Token-Farbchips — bewusst KEINE Live-Komponenten). Die Bühne richtet sich
+	// beim Scrollen aus 3D auf (scroll-driven, Reduced-Motion-sicher).
+	// Die kleine Produkt-Vorschau in der „Welten"-Karte nutzt weiterhin echte
+	// z-Klassen; deren Pattern-CSS kommt via ?raw aus den Component-Ordnern.
 	import { CATALOG } from '$data/catalog';
 	import { CHANGELOG } from '$data/changelog';
 	import buttonCss from './product/components/button/pattern.css?raw';
 	import toggleCss from './product/components/toggle/pattern.css?raw';
 	import checkboxCss from './product/components/checkbox/pattern.css?raw';
-	import stepperCss from './product/components/stepper/pattern.css?raw';
-	import cellCss from './product/components/cell/pattern.css?raw';
 
 	const componentCount = CATALOG.length;
-	const showcaseCss = [buttonCss, toggleCss, checkboxCss, stepperCss, cellCss].join('\n');
-
-	// Interaktive Showcase-Zustände — die Komponenten reagieren auf Klick (wie „echt").
-	let toggleOn = $state(true);
-	let checked = $state(true);
-	let stepVal = $state(2);
+	const worldCss = [buttonCss, toggleCss, checkboxCss].join('\n');
 
 	// „Was ist neu" — neuester Datumsblock aus dem Changelog.
 	const latest = CHANGELOG[0]?.dates[0];
@@ -27,149 +22,118 @@
 	<title>DIE ZEIT — Design System &amp; Brandhub</title>
 </svelte:head>
 
-<!-- Pattern-CSS der Showcase-Komponenten einmalig einbinden (gültiges HTML, {@html}). -->
+<!-- Pattern-CSS der Welten-Vorschau einmalig einbinden (gültiges HTML, {@html}). -->
 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-{@html `<style>${showcaseCss}</style>`}
+{@html `<style>${worldCss}</style>`}
 
 <div class="landing">
 	<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
 	<section class="hero">
 		<div class="hero__inner">
-		<div class="hero__copy">
-			<p class="eyebrow">DIE ZEIT · Design System</p>
-			<h1>Marke und Produkt,<br />an einem Ort.</h1>
-			<p class="lead">
-				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und
-				agent-ready.
-			</p>
-			<div class="hero__cta">
-				<a class="btn btn--primary" href="/product">Zum Design-System</a>
-				<a class="btn" href="/brand">Zum Brandhub</a>
-			</div>
-			<ul class="stats">
-				<li><strong>{componentCount}</strong> Komponenten</li>
-				<li>Light &amp; Dark</li>
-				<li>agent-ready</li>
-			</ul>
-		</div>
-
-		<!-- Produkt-Showcase: echte, klickbare z-Komponenten. -->
-		<div class="showcase">
-			<div class="sc-card">
-				<span class="sc-label">Button</span>
-				<button class="z-button z-button--primary" type="button">Speichern</button>
+			<div class="hero__copy">
+				<p class="eyebrow">DIE ZEIT · Design System</p>
+				<h1>Marke und Produkt,<br />an einem Ort.</h1>
+				<p class="lead">
+					Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und
+					agent-ready.
+				</p>
+				<div class="hero__cta">
+					<a class="btn btn--primary" href="/product">Zum Design-System</a>
+					<a class="btn" href="/brand">Zum Brandhub</a>
+				</div>
+				<ul class="stats">
+					<li><strong>{componentCount}</strong> Komponenten</li>
+					<li>Light &amp; Dark</li>
+					<li>agent-ready</li>
+				</ul>
 			</div>
 
-			<div class="sc-card">
-				<span class="sc-label">Toggle</span>
-				<button
-					class="z-switch"
-					class:z-switch--on={toggleOn}
-					type="button"
-					role="switch"
-					aria-checked={toggleOn}
-					aria-label="Beispiel-Schalter"
-					onclick={() => (toggleOn = !toggleOn)}
-				>
-					<span class="z-switch__thumb"></span>
-				</button>
-			</div>
-
-			<div class="sc-card">
-				<span class="sc-label">Checkbox</span>
-				<button
-					class="z-checkbox"
-					class:z-checkbox--checked={checked}
-					type="button"
-					role="checkbox"
-					aria-checked={checked}
-					aria-label="Beispiel-Checkbox"
-					onclick={() => (checked = !checked)}
-				>
-					<span class="z-checkbox__check"></span>
-				</button>
-			</div>
-
-			<div class="sc-card">
-				<span class="sc-label">Stepper</span>
-				<div class="z-stepper">
-					<button
-						class="z-stepper__minus"
-						type="button"
-						aria-label="Weniger"
-						onclick={() => (stepVal = Math.max(0, stepVal - 1))}
-					></button>
-					<span class="z-stepper__val">{stepVal}</span>
-					<button
-						class="z-stepper__plus"
-						type="button"
-						aria-label="Mehr"
-						onclick={() => (stepVal += 1)}
-					></button>
+			<!-- Bühne: abgerundetes Docsite-Mockup, richtet sich beim Scrollen auf. -->
+			<div class="stage-wrap">
+				<div class="stage-glow" aria-hidden="true"></div>
+				<div class="stage" aria-hidden="true">
+					<div class="stage__bar">
+						<span class="stage__dots"><i></i><i></i><i></i></span>
+						<span class="stage__url">zeit.design / product / components</span>
+					</div>
+					<div class="stage__body">
+						<aside class="stage__nav">
+							<span class="stage__navhead"></span>
+							<span class="stage__navitem"></span>
+							<span class="stage__navitem stage__navitem--active"></span>
+							<span class="stage__navitem"></span>
+							<span class="stage__navhead"></span>
+							<span class="stage__navitem"></span>
+							<span class="stage__navitem"></span>
+							<span class="stage__navitem"></span>
+						</aside>
+						<div class="stage__main">
+							<span class="stage__title"></span>
+							<span class="stage__sub"></span>
+							<div class="stage__swatches">
+								<i style="--c: var(--ds-accent-brand)"></i>
+								<i style="--c: var(--ds-text)"></i>
+								<i style="--c: var(--ds-text-muted)"></i>
+								<i style="--c: var(--ds-border-strong)"></i>
+								<i style="--c: var(--ds-accent)"></i>
+								<i style="--c: var(--ds-surface-raised)"></i>
+							</div>
+							<div class="stage__lines"><span></span><span></span><span></span></div>
+							<div class="stage__cards"><div></div><div></div><div></div></div>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<div class="sc-card sc-card--wide">
-				<span class="sc-label">Cell</span>
-				<article class="z-cell z-cell--article">
-					<div class="z-cell__body">
-						<p class="z-cell__kicker">Politik</p>
-						<h3 class="z-cell__title">Artikel Überschrift</h3>
-						<div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
-					</div>
-				</article>
-			</div>
-		</div>
 		</div>
 	</section>
 
 	<div class="container">
-	<!-- ── Zwei Welten ──────────────────────────────────────────────────────── -->
-	<section class="worlds">
-		<a class="world world--brand" href="/brand">
-			<img src="/media/brand/logo/wordmark-1.webp" alt="" class="world__img" loading="lazy" />
-			<div class="world__text">
-				<h2>Brandhub</h2>
-				<p>
-					Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles,
-					was die Marke DIE ZEIT ausmacht.
-				</p>
-				<span class="world__go">Zur Marke →</span>
-			</div>
-		</a>
-		<a class="world world--product" href="/product">
-			<div class="world__demo" aria-hidden="true">
-				<button class="z-button z-button--primary" type="button">Primary</button>
-				<span class="z-switch z-switch--on"><span class="z-switch__thumb"></span></span>
-				<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>
-			</div>
-			<div class="world__text">
-				<h2>Design-System</h2>
-				<p>
-					Design Principles, Foundations, Tokens und dokumentierte Komponenten mit
-					interaktivem Playground — für konsistente, barrierearme Interfaces.
-				</p>
-				<span class="world__go">Zum System →</span>
-			</div>
-		</a>
-	</section>
-
-	<!-- ── Was ist neu ──────────────────────────────────────────────────────── -->
-	{#if latest}
-		<section class="whatsnew">
-			<div class="whatsnew__head">
-				<h2>Was ist neu</h2>
-				<a href="/product/changelog">Alle Änderungen →</a>
-			</div>
-			<ul class="whatsnew__list">
-				{#each latest.notes.slice(0, 4) as note}
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					<li>{@html note}</li>
-				{/each}
-			</ul>
-			<p class="whatsnew__date">Stand {latest.date}</p>
+		<!-- ── Zwei Welten ──────────────────────────────────────────────────────── -->
+		<section class="worlds">
+			<a class="world world--brand" href="/brand">
+				<img src="/media/brand/logo/wordmark-1.webp" alt="" class="world__img" loading="lazy" />
+				<div class="world__text">
+					<h2>Brandhub</h2>
+					<p>
+						Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles,
+						was die Marke DIE ZEIT ausmacht.
+					</p>
+					<span class="world__go">Zur Marke →</span>
+				</div>
+			</a>
+			<a class="world world--product" href="/product">
+				<div class="world__demo" aria-hidden="true">
+					<button class="z-button z-button--primary" type="button">Primary</button>
+					<span class="z-switch z-switch--on"><span class="z-switch__thumb"></span></span>
+					<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>
+				</div>
+				<div class="world__text">
+					<h2>Design-System</h2>
+					<p>
+						Design Principles, Foundations, Tokens und dokumentierte Komponenten mit
+						interaktivem Playground — für konsistente, barrierearme Interfaces.
+					</p>
+					<span class="world__go">Zum System →</span>
+				</div>
+			</a>
 		</section>
-	{/if}
+
+		<!-- ── Was ist neu ──────────────────────────────────────────────────────── -->
+		{#if latest}
+			<section class="whatsnew">
+				<div class="whatsnew__head">
+					<h2>Was ist neu</h2>
+					<a href="/product/changelog">Alle Änderungen →</a>
+				</div>
+				<ul class="whatsnew__list">
+					{#each latest.notes.slice(0, 4) as note}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<li>{@html note}</li>
+					{/each}
+				</ul>
+				<p class="whatsnew__date">Stand {latest.date}</p>
+			</section>
+		{/if}
 	</div>
 </div>
 
@@ -189,22 +153,18 @@
 		padding-block: clamp(3rem, 8vw, 5rem) 4rem;
 	}
 
-	/* ── Hero (vollbreites Band) ── */
+	/* ── Hero (vollbreites Band, zentriert) ── */
 	.hero {
-		background: var(--ds-surface-raised);
-		border-bottom: 1px solid var(--ds-border-soft);
-		padding-block: clamp(3rem, 8vw, 6rem);
+		background: linear-gradient(180deg, var(--ds-surface-raised) 0%, var(--ds-surface) 100%);
+		padding-block: clamp(3rem, 8vw, 6rem) 0;
+		overflow: hidden; /* Glow + gekippte Bühne dürfen nicht ausbrechen */
 	}
 	.hero__inner {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: clamp(2rem, 5vw, 4rem);
-		align-items: center;
+		text-align: center;
 	}
-	@media (min-width: 900px) {
-		.hero__inner {
-			grid-template-columns: 1.05fr 0.95fr;
-		}
+	.hero__copy {
+		max-width: 46rem;
+		margin-inline: auto;
 	}
 	.eyebrow {
 		font-size: var(--ds-label-size);
@@ -216,8 +176,8 @@
 	}
 	.hero__copy h1 {
 		font-family: 'FranziskaWebPro', Georgia, serif;
-		font-size: clamp(2.2rem, 5.2vw, 3.7rem);
-		line-height: 1.06;
+		font-size: clamp(2.4rem, 6vw, 4.2rem);
+		line-height: 1.05;
 		letter-spacing: -0.01em;
 		color: var(--ds-text);
 		margin: 0 0 1.25rem;
@@ -228,12 +188,13 @@
 		font-size: var(--ds-text-lg);
 		line-height: 1.5;
 		color: var(--ds-text-body);
-		max-width: 34ch;
-		margin: 0 0 2rem;
+		max-width: 42ch;
+		margin: 0 auto 2rem;
 	}
 	.hero__cta {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 0.75rem;
 		margin-bottom: 2rem;
 	}
@@ -272,6 +233,7 @@
 		list-style: none;
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 0.5rem 1.5rem;
 		margin: 0;
 		padding: 0;
@@ -282,32 +244,193 @@
 		color: var(--ds-text);
 	}
 
-	/* ── Showcase ── */
-	.showcase {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.75rem;
+	/* ── Bühne (Docsite-Mockup) ── */
+	.stage-wrap {
+		position: relative;
+		margin-top: clamp(2.5rem, 6vw, 4.5rem);
+		/* Bühne perspektivisch aufrichten (Scroll-Effekt) */
+		perspective: 1600px;
 	}
-	.sc-card {
+	.stage-glow {
+		position: absolute;
+		inset: -12% -6% auto -6%;
+		height: 70%;
+		z-index: 0;
+		background: radial-gradient(
+			55% 60% at 50% 35%,
+			color-mix(in srgb, var(--ds-accent-brand) 22%, transparent),
+			transparent 70%
+		);
+		filter: blur(8px);
+		pointer-events: none;
+	}
+	.stage {
+		position: relative;
+		z-index: 1;
+		margin-inline: auto;
+		max-width: 62rem;
+		border: 1px solid var(--ds-border-soft);
+		border-radius: clamp(14px, 1.6vw, 22px);
+		background: var(--ds-surface);
+		box-shadow: var(--ds-shadow-lg, 0 30px 60px -20px rgba(0, 0, 0, 0.35));
+		overflow: hidden;
+		transform-origin: 50% 0%;
+	}
+	/* Scroll-driven: startet leicht gekippt/verkleinert, richtet sich beim
+	   Scrollen der ersten ~65vh auf. Nur wo unterstützt; sonst flach. */
+	@supports (animation-timeline: scroll()) {
+		.stage {
+			animation: stage-rise linear both;
+			animation-timeline: scroll(root);
+			animation-range: 0 65vh;
+		}
+	}
+	@keyframes stage-rise {
+		from {
+			transform: rotateX(11deg) scale(0.95) translateY(14px);
+			opacity: 0.88;
+		}
+		to {
+			transform: rotateX(0deg) scale(1) translateY(0);
+			opacity: 1;
+		}
+	}
+	.stage__bar {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.7rem 1rem;
+		border-bottom: 1px solid var(--ds-border-soft);
+		background: var(--ds-surface-raised);
+	}
+	.stage__dots {
+		display: inline-flex;
+		gap: 0.4rem;
+	}
+	.stage__dots i {
+		width: 10px;
+		height: 10px;
+		border-radius: 999px;
+		background: var(--ds-border-strong);
+	}
+	.stage__url {
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		margin-inline: auto;
+		padding: 0.2rem 0.7rem;
+		border-radius: 999px;
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border-soft);
+	}
+	.stage__body {
+		display: grid;
+		grid-template-columns: 1fr;
+		min-height: 300px;
+	}
+	@media (min-width: 640px) {
+		.stage__body {
+			grid-template-columns: 172px 1fr;
+		}
+	}
+	.stage__nav {
+		display: none;
+		flex-direction: column;
+		gap: 0.7rem;
+		padding: 1.4rem 1.1rem;
+		border-right: 1px solid var(--ds-border-soft);
+		background: var(--ds-surface-raised);
+	}
+	@media (min-width: 640px) {
+		.stage__nav {
+			display: flex;
+		}
+	}
+	.stage__navhead {
+		width: 42%;
+		height: 7px;
+		border-radius: 4px;
+		background: var(--ds-border-strong);
+		margin-top: 0.4rem;
+	}
+	.stage__navitem {
+		width: 78%;
+		height: 9px;
+		border-radius: 5px;
+		background: var(--ds-border-soft);
+	}
+	.stage__navitem:nth-of-type(4) {
+		width: 64%;
+	}
+	.stage__navitem:nth-of-type(7) {
+		width: 70%;
+	}
+	.stage__navitem--active {
+		width: 86%;
+		background: color-mix(in srgb, var(--ds-accent-brand) 55%, var(--ds-border-strong));
+	}
+	.stage__main {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.9rem;
-		min-height: 92px;
-		padding: 1rem 1.1rem;
+		gap: 1rem;
+		padding: clamp(1.2rem, 3vw, 2rem);
+	}
+	.stage__title {
+		width: 52%;
+		height: 22px;
+		border-radius: 6px;
+		background: var(--ds-text);
+		opacity: 0.85;
+	}
+	.stage__sub {
+		width: 72%;
+		height: 11px;
+		border-radius: 5px;
+		background: var(--ds-border-strong);
+	}
+	.stage__swatches {
+		display: flex;
+		gap: 0.6rem;
+		margin-top: 0.4rem;
+	}
+	.stage__swatches i {
+		width: 44px;
+		height: 44px;
+		border-radius: 10px;
+		background: var(--c);
 		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		background: var(--ds-surface);
-		box-shadow: var(--ds-shadow-sm);
 	}
-	.sc-card--wide {
-		grid-column: 1 / -1;
+	.stage__lines {
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
+		margin-top: 0.4rem;
 	}
-	.sc-label {
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: var(--ds-label-tracking);
-		color: var(--ds-text-faint);
+	.stage__lines span {
+		height: 9px;
+		border-radius: 5px;
+		background: var(--ds-border-soft);
+	}
+	.stage__lines span:nth-child(1) {
+		width: 92%;
+	}
+	.stage__lines span:nth-child(2) {
+		width: 84%;
+	}
+	.stage__lines span:nth-child(3) {
+		width: 60%;
+	}
+	.stage__cards {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0.7rem;
+		margin-top: 0.6rem;
+	}
+	.stage__cards div {
+		height: 64px;
+		border-radius: 10px;
+		border: 1px solid var(--ds-border-soft);
+		background: var(--ds-surface-raised);
 	}
 
 	/* ── Zwei Welten ── */
@@ -431,6 +554,11 @@
 		.btn,
 		.world {
 			transition: none;
+		}
+		.stage {
+			animation: none;
+			transform: none;
+			opacity: 1;
 		}
 	}
 </style>
