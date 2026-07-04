@@ -74,7 +74,14 @@
 <style>
 	/* ── Hero (vollbreites Band, zentriert) ── */
 	.hero {
-		background: linear-gradient(180deg, var(--ds-surface-raised) 0%, var(--ds-surface) 100%);
+		/* Themed Band: RAW --z-ds-color-background-* (flippt mit Light/Dark),
+		   nicht das abgeleitete --ds-surface (löst hier zu transparent auf).
+		   Unterer Stopp = background-0 = Seitenhintergrund → nahtloser Übergang. */
+		background: linear-gradient(
+			180deg,
+			var(--z-ds-color-background-10) 0%,
+			var(--z-ds-color-background-0) 100%
+		);
 		padding-block: clamp(3rem, 8vw, 6rem) 0;
 		overflow: hidden; /* Glow + gekippte Bühne dürfen nicht ausbrechen */
 	}
@@ -97,12 +104,17 @@
 		margin: 0 0 1rem;
 	}
 	.hero__copy h1 {
+		/* Globale Heading-Regel setzt display:flex (linksgepackt) → hier auf Block
+		   zurück, damit text-align:center die Zeilen tatsächlich zentriert. */
+		display: block;
+		text-align: center;
 		font-family: 'FranziskaWebPro', Georgia, serif;
 		font-size: clamp(2.4rem, 6vw, 4.2rem);
 		line-height: 1.05;
 		letter-spacing: -0.01em;
 		color: var(--ds-text);
 		margin: 0 0 1.25rem;
+		padding-bottom: 0;
 		hyphens: none;
 		text-wrap: balance;
 	}
