@@ -74,14 +74,9 @@
 <style>
 	/* ── Hero (vollbreites Band, zentriert) ── */
 	.hero {
-		/* Themed Band: RAW --z-ds-color-background-* (flippt mit Light/Dark),
-		   nicht das abgeleitete --ds-surface (löst hier zu transparent auf).
-		   Unterer Stopp = background-0 = Seitenhintergrund → nahtloser Übergang. */
-		background: linear-gradient(
-			180deg,
-			var(--z-ds-color-background-10) 0%,
-			var(--z-ds-color-background-0) 100%
-		);
+		/* Band von der angehobenen Fläche zur Basis-Fläche (= Seitenhintergrund)
+		   → nahtloser Übergang. Semantische Rollen, flippen mit Light/Dark. */
+		background: linear-gradient(180deg, var(--ds-surface-raised) 0%, var(--ds-surface) 100%);
 		padding-block: clamp(3rem, 8vw, 6rem) 0;
 		overflow: hidden; /* Glow + gekippte Bühne dürfen nicht ausbrechen */
 	}

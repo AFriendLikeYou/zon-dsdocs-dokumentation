@@ -21,7 +21,7 @@
 	   kommen weiter aus @zeitonline/design-system → theme-adaptiv). Komponenten
 	   nutzen NUR diese Rollen. Rohe --z-ds-* erscheinen nur noch: hier (Mapping),
 	   in den originalgetreuen DS-Kopien (Playground-Specimens) und bei Abständen/
-	   Zeilenhöhen (--z-ds-space-*/-lineheight-* sind bereits semantisch). */
+	   Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind bereits semantisch). */
 
 	/* Flächen */
 	--ds-surface: var(--z-ds-color-background-0); /* Seite, Karten, Navbar */
