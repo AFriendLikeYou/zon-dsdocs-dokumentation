@@ -228,6 +228,18 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Spacing',
+		href: '/product/foundations/spacing',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Shape',
+		href: '/product/foundations/shape',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Motion & Elevation',
 		href: '/product/foundations/motion',
 		badge: 'Neu',

@@ -1,0 +1,72 @@
+---
+title: Spacing
+---
+
+<script lang="ts">
+	import { SpacingScale } from '$components/ui/scale';
+	import { DoDontList } from '$components/ui/specsheet';
+
+	const semantisch = [
+		'--z-ds-space-xxs',
+		'--z-ds-space-xs',
+		'--z-ds-space-s',
+		'--z-ds-space-m',
+		'--z-ds-space-l',
+		'--z-ds-space-xl',
+		'--z-ds-space-xxl'
+	];
+	const numerisch = [
+		'--z-ds-space-4',
+		'--z-ds-space-6',
+		'--z-ds-space-8',
+		'--z-ds-space-10',
+		'--z-ds-space-12',
+		'--z-ds-space-14',
+		'--z-ds-space-16',
+		'--z-ds-space-20',
+		'--z-ds-space-24',
+		'--z-ds-space-32',
+		'--z-ds-space-56'
+	];
+
+	const doDont = {
+		do: [
+			'Zuerst die semantischen Stufen nutzen (<code>--z-ds-space-m</code>) — sie halten Abstände über Komponenten hinweg konsistent.',
+			'Am 4px-Raster bleiben: kleine Stufen für dichte Innenabstände, große für Sektions-Abstände.'
+		],
+		dont: [
+			'Keine freien Pixelwerte außerhalb der Skala verwenden.',
+			'Spacing-Token nicht mit rohen px/rem-Werten mischen.'
+		]
+	};
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+Abstände sorgen für Rhythmus und Ordnung. Die Skala basiert auf einer **4px-Basiseinheit**:
+feine Stufen (2, 4, 6px) für dichte Innenabstände, konsistente Vielfache von 4 für größere
+Abstände. Die Balken unten sind so breit wie der Token **wirklich** ist; die Werte werden
+live aus dem aktiven Theme gelesen.
+
+## Semantisch zuerst
+
+Für Abstände gibt es zwei Skalen. Nutze **zuerst die semantischen Stufen** — sie beschreiben
+die Rolle (klein/mittel/groß) statt einer festen Zahl und passen sich Theme- oder
+Density-Änderungen an, ohne dass du Pixel nachziehst.
+
+<SpacingScale tokens={semantisch} />
+
+## Numerische Skala
+
+Die numerische Skala ist die **Ausnahme** für Feinabstimmung, wenn keine semantische Stufe
+passt.
+
+<SpacingScale tokens={numerisch} />
+
+## Do &amp; Don't
+
+<DoDontList {doDont} />
