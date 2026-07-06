@@ -6,6 +6,7 @@
 </script>
 
 {#if tokens.length}
+  <div class="tok-wrap">
   <table class="tok">
     <tbody>
       {#each tokens as group}
@@ -34,13 +35,19 @@
       {/each}
     </tbody>
   </table>
+  </div>
 {/if}
 
 <style>
+  /* Schmale Viewports: lange Token-Namen scrollen im Container statt die Seite zu schieben. */
+  .tok-wrap {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 0 0 1em;
+  }
   .tok {
     width: 100%;
     border-collapse: collapse;
-    margin: 0 0 1em;
   }
   .tok td {
     padding: 9px 10px 9px 0;

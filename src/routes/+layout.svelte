@@ -28,6 +28,8 @@
 		url?.startsWith('/product') ? 'product' : url?.startsWith('/brand') ? 'brand' : 'root'
 	);
 	const isProduct = $derived(section === 'product');
+	// Startseite (`/`) ist eine vollflächige Landing — ohne Sidebar/Breadcrumbs/TOC.
+	const isRoot = $derived(section === 'root');
 	const menuItems = $derived(isProduct ? MENU_ITEMS_PRODUCT : MENU_ITEMS_BRAND);
 	const flatMenuItems = $derived(isProduct ? FLAT_MENU_ITEMS_PRODUCT : FLAT_MENU_ITEMS_BRAND);
 	const showFooterNav = $derived(section !== 'root');
@@ -53,12 +55,16 @@
 
 <Navbar isUserLoggedIn={data.isUserLoggedIn} />
 
-<div class="flex">
-	<Sidebar isUserLoggedIn={data.isUserLoggedIn} items={menuItems} />
+<div class="flex" class:flex--root={isRoot}>
+	{#if !isRoot}
+		<Sidebar isUserLoggedIn={data.isUserLoggedIn} items={menuItems} />
+	{/if}
 	<div class="layout">
 		<div class="layout__inner">
-			<main id="main-content">
-				<BreadCrumbs />
+			<main id="main-content" data-area={section}>
+				{#if !isRoot}
+					<BreadCrumbs />
+				{/if}
 
 				{@render children()}
 
@@ -102,6 +108,15 @@
 		max-width: var(--ds-content-width);
 		margin-inline: auto;
 		padding: var(--z-ds-space-s) var(--z-ds-space-m);
+	}
+
+	/* Startseite: vollflächige Landing ohne Sidebar → Content-Spalte zentriert, kein Cap. */
+	.flex--root .layout {
+		margin-inline: auto;
+	}
+	main[data-area='root'] {
+		max-width: none;
+		padding: 0;
 	}
 
 	@media (min-width: 768px) {

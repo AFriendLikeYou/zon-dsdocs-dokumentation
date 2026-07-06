@@ -6,6 +6,10 @@
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=477-3021&m=dev",
 	"aktualisiertAm": "2026-07-03",
 	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
+	"verwandt": [
+		"checkbox",
+		"stepper"
+	],
 	"masse": {
 		"hoehe": "40",
 		"breite": "292",
@@ -196,6 +200,20 @@
 			"status": "pass"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus ins Feld bzw. zum nächsten Bedienelement."
+		},
+		{
+			"taste": "Text",
+			"aktion": "Zeichen werden direkt ins Feld eingegeben."
+		},
+		{
+			"taste": "Esc",
+			"aktion": "Leert das Feld — nur wenn es als clearable markiert ist."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Immer ein sichtbares Label über dem Feld.",
@@ -206,6 +224,18 @@
 			"Disabled-Felder ohne Erklärung, warum sie gesperrt sind."
 		]
 	},
+	"doDontBeispiele": [
+		{
+			"gut": {
+				"html": "<div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start\"><label for=\"ddv-mail-good\" style=\"font-size:14px;color:var(--z-ds-color-text-100)\">E-Mail</label><div class=\"z-input z-input--filled\"><input id=\"ddv-mail-good\" class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" /></div></div>",
+				"text": "Sichtbares Label über dem Feld — bleibt beim Tippen stehen und ist mit for/id verknüpft."
+			},
+			"schlecht": {
+				"html": "<div class=\"z-input\"><input class=\"z-input__field\" type=\"text\" placeholder=\"E-Mail\" aria-label=\"E-Mail\" /></div>",
+				"text": "Platzhalter als Label — verschwindet bei der Eingabe, das Feld verliert seine Beschriftung."
+			}
+		}
+	],
 	"verwendung": {
 		"nutzen": [
 			"Für kurze, einzeilige Freitext-Eingaben (Name, Suche, E-Mail).",

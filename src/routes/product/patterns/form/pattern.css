@@ -1,0 +1,41 @@
+/* Formular-Pattern — NUR Layout-Glue (Stack-Abstände, Label-/Fehlertext-Stil).
+   KEIN kopiertes Komponenten-CSS: die z-Klassen (z-input, z-checkbox, z-button)
+   liefern die eigentlichen Komponenten-Ordner via ?raw (Single Source of Truth).
+   Diese Klassen sind pattern-eigen (Präfix pf-) und kollidieren mit nichts. */
+
+.pf-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-16);
+	max-width: 360px;
+}
+
+.pf-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-6);
+}
+
+.pf-label {
+	font-size: var(--z-ds-fontsize-16);
+	color: var(--z-ds-color-text-100);
+}
+
+/* Checkbox-Zeile: Kästchen + Label nebeneinander, klickbar zentriert. */
+.pf-check {
+	display: flex;
+	align-items: center;
+	gap: var(--z-ds-space-8);
+	cursor: pointer;
+}
+
+/* Fehlertext unter dem Feld — Farbe aus dem Error-Token, wie der z-input--error-Rahmen. */
+.pf-error {
+	font-size: var(--z-ds-fontsize-14, 0.875rem);
+	color: var(--z-ds-color-error-70);
+}
+
+.pf-hint {
+	font-size: var(--z-ds-fontsize-14, 0.875rem);
+	color: var(--z-ds-color-text-55);
+}

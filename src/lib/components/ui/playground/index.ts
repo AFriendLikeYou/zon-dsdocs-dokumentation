@@ -1,2 +1,7 @@
-export { default as Playground } from './Playground.svelte';
-export type { PlaygroundControl, PlaygroundOption, PlaygroundState } from './Playground.svelte';
+export { default as Playground, instantiate } from './Playground.svelte';
+export type {
+	PlaygroundControl,
+	PlaygroundOption,
+	PlaygroundState,
+	PlaygroundPreset
+} from './Playground.svelte';

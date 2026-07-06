@@ -9,7 +9,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, CodeBlock } from '$components/ui/specsheet';
+	import { ComponentHero, RelatedComponents, CodeBlock } from '$components/ui/specsheet';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -77,7 +77,12 @@ button.buttongroup-button {
 ]} sticky />
 
 {#snippet designTab()}
-	<Specimen spec={spec} />
+	<div id="playground" class="section-anchor">
+		<Specimen spec={spec} />
+	</div>
+
+	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 
 {#snippet developTab()}

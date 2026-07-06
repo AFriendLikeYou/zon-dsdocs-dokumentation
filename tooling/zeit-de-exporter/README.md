@@ -31,8 +31,9 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 - **Modell geändert** (Maße, Tokens, Varianten, Playground …) → `model.json` + Exporter
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
   `content.ts` bleibt unangetastet.
-- **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `doDont`,
-  `verwendung`, `wording`, `version`, `variantInfo`) → **`content.ts` von Hand**.
+- **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
+  `doDontBeispiele`, `verwendung`, `wording`, `verwandt`, `version`, `variantInfo`) →
+  **`content.ts` von Hand**.
 - **Menüeintrag** → [`src/lib/data/navigation.ts`](../../src/lib/data/navigation.ts) von
   Hand (`MENU_ITEMS_PRODUCT`). `npm run check` (→ `check-nav.mjs`) warnt bei fehlendem
   Link. Reihenfolge im Katalog: `src/lib/data/catalog.ts` (Override-Map).
@@ -65,9 +66,12 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 | `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `VariantList` (Drift-Check prüft `cssClass` vs. `pattern.css`) |
 | `zustaende` | `{ label, vorhanden? }[]` | `StateList` |
 | `a11y` | `{ label, wert, status: pass\|warn\|todo }[]` | `A11yList` (eigener Tab) |
+| `tastatur` | `{ taste, aktion }[]` | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur") |
 | `doDont` | `{ do?: string[], dont?: string[] }` | `DoDontList` |
+| `doDontBeispiele` | `{ gut: { html, text }, schlecht: { html, text } }[]` | `DoDontVisual` (visuelle Specimen-Paare unter der Do&Don't-Liste) |
 | `verwendung` | `{ nutzen?: string[], nichtNutzen?: string[] }` | `UsageBlock` |
 | `wording` | `{ schlecht, gut, hinweis? }[]` | `WordingList` (Texte & Wording) |
+| `verwandt` | `string[]` (Katalog-Slugs) | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen) |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)
 

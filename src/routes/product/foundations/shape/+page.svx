@@ -1,0 +1,93 @@
+---
+title: Shape
+---
+
+<script lang="ts">
+	import { RadiusScale } from '$components/ui/scale';
+	import { DoDontList } from '$components/ui/specsheet';
+
+	const radien = [
+		{ token: '--z-ds-border-radius-2', usage: 'Kleinste Rundung — Checkbox, kleine Marker.' },
+		{ token: '--z-ds-border-radius-4', usage: 'Standard — Button, Input, Karte.' },
+		{ token: '--z-ds-border-radius-8', usage: 'Größer — Panel, Dialog, Bühne.' }
+	];
+
+	const doDont = {
+		do: [
+			'Buttons und Inputs mit <code>--z-ds-border-radius-4</code>, größere Flächen (Panel, Dialog) mit <code>--z-ds-border-radius-8</code>.',
+			'Bei verschachtelten Rundungen den inneren Radius reduzieren: <code>max(0, außen − Innenabstand)</code>.'
+		],
+		dont: [
+			'Radius nie fest verdrahten — immer den Token referenzieren.',
+			'Große Flächen-Radien nicht auf kleine Elemente anwenden.'
+		]
+	};
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+Eckenrundung gibt Komponenten ihren Charakter — von scharfkantig bis stark gerundet. Das
+ZEIT-System nutzt drei Radius-Tokens. Die Swatches unten rendern die Ecke **direkt** aus dem
+Token; die Werte kommen live aus dem aktiven Theme.
+
+## Radius-Skala
+
+<RadiusScale items={radien} />
+
+<p class="note">
+	Voll gerundete Formen (Pills, Avatare) werden aktuell ohne eigenes Token per
+	<code>border-radius: 999px</code> umgesetzt — z.&nbsp;B. beim Toggle-Schalter.
+</p>
+
+## Konzentrische Radien
+
+Sitzt ein gerundetes Element in einem anderen, wirkt gleiche Rundung außen wie innen unruhig.
+Der innere Radius sollte um den Innenabstand kleiner sein:
+**innen = max(0, außen − Innenabstand)**. So laufen die Ecken sauber parallel.
+
+<div class="concentric" aria-hidden="true">
+	<div class="outer">
+		<div class="inner"></div>
+	</div>
+	<p class="concentric__label">außen <code>radius-8</code> · Innenabstand 4 · innen <code>radius-4</code></p>
+</div>
+
+## Do &amp; Don't
+
+<DoDontList {doDont} />
+
+<style>
+	.note {
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-muted);
+		border-left: 2px solid var(--ds-border);
+		padding-left: var(--z-ds-space-12);
+		margin: var(--z-ds-space-16) 0;
+	}
+	.concentric {
+		margin: var(--z-ds-space-16) 0;
+	}
+	.outer {
+		display: inline-block;
+		padding: 4px;
+		background: var(--ds-surface-raised);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--z-ds-border-radius-8);
+	}
+	.inner {
+		width: 120px;
+		height: 72px;
+		background: var(--ds-accent-brand);
+		border-radius: var(--z-ds-border-radius-4);
+	}
+	.concentric__label {
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		margin-top: var(--z-ds-space-8);
+	}
+</style>

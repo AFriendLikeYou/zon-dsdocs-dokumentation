@@ -6,42 +6,92 @@ title: Getting started
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { CardGrid } from '$components/ui/card';
+
+	// Zwei Einstiegs-Strecken als Karten (Anker auf die Abschnitte weiter unten).
+	const tracks = [
+		{
+			url: '#fuer-designerinnen',
+			title: 'Für Designer:innen',
+			description:
+				'Von der Figma-Library zur fertigen Komponente — welche wann, und wie du eine Component-Seite liest.'
+		},
+		{
+			url: '#fuer-entwicklerinnen',
+			title: 'Für Entwickler:innen',
+			description:
+				'DS-CSS einbinden, z-Klassen und pattern.css verstehen, Props, Tokens und der MCP-Endpoint.'
+		}
+	];
+</script>
+
 # {title}
 
-Der ZEIT-Brandguide hilft Mitarbeitern, Partnern und Kollaborateuren bei der Erstellung von Inhalten und Materialien, die unsere Marke konsistent und sicher repräsentieren.
+Das ZEIT Design System dokumentiert das **bestehende** ZEIT-Designsystem — Tokens,
+Komponenten und die Regeln dahinter. Diese Seite ist der Einstieg: Sie richtet sich an
+zwei Rollen und zeigt jeder einen kurzen, sinnvollen Weg durch die Doku. Such dir deine
+Strecke aus — beide brauchen kein Vorwissen.
 
-## Für wen ist das Marken-Toolkit gedacht?
+<CardGrid cards={tracks} />
 
-Dieses Toolkit richtet sich an eine Vielzahl von Personen mit unterschiedlichen Aufgaben, Zielen und unterschiedlichen Kenntnissen über Institutionen. Hier ist eine Liste von Rollen, die das Hauptpublikum darstellen:
+---
 
-#### Externe Mitarbeiter:innen
+<h2 id="fuer-designerinnen">Für Designer:innen</h2>
 
-- Gestalter
-- Werbetexter
-- Strategen
-- Produzenten
-- Art Director der Agentur
-- Event-Planer
+Du gestaltest in Figma und willst konsistent mit dem System arbeiten. Diese Schritte
+bringen dich von der Library zur fertigen, dokumentierten Komponente.
 
-#### DIE ZEIT-Mitarbeiter:innen
+1. **Figma-Library „❖ ZDS" aktivieren.** Die ZEIT-Design-System-Library (❖ ZDS) ist die
+   Quelle aller Komponenten und Styles in Figma. Aktiviere sie in deiner Datei, dann
+   ziehst du Komponenten direkt aus dem Assets-Panel — kein Nachbauen.
+2. **Tokens statt fester Werte nutzen.** Farben, Abstände und Radien kommen als Variablen
+   aus der Library. Wer Tokens bindet statt Hex-Werte zu tippen, bekommt Light/Dark und
+   Marken-Änderungen automatisch — mehr dazu auf der **[Tokens-Seite](/product/foundations/tokens)**.
+3. **„Wann welche Komponente?" klären.** Die **[Component-Übersicht](/product/components)**
+   listet alles Dokumentierte. Jede Seite hat oben einen „Verwendung"-Block (Wann verwenden /
+   Wann nicht) — die schnellste Entscheidungshilfe, bevor du etwas platzierst.
+4. **Eine Component-Seite richtig lesen.** Der **Design-Tab** folgt immer derselben
+   Reihenfolge: **Playground** (Varianten durchspielen) → **Anatomie** (Aufbau und Maße) →
+   **Verwendung / Varianten / Zustände** → **Do & Don't**. Von oben nach unten gelesen
+   verstehst du eine Komponente in unter einer Minute.
+5. **Prinzipien mitnehmen.** Die **[Design Principles](/product/design-principles)** sind der
+   gemeinsame Nenner hinter jeder Entscheidung — im Zweifel der Maßstab.
+6. **Neue Komponente in die Doku bringen.** Fehlt eine Komponente? Der Weg führt über einen
+   kurzen Steckbrief („model.json") aus dem Figma-Node. Wie das läuft, steht kompakt unter
+   **[Mitwirken](/product/contribute)**; die technischen Details im Import-Guide des Repos
+   (`tooling/zeit-de-exporter/IMPORT.md`).
 
-- Unternehmensmarketing
-- Produktmarketing
-- DevRel
-- Kundenerfolg
-- Design/Produkt
-- Werbetexter
+---
 
-## Wie man den Brandguide verwendet
+<h2 id="fuer-entwicklerinnen">Für Entwickler:innen</h2>
 
-Hier ist die Schritt-für-Schritt-Checkliste, die wir vorschlagen, um das meiste über die Marke GitHub zu erfahren:
+Du baust Interfaces mit den ZEIT-Styles. Diese Schritte zeigen, wie du das System einbindest
+und die Doku als Nachschlagewerk nutzt.
 
-1. Bestimmen Sie die Art der Kreation, die Sie erstellen möchten, um herauszufinden, welche Überlegungen Sie dabei anstellen müssen. (Mehr dazu weiter unten)
-2. Informieren Sie sich über die Grundsätze, die DIE ZEIT als Marke ausmachen, im Abschnitt zur Markenidentität.
-3. Machen Sie sich mit den Grundlagen von DIE ZEIT vertraut.
-4. Entdecken Sie, wie Sie unsere grafischen Elemente verwenden können.
-5. Finden Sie Beispiele für die Art von Inhalten, die Sie erstellen möchten.
+1. **DS-CSS einbinden.** Die Styles liegen im Paket `@zeitonline/design-system`. Einmal
+   eingebunden, stehen dir alle `z-`-Klassen zur Verfügung — du schreibst Markup, das Paket
+   liefert die Optik.
+2. **z-Klassen und pattern.css verstehen.** Jede Komponente hat einen Basis-Selektor
+   (z. B. `.z-button`) plus Modifier (`.z-button--primary`). Die Doku zeigt pro Komponente
+   die **originalgetreue `pattern.css`** — genau das CSS, das die Klasse rendert. Kein Rätselraten,
+   welche Klasse was tut.
+3. **Develop-Tab für Props und Code.** Neben dem Design-Tab hat jede Component-Seite einen
+   **Develop-Tab**: fertige HTML/Svelte-Snippets zum Kopieren und — wo vorhanden — eine
+   Properties-Tabelle. Startpunkt ist die **[Component-Übersicht](/product/components)**.
+4. **Tokens als Custom Properties.** Alle Werte sind CSS Custom Properties (`--z-ds-*`). Auf
+   der **[Tokens-Seite](/product/foundations/tokens)** kannst du jeden Token direkt kopieren —
+   binde die Variable, nicht den Wert, dann greifen Theme-Wechsel automatisch.
+5. **Barrierefreiheit-Tab lesen.** Interaktive Komponenten haben einen **Barrierefreiheit-Tab**
+   mit a11y-Hinweisen und einer **Tastatur**-Tabelle (welche Taste macht was). Semantisches
+   Markup und Fokus-Verhalten sind damit dokumentiert, nicht geraten.
+6. **MCP-Endpoint für KI-Agenten.** Die Doku ist selbst ein **MCP-Server** unter `/api/mcp`
+   (Tools `search` + `get` über die Komponenten-Registry). So können KI-Agenten mit dem
+   Design-System UIs bauen. Details und Client-Konfiguration stehen in der Repo-`README.md`
+   (Abschnitt „MCP-Endpoint").
 
-## Bestimmen Sie Ihre Art von Kreativität
+---
 
-Für den Anfang ist es hilfreich, wenn Sie sich selbst einige Fragen stellen, um die Art des von Ihnen zu erstellenden Materials zu bestimmen.
+*Beide Strecken führen früher oder später in die **[Component-Übersicht](/product/components)** —
+sie ist das Herz der Doku. Fehlt etwas oder ist etwas falsch? **[Mitwirken](/product/contribute)**
+erklärt den Weg.*

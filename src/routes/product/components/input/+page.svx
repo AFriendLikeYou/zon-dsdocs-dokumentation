@@ -10,8 +10,9 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
+	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -126,21 +127,24 @@ kategorie: Formulare
 ]} sticky />
 
 {#snippet designTab()}
-	<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
+	<div id="playground" class="section-anchor">
+		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+	</div>
 
-	<h2>Anatomie</h2>
+	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>{/snippet}
 		{#snippet variant()}<div class="z-input z-input--error"><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>{/snippet}
 	</Anatomy>
 
-	<h2>Verwendung</h2>
+	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
 	<UsageBlock verwendung={spec.verwendung} />
 
-	<h2>Texte &amp; Wording</h2>
+	<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
 	<WordingList items={spec.wording} />
 
-	<h2>Varianten</h2>
+	<h2 id="varianten" class="section-anchor">Varianten</h2>
 	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
 	<VariantMatrix>
 		<div class="cell"><span class="cell-label">Default</span><div class="z-input"><input class="z-input__field" type="text" placeholder="Platzhalter" aria-label="Beispiel" /></div></div>
@@ -152,11 +156,15 @@ kategorie: Formulare
 		<div class="cell"><span class="cell-label">Dropdown</span><div class="z-input z-input--dropdown"><input class="z-input__field" type="text" placeholder="Auswählen" aria-label="Beispiel" /><span class="z-input__chevron" aria-hidden="true"></span></div></div>
 	</VariantMatrix>
 
-	<h2>Zustände</h2>
+	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<StateList states={spec.zustaende} />
 
-	<h2>Do & Don't</h2>
+	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
+	<DoDontVisual beispiele={spec.doDontBeispiele} />
+
+	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 
 {#snippet developTab()}
@@ -170,6 +178,9 @@ kategorie: Formulare
 
 {#snippet a11yTab()}
 	<A11yList items={spec.a11y} />
+
+	<h2>Tastatur</h2>
+	<KeyboardList items={spec.tastatur} />
 {/snippet}
 
 {#snippet specsTab()}

@@ -8,6 +8,11 @@ export const generated = {
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"zweck": "Löst eine Aktion ohne sichtbares Label aus — kompakt und ikonografisch. Da kein Text sichtbar ist, braucht jeder Icon Button ein aria-label, das die Aktion beschreibt.",
+	"verwandt": [
+		"button",
+		"text-button",
+		"button-group"
+	],
 	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=11-11508&m=dev",
 	"aktualisiertAm": "2026-06-28",
 	"masse": {

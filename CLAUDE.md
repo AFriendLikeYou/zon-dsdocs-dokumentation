@@ -107,8 +107,10 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
    `render`-Block = Playground (`controls`/`template`/`cssFile`) + optional
    `matrix`/`props`/`calloutAnchors`/`variantInfo`.
 4. Exporter laufen lassen (s. o.).
-5. Nav-Eintrag in `src/lib/data/navigation.ts` → `MENU_ITEMS_PRODUCT`; ggf.
-   Reihenfolge in `catalog.ts`.
+5. Nav-Eintrag: **entfällt** für Komponenten mit `model.json` — die Components-Sektion
+   wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen in der
+   Override-Map in `catalog.ts`; geplante Stubs ohne model.json in `PLANNED_COMPONENTS`
+   (navigation.ts).
 6. Gate ausführen; redaktionelle Texte in `content.ts` prüfen (klar trennen:
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
@@ -131,6 +133,15 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 - Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 
+## MCP-Endpoint (`/api/mcp`)
+Die Site ist selbst ein **MCP-Server** (agent-ready): Tools `search` + `get` über die
+Komponenten-Registry. Minimaler, handgerollter JSON-RPC-2.0-Handler (Streamable HTTP,
+stateless, **kein SDK**). Route `src/routes/api/mcp/+server.ts` (dünn) → Logik
+`src/lib/server/mcp.ts` (pure Funktionen, getestet) → Datenbasis
+`src/lib/data/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem `pattern.css`**,
+**nur serverseitig** importieren!). Liegt hinter Basic Auth wie alles. Details/Client-Config:
+[`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
+
 ## Stolperfallen
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
   `git symbolic-ref HEAD refs/heads/main`.
@@ -141,5 +152,6 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 
 ## Weiterführend
 - [`DECISIONS.md`](DECISIONS.md) — ADR-Log (u. a. ADR-018 Discovery/Drift,
-  ADR-021 Struktur, ADR-023 Registry-Schema, ADR-024 generierter Katalog).
+  ADR-021 Struktur, ADR-023 Registry-Schema, ADR-024 generierter Katalog,
+  ADR-025 katalog-getriebene Components-Nav).
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`STRUKTUR-PLAN.md`](STRUKTUR-PLAN.md).

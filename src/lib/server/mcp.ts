@@ -1,0 +1,319 @@
+/**
+ * mcp.ts — MCP-Tool-Handler + JSON-RPC-Dispatch für /api/mcp (server-only).
+ *
+ * Bewusst MINIMALE, handgerollte Implementierung des MCP Streamable-HTTP-Protokolls
+ * (stateless, JSON-RPC 2.0): nur `initialize`, `notifications/initialized`,
+ * `tools/list`, `tools/call`. Das reicht für die zwei Tools `search` + `get` über die
+ * Komponenten-Registry (Astryx-Vorbild) und vermeidet eine SDK-Abhängigkeit, die sich
+ * nicht sauber in adapter-vercel integrieren ließe. Die Route (+server.ts) bleibt dünn;
+ * die Tool-Logik ist hier als pure Funktionen testbar.
+ */
+import { AGENT_CATALOG, type AgentCatalogEntry } from '$data/agent-catalog';
+
+const PROTOCOL_VERSION = '2025-06-18';
+const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.0.0' };
+
+/** Kontext-Budget pro `get`-Antwort (Astryx-Muster): lange Ausgaben kappen. */
+export const GET_CHAR_BUDGET = 4000;
+
+export type GetSection = 'overview' | 'markup' | 'tokens' | 'a11y' | 'usage';
+const SECTIONS: GetSection[] = ['overview', 'markup', 'tokens', 'a11y', 'usage'];
+
+// ---------------------------------------------------------------------------
+// Suche
+// ---------------------------------------------------------------------------
+
+export type SearchHit = { slug: string; name: string; kategorie: string; zweck: string };
+
+/** Sammelt alle durchsuchbaren Textfragmente eines Eintrags, nach Gewicht gruppiert. */
+function haystack(entry: AgentCatalogEntry) {
+	const spec = entry.spec;
+	const variantLabels = (spec.varianten ?? []).flatMap((v) =>
+		(v.werte ?? []).map((w) => w.label)
+	);
+	const tokenNames = (spec.tokens ?? []).flatMap((g) => (g.items ?? []).map((i) => i.name));
+	return {
+		name: [spec.name ?? '', entry.slug].join(' ').toLowerCase(),
+		zweck: (spec.zweck ?? '').toLowerCase(),
+		rest: [spec.kategorie ?? '', ...variantLabels, ...tokenNames].join(' ').toLowerCase()
+	};
+}
+
+/** Case-insensitive Suche mit einfachem Scoring (Name > zweck > Rest). */
+export function searchComponents(query: string, limit = 8): SearchHit[] {
+	const q = String(query ?? '').trim().toLowerCase();
+	if (!q) return [];
+	const terms = q.split(/\s+/).filter(Boolean);
+
+	const scored = AGENT_CATALOG.map((entry) => {
+		const h = haystack(entry);
+		let score = 0;
+		for (const t of terms) {
+			if (h.name.includes(t)) score += 10;
+			if (h.zweck.includes(t)) score += 4;
+			if (h.rest.includes(t)) score += 1;
+		}
+		return { entry, score };
+	})
+		.filter((s) => s.score > 0)
+		.sort((a, b) => b.score - a.score || a.entry.slug.localeCompare(b.entry.slug))
+		.slice(0, Math.max(1, Number(limit) || 8));
+
+	return scored.map(({ entry }) => ({
+		slug: entry.slug,
+		name: entry.spec.name ?? entry.slug,
+		kategorie: entry.spec.kategorie ?? '',
+		zweck: entry.spec.zweck ?? ''
+	}));
+}
+
+// ---------------------------------------------------------------------------
+// get — Detail je Sektion (Text)
+// ---------------------------------------------------------------------------
+
+const find = (slug: string) => AGENT_CATALOG.find((e) => e.slug === String(slug));
+
+function line(label: string, value: unknown): string {
+	if (value == null || value === '') return '';
+	return `${label}: ${value}\n`;
+}
+
+function sectionOverview(e: AgentCatalogEntry): string {
+	const s = e.spec;
+	let out = `# ${s.name ?? e.slug} (${e.slug})\n`;
+	out += line('Kategorie', s.kategorie);
+	out += line('Zweck', s.zweck);
+	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.varianten?.length) {
+		out += `Varianten:\n`;
+		for (const v of s.varianten) {
+			const werte = (v.werte ?? [])
+				.map((w) => (w.cssClass ? `${w.label} (.${w.cssClass})` : w.label))
+				.join(', ');
+			out += `  - ${v.prop}: ${werte}\n`;
+		}
+	}
+	if (s.zustaende?.length) out += line('Zustände', s.zustaende.map((z) => z.label).join(', '));
+	return out;
+}
+
+function sectionMarkup(e: AgentCatalogEntry): string {
+	const r = e.spec.render ?? {};
+	let out = `# Markup — ${e.spec.name ?? e.slug}\n`;
+	if (r.template) out += `Template:\n${r.template}\n\n`;
+	if (Array.isArray(r.controls) && r.controls.length) {
+		out += `Controls:\n`;
+		for (const c of r.controls as Array<Record<string, unknown>>) {
+			out += `  - ${c.key} (${c.type})${c.cssClass ? ` → .${c.cssClass}` : ''}${c.attr ? ` → [${c.attr}]` : ''}\n`;
+		}
+	}
+	if (Array.isArray(r.presets) && r.presets.length) {
+		out += `Presets: ${r.presets.map((p) => p.label).join(', ')}\n`;
+	}
+	if (e.patternCss) out += `\npattern.css:\n${e.patternCss}\n`;
+	return out;
+}
+
+function sectionTokens(e: AgentCatalogEntry): string {
+	const s = e.spec;
+	let out = `# Tokens & Maße — ${s.name ?? e.slug}\n`;
+	for (const g of s.tokens ?? []) {
+		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
+		for (const i of g.items ?? []) out += `  - ${i.name}: ${i.wert}\n`;
+	}
+	if (s.masse) {
+		out += `\nMaße:\n`;
+		for (const [k, v] of Object.entries(s.masse)) {
+			if (v == null) continue;
+			const val = typeof v === 'string' ? v : `${v.px}${v.token ? ` (${v.token})` : ''}`;
+			out += `  - ${k}: ${val}\n`;
+		}
+	}
+	if (s.spacing?.length) {
+		out += `\nInnenabstände:\n`;
+		for (const sp of s.spacing) out += `  - ${sp.label}: ${sp.px}${sp.token ? ` (${sp.token})` : ''}\n`;
+	}
+	return out;
+}
+
+function sectionA11y(e: AgentCatalogEntry): string {
+	const s = e.spec;
+	let out = `# Barrierefreiheit — ${s.name ?? e.slug}\n`;
+	for (const a of s.a11y ?? []) out += `  - [${a.status}] ${a.label}: ${a.wert}\n`;
+	if (s.tastatur?.length) {
+		out += `\nTastatur:\n`;
+		for (const k of s.tastatur) out += `  - ${k.taste}: ${k.aktion}\n`;
+	}
+	if (s.wording?.length) {
+		out += `\nWording:\n`;
+		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"${w.hinweis ? ` (${w.hinweis})` : ''}\n`;
+	}
+	return out;
+}
+
+function sectionUsage(e: AgentCatalogEntry): string {
+	const s = e.spec;
+	let out = `# Verwendung — ${s.name ?? e.slug}\n`;
+	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.doDont?.do?.length) out += `\nDo:\n${s.doDont.do.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.doDont?.dont?.length) out += `Don't:\n${s.doDont.dont.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.wording?.length) {
+		out += `\nWording:\n`;
+		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"\n`;
+	}
+	const info = s.render?.variantInfo ?? s.variantInfo;
+	if (info && Object.keys(info).length) {
+		out += `\nWann welche Variante:\n`;
+		for (const [k, v] of Object.entries(info)) out += `  - ${k}: ${v}\n`;
+	}
+	return out;
+}
+
+const RENDERERS: Record<GetSection, (e: AgentCatalogEntry) => string> = {
+	overview: sectionOverview,
+	markup: sectionMarkup,
+	tokens: sectionTokens,
+	a11y: sectionA11y,
+	usage: sectionUsage
+};
+
+/** Kappt auf das Budget und hängt (bei Kappung) den section-Hinweis an. */
+function budget(text: string, sectioned: boolean): string {
+	if (text.length <= GET_CHAR_BUDGET) return text;
+	const hint = sectioned
+		? '\n\n[…gekürzt auf das Kontext-Budget]'
+		: `\n\n[…gekürzt. Für den vollen Inhalt einzeln abrufen mit section: ${SECTIONS.join(' | ')}]`;
+	return text.slice(0, GET_CHAR_BUDGET - hint.length) + hint;
+}
+
+/**
+ * Liefert die Doku einer Komponente als Text. Ohne `section` eine kompakte
+ * Gesamtausgabe (overview + gekürztes markup + a11y), auf das Budget gekappt.
+ */
+export function getComponent(slug: string, section?: GetSection | string): string {
+	const e = find(slug);
+	if (!e) {
+		const near = searchComponents(String(slug), 3).map((h) => h.slug);
+		return `Keine Komponente "${slug}" gefunden.${near.length ? ` Meintest du: ${near.join(', ')}?` : ''}`;
+	}
+
+	if (section && SECTIONS.includes(section as GetSection)) {
+		return budget(RENDERERS[section as GetSection](e), true);
+	}
+
+	// Ohne section: kompakte Gesamtsicht (overview + markup + a11y), budgetiert.
+	const combined = [sectionOverview(e), sectionMarkup(e), sectionA11y(e)]
+		.filter(Boolean)
+		.join('\n---\n');
+	return budget(combined, false);
+}
+
+// ---------------------------------------------------------------------------
+// JSON-RPC 2.0 Dispatch (MCP Streamable HTTP, stateless)
+// ---------------------------------------------------------------------------
+
+const TOOLS = [
+	{
+		name: 'search',
+		description:
+			'Sucht Komponenten des ZEIT-Designsystems (Name, Zweck, Kategorie, Varianten, Tokens). Liefert slug, name, kategorie, zweck.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: { type: 'string', description: 'Suchbegriff(e).' },
+				limit: { type: 'number', description: 'Max. Treffer (Default 8).' }
+			},
+			required: ['query']
+		}
+	},
+	{
+		name: 'get',
+		description:
+			'Liefert die Doku einer Komponente als Text. Ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				slug: { type: 'string', description: 'Katalog-Slug, z. B. "input".' },
+				section: {
+					type: 'string',
+					enum: SECTIONS,
+					description: 'Optionaler Ausschnitt.'
+				}
+			},
+			required: ['slug']
+		}
+	}
+];
+
+type JsonRpcId = string | number | null;
+type JsonRpcRequest = { jsonrpc?: string; id?: JsonRpcId; method?: string; params?: unknown };
+export type JsonRpcResponse = { jsonrpc: '2.0'; id: JsonRpcId; result?: unknown; error?: { code: number; message: string } };
+
+const ok = (id: JsonRpcId, result: unknown): JsonRpcResponse => ({ jsonrpc: '2.0', id, result });
+const err = (id: JsonRpcId, code: number, message: string): JsonRpcResponse => ({
+	jsonrpc: '2.0',
+	id,
+	error: { code, message }
+});
+const textResult = (text: string) => ({ content: [{ type: 'text', text }] });
+
+/**
+ * Verarbeitet EINE JSON-RPC-Nachricht. Notifications (ohne id) liefern `null`
+ * (keine Antwort). Gibt sonst eine JsonRpcResponse zurück.
+ */
+export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
+	const id = msg.id ?? null;
+	const method = msg.method;
+
+	switch (method) {
+		case 'initialize':
+			return ok(id, {
+				protocolVersion: PROTOCOL_VERSION,
+				capabilities: { tools: {} },
+				serverInfo: SERVER_INFO
+			});
+
+		case 'notifications/initialized':
+		case 'initialized':
+			return null; // Notification — keine Antwort.
+
+		case 'ping':
+			return ok(id, {});
+
+		case 'tools/list':
+			return ok(id, { tools: TOOLS });
+
+		case 'tools/call': {
+			const params = (msg.params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
+			const args = params.arguments ?? {};
+			if (params.name === 'search') {
+				const hits = searchComponents(String(args.query ?? ''), Number(args.limit) || 8);
+				const text = hits.length
+					? hits.map((h) => `- ${h.slug} · ${h.name} (${h.kategorie}): ${h.zweck}`).join('\n')
+					: `Keine Treffer für "${args.query}".`;
+				return ok(id, textResult(text));
+			}
+			if (params.name === 'get') {
+				return ok(id, textResult(getComponent(String(args.slug ?? ''), args.section as string)));
+			}
+			return err(id, -32602, `Unbekanntes Tool: ${params.name}`);
+		}
+
+		default:
+			// Unbekannte Notification (kein id) still schlucken, sonst Method-not-found.
+			if (id === null) return null;
+			return err(id, -32601, `Methode nicht unterstützt: ${method}`);
+	}
+}
+
+/** Verarbeitet einen JSON-RPC-Body (Einzelnachricht ODER Batch). */
+export function handleMcpBody(body: unknown): JsonRpcResponse | JsonRpcResponse[] | null {
+	if (Array.isArray(body)) {
+		const responses = body.map(handleRpc).filter((r): r is JsonRpcResponse => r !== null);
+		return responses.length ? responses : null;
+	}
+	if (body && typeof body === 'object') return handleRpc(body as JsonRpcRequest);
+	return err(null, -32600, 'Ungültige JSON-RPC-Anfrage.');
+}

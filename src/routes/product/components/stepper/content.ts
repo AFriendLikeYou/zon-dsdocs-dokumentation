@@ -53,6 +53,20 @@ export const content = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Wechselt den Fokus zwischen − und +."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst den fokussierten Button aus (erhöht bzw. verringert)."
+		},
+		{
+			"taste": "↑ / ↓",
+			"aktion": "Erhöht bzw. verringert den Wert (optional, bei role=spinbutton)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Für kleine, schrittweise Anpassungen (Menge, Anzahl).",
@@ -81,6 +95,7 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 4153:1351",
+	"verwandt": ["input"],
 	"variantInfo": {
 		"Default": "Ruhezustand.",
 		"Hover": "Mauszeiger über einem Button — Background-10.",

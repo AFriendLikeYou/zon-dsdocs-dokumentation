@@ -8,6 +8,11 @@ export const generated = {
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
+	"verwandt": [
+		"text-button",
+		"icon-button",
+		"button-group"
+	],
 	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=4185-3778&m=dev",
 	"aktualisiertAm": "2026-06-27",
 	"masse": {
@@ -237,6 +242,16 @@ export const generated = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Button."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst die Aktion aus (nativ)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Pro Aktionsgruppe nur eine Primary-Aktion.",
@@ -247,6 +262,18 @@ export const generated = {
 			"Buttons nicht für reine Navigation verwenden — dafür Links."
 		]
 	},
+	"doDontBeispiele": [
+		{
+			"gut": {
+				"html": "<button type=\"button\" class=\"z-button z-button--primary\">Speichern</button>",
+				"text": "Label als konkrete Verb-Aktion — sagt, was der Klick auslöst."
+			},
+			"schlecht": {
+				"html": "<button type=\"button\" class=\"z-button z-button--primary\">OK</button>",
+				"text": "Generische Bestätigung — der Nutzer muss raten, was passiert."
+			}
+		}
+	],
 	"verwendung": {
 		"nutzen": [
 			"Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).",

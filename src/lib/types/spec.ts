@@ -44,6 +44,12 @@ export type VariantGroup = {
 
 export type DoDont = { do?: string[]; dont?: string[] };
 
+/** Ein visuelles Do/Don't-Paar: gut vs. schlecht als echte Specimens (HTML) + Erklärung. */
+export type DoDontBeispiel = {
+	gut: { html: string; text: string };
+	schlecht: { html: string; text: string };
+};
+
 /** „Wann verwenden / Wann nicht" — Entscheidungshilfe ganz oben in der Component-Doku. */
 export type Verwendung = { nutzen?: string[]; nichtNutzen?: string[] };
 
@@ -51,6 +57,9 @@ export type Verwendung = { nutzen?: string[]; nichtNutzen?: string[] };
 export type WordingRule = { schlecht: string; gut: string; hinweis?: string };
 
 export type PropRow = { name: string; typ: string; default?: string; beschreibung?: string };
+
+/** Eine Tastatur-Regel: welche Taste löst welche Aktion aus (Barrierefreiheit-Tab). */
+export type KeyboardRule = { taste: string; aktion: string };
 
 /**
  * Das gemergte Spec-Objekt (generated + content), das jede Component-Seite an die
@@ -73,7 +82,12 @@ export type ComponentSpec = {
 	varianten?: VariantGroup[];
 	zustaende?: SpecState[];
 	a11y?: A11yItem[];
+	tastatur?: KeyboardRule[];
 	doDont?: DoDont | null;
+	/** Visuelle Do/Don't-Paare (echte Specimens) — ergänzen die Textliste. */
+	doDontBeispiele?: DoDontBeispiel[];
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
+	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
+	verwandt?: string[];
 };

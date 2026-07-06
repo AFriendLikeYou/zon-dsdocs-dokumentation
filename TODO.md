@@ -11,6 +11,69 @@ Tokens). Reihenfolge oben = empfohlene Abarbeitung.
 
 ---
 
+## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
+Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.
+- [x] **Paket 1 — Tastatur-Interaktionen** ✅ Redaktionelles Feld `tastatur`
+  ({ taste, aktion }[]) → `KeyboardList` (kbd-Pills) im Barrierefreiheit-Tab; Schema
+  dreifach (spec.ts/model.schema.json/README); Exporter-Gate `hasKeyboard` + A11yList-Guard
+  + validate. Inhalte für input/checkbox/toggle/stepper/button.
+- [x] **Paket 2 — Verwandte Komponenten** ✅ Redaktionelles Feld `verwandt` (Slugs) →
+  `RelatedComponents` (CardGrid-Reuse, DRY) am Ende des Design-Tabs; validate() warnt bei
+  Slug ohne model.json. Kuratiert: Aktions- + Formular-Familie.
+- [x] **Paket 3 — Components-Nav katalog-getrieben** ✅ (ADR-025) Sektion aus `CATALOG`
+  generiert; Badges als `CatalogOverride`-Kuratierung; geplante Stubs in `PLANNED_COMPONENTS`;
+  `check-nav.mjs` erkennt Component-Routen per model.json/PLANNED (negativ verifiziert:
+  Ghost-Route wird geflaggt); `navigation.test.ts` (6 Tests). Ersetzt Handpflege aus ADR-007.
+- [x] **Paket 4 — MCP-Endpoint `/api/mcp`** ✅ agent-ready: Tools `search` + `get` über die
+  Registry (JSON-RPC 2.0, stateless, **kein SDK** → Build/adapter-vercel clean); `agent-catalog`
+  (render + rohes pattern.css, server-only), `src/lib/server/mcp.ts` (pure, 18 Tests),
+  4.000-Zeichen-Budget. curl-Smoke: handshake/search/get/405/202 OK.
+  **Learning:** Vite serviert `.css` im **Vitest-Transform als leeren String** — die
+  `?raw`-CSS-Ladung ist im Build/Dev korrekt (curl-verifiziert), im Unit-Test nur als
+  „Schlüssel matcht" prüfbar.
+
+---
+
+## PLAN-OPUS-2 — 10 Arbeitspakete ✅ (2026-07-04)
+Content-/UI-Ausbau nach PLAN-OPUS. Je ein Commit, Gate grün, per curl auf dem laufenden
+Preview verifiziert. Redaktionelle Texte (A, B, G, H) sind Entwürfe → Brand-/DS-Team prüft.
+- [x] **A — Getting Started pro Rolle** (`822a2f6`) ✅ `/product/getting-started` auf zwei
+  Strecken „Für Designer:innen" / „Für Entwickler:innen" (je 6 Schritte, interne Links,
+  MCP-Hinweis) umgebaut; Einstiegs-Kacheln via CardGrid.
+- [x] **B — Governance-Seite „Mitwirken"** (`4331aca`) ✅ `/product/contribute`: Bug melden,
+  Komponente vorschlagen, Status-Definitionen (Badge), Rollen, Lebenszyklus. Nav unter
+  „Resources". _Platzhalter: Meldeweg-Kanal + Rollen/Namen (redaktionell zu füllen)._
+- [x] **C — Anker-Navigation im Design-Tab** (`2b891bd`) ✅ `ui/section-nav/SectionNav`
+  (scrollbare Chips, smooth + reduced-motion); Exporter vergibt Anker-ids + scroll-margin
+  (Sticky-Offset) und emittiert SectionNav nur bei ≥ 4 Design-Sektionen. Alle re-exportiert.
+- [x] **D — Visuelle Do/Don'ts** (`603b200`) ✅ Schema `doDontBeispiele` (dreifach),
+  `ui/specsheet/DoDontVisual` (Specimen-Paare gut/schlecht auf ds-stage, ✓/✕), validate;
+  befüllt für button (Verb-Label) + input (Label vs. Platzhalter).
+- [x] **E — Mini-Vorschauen im Katalog** (`35ffd5a`) ✅ `data/catalog-previews.ts`
+  (render.preview/instantiate + gescoptes pattern.css, Build-Zeit); `/product/components`
+  rendert Mini-Bühnen (inert, scale, overflow hidden). `instantiate` aus Playground-Barrel.
+- [x] **F — Patterns-/Rezepte-Ebene** (`6107e6e`) ✅ (ADR-026) `/product/patterns` +
+  Formular-Pattern (handkuratiert, pattern.css via ?raw unscoped, Glue co-located,
+  Live-Vorschau + Code + Regeln + Related). Nav-Kategorie „Patterns" mit literalen hrefs.
+- [x] **G — Voice & Tone vertiefen** (`a35b372`) ✅ Sektion „Konkrete Beispiele" mit
+  WordingList (3 Kanäle × 3 Paare: Push/Teaser/Fehler), konsistent zu Cell-/Input-Wording.
+- [x] **H — Anwendungsbeispiele Brandhub** (`1f57cd4`) ✅ `/brand/identity/examples`:
+  Social-Kachel + Plakat-Motiv (HTML/CSS, vorhandene Assets), Regel-Callouts mit Links,
+  Hinweis „illustrativ, keine Vorlagen". Nav unter „Marke".
+- [x] **I — Bereichs-Differenzierung Brandhub** (`4866e9f`) ✅ (ADR-027) `data-area` am
+  `<main>` → Brand-h1 als Display-Heading (FranziskaWebPro); `ui/brand-hero` auf
+  getting-started + logo. Product unverändert (kein Scope-Match).
+- [x] **J — Mobile- & Dark-Audit** (`a55cc00`) ✅ MeasureTable/TokenTable overflow-x-Container
+  (lange Token-Namen bei ~375px); übrige Checkliste geprüft/ok, neue Komponenten
+  responsiv + rollen-token-treu.
+  **Learning:** Ein `<style>` via `{@html}` umgeht den Svelte-Compiler → `:global(...)` ist
+  dort **ungültige CSS-Syntax**; Preview-CSS muss mit nackten Selektoren (`.spec-canvas …`)
+  gescoped werden (catalog-previews) bzw. inline-`:global` vorher entwrappt.
+  **Offen (visuelle Abnahme):** 375px + Dark-Screenshots durch den Nutzer (Browser-Tools
+  hier nicht garantiert).
+
+---
+
 ## 1. UI-Komponenten
 
 ### Inline-Duplikate zur Komponente heben

@@ -49,6 +49,16 @@ export const content = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf die Checkbox."
+		},
+		{
+			"taste": "Leertaste",
+			"aktion": "Schaltet die Auswahl um (checked ↔ unchecked)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Immer mit klickbarem Label kombinieren.",
@@ -77,6 +87,7 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 973:945",
+	"verwandt": ["toggle", "input"],
 	"variantInfo": {
 		"Unchecked": "Nicht ausgewählt.",
 		"Checked": "Ausgewählt — dunkle Füllung mit weißem Haken.",

@@ -51,6 +51,20 @@ function camelCase(kebab) {
 	return kebab.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 }
 
+/** Deutschen Sektions-Titel auf eine stabile Anker-id abbilden (SectionNav, Paket C).
+ *  Feste Map statt kebabCase(label), damit „Do & Don't"/„Texte & Wording" saubere,
+ *  URL-freundliche ids bekommen und über Re-Exports hinweg stabil bleiben. */
+const SECTION_IDS = {
+	Playground: 'playground',
+	Anatomie: 'anatomie',
+	Verwendung: 'verwendung',
+	Wording: 'wording',
+	Varianten: 'varianten',
+	Zustände: 'zustaende',
+	'Do & Don\'t': 'do-dont',
+	'Verwandte Komponenten': 'verwandte'
+};
+
 /** Wrap markup as a named Svelte-5-Snippet (Anatomy nutzt Snippet-Props preview/variant). */
 function asSnippet(html, name) {
 	return `{#snippet ${name}()}${String(html).trim()}{/snippet}`;
@@ -87,7 +101,7 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'doDont', 'verwendung', 'wording'];
+const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'doDontBeispiele', 'verwendung', 'wording', 'verwandt'];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -124,7 +138,9 @@ function renderContentStub(model) {
 		`//   variantInfo – Wann welche Variante nutzen (Label → Text)\n` +
 		`//   callouts    – Anatomie-Beschriftungen ({ nr, text })\n` +
 		`//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
+		`//   tastatur    – Tastatur-Bedienung ({ taste, aktion })\n` +
 		`//   doDont      – { do: [...], dont: [...] }\n` +
+		`//   verwandt    – Querverweise auf verwandte Komponenten (Katalog-Slugs)\n` +
 		`export const content = ${json};\n`
 	);
 }
@@ -254,17 +270,33 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
 	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
 	const hasDoDont = Boolean(model.doDont);
+	const hasDoDontVisual = Array.isArray(model.doDontBeispiele) && model.doDontBeispiele.length > 0;
 	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
+	const hasKeyboard = Array.isArray(model.tastatur) && model.tastatur.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
 	const hasMasse = Boolean(model.masse);
 	const hasUsage = Boolean(
 		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
 	);
 	const hasWording = Array.isArray(model.wording) && model.wording.length > 0;
+	const hasRelated = Array.isArray(model.verwandt) && model.verwandt.length > 0;
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse;
+
+	// In-Page-Sprungleiste (SectionNav, Paket C) nur bei ≥ 4 Design-Tab-Sektionen.
+	// Zählung deckungsgleich mit dem Aufbau des Design-Tabs weiter unten.
+	const designSectionCount =
+		(hasSpecimenPg || hasTemplatePg ? 1 : 0) +
+		(hasAnatomy ? 1 : 0) +
+		(hasUsage ? 1 : 0) +
+		(hasWording ? 1 : 0) +
+		(hasVariants || hasMatrix ? 1 : 0) +
+		(hasStates ? 1 : 0) +
+		(hasDoDont || hasDoDontVisual ? 1 : 0) +
+		(hasRelated ? 1 : 0);
+	const hasSectionNav = designSectionCount >= 4;
 
 	// Nur tatsächlich genutzte Komponenten importieren.
 	const used = new Set(['ComponentHero']);
@@ -273,22 +305,26 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasVariants) used.add('VariantList');
 	if (hasStates) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
+	if (hasDoDontVisual) used.add('DoDontVisual');
 	if (hasWording) used.add('WordingList');
+	if (hasRelated) used.add('RelatedComponents');
 	if (anyCode) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
 	if (hasA11y) used.add('A11yList');
+	if (hasKeyboard) used.add('KeyboardList');
 	if (hasMasse) used.add('MeasureTable');
 	if (hasTokens) used.add('TokenTable');
 
 	const tabs = [{ label: 'Design', name: 'designTab' }];
 	if (hasDevelop) tabs.push({ label: 'Develop', name: 'developTab' });
-	if (hasA11y) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
+	if (hasA11y || hasKeyboard) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
 	if (hasSpecs) tabs.push({ label: 'Specs', name: 'specsTab' });
 
 	const imports =
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
+		(hasSectionNav ? `\timport { SectionNav } from '$components/ui/section-nav';\n` : '') +
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
@@ -314,32 +350,64 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02):
 	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
 	// Zustände) · 4) Do/Don'ts.
+	// Nebenbei sammeln wir die vorhandenen Sektionen für die In-Page-Sprungleiste
+	// (SectionNav, Paket C): jede Sektion trägt eine stabile id + class="section-anchor".
+	const designSections = []; // [{ label, id }] in Erscheinungsreihenfolge
 	let design = '';
-	if (hasSpecimenPg) {
-		design += `\t<Specimen spec={${S}} />\n`;
-	} else if (hasTemplatePg) {
-		const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
-		const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
-		const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
-		design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n`;
+	if (hasSpecimenPg || hasTemplatePg) {
+		designSections.push({ label: 'Playground', id: SECTION_IDS.Playground });
+		if (hasSpecimenPg) {
+			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Specimen spec={${S}} />\n\t</div>\n`;
+		} else {
+			const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
+			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
+			const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
+			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n\t</div>\n`;
+		}
 	}
 	if (hasAnatomy) {
+		designSections.push({ label: 'Anatomie', id: SECTION_IDS.Anatomie });
 		design +=
-			`\n\t<h2>Anatomie</h2>\n` +
+			`\n\t<h2 id="${SECTION_IDS.Anatomie}" class="section-anchor">Anatomie</h2>\n` +
 			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
 			previewSlot +
 			variantSlot +
 			`\t</Anatomy>\n`;
 	}
-	if (hasUsage) design += `\n\t<h2>Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
-	if (hasWording) design += `\n\t<h2>Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
+	if (hasUsage) {
+		designSections.push({ label: 'Verwendung', id: SECTION_IDS.Verwendung });
+		design += `\n\t<h2 id="${SECTION_IDS.Verwendung}" class="section-anchor">Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
+	}
+	if (hasWording) {
+		designSections.push({ label: 'Wording', id: SECTION_IDS.Wording });
+		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
+	}
 	if (hasVariants || hasMatrix) {
-		design += `\n\t<h2>Varianten</h2>\n`;
+		designSections.push({ label: 'Varianten', id: SECTION_IDS.Varianten });
+		design += `\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n`;
 		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
 		if (hasMatrix) design += `\t<VariantMatrix>\n${matrixCells}\n\t</VariantMatrix>\n`;
 	}
-	if (hasStates) design += `\n\t<h2>Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
-	if (hasDoDont) design += `\n\t<h2>Do & Don't</h2>\n\t<DoDontList doDont={${S}.doDont} />\n`;
+	if (hasStates) {
+		designSections.push({ label: 'Zustände', id: SECTION_IDS.Zustände });
+		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
+	}
+	if (hasDoDont || hasDoDontVisual) {
+		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });
+		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n`;
+		if (hasDoDont) design += `\t<DoDontList doDont={${S}.doDont} />\n`;
+		if (hasDoDontVisual) design += `\t<DoDontVisual beispiele={${S}.doDontBeispiele} />\n`;
+	}
+	if (hasRelated) {
+		designSections.push({ label: 'Verwandte', id: SECTION_IDS['Verwandte Komponenten'] });
+		design += `\n\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
+	}
+
+	// In-Page-Sprungleiste als erste Zeile des Tabs (hasSectionNav oben berechnet).
+	if (hasSectionNav) {
+		const navItems = designSections.map((s) => ({ label: s.label, href: `#${s.id}` }));
+		design = `\t<SectionNav items={${JSON.stringify(navItems)}} />\n` + design;
+	}
 
 	// ---- Develop-Tab ----
 	let develop = '';
@@ -364,7 +432,11 @@ function renderPage(model, { patternCss = null } = {}) {
 	}
 
 	// ---- Barrierefreiheit-Tab ----
-	const a11y = `\t<A11yList items={${S}.a11y} />\n`;
+	// A11yList nur bei hasA11y (der Body ist sonst leer); Tastatur-Abschnitt danach.
+	let a11y = '';
+	if (hasA11y) a11y += `\t<A11yList items={${S}.a11y} />\n`;
+	if (hasKeyboard)
+		a11y += `\n\t<h2>Tastatur</h2>\n\t<KeyboardList items={${S}.tastatur} />\n`;
 
 	// ---- Specs-Tab ----
 	let specs = '';
@@ -443,7 +515,7 @@ function resolveModelPath(input) {
  * Modell-Validierung: harte Fehler werfen (Export bricht ab), weiche Hinweise warnen.
  * Fängt die häufigen Registry-Fehler früh ab, statt sie erst zur Laufzeit zu zeigen.
  */
-function validate(model) {
+function validate(model, { root = process.cwd() } = {}) {
 	const errors = [];
 	const warnings = [];
 
@@ -496,6 +568,34 @@ function validate(model) {
 		for (const [i, w] of model.wording.entries())
 			if (!w?.schlecht || !w?.gut)
 				errors.push(`wording[${i}]: schlecht und gut sind nötig`);
+
+	// tastatur: taste + aktion sind Pflicht.
+	if (Array.isArray(model.tastatur))
+		for (const [i, k] of model.tastatur.entries())
+			if (!k?.taste || !k?.aktion)
+				errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
+
+	// doDontBeispiele: je Paar gut+schlecht, je Seite html+text (Pflicht).
+	if (Array.isArray(model.doDontBeispiele))
+		for (const [i, b] of model.doDontBeispiele.entries()) {
+			for (const side of ['gut', 'schlecht']) {
+				const s = b?.[side];
+				if (!s || typeof s !== 'object')
+					errors.push(`doDontBeispiele[${i}].${side}: fehlt (braucht { html, text })`);
+				else {
+					if (!s.html) errors.push(`doDontBeispiele[${i}].${side}: html fehlt`);
+					if (!s.text) errors.push(`doDontBeispiele[${i}].${side}: text fehlt`);
+				}
+			}
+		}
+
+	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Component-Ordner hat.
+	if (Array.isArray(model.verwandt))
+		for (const slug of model.verwandt) {
+			const target = resolve(root, ROUTE_BASE, String(slug), 'model.json');
+			if (!existsSync(target))
+				warnings.push(`verwandt: "${slug}" hat kein model.json (${ROUTE_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`);
+		}
 
 	for (const w of warnings) console.warn(`  ⚠️  ${w}`);
 	if (errors.length)
@@ -587,7 +687,7 @@ function main() {
 	const { input, root, dry } = parsed;
 	const modelPath = resolveModelPath(input);
 	const model = JSON.parse(readFileSync(modelPath, 'utf8'));
-	validate(model);
+	validate(model, { root });
 
 	const kebab = kebabCase(model.name);
 	const outDir = resolve(root, ROUTE_BASE, kebab);

@@ -56,7 +56,17 @@
 			"description": "Barrierefreiheit-Hinweise (eigener Tab). status: pass | warn | todo. (Redaktionell.)",
 			"items": { "$ref": "#/$defs/a11yItem" }
 		},
+		"tastatur": {
+			"type": "array",
+			"description": "Tastatur-Bedienung (Barrierefreiheit-Tab): welche Taste löst welche Aktion aus. (Redaktionell.)",
+			"items": { "$ref": "#/$defs/keyboardRule" }
+		},
 		"doDont": { "$ref": "#/$defs/doDont" },
+		"doDontBeispiele": {
+			"type": "array",
+			"description": "Visuelle Do/Don't-Paare: gut vs. schlecht als echte Specimens (HTML) + Erklärtext. Ergänzt die doDont-Textliste. (Redaktionell.)",
+			"items": { "$ref": "#/$defs/doDontBeispiel" }
+		},
 		"verwendung": { "$ref": "#/$defs/verwendung" },
 		"wording": {
 			"type": "array",
@@ -67,6 +77,11 @@
 			"type": "object",
 			"description": "Wann welche Variante nutzen (Label → Satz). (Redaktionell.)",
 			"additionalProperties": { "type": "string" }
+		},
+		"verwandt": {
+			"type": "array",
+			"description": "Kuratierte Querverweise auf verwandte Komponenten — Katalog-Slugs, z. B. [\"text-button\", \"icon-button\"]. Unbekannte Slugs werden still übersprungen. (Redaktionell.)",
+			"items": { "type": "string" }
 		},
 		"render": { "$ref": "#/$defs/render" }
 	},
@@ -166,6 +181,15 @@
 				"status": { "enum": ["pass", "warn", "todo"] }
 			}
 		},
+		"keyboardRule": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["taste", "aktion"],
+			"properties": {
+				"taste": { "type": "string", "description": "Taste(n), z. B. \"Leertaste\", \"Tab\", \"Enter\", \"Esc\", \"↑ / ↓\"." },
+				"aktion": { "type": "string", "description": "Was die Taste bewirkt (Deutsch)." }
+			}
+		},
 		"doDont": {
 			"type": "object",
 			"additionalProperties": false,
@@ -182,6 +206,25 @@
 			"properties": {
 				"nutzen": { "type": "array", "items": { "type": "string" } },
 				"nichtNutzen": { "type": "array", "items": { "type": "string" } }
+			}
+		},
+		"doDontBeispiel": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["gut", "schlecht"],
+			"description": "Ein visuelles Paar: gut vs. schlecht.",
+			"properties": {
+				"gut": { "$ref": "#/$defs/doDontBeispielSeite" },
+				"schlecht": { "$ref": "#/$defs/doDontBeispielSeite" }
+			}
+		},
+		"doDontBeispielSeite": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["html", "text"],
+			"properties": {
+				"html": { "type": "string", "description": "Specimen-Markup (echte z-Klassen) für die Bühne." },
+				"text": { "type": "string", "description": "Kurze Erklärung unter dem Specimen." }
 			}
 		},
 		"wordingRule": {

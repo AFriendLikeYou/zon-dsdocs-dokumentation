@@ -10,6 +10,10 @@ export const generated = {
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=973-945&m=dev",
 	"aktualisiertAm": "2026-07-03",
 	"zweck": "Auswahlkästchen für eine An/Aus-Entscheidung oder Mehrfachauswahl. Zwei Achsen: ausgewählt (checked) und Interaktionszustand (Default, Hover, Focus, Disabled).",
+	"verwandt": [
+		"toggle",
+		"input"
+	],
 	"masse": {
 		"hoehe": "16",
 		"breite": "16",
@@ -167,6 +171,16 @@ export const generated = {
 			"label": "Kontrast",
 			"wert": "Rahmen #cccccf auf #ffffff ≈ 1.5:1 — nur Rahmen, Zustand zusätzlich über Haken.",
 			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf die Checkbox."
+		},
+		{
+			"taste": "Leertaste",
+			"aktion": "Schaltet die Auswahl um (checked ↔ unchecked)."
 		}
 	],
 	"doDont": {

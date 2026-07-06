@@ -8,6 +8,11 @@ interface FooterVisible {
 import type { BadgeVariant } from '$types/spec';
 export type { BadgeVariant };
 
+// Katalog-Index (Build-Zeit-Glob über co-located model.json) — Single Source of
+// Truth für die dokumentierten Komponenten. Die Components-Nav-Sektion wird daraus
+// abgeleitet (ADR-025), statt sie hier von Hand zu pflegen.
+import { CATALOG } from '$data/catalog';
+
 export interface MenuItem extends FooterVisible {
 	label: string;
 	href: string;
@@ -48,7 +53,8 @@ export const MENU_ITEMS_BRAND: MenuSection[] = [
 			{ label: 'Markenstrategie', href: '/brand/identity/strategy' },
 			{ label: 'Markenarchitektur', href: '/brand/identity/architecture', badge: 'Neu' },
 			{ label: 'Erscheinungsbild', href: '/brand/identity/appearance' },
-			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' }
+			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' },
+			{ label: 'Anwendungsbeispiele', href: '/brand/identity/examples', badge: 'Neu' }
 		],
 		isInFooter: true
 	},
@@ -160,6 +166,37 @@ export const FLAT_MENU_ITEMS_BRAND: MenuItem[] = MENU_ITEMS_BRAND.reduce<MenuIte
 	[]
 );
 
+// Geplante Komponenten: Route/Doku existiert (noch) nicht als model.json, soll aber
+// ehrlich und explizit im Menü stehen. Als Literal lesbar (auch für check-nav.mjs).
+type PlannedComponent = { label: string; slug: string };
+export const PLANNED_COMPONENTS: PlannedComponent[] = [
+	{ label: 'Date Picker', slug: 'date-picker' }
+];
+
+// Components-Sektion aus dem Katalog ableiten (ADR-025): erst die dokumentierten
+// Einträge (sortiert kommt der Katalog schon), dann die geplanten Stubs. Badges sind
+// kuratiert (Override-Map im Katalog bzw. „Geplant" hier) — keine Automatik.
+const COMPONENT_MENU_ITEMS: MenuSection[] = [
+	...CATALOG.map(
+		(e): MenuSection => ({
+			title: e.spec.name ?? e.slug,
+			href: `/product/components/${e.slug}`,
+			badge: e.badge,
+			badgeVariant: e.badgeVariant,
+			isInFooter: true
+		})
+	),
+	...PLANNED_COMPONENTS.map(
+		(p): MenuSection => ({
+			title: p.label,
+			href: `/product/components/${p.slug}`,
+			badge: 'Geplant',
+			badgeVariant: 'neutral',
+			isInFooter: true
+		})
+	)
+];
+
 export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Getting started',
@@ -191,6 +228,18 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Spacing',
+		href: '/product/foundations/spacing',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Shape',
+		href: '/product/foundations/shape',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Motion & Elevation',
 		href: '/product/foundations/motion',
 		badge: 'Neu',
@@ -205,76 +254,33 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		href: '/product/components',
 		isInFooter: true
 	},
+	// Ab hier katalog-getrieben (ADR-025): dokumentierte Komponenten + geplante Stubs.
+	...COMPONENT_MENU_ITEMS,
 	{
-		title: 'Button',
-		href: '/product/components/button',
-		badge: 'Neu',
+		title: 'Patterns',
+		isCategory: true
+	},
+	// Patterns sind handkuratiert (ADR-026), keine katalog-getriebene Sektion — daher
+	// literale hrefs (check-nav.mjs scannt navigation.ts als Text).
+	{
+		title: 'Übersicht',
+		href: '/product/patterns',
 		isInFooter: true
 	},
 	{
-		title: 'Text Button',
-		href: '/product/components/text-button',
+		title: 'Formular',
+		href: '/product/patterns/form',
 		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Page Shortcut',
-		href: '/product/components/page-shortcut',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Button Group',
-		href: '/product/components/button-group',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Icon Button',
-		href: '/product/components/icon-button',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Cell',
-		href: '/product/components/cell',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Input',
-		href: '/product/components/input',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Checkbox',
-		href: '/product/components/checkbox',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Toggle',
-		href: '/product/components/toggle',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Stepper',
-		href: '/product/components/stepper',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Date Picker',
-		href: '/product/components/date-picker',
-		badge: 'Geplant',
-		badgeVariant: 'neutral',
 		isInFooter: true
 	},
 	{
 		title: 'Resources',
 		isCategory: true
+	},
+	{
+		title: 'Mitwirken',
+		href: '/product/contribute',
+		isInFooter: true
 	},
 	{
 		title: 'Changelog',

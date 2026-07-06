@@ -60,7 +60,30 @@ const routes = collectRoutes(routesDir).sort();
 const nav = fs.readFileSync(navFile, 'utf8');
 const navHrefs = new Set([...nav.matchAll(/href:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
 
-const missing = routes.filter((route) => !isAllowed(route) && !navHrefs.has(route));
+// Components-Sektion ist katalog-getrieben (ADR-025): die Einträge stehen nicht mehr als
+// href-Literale in navigation.ts, sondern werden aus CATALOG generiert. Eine Component-
+// Route /product/components/<slug> gilt daher als verlinkt, wenn sie per Konstruktion
+// abgedeckt ist — entweder existiert ihr model.json (→ CATALOG → Nav) ODER der Slug steht
+// in der PLANNED-Liste (die bleibt als Literal in navigation.ts lesbar). Der inverse Fall
+// (Route ohne beides) schlägt weiterhin an; Routen ohne model.json fängt zusätzlich
+// check-component-drift.mjs ab.
+const COMPONENT_ROUTE = /^\/product\/components\/([^/]+)$/;
+const plannedSlugs = new Set(
+	[...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1])
+);
+const hasModelJson = (slug) =>
+	fs.existsSync(path.join(routesDir, 'product/components', slug, 'model.json'));
+
+const isComponentCovered = (route) => {
+	const m = route.match(COMPONENT_ROUTE);
+	if (!m) return false;
+	const slug = m[1];
+	return hasModelJson(slug) || plannedSlugs.has(slug);
+};
+
+const missing = routes.filter(
+	(route) => !isAllowed(route) && !navHrefs.has(route) && !isComponentCovered(route)
+);
 
 if (missing.length === 0) {
 	console.log(`✓ Nav-Check: alle ${routes.length} Routen sind verlinkt oder bewusst ausgenommen.`);

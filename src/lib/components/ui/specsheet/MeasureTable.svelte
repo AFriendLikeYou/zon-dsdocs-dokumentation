@@ -9,20 +9,27 @@
 </script>
 
 {#if masse}
-  <table class="m">
-    <tbody>
-      {#if masse.hoehe}<tr><th>Höhe</th><td>{px(masse.hoehe)} px{#if tok(masse.hoehe)}<span class="tok">{tok(masse.hoehe)}</span>{/if}</td></tr>{/if}
-      {#if masse.breite}<tr><th>Breite</th><td>{px(masse.breite)} px{#if tok(masse.breite)}<span class="tok">{tok(masse.breite)}</span>{/if}</td></tr>{/if}
-      {#if masse.padding}<tr><th>Padding</th><td>{px(masse.padding)}{#if tok(masse.padding)}<span class="tok">{tok(masse.padding)}</span>{/if}</td></tr>{/if}
-      {#if masse.radius}<tr><th>Radius</th><td>{px(masse.radius)} px{#if tok(masse.radius)}<span class="tok">{tok(masse.radius)}</span>{/if}</td></tr>{/if}
-    </tbody>
-  </table>
+  <div class="m-wrap">
+    <table class="m">
+      <tbody>
+        {#if masse.hoehe}<tr><th>Höhe</th><td>{px(masse.hoehe)} px{#if tok(masse.hoehe)}<span class="tok">{tok(masse.hoehe)}</span>{/if}</td></tr>{/if}
+        {#if masse.breite}<tr><th>Breite</th><td>{px(masse.breite)} px{#if tok(masse.breite)}<span class="tok">{tok(masse.breite)}</span>{/if}</td></tr>{/if}
+        {#if masse.padding}<tr><th>Padding</th><td>{px(masse.padding)}{#if tok(masse.padding)}<span class="tok">{tok(masse.padding)}</span>{/if}</td></tr>{/if}
+        {#if masse.radius}<tr><th>Radius</th><td>{px(masse.radius)} px{#if tok(masse.radius)}<span class="tok">{tok(masse.radius)}</span>{/if}</td></tr>{/if}
+      </tbody>
+    </table>
+  </div>
 {/if}
 
 <style>
+  /* Schmale Viewports: Tabelle scrollt im eigenen Container statt die Seite zu schieben. */
+  .m-wrap {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 0 0 1em;
+  }
   .m {
     border-collapse: collapse;
-    margin: 0 0 1em;
     min-width: 260px;
   }
   .m th {

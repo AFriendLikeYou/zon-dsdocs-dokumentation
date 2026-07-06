@@ -21,7 +21,7 @@
 	   kommen weiter aus @zeitonline/design-system → theme-adaptiv). Komponenten
 	   nutzen NUR diese Rollen. Rohe --z-ds-* erscheinen nur noch: hier (Mapping),
 	   in den originalgetreuen DS-Kopien (Playground-Specimens) und bei Abständen/
-	   Zeilenhöhen (--z-ds-space-*/-lineheight-* sind bereits semantisch). */
+	   Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind bereits semantisch). */
 
 	/* Flächen */
 	--ds-surface: var(--z-ds-color-background-0); /* Seite, Karten, Navbar */
@@ -250,6 +250,18 @@ h1 {
 	letter-spacing: -0.02em;
 	padding-bottom: 0.5rem;
 	margin-top: 0.5em;
+}
+
+/* Bereichs-Differenzierung (ADR-027): Der Brandhub zeigt etwas mehr Markenwärme als
+   die nüchterne DS-Doku. Nur im Brand-Scope ([data-area='brand'] am <main>): das
+   Seiten-h1 wird zum markanteren Display-Heading in FranziskaWebPro (Hausschrift-
+   Serife). Product bleibt unberührt. Subtil, kein Redesign. */
+[data-area='brand'] h1 {
+	font-family: 'FranziskaWebPro', Georgia, 'Times New Roman', serif;
+	font-size: var(--z-ds-fontsize-42);
+	font-weight: 700;
+	letter-spacing: -0.022em;
+	line-height: 1.1;
 }
 
 h2 {

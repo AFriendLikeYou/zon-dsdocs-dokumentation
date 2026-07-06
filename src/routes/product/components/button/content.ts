@@ -54,6 +54,16 @@ export const content = {
 			"status": "warn"
 		}
 	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Button."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst die Aktion aus (nativ)."
+		}
+	],
 	"doDont": {
 		"do": [
 			"Pro Aktionsgruppe nur eine Primary-Aktion.",
@@ -64,7 +74,20 @@ export const content = {
 			"Buttons nicht für reine Navigation verwenden — dafür Links."
 		]
 	},
+	"doDontBeispiele": [
+		{
+			"gut": {
+				"html": "<button type=\"button\" class=\"z-button z-button--primary\">Speichern</button>",
+				"text": "Label als konkrete Verb-Aktion — sagt, was der Klick auslöst."
+			},
+			"schlecht": {
+				"html": "<button type=\"button\" class=\"z-button z-button--primary\">OK</button>",
+				"text": "Generische Bestätigung — der Nutzer muss raten, was passiert."
+			}
+		}
+	],
 	"version": "Figma-Node 4185:3778",
+	"verwandt": ["text-button", "icon-button", "button-group"],
 	"variantInfo": {
 		"Primary": "Wichtigste Aktion im Kontext — pro Aktionsgruppe nur einmal.",
 		"Neutral": "Sekundäre Aktion, gleichrangig neben Primary.",

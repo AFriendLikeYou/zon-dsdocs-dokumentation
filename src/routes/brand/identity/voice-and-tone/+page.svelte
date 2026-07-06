@@ -1,5 +1,63 @@
 <script lang="ts">
 	import { Alert } from '$components/ui/alert';
+	import { WordingList } from '$components/ui/specsheet';
+	import type { WordingRule } from '$types/spec';
+
+	// Konkrete „statt X → besser Y"-Paare je Kanal. Bewusst konsistent zu den
+	// Component-Wordings: Teaser/Spitzmarke an der Cell-Seite, Fehlermeldung an Input.
+	const pushBeispiele: WordingRule[] = [
+		{
+			schlecht: 'SKANDAL! Das müssen Sie jetzt wissen!!!',
+			gut: 'Neue Details zur Reform des Bürgergelds',
+			hinweis: 'Präzise statt reißerisch — die Meldung sagt, worum es geht, ohne Alarm.'
+		},
+		{
+			schlecht: 'Sie werden nicht glauben, was passiert ist',
+			gut: 'Bundestag beschließt das Klimapaket',
+			hinweis: 'Kein Clickbait: Der Push nennt den Kern, nicht ein Rätsel.'
+		},
+		{
+			schlecht: 'Eilmeldung: Alles anders!',
+			gut: 'Eilmeldung: EZB senkt den Leitzins um 0,25 Punkte',
+			hinweis: '„Eil" verpflichtet zur Substanz — konkret, was gerade passiert ist.'
+		}
+	];
+
+	const teaserBeispiele: WordingRule[] = [
+		{
+			schlecht: 'Artikel',
+			gut: 'Streit ums Bürgergeld: Was die Reform wirklich ändert',
+			hinweis: 'Der Titel ist eine konkrete Schlagzeile, kein Platzhalter (vgl. Cell).'
+		},
+		{
+			schlecht: 'NEWS',
+			gut: 'Wirtschaft',
+			hinweis: 'Die Spitzmarke ist das Ressort — kurz, normale Schreibung, keine Versalien (vgl. Cell).'
+		},
+		{
+			schlecht: 'Interessante Entwicklungen in der Politik',
+			gut: 'Warum die Koalition beim Haushalt blockiert',
+			hinweis: 'Konkret statt vage — der Teaser verrät die These, nicht nur das Thema.'
+		}
+	];
+
+	const fehlerBeispiele: WordingRule[] = [
+		{
+			schlecht: 'Ungültig',
+			gut: 'Bitte eine gültige E-Mail-Adresse eingeben.',
+			hinweis: 'Fehlermeldungen sagen konkret, was zu tun ist (vgl. Input).'
+		},
+		{
+			schlecht: 'Fehler 400: Bad Request',
+			gut: 'Das hat nicht geklappt. Bitte später noch einmal versuchen.',
+			hinweis: 'Hilfreich statt systemisch — kein Fehlercode, sondern ein nächster Schritt.'
+		},
+		{
+			schlecht: 'Sie haben das Feld nicht korrekt ausgefüllt.',
+			gut: 'Das Passwort braucht mindestens 8 Zeichen.',
+			hinweis: 'Ruhig und lösungsorientiert, ohne Schuldzuweisung.'
+		}
+	];
 </script>
 
 <svelte:head>
@@ -43,3 +101,22 @@
 	Konkrete Ja/Nein-Satzpaare als Richtschnur — werden hier ergänzt, sobald die
 	Voice-Eigenschaften feststehen.
 </p>
+
+<h2>Konkrete Beispiele</h2>
+<p>
+	Voice &amp; Tone wird greifbar an konkreten Formulierungen. Drei Kanäle, je ein paar
+	Paare — links, was wir vermeiden, rechts die bessere Fassung. Die Beispiele bleiben
+	bewusst konsistent mit den Wording-Regeln der Komponenten.
+</p>
+
+<h3>Push-Meldung</h3>
+<p>Reißerisch verspielt Vertrauen — der Push nennt präzise, was passiert ist.</p>
+<WordingList items={pushBeispiele} />
+
+<h3>Teaser &amp; Spitzmarke</h3>
+<p>Vage Platzhalter langweilen — Titel und Spitzmarke sind konkret und benennbar.</p>
+<WordingList items={teaserBeispiele} />
+
+<h3>Fehlermeldung &amp; UI-Text</h3>
+<p>Systemsprache hilft niemandem — der Text erklärt ruhig den nächsten Schritt.</p>
+<WordingList items={fehlerBeispiele} />
