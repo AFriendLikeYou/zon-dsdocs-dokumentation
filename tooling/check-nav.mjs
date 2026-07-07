@@ -30,7 +30,13 @@ const ALLOW_EXACT = new Set([
 	'/admin', // interne Utility
 	'/login', // Auth
 	'/brand', // Bereichs-Landingpage (über den Navbar-Bereichswechsler erreichbar, nicht via Sidebar)
-	'/product' // dito
+	'/product', // dito
+	// Orientierungsseite der „Marke"-Sektion: die Sidebar zeigt die Unterseiten
+	// (identity/strategy, …) direkt unter dem Gruppen-Header „Marke" (ohne eigenen
+	// Header-Link — die Gruppe klappt nur auf). Der Index /brand/identity fasst die
+	// fünf Unterseiten als Kachel-Übersicht zusammen und ist bewusst nicht separat
+	// im Sidebar-Menü verlinkt (analog zu den Foundations-Übersichten).
+	'/brand/identity'
 ]);
 const ALLOW_PREFIX = [
 	'/product/foundations/' // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)
