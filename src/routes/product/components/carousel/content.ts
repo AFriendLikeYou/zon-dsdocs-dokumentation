@@ -32,7 +32,7 @@ export const content = {
 		},
 		{
 			"nr": 3,
-			"text": "Progress-Indikatoren — Radio-artige Dots (appearance:none, :checked). Aktiv Text-70, breiter; inaktiv Background-20.",
+			"text": "Progress-Indikatoren — Tab-Leiste: <fieldset role=\"tablist\">, jeder Dot ein <input type=\"radio\" role=\"tab\"> (appearance:none). Aktiv (aria-selected) Text-70 und breiter; inaktiv Background-20.",
 			"art": "instance"
 		},
 		{
@@ -43,18 +43,33 @@ export const content = {
 	],
 	"a11y": [
 		{
-			"label": "Pfeil-Buttons",
-			"wert": "Vor/Zurück sind echte <button> — am Anfang/Ende disabled (pointer-events aus, Icon gedimmt).",
+			"label": "Rolle & Beschriftung",
+			"wert": "Wurzel role=\"group\" + aria-roledescription=\"Karussell\"; die beiden Steuer-Gruppen sind als \"Steuerelemente\" (Pfeile) und \"Seitensteuerung\" (Dots) beschriftet.",
 			"status": "pass"
 		},
 		{
-			"label": "Progress-Indikatoren",
-			"wert": "Dots sind Radio-artige <input> (appearance:none, :checked) — als radiogroup mit Beschriftung je Slot umsetzen.",
-			"status": "warn"
+			"label": "Tabs-Muster (Dots ↔ Slides)",
+			"wert": "Dots sind role=\"tab\" in einer <fieldset role=\"tablist\">; jeder Slot ist ein role=\"tabpanel\", über aria-labelledby/aria-controls mit seinem Dot verknüpft. Der aktive Dot trägt aria-selected=\"true\".",
+			"status": "pass"
+		},
+		{
+			"label": "Slide-Wechsel wird angesagt",
+			"wert": "Der Scroll-Container ist eine Live-Region (aria-live=\"polite\", aria-atomic=\"false\") — Screenreader melden die neu sichtbare Seite.",
+			"status": "pass"
+		},
+		{
+			"label": "Verborgene Slides",
+			"wert": "Nicht sichtbare Slots sind inert + aria-hidden=\"true\" — nicht fokussierbar und für Screenreader übersprungen.",
+			"status": "pass"
+		},
+		{
+			"label": "Pfeil-Buttons",
+			"wert": "Vor/Zurück sind echte <button> mit aria-label \"Vorige/Nächste Seite\"; am Anfang/Ende disabled (pointer-events aus, Icon gedimmt).",
+			"status": "pass"
 		},
 		{
 			"label": "Fokus sichtbar",
-			"wert": "Pfeile und Dots haben :focus-visible-Ringe (--z-ds-color-focus-100, 2px).",
+			"wert": "Pfeile und Dots haben :focus-visible-Ringe (--z-ds-color-focus-100, 2px; Dots mit -2px Offset nach innen).",
 			"status": "pass"
 		},
 		{
@@ -76,7 +91,11 @@ export const content = {
 	"tastatur": [
 		{
 			"taste": "Tab",
-			"aktion": "Fokussiert Pfeil-Buttons, Progress-Dots und (bei Autoplay) den Play/Pause-Button."
+			"aktion": "Springt zwischen den Steuer-Gruppen: Pfeil-Buttons, Dot-Leiste (ein Tabstopp) und — bei Autoplay — Play/Pause-Button."
+		},
+		{
+			"taste": "Pfeil ← / →",
+			"aktion": "Wechselt innerhalb der Dot-Leiste (Radio-/Tablist-Gruppe) zwischen den Seiten; die gewählte Seite wird angezeigt."
 		},
 		{
 			"taste": "Enter / Leertaste",
