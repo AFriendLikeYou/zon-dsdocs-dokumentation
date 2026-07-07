@@ -82,7 +82,7 @@
 
 	/* WICHTIG: direkt über .grid.debug > * mit !important */
 	:global(.grid.debug > *) {
-		outline: 1px dashed rgba(0, 0, 0, 0.5) !important;
+		outline: 1px dashed var(--ds-border-strong) !important;
 	}
 
 	@media (max-width: 768px) {

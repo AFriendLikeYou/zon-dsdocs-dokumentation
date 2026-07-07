@@ -191,6 +191,12 @@
 		transform: scale(0.9);
 	}
 
+	.search__clear-button:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+		border-radius: var(--ds-radius-xs);
+	}
+
 	.search__clear-icon {
 		width: 16px;
 		height: 16px;

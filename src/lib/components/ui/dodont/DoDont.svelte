@@ -81,7 +81,7 @@
 
 	.dodont-card__bar {
 		height: 4px;
-		background: var(--bar-color, #4ade80);
+		background: var(--bar-color, var(--ds-positive));
 	}
 
 	.dodont-card__caption {
@@ -127,7 +127,7 @@
 		background: linear-gradient(
 			to bottom right,
 			transparent calc(50% - 1.5px),
-			rgba(255, 0, 0, 0.8),
+			var(--ds-negative),
 			transparent calc(50% + 1.5px)
 		);
 		pointer-events: none;
