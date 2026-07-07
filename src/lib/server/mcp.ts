@@ -25,6 +25,22 @@ const SECTIONS: GetSection[] = ['overview', 'markup', 'tokens', 'a11y', 'usage']
 
 export type SearchHit = { slug: string; name: string; kategorie: string; zweck: string };
 
+/** Obergrenze für Treffer — hält Antworten im Kontext-Budget. */
+const MAX_LIMIT = 50;
+
+/**
+ * Robustes limit-Handling (Entscheidung zu Paket-Punkt 4: sauberes CLAMPING,
+ * kein Fehler): fehlend/nicht-numerisch → Default 8; <1 → 1; >MAX_LIMIT → MAX_LIMIT.
+ * Bewusst statt `Number(x) || 8` (das schluckt limit:0 und macht daraus 8) — und
+ * bewusst kein -32602, weil ein geklemmter Wert den Agenten weniger überrascht als
+ * ein harter Fehler mitten in einer sonst gültigen Suche. Dokumentiert im inputSchema.
+ */
+function clampLimit(limit: unknown): number {
+	const n = Number(limit);
+	if (!Number.isFinite(n)) return 8;
+	return Math.min(MAX_LIMIT, Math.max(1, Math.floor(n)));
+}
+
 /** Sammelt alle durchsuchbaren Textfragmente eines Eintrags, nach Gewicht gruppiert. */
 function haystack(entry: AgentCatalogEntry) {
 	const spec = entry.spec;
@@ -39,7 +55,12 @@ function haystack(entry: AgentCatalogEntry) {
 	};
 }
 
-/** Case-insensitive Suche mit einfachem Scoring (Name > zweck > Rest). */
+/**
+ * Case-insensitive Suche mit einfachem Scoring. Reihenfolge des Gewichts:
+ * Exakt-Match auf Slug/Name (die ganze Query trifft genau) > Präfix-Match auf
+ * Slug/Name > Teilstring-Treffer je Term (Name > zweck > Rest). So landet bei
+ * `search "button"` die Komponente `button` VOR `button-group`/`icon-button`.
+ */
 export function searchComponents(query: string, limit = 8): SearchHit[] {
 	const q = String(query ?? '').trim().toLowerCase();
 	if (!q) return [];
@@ -47,7 +68,16 @@ export function searchComponents(query: string, limit = 8): SearchHit[] {
 
 	const scored = AGENT_CATALOG.map((entry) => {
 		const h = haystack(entry);
+		const slug = entry.slug.toLowerCase();
+		const name = (entry.spec.name ?? '').toLowerCase();
 		let score = 0;
+
+		// Stufe 1: Exakt-Match auf Slug oder Name → höchstes Gewicht.
+		if (q === slug || q === name) score += 1000;
+		// Stufe 2: Präfix-Match auf Slug oder Name.
+		else if (slug.startsWith(q) || (name && name.startsWith(q))) score += 100;
+
+		// Stufe 3: Teilstring-Treffer je Term (wie bisher).
 		for (const t of terms) {
 			if (h.name.includes(t)) score += 10;
 			if (h.zweck.includes(t)) score += 4;
@@ -57,7 +87,7 @@ export function searchComponents(query: string, limit = 8): SearchHit[] {
 	})
 		.filter((s) => s.score > 0)
 		.sort((a, b) => b.score - a.score || a.entry.slug.localeCompare(b.entry.slug))
-		.slice(0, Math.max(1, Number(limit) || 8));
+		.slice(0, clampLimit(limit));
 
 	return scored.map(({ entry }) => ({
 		slug: entry.slug,
@@ -211,19 +241,45 @@ export function getComponent(slug: string, section?: GetSection | string): strin
 }
 
 // ---------------------------------------------------------------------------
+// list — kompakte Katalog-Übersicht (Einstieg ohne Rate-Begriff)
+// ---------------------------------------------------------------------------
+
+/**
+ * Kompakte Gesamtübersicht aller dokumentierten Komponenten: eine Zeile je
+ * Eintrag (slug · name · kategorie), plus Einleitungszeile mit der Anzahl. Gibt
+ * Agenten den Einstieg, den `search` (braucht einen Begriff) nicht bietet.
+ */
+export function listComponents(): string {
+	const rows = AGENT_CATALOG.map(
+		(e) => `- ${e.slug} · ${e.spec.name ?? e.slug} · ${e.spec.kategorie ?? ''}`
+	);
+	return `${AGENT_CATALOG.length} dokumentierte Komponenten:\n${rows.join('\n')}`;
+}
+
+// ---------------------------------------------------------------------------
 // JSON-RPC 2.0 Dispatch (MCP Streamable HTTP, stateless)
 // ---------------------------------------------------------------------------
 
 const TOOLS = [
 	{
+		name: 'list',
+		description:
+			'Listet alle dokumentierten Komponenten des ZEIT-Designsystems kompakt (slug · name · kategorie je Zeile). Parameterlos — Einstiegspunkt, wenn kein Suchbegriff bekannt ist.',
+		inputSchema: { type: 'object', properties: {} }
+	},
+	{
 		name: 'search',
 		description:
-			'Sucht Komponenten des ZEIT-Designsystems (Name, Zweck, Kategorie, Varianten, Tokens). Liefert slug, name, kategorie, zweck.',
+			'Sucht Komponenten des ZEIT-Designsystems (Name, Zweck, Kategorie, Varianten, Tokens). Liefert slug, name, kategorie, zweck. Exakte und Präfix-Treffer auf slug/name werden bevorzugt.',
 		inputSchema: {
 			type: 'object',
 			properties: {
-				query: { type: 'string', description: 'Suchbegriff(e).' },
-				limit: { type: 'number', description: 'Max. Treffer (Default 8).' }
+				query: { type: 'string', description: 'Suchbegriff(e). Pflicht, nicht leer.' },
+				limit: {
+					type: 'number',
+					description:
+						'Max. Treffer. Default 8; wird auf 1..50 geklemmt (nicht-numerisch/fehlend → 8).'
+				}
 			},
 			required: ['query']
 		}
@@ -267,6 +323,12 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 	const id = msg.id ?? null;
 	const method = msg.method;
 
+	// JSON-RPC-2.0-Envelope validieren, bevor wir dispatchen.
+	// Fehlendes/falsches jsonrpc ODER fehlendes/nicht-string method → -32600.
+	if (msg.jsonrpc !== '2.0' || typeof method !== 'string' || method === '') {
+		return err(id, -32600, 'Ungültige JSON-RPC-Anfrage (jsonrpc:"2.0" und method:string erforderlich).');
+	}
+
 	switch (method) {
 		case 'initialize':
 			return ok(id, {
@@ -288,15 +350,27 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 		case 'tools/call': {
 			const params = (msg.params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
 			const args = params.arguments ?? {};
+			if (params.name === 'list') {
+				return ok(id, textResult(listComponents()));
+			}
 			if (params.name === 'search') {
-				const hits = searchComponents(String(args.query ?? ''), Number(args.limit) || 8);
+				// Pflicht-Argument erzwingen: fehlend/leer/kein-String → -32602 statt Pseudo-Erfolg.
+				const query = typeof args.query === 'string' ? args.query.trim() : '';
+				if (!query) {
+					return err(id, -32602, 'Pflicht-Argument "query" fehlt oder ist leer.');
+				}
+				const hits = searchComponents(query, clampLimit(args.limit));
 				const text = hits.length
 					? hits.map((h) => `- ${h.slug} · ${h.name} (${h.kategorie}): ${h.zweck}`).join('\n')
-					: `Keine Treffer für "${args.query}".`;
+					: `Keine Treffer für "${query}".`;
 				return ok(id, textResult(text));
 			}
 			if (params.name === 'get') {
-				return ok(id, textResult(getComponent(String(args.slug ?? ''), args.section as string)));
+				const slug = typeof args.slug === 'string' ? args.slug.trim() : '';
+				if (!slug) {
+					return err(id, -32602, 'Pflicht-Argument "slug" fehlt oder ist leer.');
+				}
+				return ok(id, textResult(getComponent(slug, args.section as string)));
 			}
 			return err(id, -32602, `Unbekanntes Tool: ${params.name}`);
 		}
@@ -311,6 +385,8 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 /** Verarbeitet einen JSON-RPC-Body (Einzelnachricht ODER Batch). */
 export function handleMcpBody(body: unknown): JsonRpcResponse | JsonRpcResponse[] | null {
 	if (Array.isArray(body)) {
+		// Leeres Batch ist laut JSON-RPC-2.0-Spec ungültig → einzelner -32600-Fehler.
+		if (body.length === 0) return err(null, -32600, 'Ungültige JSON-RPC-Anfrage (leeres Batch).');
 		const responses = body.map(handleRpc).filter((r): r is JsonRpcResponse => r !== null);
 		return responses.length ? responses : null;
 	}

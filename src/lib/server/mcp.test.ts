@@ -2,6 +2,7 @@ import { AGENT_CATALOG } from '$data/agent-catalog';
 import {
 	searchComponents,
 	getComponent,
+	listComponents,
 	handleRpc,
 	handleMcpBody,
 	GET_CHAR_BUDGET
@@ -50,6 +51,35 @@ describe('searchComponents', () => {
 	it('liefert bei leerer Query nichts', () => {
 		expect(searchComponents('   ')).toEqual([]);
 	});
+
+	it('rankt den Exakt-Match auf den Slug vor Präfix-Verwandten', () => {
+		// Voraussetzung: es gibt einen "button"-Slug (siehe AGENT_CATALOG-Test).
+		const hits = searchComponents('button');
+		expect(hits[0].slug).toBe('button');
+	});
+
+	it('clampt das limit: 0 → mind. 1 Treffer (nicht Default-8-Verhalten)', () => {
+		// Regression: früher machte `Number(0) || 8` aus limit:0 → 8.
+		expect(searchComponents('a', 0).length).toBe(1);
+	});
+
+	it('clampt negatives limit auf 1', () => {
+		expect(searchComponents('a', -5).length).toBe(1);
+	});
+
+	it('nicht-numerisches limit → Default 8', () => {
+		expect(searchComponents('a', 'abc' as unknown as number).length).toBeLessThanOrEqual(8);
+		expect(searchComponents('a', 'abc' as unknown as number).length).toBeGreaterThan(1);
+	});
+});
+
+describe('listComponents', () => {
+	it('nennt die Anzahl und eine Zeile je Komponente', () => {
+		const out = listComponents();
+		expect(out).toMatch(/^\d+ dokumentierte Komponenten:/);
+		expect(out).toContain('button');
+		expect(out).toContain('input');
+	});
 });
 
 describe('getComponent', () => {
@@ -93,10 +123,22 @@ describe('JSON-RPC Dispatch', () => {
 		expect(handleRpc({ jsonrpc: '2.0', method: 'notifications/initialized' })).toBeNull();
 	});
 
-	it('tools/list liefert search + get', () => {
+	it('tools/list liefert search + get + list', () => {
 		const res = handleRpc({ jsonrpc: '2.0', id: 2, method: 'tools/list' })!;
 		const names = (res.result as { tools: { name: string }[] }).tools.map((t) => t.name);
-		expect(names).toEqual(expect.arrayContaining(['search', 'get']));
+		expect(names).toEqual(expect.arrayContaining(['search', 'get', 'list']));
+	});
+
+	it('tools/call list liefert Katalog-Übersicht', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 20,
+			method: 'tools/call',
+			params: { name: 'list' }
+		})!;
+		const content = (res.result as { content: { text: string }[] }).content;
+		expect(content[0].text).toMatch(/dokumentierte Komponenten/);
+		expect(content[0].text).toContain('button');
 	});
 
 	it('tools/call search liefert Text-Content', () => {
@@ -125,6 +167,64 @@ describe('JSON-RPC Dispatch', () => {
 	it('unbekannte Methode → -32601', () => {
 		const res = handleRpc({ jsonrpc: '2.0', id: 5, method: 'nope' })!;
 		expect(res.error?.code).toBe(-32601);
+	});
+
+	it('search ohne query → -32602', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 6,
+			method: 'tools/call',
+			params: { name: 'search', arguments: {} }
+		})!;
+		expect(res.error?.code).toBe(-32602);
+		expect(res.result).toBeUndefined();
+	});
+
+	it('search mit leerer query → -32602', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 7,
+			method: 'tools/call',
+			params: { name: 'search', arguments: { query: '   ' } }
+		})!;
+		expect(res.error?.code).toBe(-32602);
+	});
+
+	it('get ohne slug → -32602', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 8,
+			method: 'tools/call',
+			params: { name: 'get', arguments: {} }
+		})!;
+		expect(res.error?.code).toBe(-32602);
+		expect(res.result).toBeUndefined();
+	});
+
+	it('get mit leerem slug → -32602', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 9,
+			method: 'tools/call',
+			params: { name: 'get', arguments: { slug: '' } }
+		})!;
+		expect(res.error?.code).toBe(-32602);
+	});
+
+	it('fehlendes jsonrpc → -32600', () => {
+		const res = handleRpc({ id: 10, method: 'tools/list' } as never)!;
+		expect(res.error?.code).toBe(-32600);
+	});
+
+	it('fehlendes/nicht-string method → -32600 (nicht -32601)', () => {
+		const res = handleRpc({ jsonrpc: '2.0', id: 11 } as never)!;
+		expect(res.error?.code).toBe(-32600);
+	});
+
+	it('leeres Batch [] → einzelner -32600-Fehler', () => {
+		const res = handleMcpBody([]);
+		expect(Array.isArray(res)).toBe(false);
+		expect((res as { error?: { code: number } }).error?.code).toBe(-32600);
 	});
 
 	it('handleMcpBody verarbeitet Batches', () => {
