@@ -15,6 +15,7 @@
 		MENU_ITEMS_PRODUCT
 	} from '$data/navigation';
 	import Sidebar from '$components/layout/Sidebar.svelte';
+	import { initDesktopCollapsed } from '$stores/sidebar.svelte';
 
 	let url = $state(page.url.pathname);
 
@@ -24,7 +25,7 @@
 
 	// Eine Quelle für die Bereichszuordnung — Menü, Footer-Navigation und TOC
 	// leiten sich daraus ab (statt drei verschiedener Routen-Checks).
-	const section = $derived(
+	const section: Section = $derived(
 		url?.startsWith('/product') ? 'product' : url?.startsWith('/brand') ? 'brand' : 'root'
 	);
 	const isProduct = $derived(section === 'product');
@@ -37,14 +38,18 @@
 
 	import TableOfContents from '$components/layout/TableOfContents.svelte';
 	import Footer from '$components/layout/Footer.svelte';
-	import type { Theme } from '$types/global';
+	import type { Theme, Section } from '$types/global';
 
 	type Props = {
-		data: { theme: Theme; isUserLoggedIn: boolean };
+		data: { theme: Theme; sidebarCollapsed: boolean; isUserLoggedIn: boolean };
 		children: () => ReturnType<import('svelte').Snippet>;
 	};
 
 	const { data, children }: Props = $props();
+
+	// Persistierten Einklapp-Zustand synchron (SSR + Client) in den Store spiegeln →
+	// kein Flash: der Server-Wert bestimmt bereits das erste Rendering.
+	initDesktopCollapsed(data.sidebarCollapsed);
 
 	const currentTheme = $state(data.theme);
 
@@ -53,7 +58,7 @@
 
 <SkipToMainContentLink />
 
-<Navbar isUserLoggedIn={data.isUserLoggedIn} />
+<Navbar isUserLoggedIn={data.isUserLoggedIn} {section} />
 
 <div class="flex" class:flex--root={isRoot}>
 	{#if !isRoot}

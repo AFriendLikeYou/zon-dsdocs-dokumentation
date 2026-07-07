@@ -70,4 +70,10 @@
 		cursor: pointer;
 		color: var(--ds-surface);
 	}
+
+	.toast__close:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+		border-radius: var(--ds-radius-xs);
+	}
 </style>

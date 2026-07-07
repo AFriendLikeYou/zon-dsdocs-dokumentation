@@ -216,6 +216,12 @@
 		}
 	}
 
+	.collapsible-link:focus-visible,
+	.collapsible-title:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
 	/* Aktiv = Pill-Hintergrund + kräftige Schrift — ohne Indikator-Balken
 	   (Minimalismus-Pass: keine Linien als Abgrenzung). */
 	.collapsible-link.active {
@@ -293,6 +299,11 @@
 			background-color: var(--ds-surface-raised);
 			color: var(--ds-text);
 		}
+	}
+
+	.submenu-link:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
 	}
 
 	.submenu-link.active {

@@ -55,6 +55,11 @@
 	.section-nav__chips {
 		display: flex;
 		gap: var(--z-ds-space-6);
+		/* Column-Flex mit align-items:flex-start: das Kind nimmt sonst Content-
+		   Breite an und überläuft den Viewport — erst die Kappung auf 100 %
+		   aktiviert das eigene overflow-x-Scrolling. */
+		min-width: 0;
+		max-width: 100%;
 		overflow-x: auto;
 		scrollbar-width: none;
 		-webkit-overflow-scrolling: touch;

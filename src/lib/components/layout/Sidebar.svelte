@@ -2,7 +2,7 @@
 	import { type MenuSection } from '$data/navigation';
 	import { useMediaQuery } from '$stores/media-query.svelte';
 	import MenuCollapsible from './MenuCollapsible.svelte';
-	import { closeSidebar, openSidebar, sidebarState } from '$stores/sidebar.svelte';
+	import { closeSidebar, desktopCollapsed, sidebarState } from '$stores/sidebar.svelte';
 	import { trapFocus } from '$lib/actions';
 
 	let { items, isUserLoggedIn }: { items: MenuSection[]; isUserLoggedIn: boolean } = $props();
@@ -10,14 +10,9 @@
 	const mq = useMediaQuery('(min-width: 768px)');
 	const isDesktop = $derived(mq.matches);
 
-	// Auf Desktop einmalig öffnen; danach respektiert es den Toggle des Nutzers.
-	let openedOnDesktop = false;
-	$effect(() => {
-		if (isDesktop && !openedOnDesktop) {
-			openedOnDesktop = true;
-			openSidebar();
-		}
-	});
+	// Desktop: Sidebar ist Teil des Layouts und offen, solange sie nicht (persistiert)
+	// eingeklappt wurde. Mobile: Off-Canvas-Drawer über `sidebarState()`.
+	const isDesktopOpen = $derived(!desktopCollapsed());
 
 	function closeMenu() {
 		if (!sidebarState()) return;
@@ -99,8 +94,8 @@
 	<aside
 		id="sidebar__navigation--desktop"
 		class="sidebar__content"
-		class:is-open={sidebarState()}
-		inert={!sidebarState()}
+		class:is-open={isDesktopOpen}
+		inert={!isDesktopOpen}
 	>
 		{@render navigation()}
 	</aside>
@@ -169,6 +164,11 @@
 
 	.close-button:active {
 		transform: scale(0.95);
+	}
+
+	.close-button:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
 	}
 
 	/* Mobile drawer */

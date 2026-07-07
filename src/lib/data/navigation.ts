@@ -40,7 +40,7 @@ export const MENU_ITEMS_BRAND: MenuSection[] = [
 	},
 	{
 		title: 'Willkommen',
-		href: '/brand/getting-started',
+		href: '/brand',
 		isInFooter: false // Mark this item for the footer
 	},
 	{
@@ -204,7 +204,7 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	},
 	{
 		title: 'Willkommen',
-		href: '/product/getting-started',
+		href: '/product',
 		isInFooter: false
 	},
 	{
@@ -228,6 +228,12 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Typografie',
+		href: '/product/foundations/typography',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Spacing',
 		href: '/product/foundations/spacing',
 		badge: 'Neu',
@@ -242,6 +248,18 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Motion & Elevation',
 		href: '/product/foundations/motion',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Icons',
+		href: '/product/foundations/icons',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Barrierefreiheit',
+		href: '/product/foundations/accessibility',
 		badge: 'Neu',
 		isInFooter: true
 	},
