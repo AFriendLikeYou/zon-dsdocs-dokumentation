@@ -30,7 +30,7 @@
     color: var(--ds-surface);
   }
   .todo {
-    color: var(--ds-text-faint);
+    color: var(--ds-text-muted);
     border: 1px dashed var(--ds-border-strong);
   }
   .hint {

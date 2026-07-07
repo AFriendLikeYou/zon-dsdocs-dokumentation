@@ -48,6 +48,20 @@
   const sval = (s: SpacingSpec) => (tokenMode && s.token ? s.token : s.px);
   const spacingHasTokens = $derived(spacing.some((s) => s.token));
 
+  // Deutsches Label je Callout-Rolle (dezentes Typ-Badge in der Legende).
+  const ART_LABEL: Record<string, string> = {
+    instance: 'Instanz',
+    text: 'Text',
+    slot: 'Slot',
+    container: 'Container',
+    structural: 'Struktur'
+  };
+  // Provenance-Badge: nur Abweichungen markieren (gemessen = Normalfall, kein Badge).
+  const HERKUNFT_LABEL: Record<string, string> = {
+    abgeleitet: '≈ abgeleitet',
+    geschätzt: '≈ geschätzt'
+  };
+
   // Beschriftung „Term — Beschreibung" in Lead + Rest zerlegen (präzisere Legende).
   function splitLabel(text: string): { lead: string; rest: string } {
     const m = text.match(/^(.+?)\s+[—–]\s+(.+)$/);
@@ -123,7 +137,9 @@
         <span class="n">{c.nr}</span>
         <span class="t">
           {#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
+          {#if c.optionalDurch}<span class="opt">optional — gesteuert über <code>{c.optionalDurch}</code></span>{/if}
         </span>
+        {#if c.art && ART_LABEL[c.art]}<span class="art-badge">{ART_LABEL[c.art]}</span>{/if}
       </li>
     {/each}
   </ol>
@@ -146,6 +162,7 @@
         <li class="sp-row">
           <span class="sp-bar" aria-hidden="true"></span>
           <span class="sp-name">{s.label}</span>
+          {#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft">{HERKUNFT_LABEL[s.herkunft]}</span>{/if}
           <span class="sp-val">{sval(s)}</span>
         </li>
       {/each}
@@ -244,7 +261,7 @@
     height: 18px;
     border-radius: 999px;
     background: var(--measure);
-    color: #fff;
+    color: var(--z-ds-color-general-white-100);
     font-family: var(--ds-font-mono);
     font-size: 11px;
     font-weight: 600;
@@ -350,6 +367,29 @@
     font-weight: 600;
     color: var(--ds-text);
   }
+  /* Dezentes Typ-Badge (Instanz/Text/Slot/…) — gemutet, rechtsbündig. */
+  .art-badge {
+    flex: none;
+    align-self: center;
+    margin-left: auto;
+    padding: 1px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--ds-border);
+    font-size: var(--ds-text-xs);
+    line-height: 1.5;
+    color: var(--ds-text-muted);
+    white-space: nowrap;
+  }
+  /* „optional — gesteuert über X" — leiser Zusatz in eigener Zeile. */
+  .opt {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-faint);
+  }
+  .opt code {
+    font-family: var(--ds-font-mono);
+  }
 
   /* Innenabstände — Redline-Spec: kleine Maßbalken (Blueprint-Blau) + Label + Wert. */
   .sp {
@@ -407,6 +447,14 @@
   .sp-name {
     flex: 1 1 auto;
     color: var(--ds-text-body);
+  }
+  /* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
+  .herkunft {
+    flex: none;
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-faint);
+    white-space: nowrap;
   }
   .sp-val {
     font-family: var(--ds-font-mono);

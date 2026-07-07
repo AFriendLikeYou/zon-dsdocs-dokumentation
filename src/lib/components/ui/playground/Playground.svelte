@@ -232,7 +232,11 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--z-ds-space-32) var(--z-ds-space-16);
+		/* Feste 16:9-Bühne (wie die Katalog-Vorschauen); Specimen bleibt zentriert,
+		   Überlauf wird geclippt. min-height als Boden für sehr schmale Viewports. */
+		aspect-ratio: 16 / 9;
 		min-height: 96px;
+		overflow: hidden;
 		/* RAW-Token, damit die Fläche mit den je Bühne gepinnten Werten flippt —
 		   ein abgeleitetes --ds-*-Token wäre schon auf :root-Ebene aufgelöst. */
 		background: var(--z-ds-color-background-10);

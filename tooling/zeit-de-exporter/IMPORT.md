@@ -14,7 +14,7 @@ Figma-Node ──(Figma MCP)──▶ Fakten (Name, Varianten, Tokens, Maße, St
 model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
    │
    ▼
-Nav-Eintrag · Katalog-Order · Gate · redaktionelle Prüfung (content.ts)
+Katalog-Order (optional) · Gate · redaktionelle Prüfung (content.ts)
 ```
 
 ## Schnellstart
@@ -57,6 +57,15 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
 - **Playground**: `render.controls` + `render.template` (ein gemeinsames Markup, per
   Modifier ein-/ausgeblendet) — deckt den Control-Raum ab; volle Achse in `render.matrix`.
 - **`spacing`** für die internen Gaps (mit Token → Anatomie-Redlines + px↔Token-Toggle).
+- **`farbrollen`** (Farbrollen-Matrix): aus den Figma-**States** (default/hover/disabled …)
+  ableiten — je Teil (Hintergrund, Text, Rahmen …) das `--z-ds-*`-Token pro Zustand.
+  Nur Zustände aufnehmen, die es real gibt; hat ein Zustand kein eigenes Token, den Basis-Wert
+  mit `hinweis` erklären oder die Spalte weglassen. Bewusst kein Fill = Wert `"none"`.
+- **`herkunft` (Pflicht bei Import):** jeden `masse`-/`spacing`-Wert mit seiner Provenance
+  markieren — aus Figma abgelesen = `gemessen`, berechnet = `abgeleitet`, Platzhalter/geschätzt
+  = `geschätzt`. `gemessen` ist der Normalfall und darf weggelassen werden (kein Badge); nur
+  Abweichungen (`abgeleitet`/`geschätzt`) bekommen ein dezentes Badge. Nie einen geschätzten
+  Wert als gemessen ausgeben.
 - **`presets`** für benannte Beispiel-Kombinationen.
 - **Platzhalter kennzeichnen:** fehlen Assets (Bild/Cover/Avatar), neutrale Flächen
   nutzen und im `repoNote`/Kommentar als Doku-Platzhalter markieren.
@@ -75,10 +84,13 @@ node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>
 
 Erzeugt `+page.svx` + `spec.generated.ts` (+ `content.ts`-Stub beim ersten Mal).
 
-## 5 · Nav + Katalog
+## 5 · Katalog (kein Nav-Handeintrag)
 
-- `src/lib/data/navigation.ts` → `MENU_ITEMS_PRODUCT`: Eintrag ergänzen.
-- `src/lib/data/catalog.ts` → `CATALOG_OVERRIDES`: Reihenfolge/Ausschluss (optional).
+Die Components-Nav-Sektion ist **katalog-getrieben** (ADR-025): ein neues `model.json`
+erscheint automatisch, **kein Eintrag in `navigation.ts` nötig**.
+
+- `src/lib/data/catalog.ts` → `CATALOG_OVERRIDES`: nur **optional** Reihenfolge/Badge/
+  Ausschluss. Ohne Override läuft der Eintrag ans Ende.
 
 ## 6 · Gate + redaktionelle Prüfung
 
@@ -96,8 +108,10 @@ Danach in `content.ts` klar trennen: **aus Figma übernommen** (verlässlich) vs
 
 - [ ] Node zum Component-Set aufgelöst, Fakten notiert
 - [ ] `model.json` (Tokens = `--z-ds-*`, `varianten[].cssClass`, `spacing`, `presets`)
+- [ ] `farbrollen` aus den Figma-States gebaut (Teil × Zustand → Token; `"none"` = kein Fill)
+- [ ] `herkunft` je `masse`/`spacing` gesetzt (Figma = gemessen, berechnet = abgeleitet, Platzhalter = geschätzt)
 - [ ] `pattern.css` (flach, originalgetreu) — falls nötig
 - [ ] Exporter gelaufen
-- [ ] Nav-Eintrag + ggf. Katalog-Order
+- [ ] ggf. Katalog-Order/Badge in `catalog.ts` (Nav ist katalog-getrieben — kein Handeintrag)
 - [ ] Gate grün (check 0/0 · build · vitest)
 - [ ] Platzhalter/Beispieltexte in `content.ts` geprüft

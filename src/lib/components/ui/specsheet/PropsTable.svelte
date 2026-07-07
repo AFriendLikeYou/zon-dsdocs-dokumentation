@@ -2,6 +2,9 @@
 <script lang="ts">
   import type { PropRow } from '$types/spec';
   let { props = [] }: { props?: PropRow[] } = $props();
+
+  // Spalte „Erlaubte Werte" nur zeigen, wenn irgendein Prop welche deklariert.
+  const hasErlaubteWerte = $derived(props.some((p) => p.erlaubteWerte?.length));
 </script>
 
 {#if props.length}
@@ -11,6 +14,7 @@
         <tr>
           <th>Prop</th>
           <th>Typ</th>
+          {#if hasErlaubteWerte}<th>Erlaubte Werte</th>{/if}
           <th>Default</th>
           <th>Beschreibung</th>
         </tr>
@@ -18,8 +22,18 @@
       <tbody>
         {#each props as p}
           <tr>
-            <td><code class="pt-name">{p.name}</code></td>
+            <td class="pt-name-cell">
+              <code class="pt-name">{p.name}</code>
+              {#if p.pflicht}<span class="pt-req" title="Pflicht">Pflicht</span>{/if}
+            </td>
             <td><code class="pt-typ">{p.typ}</code></td>
+            {#if hasErlaubteWerte}
+              <td class="pt-vals">
+                {#if p.erlaubteWerte?.length}
+                  {#each p.erlaubteWerte as v}<code class="pt-chip">{v}</code>{/each}
+                {:else}<span class="pt-dash">—</span>{/if}
+              </td>
+            {/if}
             <td>{#if p.default}<code class="pt-def">{p.default}</code>{:else}<span class="pt-dash">—</span>{/if}</td>
             <td class="pt-desc">{p.beschreibung ?? ''}</td>
           </tr>
@@ -74,6 +88,36 @@
   .pt-name {
     color: var(--ds-text);
     font-weight: 600;
+  }
+  .pt-name-cell {
+    white-space: nowrap;
+  }
+  /* Pflicht-Badge am Prop-Namen — dezent, gemutet. */
+  .pt-req {
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--ds-border);
+    font-family: var(--ds-font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ds-text-muted);
+    vertical-align: middle;
+  }
+  /* Erlaubte-Werte-Spalte: Code-Chips. */
+  .pt-vals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .pt-chip {
+    padding: 1px 6px;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-surface-raised);
+    border: 1px solid var(--ds-border);
+    color: var(--ds-text-body);
+    white-space: nowrap;
   }
   .pt-typ {
     color: var(--ds-accent);

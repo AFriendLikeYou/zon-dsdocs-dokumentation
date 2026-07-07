@@ -34,9 +34,10 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
   `doDontBeispiele`, `verwendung`, `wording`, `verwandt`, `version`, `variantInfo`) →
   **`content.ts` von Hand**.
-- **Menüeintrag** → [`src/lib/data/navigation.ts`](../../src/lib/data/navigation.ts) von
-  Hand (`MENU_ITEMS_PRODUCT`). `npm run check` (→ `check-nav.mjs`) warnt bei fehlendem
-  Link. Reihenfolge im Katalog: `src/lib/data/catalog.ts` (Override-Map).
+- **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
+  Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Nur
+  Reihenfolge/Badge (optional) in der Override-Map in
+  [`src/lib/data/catalog.ts`](../../src/lib/data/catalog.ts).
 
 ## Frontmatter-Mapping (Doku-Modell → zeit.de)
 
@@ -59,10 +60,11 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 | `kategorie` | string | Hero-Meta |
 | `zweck` | string | Hero-Beschreibung |
 | `figma`, `aktualisiertAm` | string | Frontmatter |
-| `masse` | `{ hoehe?, breite?, padding?, radius? }` — Wert je `string` **oder** `{ px, token? }` | Anatomie-Maßlinien + `MeasureTable` (Specs) |
-| `spacing` | `{ label, px, token? }[]` | Anatomie-**Innenabstände** (Redlines, px↔Token-Toggle) |
-| `callouts` | `{ nr, text }[]` | Anatomie-Legende (Lead vor `—` wird fett) |
+| `masse` | `{ hoehe?, breite?, padding?, radius? }` — Wert je `string` **oder** `{ px, token?, herkunft? }` | Anatomie-Maßlinien + `MeasureTable` (Specs) |
+| `spacing` | `{ label, px, token?, herkunft? }[]` | Anatomie-**Innenabstände** (Redlines, px↔Token-Toggle) |
+| `callouts` | `{ nr, text, art?, optionalDurch? }[]` | Anatomie-Legende (Lead vor `—` fett; `art` → dezentes Typ-Badge, `optionalDurch` → „optional — gesteuert über X") |
 | `tokens` | `{ kategorie, items: { name, wert, swatch? }[] }[]` | `TokenTable` (Specs) |
+| `farbrollen` | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }` | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill) |
 | `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `VariantList` (Drift-Check prüft `cssClass` vs. `pattern.css`) |
 | `zustaende` | `{ label, vorhanden? }[]` | `StateList` |
 | `a11y` | `{ label, wert, status: pass\|warn\|todo }[]` | `A11yList` (eigener Tab) |
@@ -102,7 +104,7 @@ Weitere `render`-Felder:
 | `preview`, `variant` | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`) |
 | `matrix` | `{ label, html }[]` → Varianten-Raster (`VariantMatrix`) |
 | `calloutAnchors` | `{ nr, side, x?, y? }[]` → Position der Anatomie-Callouts |
-| `props` | `{ name, typ, default?, beschreibung? }[]` → `PropsTable` (Develop) |
+| `props` | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen |
 | `css` | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas` |
 | `codeNote`, `codeSvelte` | HTML/Svelte-Code-Beispiele (Develop) |
 | `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) |
@@ -112,9 +114,18 @@ Weitere `render`-Felder:
 > `check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:
 > Component-Route ohne `model.json` wird geflaggt).
 
+**Provenance (`herkunft`)** — `masse`-Werte (als `{ px, token?, herkunft }`) und
+`spacing`-Einträge tragen optional `herkunft: 'gemessen' | 'abgeleitet' | 'geschätzt'`
+(uSpec-Prinzip „Nicht gemessene Werte werden nicht erfunden, sondern als solche
+markiert"). `MeasureTable` und die Anatomie-Redlines rendern ein dezentes Badge nur
+bei **Abweichung** (`≈ abgeleitet` / `≈ geschätzt`); `gemessen` = Normalfall, **kein**
+Badge (Abwesenheit = gemessen).
+
 Der Exporter **validiert** die Eingabe (harte Fehler brechen ab, weiche warnen):
 Pflichtfeld `name`, gültige `controls` (key/type/options/attr), `template` mit
 `{classes}`/`{attrs}`, `presets`-Keys gegen Controls, `wording` mit `schlecht`+`gut`.
+Für `farbrollen` warnt der Exporter, wenn ein Zustand-Key in `tokensProZustand` nicht
+in `zustaende` steht oder ein Token weder `--z-ds-*` noch `"none"` ist.
 
 ## Benutzung
 
@@ -127,6 +138,9 @@ node tooling/zeit-de-exporter/export.mjs <model.json> [--root <repoRoot>] [--dry
 
 # (b) Re-Export eines bestehenden Components — Ordner übergeben (liest <dir>/model.json):
 node tooling/zeit-de-exporter/export.mjs src/routes/product/components/button
+
+# (c) Re-Export ALLER Komponenten (Batch über alle model.json) — z. B. nach Format-Änderung:
+npm run export:all        # oder: node tooling/zeit-de-exporter/export-all.mjs [--dry]
 ```
 
 `--dry` schreibt nichts, sondern gibt die generierten Dateien zur Kontrolle aus.

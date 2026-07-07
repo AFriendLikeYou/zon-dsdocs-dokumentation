@@ -10,8 +10,18 @@ export type BadgeVariant = 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
 /** Bekannte Component-Status; offen für redaktionelle Sonderwerte (Fallback im Hero). */
 export type SpecStatus = 'ready_for_dev' | 'completed' | 'changed';
 
+/**
+ * Provenance eines Werts (uSpec-Prinzip „Nicht gemessene Werte werden nicht
+ * erfunden, sondern als solche markiert"). Fehlt das Feld, gilt der Normalfall
+ * `gemessen` — nur Abweichungen bekommen ein Badge.
+ *   gemessen   – 1:1 aus Figma/Design abgelesen
+ *   abgeleitet – aus anderen Werten berechnet
+ *   geschätzt  – Platzhalter / noch nicht verifiziert
+ */
+export type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
+
 /** Ein Maß: einfacher px-String ODER { px, token } für den px↔Token-Umschalter. */
-export type Measure = { px: string; token?: string };
+export type Measure = { px: string; token?: string; herkunft?: Herkunft };
 export type MasseValue = string | Measure;
 
 export type Masse = {
@@ -22,9 +32,26 @@ export type Masse = {
 };
 
 /** Interner Abstand (Spacing-Redline): benannter Gap zwischen Teilen, mit Token. */
-export type SpacingSpec = { label: string; px: string; token?: string };
+export type SpacingSpec = { label: string; px: string; token?: string; herkunft?: Herkunft };
 
-export type Callout = { nr: number; text: string };
+/**
+ * Rolle eines Anatomie-Teils (dezentes Typ-Badge in der Legende):
+ *   instance   – eingebettete Komponente (Instanz)
+ *   text       – Text-Ebene
+ *   slot       – Slot/Platzhalter für frei einsetzbaren Inhalt
+ *   container  – Layout-/Gruppierungs-Container
+ *   structural – strukturelles Gerüst (nicht sichtbar/dekorativ)
+ */
+export type CalloutArt = 'instance' | 'text' | 'slot' | 'container' | 'structural';
+
+export type Callout = {
+	nr: number;
+	text: string;
+	/** Rolle des Teils → dezentes Typ-Badge. */
+	art?: CalloutArt;
+	/** Teil ist optional; genannt wird der steuernde Prop-/Control-Name. */
+	optionalDurch?: string;
+};
 
 export type CalloutAnchor = { nr: number; side: string; x?: number; y?: number };
 
@@ -56,7 +83,31 @@ export type Verwendung = { nutzen?: string[]; nichtNutzen?: string[] };
 /** Konkrete Formulierungs-Regel (UX-Writing): statt `schlecht` besser `gut`. */
 export type WordingRule = { schlecht: string; gut: string; hinweis?: string };
 
-export type PropRow = { name: string; typ: string; default?: string; beschreibung?: string };
+export type PropRow = {
+	name: string;
+	typ: string;
+	default?: string;
+	beschreibung?: string;
+	/** Erlaubte Werte (z. B. aus select-Options) → Code-Chips in eigener Spalte. */
+	erlaubteWerte?: string[];
+	/** Pflicht-Prop → Badge am Namen. */
+	pflicht?: boolean;
+};
+
+/**
+ * Farbrollen-Matrix: Teil (Zeile) × Zustand (Spalte) → --z-ds-Token.
+ * `zustaende` legt die Spaltenreihenfolge fest; jeder Key in `tokensProZustand`
+ * muss dort vorkommen. Wert `"none"` = bewusst kein Fill (nicht: „nicht gemessen").
+ */
+export type ColorRoleElement = {
+	teil: string;
+	tokensProZustand: Record<string, string>;
+	hinweis?: string;
+};
+export type ColorRoles = {
+	zustaende: string[];
+	elemente: ColorRoleElement[];
+};
 
 /** Eine Tastatur-Regel: welche Taste löst welche Aktion aus (Barrierefreiheit-Tab). */
 export type KeyboardRule = { taste: string; aktion: string };
@@ -79,6 +130,8 @@ export type ComponentSpec = {
 	spacing?: SpacingSpec[];
 	callouts?: Callout[];
 	tokens?: TokenGroup[];
+	/** Farbrollen-Matrix (Teil × Zustand → Token) — im Specs-Tab vor der TokenTable. */
+	farbrollen?: ColorRoles | null;
 	varianten?: VariantGroup[];
 	zustaende?: SpecState[];
 	a11y?: A11yItem[];

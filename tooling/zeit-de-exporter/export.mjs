@@ -107,7 +107,11 @@ const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 
 function renderGenerated(model) {
 	// `render` ist Repo-Verdrahtung (Slot-Markup/CSS), gehört nicht ins Datenmodell.
 	// `$schema` ist nur Editor-Komfort (Autocomplete) und darf nicht ins Modell leaken.
-	const { render: _render, $schema: _schema, ...spec } = model;
+	const { render: _render, $schema: _schema, ...rest } = model;
+	// EDITORIAL-Felder gehören dem Menschen (content.ts) und würden hier nur doppelt
+	// liegen — strippen (Maschine = Fakten, Mensch = Redaktion). Merge bleibt
+	// { ...generated, ...content }: content liefert diese Felder.
+	const spec = Object.fromEntries(Object.entries(rest).filter(([k]) => !EDITORIAL.includes(k)));
 	const json = JSON.stringify(spec, null, '\t');
 	return (
 		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
@@ -132,16 +136,20 @@ function renderContentStub(model) {
 		`// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).\n` +
 		`// Die Felder überschreiben die generierten Werte aus spec.generated.ts.\n` +
 		`//\n` +
-		`//   zweck       – Beschreibung im Hero\n` +
-		`//   status      – ready_for_dev | completed | changed\n` +
-		`//   version     – Snapshot-/Versions-Label im Hero\n` +
-		`//   variantInfo – Wann welche Variante nutzen (Label → Text)\n` +
-		`//   callouts    – Anatomie-Beschriftungen ({ nr, text })\n` +
-		`//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
-		`//   tastatur    – Tastatur-Bedienung ({ taste, aktion })\n` +
-		`//   doDont      – { do: [...], dont: [...] }\n` +
-		`//   verwandt    – Querverweise auf verwandte Komponenten (Katalog-Slugs)\n` +
-		`export const content = ${json};\n`
+		`//   zweck            – Beschreibung im Hero\n` +
+		`//   status           – ready_for_dev | completed | changed\n` +
+		`//   version          – Snapshot-/Versions-Label im Hero\n` +
+		`//   variantInfo      – Wann welche Variante nutzen (Label → Text)\n` +
+		`//   callouts         – Anatomie-Beschriftungen ({ nr, text })\n` +
+		`//   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
+		`//   tastatur         – Tastatur-Bedienung ({ taste, aktion })\n` +
+		`//   doDont           – { do: [...], dont: [...] }\n` +
+		`//   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })\n` +
+		`//   verwendung       – { nutzen: [...], nichtNutzen: [...] }\n` +
+		`//   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })\n` +
+		`//   verwandt         – Querverweise auf verwandte Komponenten (Katalog-Slugs)\n` +
+		`import type { ComponentSpec } from '$types/spec';\n\n` +
+		`export const content = ${json} satisfies Partial<ComponentSpec>;\n`
 	);
 }
 
@@ -190,6 +198,19 @@ function tl(s) {
 		.replace(/<\/(script|style)>/gi, '<\\/$1>');
 }
 
+/** HTML-Text escapen (für Werte, die als Text — nicht als Markup — gerendert werden). */
+function escapeHtml(s) {
+	return String(s)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+}
+
+/** Bewusstes Markup, aber schützt gegen vorzeitigen </script>/</style>-Ausbruch. */
+function neutralizeScriptClose(s) {
+	return String(s).replace(/<\/(script|style)>/gi, '<\\/$1>');
+}
+
 /**
  * +page.svx — getabbte mdsvex-Seite (eBay-Stil): Hero + Tabs
  * Design / Develop / Barrierefreiheit / Specs. Komponiert die nativen,
@@ -203,8 +224,12 @@ function renderPage(model, { patternCss = null } = {}) {
 	const variantSlot = render.variant ? `\t\t${asSnippet(render.variant, 'variant')}\n` : '';
 
 	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
+	// label = Text (HTML-escapen), html = bewusstes Markup (nur </script>/</style>-Schutz).
 	const matrixCells = matrix
-		.map((m) => `\t\t<div class="cell"><span class="cell-label">${m.label}</span>${m.html}</div>`)
+		.map(
+			(m) =>
+				`\t\t<div class="cell"><span class="cell-label">${escapeHtml(m.label)}</span>${neutralizeScriptClose(m.html)}</div>`
+		)
 		.join('\n');
 
 	const anchors = Array.isArray(render.calloutAnchors) ? render.calloutAnchors : [];
@@ -220,7 +245,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	const styleBlock = allCss ? `\n<style>\n${allCss}\n</style>\n` : '';
 
 	// Code-Beispiele (Develop): HTML/Svelte-Snippet + entscoptes CSS.
-	const note = render.codeNote ? `<!-- ${render.codeNote} -->\n` : '';
+	// `-->` im Text würde den Kommentar vorzeitig schließen → neutralisieren.
+	const note = render.codeNote ? `<!-- ${String(render.codeNote).replace(/--+>/g, '--&gt;')} -->\n` : '';
 	const htmlBody = [render.preview, render.variant].filter(Boolean).join('\n');
 	const htmlCode = htmlBody ? note + htmlBody : '';
 	const svelteCode = Array.isArray(render.codeSvelte)
@@ -276,6 +302,13 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
 	const hasKeyboard = Array.isArray(model.tastatur) && model.tastatur.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
+	const hasColorRoles = Boolean(
+		model.farbrollen &&
+			Array.isArray(model.farbrollen.zustaende) &&
+			model.farbrollen.zustaende.length &&
+			Array.isArray(model.farbrollen.elemente) &&
+			model.farbrollen.elemente.length
+	);
 	const hasMasse = Boolean(model.masse);
 	const hasUsage = Boolean(
 		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
@@ -283,7 +316,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasWording = Array.isArray(model.wording) && model.wording.length > 0;
 	const hasRelated = Array.isArray(model.verwandt) && model.verwandt.length > 0;
 	const hasDevelop = anyCode || hasProps;
-	const hasSpecs = hasTokens || hasMasse;
+	const hasSpecs = hasTokens || hasMasse || hasColorRoles;
 
 	// In-Page-Sprungleiste (SectionNav, Paket C) nur bei ≥ 4 Design-Tab-Sektionen.
 	// Zählung deckungsgleich mit dem Aufbau des Design-Tabs weiter unten.
@@ -313,6 +346,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasA11y) used.add('A11yList');
 	if (hasKeyboard) used.add('KeyboardList');
 	if (hasMasse) used.add('MeasureTable');
+	if (hasColorRoles) used.add('ColorRoleTable');
 	if (hasTokens) used.add('TokenTable');
 
 	const tabs = [{ label: 'Design', name: 'designTab' }];
@@ -441,6 +475,9 @@ function renderPage(model, { patternCss = null } = {}) {
 	// ---- Specs-Tab ----
 	let specs = '';
 	if (hasMasse) specs += `\t<h2>Maße</h2>\n\t<MeasureTable masse={${S}.masse} />\n`;
+	// Farbrollen-Matrix leitet die Token-Sektion ein (Teil × Zustand → Token),
+	// die volle Token-Liste folgt darunter.
+	if (hasColorRoles) specs += `\n\t<h2>Farbrollen</h2>\n\t<ColorRoleTable farbrollen={${S}.farbrollen} />\n`;
 	if (hasTokens) specs += `\n\t<h2>Tokens</h2>\n\t<TokenTable tokens={${S}.tokens} />\n`;
 
 	const bodies = { designTab: design, developTab: develop, a11yTab: a11y, specsTab: specs };
@@ -520,10 +557,18 @@ function validate(model, { root = process.cwd() } = {}) {
 	const warnings = [];
 
 	if (!model.name) errors.push('Pflichtfeld fehlt: name');
+	// Leerer Slug (Name aus reinen Sonderzeichen) → Export würde nach components//
+	// direkt in den Ordner schreiben. Harter Fehler.
+	else if (!kebabCase(model.name))
+		errors.push(
+			`name "${model.name}" ergibt einen leeren kebab-case-Slug — bitte alphanumerische Zeichen verwenden.`
+		);
 
 	const render = model.render ?? {};
 	const controls = Array.isArray(render.controls) ? render.controls : [];
 	const keys = new Set();
+	// key → Set gültiger option-values (für preset-Wert-Prüfung); toggles nehmen true/false.
+	const optionValues = new Map();
 
 	for (const [i, c] of controls.entries()) {
 		const at = `render.controls[${i}]${c?.key ? ` "${c.key}"` : ''}`;
@@ -535,10 +580,19 @@ function validate(model, { root = process.cwd() } = {}) {
 		if (c.type === 'select') {
 			if (!Array.isArray(c.options) || !c.options.length)
 				errors.push(`${at}: select braucht options[]`);
-			else
+			else {
+				const values = new Set();
 				for (const [j, o] of c.options.entries())
 					if (!o || o.value == null || o.label == null)
 						errors.push(`${at}.options[${j}]: value und label nötig`);
+					else values.add(o.value);
+				if (c.key) optionValues.set(c.key, values);
+				// default (wenn gesetzt) muss ein bekannter option-value sein.
+				if (c.default != null && !values.has(c.default))
+					errors.push(
+						`${at}: default "${c.default}" ist kein option-value (${[...values].join(', ')})`
+					);
+			}
 		}
 		if (c.type === 'toggle' && !c.cssClass)
 			warnings.push(`${at}: toggle ohne cssClass bewirkt nichts`);
@@ -558,10 +612,28 @@ function validate(model, { root = process.cwd() } = {}) {
 			if (!p?.state || typeof p.state !== 'object')
 				errors.push(`render.presets[${i}]: state-Objekt fehlt`);
 			else
-				for (const k of Object.keys(p.state))
-					if (keys.size && !keys.has(k))
+				for (const [k, v] of Object.entries(p.state)) {
+					if (keys.size && !keys.has(k)) {
 						warnings.push(`render.presets[${i}].state: "${k}" ist kein control-key`);
+						continue;
+					}
+					// Wert gegen die gültigen option-values des select-Controls prüfen.
+					const values = optionValues.get(k);
+					if (values && !values.has(v))
+						warnings.push(
+							`render.presets[${i}].state: "${k}" = ${JSON.stringify(v)} ist kein option-value (${[...values].join(', ')})`
+						);
+				}
 		}
+
+	// variantInfo (redaktionell) ohne Varianten → wird nie gerendert.
+	if (
+		render.variantInfo &&
+		typeof render.variantInfo === 'object' &&
+		Object.keys(render.variantInfo).length &&
+		!(Array.isArray(model.varianten) && model.varianten.length)
+	)
+		warnings.push('render.variantInfo gesetzt, aber model.varianten ist leer — wird nie gerendert');
 
 	// wording: schlecht + gut sind Pflicht.
 	if (Array.isArray(model.wording))
@@ -589,6 +661,32 @@ function validate(model, { root = process.cwd() } = {}) {
 			}
 		}
 
+	// farbrollen: jeder Zustand-Key in tokensProZustand muss in zustaende existieren;
+	// Token-Namen müssen --z-ds-* oder "none" sein (sonst warnen — Härtetest deckt das ab).
+	if (model.farbrollen && typeof model.farbrollen === 'object') {
+		const fr = model.farbrollen;
+		const zust = Array.isArray(fr.zustaende) ? fr.zustaende : [];
+		if (!zust.length) warnings.push('farbrollen: zustaende ist leer — Matrix wird nicht gerendert');
+		const zustSet = new Set(zust);
+		const elemente = Array.isArray(fr.elemente) ? fr.elemente : [];
+		if (!elemente.length) warnings.push('farbrollen: elemente ist leer — Matrix wird nicht gerendert');
+		for (const [i, el] of elemente.entries()) {
+			const at = `farbrollen.elemente[${i}]${el?.teil ? ` "${el.teil}"` : ''}`;
+			if (!el?.teil) warnings.push(`${at}: teil fehlt`);
+			const tpz = el?.tokensProZustand;
+			if (!tpz || typeof tpz !== 'object') {
+				warnings.push(`${at}: tokensProZustand fehlt`);
+				continue;
+			}
+			for (const [key, token] of Object.entries(tpz)) {
+				if (!zustSet.has(key))
+					warnings.push(`${at}: Zustand-Key "${key}" ist nicht in zustaende (${zust.join(', ')})`);
+				if (token !== 'none' && !/^--z-ds-/.test(String(token)) && !/^var\(\s*--z-ds-/.test(String(token)))
+					warnings.push(`${at}.${key}: Token "${token}" ist weder --z-ds-* noch "none"`);
+			}
+		}
+	}
+
 	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Component-Ordner hat.
 	if (Array.isArray(model.verwandt))
 		for (const slug of model.verwandt) {
@@ -610,6 +708,10 @@ function validate(model, { root = process.cwd() } = {}) {
 function scaffold(name, root) {
 	if (!name) throw new Error('Name fehlt. Nutzung: export.mjs --init "Text Button"');
 	const kebab = kebabCase(name);
+	if (!kebab)
+		throw new Error(
+			`Name "${name}" ergibt einen leeren kebab-case-Slug — bitte alphanumerische Zeichen verwenden.`
+		);
 	const cls = `z-${kebab}`;
 	const outDir = resolve(root, ROUTE_BASE, kebab);
 	const modelPath = resolve(outDir, 'model.json');
@@ -675,7 +777,8 @@ function scaffold(name, root) {
 	console.log('  1. model.json ausfüllen — der Editor zeigt Feld-Hilfe dank $schema.');
 	console.log('  2. pattern.css mit den echten z-*-Styles füllen.');
 	console.log(`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`);
-	console.log('  4. Menüeintrag in src/lib/data/navigation.ts ergänzen.');
+	console.log('  4. Nav & Katalog sind katalog-getrieben (ADR-025) — kein Nav-Eintrag nötig.');
+	console.log('     Optional Reihenfolge/Badge in der Override-Map in src/lib/data/catalog.ts.');
 }
 
 function main() {

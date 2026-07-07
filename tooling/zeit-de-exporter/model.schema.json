@@ -41,6 +41,7 @@
 			"description": "Design-Tokens der Komponente, gruppiert (Farbe, Spacing, Radius, Typografie …) → Specs-Tab.",
 			"items": { "$ref": "#/$defs/tokenGroup" }
 		},
+		"farbrollen": { "$ref": "#/$defs/farbrollen" },
 		"varianten": {
 			"type": "array",
 			"description": "Varianten-Achsen wie in Figma (Typ, Größe …). cssClass verknüpft eine Variante mit ihrer Modifier-Klasse (Drift-Check).",
@@ -92,8 +93,13 @@
 			"required": ["px"],
 			"properties": {
 				"px": { "type": "string", "description": "Wert in px, z. B. \"4 px\"." },
-				"token": { "type": "string", "description": "z-ds-Token-Name, z. B. \"--z-ds-space-xxxs\" (für den px↔Token-Umschalter)." }
+				"token": { "type": "string", "description": "z-ds-Token-Name, z. B. \"--z-ds-space-xxxs\" (für den px↔Token-Umschalter)." },
+				"herkunft": { "$ref": "#/$defs/herkunft" }
 			}
+		},
+		"herkunft": {
+			"enum": ["gemessen", "abgeleitet", "geschätzt"],
+			"description": "Provenance des Werts (uSpec-Prinzip). Fehlt das Feld = Normalfall gemessen (kein Badge). gemessen=aus Figma, abgeleitet=berechnet, geschätzt=Platzhalter (bekommt „≈ geschätzt\"-Badge)."
 		},
 		"masseValue": {
 			"description": "Einfacher Text (nur px) ODER { px, token }.",
@@ -106,7 +112,8 @@
 			"properties": {
 				"label": { "type": "string", "description": "Name des Abstands, z. B. \"Spitzmarke ↔ Titel\"." },
 				"px": { "type": "string", "description": "Wert in px." },
-				"token": { "type": "string", "description": "z-ds-Spacing-Token." }
+				"token": { "type": "string", "description": "z-ds-Spacing-Token." },
+				"herkunft": { "$ref": "#/$defs/herkunft" }
 			}
 		},
 		"callout": {
@@ -115,7 +122,9 @@
 			"required": ["nr", "text"],
 			"properties": {
 				"nr": { "type": "integer", "description": "Nummer des Callouts (1, 2, 3 …)." },
-				"text": { "type": "string", "description": "\"Begriff — Beschreibung\" (Begriff wird fett)." }
+				"text": { "type": "string", "description": "\"Begriff — Beschreibung\" (Begriff wird fett)." },
+				"art": { "enum": ["instance", "text", "slot", "container", "structural"], "description": "Rolle des Teils → dezentes Typ-Badge in der Legende (optional)." },
+				"optionalDurch": { "type": "string", "description": "Teil ist optional; Name des steuernden Props/Controls (z. B. \"hasIconStart\") → Hinweis „optional — gesteuert über X\"." }
 			}
 		},
 		"tokenGroup": {
@@ -136,6 +145,36 @@
 							"wert": { "type": "string", "description": "Wert/Beschreibung." },
 							"swatch": { "type": "string", "description": "Farb-Hex für die Vorschau (optional)." },
 							"translucent": { "type": "boolean" }
+						}
+					}
+				}
+			}
+		},
+		"farbrollen": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["zustaende", "elemente"],
+			"description": "Farbrollen-Matrix: Teil (Zeile) × Zustand (Spalte) → --z-ds-Token. Zeigt, welches Token welchen Teil in welchem Zustand einfärbt. Wert \"none\" = bewusst kein Fill.",
+			"properties": {
+				"zustaende": {
+					"type": "array",
+					"description": "Spalten-Zustände in Reihenfolge, z. B. [\"default\", \"hover\", \"disabled\"]. Jeder Key in tokensProZustand muss hier vorkommen.",
+					"items": { "type": "string" }
+				},
+				"elemente": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["teil", "tokensProZustand"],
+						"properties": {
+							"teil": { "type": "string", "description": "Name des Teils/der Rolle, z. B. \"Hintergrund\", \"Text\", \"Rahmen\"." },
+							"tokensProZustand": {
+								"type": "object",
+								"description": "Zustand-Key → --z-ds-Token oder \"none\". Keys müssen in zustaende vorkommen.",
+								"additionalProperties": { "type": "string" }
+							},
+							"hinweis": { "type": "string", "description": "Optionaler Hinweis (letzte Spalte)." }
 						}
 					}
 				}
@@ -328,7 +367,9 @@
 							"name": { "type": "string" },
 							"typ": { "type": "string" },
 							"default": { "type": "string" },
-							"beschreibung": { "type": "string" }
+							"beschreibung": { "type": "string" },
+							"erlaubteWerte": { "type": "array", "items": { "type": "string" }, "description": "Erlaubte Werte (z. B. select-Options) → Code-Chips in eigener Spalte." },
+							"pflicht": { "type": "boolean", "description": "Pflicht-Prop → Badge am Namen." }
 						}
 					}
 				},

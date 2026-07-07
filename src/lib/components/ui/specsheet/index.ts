@@ -5,6 +5,7 @@ export { default as VariantMatrix } from './VariantMatrix.svelte';
 export { default as VariantList } from './VariantList.svelte';
 export { default as StateList } from './StateList.svelte';
 export { default as TokenTable } from './TokenTable.svelte';
+export { default as ColorRoleTable } from './ColorRoleTable.svelte';
 export { default as MeasureTable } from './MeasureTable.svelte';
 export { default as A11yList } from './A11yList.svelte';
 export { default as KeyboardList } from './KeyboardList.svelte';
