@@ -67,6 +67,48 @@ passt.
 
 <SpacingScale tokens={numerisch} />
 
+## Anwendung
+
+So wirkt ein Abstands-Token in der Praxis: Die beiden Flächen sind über
+`gap: var(--z-ds-space-m)` getrennt — ändert sich der Token, verschiebt sich der
+Abstand automatisch mit.
+
+<div class="spacing-example">
+	<div class="spacing-example__row">
+		<div class="spacing-example__box"></div>
+		<div class="spacing-example__box"></div>
+	</div>
+	<p class="spacing-example__label"><code>gap: var(--z-ds-space-m)</code></p>
+</div>
+
 ## Do &amp; Don't
 
 <DoDontList {doDont} />
+
+<style>
+	.spacing-example {
+		margin: var(--z-ds-space-16) 0;
+	}
+	.spacing-example__row {
+		display: flex;
+		/* Live-Anwendung: der dokumentierte Abstand als echter gap. */
+		gap: var(--z-ds-space-m);
+		padding: var(--z-ds-space-16);
+		background: var(--ds-surface-raised);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius);
+		width: fit-content;
+	}
+	.spacing-example__box {
+		width: 96px;
+		height: 64px;
+		background: var(--ds-accent-brand);
+		border-radius: var(--ds-radius-sm);
+	}
+	.spacing-example__label {
+		margin-top: var(--z-ds-space-8);
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
+</style>

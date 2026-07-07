@@ -9,6 +9,8 @@
 		title: string;
 		/** true = aufgelösten Hex-Wert kopieren (Brand-Hub-Default), false = Token-Namen. */
 		copyHex?: boolean;
+		/** true = aufgelösten Farbwert (Hex) zusätzlich unter dem Token anzeigen. */
+		showValue?: boolean;
 	};
 
 	let {
@@ -17,19 +19,29 @@
 		borderColor,
 		description,
 		title,
-		copyHex = true
+		copyHex = true,
+		showValue = false
 	}: Props = $props();
 
 	if (borderColor === '') {
 		borderColor = `var(${colorCustomProperty})`;
 	}
 
+	/** Aufgelöster Farbwert aus dem geladenen styles-zds.css — nie Drift zum Upstream-Paket
+	    (gleiches Muster wie foundation-tokens.ts / die Tokens-Seite). Nur im Browser. */
+	function resolveValue(): string {
+		if (typeof window === 'undefined') return '';
+		return getComputedStyle(document.documentElement).getPropertyValue(colorCustomProperty).trim();
+	}
+
+	let resolvedValue = $state('');
+	$effect(() => {
+		resolvedValue = resolveValue();
+	});
+
 	function copyValue(): string {
 		if (!copyHex || typeof window === 'undefined') return colorCustomProperty;
-		const hex = getComputedStyle(document.documentElement)
-			.getPropertyValue(colorCustomProperty)
-			.trim();
-		return hex || colorCustomProperty;
+		return resolveValue() || colorCustomProperty;
 	}
 </script>
 
@@ -53,6 +65,9 @@
 			<small>{description}</small>
 		</div>
 		<code style="font-size: 0.5rem;">{colorCustomProperty}</code>
+		{#if showValue && resolvedValue}
+			<code class="resolved-value">{resolvedValue}</code>
+		{/if}
 	</div>
 </div>
 
@@ -68,6 +83,12 @@
 	small,
 	code {
 		opacity: 0.8;
+	}
+
+	.resolved-value {
+		font-size: 0.625rem;
+		text-transform: uppercase;
+		opacity: 0.65;
 	}
 
 	/* Positionierung + Look des Copy-Buttons über der Farbfläche.

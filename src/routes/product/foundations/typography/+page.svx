@@ -8,6 +8,71 @@ title: Typography
 
 <script lang="ts">
 	import { DoDont, DoDontGroup } from '$components/ui/dodont';
+	import { TypeSpecimen, type TypeRole } from '$components/ui/type-specimen';
+
+	// Nur fontsize-Tokens, die in static/styles-zds.css existieren. Gruppiert nach Rolle.
+	const ueberschriften: TypeRole[] = [
+		{
+			token: '--z-ds-fontsize-34',
+			label: 'Überschrift 1',
+			usage: 'Seitentitel (H1) — genau einmal pro Seite, ganz oben.',
+			lineHeightToken: '--z-ds-lineheight-11',
+			bold: true
+		},
+		{
+			token: '--z-ds-fontsize-30',
+			label: 'Überschrift 2',
+			usage: 'Hauptabschnitte einer Seite.',
+			lineHeightToken: '--z-ds-lineheight-12',
+			bold: true
+		},
+		{
+			token: '--z-ds-fontsize-24',
+			label: 'Überschrift 3',
+			usage: 'Unterabschnitte innerhalb eines Hauptabschnitts.',
+			lineHeightToken: '--z-ds-lineheight-12',
+			bold: true
+		},
+		{
+			token: '--z-ds-fontsize-20',
+			label: 'Überschrift 4',
+			usage: 'Kleinere Zwischenüberschriften und hervorgehobene Blöcke.',
+			lineHeightToken: '--z-ds-lineheight-12',
+			bold: true
+		}
+	];
+
+	const fliesstext: TypeRole[] = [
+		{
+			token: '--z-ds-fontsize-18',
+			label: 'Fließtext',
+			usage: 'Standard-Lauftext auf Inhaltsseiten; ruhige Zeilenhöhe für langen Lesefluss.',
+			lineHeightToken: '--z-ds-lineheight-15',
+			beispieltext:
+				'Typografie trägt bei DIE ZEIT den Großteil der Gestaltung — klare Hierarchie und ruhige Lesbarkeit gehen vor Schmuck.'
+		},
+		{
+			token: '--z-ds-fontsize-16',
+			label: 'Text — Basis',
+			usage: 'Basisgröße für UI-Text und kompaktere Fließtext-Bereiche.',
+			lineHeightToken: '--z-ds-lineheight-15'
+		}
+	];
+
+	const label: TypeRole[] = [
+		{
+			token: '--z-ds-fontsize-14',
+			label: 'Label — klein',
+			usage: 'Sekundäre UI-Beschriftung, Tabellen und Steuerelemente.',
+			lineHeightToken: '--z-ds-lineheight-12'
+		},
+		{
+			token: '--z-ds-fontsize-12',
+			label: 'Label — Meta',
+			usage: 'Meta-Angaben, Bildunterschriften und Icon-Beschriftungen.',
+			lineHeightToken: '--z-ds-lineheight-12'
+		}
+	];
 </script>
 
 # {title}
@@ -22,25 +87,24 @@ nicht feste Werte; so bleibt die Skala konsistent und theme-unabhängig.
   ausgewogene Formen, gut lesbar über alle Bildschirmgrößen.
 - **FranziskaWebPro** — die Serifenschrift für lange, redaktionelle Fließtexte.
 
-## Größen-Skala
+## Text-Rollen
 
-Die vollständige Skala steht als Token-Referenz unter
+Jede Rolle zeigt echten Text in der Zielgröße im Doku-Font, den aufgelösten Wert
+(live in px) und die zugehörigen Tokens zum Kopieren. Die vollständige Größenskala
+steht als Token-Referenz unter
 **[Foundations → Tokens](/product/foundations/tokens)** (Gruppe „Schriftgröße").
-Für Inhaltsseiten gilt diese Hierarchie:
 
-# Überschrift 1 · fontsize-34
+### Überschriften
 
-## Überschrift 2 · fontsize-30
+<TypeSpecimen roles={ueberschriften} />
 
-### Überschrift 3 · fontsize-24
+### Fließtext
 
-#### Überschrift 4 · fontsize-20
+<TypeSpecimen roles={fliesstext} />
 
-##### Überschrift 5 · fontsize-18
+### Label
 
-Fließtext steht auf `--z-ds-fontsize-18` mit `line-height: 1.7` und gedämpfter
-Textfarbe (`--z-ds-color-text-70`) für ruhigen Lesefluss. Die Lesespalte ist auf eine
-angenehme Breite begrenzt und zentriert.
+<TypeSpecimen roles={label} />
 
 ## Grundregeln
 

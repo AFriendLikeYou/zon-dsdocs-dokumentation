@@ -6,6 +6,10 @@ title: Accessibility
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { ContrastMatrix } from '$components/ui/contrast-matrix';
+</script>
+
 # {title}
 
 Barrierefreiheit ist im ZEIT Design System keine nachträgliche Prüfung, sondern Teil
@@ -26,6 +30,37 @@ Für Komponenten sind vor allem diese Kriterien relevant:
 | [2.4.7 Fokus sichtbar](https://www.w3.org/WAI/WCAG21/Understanding/focus-visible.html) | Der Tastatur-Fokus ist jederzeit klar erkennbar. |
 | [4.1.2 Name, Rolle, Wert](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html) | Bedienelemente haben einen zugänglichen Namen und korrekte Rolle (natives Element oder ARIA). |
 | [2.5.5 Zielgröße](https://www.w3.org/WAI/WCAG21/Understanding/target-size-enhanced.html) | Touch-Ziele möglichst ≥ 44 × 44 px. |
+
+## Kontrast
+
+Ausreichender Farbkontrast entscheidet, ob Text lesbar ist. Nach **WCAG 2.1 AA**
+gilt: **4.5:1** für Fließtext, **3:1** für großen Text (ab ca. 24 px bzw. 19 px fett).
+Ab **7:1** ist zusätzlich die strengere Stufe **AAA** erfüllt.
+
+Die folgende Matrix rechnet die Kontrastverhältnisse **live** aus den echten
+`--z-ds-*`-Tokens des geladenen Design-Systems — nicht aus fest eingetragenen
+Werten. Sie reagiert direkt auf den Light-/Dark-Schalter: schalte das Theme um,
+und alle Werte werden neu aufgelöst.
+
+<ContrastMatrix
+	textTokens={[
+		'--z-ds-color-text-100',
+		'--z-ds-color-text-70',
+		'--z-ds-color-text-55',
+		'--z-ds-color-text-40'
+	]}
+	backgroundTokens={[
+		'--z-ds-color-background-0',
+		'--z-ds-color-background-10',
+		'--z-ds-color-background-20'
+	]}
+	caption="Kontrastverhältnisse der Text-Tokens (Zeilen) gegen die Hintergrund-Tokens (Spalten) nach WCAG 2.1."
+/>
+
+> **Hinweis zu `text-40`:** Dieses Token ist bewusst kontrastarm und ausschließlich
+> für **deaktivierte Zustände** (Disabled) gedacht. Deaktivierte Bedienelemente sind
+> nach WCAG 1.4.3 von der Kontrastanforderung ausgenommen — die roten „Fail"-Badges
+> in dieser Zeile sind also erwartetes Verhalten, kein Mangel.
 
 ## Wo Barrierefreiheit in der Doku auftaucht
 
