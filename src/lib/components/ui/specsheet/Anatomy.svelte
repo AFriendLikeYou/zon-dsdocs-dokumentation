@@ -79,41 +79,60 @@
       };
     })
   );
+
+  // Zwei Modi: „parts" = Bestandteile (Callouts + Legende, für Design/PM),
+  // „measure" = Measurements (Maßlinien + Innenabstände als Blueprint, für Devs).
+  // Der Umschalter erscheint nur, wenn BEIDE Sichten Inhalt haben — sonst zeigt
+  // die Ansicht graceful das, was vorhanden ist (Rückwärtskompatibilität).
+  let mode = $state<'parts' | 'measure'>('parts');
+  const hasParts = $derived(cs.length > 0);
+  const hasMeasure = $derived(!!masse || spacing.length > 0);
+  const showModeToggle = $derived(hasParts && hasMeasure);
+  const view = $derived(showModeToggle ? mode : hasParts ? 'parts' : 'measure');
 </script>
 
 <div class="art spec-canvas ds-stage" class:is-dark={isDark}>
-  <div class="grid" aria-hidden="true"></div>
+  {#if showModeToggle}
+    <div class="art-toolbar art-toolbar--left">
+      <div class="mode-toggle" role="group" aria-label="Ansicht">
+        <button type="button" class="mode-btn" aria-pressed={view === 'parts'} onclick={() => (mode = 'parts')}>Bestandteile</button>
+        <button type="button" class="mode-btn" aria-pressed={view === 'measure'} onclick={() => (mode = 'measure')}>Measurements</button>
+      </div>
+    </div>
+  {/if}
   <div class="art-toolbar">
     <StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
   </div>
   <div class="specimen" style="--zoom:{zoom}">
-    {#each cs as c, i}
-      <!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
-           Nutzer bekommen dieselbe Info über die Legende → role="presentation". -->
-      {#if c.anchor}
-        <span
-          role="presentation"
-          class="co co--anchored co--{c.anchor.side ?? 'top'}"
-          class:co--on={active === c.nr}
-          style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null ? `top:${c.anchor.y}%;` : ''}"
-          onmouseenter={() => (active = c.nr)}
-          onmouseleave={() => (active = null)}
-        >{c.nr}</span>
-      {:else}
-        <span
-          role="presentation"
-          class="co"
-          class:co--on={active === c.nr}
-          style="--i:{i}"
-          onmouseenter={() => (active = c.nr)}
-          onmouseleave={() => (active = null)}
-        >{c.nr}</span>
-      {/if}
-    {/each}
+    {#if view === 'parts'}
+      {#each cs as c, i}
+        <!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
+             Nutzer bekommen dieselbe Info über die Legende → role="presentation". -->
+        {#if c.anchor}
+          <span
+            role="presentation"
+            class="co co--anchored co--{c.anchor.side ?? 'top'}"
+            class:co--on={active === c.nr}
+            style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null ? `top:${c.anchor.y}%;` : ''}"
+            onmouseenter={() => (active = c.nr)}
+            onmouseleave={() => (active = null)}
+          >{c.nr}</span>
+        {:else}
+          <span
+            role="presentation"
+            class="co"
+            class:co--on={active === c.nr}
+            style="--i:{i}"
+            onmouseenter={() => (active = c.nr)}
+            onmouseleave={() => (active = null)}
+          >{c.nr}</span>
+        {/if}
+      {/each}
+    {/if}
 
     <div class="slot">{@render preview?.()}</div>
 
-    {#if masse}
+    {#if view === 'measure' && masse}
       {#if masse.hoehe}<div class="dim dim-h" aria-hidden="true"><span class="dl">{apx(masse.hoehe)}</span></div>{/if}
       {#if masse.breite}<div class="dim dim-w" aria-hidden="true"><span class="dl">{apx(masse.breite)}</span></div>{/if}
       {#if masse.padding}<div class="dim dim-pad" aria-hidden="true"><span class="dl">{apx(masse.padding)}</span></div>{/if}
@@ -126,7 +145,7 @@
   {/if}
 </div>
 
-{#if cs.length}
+{#if view === 'parts' && cs.length}
   <ol class="legend">
     {#each cs as c}
       <li
@@ -145,7 +164,7 @@
   </ol>
 {/if}
 
-{#if spacing.length}
+{#if view === 'measure' && spacing.length}
   <!-- Innenabstände (Spacing-Redlines): Gaps zwischen den Teilen, nicht nur Außenmaße. -->
   <div class="sp">
     <div class="sp-head">
@@ -172,16 +191,17 @@
 
 <style>
   .art {
-    /* Fläche = dieselbe Bühne wie der Playground (.ds-stage, Light/Dark umschaltbar).
-       Blueprint-Kanäle leiten sich aus den gepinnten Token ab und adaptieren so mit:
-       Maßlinien/Callouts = focus-100 (Blueprint-Blau, eigener Kanal, damit Maße nie
-       mit Komponentenfarben verwechselt werden), Raster = feiner text-100-Mix.
-       RAW-Token, damit alles mit den je Bühne gepinnten Werten flippt (ein
-       abgeleitetes --ds-*-Token wäre schon auf :root-Ebene aufgelöst). */
+    /* Fläche = dieselbe Bühne wie der Playground: background-10 + Punktraster über
+       border-70. Beide Token sind in .ds-stage.is-dark gepinnt → Fläche UND Punkte
+       flippen gemeinsam mit dem Light/Dark-Schalter (RAW-Token; ein --ds-*-Token
+       wäre schon auf :root aufgelöst). Maßlinien/Callouts nutzen einen eigenen
+       Kanal (--measure = focus-100 „Blueprint-Blau"), damit Maße nie mit
+       Komponentenfarben verwechselt werden. */
     --measure: var(--z-ds-color-focus-100);
-    --gl: color-mix(in srgb, var(--z-ds-color-text-100) 6%, transparent);
     position: relative;
-    background: var(--z-ds-color-background-10);
+    background-color: var(--z-ds-color-background-10);
+    background-image: radial-gradient(circle, var(--z-ds-color-border-70) 1px, transparent 1px);
+    background-size: 12px 12px;
     border: 1px solid var(--ds-border-soft);
     border-radius: var(--ds-radius);
     padding: 80px 64px 44px;
@@ -196,6 +216,47 @@
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+  .art-toolbar--left {
+    right: auto;
+    left: var(--z-ds-space-8);
+  }
+  /* Bestandteile ↔ Measurements — Segmented-Control im Stil des px↔Token-Umschalters. */
+  .mode-toggle {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+  }
+  .mode-btn {
+    border: none;
+    background: none;
+    border-radius: 999px;
+    padding: 3px 12px;
+    height: 26px;
+    font-size: var(--ds-text-xs);
+    font-weight: 500;
+    color: var(--z-ds-color-text-55);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      color var(--ds-dur) var(--ds-ease),
+      background-color var(--ds-dur) var(--ds-ease);
+  }
+  .mode-btn[aria-pressed='true'] {
+    background: var(--z-ds-color-background-0);
+    color: var(--z-ds-color-text-100);
+    box-shadow: var(--ds-shadow-sm);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mode-btn:hover {
+      color: var(--z-ds-color-text-100);
+    }
+  }
+  .mode-btn:focus-visible {
+    outline: 2px solid var(--ds-focus-ring);
+    outline-offset: 2px;
   }
   /* px ↔ Token — Segmented-Control, adaptiert (wie StageToggle) an das Bühnen-Theme. */
   .unit-toggle {
@@ -232,14 +293,6 @@
   .unit-btn:focus-visible {
     outline: 2px solid var(--ds-focus-ring);
     outline-offset: 2px;
-  }
-  .grid {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(var(--gl) 1px, transparent 1px),
-      linear-gradient(90deg, var(--gl) 1px, transparent 1px);
-    background-size: 22px 22px;
-    mask-image: radial-gradient(120% 100% at 50% 40%, #000 55%, transparent 100%);
   }
   .specimen {
     position: relative;
