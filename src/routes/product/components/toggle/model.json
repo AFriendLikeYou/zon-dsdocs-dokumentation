@@ -11,9 +11,18 @@
 		"input"
 	],
 	"masse": {
-		"hoehe": "16",
-		"breite": "26",
-		"radius": "999 (voll)"
+		"hoehe": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "26",
+			"herkunft": "abgeleitet"
+		},
+		"radius": {
+			"px": "999 (voll)",
+			"herkunft": "abgeleitet"
+		}
 	},
 	"spacing": [
 		{
@@ -62,6 +71,42 @@
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"off",
+			"on",
+			"focus"
+		],
+		"elemente": [
+			{
+				"teil": "Track · Hintergrund",
+				"tokensProZustand": {
+					"off": "--z-ds-color-background-20",
+					"on": "--z-ds-color-text-100",
+					"focus": "--z-ds-color-background-20"
+				},
+				"hinweis": "Track-Farbe signalisiert den Zustand; Focus zeigt zusätzlich einen 2px-Outline."
+			},
+			{
+				"teil": "Thumb",
+				"tokensProZustand": {
+					"off": "--z-ds-color-general-white-100",
+					"on": "--z-ds-color-general-white-100",
+					"focus": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Weißer Kreis; wandert im On-Zustand nach rechts (Farbe konstant)."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"off": "none",
+					"on": "none",
+					"focus": "--z-ds-color-focus-100"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Outline (kein Fill)."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Zustand",

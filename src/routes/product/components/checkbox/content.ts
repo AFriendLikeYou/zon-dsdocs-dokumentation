@@ -9,6 +9,8 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Auswahlkästchen für eine An/Aus-Entscheidung oder Mehrfachauswahl. Zwei Achsen: ausgewählt (checked) und Interaktionszustand (Default, Hover, Focus, Disabled).",
 	"status": "ready_for_dev",
@@ -96,4 +98,4 @@ export const content = {
 		"Focus": "Tastaturfokus — 2px-Rahmen in Focus-100.",
 		"Disabled": "Gesperrt — gedämpft."
 	}
-};
+} satisfies Partial<ComponentSpec>;

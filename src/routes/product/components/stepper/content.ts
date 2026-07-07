@@ -9,6 +9,8 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
 	"status": "ready_for_dev",
@@ -102,4 +104,4 @@ export const content = {
 		"Focus": "Tastaturfokus auf einem Button — 2px Focus-100.",
 		"Disabled": "Gesperrt — Wert und Icons in Text-40."
 	}
-};
+} satisfies Partial<ComponentSpec>;

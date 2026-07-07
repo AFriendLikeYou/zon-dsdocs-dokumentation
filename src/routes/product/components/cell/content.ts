@@ -9,6 +9,8 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
 	"status": "ready_for_dev",
@@ -99,7 +101,7 @@ export const content = {
 			"hinweis": "Die Byline nennt Autor:innen namentlich, wenn möglich."
 		}
 	],
-	"version": "Figma-Node 33137:39890",
+	"version": "Figma-Node 4388:32445",
 	"variantInfo": {
 		"Pinned": "In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt.",
 		"Article": "Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt.",
@@ -111,4 +113,4 @@ export const content = {
 		"Wide": "Standardbreite (343).",
 		"Small": "Kompakt — kleinerer Titel und kleinere Fläche."
 	}
-};
+} satisfies Partial<ComponentSpec>;

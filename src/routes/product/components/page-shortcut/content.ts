@@ -9,7 +9,9 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Umrandeter Shortcut zu einem Seitenziel — ein einzelner Stil mit Hover- und Focus-State, bewusst ohne Varianten.",
 	"status": "ready_for_dev"
-};
+} satisfies Partial<ComponentSpec>;

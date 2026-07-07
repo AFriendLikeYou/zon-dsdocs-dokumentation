@@ -5,17 +5,23 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Cell",
-	"status": "ready_for_dev",
 	"kategorie": "Inhalte",
-	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=33137-39890&m=dev",
-	"aktualisiertAm": "2026-07-03",
-	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=213-12&focus-id=4388-32445",
+	"aktualisiertAm": "2026-07-07",
 	"masse": {
-		"breite": "343 (Wide) · Cover 84 (Small 72)",
-		"padding": "Anzeige 16 · sonst 0",
+		"breite": {
+			"px": "343 (Wide) · Cover 84 (Small 72)",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "Anzeige 16 · sonst 0",
+			"token": "--z-ds-space-m",
+			"herkunft": "gemessen"
+		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
@@ -38,24 +44,6 @@ export const generated = {
 			"label": "Fläche ↔ Body",
 			"px": "16 px",
 			"token": "--z-ds-space-m"
-		}
-	],
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Fläche — Bild bzw. Podcast-Cover, 84×84 (Small 72), Radius 4; beim Author ein runder Avatar."
-		},
-		{
-			"nr": 2,
-			"text": "Spitzmarke (Kicker) — redaktionelle Kategorie in Akzentrot (#b91109), Tablet Gothic 14."
-		},
-		{
-			"nr": 3,
-			"text": "Titel — Tablet Gothic Bold 20/1.2 (Small 18; Pinned/Anzeige 16)."
-		},
-		{
-			"nr": 4,
-			"text": "Byline / Meta — Zeitstempel und Autor in Text-55 (#69696c), 14/1.5."
 		}
 	],
 	"tokens": [
@@ -159,6 +147,52 @@ export const generated = {
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche (Cell-Hintergrund)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0"
+				},
+				"hinweis": "Anzeige-Typ nutzt --z-ds-color-background-10 (getönt)."
+			},
+			{
+				"teil": "Media/Cover-Fläche",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-10"
+				},
+				"hinweis": "Podcast-Cover verwendet stattdessen eine feste Produktfarbe (#8e8cf7)."
+			},
+			{
+				"teil": "Spitzmarke (Kicker)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-accent-100"
+				},
+				"hinweis": "Anzeige-Typ: Kicker in --z-ds-color-text-55 statt Akzent."
+			},
+			{
+				"teil": "Titel",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100"
+				}
+			},
+			{
+				"teil": "Byline / Meta",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55"
+				}
+			},
+			{
+				"teil": "Trennlinie (Headline/Author)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-70"
+				}
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Typ",
@@ -221,75 +255,6 @@ export const generated = {
 		},
 		{
 			"label": "visited"
-		}
-	],
-	"a11y": [
-		{
-			"label": "Struktur",
-			"wert": "Pro Teaser ein <article>; die gesamte Zelle als ein Link (a) umsetzen, nicht mehrere.",
-			"status": "warn"
-		},
-		{
-			"label": "Überschrift",
-			"wert": "Titel je Kontext als <h2>/<h3> — nicht optisch fälschen.",
-			"status": "warn"
-		},
-		{
-			"label": "Spitzmarke",
-			"wert": "Kicker ist redaktionelle Kategorie, keine Überschrift — als <p>/<span> auszeichnen.",
-			"status": "pass"
-		},
-		{
-			"label": "Kontrast Titel",
-			"wert": "#252525 auf #ffffff ≈ 15:1 · AAA",
-			"status": "pass"
-		},
-		{
-			"label": "Kontrast Meta",
-			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
-			"status": "pass"
-		},
-		{
-			"label": "Fläche",
-			"wert": "Cover/Avatar brauchen alt-Text; rein dekorative Flächen aria-hidden.",
-			"status": "warn"
-		}
-	],
-	"doDont": {
-		"do": [
-			"Bei Pinned Spitzmarke und Headline kurz halten — der Platz ist begrenzt.",
-			"Bei Article möglichst einen Zeitstempel zeigen (Aktualität)."
-		],
-		"dont": [
-			"Nicht mehrere Links pro Zelle — die gesamte Zelle ist ein Ziel.",
-			"Spitzmarke nicht als Überschrift auszeichnen."
-		]
-	},
-	"verwendung": {
-		"nutzen": [
-			"In Navigations-Menüs für regelmäßig aktualisierte Inhalte (Pinned): Dashboards, Karten, empfohlene Center-Pages.",
-			"Für aktuelle Schlagzeilen, die gerade eintreffen (Article) — mit Zeitstempel."
-		],
-		"nichtNutzen": [
-			"Nicht für einzelne Aktionen — dafür Button / Text Button.",
-			"Pinned nicht mit langen Titeln überfrachten (begrenzter Platz)."
-		]
-	},
-	"wording": [
-		{
-			"schlecht": "Artikel",
-			"gut": "Streit ums Bürgergeld: Was die Reform wirklich ändert",
-			"hinweis": "Der Titel ist eine konkrete Schlagzeile, kein Platzhalter."
-		},
-		{
-			"schlecht": "NEWS",
-			"gut": "Wirtschaft",
-			"hinweis": "Die Spitzmarke ist die Ressort-/Kategorie — kurz, in normaler Schreibung, nicht in Versalien."
-		},
-		{
-			"schlecht": "Von der Redaktion",
-			"gut": "Von Anna Schmidt",
-			"hinweis": "Die Byline nennt Autor:innen namentlich, wenn möglich."
 		}
 	]
 } satisfies Partial<ComponentSpec>;

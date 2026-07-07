@@ -9,6 +9,8 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
 	"status": "ready_for_dev",
@@ -122,4 +124,4 @@ export const content = {
 		"Leading Icon": "Führendes Icon, z. B. Suche.",
 		"Dropdown": "Chevron als Auswahl-/Combobox-Trigger."
 	}
-};
+} satisfies Partial<ComponentSpec>;

@@ -11,12 +11,23 @@
 		"stepper"
 	],
 	"masse": {
-		"hoehe": "40",
-		"breite": "292",
-		"padding": "0 · 12 horizontal",
+		"hoehe": {
+			"px": "40",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "292",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "0 · 12 horizontal",
+			"token": "--z-ds-space-s",
+			"herkunft": "gemessen"
+		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
@@ -108,6 +119,49 @@
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"active",
+			"filled",
+			"error",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Container · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"active": "--z-ds-color-text-55",
+					"filled": "--z-ds-color-border-100",
+					"error": "--z-ds-color-error-70",
+					"disabled": "--z-ds-color-border-100"
+				},
+				"hinweis": "Active greift auch über :focus-within (Rahmen in Text-55)."
+			},
+			{
+				"teil": "Text (Eingabe)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"active": "--z-ds-color-text-100",
+					"filled": "--z-ds-color-text-100",
+					"error": "--z-ds-color-text-100",
+					"disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Platzhalter",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55",
+					"active": "--z-ds-color-text-55",
+					"filled": "--z-ds-color-text-100",
+					"error": "--z-ds-color-text-55",
+					"disabled": "--z-ds-color-text-40"
+				},
+				"hinweis": "Im Filled-Zustand rückt der Platzhalter-/Textwert auf Text-100."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Zustand",
@@ -407,6 +461,13 @@
 				"name": "state",
 				"typ": "\"default\" | \"active\" | \"filled\" | \"error\" | \"disabled\"",
 				"default": "\"default\"",
+				"erlaubteWerte": [
+					"default",
+					"active",
+					"filled",
+					"error",
+					"disabled"
+				],
 				"beschreibung": "Visueller Zustand (meist aus Fokus/Validierung abgeleitet)."
 			},
 			{

@@ -1,7 +1,8 @@
 ---
 title: "Button Group"
 status: ready_for_dev
-aktualisiert_am: 2026-07-02
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=904-800
+aktualisiert_am: 2026-07-07
 kategorie: Aktionen
 ---
 
@@ -9,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, RelatedComponents, CodeBlock } from '$components/ui/specsheet';
+	import { ComponentHero, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -73,7 +74,8 @@ button.buttongroup-button {
 
 <Tabs items={[
 		{ label: 'Design', component: designTab },
-		{ label: 'Develop', component: developTab }
+		{ label: 'Develop', component: developTab },
+		{ label: 'Specs', component: specsTab }
 ]} sticky />
 
 {#snippet designTab()}
@@ -89,6 +91,12 @@ button.buttongroup-button {
 
 	<h2>Code</h2>
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+{/snippet}
+
+{#snippet specsTab()}
+
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
 {/snippet}
 
 <style>

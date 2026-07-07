@@ -5,24 +5,27 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Stepper",
-	"status": "ready_for_dev",
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=4153-1351&m=dev",
 	"aktualisiertAm": "2026-07-03",
-	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
-	"verwandt": [
-		"input"
-	],
 	"masse": {
-		"hoehe": "38",
-		"breite": "112",
+		"hoehe": {
+			"px": "38",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "112",
+			"herkunft": "abgeleitet"
+		},
 		"padding": {
 			"px": "6",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"herkunft": "gemessen"
 		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
@@ -30,20 +33,6 @@ export const generated = {
 			"label": "Abstand −/Wert/+",
 			"px": "6 px",
 			"token": "--z-ds-space-xxs"
-		}
-	],
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Container — 112 breit, Rahmen 1px, Radius 4, Innenabstand 6."
-		},
-		{
-			"nr": 2,
-			"text": "Wert — Tablet Gothic Regular 14, zentriert; Text-40 im Disabled-Zustand."
-		},
-		{
-			"nr": 3,
-			"text": "Buttons − / + — Hover legt Background-10 an, Focus einen 2px-Fokus in Focus-100."
 		}
 	],
 	"tokens": [
@@ -100,6 +89,55 @@ export const generated = {
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Container · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"hover": "--z-ds-color-border-100",
+					"focus": "--z-ds-color-border-100",
+					"disabled": "--z-ds-color-border-100"
+				},
+				"hinweis": "Rahmenfarbe bleibt über die Zustände konstant."
+			},
+			{
+				"teil": "Wert & Icons",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-100",
+					"focus": "--z-ds-color-text-100",
+					"disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Button-Fläche (− / +)",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "--z-ds-color-background-10",
+					"focus": "none",
+					"disabled": "none"
+				},
+				"hinweis": "Transparent bis zum Hover; Hover legt Background-10 unter den Button."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Inset-Ring am fokussierten Button."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Zustand",
@@ -139,74 +177,6 @@ export const generated = {
 		{
 			"label": "disabled",
 			"vorhanden": true
-		}
-	],
-	"a11y": [
-		{
-			"label": "Buttons",
-			"wert": "− und + als echte <button> mit aria-label (Weniger/Mehr).",
-			"status": "warn"
-		},
-		{
-			"label": "Wert",
-			"wert": "Wert als Live-Region ausgeben (aria-live) oder role=spinbutton mit aria-valuenow.",
-			"status": "warn"
-		},
-		{
-			"label": "Tastatur",
-			"wert": "Buttons per Enter/Leertaste; optional Pfeiltasten hoch/runter.",
-			"status": "warn"
-		},
-		{
-			"label": "Fokus",
-			"wert": "Sichtbarer 2px-Fokus in Focus-100.",
-			"status": "pass"
-		},
-		{
-			"label": "Grenzen",
-			"wert": "Am Min/Max den jeweiligen Button deaktivieren (disabled).",
-			"status": "warn"
-		}
-	],
-	"tastatur": [
-		{
-			"taste": "Tab",
-			"aktion": "Wechselt den Fokus zwischen − und +."
-		},
-		{
-			"taste": "Enter / Leertaste",
-			"aktion": "Löst den fokussierten Button aus (erhöht bzw. verringert)."
-		},
-		{
-			"taste": "↑ / ↓",
-			"aktion": "Erhöht bzw. verringert den Wert (optional, bei role=spinbutton)."
-		}
-	],
-	"doDont": {
-		"do": [
-			"Für kleine, schrittweise Anpassungen (Menge, Anzahl).",
-			"Am Minimum/Maximum den passenden Button deaktivieren."
-		],
-		"dont": [
-			"Nicht für große Wertebereiche — dafür Eingabefeld oder Slider.",
-			"Direkte Eingabe nicht verhindern, wenn große Sprünge nötig sind."
-		]
-	},
-	"verwendung": {
-		"nutzen": [
-			"Mengen/Anzahl in kleinen Schritten ändern (Warenkorb, Portionen).",
-			"Werte mit klaren, kleinen Schrittweiten."
-		],
-		"nichtNutzen": [
-			"Große oder freie Zahlenbereiche — dafür ein Eingabefeld.",
-			"Kontinuierliche Bereiche — dafür ein Slider."
-		]
-	},
-	"wording": [
-		{
-			"schlecht": "+ / −",
-			"gut": "aria-label »Mehr« / »Weniger«",
-			"hinweis": "Die Icons brauchen für Screenreader ein sprechendes Label."
 		}
 	]
 } satisfies Partial<ComponentSpec>;

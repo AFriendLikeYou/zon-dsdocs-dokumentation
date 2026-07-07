@@ -1,8 +1,8 @@
 ---
 title: Button
 status: ready_for_dev
-figma: https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=4185-3778&m=dev
-aktualisiert_am: 2026-06-27
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=298-106
+aktualisiert_am: 2026-07-07
 kategorie: Aktionen
 ---
 
@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -21,16 +21,16 @@ kategorie: Aktionen
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
 	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
 	const playgroundTemplate = `<button type="submit" class="z-button{classes}"{attrs}>Click me</button>`;
-	const htmlCode = `<!-- Button-Styles global einbinden (z. B. button.css) -->
-<button class="sds-btn sds-btn--primary" type="button">Button</button>
-<button class="sds-btn sds-btn--neutral" type="button">Button</button>`;
+	const htmlCode = `<!-- Button-Styles global einbinden (button.css); echte --z-ds-Tokens. -->
+<button class="z-button z-button--primary" type="button">Button</button>
+<button class="z-button" type="button">Button</button>`;
 	const svelteCode = `<script>
-  // 'primary' | 'neutral' | 'subtle'
-  export let variant = 'primary';
+  // 'default' | 'primary' | 'zplus'
+  export let variant = 'default';
   export let label = 'Button';
 <\/script>
 
-<button class="sds-btn sds-btn--{variant}" type="button">{label}</button>`;
+<button class="z-button z-button--{variant}" type="button">{label}</button>`;
 	const repoCode = `<script>
   import { Button } from '$components/ui/button';
 <\/script>
@@ -42,37 +42,6 @@ kategorie: Aktionen
 
 <!-- Navigation: Link im Button-Look (Link-Button) -->
 <a class="app-button" href="/pfad">Weiter</a>`;
-	const cssCode = `.sds-btn{
-  --sds-color-background-brand-default:#2c2c2c;
-  --sds-color-background-brand-hover:#1e1e1e;
-  --sds-color-text-brand-on-brand:#f5f5f5;
-  --sds-color-background-neutral-tertiary:#e3e3e3;
-  --sds-color-background-neutral-tertiary-hover:#cdcdcd;
-  --sds-color-border-neutral-secondary:#767676;
-  --sds-color-text-default-default:#1e1e1e;
-  --sds-color-border-default-default:#d9d9d9;
-  --sds-color-background-disabled-default:#d9d9d9;
-  --sds-color-text-disabled-on-disabled:#b3b3b3;
-  --sds-size-space-300:12px; --sds-size-space-200:8px;
-  --sds-size-radius-200:8px; --sds-size-stroke-border:1px;
-  display:inline-flex; align-items:center; justify-content:center;
-  gap:var(--sds-size-space-200);
-  padding:var(--sds-size-space-300);
-  border-radius:var(--sds-size-radius-200);
-  border:var(--sds-size-stroke-border) solid transparent;
-  font:400 16px/1 'Inter',system-ui,sans-serif; cursor:pointer;
-}
-.sds-btn--small{ padding:var(--sds-size-space-200); }
-.sds-btn--primary{ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-text-brand-on-brand); }
-.sds-btn--primary:hover{ background:var(--sds-color-background-brand-hover); }
-.sds-btn--neutral{ background:var(--sds-color-background-neutral-tertiary); border-color:var(--sds-color-border-neutral-secondary); color:var(--sds-color-text-default-default); }
-.sds-btn--neutral:hover{ background:var(--sds-color-background-neutral-tertiary-hover); }
-.sds-btn--subtle{ background:transparent; border-color:transparent; color:var(--sds-color-text-default-default); }
-.sds-btn--subtle:hover{ border-color:var(--sds-color-border-default-default); }
-.sds-btn:disabled{ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-text-disabled-on-disabled); cursor:not-allowed; }
-.sds-btn--primary.sds-btn--hover{ background:var(--sds-color-background-brand-hover); }
-.sds-btn--neutral.sds-btn--hover{ background:var(--sds-color-background-neutral-tertiary-hover); }
-.sds-btn--subtle.sds-btn--hover{ border-color:var(--sds-color-border-default-default); }`;
 	const patternCssCode = `/* z-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert).
    Wird vom Exporter gegen die Vorschau-Flächen gescoped und im Develop-Tab
    verbatim gezeigt. Flache Regeln (v1-Scoping, keine At-Rules). */
@@ -126,7 +95,7 @@ kategorie: Aktionen
   opacity: 0.5;
 }
 `;
-	const propsData = [{"name":"variant","typ":"\"Primary\" | \"Neutral\" | \"Subtle\"","default":"\"Primary\"","beschreibung":"Visuelle Gewichtung der Aktion."},{"name":"size","typ":"\"Medium\" | \"Small\"","default":"\"Medium\"","beschreibung":"Steuert Padding und Touch-Fläche."},{"name":"state","typ":"\"Default\" | \"Hover\" | \"Disabled\"","default":"\"Default\"","beschreibung":"Interaktionszustand — im Code i. d. R. über CSS-Pseudoklassen bzw. das disabled-Attribut."},{"name":"label","typ":"string","default":"\"Button\"","beschreibung":"Sichtbarer Button-Text."},{"name":"hasIconStart","typ":"boolean","default":"false","beschreibung":"Zeigt ein führendes Icon (Slot iconStart)."},{"name":"hasIconEnd","typ":"boolean","default":"false","beschreibung":"Zeigt ein nachgestelltes Icon (Slot iconEnd)."}];
+	const propsData = [{"name":"variant","typ":"\"default\" | \"primary\" | \"zplus\"","default":"\"default\"","erlaubteWerte":["default","primary","zplus"],"beschreibung":"Visuelle Gewichtung der Aktion (Modifier z-button--primary / z-button--zplus)."},{"name":"fullwidth","typ":"boolean","default":"false","beschreibung":"Streckt den Button auf 100% Breite (z-button--fullwidth)."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Button (nativ; visuell via opacity 0.5)."},{"name":"label","typ":"string","default":"\"Button\"","beschreibung":"Sichtbarer Button-Text."}];
 </script>
 
 <svelte:head>
@@ -152,8 +121,8 @@ kategorie: Aktionen
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
-		{#snippet preview()}<button class="sds-btn sds-btn--primary" type="button">Button</button>{/snippet}
-		{#snippet variant()}<button class="sds-btn sds-btn--neutral" type="button">Button</button>{/snippet}
+		{#snippet preview()}<button class="z-button z-button--primary" type="button">Button</button>{/snippet}
+		{#snippet variant()}<button class="z-button" type="button">Button</button>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
@@ -162,15 +131,12 @@ kategorie: Aktionen
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
 	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
 	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Primary · Default</span><button class="sds-btn sds-btn--primary" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Primary · Hover</span><button class="sds-btn sds-btn--primary sds-btn--hover" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Primary · Disabled</span><button class="sds-btn sds-btn--primary" type="button" disabled>Button</button></div>
-		<div class="cell"><span class="cell-label">Neutral · Default</span><button class="sds-btn sds-btn--neutral" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Neutral · Hover</span><button class="sds-btn sds-btn--neutral sds-btn--hover" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Neutral · Disabled</span><button class="sds-btn sds-btn--neutral" type="button" disabled>Button</button></div>
-		<div class="cell"><span class="cell-label">Subtle · Default</span><button class="sds-btn sds-btn--subtle" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Subtle · Hover</span><button class="sds-btn sds-btn--subtle sds-btn--hover" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Subtle · Disabled</span><button class="sds-btn sds-btn--subtle" type="button" disabled>Button</button></div>
+		<div class="cell"><span class="cell-label">Default</span><button class="z-button" type="button">Button</button></div>
+		<div class="cell"><span class="cell-label">Default · Disabled</span><button class="z-button" type="button" disabled>Button</button></div>
+		<div class="cell"><span class="cell-label">Primary</span><button class="z-button z-button--primary" type="button">Button</button></div>
+		<div class="cell"><span class="cell-label">Primary · Disabled</span><button class="z-button z-button--primary" type="button" disabled>Button</button></div>
+		<div class="cell"><span class="cell-label">Z+</span><button class="z-button z-button--zplus" type="button">Button</button></div>
+		<div class="cell"><span class="cell-label">Z+ · Disabled</span><button class="z-button z-button--zplus" type="button" disabled>Button</button></div>
 	</VariantMatrix>
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
@@ -191,9 +157,8 @@ kategorie: Aktionen
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
-	<p>Die sds-btn-Doku oben ist die Figma-/Simple-Design-System-Referenz. Im Repo heißt die Komponente Button.svelte (Klasse .app-button) mit den Varianten default / transparent / outline auf --z-ds-Tokens. Für reine Navigation nutzt du einen Link im Button-Look (Link-Button) statt eines Buttons.</p>
+	<p>Originalgetreue ZDS-Referenz (Figma ❖ ZDS, node 298:106) als CSS-Klasse .z-button mit den Varianten default / primary / zplus und dem Layout-Modifier fullwidth auf echten --z-ds-Tokens. Im Repo als Button.svelte (Klasse .app-button) verfügbar. Für reine Navigation einen Link im Button-Look (Link-Button) statt eines Buttons nutzen.</p>
 	<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />
-	<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
 {/snippet}
 
@@ -208,43 +173,14 @@ kategorie: Aktionen
 	<h2>Maße</h2>
 	<MeasureTable masse={spec.masse} />
 
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
+
 	<h2>Tokens</h2>
 	<TokenTable tokens={spec.tokens} />
 {/snippet}
 
 <style>
-:global(.spec-canvas .sds-btn){
-  --sds-color-background-brand-default:#2c2c2c;
-  --sds-color-background-brand-hover:#1e1e1e;
-  --sds-color-text-brand-on-brand:#f5f5f5;
-  --sds-color-background-neutral-tertiary:#e3e3e3;
-  --sds-color-background-neutral-tertiary-hover:#cdcdcd;
-  --sds-color-border-neutral-secondary:#767676;
-  --sds-color-text-default-default:#1e1e1e;
-  --sds-color-border-default-default:#d9d9d9;
-  --sds-color-background-disabled-default:#d9d9d9;
-  --sds-color-text-disabled-on-disabled:#b3b3b3;
-  --sds-size-space-300:12px; --sds-size-space-200:8px;
-  --sds-size-radius-200:8px; --sds-size-stroke-border:1px;
-  display:inline-flex; align-items:center; justify-content:center;
-  gap:var(--sds-size-space-200);
-  padding:var(--sds-size-space-300);
-  border-radius:var(--sds-size-radius-200);
-  border:var(--sds-size-stroke-border) solid transparent;
-  font:400 16px/1 'Inter',system-ui,sans-serif; cursor:pointer;
-}
-:global(.spec-canvas .sds-btn--small){ padding:var(--sds-size-space-200); }
-:global(.spec-canvas .sds-btn--primary){ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-text-brand-on-brand); }
-:global(.spec-canvas .sds-btn--primary:hover){ background:var(--sds-color-background-brand-hover); }
-:global(.spec-canvas .sds-btn--neutral){ background:var(--sds-color-background-neutral-tertiary); border-color:var(--sds-color-border-neutral-secondary); color:var(--sds-color-text-default-default); }
-:global(.spec-canvas .sds-btn--neutral:hover){ background:var(--sds-color-background-neutral-tertiary-hover); }
-:global(.spec-canvas .sds-btn--subtle){ background:transparent; border-color:transparent; color:var(--sds-color-text-default-default); }
-:global(.spec-canvas .sds-btn--subtle:hover){ border-color:var(--sds-color-border-default-default); }
-:global(.spec-canvas .sds-btn:disabled){ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-text-disabled-on-disabled); cursor:not-allowed; }
-:global(.spec-canvas .sds-btn--primary.sds-btn--hover){ background:var(--sds-color-background-brand-hover); }
-:global(.spec-canvas .sds-btn--neutral.sds-btn--hover){ background:var(--sds-color-background-neutral-tertiary-hover); }
-:global(.spec-canvas .sds-btn--subtle.sds-btn--hover){ border-color:var(--sds-color-border-default-default); }
-
 :global(.spec-canvas .z-button),
 :global(.pg-preview .z-button) {
   background-color: var(--z-ds-color-background-10);

@@ -2,15 +2,23 @@
 	"name": "Cell",
 	"status": "ready_for_dev",
 	"kategorie": "Inhalte",
-	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=33137-39890&m=dev",
-	"aktualisiertAm": "2026-07-03",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=213-12&focus-id=4388-32445",
+	"aktualisiertAm": "2026-07-07",
 	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
 	"masse": {
-		"breite": "343 (Wide) · Cover 84 (Small 72)",
-		"padding": "Anzeige 16 · sonst 0",
+		"breite": {
+			"px": "343 (Wide) · Cover 84 (Small 72)",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "Anzeige 16 · sonst 0",
+			"token": "--z-ds-space-m",
+			"herkunft": "gemessen"
+		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
@@ -154,6 +162,52 @@
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche (Cell-Hintergrund)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0"
+				},
+				"hinweis": "Anzeige-Typ nutzt --z-ds-color-background-10 (getönt)."
+			},
+			{
+				"teil": "Media/Cover-Fläche",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-10"
+				},
+				"hinweis": "Podcast-Cover verwendet stattdessen eine feste Produktfarbe (#8e8cf7)."
+			},
+			{
+				"teil": "Spitzmarke (Kicker)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-accent-100"
+				},
+				"hinweis": "Anzeige-Typ: Kicker in --z-ds-color-text-55 statt Akzent."
+			},
+			{
+				"teil": "Titel",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100"
+				}
+			},
+			{
+				"teil": "Byline / Meta",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55"
+				}
+			},
+			{
+				"teil": "Trennlinie (Headline/Author)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-70"
+				}
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Typ",
@@ -461,8 +515,8 @@
 			"  </div>",
 			"</article>"
 		],
-		"repoNote": "Erst-Import aus Figma (❖ ZDS, node 33137:39890) — noch keine Repo-Komponente. Media/Avatar sind hier neutrale Platzhalter-Flächen; im Produkt Bild bzw. Podcast-Cover. Redaktionelle Texte (Beispiele, Byline) vor Freigabe prüfen.",
-		"version": "Figma-Node 33137:39890",
+		"repoNote": "Erst-Import aus Figma (❖ ZDS, node 4388:32445) — noch keine Repo-Komponente. Media/Avatar sind hier neutrale Platzhalter-Flächen; im Produkt Bild bzw. Podcast-Cover. Redaktionelle Texte (Beispiele, Byline) vor Freigabe prüfen.",
+		"version": "Figma-Node 4388:32445",
 		"variantInfo": {
 			"Pinned": "In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt.",
 			"Article": "Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt.",

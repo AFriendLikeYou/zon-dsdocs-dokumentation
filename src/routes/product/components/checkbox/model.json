@@ -11,21 +11,31 @@
 		"input"
 	],
 	"masse": {
-		"hoehe": "16",
-		"breite": "16",
+		"hoehe": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
 		"radius": {
 			"px": "2",
-			"token": "--z-ds-border-radius-2"
+			"token": "--z-ds-border-radius-2",
+			"herkunft": "gemessen"
 		}
 	},
 	"callouts": [
 		{
 			"nr": 1,
-			"text": "Box — 16×16, Radius 2; Rahmen bzw. Füllung signalisieren den Zustand."
+			"text": "Box — 16×16, Radius 2; Rahmen bzw. Füllung signalisieren den Zustand.",
+			"art": "container"
 		},
 		{
 			"nr": 2,
-			"text": "Haken — weiß, nur im checked-Zustand; Fokus als 2px-Rahmen in Focus-100."
+			"text": "Haken — weiß, nur im checked-Zustand; Fokus als 2px-Rahmen in Focus-100.",
+			"art": "structural",
+			"optionalDurch": "checked"
 		}
 	],
 	"tokens": [
@@ -84,6 +94,57 @@
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"checked",
+			"checked+hover",
+			"disabled",
+			"checked+disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Box · Hintergrund",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0",
+					"hover": "--z-ds-color-background-10",
+					"focus": "--z-ds-color-background-0",
+					"checked": "--z-ds-color-text-100",
+					"checked+hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-background-0",
+					"checked+disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Box · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"hover": "--z-ds-color-border-100",
+					"focus": "--z-ds-color-focus-100",
+					"checked": "--z-ds-color-text-100",
+					"checked+hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-border-70",
+					"checked+disabled": "--z-ds-color-text-40"
+				},
+				"hinweis": "Focus zeichnet einen 2px-Rahmen in Focus-100 (unchecked wie checked)."
+			},
+			{
+				"teil": "Haken",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus": "none",
+					"checked": "--z-ds-color-general-white-100",
+					"checked+hover": "--z-ds-color-general-white-100",
+					"disabled": "none",
+					"checked+disabled": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Nur im checked-Zustand sichtbar (weißes CSS-Häkchen)."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Auswahl",

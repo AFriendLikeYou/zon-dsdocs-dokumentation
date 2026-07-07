@@ -1,5 +1,5 @@
 /* z-cell — Teaser-Zelle (Cell), originalgetreu aus Figma ❖ ZDS portiert
-   (node 33137:39890). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+   (node 4388:32445). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
 
    Ein Markup, viele Typen: die gemeinsame Struktur (Media · Kicker · Titel ·
    Byline · Meta) wird pro Typ-Modifier ein-/ausgeblendet und umgelegt — so wie
@@ -26,7 +26,7 @@
   /* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
      Getönte Fläche + feiner Rahmen markieren den Bild-Slot; Farbe = z-ds-Token,
      adaptiert also mit dem Light/Dark-Schalter. */
-  background-color: var(--z-ds-color-background-20);
+  background-color: var(--z-ds-color-background-10);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 

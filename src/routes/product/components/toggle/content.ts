@@ -9,6 +9,8 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
 	"status": "ready_for_dev",
@@ -92,4 +94,4 @@ export const content = {
 		"Off": "Ausgeschaltet — Track in Background-20, Thumb links.",
 		"On": "Eingeschaltet — Track in Text-100, Thumb rechts."
 	}
-};
+} satisfies Partial<ComponentSpec>;

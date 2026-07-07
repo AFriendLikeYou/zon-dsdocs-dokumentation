@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -108,7 +108,7 @@ kategorie: Formulare
   color: var(--z-ds-color-text-40);
 }
 `;
-	const propsData = [{"name":"value","typ":"string","default":"\"\"","beschreibung":"Eingabewert."},{"name":"placeholder","typ":"string","default":"—","beschreibung":"Beispieltext im leeren Feld (kein Ersatz fürs Label)."},{"name":"state","typ":"\"default\" | \"active\" | \"filled\" | \"error\" | \"disabled\"","default":"\"default\"","beschreibung":"Visueller Zustand (meist aus Fokus/Validierung abgeleitet)."},{"name":"leadingIcon","typ":"boolean","default":"false","beschreibung":"Zeigt ein führendes Icon."},{"name":"dropdown","typ":"boolean","default":"false","beschreibung":"Zeigt den Dropdown-Chevron (Auswahl-Trigger)."},{"name":"clearable","typ":"boolean","default":"false","beschreibung":"Clear-Button bei gefülltem Feld."}];
+	const propsData = [{"name":"value","typ":"string","default":"\"\"","beschreibung":"Eingabewert."},{"name":"placeholder","typ":"string","default":"—","beschreibung":"Beispieltext im leeren Feld (kein Ersatz fürs Label)."},{"name":"state","typ":"\"default\" | \"active\" | \"filled\" | \"error\" | \"disabled\"","default":"\"default\"","erlaubteWerte":["default","active","filled","error","disabled"],"beschreibung":"Visueller Zustand (meist aus Fokus/Validierung abgeleitet)."},{"name":"leadingIcon","typ":"boolean","default":"false","beschreibung":"Zeigt ein führendes Icon."},{"name":"dropdown","typ":"boolean","default":"false","beschreibung":"Zeigt den Dropdown-Chevron (Auswahl-Trigger)."},{"name":"clearable","typ":"boolean","default":"false","beschreibung":"Clear-Button bei gefülltem Feld."}];
 </script>
 
 <svelte:head>
@@ -186,6 +186,9 @@ kategorie: Formulare
 {#snippet specsTab()}
 	<h2>Maße</h2>
 	<MeasureTable masse={spec.masse} />
+
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
 
 	<h2>Tokens</h2>
 	<TokenTable tokens={spec.tokens} />

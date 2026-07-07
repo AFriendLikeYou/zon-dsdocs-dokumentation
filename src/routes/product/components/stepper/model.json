@@ -10,15 +10,23 @@
 		"input"
 	],
 	"masse": {
-		"hoehe": "38",
-		"breite": "112",
+		"hoehe": {
+			"px": "38",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "112",
+			"herkunft": "abgeleitet"
+		},
 		"padding": {
 			"px": "6",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"herkunft": "gemessen"
 		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
@@ -96,6 +104,55 @@
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Container · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"hover": "--z-ds-color-border-100",
+					"focus": "--z-ds-color-border-100",
+					"disabled": "--z-ds-color-border-100"
+				},
+				"hinweis": "Rahmenfarbe bleibt über die Zustände konstant."
+			},
+			{
+				"teil": "Wert & Icons",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-100",
+					"focus": "--z-ds-color-text-100",
+					"disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Button-Fläche (− / +)",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "--z-ds-color-background-10",
+					"focus": "none",
+					"disabled": "none"
+				},
+				"hinweis": "Transparent bis zum Hover; Hover legt Background-10 unter den Button."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Inset-Ring am fokussierten Button."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Zustand",

@@ -1,8 +1,8 @@
 ---
 title: Cell
 status: ready_for_dev
-figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=33137-39890&m=dev
-aktualisiert_am: 2026-07-03
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=213-12&focus-id=4388-32445
+aktualisiert_am: 2026-07-07
 kategorie: Inhalte
 ---
 
@@ -10,7 +10,7 @@ kategorie: Inhalte
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -49,7 +49,7 @@ kategorie: Inhalte
   </div>
 </article>`;
 	const patternCssCode = `/* z-cell — Teaser-Zelle (Cell), originalgetreu aus Figma ❖ ZDS portiert
-   (node 33137:39890). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+   (node 4388:32445). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
 
    Ein Markup, viele Typen: die gemeinsame Struktur (Media · Kicker · Titel ·
    Byline · Meta) wird pro Typ-Modifier ein-/ausgeblendet und umgelegt — so wie
@@ -76,7 +76,7 @@ kategorie: Inhalte
   /* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
      Getönte Fläche + feiner Rahmen markieren den Bild-Slot; Farbe = z-ds-Token,
      adaptiert also mit dem Light/Dark-Schalter. */
-  background-color: var(--z-ds-color-background-20);
+  background-color: var(--z-ds-color-background-10);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 
@@ -358,6 +358,9 @@ kategorie: Inhalte
 	<h2>Maße</h2>
 	<MeasureTable masse={spec.masse} />
 
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
+
 	<h2>Tokens</h2>
 	<TokenTable tokens={spec.tokens} />
 {/snippet}
@@ -382,7 +385,7 @@ kategorie: Inhalte
   height: 84px;
   border-radius: var(--z-ds-border-radius-4);
   
-  background-color: var(--z-ds-color-background-20);
+  background-color: var(--z-ds-color-background-10);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 :global(.spec-canvas .z-cell--artikel .z-cell__media),

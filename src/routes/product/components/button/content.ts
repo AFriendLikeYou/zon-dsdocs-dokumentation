@@ -9,17 +9,19 @@
 //   callouts    – Anatomie-Beschriftungen ({ nr, text })
 //   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
 //   doDont      – { do: [...], dont: [...] }
+import type { ComponentSpec } from '$types/spec';
+
 export const content = {
 	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
 	"status": "ready_for_dev",
 	"callouts": [
 		{
 			"nr": 1,
-			"text": "Container — Auto-Layout, gap --sds-size-space-200 (8px), Inhalt zentriert"
+			"text": "Container — natives <button>, Innenabstand 10px vertikal / 16px horizontal, Text zentriert."
 		},
 		{
 			"nr": 2,
-			"text": "Label — Inter Regular 16, optionale Icon-Slots (Star/X) links und rechts"
+			"text": "Label — Tablet Gothic Bold 16, fett; optionale Icon-Slots links und rechts."
 		}
 	],
 	"a11y": [
@@ -95,4 +97,4 @@ export const content = {
 		"Medium": "Standardgröße, Padding 12px.",
 		"Small": "Kompakt für dichte Layouts, Padding 8px."
 	}
-};
+} satisfies Partial<ComponentSpec>;

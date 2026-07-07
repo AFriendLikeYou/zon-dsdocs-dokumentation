@@ -8,141 +8,112 @@
 		"text-button",
 		"button-group"
 	],
-	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=11-11508&m=dev",
-	"aktualisiertAm": "2026-06-28",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=3334-5440",
+	"aktualisiertAm": "2026-07-07",
 	"masse": {
-		"hoehe": "40",
-		"breite": "40",
-		"padding": "12",
-		"radius": "32"
+		"hoehe": {
+			"px": "40",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "40",
+			"herkunft": "abgeleitet"
+		},
+		"radius": {
+			"px": "4",
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
+		}
 	},
 	"callouts": [
 		{
 			"nr": 1,
-			"text": "Container — quadratisch, voll abgerundet (border-radius 32 = Kreis), Icon zentriert"
+			"text": "Container — quadratisch, Radius 4 (--z-ds-border-radius-4), Fläche --z-ds-color-background-10, Icon zentriert."
 		},
 		{
 			"nr": 2,
-			"text": "Icon — 20×20, zentriert; KEIN sichtbares Label → aria-label Pflicht"
+			"text": "Icon — 20×20, zentriert, --z-ds-color-text-100; KEIN sichtbares Label → aria-label Pflicht."
 		}
 	],
 	"tokens": [
 		{
-			"kategorie": "Farbe · Primary",
+			"kategorie": "Farbe",
 			"items": [
 				{
-					"name": "--sds-color-background-brand-default",
-					"wert": "#2c2c2c",
-					"swatch": "#2c2c2c"
+					"name": "--z-ds-color-background-10",
+					"wert": "#eeeeee · Fläche",
+					"swatch": "#eeeeee"
 				},
 				{
-					"name": "--sds-color-icon-brand-on-brand",
-					"wert": "#f5f5f5",
-					"swatch": "#f5f5f5"
+					"name": "--z-ds-color-text-100",
+					"wert": "#252525 · Icon (default)",
+					"swatch": "#252525"
 				},
 				{
-					"name": "--sds-color-background-brand-hover",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
+					"name": "--z-ds-color-text-70",
+					"wert": "#444444 · Icon (hover)",
+					"swatch": "#444444"
+				},
+				{
+					"name": "--z-ds-color-text-40",
+					"wert": "#999999 · Icon (disabled)",
+					"swatch": "#999999"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Neutral / Subtle",
+			"kategorie": "Radius",
 			"items": [
 				{
-					"name": "--sds-color-background-default-secondary",
-					"wert": "#f5f5f5",
-					"swatch": "#f5f5f5"
-				},
-				{
-					"name": "--sds-color-background-default-secondary-hover",
-					"wert": "#e6e6e6",
-					"swatch": "#e6e6e6"
-				},
-				{
-					"name": "--sds-color-border-default-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
-				},
-				{
-					"name": "--sds-color-icon-default-default",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
+					"name": "--z-ds-border-radius-4",
+					"wert": "4px"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Disabled",
+			"kategorie": "Farbe · Fokus",
 			"items": [
 				{
-					"name": "--sds-color-background-disabled-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
-				},
-				{
-					"name": "--sds-color-icon-disabled-on-disabled",
-					"wert": "#b3b3b3",
-					"swatch": "#b3b3b3"
-				}
-			]
-		},
-		{
-			"kategorie": "Größe & Form",
-			"items": [
-				{
-					"name": "--sds-typography-scale-07",
-					"wert": "40px · Box Medium"
-				},
-				{
-					"name": "--sds-typography-scale-06",
-					"wert": "32px · Radius (rund)"
-				},
-				{
-					"name": "--sds-size-space-300",
-					"wert": "12px · Padding Medium"
-				},
-				{
-					"name": "--sds-size-space-200",
-					"wert": "8px · Padding Small"
-				}
-			]
-		},
-		{
-			"kategorie": "Border",
-			"items": [
-				{
-					"name": "--sds-size-stroke-border",
-					"wert": "1px"
+					"name": "--z-ds-color-focus-100",
+					"wert": "#005fcc · :focus-visible-Outline (2px)",
+					"swatch": "#005fcc"
 				}
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche (Container)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-10",
+					"hover": "--z-ds-color-background-10",
+					"disabled": "--z-ds-color-background-10"
+				},
+				"hinweis": "Die Fläche bleibt in allen Zuständen --z-ds-color-background-10; die Rückmeldung erfolgt über die Icon-Farbe."
+			},
+			{
+				"teil": "Icon",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-text-40"
+				}
+			}
+		]
+	},
 	"varianten": [
 		{
-			"prop": "Variant",
+			"prop": "Variante",
 			"werte": [
 				{
-					"label": "Primary",
+					"label": "Default",
 					"default": true
-				},
-				{
-					"label": "Neutral"
-				},
-				{
-					"label": "Subtle"
-				}
-			]
-		},
-		{
-			"prop": "Größe",
-			"werte": [
-				{
-					"label": "Medium",
-					"default": true
-				},
-				{
-					"label": "Small"
 				}
 			]
 		}
@@ -193,12 +164,12 @@
 		},
 		{
 			"label": "Kontrast",
-			"wert": "Icon #f5f5f5 auf #2c2c2c ≈ 13:1 · AAA",
+			"wert": "Icon #252525 auf Fläche #eeeeee ≈ 11.7:1 · AAA",
 			"status": "pass"
 		},
 		{
 			"label": "Touch-Target",
-			"wert": "Medium 40px · Small 36px < 44px",
+			"wert": "40px < 44px empfohlene Mindestgröße",
 			"status": "warn"
 		}
 	],
@@ -213,39 +184,16 @@
 		]
 	},
 	"render": {
-		"css": [
-			":global(.spec-canvas .sds-iconbtn){",
-			"  --sds-color-background-brand-default:#2c2c2c;",
-			"  --sds-color-background-brand-hover:#1e1e1e;",
-			"  --sds-color-icon-brand-on-brand:#f5f5f5;",
-			"  --sds-color-background-default-secondary:#f5f5f5;",
-			"  --sds-color-background-default-secondary-hover:#e6e6e6;",
-			"  --sds-color-background-default-default-hover:#f5f5f5;",
-			"  --sds-color-border-default-default:#d9d9d9;",
-			"  --sds-color-icon-default-default:#1e1e1e;",
-			"  --sds-color-background-disabled-default:#d9d9d9;",
-			"  --sds-color-icon-disabled-on-disabled:#b3b3b3;",
-			"  --sds-color-border-disabled-default:#b3b3b3;",
-			"  --sds-size-stroke-border:1px;",
-			"  display:inline-flex; align-items:center; justify-content:center;",
-			"  width:40px; height:40px; padding:0;",
-			"  border-radius:999px;",
-			"  border:var(--sds-size-stroke-border) solid transparent;",
-			"  background:transparent; cursor:pointer;",
-			"}",
-			":global(.spec-canvas .sds-iconbtn svg){ width:20px; height:20px; }",
-			":global(.spec-canvas .sds-iconbtn--small){ width:36px; height:36px; }",
-			":global(.spec-canvas .sds-iconbtn--primary){ background:var(--sds-color-background-brand-default); border-color:var(--sds-color-background-brand-default); color:var(--sds-color-icon-brand-on-brand); }",
-			":global(.spec-canvas .sds-iconbtn--primary:hover){ background:var(--sds-color-background-brand-hover); }",
-			":global(.spec-canvas .sds-iconbtn--neutral){ background:var(--sds-color-background-default-secondary); border-color:var(--sds-color-border-default-default); color:var(--sds-color-icon-default-default); }",
-			":global(.spec-canvas .sds-iconbtn--neutral:hover){ background:var(--sds-color-background-default-secondary-hover); }",
-			":global(.spec-canvas .sds-iconbtn--subtle){ background:transparent; border-color:transparent; color:var(--sds-color-icon-default-default); }",
-			":global(.spec-canvas .sds-iconbtn--subtle:hover){ background:var(--sds-color-background-default-default-hover); }",
-			":global(.spec-canvas .sds-iconbtn:disabled){ background:var(--sds-color-background-disabled-default); border-color:var(--sds-color-border-disabled-default); color:var(--sds-color-icon-disabled-on-disabled); cursor:not-allowed; }",
-			":global(.spec-canvas .sds-iconbtn--primary.sds-iconbtn--hover){ background:var(--sds-color-background-brand-hover); }",
-			":global(.spec-canvas .sds-iconbtn--neutral.sds-iconbtn--hover){ background:var(--sds-color-background-default-secondary-hover); }",
-			":global(.spec-canvas .sds-iconbtn--subtle.sds-iconbtn--hover){ background:var(--sds-color-background-default-default-hover); }"
+		"controls": [
+			{
+				"key": "disabled",
+				"label": "Disabled",
+				"type": "attr",
+				"attr": "disabled"
+			}
 		],
+		"template": "<button class=\"z-icon-button{classes}\" type=\"button\" aria-label=\"Favorit\"{attrs}><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>",
+		"cssFile": "./pattern.css",
 		"calloutAnchors": [
 			{
 				"nr": 1,
@@ -260,60 +208,20 @@
 		],
 		"matrix": [
 			{
-				"label": "Primary · Default",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+				"label": "Default",
+				"html": "<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
 			},
 			{
-				"label": "Primary · Hover",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Primary · Disabled",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Neutral · Default",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Neutral · Hover",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Neutral · Disabled",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Subtle · Default",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Subtle · Hover",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle sds-iconbtn--hover\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
-			},
-			{
-				"label": "Subtle · Disabled",
-				"html": "<button class=\"sds-iconbtn sds-iconbtn--subtle\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+				"label": "Disabled",
+				"html": "<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
 			}
 		],
 		"props": [
 			{
-				"name": "variant",
-				"typ": "\"Primary\" | \"Neutral\" | \"Subtle\"",
-				"default": "\"Primary\"",
-				"beschreibung": "Visuelle Gewichtung der Aktion."
-			},
-			{
-				"name": "size",
-				"typ": "\"Medium\" | \"Small\"",
-				"default": "\"Medium\"",
-				"beschreibung": "Box-Größe (40 bzw. 36 px)."
-			},
-			{
-				"name": "state",
-				"typ": "\"Default\" | \"Hover\" | \"Disabled\"",
-				"default": "\"Default\"",
-				"beschreibung": "Interaktionszustand."
+				"name": "disabled",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Sperrt den Button (nativ; Icon in --z-ds-color-text-40)."
 			},
 			{
 				"name": "icon",
@@ -328,27 +236,22 @@
 				"beschreibung": "Beschreibt die Aktion — Pflicht, da kein sichtbares Label."
 			}
 		],
-		"version": "Figma-Node 11:11508",
+		"version": "Figma-Node 3334:5440",
 		"variantInfo": {
-			"Primary": "Wichtigste ikonografische Aktion — gefüllt, hoher Kontrast.",
-			"Neutral": "Sekundäre Aktion auf heller Fläche mit Rahmen.",
-			"Subtle": "Geringe Betonung — transparent bis zum Hover.",
-			"Medium": "Standardgröße, 40px Box.",
-			"Small": "Kompakt, 36px Box."
+			"Default": "Neutrale ikonografische Aktion — helle Fläche (--z-ds-color-background-10), dunkles Icon (--z-ds-color-text-100)."
 		},
-		"codeNote": "Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label)",
+		"codeNote": "Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label).",
 		"codeSvelte": [
 			"<script>",
-			"  // 'primary' | 'neutral' | 'subtle'",
-			"  export let variant = 'primary';",
 			"  export let label; // aria-label — Pflicht",
 			"</script>",
 			"",
-			"<button class=\"sds-iconbtn sds-iconbtn--{variant}\" type=\"button\" aria-label={label}>",
+			"<button class=\"z-icon-button\" type=\"button\" aria-label={label}>",
 			"  <!-- Icon 20×20, z. B. <Star /> -->",
 			"</button>"
 		],
-		"preview": "<button class=\"sds-iconbtn sds-iconbtn--primary\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>",
-		"variant": "<button class=\"sds-iconbtn sds-iconbtn--neutral\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
+		"repoNote": "Portiert aus dem echten ZDS-Figma-Node (❖ ZDS, node 3334:5440) — neutraler Icon-Button, kein Akzent. Fläche und Radius sind gemessen (--z-ds-color-background-10, --z-ds-border-radius-4); Box-Maße (40×40, Icon 20×20) sind abgeleitet.",
+		"preview": "<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>",
+		"variant": "<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"
 	}
 }
