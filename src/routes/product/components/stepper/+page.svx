@@ -141,7 +141,6 @@ kategorie: Formulare
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div>{/snippet}
-		{#snippet variant()}<div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>

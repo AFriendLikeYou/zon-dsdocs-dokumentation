@@ -105,7 +105,6 @@ kategorie: Formulare
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>{/snippet}
-		{#snippet variant()}<span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>

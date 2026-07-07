@@ -13,19 +13,13 @@
     spacing = [],
     callouts = [],
     calloutAnchors = [],
-    /** Vergrößerung des Specimens. 1.3 passt für kleine Bausteine (Button);
-        große Patterns (Teaser, Pager) setzen 1 — sonst laufen sie aus dem Artboard. */
-    zoom = 1.3,
-    preview,
-    variant
+    preview
   }: {
     masse?: Masse | null;
     spacing?: SpacingSpec[];
     callouts?: Callout[];
     calloutAnchors?: CalloutAnchor[];
-    zoom?: number;
     preview?: Snippet;
-    variant?: Snippet;
   } = $props();
 
   let active = $state<number | null>(null);
@@ -41,12 +35,6 @@
 
   // Artboard-Maße zeigen IMMER px (Blueprint-Konvention + wenig Platz in den Ecken).
   const apx = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
-
-  // px ↔ Token nur für die Innenabstände-Liste (Best Practice: Token-Namen bauen die
-  // Brücke Design↔Eng; dort ist Platz). Der Specs-Tab zeigt zusätzlich beide.
-  let tokenMode = $state(false);
-  const sval = (s: SpacingSpec) => (tokenMode && s.token ? s.token : s.px);
-  const spacingHasTokens = $derived(spacing.some((s) => s.token));
 
   // Deutsches Label je Callout-Rolle (dezentes Typ-Badge in der Legende).
   const ART_LABEL: Record<string, string> = {
@@ -103,7 +91,7 @@
   <div class="art-toolbar">
     <StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
   </div>
-  <div class="specimen" style="--zoom:{zoom}">
+  <div class="specimen">
     {#if view === 'parts'}
       {#each cs as c, i}
         <!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
@@ -139,10 +127,6 @@
       {#if masse.radius}<div class="rad" aria-hidden="true"><span>r {apx(masse.radius)}</span></div>{/if}
     {/if}
   </div>
-
-  {#if variant}
-    <div class="strip">{@render variant()}</div>
-  {/if}
 </div>
 
 {#if view === 'parts' && cs.length}
@@ -165,27 +149,24 @@
 {/if}
 
 {#if view === 'measure' && spacing.length}
-  <!-- Innenabstände (Spacing-Redlines): Gaps zwischen den Teilen, nicht nur Außenmaße. -->
+  <!-- Innenabstände als Spec-Tabelle: px UND Token zusammen (Dev-Mode-Muster,
+       kein Umschalter). Gaps zwischen den Teilen, nicht nur Außenmaße. -->
   <div class="sp">
-    <div class="sp-head">
-      <span class="sp-cap">Innenabstände</span>
-      {#if spacingHasTokens}
-        <div class="unit-toggle" role="group" aria-label="Maßeinheit">
-          <button type="button" class="unit-btn" aria-pressed={!tokenMode} onclick={() => (tokenMode = false)}>px</button>
-          <button type="button" class="unit-btn" aria-pressed={tokenMode} onclick={() => (tokenMode = true)}>Token</button>
-        </div>
-      {/if}
-    </div>
-    <ul class="sp-list">
+    <div class="sp-head"><span class="sp-cap">Abstände</span></div>
+    <dl class="sp-grid">
       {#each spacing as s}
-        <li class="sp-row">
-          <span class="sp-bar" aria-hidden="true"></span>
-          <span class="sp-name">{s.label}</span>
-          {#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft">{HERKUNFT_LABEL[s.herkunft]}</span>{/if}
-          <span class="sp-val">{sval(s)}</span>
-        </li>
+        <div class="sp-item">
+          <dt class="sp-name">
+            {s.label}
+            {#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft">{HERKUNFT_LABEL[s.herkunft]}</span>{/if}
+          </dt>
+          <dd class="sp-val">
+            <span class="sp-px">{s.px}</span>
+            {#if s.token}<code class="sp-token">{s.token}</code>{/if}
+          </dd>
+        </div>
       {/each}
-    </ul>
+    </dl>
   </div>
 {/if}
 
@@ -258,49 +239,12 @@
     outline: 2px solid var(--ds-focus-ring);
     outline-offset: 2px;
   }
-  /* px ↔ Token — Segmented-Control, adaptiert (wie StageToggle) an das Bühnen-Theme. */
-  .unit-toggle {
-    display: inline-flex;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
-  }
-  .unit-btn {
-    border: none;
-    background: none;
-    border-radius: 999px;
-    padding: 3px 10px;
-    height: 26px;
-    font-family: var(--ds-font-mono);
-    font-size: 11px;
-    color: var(--z-ds-color-text-55);
-    cursor: pointer;
-    transition:
-      color var(--ds-dur) var(--ds-ease),
-      background-color var(--ds-dur) var(--ds-ease);
-  }
-  .unit-btn[aria-pressed='true'] {
-    background: var(--z-ds-color-background-0);
-    color: var(--z-ds-color-text-100);
-    box-shadow: var(--ds-shadow-sm);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .unit-btn:hover {
-      color: var(--z-ds-color-text-100);
-    }
-  }
-  .unit-btn:focus-visible {
-    outline: 2px solid var(--ds-focus-ring);
-    outline-offset: 2px;
-  }
   .specimen {
+    /* Immer Originalgröße (1:1) — kein Zoom, damit Maße/Proportionen stimmen. */
     position: relative;
     width: max-content;
     max-width: 100%; /* große Patterns (Teaser, Pager) laufen nicht aus dem Artboard */
     margin: 6px auto 0;
-    transform: scale(var(--zoom, 1.3));
-    transform-origin: center top;
   }
   .slot {
     position: relative;
@@ -363,18 +307,6 @@
   .dim-pad .dl { position: static; border: 1px dashed color-mix(in srgb, var(--measure) 55%, transparent); }
   .rad { position: absolute; top: -6px; right: -44px; font-family: var(--ds-font-mono); font-size: 11px; color: var(--measure); }
   .rad::before { content: ''; position: absolute; left: -12px; top: 9px; width: 12px; height: 1px; background: var(--measure); }
-
-  .strip {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 44px;
-    padding-top: 18px;
-    border-top: 1px dashed var(--ds-border-strong);
-  }
 
   .legend {
     list-style: none;
@@ -444,16 +376,13 @@
     font-family: var(--ds-font-mono);
   }
 
-  /* Innenabstände — Redline-Spec: kleine Maßbalken (Blueprint-Blau) + Label + Wert. */
+  /* Abstände — aufgeräumte Spec-Tabelle: Label links, px + Token rechts (beide
+     zusammen, kein Umschalter). Dünne Trennlinien statt dekorativer Balken. */
   .sp {
     margin: 18px 2px 0;
   }
   .sp-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .sp-cap {
     font-size: var(--ds-label-size);
@@ -462,58 +391,50 @@
     font-weight: 600;
     color: var(--ds-text-muted);
   }
-  .sp-list {
-    list-style: none;
+  .sp-grid {
     margin: 0;
-    padding: 0;
     display: grid;
-    gap: 6px;
   }
-  .sp-row {
+  .sp-item {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-top: 1px solid var(--ds-border-soft);
     font-size: var(--ds-text-sm);
   }
-  .sp-bar {
-    position: relative;
-    flex: none;
-    width: 40px;
-    height: 1px;
-    background: var(--ds-accent);
-  }
-  .sp-bar::before,
-  .sp-bar::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    width: 1px;
-    height: 7px;
-    background: var(--ds-accent);
-  }
-  .sp-bar::before {
-    left: 0;
-  }
-  .sp-bar::after {
-    right: 0;
+  .sp-item:last-child {
+    border-bottom: 1px solid var(--ds-border-soft);
   }
   .sp-name {
-    flex: 1 1 auto;
     color: var(--ds-text-body);
   }
   /* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
   .herkunft {
-    flex: none;
+    margin-left: 8px;
     font-family: var(--ds-font-mono);
     font-size: var(--ds-text-xs);
     color: var(--ds-text-faint);
     white-space: nowrap;
   }
   .sp-val {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .sp-px {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-sm);
+    font-weight: 600;
+    color: var(--ds-text);
+  }
+  .sp-token {
     font-family: var(--ds-font-mono);
     font-size: var(--ds-text-xs);
     color: var(--ds-accent);
-    white-space: nowrap;
   }
 
   @media (max-width: 560px) {

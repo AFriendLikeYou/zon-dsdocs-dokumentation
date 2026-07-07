@@ -89,7 +89,6 @@ kategorie: Formulare
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>{/snippet}
-		{#snippet variant()}<button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>

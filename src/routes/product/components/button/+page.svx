@@ -122,7 +122,6 @@ kategorie: Aktionen
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="z-button z-button--primary" type="button">Button</button>{/snippet}
-		{#snippet variant()}<button class="z-button" type="button">Button</button>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>

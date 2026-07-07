@@ -135,7 +135,6 @@ kategorie: Formulare
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>{/snippet}
-		{#snippet variant()}<div class="z-input z-input--error"><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>

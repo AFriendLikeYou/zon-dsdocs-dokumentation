@@ -221,7 +221,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	const render = model.render ?? {};
 	const S = 'spec'; // lokale, zusammengeführte Konstante (generated + content)
 	const previewSlot = render.preview ? `\t\t${asSnippet(render.preview, 'preview')}\n` : '';
-	const variantSlot = render.variant ? `\t\t${asSnippet(render.variant, 'variant')}\n` : '';
+	// render.variant wird bewusst NICHT mehr in die Anatomie emittiert — die Anatomie
+	// zeigt nur die Default-Version in Originalgröße; Varianten leben in der Varianten-Sektion.
 
 	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
 	// label = Text (HTML-escapen), html = bewusstes Markup (nur </script>/</style>-Schutz).
@@ -405,7 +406,6 @@ function renderPage(model, { patternCss = null } = {}) {
 			`\n\t<h2 id="${SECTION_IDS.Anatomie}" class="section-anchor">Anatomie</h2>\n` +
 			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
 			previewSlot +
-			variantSlot +
 			`\t</Anatomy>\n`;
 	}
 	if (hasUsage) {
