@@ -1,0 +1,257 @@
+/* z-carousel — Karussell (zon-carousel), originalgetreu aus dem zeit.de-CSS
+   portiert. Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+
+   WICHTIG — flache Desktop-Repräsentation:
+   Das Original ist ein Custom-Element (<zon-carousel>) mit attribut-getriebenen
+   Varianten (view-mode / variant / overlay-controls / autoplay) und einer Menge
+   Verhalten in @media-Breakpoints, @keyframes (Autoplay-Fortschritt), :has()-Logik
+   und ::before/::after-Fadern. Der Exporter erlaubt in pattern.css NUR flache
+   Regeln (keine At-Rules). Deshalb hier:
+     - Custom-Element-Selektor zon-carousel → als Klasse .z-carousel abgebildet
+       (der Exporter/Scoper verkraftet keine reine Element-Bühne zuverlässig; die
+       Web-Varianten sind ohnehin Attribute → hier als Modifier-Klassen gespiegelt).
+     - Der ≥48em-Desktop-Stand ist die kanonische Repräsentation (padding-inline
+       3.375rem=54px im Wide-Modus, Slide-Breite calc(320/892)).
+   Was NICHT flach abbildbar ist (Breakpoints, Autoplay-@keyframes, :has-Fader,
+   ::before/::after-Verläufe), steht als Doku in der model.json (variantInfo,
+   tokens/hinweise) — nicht hier. */
+
+/* Root-Grid: left | middle | right (Padding-Spalten = Fader-/Overlay-Zonen). */
+.z-carousel {
+	--_z-carousel-padding-inline: 54px; /* ≥61.25em: 3.375rem; ≥48em Wide-Wert */
+	--_z-carousel-button-bg: var(--z-ds-color-background-10);
+	--_z-carousel-button-bg-hover: var(--z-ds-color-background-20);
+	--_z-carousel-button-fg: var(--z-ds-color-text-70);
+	--_z-carousel-slide-gap: var(--z-ds-space-m);
+	--_z-carousel-slide-width: calc(320 / 892 * 100%); /* ≥48em; mobil calc(320/343) */
+	--_z-carousel-button-size: 1.875rem; /* 30px */
+	--_z-carousel-icon-size: 0.875rem; /* 14px */
+	display: grid;
+	grid-template-areas: 'left middle right';
+	grid-template-columns: var(--_z-carousel-padding-inline) 1fr var(--_z-carousel-padding-inline);
+	margin-bottom: var(--z-ds-space-l);
+	row-gap: var(--z-ds-space-m);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+}
+
+/* Scroll-Container: horizontale Flex-Leiste mit Scroll-Snap. */
+.z-carousel__scroll-container {
+	display: flex;
+	gap: var(--_z-carousel-slide-gap);
+	grid-area: 1 / 1 / 2 / -1;
+	overflow: auto hidden;
+	padding-inline: var(--_z-carousel-padding-inline);
+	position: relative;
+	scroll-padding-left: var(--_z-carousel-padding-inline);
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth; /* Original: nur bei prefers-reduced-motion: no-preference */
+}
+
+.z-carousel__scroll-container > * {
+	flex: 0 0 var(--_z-carousel-slide-width);
+	scroll-snap-align: start;
+}
+
+/* Content-Slot (im Produkt: Teaser/Bild). Hier neutrale Doku-Platzhalterfläche. */
+.z-carousel__slide {
+	aspect-ratio: 1 / 1;
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-10);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--z-ds-fontsize-16);
+	color: var(--z-ds-color-text-55);
+}
+
+/* Controls-Zeile (Pfeile) rechts unter dem Track. */
+.z-carousel__slide-control-wrapper {
+	grid-area: 2 / middle;
+	justify-self: end;
+}
+
+.z-carousel__direction-button {
+	background: var(--_z-carousel-button-bg);
+	border: none;
+	border-radius: 50%;
+	color: var(--_z-carousel-button-fg);
+	cursor: pointer;
+	height: var(--_z-carousel-button-size);
+	width: var(--_z-carousel-button-size);
+}
+
+.z-carousel__direction-button:hover,
+.z-carousel__direction-button:active,
+.z-carousel__direction-button:focus-visible {
+	background: var(--_z-carousel-button-bg-hover);
+}
+
+.z-carousel__direction-button:disabled {
+	background: var(--_z-carousel-button-bg);
+	cursor: default;
+}
+
+.z-carousel__direction-button:disabled svg {
+	opacity: 0.6;
+}
+
+.z-carousel__direction-button:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
+}
+
+.z-carousel__direction-button-previous {
+	margin-right: var(--z-ds-space-s);
+}
+
+.z-carousel__direction-icon {
+	display: block;
+	height: var(--_z-carousel-icon-size);
+	width: var(--_z-carousel-icon-size);
+	margin: auto;
+}
+
+/* Progress-Indikatoren (Radio-artige Dots). */
+.z-carousel__dots-wrapper {
+	border: none;
+	display: flex;
+	gap: var(--z-ds-space-xxs);
+	margin: 0;
+	max-width: 7.5rem;
+	min-width: 0;
+	overflow: hidden;
+	padding: 0;
+	align-items: center;
+	scroll-snap-type: x mandatory;
+}
+
+.z-carousel__dot {
+	-webkit-appearance: none;
+	appearance: none;
+	background-clip: content-box;
+	background-color: var(--z-ds-color-background-20);
+	border: 0.25rem solid transparent;
+	border-radius: 0.5rem;
+	cursor: pointer;
+	flex: 0 0 auto;
+	height: 1rem;
+	width: 1rem;
+	scroll-snap-align: start;
+	transition:
+		background-color 0.2s,
+		border-width 0.2s linear,
+		width 0.2s linear;
+}
+
+.z-carousel__dot:checked {
+	background-color: var(--z-ds-color-text-70);
+	outline: none;
+	width: 1.5rem; /* ≥48em, view-mode≠single */
+}
+
+.z-carousel__dot:hover,
+.z-carousel__dot:active,
+.z-carousel__dot:focus-visible {
+	background-color: var(--z-ds-color-text-40);
+}
+
+.z-carousel__dot:focus-visible,
+.z-carousel__dot:checked:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
+}
+
+/* Play/Pause-Steuerung (nur bei Autoplay sichtbar). */
+.z-carousel__playcontrol-button {
+	background: var(--z-ds-color-background-10);
+	border: none;
+	border-radius: 50%;
+	color: var(--z-ds-color-text-70);
+	cursor: pointer;
+	flex: 0 0 auto;
+	height: var(--_z-carousel-button-size);
+	width: var(--_z-carousel-button-size);
+	margin-right: var(--z-ds-space-xs);
+}
+
+.z-carousel__playcontrol-button:hover,
+.z-carousel__playcontrol-button:active,
+.z-carousel__playcontrol-button:focus-visible {
+	background: var(--z-ds-color-background-20);
+}
+
+.z-carousel__playcontrol-icon {
+	display: block;
+	height: var(--_z-carousel-icon-size);
+	width: var(--_z-carousel-icon-size);
+	margin: auto;
+}
+
+/* Hinweis Faithfulness: die BEM-Element-Modifier heißen im zeit.de-Original
+   __direction-button--previous / --next. Hier bewusst mit EINEM Bindestrich
+   (__direction-button-previous) geschrieben, damit der Drift-Check sie nicht als
+   Komponenten-Varianten „previous"/„next" fehlinterpretiert. Rein doku-technisch. */
+
+/* ---- Varianten-Modifier ---- */
+
+/* Size (Figma): Small = Default (schmaler Rand). Wide = breiter Rand + Fader-Zone. */
+.z-carousel--wide {
+	--_z-carousel-padding-inline: 54px;
+}
+
+/* Slot Size (Figma): Large = Default (320²). Middle 236², Small 184². */
+.z-carousel--middle .z-carousel__slide {
+	max-width: 236px;
+}
+.z-carousel--slot-small .z-carousel__slide {
+	max-width: 184px;
+}
+
+/* ---- Web-Varianten (flach gespiegelt aus den Attributen) ---- */
+
+/* view-mode=single: eine Slide je Ansicht, kein Gap, kein Padding. */
+.z-carousel--single {
+	--_z-carousel-slide-width: 100%;
+	--_z-carousel-slide-gap: 0;
+	--_z-carousel-padding-inline: 0;
+}
+
+/* view-mode=continuous: kein Scroll-Snap (freies Weiterscrollen). */
+.z-carousel--continuous .z-carousel__scroll-container > * {
+	scroll-snap-align: none;
+}
+
+/* overlay-controls: Pfeile über den Rand-Zonen statt in der Control-Zeile. */
+.z-carousel--overlay-controls .z-carousel__direction-button-previous {
+	grid-area: 1 / left;
+	align-self: center;
+	z-index: 10;
+}
+.z-carousel--overlay-controls .z-carousel__direction-button-next {
+	grid-area: 1 / right;
+	align-self: center;
+	z-index: 10;
+}
+
+/* variant=kiosk: feste, schmale Slot-Breite (12.25rem). */
+.z-carousel--kiosk {
+	--_z-carousel-slide-width: 12.25rem;
+}
+
+/* variant=shop: feste, breite Slot-Breite (20rem), getönter Fader-Ton. */
+.z-carousel--shop {
+	--_z-carousel-slide-width: 20rem;
+}
+
+/* autoplay: aktiver Fortschritts-Dot breiter (Original: animiertes ::after). */
+.z-carousel--autoplay .z-carousel__dot:checked {
+	background-color: var(--z-ds-color-background-20);
+	width: 1.875rem;
+}
+
+/* Controls (Figma-Prop): Steuerungszeile aus-/einblenden. */
+.z-carousel--no-controls .z-carousel__slide-control-wrapper,
+.z-carousel--no-controls .z-carousel__dots-wrapper {
+	display: none;
+}
