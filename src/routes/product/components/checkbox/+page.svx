@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -78,6 +78,8 @@ kategorie: Formulare
   display: block;
 }
 `;
+	const variantItems = [{"label":"Unchecked","html":"<span class=\"z-checkbox\"><span class=\"z-checkbox__check\"></span></span>","note":"Nicht ausgewählt."},{"label":"Checked","html":"<span class=\"z-checkbox z-checkbox--checked\"><span class=\"z-checkbox__check\"></span></span>","note":"Ausgewählt — dunkle Füllung mit weißem Haken."},{"label":"Default","html":"<span class=\"z-checkbox\"><span class=\"z-checkbox__check\"></span></span>","note":"Ruhezustand."},{"label":"Hover","html":"<span class=\"z-checkbox z-checkbox--hover\"><span class=\"z-checkbox__check\"></span></span>","note":"Mauszeiger darüber."},{"label":"Focus","html":"<span class=\"z-checkbox z-checkbox--focus\"><span class=\"z-checkbox__check\"></span></span>","note":"Tastaturfokus — 2px-Rahmen in Focus-100."},{"label":"Disabled","html":"<span class=\"z-checkbox z-checkbox--disabled\"><span class=\"z-checkbox__check\"></span></span>","note":"Gesperrt — gedämpft."}];
+	const stateItems = [{"label":"default","html":"<span class=\"z-checkbox\"><span class=\"z-checkbox__check\"></span></span>"},{"label":"hover","html":"<span class=\"z-checkbox z-checkbox--hover\"><span class=\"z-checkbox__check\"></span></span>"},{"label":"focus","html":"<span class=\"z-checkbox z-checkbox--focus\"><span class=\"z-checkbox__check\"></span></span>"},{"label":"checked","html":"<span class=\"z-checkbox z-checkbox--checked\"><span class=\"z-checkbox__check\"></span></span>"},{"label":"disabled","html":"<span class=\"z-checkbox z-checkbox--disabled\"><span class=\"z-checkbox__check\"></span></span>"}];
 	const propsData = [{"name":"checked","typ":"boolean","default":"false","beschreibung":"Ausgewählt-Zustand."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt die Auswahl."},{"name":"label","typ":"string","default":"—","beschreibung":"Sichtbares, klickbares Label."}];
 </script>
 
@@ -114,20 +116,10 @@ kategorie: Formulare
 	<WordingList items={spec.wording} />
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Unchecked · Default</span><span class="z-checkbox"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Unchecked · Hover</span><span class="z-checkbox z-checkbox--hover"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Unchecked · Focus</span><span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Unchecked · Disabled</span><span class="z-checkbox z-checkbox--disabled"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Checked · Default</span><span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Checked · Hover</span><span class="z-checkbox z-checkbox--checked z-checkbox--hover"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Checked · Focus</span><span class="z-checkbox z-checkbox--checked z-checkbox--focus"><span class="z-checkbox__check"></span></span></div>
-		<div class="cell"><span class="cell-label">Checked · Disabled</span><span class="z-checkbox z-checkbox--checked z-checkbox--disabled"><span class="z-checkbox__check"></span></span></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<SpecimenGrid items={stateItems} />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

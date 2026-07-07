@@ -65,8 +65,8 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` g
 | `callouts` | `{ nr, text, art?, optionalDurch? }[]` | Anatomie-Legende (Lead vor `—` fett; `art` → dezentes Typ-Badge, `optionalDurch` → „optional — gesteuert über X") |
 | `tokens` | `{ kategorie, items: { name, wert, swatch? }[] }[]` | `TokenTable` (Specs) |
 | `farbrollen` | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }` | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill) |
-| `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `VariantList` (Drift-Check prüft `cssClass` vs. `pattern.css`) |
-| `zustaende` | `{ label, vorhanden? }[]` | `StateList` |
+| `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. `pattern.css`. |
+| `zustaende` | `{ label, vorhanden? }[]` | Renderbare Zustände (Matrix-Zelle **oder** Control-Klasse/Attribut vorhanden) als `SpecimenGrid`; reine Pseudoklassen-Zustände (`:hover`/`:focus`/`:active` ohne eigene Klasse) bleiben beschreibend in `StateList` (nicht gefakt). |
 | `a11y` | `{ label, wert, status: pass\|warn\|todo }[]` | `A11yList` (eigener Tab) |
 | `tastatur` | `{ taste, aktion }[]` | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur") |
 | `doDont` | `{ do?: string[], dont?: string[] }` | `DoDontList` |
@@ -102,7 +102,7 @@ Weitere `render`-Felder:
 | Feld | Zweck |
 | --- | --- |
 | `preview`, `variant` | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`) |
-| `matrix` | `{ label, html }[]` → Varianten-Raster (`VariantMatrix`) |
+| `matrix` | `{ label, html }[]` → beschriftete Specimen-Kacheln. Zellen, deren Label ein einzelner Zustands-Name ist (z. B. „Active"), speisen das **Zustände**-`SpecimenGrid`; Nicht-Zustands-Zellen dienen als **Varianten**-Fallback, falls kein `render.template` existiert. |
 | `calloutAnchors` | `{ nr, side, x?, y? }[]` → Position der Anatomie-Callouts |
 | `props` | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen |
 | `css` | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas` |

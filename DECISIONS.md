@@ -20,7 +20,7 @@ tooling/zeit-de-exporter/
   examples/button.json  # Eingabe-Modell + Render-Config (Beispiel/Quelle)
 
 src/components/ui/specsheet/   # natives, adaptives Spec-UI-Kit
-  ComponentHero · Anatomy · VariantMatrix · VariantList · StateList
+  ComponentHero · Anatomy · SpecimenGrid · StateList
   TokenTable · MeasureTable · A11yList · DoDontList · PropsTable · CodeBlock
   index.ts
 

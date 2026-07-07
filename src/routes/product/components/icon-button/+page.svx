@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, RelatedComponents, CodeBlock, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, RelatedComponents, CodeBlock, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
@@ -67,6 +67,8 @@ kategorie: Aktionen
   color: var(--z-ds-color-text-40);
 }
 `;
+	const variantItems = [{"label":"Default","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>","note":"Neutrale ikonografische Aktion — helle Fläche (--z-ds-color-background-10), dunkles Icon (--z-ds-color-text-100)."}];
+	const stateItems = [{"label":"default","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"},{"label":"disabled","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"}];
 	const propsData = [{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Button (nativ; Icon in --z-ds-color-text-40)."},{"name":"icon","typ":"Snippet / ReactNode","default":"—","beschreibung":"Das anzuzeigende Icon (20×20)."},{"name":"aria-label","typ":"string (Pflicht)","default":"—","beschreibung":"Beschreibt die Aktion — Pflicht, da kein sichtbares Label."}];
 </script>
 
@@ -97,14 +99,11 @@ kategorie: Aktionen
 	</Anatomy>
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Default</span><button class="z-icon-button" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
-		<div class="cell"><span class="cell-label">Disabled</span><button class="z-icon-button" type="button" aria-label="Favorit" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<SpecimenGrid items={stateItems} />
+	<StateList states={[{"label":"hover","vorhanden":true},{"label":"focus"},{"label":"active"},{"label":"loading"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

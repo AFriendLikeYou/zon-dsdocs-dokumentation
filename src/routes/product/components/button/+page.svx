@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, DoDontVisual, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, DoDontVisual, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -95,6 +95,8 @@ kategorie: Aktionen
   opacity: 0.5;
 }
 `;
+	const variantItems = [{"label":"Default","html":"<button type=\"submit\" class=\"z-button\">Click me</button>","note":"Neutrale Aktion — helle Fläche, dunkles Label."},{"label":"Primary","html":"<button type=\"submit\" class=\"z-button z-button--primary\">Click me</button>","note":"Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal."},{"label":"Z+","html":"<button type=\"submit\" class=\"z-button z-button--zplus\">Click me</button>","note":"Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext)."},{"label":"Fullwidth","html":"<button type=\"submit\" class=\"z-button z-button--fullwidth\">Click me</button>"}];
+	const stateItems = [{"label":"default","html":"<button class=\"z-button\" type=\"button\">Button</button>"},{"label":"disabled","html":"<button type=\"submit\" class=\"z-button\" disabled>Click me</button>"}];
 	const propsData = [{"name":"variant","typ":"\"default\" | \"primary\" | \"zplus\"","default":"\"default\"","erlaubteWerte":["default","primary","zplus"],"beschreibung":"Visuelle Gewichtung der Aktion (Modifier z-button--primary / z-button--zplus)."},{"name":"fullwidth","typ":"boolean","default":"false","beschreibung":"Streckt den Button auf 100% Breite (z-button--fullwidth)."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Button (nativ; visuell via opacity 0.5)."},{"name":"label","typ":"string","default":"\"Button\"","beschreibung":"Sichtbarer Button-Text."}];
 </script>
 
@@ -128,18 +130,11 @@ kategorie: Aktionen
 	<UsageBlock verwendung={spec.verwendung} />
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Default</span><button class="z-button" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Default · Disabled</span><button class="z-button" type="button" disabled>Button</button></div>
-		<div class="cell"><span class="cell-label">Primary</span><button class="z-button z-button--primary" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Primary · Disabled</span><button class="z-button z-button--primary" type="button" disabled>Button</button></div>
-		<div class="cell"><span class="cell-label">Z+</span><button class="z-button z-button--zplus" type="button">Button</button></div>
-		<div class="cell"><span class="cell-label">Z+ · Disabled</span><button class="z-button z-button--zplus" type="button" disabled>Button</button></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<SpecimenGrid items={stateItems} />
+	<StateList states={[{"label":"hover","vorhanden":true},{"label":"focus"},{"label":"active"},{"label":"loading"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

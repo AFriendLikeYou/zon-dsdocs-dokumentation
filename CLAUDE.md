@@ -88,7 +88,7 @@ Registry-Daten konsumieren).
 
 **Spec-UI-Kit** `src/lib/components/ui/specsheet/` — theme-adaptive Renderer, die
 die Seiten-Styles erben (keine verschachtelten weißen Cards): `ComponentHero ·
-Anatomy · VariantMatrix/List · StateList · TokenTable · MeasureTable · A11yList ·
+Anatomy · SpecimenGrid · StateList · TokenTable · MeasureTable · A11yList ·
 DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
 Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 

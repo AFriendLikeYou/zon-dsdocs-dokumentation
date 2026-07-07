@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -62,6 +62,8 @@ kategorie: Formulare
   outline-offset: 2px;
 }
 `;
+	const variantItems = [{"label":"Off","html":"<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>","note":"Ausgeschaltet — Track in Background-20, Thumb links."},{"label":"On","html":"<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>","note":"Eingeschaltet — Track in Text-100, Thumb rechts."}];
+	const stateItems = [{"label":"off","html":"<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>"},{"label":"on","html":"<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>"}];
 	const propsData = [{"name":"checked","typ":"boolean","default":"false","beschreibung":"On/Off-Zustand (aria-checked)."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Schalter."},{"name":"label","typ":"string","default":"—","beschreibung":"Beschreibt, was ein-/ausgeschaltet wird."}];
 </script>
 
@@ -98,14 +100,11 @@ kategorie: Formulare
 	<WordingList items={spec.wording} />
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Off</span><button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button></div>
-		<div class="cell"><span class="cell-label">On</span><button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<SpecimenGrid items={stateItems} />
+	<StateList states={[{"label":"focus","vorhanden":true},{"label":"disabled"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

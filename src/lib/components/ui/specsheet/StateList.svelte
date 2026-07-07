@@ -1,7 +1,10 @@
 <!-- StateList.svelte — Zustände als adaptive Chips. -->
 <script lang="ts">
   import type { SpecState } from '$types/spec';
-  let { states = [] }: { states?: SpecState[] } = $props();
+  let {
+    states = [],
+    hint = 'Gefüllt = im Design vorhanden, gestrichelt = in Figma ergänzen.'
+  }: { states?: SpecState[]; hint?: string } = $props();
 </script>
 
 {#if states.length}
@@ -10,7 +13,7 @@
       <span class="state" class:on={s.vorhanden} class:todo={!s.vorhanden}>{s.label}</span>
     {/each}
   </div>
-  <p class="hint">Gefüllt = im Design vorhanden, gestrichelt = in Figma ergänzen.</p>
+  {#if hint}<p class="hint">{hint}</p>{/if}
 {/if}
 
 <style>

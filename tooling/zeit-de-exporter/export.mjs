@@ -198,17 +198,166 @@ function tl(s) {
 		.replace(/<\/(script|style)>/gi, '<\\/$1>');
 }
 
-/** HTML-Text escapen (für Werte, die als Text — nicht als Markup — gerendert werden). */
-function escapeHtml(s) {
-	return String(s)
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
+// ---------------------------------------------------------------------------
+// Specimen-Grid: Varianten & renderbare Zustände als beschriftete Live-Kacheln
+// ---------------------------------------------------------------------------
+// Once-UI-Muster: Varianten und (statisch renderbare) Zustände als gerenderte,
+// beschriftete Specimens NEBENEINANDER. Ehrlichkeit: reine Pseudoklassen-Zustände
+// (:hover/:focus/:active ohne eigene Modifier-Klasse/Attribut) lassen sich statisch
+// NICHT erzwingen und werden NICHT gefakt — sie bleiben beschreibend in der StateList.
+
+/** Mirror von Playground.instantiate (src/lib/components/ui/playground): Template +
+ *  Controls + State → fertiges Markup. Bewusst als eigenständige JS-Kopie, weil der
+ *  Exporter kein Svelte importieren kann; Logik 1:1 identisch (kein Drift durch Daten). */
+function instantiate(template, controls, state) {
+	const classes = [];
+	let attrs = '';
+	for (const c of controls) {
+		if (c.type === 'select') {
+			const opt = (c.options || []).find((o) => o.value === state[c.key]);
+			if (opt?.cssClass) classes.push(opt.cssClass);
+		} else if (c.type === 'toggle') {
+			if (c.cssClass && state[c.key]) classes.push(c.cssClass);
+		} else if (c.type === 'attr') {
+			if (state[c.key]) attrs += ` ${c.attr}`;
+		}
+	}
+	return template
+		.replaceAll('{classes}', classes.length ? ` ${classes.join(' ')}` : '')
+		.replaceAll('{attrs}', attrs);
 }
 
-/** Bewusstes Markup, aber schützt gegen vorzeitigen </script>/</style>-Ausbruch. */
-function neutralizeScriptClose(s) {
-	return String(s).replace(/<\/(script|style)>/gi, '<\\/$1>');
+const _norm = (s) => String(s).toLowerCase().trim();
+/** Label in Zustands-Tokens zerlegen (an ·, /, +, Komma), z. B. „Active / Focus". */
+const _tokens = (label) =>
+	_norm(label)
+		.split(/[·/+,]/)
+		.map((t) => t.trim())
+		.filter(Boolean);
+
+/** Vokabular der Zustands-Namen dieser Komponente (aus zustaende + farbrollen.zustaende). */
+function stateVocab(model) {
+	const vocab = new Set();
+	for (const z of Array.isArray(model.zustaende) ? model.zustaende : [])
+		for (const t of _tokens(z.label)) vocab.add(t);
+	const fr = model.farbrollen;
+	if (fr && Array.isArray(fr.zustaende)) for (const z of fr.zustaende) for (const t of _tokens(z)) vocab.add(t);
+	return vocab;
+}
+
+/**
+ * SpecimenGrid-items als JS-Literal serialisieren. JSON.stringify escapt Anführungs-
+ * zeichen; zusätzlich </script>/</style> im html/label/note neutralisieren, damit der
+ * String den umschließenden <script>-Block der .svx-Seite nicht vorzeitig schließt.
+ */
+function serializeItems(items) {
+	return JSON.stringify(items).replace(/<\/(script|style)>/gi, '<\\/$1>');
+}
+
+/**
+ * Varianten-Specimens für das SpecimenGrid. Robuster Weg: die `varianten`-Achsen
+ * sind die kanonische Varianten-Definition — wir instanziieren `render.template`
+ * je Varianten-Wert mit seiner `cssClass` (identisch zum Playground). Fallback ohne
+ * template: Varianten-Zellen aus `render.matrix` (Nicht-Zustands-Zellen — anhand des
+ * Zustands-Vokabulars gefiltert). `variantInfo` (redaktionell) → item.note.
+ */
+function buildVariantItems(model) {
+	const render = model.render ?? {};
+	const template = typeof render.template === 'string' ? render.template : null;
+	const varianten = Array.isArray(model.varianten) ? model.varianten : [];
+	const info = render.variantInfo && typeof render.variantInfo === 'object' ? render.variantInfo : {};
+	const items = [];
+	if (template && varianten.length) {
+		for (const group of varianten)
+			for (const w of group.werte || []) {
+				const html = template
+					.replaceAll('{classes}', w.cssClass ? ` ${w.cssClass}` : '')
+					.replaceAll('{attrs}', '');
+				const item = { label: w.label, html };
+				if (info[w.label]) item.note = info[w.label];
+				items.push(item);
+			}
+		return items;
+	}
+	// Fallback: kein template → Varianten-Zellen der Matrix (alles, was KEIN reiner Zustand ist).
+	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
+	if (matrix.length) {
+		const vocab = stateVocab(model);
+		const isState = (label) => {
+			const t = _tokens(label);
+			return t.length > 0 && t.every((x) => vocab.has(x));
+		};
+		for (const m of matrix.filter((m) => !isState(m.label))) {
+			const item = { label: m.label, html: m.html };
+			if (info[m.label]) item.note = info[m.label];
+			items.push(item);
+		}
+	}
+	return items;
+}
+
+/**
+ * Zustands-Specimens (renderbar) + Rest (nur beschreibend). „Renderbar" heißt: es gibt
+ * eine Möglichkeit, den Zustand STATISCH zu zeigen — eine passende `render.matrix`-Zelle
+ * ODER ein Control (select-Option/toggle/attr) mit cssClass/Attribut, mit dem wir das
+ * template instanziieren können. Reine Pseudoklassen (z. B. :hover ohne eigene Klasse)
+ * lassen sich nicht erzwingen → bleiben im `rest` (StateList, beschreibend, nicht gefakt).
+ * item.note kommt aus dem farbrollen-hinweis des Zustands, falls vorhanden.
+ */
+function buildStateItems(model) {
+	const render = model.render ?? {};
+	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
+	const zust = Array.isArray(model.zustaende) ? model.zustaende : [];
+	const template = typeof render.template === 'string' ? render.template : null;
+	const controls = Array.isArray(render.controls) ? render.controls : [];
+
+	// Bewusst KEINE note aus farbrollen.elemente[].hinweis ableiten: die Hinweise gelten
+	// je ELEMENT (Rahmen/Text/…), nicht je Zustand — eine 1:Zustand-Zuordnung wäre falsch
+	// (z. B. würde der Disabled-Hinweis am „default"-Token hängen). Das Zustands-Label
+	// (default/active/error/…) ist selbsterklärend; Token-Details stehen in der Farbrollen-Tabelle.
+
+	// Matrix-Zellen, deren Label ein EINZELNER Zustands-Token ist (z. B. „Active"), indexieren.
+	const matrixByState = new Map();
+	for (const m of matrix) {
+		const t = _tokens(m.label);
+		if (t.length === 1) matrixByState.set(t[0], m.html);
+	}
+
+	// Zustand über ein Control instanziieren (Option-Value/Label, Toggle-Key/Label, Attr).
+	const instantiateByControl = (tok) => {
+		if (!template) return null;
+		for (const c of controls) {
+			if (c.type === 'select') {
+				const opt = (c.options || []).find((o) => _norm(o.value) === tok || _norm(o.label) === tok);
+				if (opt) return instantiate(template, controls, { [c.key]: opt.value });
+			} else if (c.type === 'toggle') {
+				if (_norm(c.key) === tok || _norm(c.label) === tok)
+					return instantiate(template, controls, { [c.key]: true });
+			} else if (c.type === 'attr') {
+				if (_norm(c.key) === tok || _norm(c.label) === tok || _norm(c.attr) === tok)
+					return instantiate(template, controls, { [c.key]: true });
+			}
+		}
+		return null;
+	};
+
+	const items = [];
+	const rest = [];
+	for (const s of zust) {
+		const toks = _tokens(s.label);
+		const key = toks[0]; // Primär-Token, z. B. „active / focus" → „active"
+		let html = null;
+		const exact = matrix.find((m) => _norm(m.label) === _norm(s.label));
+		if (exact) html = exact.html;
+		if (!html && key && matrixByState.has(key)) html = matrixByState.get(key);
+		if (!html && key) html = instantiateByControl(key);
+		if (html) {
+			items.push({ label: s.label, html });
+		} else {
+			rest.push(s);
+		}
+	}
+	return { items, rest };
 }
 
 /**
@@ -224,20 +373,17 @@ function renderPage(model, { patternCss = null } = {}) {
 	// render.variant wird bewusst NICHT mehr in die Anatomie emittiert — die Anatomie
 	// zeigt nur die Default-Version in Originalgröße; Varianten leben in der Varianten-Sektion.
 
-	const matrix = Array.isArray(render.matrix) ? render.matrix : [];
-	// label = Text (HTML-escapen), html = bewusstes Markup (nur </script>/</style>-Schutz).
-	const matrixCells = matrix
-		.map(
-			(m) =>
-				`\t\t<div class="cell"><span class="cell-label">${escapeHtml(m.label)}</span>${neutralizeScriptClose(m.html)}</div>`
-		)
-		.join('\n');
+	// Varianten & renderbare Zustände als beschriftete Live-Specimens (SpecimenGrid,
+	// Once-UI-Muster). Die items werden HIER — datenseitig — gebaut (nicht im Renderer):
+	//   Varianten = template je Varianten-Wert instanziiert (Fallback: Matrix-Zellen).
+	//   Zustände  = renderbare (Matrix-Zelle ODER Control-Klasse/Attr) vs. Rest (StateList).
+	// So bleibt SpecimenGrid ein dummer Renderer, und die Ehrlichkeits-Logik liegt sichtbar
+	// in der Exporter-Schicht (reine Pseudoklassen-Zustände werden nicht gefakt).
+	const variantItems = buildVariantItems(model);
+	const { items: stateItems, rest: stateRest } = buildStateItems(model);
 
 	const anchors = Array.isArray(render.calloutAnchors) ? render.calloutAnchors : [];
 	const anchorsProp = anchors.length ? ` {calloutAnchors}` : '';
-	// variantInfo + version sind redaktionell → kommen aus content.ts (nicht generated).
-	const hasVariantInfo = Boolean(render.variantInfo && typeof render.variantInfo === 'object');
-	const variantInfoProp = hasVariantInfo ? ` info={content.variantInfo ?? {}}` : '';
 
 	// CSS für die Live-Specimens (gegen .spec-canvas gescopt).
 	const css = Array.isArray(render.css) ? render.css.join('\n') : render.css ?? '';
@@ -293,9 +439,12 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasAnatomy = Boolean(
 		render.preview || model.callouts?.length || model.masse || model.spacing?.length
 	);
-	const hasMatrix = matrix.length > 0;
-	const hasVariants = Array.isArray(model.varianten) && model.varianten.length > 0;
-	const hasStates = Array.isArray(model.zustaende) && model.zustaende.length > 0;
+	// Varianten-Sektion: gerenderte Varianten-Specimens (SpecimenGrid).
+	const hasVariants = variantItems.length > 0;
+	// Zustände-Sektion: renderbare Zustände (SpecimenGrid) und/oder beschreibende Rest-Chips (StateList).
+	const hasStateGrid = stateItems.length > 0;
+	const hasStateRest = stateRest.length > 0;
+	const hasStates = hasStateGrid || hasStateRest;
 	const hasDoDont = Boolean(model.doDont);
 	const hasDoDontVisual = Array.isArray(model.doDontBeispiele) && model.doDontBeispiele.length > 0;
 	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
@@ -326,7 +475,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		(hasAnatomy ? 1 : 0) +
 		(hasUsage ? 1 : 0) +
 		(hasWording ? 1 : 0) +
-		(hasVariants || hasMatrix ? 1 : 0) +
+		(hasVariants ? 1 : 0) +
 		(hasStates ? 1 : 0) +
 		(hasDoDont || hasDoDontVisual ? 1 : 0) +
 		(hasRelated ? 1 : 0);
@@ -335,9 +484,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Nur tatsächlich genutzte Komponenten importieren.
 	const used = new Set(['ComponentHero']);
 	if (hasAnatomy) used.add('Anatomy');
-	if (hasMatrix) used.add('VariantMatrix');
-	if (hasVariants) used.add('VariantList');
-	if (hasStates) used.add('StateList');
+	if (hasVariants || hasStateGrid) used.add('SpecimenGrid');
+	if (hasStateRest) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
 	if (hasDoDontVisual) used.add('DoDontVisual');
 	if (hasWording) used.add('WordingList');
@@ -379,6 +527,8 @@ function renderPage(model, { patternCss = null } = {}) {
 		(repoCode ? `\tconst repoCode = \`${tl(repoCode)}\`;\n` : '') +
 		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
 		(patternCss ? `\tconst patternCssCode = \`${tl(patternCss)}\`;\n` : '') +
+		(hasVariants ? `\tconst variantItems = ${serializeItems(variantItems)};\n` : '') +
+		(hasStateGrid ? `\tconst stateItems = ${serializeItems(stateItems)};\n` : '') +
 		(hasProps ? `\tconst propsData = ${JSON.stringify(props)};\n` : '');
 
 	// ---- Design-Tab ----
@@ -416,15 +566,22 @@ function renderPage(model, { patternCss = null } = {}) {
 		designSections.push({ label: 'Wording', id: SECTION_IDS.Wording });
 		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
 	}
-	if (hasVariants || hasMatrix) {
+	if (hasVariants) {
 		designSections.push({ label: 'Varianten', id: SECTION_IDS.Varianten });
-		design += `\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n`;
-		if (hasVariants) design += `\t<VariantList varianten={${S}.varianten}${variantInfoProp} />\n`;
-		if (hasMatrix) design += `\t<VariantMatrix>\n${matrixCells}\n\t</VariantMatrix>\n`;
+		design +=
+			`\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n` +
+			`\t<SpecimenGrid items={variantItems} />\n`;
 	}
 	if (hasStates) {
 		designSections.push({ label: 'Zustände', id: SECTION_IDS.Zustände });
-		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n\t<StateList states={${S}.zustaende} />\n`;
+		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n`;
+		// Renderbare Zustände als beschriftete Live-Kacheln …
+		if (hasStateGrid) design += `\t<SpecimenGrid items={stateItems} />\n`;
+		// … reine Pseudoklassen-Zustände (kein statisches Rendering möglich) NUR beschreibend,
+		// mit Hinweis auf den Playground. Kein gefaktes Hover/Focus/Active.
+		if (hasStateRest)
+			design +=
+				`\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
 	}
 	if (hasDoDont || hasDoDontVisual) {
 		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });

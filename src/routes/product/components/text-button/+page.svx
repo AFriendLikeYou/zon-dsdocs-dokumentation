@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, VariantList, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
+	import { ComponentHero, SpecimenGrid, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import { content } from './content';
@@ -69,6 +69,7 @@ kategorie: Aktionen
   color: var(--z-ds-color-general-white-100);
 }
 `;
+	const variantItems = [{"label":"Default","html":"<button type=\"button\" class=\"z-text-button\">Mehr anzeigen</button>"},{"label":"Slim","html":"<button type=\"button\" class=\"z-text-button z-text-button--slim\">Mehr anzeigen</button>"},{"label":"Large","html":"<button type=\"button\" class=\"z-text-button z-text-button--large\">Mehr anzeigen</button>"},{"label":"Bold","html":"<button type=\"button\" class=\"z-text-button z-text-button--bold\">Mehr anzeigen</button>"},{"label":"Active","html":"<button type=\"button\" class=\"z-text-button z-text-button--active\">Mehr anzeigen</button>"},{"label":"On Image","html":"<button type=\"button\" class=\"z-text-button z-text-button--on-image\">Mehr anzeigen</button>"}];
 </script>
 
 <svelte:head>
@@ -91,7 +92,7 @@ kategorie: Aktionen
 	</div>
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} />
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 	<RelatedComponents slugs={spec.verwandt} />

@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
@@ -114,6 +114,8 @@ kategorie: Formulare
   cursor: default;
 }
 `;
+	const variantItems = [{"label":"Default","html":"<div class=\"z-stepper\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>","note":"Ruhezustand."},{"label":"Hover","html":"<div class=\"z-stepper z-stepper--hover\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>","note":"Mauszeiger über einem Button — Background-10."},{"label":"Focus","html":"<div class=\"z-stepper z-stepper--focus\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>","note":"Tastaturfokus auf einem Button — 2px Focus-100."},{"label":"Disabled","html":"<div class=\"z-stepper z-stepper--disabled\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>","note":"Gesperrt — Wert und Icons in Text-40."}];
+	const stateItems = [{"label":"default","html":"<div class=\"z-stepper\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button></div>"},{"label":"hover","html":"<div class=\"z-stepper z-stepper--hover\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button></div>"},{"label":"focus","html":"<div class=\"z-stepper z-stepper--focus\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button></div>"},{"label":"disabled","html":"<div class=\"z-stepper z-stepper--disabled\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\" disabled></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\" disabled></button></div>"}];
 	const propsData = [{"name":"value","typ":"number","default":"0","beschreibung":"Aktueller Wert."},{"name":"min","typ":"number","default":"—","beschreibung":"Untere Grenze (− wird deaktiviert)."},{"name":"max","typ":"number","default":"—","beschreibung":"Obere Grenze (+ wird deaktiviert)."},{"name":"step","typ":"number","default":"1","beschreibung":"Schrittweite."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt beide Buttons."}];
 </script>
 
@@ -150,16 +152,10 @@ kategorie: Formulare
 	<WordingList items={spec.wording} />
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Default</span><div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
-		<div class="cell"><span class="cell-label">Hover</span><div class="z-stepper z-stepper--hover"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
-		<div class="cell"><span class="cell-label">Focus</span><div class="z-stepper z-stepper--focus"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div></div>
-		<div class="cell"><span class="cell-label">Disabled</span><div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<SpecimenGrid items={stateItems} />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

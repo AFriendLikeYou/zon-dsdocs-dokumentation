@@ -1,8 +1,7 @@
 // Spec-UI-Kit: native, adaptive Komponenten für die Component-Doku.
 export { default as ComponentHero } from './ComponentHero.svelte';
 export { default as Anatomy } from './Anatomy.svelte';
-export { default as VariantMatrix } from './VariantMatrix.svelte';
-export { default as VariantList } from './VariantList.svelte';
+export { default as SpecimenGrid } from './SpecimenGrid.svelte';
 export { default as StateList } from './StateList.svelte';
 export { default as TokenTable } from './TokenTable.svelte';
 export { default as ColorRoleTable } from './ColorRoleTable.svelte';
