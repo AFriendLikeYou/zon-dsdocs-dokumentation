@@ -125,6 +125,13 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
   (der „Edit on GitHub"-Stift zeigt dorthin).
 - **Vanilla HTML/CSS ist der Default** für Beispiele; Svelte nur bei
   interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.
+- **Bild-Konvention 16:9:** Content-Prosabilder (`main p > img`, also mdsvex
+  `![]()`) zeigen per Default 16:9 (`aspect-ratio` + `object-fit: cover`,
+  `static/global.css`). Ausnahme explizit auszeichnen: als HTML-`<img class="img-natural">`
+  statt `![]()` (natürliches Verhältnis, kein Crop) — für Logos/Wortmarken,
+  Icon-Anatomie-Diagramme, Hochformat-Poster u. Ä. UI-Komponenten (DoDont, Lightbox,
+  BrandHero, ExampleStage) bringen eigene, klassen-gescopte Bild-Regeln mit und sind
+  unberührt. Katalog-Mini-Previews nutzen die geteilte `.catalog-preview`-Bühne (16:9).
 - **Animationen** folgen dem `emil-design-eng`-Skill (`.agents/skills/…`):
   starke ease-out, nie ease-in, <300ms, Hover gated, `:active`-Feedback,
   `prefers-reduced-motion`.

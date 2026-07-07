@@ -52,6 +52,12 @@ Seiten sind mdsvex-Routen (`+page.svx`) unter `src/routes/brand/…` oder `src/r
    `import.meta.glob`). Für Titel/Beschreibung/Badge/Reihenfolge einen Eintrag in der `META`-
    Map in `src/routes/product/foundations/+page.svx` ergänzen; ohne Eintrag greift ein
    Fallback (Title-Case des Slugs, ans Ende sortiert).
+4. **Bilder (16:9-Konvention)** — Content-Bilder in Prosa (`![alt](/media/…)`) werden per
+   Default im Verhältnis **16:9** gezeigt (`object-fit: cover`, Regel `main p > img` in
+   `static/global.css`) — passend für Fotos, Screenshots und Beispiel-Szenen. Soll ein Bild
+   im **natürlichen Verhältnis** ohne Beschnitt stehen (Logos/Wortmarken, Icon-Anatomie-
+   Diagramme, Hochformat-Poster), es als HTML-`<img class="img-natural" src="…" alt="…" />`
+   statt Markdown schreiben. Die Abweichung ist so im Markup sichtbar.
 
 ## 4. Eine dokumentierte Komponente hinzufügen (Exporter)
 

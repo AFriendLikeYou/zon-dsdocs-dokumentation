@@ -128,7 +128,7 @@ Prinzip: **Discovery killt Drift, Override-Map bewahrt Kuratierung.** Assets ble
 
 ### Vom Check zutage gefördert — Kuratierungs-Entscheidungen (offen, bewusst nicht stumm gefixt)
 - [ ] Nav-Orphans verlinken oder allowlisten: `/brand/marke`, `/brand/resources/contributions`.
-- [ ] 3 undokumentierte Tokens klären (dokumentieren oder CSS auf dok. Token umstellen): `--z-ds-color-black-100`, `--z-ds-color-general-white-100`, `--z-ds-fontsize-34`.
+- [ ] Undokumentierten Token klären: `--z-ds-color-general-white-100` (existiert real in `styles-zds.css`, aber nicht in `foundation-tokens.ts` → dokumentieren oder allowlisten). _Erledigt: `--z-ds-color-black-100` (toter Token) → CSS auf `--z-ds-color-general-black-100` umgestellt; `--z-ds-color-background-100` (echter Fehl-Token) → `--ds-surface-inverse` auf `--z-ds-color-text-100` gemappt. `--z-ds-fontsize-34` existiert real und wird nicht mehr referenziert._
 
 ## 5. ZdsButton / Ansatz C  ✅ (ADR-019, Option A: CSS-treu)
 Grundfund: `@zeitonline/design-system` liefert **nur CSS** (keine Komponenten). Der Specimen
