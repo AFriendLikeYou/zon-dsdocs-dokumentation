@@ -27,3 +27,6 @@ vite.config.ts.timestamp-*
 
 # Lokales Claude-Code-Tooling (z. B. Preview-Dev-Server-Config)
 /.claude/
+
+# Editor-Cruft
+.obsidian/
