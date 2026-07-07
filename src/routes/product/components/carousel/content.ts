@@ -27,7 +27,7 @@ export const content = {
 		},
 		{
 			"nr": 2,
-			"text": "Slot — Content-Container (im Produkt Teaser/Bild/Karte); hier neutrale Platzhalterfläche, Slot-Breite calc(320/892·100%) (≥48em) bzw. calc(320/343·100%) (mobil).",
+			"text": "Slot — Content-Container, role=\"tabpanel\" (im Produkt Teaser/Bild/Karte; z. B. im ZEITmagazin-Wochenmarkt ein woma-teaser mit Kicker, Titel, Byline und Merken-Button). Hier neutrale Platzhalterfläche; Slot-Breite calc(320/892·100%) (≥48em) bzw. calc(320/343·100%) (mobil).",
 			"art": "slot"
 		},
 		{

@@ -19,22 +19,24 @@ kategorie: Medien
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"top","x":50},{"nr":2,"side":"left","y":40},{"nr":3,"side":"bottom","x":40},{"nr":4,"side":"right","y":60}];
 	const playgroundControls = [{"key":"viewMode","label":"View Mode","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"variant","label":"Variant","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Overlay-Pfeile","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"noControls","label":"Ohne Controls","type":"toggle","cssClass":"z-carousel--no-controls"}];
-	const playgroundTemplate = `<div class="z-carousel{classes}"{attrs}>
-  <div class="z-carousel__scroll-container">
-    <div class="z-carousel__slide">Slot 1</div>
-    <div class="z-carousel__slide">Slot 2</div>
-    <div class="z-carousel__slide">Slot 3</div>
-    <div class="z-carousel__slide">Slot 4</div>
+	const playgroundTemplate = `<div class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
+  <div class="z-carousel__scroll-container" tabindex="-1" aria-live="polite">
+    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-1" aria-labelledby="pg-c-tab-1">Slot 1</div>
+    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-2" aria-labelledby="pg-c-tab-2">Slot 2</div>
+    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-3" aria-labelledby="pg-c-tab-3">Slot 3</div>
+    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-4" aria-labelledby="pg-c-tab-4">Slot 4</div>
   </div>
-  <div class="z-carousel__slide-control-wrapper">
-    <button class="z-carousel__direction-button z-carousel__direction-button--previous" aria-label="Zurück" disabled><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 4 7l5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-    <button class="z-carousel__direction-button z-carousel__direction-button--next" aria-label="Weiter"><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M5 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  <div class="z-carousel__slide-control-wrapper" role="group" aria-label="Steuerelemente">
+    <button class="z-carousel__direction-button z-carousel__direction-button--previous" aria-label="Vorige Seite" disabled><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 4 7l5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="z-carousel__direction-button z-carousel__direction-button--next" aria-label="Nächste Seite"><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M5 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
   </div>
-  <div class="z-carousel__dots-wrapper" role="radiogroup" aria-label="Slide-Auswahl">
-    <input class="z-carousel__dot" type="radio" name="pg-carousel" aria-label="Slide 1" checked>
-    <input class="z-carousel__dot" type="radio" name="pg-carousel" aria-label="Slide 2">
-    <input class="z-carousel__dot" type="radio" name="pg-carousel" aria-label="Slide 3">
-    <input class="z-carousel__dot" type="radio" name="pg-carousel" aria-label="Slide 4">
+  <div class="z-carousel__tabpanel-control-wrapper" role="group" aria-label="Seitensteuerung">
+    <fieldset class="z-carousel__dots-wrapper" role="tablist" aria-label="Seite auswählen">
+      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-1" aria-controls="pg-c-panel-1" aria-label="Seite 1" aria-selected="true" checked>
+      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-2" aria-controls="pg-c-panel-2" aria-label="Seite 2" aria-selected="false">
+      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-3" aria-controls="pg-c-panel-3" aria-label="Seite 3" aria-selected="false">
+      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-4" aria-controls="pg-c-panel-4" aria-label="Seite 4" aria-selected="false">
+    </fieldset>
   </div>
 </div>`;
 	const playgroundPresets = [{"label":"Standard mit Controls","state":{"viewMode":"standard","noControls":false}},{"label":"Ohne Controls","state":{"noControls":true}},{"label":"Single","state":{"viewMode":"single"}},{"label":"Overlay-Pfeile","state":{"viewMode":"standard","overlay":true}}];
