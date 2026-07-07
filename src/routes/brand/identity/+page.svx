@@ -6,5 +6,45 @@ title: Marke
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { SectionTiles } from '$components/ui/section-tiles';
+
+	const bereiche = [
+		{
+			href: '/brand/identity/strategy',
+			title: 'Markenstrategie',
+			description: 'Wofür DIE ZEIT steht: Tradition, Transformation und Haltung.'
+		},
+		{
+			href: '/brand/identity/architecture',
+			title: 'Markenarchitektur',
+			description: 'Dachmarke und Submarken — wie das Markensystem zusammenhängt.'
+		},
+		{
+			href: '/brand/identity/appearance',
+			title: 'Erscheinungsbild',
+			description: 'Die visuelle Übersetzung der Marke im Überblick.'
+		},
+		{
+			href: '/brand/identity/voice-and-tone',
+			title: 'Voice & Tone',
+			description: 'Wie DIE ZEIT klingt — mit konkreten Wording-Beispielen.'
+		},
+		{
+			href: '/brand/identity/examples',
+			title: 'Anwendungsbeispiele',
+			description: 'Annotierte Beispiele: Regeln in der Praxis.'
+		}
+	];
+</script>
+
 # {title}
-Unser Markenzeichen ist das Herzstück unserer Marke. Es ist ein Symbol für unsere Identität und hilft uns, uns auf dem Markt zu differenzieren. Die konsistente Verwendung unseres Markenzeichens sorgt für Wiedererkennung und Vertrautheit.
+
+Unser Markenzeichen ist das Herzstück unserer Marke: ein Symbol für unsere Identität,
+das Wiedererkennung und Vertrautheit schafft. Die folgenden Seiten beschreiben, wofür
+DIE ZEIT steht und wie sich diese Haltung visuell und sprachlich ausdrückt.
+
+Wähle einen Bereich, um tiefer einzusteigen — von der übergeordneten Strategie bis zu
+konkreten Anwendungsbeispielen.
+
+<SectionTiles tiles={bereiche} />

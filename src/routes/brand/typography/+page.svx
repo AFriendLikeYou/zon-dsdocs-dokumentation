@@ -20,7 +20,7 @@ und Lesbarkeit. Auf dieser Seite stehen die Grundlagen der Marken-Typografie.
 	technische Schrift-Skala der Produkte steht unter <a href="/product/foundations/typography">Foundations → Typography</a>.
 </Alert>
 
-![Typografie der Marke DIE ZEIT](/media/brand/typography/typografie-image-0.png)
+<img class="img-natural" src="/media/brand/typography/typografie-image-0.png" alt="Typografie der Marke DIE ZEIT" />
 
 ## Schriften
 

@@ -45,7 +45,7 @@
 			</tr>
 		</tbody>
 	</table>
-	
+
 	<table aria-label="Interne Mitarbeiter:innen">
 		<thead>
 			<tr>
@@ -71,14 +71,13 @@
 			<tr>
 				<td>Werbetexter</td>
 			</tr>
-	
 		</tbody>
 	</table>
 </div>
 
-<h2>Wie man den Brandguide verwendet</h2> 
+<h2>Wie man den Brandguide verwendet</h2>
 
-<p>Der Brandguide ist als praktisches Nachschlagewerk konzipiert. Er bietet klare Richtlinien, konkrete Beispiele und sofort einsetzbare Vorlagen. <strong>Sie finden hier Informationen zu Farben, Typografie, Logos, Symbolen sowie zu Bildsprache, Tonalität und Stimme der Marke.</strong> Ziel ist es, allen Beteiligten Sicherheit bei der Gestaltung zu geben und gleichzeitig genügend Flexibilität zu lassen, damit kreative Lösungen entstehen können. </p>
+<p>Der Brandguide ist als praktisches Nachschlagewerk konzipiert. Er bietet klare Richtlinien, konkrete Beispiele und sofort einsetzbare Vorlagen. <strong>Sie finden hier Informationen zu Farben, Typografie, Logos, Symbolen sowie zu Bildsprache, Tonalität und Stimme der Marke.</strong> Ziel ist es, allen Beteiligten Sicherheit bei der Gestaltung zu geben und gleichzeitig genügend Flexibilität zu lassen, damit kreative Lösungen entstehen können.</p>
 
 <p>Ob Sie ein neues Event gestalten, eine digitale Kampagne planen oder ein Produkt-Feature umsetzen – der Brandguide hilft dabei, die Marke ZEIT stimmig und konsistent zu transportieren. Nutzen Sie die Inhalte als Orientierung, Inspiration und verbindliche Grundlage für Ihre Arbeit.</p>
 

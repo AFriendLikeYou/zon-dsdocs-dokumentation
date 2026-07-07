@@ -1,11 +1,38 @@
 ---
-title: Prike-Kommunikation
+title: Pride-Kommunikation
 ---
 
 <svelte:head>
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { Alert } from '$components/ui/alert';
+</script>
+
 # {title}
 
-...
+Wie DIE ZEIT rund um Pride sichtbar und glaubwürdig kommuniziert — visuell wie
+sprachlich. Diese Seite hält die Leitplanken fest, damit die Marke im richtigen
+Ton und mit klarer Haltung auftritt.
+
+<Alert
+	variant="default"
+	title="Diese Seite ist im Aufbau"
+	description="Die verbindlichen Inhalte zur Pride-Kommunikation werden vom Brand-Team gepflegt. Unten steht die Struktur, die hier mit ZEIT-spezifischem Inhalt gefüllt wird."
+/>
+
+## Haltung
+
+Wofür DIE ZEIT bei Pride steht und welche Grundsätze die Kommunikation tragen —
+jeweils mit einem Satz, was sie konkret bedeuten.
+
+## Visuelle Umsetzung
+
+Wie Logo, Farbe und Bildsprache im Pride-Kontext eingesetzt werden (und wo die
+Grenzen liegen) — mit Verweisen auf die jeweiligen Brand-Seiten.
+
+## Sprache & Tonalität
+
+Wie wir über Pride sprechen: respektvoll, präzise, ohne Vereinnahmung. Konkrete
+Formulierungshilfen kommen hier hin.

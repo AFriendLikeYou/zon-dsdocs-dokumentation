@@ -6,5 +6,36 @@ title: Bildsprache
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { Alert } from '$components/ui/alert';
+</script>
 
-# { title }
+# {title}
+
+Unsere Bildsprache prägt, wie DIE ZEIT visuell wahrgenommen wird — von der
+Fotografie über Illustrationen bis zur Bildauswahl. Diese Seite hält fest, welche
+Kriterien Bilder erfüllen, damit sie zur Marke passen.
+
+<Alert
+	variant="default"
+	title="Diese Seite ist im Aufbau"
+	description="Die verbindlichen Inhalte zur Bildsprache werden vom Brand-Team gepflegt. Unten steht die Struktur, die hier mit ZEIT-spezifischem Inhalt gefüllt wird."
+/>
+
+## Prinzipien
+
+Die Grundsätze unserer Bildsprache (z. B. Haltung, Bildausschnitt, Authentizität) —
+jeweils mit einem Satz, was sie konkret bedeuten.
+
+## Fotografie
+
+Kriterien für Fotos: Motivwahl, Licht, Farbigkeit und Nachbearbeitung — mit
+Beispielen, was passt und was nicht.
+
+## Illustration & Grafik
+
+Wann Illustrationen statt Fotos eingesetzt werden und welcher Stil dabei gilt.
+
+## Bildauswahl & Rechte
+
+Hinweise zu Bildquellen, Nutzungsrechten und Bildunterschriften.

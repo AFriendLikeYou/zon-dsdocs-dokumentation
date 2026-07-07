@@ -12,9 +12,9 @@ Die ZEIT-Icons folgen einem einheitlichen Aufbau, damit sie über das ganze Set
 konsistent wirken — gleiche Strichstärke, gleiches Raster, gleiche optische Größe.
 Die folgenden Beispiele zeigen Auswahl und Anatomie.
 
-![Icon Auswahl](/media/brand/icons/icon-uebersicht.png)
+<img class="img-natural" src="/media/brand/icons/icon-uebersicht.png" alt="Icon Auswahl" />
 
-![Icon Aufbau 1](/media/brand/icons/icon-anatomy-1.png)
+<img class="img-natural" src="/media/brand/icons/icon-anatomy-1.png" alt="Icon Aufbau 1" />
 
-![Icon Aufbau 2](/media/brand/icons/icon-anatomy-2.png)
+<img class="img-natural" src="/media/brand/icons/icon-anatomy-2.png" alt="Icon Aufbau 2" />
 
