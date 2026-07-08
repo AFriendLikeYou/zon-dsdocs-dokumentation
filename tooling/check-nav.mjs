@@ -39,7 +39,8 @@ const ALLOW_EXACT = new Set([
 	'/brand/identity'
 ]);
 const ALLOW_PREFIX = [
-	'/product/foundations/' // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)
+	'/product/foundations/', // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)
+	'/admin/' // CMS-Editor-Seiten (interne Utility, bewusst nicht im Sidebar-Menü)
 ];
 
 const isAllowed = (route) =>
