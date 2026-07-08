@@ -315,7 +315,13 @@ const flattenMenu = (menu: MenuSection[]): MenuItem[] =>
 		if (item.items) {
 			item.items.forEach((subItem) => acc.push(subItem));
 		} else if (item.href) {
-			acc.push({ label: item.title, href: item.href, ...(item.badge && { badge: item.badge }) });
+			acc.push({
+				label: item.title,
+				href: item.href,
+				// badgeVariant MIT kopieren — sonst fällt „Geplant" (neutral) auf den
+				// ready-Fallback der SearchPalette zurück und färbt sich grün.
+				...(item.badge && { badge: item.badge, badgeVariant: item.badgeVariant })
+			});
 		}
 		return acc;
 	}, []);
