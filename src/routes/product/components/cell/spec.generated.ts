@@ -246,15 +246,6 @@ export const generated = {
 		{
 			"label": "default",
 			"vorhanden": true
-		},
-		{
-			"label": "hover"
-		},
-		{
-			"label": "focus"
-		},
-		{
-			"label": "visited"
 		}
 	]
 } satisfies Partial<ComponentSpec>;

@@ -38,6 +38,7 @@ const STATE_MODIFIERS = new Set([
 	'checked',
 	'selected',
 	'loading',
+	'filled',
 	'open',
 	'error',
 	'success'

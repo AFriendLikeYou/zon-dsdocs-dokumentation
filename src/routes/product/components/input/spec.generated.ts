@@ -148,31 +148,6 @@ export const generated = {
 	},
 	"varianten": [
 		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
-				},
-				{
-					"label": "Active",
-					"cssClass": "z-input--active"
-				},
-				{
-					"label": "Filled",
-					"cssClass": "z-input--filled"
-				},
-				{
-					"label": "Error",
-					"cssClass": "z-input--error"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-input--disabled"
-				}
-			]
-		},
-		{
 			"prop": "Extras",
 			"werte": [
 				{

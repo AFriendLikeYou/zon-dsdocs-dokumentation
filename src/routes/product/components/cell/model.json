@@ -261,15 +261,6 @@
 		{
 			"label": "default",
 			"vorhanden": true
-		},
-		{
-			"label": "hover"
-		},
-		{
-			"label": "focus"
-		},
-		{
-			"label": "visited"
 		}
 	],
 	"a11y": [

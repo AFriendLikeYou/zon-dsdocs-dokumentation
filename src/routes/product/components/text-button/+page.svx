@@ -62,7 +62,7 @@ kategorie: Aktionen
   cursor: default;
 }
 .z-text-button--on-image {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--z-ds-color-general-white-60);
 }
 .z-text-button--on-image:hover {
   background-color: var(--z-ds-color-general-black-60);
@@ -163,7 +163,7 @@ kategorie: Aktionen
 }
 :global(.spec-canvas .z-text-button--on-image),
 :global(.pg-preview .z-text-button--on-image) {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--z-ds-color-general-white-60);
 }
 :global(.spec-canvas .z-text-button--on-image:hover),
 :global(.pg-preview .z-text-button--on-image:hover) {

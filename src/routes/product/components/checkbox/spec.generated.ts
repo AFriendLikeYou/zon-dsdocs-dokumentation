@@ -143,27 +143,6 @@ export const generated = {
 					"cssClass": "z-checkbox--checked"
 				}
 			]
-		},
-		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
-				},
-				{
-					"label": "Hover",
-					"cssClass": "z-checkbox--hover"
-				},
-				{
-					"label": "Focus",
-					"cssClass": "z-checkbox--focus"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-checkbox--disabled"
-				}
-			]
 		}
 	],
 	"zustaende": [

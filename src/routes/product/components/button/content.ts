@@ -12,7 +12,7 @@
 import type { ComponentSpec } from '$types/spec';
 
 export const content = {
-	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
+	"zweck": "Löst eine Aktion aus. Default für nachrangige Aktionen, Primary für die Hauptaktion, Z+ als Premium-Akzent (ZEIT+). Optional über volle Breite (Fullwidth) und mit optionalen Icon-Slots (Start/Ende).",
 	"status": "ready_for_dev",
 	"callouts": [
 		{
@@ -91,10 +91,9 @@ export const content = {
 	"version": "Figma-Node 4185:3778",
 	"verwandt": ["text-button", "icon-button", "button-group"],
 	"variantInfo": {
-		"Primary": "Wichtigste Aktion im Kontext — pro Aktionsgruppe nur einmal.",
-		"Neutral": "Sekundäre Aktion, gleichrangig neben Primary.",
-		"Subtle": "Geringe Betonung — tertiäre oder optionale Aktion.",
-		"Medium": "Standardgröße, Padding 12px.",
-		"Small": "Kompakt für dichte Layouts, Padding 8px."
+		"Default": "Neutrale Aktion — helle Fläche, dunkles Label.",
+		"Primary": "Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal.",
+		"Z+": "Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext).",
+		"Fullwidth": "Streckt den Button auf 100 % Breite (z-button--fullwidth)."
 	}
 } satisfies Partial<ComponentSpec>;

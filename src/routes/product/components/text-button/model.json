@@ -25,7 +25,7 @@
 					"active": "--z-ds-color-text-100",
 					"disabled": "--z-ds-color-text-55"
 				},
-				"hinweis": "On-Image-Variante nutzt bewusst literales rgba(255,255,255,0.6) (kein Token), Hover dann General-White-100."
+				"hinweis": "On-Image-Variante nutzt --z-ds-color-general-white-60, Hover dann General-White-100."
 			},
 			{
 				"teil": "Hintergrund",

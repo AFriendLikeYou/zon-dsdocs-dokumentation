@@ -73,6 +73,7 @@ export const generated = {
 		"zustaende": [
 			"default",
 			"hover",
+			"focus-visible",
 			"disabled"
 		],
 		"elemente": [
@@ -92,6 +93,16 @@ export const generated = {
 					"hover": "--z-ds-color-text-70",
 					"disabled": "--z-ds-color-text-40"
 				}
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus-visible": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (kein Fill)."
 			}
 		]
 	},

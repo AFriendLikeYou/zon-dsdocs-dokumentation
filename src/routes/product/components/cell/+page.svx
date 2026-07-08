@@ -325,7 +325,7 @@ kategorie: Inhalte
 	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover"},{"label":"focus"},{"label":"visited"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
+	<StateList states={[{"label":"default","vorhanden":true}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />

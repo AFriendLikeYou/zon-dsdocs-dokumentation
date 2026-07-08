@@ -2,7 +2,7 @@
 	"name": "Button",
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
-	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
+	"zweck": "Löst eine Aktion aus. Default für nachrangige Aktionen, Primary für die Hauptaktion, Z+ als Premium-Akzent (ZEIT+). Optional über volle Breite (Fullwidth) und mit optionalen Icon-Slots (Start/Ende).",
 	"verwandt": [
 		"text-button",
 		"icon-button",
@@ -144,6 +144,7 @@
 		"zustaende": [
 			"default",
 			"hover",
+			"focus-visible",
 			"disabled"
 		],
 		"elemente": [
@@ -198,6 +199,7 @@
 				"tokensProZustand": {
 					"default": "none",
 					"hover": "none",
+					"focus-visible": "--z-ds-color-focus-100",
 					"disabled": "none"
 				},
 				"hinweis": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (kein Fill)."

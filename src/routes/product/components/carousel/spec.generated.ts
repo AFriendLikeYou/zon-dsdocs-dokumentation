@@ -10,20 +10,20 @@ export const generated = {
 	"aktualisiertAm": "2026-07-07",
 	"masse": {
 		"breite": {
-			"px": "375 (Small) · 1000 (Wide)",
+			"px": "375",
 			"herkunft": "gemessen"
 		},
 		"hoehe": {
-			"px": "230 (Slot S) · 282 (Slot M) · 366 (Slot L)",
+			"px": "366",
 			"herkunft": "gemessen"
 		},
 		"padding": {
-			"px": "16 (Small) · 54 (Wide) horizontal",
-			"token": "--z-ds-space-m (nur Small; 54 = 3.375rem, in Figma ohne Token)",
+			"px": "16 horizontal",
+			"token": "--z-ds-space-m (nur Small; Wide = 54px / 3.375rem, in Figma ohne Token)",
 			"herkunft": "gemessen"
 		},
 		"radius": {
-			"px": "4 (Slot)",
+			"px": "4",
 			"token": "--z-ds-border-radius-4 (Wert identisch; Bindung in Figma nicht gesetzt)",
 			"herkunft": "gemessen"
 		}
@@ -158,6 +158,10 @@ export const generated = {
 				{
 					"name": "Slot-Breite (≥48em)",
 					"wert": "calc(320 / 892 · 100%) — mobil calc(320 / 343 · 100%)"
+				},
+				{
+					"name": "Sektionshöhe (je Slot Size)",
+					"wert": "230 (Slot S) · 282 (Slot M) · 366 (Slot L)"
 				},
 				{
 					"name": "Dot",

@@ -138,29 +138,6 @@ export const generated = {
 			}
 		]
 	},
-	"varianten": [
-		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
-				},
-				{
-					"label": "Hover",
-					"cssClass": "z-stepper--hover"
-				},
-				{
-					"label": "Focus",
-					"cssClass": "z-stepper--focus"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-stepper--disabled"
-				}
-			]
-		}
-	],
 	"zustaende": [
 		{
 			"label": "default",
