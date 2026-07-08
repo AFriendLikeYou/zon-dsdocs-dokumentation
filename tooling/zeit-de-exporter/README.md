@@ -154,7 +154,7 @@ Export ignoriert, landet nicht in `spec.generated.ts`).
 ## Verifikation
 
 ```bash
-npm run check   # svelte-check + Drift-Checks (Nav, Tokens, Assets, Component-Drift)
+npm run check   # svelte-check + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync)
 npm run build   # baut die Doku inkl. generierter Seite (braucht .env mit USERS)
 npx vitest run  # Component-/Daten-Tests
 ```

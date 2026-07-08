@@ -46,8 +46,9 @@ static/
 └── *.css                       global.css, styles-zds.css (Tokens, generiert), button.css
 
 tooling/                        Generatoren (gen-icons, gen-brand-assets), Drift-Checks
-                                (check-nav, check-tokens, check-assets, check-component-drift),
-                                zeit-de-exporter/ (model.json → Component-Seite)
+                                (check-nav, check-tokens, check-assets, check-component-drift,
+                                check-zds-sync), zeit-de-exporter/ (model.json → Component-Seite,
+                                export:all, figma-measure.js)
 ```
 
 ## Wo lege ich … an?
@@ -68,7 +69,7 @@ Struktur-Historie: [STRUKTUR-PLAN.md](STRUKTUR-PLAN.md) · Backlog: [TODO.md](TO
 ```bash
 nvm use && npm i           # Node (lts) + Pakete
 npm run dev                # Dev-Server (localhost:5173; Basic Auth aus .env: USERS)
-npm run check              # svelte-check + Drift-Checks (Nav, Tokens, Assets, Components)
+npm run check              # svelte-check + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync)
 npm run build              # Produktions-Build (adapter-vercel)
 npm test                   # Vitest (Testing Library)
 npm run gen:assets         # Icon-/Brand-Logo-Registries neu generieren

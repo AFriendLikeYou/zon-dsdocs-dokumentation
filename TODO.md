@@ -2,12 +2,14 @@
 
 Offene Arbeit, priorisiert. Hintergrund/Begründung steht in `DECISIONS.md` (ADRs) —
 hier nur die umsetzbaren Punkte. Jede neue UI gemäß Coding-Standard: wiederverwendbare,
-props-getriebene Svelte-5-Komponente in `src/components/ui/<kebab>/` (Runes, `lang="ts"`,
-Tokens). Reihenfolge oben = empfohlene Abarbeitung.
+props-getriebene Svelte-5-Komponente in `src/lib/components/ui/<kebab>/` (Runes, `lang="ts"`,
+Tokens).
 
-## Empfohlene Reihenfolge (Top of Backlog)
-1. `CopyButton` (heben) → 2. `SearchPalette` + `EmptyState` (neu) → 3. `Alert`-Fix →
-4. `MotionDemo`/`ElevationDemo` (neu) → 5. `UsageBlock` (neu) → dann der Rest.
+## Verbleibend offen (Stand 2026-07-08)
+Die große Masse dieses Backlogs ist abgearbeitet (siehe abgehakte Abschnitte unten). Real
+offen sind nur noch: **Stufe 5b** (echte Patterns zon-teaser/cp-region/headed-meta/pager —
+warten auf zeit.de-Originalquellen) und die **`date-picker`**-Doku (einziger „Geplant"-Stub,
+braucht ein `model.json`).
 
 ---
 
@@ -109,8 +111,8 @@ Preview verifiziert. Redaktionelle Texte (A, B, G, H) sind Entwürfe → Brand-/
 - [x] **Footer als Full-Width-Band** — ✅ aus der Content-Spalte (`.layout__inner`, rechts neben Sidebar / links neben TOC) heraus unter `.flex` verschoben → spannt jetzt volle Breite (verifiziert: left 0 → right = viewport). Inhalt zentriert (`max-width: 1440px`). FooterNavigation (Prev/Next) bleibt content-scoped in der Spalte.
 
 ## 3. DS-Doku-Vollständigkeit (Benchmark)
-- [ ] „Wann verwenden / Related" pro Component (→ `UsageBlock`; Related vorerst schlichte Link-Liste, kein Card-Wrapper).
-- [ ] Foundation-Seite **Motion + Elevation** (→ `MotionDemo`/`ElevationDemo`).
+- [x] „Wann verwenden / Related" pro Component — ✅ `UsageBlock` (Feld `verwendung`) + `RelatedComponents` (Feld `verwandt`, CardGrid-Reuse) am Ende des Design-Tabs. Beide Renderer in `ui/specsheet/`.
+- [x] Foundation-Seite **Motion + Elevation** — ✅ `/product/foundations/motion` mit `MotionDemo`/`ElevationDemo` (`ui/motion-demo/`, `ui/elevation-demo/`).
 - [x] **Spacing-Anwendungsregel** — ✅ Prosa-Sektion „Abstände: semantisch vor numerisch" auf `foundations/tokens`.
 - [x] **Farb-Rollen + Gruppen-Beschreibungen** — ✅ `beschreibung`-Feld an `TokenGroup`/`FoundationGroup`, je ein Satz pro Gruppe, in `TokenTable` unter dem Kategorie-Header gerendert (browser-verifiziert, 7/7).
 
@@ -126,9 +128,9 @@ Prinzip: **Discovery killt Drift, Override-Map bewahrt Kuratierung.** Assets ble
 - [x] **`CONTRIBUTING.md`** — ✅ 5 Rezepte (Icon/Asset/Seite/Component/Content) mit echten Pfaden+Scripts.
 - [x] **`model.json` co-locaten + Exporter-README** — ✅ Modell landet neben dem Output, Re-Export via Ordner-Arg; README neu (3 Dateien, `generated`/`content`, Snippets).
 
-### Vom Check zutage gefördert — Kuratierungs-Entscheidungen (offen, bewusst nicht stumm gefixt)
-- [ ] Nav-Orphans verlinken oder allowlisten: `/brand/marke`, `/brand/resources/contributions`.
-- [ ] Undokumentierten Token klären: `--z-ds-color-general-white-100` (existiert real in `styles-zds.css`, aber nicht in `foundation-tokens.ts` → dokumentieren oder allowlisten). _Erledigt: `--z-ds-color-black-100` (toter Token) → CSS auf `--z-ds-color-general-black-100` umgestellt; `--z-ds-color-background-100` (echter Fehl-Token) → `--ds-surface-inverse` auf `--z-ds-color-text-100` gemappt. `--z-ds-fontsize-34` existiert real und wird nicht mehr referenziert._
+### Vom Check zutage gefördert — Kuratierungs-Entscheidungen ✅
+- [x] Nav-Orphans verlinken oder allowlisten: `/brand/marke` (→ 308-Redirect auf `/brand/identity` in `hooks.server.ts`, Stufe 2) · `/brand/resources/contributions` (aufgelöst → Route `/product/contribute`, PLAN-OPUS-2 Paket B). `check-nav.mjs` läuft sauber (52 Routen).
+- [x] Undokumentierten Token klären: `--z-ds-color-general-white-100` → in `foundation-tokens.ts` dokumentiert. _Ferner: `--z-ds-color-black-100` (toter Token) → CSS auf `--z-ds-color-general-black-100` umgestellt; `--z-ds-color-background-100` (echter Fehl-Token) → `--ds-surface-inverse` auf `--z-ds-color-text-100` gemappt. `--z-ds-fontsize-34` existiert real und wird nicht mehr referenziert._
 
 ## 5. ZdsButton / Ansatz C  ✅ (ADR-019, Option A: CSS-treu)
 Grundfund: `@zeitonline/design-system` liefert **nur CSS** (keine Komponenten). Der Specimen
@@ -138,8 +140,8 @@ Klassen + CSS-treuer Drift-Check.
 - [x] **`check-component-drift.mjs`** — ✅ gleicht dokumentierte Varianten ⇄ tatsächlich definierte CSS-Klassen ab (beide Richtungen, States ausgenommen). In `npm run check`. Verifiziert (künstliche „Ghost"-Variante erkannt).
 - [x] **`ButtonPlayground` (`ui/button-playground/`)** — ✅ interaktiver Specimen der echten ZEIT-Button-Familien (`z-button`/`z-text-button`/`z-page-shortcut`/`buttongroup`) aus dem React-Playground portiert: Live-Prop-Controls + mitlaufender Code, echte `--z-ds-*`-Tokens (theme-adaptiv), Chip + CodeBlock wiederverwendet. Route `/product/components/buttons` + Nav. Browser-verifiziert (Z+→Accent-Rot, Live-Code).
 
-### Offen (Kuratierungs-Entscheidung → gehört zu #13 Struktur)
-- [ ] **Button-Konsolidierung:** 3 Button-Repräsentationen nebeneinander — `/components/button` (sds-btn, Figma-Platzhalter, generiert) · `/components/buttons` (z-button-Familien, real, neu) · `src/components/Button.svelte` (zon-button, 4. Namensschema, undokumentiert). Welcher ist kanonisch? Mit der `src/`-Struktur besprechen.
+### Button-Konsolidierung ✅ (via Stufe 3 + 4)
+- [x] **Button-Konsolidierung:** aufgelöst. `/components/buttons` (ButtonPlayground/`ui/button-playground/`) wurde abgelöst und per 308 auf `/product/components/button` umgeleitet; die z-*-Familien sind jetzt datengetrieben dokumentiert (`button`, `text-button`, `page-shortcut`, `button-group`). Die Doku-App-eigene Button-Komponente heißt nun `.app-button` und lebt in `ui/button/Button.svelte` (ADR-011) — klar getrennt von den dokumentierten `z-button`-Familien.
 
 ## 5b. UI-Polish-Pass (emil-design-eng-Skill) ✅
 Alle Doku-UI-Komponenten gegen die Emil-Checkliste gefixt (Details siehe Skill
@@ -158,7 +160,7 @@ _Hinweis: Browser-Spot-Check war durch Basic Auth blockiert (ich gebe keine Pass
 ein) — morgen einmal durchklicken: Mobile-Drawer, Issues-Akkordeon, Lightbox-Entry._
 
 ## 5c. Bugfixing-Pass ✅
-- [x] **Lint auf 0 Fehler** — SearchPalette: nacktes `query;` → `const _search = query` (Dependency-Read, `^_`-Konvention), Ternary-Statement → if/else; 4 stale `svelte-ignore` entfernt (Lightbox + SearchPalette). _Verbleibend: 2 Warnungen in `Button.svelte`/`zds-button` — beide Dateien hängen im Struktur-Plan (Umzug/Löschung), bewusst nicht angefasst._
+- [x] **Lint auf 0 Fehler** — SearchPalette: nacktes `query;` → `const _search = query` (Dependency-Read, `^_`-Konvention), Ternary-Statement → if/else; 4 stale `svelte-ignore` entfernt (Lightbox + SearchPalette). _Die damals verbliebenen 2 Warnungen (`Button.svelte`/`zds-button`) sind hinfällig: `zds-button` gelöscht (Stufe 0), `Button.svelte` nach `ui/button/` gefoldet (Stufe 1)._
 - [x] **Login-Action loggte Formulardaten + E-Mail** in Server-Logs (PII/Debug-Reste) — alle `console.log` entfernt.
 - [x] **404-Link** `erscheinungsbild → /brand/icons` (Seite existiert nicht) → `/brand/icons/aufbau`. Link-Sweep über alle internen Links: sonst sauber.
 - [x] **SSR-Perf:** `+layout.server.ts` fetchte ~70 SVGs **pro Request** → Modul-Cache (nur vollständige Ergebnisse werden gecacht).
@@ -196,7 +198,7 @@ ein) — morgen einmal durchklicken: Mobile-Drawer, Issues-Akkordeon, Lightbox-E
 - [x] **Struktur-Finale (ADR-021)** — ✅ lib-Fold (src/ = pures SvelteKit, Aliase stabil, `$types/global`), `content/`→`ui/` gefoldet (Regel: „Chrome → layout/, alles andere → ui/"), `static/` = `media/ + downloads/ + fonts/` (Prefix-308-Redirects für Alt-Pfade), Root-README-Landkarte. Bugs dabei: toter user-manual-Download → brandguidelines.pdf; 3 Orphan-`img/`-Dirs in Routen gelöscht; `fonts.webp` als Orphan geflaggt.
 - [x] **Stufe 4** ✅ (ADR-023) — datengetriebenes Registry-Schema: `render.controls/template/cssFile/specimen/hint/stage` + `instantiate()` (eine Quelle für Preview & Code) + `scopeCss()`; **4 z-*-Familien migriert** (button datengetrieben, text-button/page-shortcut/button-group als eigene Routen mit model.json + pattern.css; button-group beweist den Specimen-Escape); `ui/button-playground` abgelöst; Drift-Check: explizites `cssClass`, pattern.css-Korpus, korrekte Basis-Meldungen, inverser Route-ohne-Entry-Check. Tests 10/10.
 - [x] **Stufe 5a** ✅ (ADR-024) — generierter Katalog-Index `$data/catalog` (Build-Zeit-Glob über co-located model.json + content.ts, Override-Map für Reihenfolge/Ausschlüsse); Components-Übersicht konsumiert ihn (+ Platzhalter-Fallback). 3 Tests.
-- [ ] **Stufe 5b** — echte Patterns **zon-teaser, cp-region, headed-meta, pager**: WARTET AUF ORIGINAL-QUELLEN (Markup + CSS von zeit.de) — nicht aus dem Gedächtnis fabrizieren. Pro Pattern dann: model.json (controls/template bzw. Specimen) + pattern.css + Export + Nav. _date-picker/input („Geplant") flaggt der inverse Check, bis sie Modelle bekommen._
+- [ ] **Stufe 5b** — echte Patterns **zon-teaser, cp-region, headed-meta, pager**: WARTET AUF ORIGINAL-QUELLEN (Markup + CSS von zeit.de) — nicht aus dem Gedächtnis fabrizieren. Pro Pattern dann: model.json (controls/template bzw. Specimen) + pattern.css + Export + Nav. _`input` ist inzwischen voll dokumentiert (model.json); `date-picker` ist der einzige verbleibende „Geplant"-Stub und flaggt den inversen Check, bis es ein Modell bekommt._
 
 ## Bewusst NICHT (Over-Scope / existiert schon)
 `AssetCard` & `FormatBadge` (kein Multi-Format-Datenmodell) · `Tooltip` (Portal zu komplex, native `title=`) · `Divider`/`Spinner` (YAGNI) · `RelatedGrid` via Card (zu schwer) · `InstallBlock` (CodeBlock deckt's) · `PageHero`/`SectionHeader` (Header sind nur `# {title}`) · stand-alone `SearchInput` (nur 1 Consumer) · `ColorRoleSwatch` (Color/TokenTable) · Storybook-Playground · Algolia/DocSearch · DAM/CMS · Token-Export-Pipeline · Auto-Nav-Generierung.

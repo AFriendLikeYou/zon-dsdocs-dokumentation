@@ -71,8 +71,12 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
    `src/routes/product/components/<kebab>/`: `+page.svx` + `spec.generated.ts` (beide **nie**
    von Hand editieren) + `content.ts` (redaktioneller Stub, **hier** editieren) und legt
    `model.json` co-locatet daneben ab. Re-Export später:
-   `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`.
-3. **Verlinken** — Menüeintrag in `src/lib/data/navigation.ts` ergänzen (`check-nav` warnt sonst).
+   `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`
+   (oder `npm run export:all` für alle Komponenten auf einmal).
+3. **Nav — kein Handeintrag.** Die Components-Sektion der Nav ist **katalog-getrieben**
+   (ADR-025): ein neues `model.json` erscheint automatisch. Nur optional Reihenfolge/Badge
+   in der Override-Map in `src/lib/data/catalog.ts`; geplante Stubs in `PLANNED_COMPONENTS`
+   (`src/lib/data/navigation.ts`).
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 
@@ -86,10 +90,10 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 ## Vor dem Pushen
 
 ```bash
-npm run check   # svelte-check 0/0 + Drift-Checks (Nav, Tokens, Assets — nur Warnungen)
+npm run check   # svelte-check 0/0 + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync — nur Warnungen)
 npm run build   # muss mit Exit 0 durchlaufen
 ```
 
 Die Drift-Checks sind **Warnungen, keine Blocker** („Never Block, Always Suggest"). Für CI
 lassen sie sich scharf schalten: `node tooling/check-nav.mjs --strict` (analog `check-tokens`,
-`check-assets`) → Exit 1 bei Drift.
+`check-assets`, `check-component-drift`, `check-zds-sync`) → Exit 1 bei Drift.

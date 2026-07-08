@@ -66,6 +66,39 @@ Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 
 ## Component-Doku-System
 
+### Schemazeichnung: Wie der Import funktioniert
+
+```
+  QUELLEN (drei Ebenen der Wahrheit)                       KANONIK                     MASCHINE (nie von Hand)
+  ─────────────────────────────────                        ───────                     ───────────────────────
+
+  ① FIGMA (ZDS-File)
+     get_design_context ──── Struktur, Per-State-Werte ┐
+     get_context_for_       Varianten-Achsen, Props ───┤
+       code_connect                                    │
+     use_figma +            exakte Maße, Token-        │
+       figma-measure.js ─── Bindungen, unbound[] ──────┤        ┌──────────────┐   Exporter (export.mjs)
+                            → herkunft: "gemessen"     ├──────► │  model.json  │ ──────────┬─► +page.svx
+                                                       │        │ (co-located, │           ├─► spec.generated.ts
+  ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content.ts (STUB,
+     pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               nur beim 1. Mal)
+       (kuratiert, flach)   (:hover/:disabled),        ├──────► └──────┬───────┘
+                            Web-Varianten, Tokens      │               │ import.meta.glob (BUILD-Zeit)
+                                                       │               ▼
+  ③ PRODUKTIONS-HTML (zeit.de)                         │        catalog.ts / agent-catalog.ts
+     echtes Markup ──────── ARIA-Semantik, Rollen,     │        (Registry: Nav + Katalog + MCP
+                            Live-Regions, inert ───────┘         erscheinen AUTOMATISCH)
+
+  MENSCH (redaktionell)                                         SEITE (Merge zur Laufzeit)
+  ─────────────────────                                         ──────────────────────────
+  content.ts ── zweck, verwendung, doDont, a11y-Texte,          spec = { ...generated, ...content }
+                variantInfo … (NIE überschrieben)      ───────►        └─ content GEWINNT
+
+  Prinzipien: „Nicht Gemessenes wird nicht erfunden" (herkunft: gemessen/abgeleitet/geschätzt) ·
+  Re-Import ohne Figma-Änderung ⇒ identischer Output (Drift-Signal) · Jede Quelle liefert die
+  Ebene, die die anderen nicht können: Figma=Maße/Tokens · CSS=Zustände · HTML=ARIA · Mensch=Urteil.
+```
+
 **Exporter** `tooling/zeit-de-exporter/export.mjs` bildet das render-unabhängige
 **Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Das `model.json`
 liegt **co-located** neben der Ausgabe (Re-Export per Ordner):
