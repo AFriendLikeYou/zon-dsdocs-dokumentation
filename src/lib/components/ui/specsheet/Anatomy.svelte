@@ -7,6 +7,7 @@
   import type { Snippet } from 'svelte';
   import type { Masse, MasseValue, SpacingSpec, Callout, CalloutAnchor } from '$types/spec';
   import { StageToggle } from '$components/ui/stage-toggle';
+  import { SegmentedControl } from '$components/ui/segmented-control';
 
   let {
     masse = null,
@@ -82,10 +83,15 @@
 <div class="art spec-canvas ds-stage" class:is-dark={isDark}>
   {#if showModeToggle}
     <div class="art-toolbar art-toolbar--left">
-      <div class="mode-toggle" role="group" aria-label="Ansicht">
-        <button type="button" class="mode-btn" aria-pressed={view === 'parts'} onclick={() => (mode = 'parts')}>Bestandteile</button>
-        <button type="button" class="mode-btn" aria-pressed={view === 'measure'} onclick={() => (mode = 'measure')}>Measurements</button>
-      </div>
+      <SegmentedControl
+        ariaLabel="Ansicht"
+        options={[
+          { value: 'parts', label: 'Bestandteile' },
+          { value: 'measure', label: 'Measurements' }
+        ]}
+        value={view}
+        onchange={(v) => (mode = v as 'parts' | 'measure')}
+      />
     </div>
   {/if}
   <div class="art-toolbar">
@@ -201,43 +207,6 @@
   .art-toolbar--left {
     right: auto;
     left: var(--z-ds-space-8);
-  }
-  /* Bestandteile ↔ Measurements — Segmented-Control im Stil des px↔Token-Umschalters. */
-  .mode-toggle {
-    display: inline-flex;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
-  }
-  .mode-btn {
-    border: none;
-    background: none;
-    border-radius: 999px;
-    padding: 3px 12px;
-    height: 26px;
-    font-size: var(--ds-text-xs);
-    font-weight: 500;
-    color: var(--z-ds-color-text-55);
-    cursor: pointer;
-    white-space: nowrap;
-    transition:
-      color var(--ds-dur) var(--ds-ease),
-      background-color var(--ds-dur) var(--ds-ease);
-  }
-  .mode-btn[aria-pressed='true'] {
-    background: var(--z-ds-color-background-0);
-    color: var(--z-ds-color-text-100);
-    box-shadow: var(--ds-shadow-sm);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .mode-btn:hover {
-      color: var(--z-ds-color-text-100);
-    }
-  }
-  .mode-btn:focus-visible {
-    outline: 2px solid var(--ds-focus-ring);
-    outline-offset: 2px;
   }
   .specimen {
     /* Immer Originalgröße (1:1) — kein Zoom, damit Maße/Proportionen stimmen. */
