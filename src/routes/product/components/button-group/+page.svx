@@ -13,8 +13,8 @@ kategorie: Aktionen
 	import { ComponentHero, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const patternCssCode = `/* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .buttongroup {

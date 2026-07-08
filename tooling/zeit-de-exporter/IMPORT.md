@@ -14,7 +14,7 @@ Figma-Node ──(Figma MCP)──▶ Fakten (Name, Varianten, Tokens, Maße, St
 model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
    │
    ▼
-Katalog-Order (optional) · Gate · redaktionelle Prüfung (content.ts)
+Katalog-Order (optional) · Gate · redaktionelle Prüfung (content.json)
 ```
 
 ## Schnellstart
@@ -118,7 +118,7 @@ Unscoped, co-located neben `model.json`. **Flache Regeln, keine At-Rules**
 node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>
 ```
 
-Erzeugt `+page.svx` + `spec.generated.ts` (+ `content.ts`-Stub beim ersten Mal).
+Erzeugt `+page.svx` + `spec.generated.ts` (+ `content.json`-Stub beim ersten Mal).
 
 ## 5 · Katalog (kein Nav-Handeintrag)
 
@@ -136,7 +136,7 @@ npm run build   # EXIT 0
 npx vitest run  # grün
 ```
 
-Danach in `content.ts` klar trennen: **aus Figma übernommen** (verlässlich) vs.
+Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) vs.
 **Platzhalter/geschätzt** (Beispieltexte, gerechnete a11y-Kontraste). Visuell abnehmen
 (die Seite liegt hinter Basic Auth).
 
@@ -150,4 +150,4 @@ Danach in `content.ts` klar trennen: **aus Figma übernommen** (verlässlich) vs
 - [ ] Exporter gelaufen
 - [ ] ggf. Katalog-Order/Badge in `catalog.ts` (Nav ist katalog-getrieben — kein Handeintrag)
 - [ ] Gate grün (check 0/0 · build · vitest)
-- [ ] Platzhalter/Beispieltexte in `content.ts` geprüft
+- [ ] Platzhalter/Beispieltexte in `content.json` geprüft

@@ -34,7 +34,7 @@ src/
 ├── routes/
 │   ├── brand/                  Brandhub-Seiten (englische URLs, deutsche Inhalte)
 │   ├── product/                DS-Doku; components/<slug>/ = +page.svx · model.json ·
-│   │                           spec.generated.ts · content.ts  (co-located, Exporter)
+│   │                           spec.generated.ts · content.json  (co-located, Exporter)
 │   ├── login/  admin/
 │   ├── +layout.svelte          Chrome-Mount + Bereichslogik (brand/product)
 │   └── hooks.server.ts (in src/): Basic Auth + 308-Redirects für Alt-URLs
@@ -57,7 +57,7 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Drift
   → `npm run gen:assets`. Sonderfälle in `src/lib/data/*-overrides.mjs`.
 - **Seite:** `src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in `src/lib/data/navigation.ts`.
 - **Dokumentierte Komponente:** `model.json` → `node tooling/zeit-de-exporter/export.mjs …`
-  (redaktionelle Texte danach in `content.ts`).
+  (redaktionelle Texte danach in `content.json`).
 - **UI-Baustein der Doku:** `src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
 
 Ausführliche Rezepte: **[CONTRIBUTING.md](CONTRIBUTING.md)** · Konventionen:

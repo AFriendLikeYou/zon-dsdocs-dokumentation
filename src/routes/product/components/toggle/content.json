@@ -1,17 +1,4 @@
-// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.
-// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).
-// Die Felder überschreiben die generierten Werte aus spec.generated.ts.
-//
-//   zweck       – Beschreibung im Hero
-//   status      – ready_for_dev | completed | changed
-//   version     – Snapshot-/Versions-Label im Hero
-//   variantInfo – Wann welche Variante nutzen (Label → Text)
-//   callouts    – Anatomie-Beschriftungen ({ nr, text })
-//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
-//   doDont      – { do: [...], dont: [...] }
-import type { ComponentSpec } from '$types/spec';
-
-export const content = {
+{
 	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
 	"status": "ready_for_dev",
 	"callouts": [
@@ -89,9 +76,12 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 2845:5966",
-	"verwandt": ["checkbox", "input"],
+	"verwandt": [
+		"checkbox",
+		"input"
+	],
 	"variantInfo": {
 		"Off": "Ausgeschaltet — Track in Background-20, Thumb links.",
 		"On": "Eingeschaltet — Track in Text-100, Thumb rechts."
 	}
-} satisfies Partial<ComponentSpec>;
+}

@@ -48,7 +48,7 @@ src/
 │     └─ components/<slug>/       # eine Component-Doku pro Ordner ↓
 │        ├─ model.json            # Eingabe-Modell (co-located, kanonisch)
 │        ├─ pattern.css           # unscoped Pattern-CSS (echte z-ds-Tokens)
-│        ├─ content.ts            # MENSCH — redaktionell, nie überschrieben
+│        ├─ content.json            # MENSCH — redaktionell, nie überschrieben
 │        ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
 │        └─ +page.svx             # MASCHINE — autogeneriert
 ├─ lib/                          # Aliases: $components $data $stores $config $types
@@ -80,7 +80,7 @@ Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
        figma-measure.js ─── Bindungen, unbound[] ──────┤        ┌──────────────┐   Exporter (export.mjs)
                             → herkunft: "gemessen"     ├──────► │  model.json  │ ──────────┬─► +page.svx
                                                        │        │ (co-located, │           ├─► spec.generated.ts
-  ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content.ts (STUB,
+  ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content.json (STUB,
      pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               nur beim 1. Mal)
        (kuratiert, flach)   (:hover/:disabled),        ├──────► └──────┬───────┘
                             Web-Varianten, Tokens      │               │ import.meta.glob (BUILD-Zeit)
@@ -91,7 +91,7 @@ Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 
   MENSCH (redaktionell)                                         SEITE (Merge zur Laufzeit)
   ─────────────────────                                         ──────────────────────────
-  content.ts ── zweck, verwendung, doDont, a11y-Texte,          spec = { ...generated, ...content }
+  content.json ── zweck, verwendung, doDont, a11y-Texte,          spec = { ...generated, ...content }
                 variantInfo … (NIE überschrieben)      ───────►        └─ content GEWINNT
 
   Prinzipien: „Nicht Gemessenes wird nicht erfunden" (herkunft: gemessen/abgeleitet/geschätzt) ·
@@ -106,7 +106,7 @@ liegt **co-located** neben der Ausgabe (Re-Export per Ordner):
 node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>
 ```
 Erzeugt `+page.svx` + `spec.generated.ts` (Maschine, immer neu) und einmalig den
-Stub `content.ts` (Mensch, nie überschrieben). Die Seite führt beides zusammen:
+Stub `content.json` (Mensch, nie überschrieben). Die Seite führt beides zusammen:
 `const spec = { ...generated, ...content }` — **content gewinnt**.
 
 **Registry-Index** `src/lib/data/catalog.ts` entsteht zur Build-Zeit per
@@ -144,7 +144,7 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
    wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen in der
    Override-Map in `catalog.ts`; geplante Stubs ohne model.json in `PLANNED_COMPONENTS`
    (navigation.ts).
-6. Gate ausführen; redaktionelle Texte in `content.ts` prüfen (klar trennen:
+6. Gate ausführen; redaktionelle Texte in `content.json` prüfen (klar trennen:
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
 ## Konventionen / Regeln
@@ -154,7 +154,7 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
   Pattern-CSS** (echte z-ds-Kopie) und generierte Seiten.
 - **Doku-Modell ist kanonisch** und render-unabhängig. Repo-Spezifisches gehört
   in die Exporter-Schicht bzw. den `render`-Block.
-- **Generierte Dateien nie von Hand editieren** — Redaktion in `content.ts`
+- **Generierte Dateien nie von Hand editieren** — Redaktion in `content.json`
   (der „Edit on GitHub"-Stift zeigt dorthin).
 - **Vanilla HTML/CSS ist der Default** für Beispiele; Svelte nur bei
   interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.

@@ -1,22 +1,4 @@
-// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.
-// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).
-// Die Felder überschreiben die generierten Werte aus spec.generated.ts.
-//
-//   zweck            – Beschreibung im Hero
-//   status           – ready_for_dev | completed | changed
-//   version          – Snapshot-/Versions-Label im Hero
-//   variantInfo      – Wann welche Variante nutzen (Label → Text)
-//   callouts         – Anatomie-Beschriftungen ({ nr, text })
-//   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })
-//   tastatur         – Tastatur-Bedienung ({ taste, aktion })
-//   doDont           – { do: [...], dont: [...] }
-//   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })
-//   verwendung       – { nutzen: [...], nichtNutzen: [...] }
-//   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })
-//   verwandt         – Querverweise auf verwandte Komponenten (Katalog-Slugs)
-import type { ComponentSpec } from '$types/spec';
-
-export const content = {
+{
 	"zweck": "Horizontal scrollende Slot-Leiste mit optionalen Controls (Progress-Indikatoren + Vor/Zurück-Pfeile). Slots sind Content-Container (im Produkt: Teaser, Bilder, Karten).",
 	"status": "ready_for_dev",
 	"callouts": [
@@ -124,7 +106,10 @@ export const content = {
 			"Nicht für kritische, einzeln wichtige Elemente, die hinter dem Rand verschwinden könnten."
 		]
 	},
-	"verwandt": ["cell", "button"],
+	"verwandt": [
+		"cell",
+		"button"
+	],
 	"version": "Figma-Node 630:630 · CSS zon-carousel",
 	"variantInfo": {
 		"Small": "Kompakte Sektionsbreite (375). Kein Fader.",
@@ -139,4 +124,4 @@ export const content = {
 		"autoplay": "Automatischer Wechsel mit Fortschritts-Dot und Play/Pause-Steuerung.",
 		"no-controls": "Reine Scroll-Leiste ohne Pfeile/Dots (Figma-Prop Controls=false)."
 	}
-} satisfies Partial<ComponentSpec>;
+}

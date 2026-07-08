@@ -1,17 +1,4 @@
-// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.
-// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).
-// Die Felder überschreiben die generierten Werte aus spec.generated.ts.
-//
-//   zweck       – Beschreibung im Hero
-//   status      – ready_for_dev | completed | changed
-//   version     – Snapshot-/Versions-Label im Hero
-//   variantInfo – Wann welche Variante nutzen (Label → Text)
-//   callouts    – Anatomie-Beschriftungen ({ nr, text })
-//   a11y        – Barrierefreiheit-Hinweise ({ label, wert, status })
-//   doDont      – { do: [...], dont: [...] }
-import type { ComponentSpec } from '$types/spec';
-
-export const content = {
+{
 	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
 	"status": "ready_for_dev",
 	"callouts": [
@@ -114,7 +101,10 @@ export const content = {
 		}
 	],
 	"version": "Figma-Node 477:3021",
-	"verwandt": ["checkbox", "stepper"],
+	"verwandt": [
+		"checkbox",
+		"stepper"
+	],
 	"variantInfo": {
 		"Default": "Ruhezustand, leeres Feld.",
 		"Active": "Fokussiert — Rahmen in Text-55.",
@@ -124,4 +114,4 @@ export const content = {
 		"Leading Icon": "Führendes Icon, z. B. Suche.",
 		"Dropdown": "Chevron als Auswahl-/Combobox-Trigger."
 	}
-} satisfies Partial<ComponentSpec>;
+}

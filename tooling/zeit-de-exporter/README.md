@@ -19,21 +19,21 @@ siehe [`IMPORT.md`](./IMPORT.md).
 | --- | --- | --- |
 | `+page.svx` | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets | **nie** (jeder Sync überschreibt) |
 | `spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt) |
-| `content.ts` | Redaktioneller Stub: `export const content = { … }` — überschreibt Defaults | **hier** (einmalig erzeugt, nie überschrieben) |
+| `content.json` | Redaktioneller Stub: `export const content = { … }` — überschreibt Defaults | **hier** (einmalig erzeugt, nie überschrieben) |
 | `model.json` | Eingabe, co-located neben dem Output (Re-Export via Ordner) | die Eingabe selbst |
 | `pattern.css` | *(optional)* unscoped Pattern-CSS, falls `render.cssFile` gesetzt | die Eingabe selbst |
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
-führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.ts` gewinnt**.
+führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json` gewinnt**.
 
 ## Nach dem Export — welche Datei?
 
 - **Modell geändert** (Maße, Tokens, Varianten, Playground …) → `model.json` + Exporter
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
-  `content.ts` bleibt unangetastet.
+  `content.json` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
   `doDontBeispiele`, `verwendung`, `wording`, `verwandt`, `version`, `variantInfo`) →
-  **`content.ts` von Hand**.
+  **`content.json` von Hand**.
 - **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
   Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Nur
   Reihenfolge/Badge (optional) in der Override-Map in
@@ -108,7 +108,7 @@ Weitere `render`-Felder:
 | `css` | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas` |
 | `codeNote`, `codeSvelte` | HTML/Svelte-Code-Beispiele (Develop) |
 | `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) |
-| `version`, `variantInfo` | **redaktionell** → landen im `content.ts`-Stub |
+| `version`, `variantInfo` | **redaktionell** → landen im `content.json`-Stub |
 
 > `varianten[].werte[].cssClass` deklariert die Modifier-Klasse explizit —
 > `check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:

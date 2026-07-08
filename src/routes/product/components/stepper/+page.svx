@@ -15,8 +15,8 @@ kategorie: Formulare
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50},{"nr":2,"side":"top","x":50},{"nr":3,"side":"right","y":50}];
 	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-stepper--hover"},{"value":"focus","label":"Focus","cssClass":"z-stepper--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-stepper--disabled"}]}];

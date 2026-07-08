@@ -8,7 +8,7 @@
  *
  *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx   (immer neu)
  *   - Maschinen-Modell:          src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
- *   - Redaktioneller Stub:       src/routes/product/components/<kebab>/content.ts  (nur beim ersten Mal)
+ *   - Redaktioneller Stub:       src/routes/product/components/<kebab>/content.json (nur beim ersten Mal)
  *   - Eingabe-Modell co-locatet: src/routes/product/components/<kebab>/model.json  (neben dem Output)
  *
  * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
@@ -122,7 +122,29 @@ function renderGenerated(model) {
 	);
 }
 
-/** content.ts — redaktioneller Stub. Wird nur erzeugt, wenn noch nicht vorhanden (nie überschrieben). */
+/**
+ * content.json — redaktioneller Stub (reines JSON, VON HAND PFLEGBAR). Wird nur
+ * erzeugt, wenn noch nicht vorhanden (nie überschrieben). Die Felder überschreiben
+ * beim Merge die generierten Werte aus spec.generated.ts (content gewinnt).
+ *
+ * JSON statt TS (CMS Phase 0): ein /admin-Editor bearbeitet Content maschinell
+ * (JSON.parse/stringify) — kein AST-Wrapper (`satisfies`), keine Kommentare im File.
+ * Validierung der Editorial-Keys übernimmt tooling/check-content.mjs (im Gate).
+ *
+ * Feld-Legende (früher als Kommentar-Header im .ts-Stub — JSON trägt keine Kommentare):
+ *   zweck            – Beschreibung im Hero
+ *   status           – ready_for_dev | completed | changed
+ *   version          – Snapshot-/Versions-Label im Hero
+ *   variantInfo      – Wann welche Variante nutzen (Label → Text)
+ *   callouts         – Anatomie-Beschriftungen ({ nr, text })
+ *   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })
+ *   tastatur         – Tastatur-Bedienung ({ taste, aktion })
+ *   doDont           – { do: [...], dont: [...] }
+ *   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })
+ *   verwendung       – { nutzen: [...], nichtNutzen: [...] }
+ *   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })
+ *   verwandt         – Querverweise auf verwandte Komponenten (Katalog-Slugs)
+ */
 function renderContentStub(model) {
 	const render = model.render ?? {};
 	/** @type {Record<string, unknown>} */
@@ -130,27 +152,7 @@ function renderContentStub(model) {
 	for (const k of EDITORIAL) if (model[k] !== undefined) content[k] = model[k];
 	if (render.version !== undefined) content.version = render.version;
 	if (render.variantInfo !== undefined) content.variantInfo = render.variantInfo;
-	const json = JSON.stringify(content, null, '\t');
-	return (
-		`// Redaktioneller Inhalt der Component-Doku — VON HAND PFLEGBAR.\n` +
-		`// Diese Datei wird vom zeit-de-Exporter NICHT überschrieben (einmalig als Stub erzeugt).\n` +
-		`// Die Felder überschreiben die generierten Werte aus spec.generated.ts.\n` +
-		`//\n` +
-		`//   zweck            – Beschreibung im Hero\n` +
-		`//   status           – ready_for_dev | completed | changed\n` +
-		`//   version          – Snapshot-/Versions-Label im Hero\n` +
-		`//   variantInfo      – Wann welche Variante nutzen (Label → Text)\n` +
-		`//   callouts         – Anatomie-Beschriftungen ({ nr, text })\n` +
-		`//   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })\n` +
-		`//   tastatur         – Tastatur-Bedienung ({ taste, aktion })\n` +
-		`//   doDont           – { do: [...], dont: [...] }\n` +
-		`//   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })\n` +
-		`//   verwendung       – { nutzen: [...], nichtNutzen: [...] }\n` +
-		`//   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })\n` +
-		`//   verwandt         – Querverweise auf verwandte Komponenten (Katalog-Slugs)\n` +
-		`import type { ComponentSpec } from '$types/spec';\n\n` +
-		`export const content = ${json} satisfies Partial<ComponentSpec>;\n`
-	);
+	return JSON.stringify(content, null, '\t') + '\n';
 }
 
 /**
@@ -511,10 +513,10 @@ function renderPage(model, { patternCss = null } = {}) {
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
-		`\timport { content } from './content';\n`;
+		`\timport content from './content.json';\n`;
 
 	const decls =
-		`\t// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.\n` +
+		`\t// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.\n` +
 		`\tconst ${S} = { ...generated, ...content };\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
@@ -951,7 +953,7 @@ function main() {
 
 	const kebab = kebabCase(model.name);
 	const outDir = resolve(root, ROUTE_BASE, kebab);
-	const contentPath = resolve(outDir, 'content.ts');
+	const contentPath = resolve(outDir, 'content.json');
 	const contentExists = existsSync(contentPath);
 
 	// Pattern-CSS (unscoped, co-located) lesen, falls das Modell es referenziert.
@@ -966,7 +968,7 @@ function main() {
 		patternCss = readFileSync(cssPath, 'utf8');
 	}
 
-	// Maschinen-Dateien werden immer geschrieben; content.ts nur beim ersten Mal (Stub).
+	// Maschinen-Dateien werden immer geschrieben; content.json nur beim ersten Mal (Stub).
 	const machineFiles = [
 		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss }) },
 		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
@@ -994,11 +996,19 @@ function main() {
 		console.log(`  Stub erzeugt: ${relative(root, contentPath)}`);
 	}
 
-	// Altes, monolithisches spec.ts aufräumen (durch spec.generated.ts + content.ts ersetzt).
+	// Altes, monolithisches spec.ts aufräumen (durch spec.generated.ts + content.json ersetzt).
 	const legacySpec = resolve(outDir, 'spec.ts');
 	if (existsSync(legacySpec)) {
 		unlinkSync(legacySpec);
 		console.log(`  entfernt (veraltet): ${relative(root, legacySpec)}`);
+	}
+
+	// Altes content.ts aufräumen (durch content.json ersetzt, CMS Phase 0) — NUR wenn
+	// content.json existiert, sonst ginge die redaktionelle Mensch-Datei verloren.
+	const legacyContent = resolve(outDir, 'content.ts');
+	if (contentExists && existsSync(legacyContent)) {
+		unlinkSync(legacyContent);
+		console.log(`  entfernt (veraltet): ${relative(root, legacyContent)}`);
 	}
 
 	// Eingabe-Modell neben den Output legen (Co-Location) — Re-Export via Ordner möglich.

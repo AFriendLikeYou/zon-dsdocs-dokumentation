@@ -2,12 +2,12 @@
  * catalog.ts — generierter Index aller dokumentierten Patterns/Komponenten.
  *
  * Discovery killt Drift (ADR-018/023): Storage bleibt CO-LOCATED
- * (src/routes/product/components/<slug>/{model.json, content.ts, pattern.css}),
+ * (src/routes/product/components/<slug>/{model.json, content.json, pattern.css}),
  * dieser Index entsteht zur Build-Zeit per import.meta.glob — ein neues Pattern
  * (model.json + Export) erscheint hier automatisch, ohne Handliste.
  *
  * Kuratierte, nicht ableitbare Felder (Reihenfolge, Ausschlüsse) leben in der
- * Override-Map. Redaktionelle Texte (content.ts) überschreiben das Maschinen-
+ * Override-Map. Redaktionelle Texte (content.json) überschreiben das Maschinen-
  * Modell per Shallow-Merge — wie auf den Component-Seiten selbst.
  */
 import type { BadgeVariant, ComponentSpec } from '$types/spec';
@@ -51,9 +51,9 @@ const models = import.meta.glob('/src/routes/product/components/*/model.json', {
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec> & { render?: unknown }>;
 
-const contents = import.meta.glob('/src/routes/product/components/*/content.ts', {
+const contents = import.meta.glob('/src/routes/product/components/*/content.json', {
 	eager: true,
-	import: 'content'
+	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
 
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
@@ -68,7 +68,8 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 			$schema?: unknown;
 		};
 		const content =
-			contents[`/src/routes/product/components/${slug}/content.ts`] ?? ({} as Partial<ComponentSpec>);
+			contents[`/src/routes/product/components/${slug}/content.json`] ??
+			({} as Partial<ComponentSpec>);
 		return {
 			slug,
 			spec: { ...machine, ...content },

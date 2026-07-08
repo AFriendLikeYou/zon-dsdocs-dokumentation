@@ -13,8 +13,8 @@ kategorie: Aktionen
 	import { ComponentHero, SpecimenGrid, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const playgroundControls = [{"key":"size","label":"Size","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"slim","label":"Slim","cssClass":"z-text-button--slim"},{"value":"large","label":"Large","cssClass":"z-text-button--large"}]},{"key":"bold","label":"Bold","type":"toggle","cssClass":"z-text-button--bold"},{"key":"active","label":"Active","type":"toggle","cssClass":"z-text-button--active"},{"key":"onImage","label":"On Image","type":"toggle","cssClass":"z-text-button--on-image"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
 	const playgroundTemplate = `<button type="button" class="z-text-button{classes}"{attrs}>Mehr anzeigen</button>`;

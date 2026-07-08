@@ -15,8 +15,8 @@ kategorie: Inhalte
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":55},{"nr":3,"side":"right","y":45},{"nr":4,"side":"bottom","x":55}];
 	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}];

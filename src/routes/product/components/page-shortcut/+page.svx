@@ -12,8 +12,8 @@ kategorie: Aktionen
 	import { ComponentHero, CodeBlock } from '$components/ui/specsheet';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const playgroundControls = [];
 	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>

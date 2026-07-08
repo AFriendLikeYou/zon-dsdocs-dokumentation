@@ -69,7 +69,7 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 2. **Exporter laufen lassen** —
    `node tooling/zeit-de-exporter/export.mjs <model.json>`. Erzeugt unter
    `src/routes/product/components/<kebab>/`: `+page.svx` + `spec.generated.ts` (beide **nie**
-   von Hand editieren) + `content.ts` (redaktioneller Stub, **hier** editieren) und legt
+   von Hand editieren) + `content.json` (redaktioneller Stub, **hier** editieren) und legt
    `model.json` co-locatet daneben ab. Re-Export später:
    `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`
    (oder `npm run export:all` für alle Komponenten auf einmal).
@@ -80,7 +80,7 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 
-- **Nur** `content.ts` im jeweiligen Component-Ordner editieren (`zweck`, `status`, `callouts`,
+- **Nur** `content.json` im jeweiligen Component-Ordner editieren (`zweck`, `status`, `callouts`,
   `a11y`, `doDont`, `verwendung`, …). Diese Datei überschreibt die generierten Defaults und
   wird beim Re-Export **nie** überschrieben.
 - **Nie** `spec.generated.ts` oder `+page.svx` von Hand ändern — die erzeugt der Exporter neu.

@@ -15,8 +15,8 @@ kategorie: Aktionen
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
 	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];

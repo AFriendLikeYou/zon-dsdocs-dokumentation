@@ -15,8 +15,8 @@ kategorie: Formulare
 	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":40},{"nr":3,"side":"right","y":50}];
 	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"active","label":"Active","cssClass":"z-input--active"},{"value":"filled","label":"Filled","cssClass":"z-input--filled"},{"value":"error","label":"Error","cssClass":"z-input--error"},{"value":"disabled","label":"Disabled","cssClass":"z-input--disabled"}]},{"key":"lead","label":"Leading Icon","type":"toggle","cssClass":"z-input--lead"},{"key":"dropdown","label":"Dropdown","type":"toggle","cssClass":"z-input--dropdown"}];

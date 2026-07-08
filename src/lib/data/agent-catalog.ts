@@ -8,7 +8,7 @@
  * und lädt kein CSS; er bleibt die Quelle für die Site-UI.
  *
  * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die co-locateten model.json +
- * content.ts (content gewinnt), `$schema` gestrippt. Zusätzlich pattern.css als ?raw.
+ * content.json (content gewinnt), `$schema` gestrippt. Zusätzlich pattern.css als ?raw.
  */
 import type { ComponentSpec } from '$types/spec';
 
@@ -24,7 +24,7 @@ export type AgentRender = {
 
 export type AgentCatalogEntry = {
 	slug: string;
-	/** Gemergter Spec (Maschinen-Modell + content.ts) INKLUSIVE render. */
+	/** Gemergter Spec (Maschinen-Modell + content.json) INKLUSIVE render. */
 	spec: Partial<ComponentSpec> & { render?: AgentRender };
 	/** Rohes, unscoped Pattern-CSS (echte --z-ds-*-Token), falls vorhanden. */
 	patternCss: string | null;
@@ -36,9 +36,9 @@ const models = import.meta.glob('/src/routes/product/components/*/model.json', {
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec> & { render?: AgentRender; $schema?: unknown }>;
 
-const contents = import.meta.glob('/src/routes/product/components/*/content.ts', {
+const contents = import.meta.glob('/src/routes/product/components/*/content.json', {
 	eager: true,
-	import: 'content'
+	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
 
 const patterns = import.meta.glob('/src/routes/product/components/*/pattern.css', {
@@ -55,7 +55,7 @@ export const AGENT_CATALOG: AgentCatalogEntry[] = Object.entries(models)
 		// `$schema` ist nur Editor-Komfort und darf nicht ins Modell leaken; render bleibt.
 		const { $schema: _schema, ...withRender } = model;
 		const content =
-			contents[`/src/routes/product/components/${slug}/content.ts`] ??
+			contents[`/src/routes/product/components/${slug}/content.json`] ??
 			({} as Partial<ComponentSpec>);
 		return {
 			slug,
