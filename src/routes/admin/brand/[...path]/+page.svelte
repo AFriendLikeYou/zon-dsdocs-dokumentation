@@ -19,6 +19,27 @@
 			prose: proseState
 		})
 	);
+
+	// Bild einfügen: gewähltes Medium als Markdown ![…](path) an die Cursor-Position
+	// des Prosa-Feldes. Markdown-Bild = prosa-sicher (kein </{}) → Insel-Schutz bleibt;
+	// mdsvex rendert es als <img> (16:9-Konvention greift). Löschen = Zeile im Feld
+	// entfernen (reiner Text).
+	let selectedMedia = $state(data.media[0]?.path ?? '');
+	let altText = $state('Bild');
+	const taEls: Record<number, HTMLTextAreaElement | null> = {};
+
+	function insertImage(index: number) {
+		if (!selectedMedia) return;
+		const ta = taEls[index];
+		const cur = proseState[index] ?? '';
+		const pos = ta ? ta.selectionStart : cur.length;
+		const before = cur.slice(0, pos);
+		const after = cur.slice(pos);
+		const md = `![${altText.trim() || 'Bild'}](${selectedMedia})`;
+		// Bild auf eigene Zeile (eigener Markdown-Absatz).
+		const ins = (before && !before.endsWith('\n') ? '\n' : '') + md + (after && !after.startsWith('\n') ? '\n' : '');
+		proseState[index] = before + ins + after;
+	}
 </script>
 
 <svelte:head><title>{data.title} bearbeiten – Admin</title></svelte:head>
@@ -63,12 +84,36 @@
 
 		<section class="block">
 			<h2 class="block-title">Inhalt</h2>
+
+			{#if !data.bodyLocked}
+				<div class="media-bar">
+					<span class="lbl media-lbl">Bild</span>
+					{#if data.media.length}
+						<select bind:value={selectedMedia} aria-label="Bild auswählen">
+							{#each data.media as m (m.path)}
+								<option value={m.path}>{m.name}</option>
+							{/each}
+						</select>
+						<input class="alt" bind:value={altText} aria-label="Alt-Text" placeholder="Alt-Text" />
+					{:else}
+						<span class="media-empty">Noch keine Bilder.</span>
+					{/if}
+					<a class="media-upload" href="/admin/media">Neues Bild hochladen →</a>
+				</div>
+				<p class="media-hint">Ein Bild wird als <code>![Alt](Pfad)</code> in das fokussierte Prosa-Feld eingefügt. Löschen: die Zeile im Feld entfernen.</p>
+			{/if}
+
 			{#each data.segments as seg (seg.index)}
 				{#if seg.type === 'prosa'}
-					<label class="field">
-						<span class="lbl">Prosa</span>
-						<textarea class="prosa" bind:value={proseState[seg.index]} rows={Math.max(3, seg.content.split('\n').length + 1)}></textarea>
-					</label>
+					<div class="field">
+						<div class="prosa-head">
+							<span class="lbl">Prosa</span>
+							{#if data.media.length}
+								<button type="button" class="ins-btn" onclick={() => insertImage(seg.index)}>+ Bild einfügen</button>
+							{/if}
+						</div>
+						<textarea class="prosa" bind:this={taEls[seg.index]} bind:value={proseState[seg.index]} rows={Math.max(3, seg.content.split('\n').length + 1)}></textarea>
+					</div>
 				{:else}
 					<div class="insel" aria-label="Geschützte Svelte-Insel">
 						<span class="insel-tag">geschützt: Svelte-Insel</span>
@@ -144,6 +189,59 @@
 		font-weight: 600;
 		color: var(--ds-text-muted);
 		margin-bottom: var(--z-ds-space-xs);
+	}
+	.media-bar {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--z-ds-space-s);
+		margin-bottom: var(--z-ds-space-xs);
+	}
+	.media-lbl {
+		margin: 0;
+	}
+	.media-bar select {
+		flex: 1 1 14rem;
+		min-width: 0;
+	}
+	.media-bar .alt {
+		flex: 0 1 10rem;
+	}
+	.media-empty {
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-muted);
+	}
+	.media-upload {
+		font-size: var(--ds-text-sm);
+		color: var(--ds-accent);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.media-hint {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		margin: 0 0 var(--z-ds-space-l);
+	}
+	.prosa-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--z-ds-space-m);
+		margin-bottom: var(--z-ds-space-xs);
+	}
+	.ins-btn {
+		border: 1px dashed var(--ds-border);
+		background: none;
+		border-radius: var(--ds-radius-sm);
+		padding: 2px var(--z-ds-space-s);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-body);
+		cursor: pointer;
+	}
+	.ins-btn:focus-visible,
+	.media-upload:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
 	}
 	input,
 	textarea {
