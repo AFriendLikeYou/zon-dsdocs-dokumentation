@@ -5,9 +5,21 @@ import { resolve } from 'node:path';
 import { dev } from '$app/environment';
 
 // Editierbare redaktionelle Felder (Teilmenge von EDITORIAL im Exporter). Nur
-// diese überschreibt das Formular — a11y/callouts/doDontBeispiele/verwandt/version
+// diese überschreibt das Formular — nicht gelistete Felder (z. B. version, masse)
 // bleiben unangetastet erhalten. Schema-Quelle: content.json / ComponentSpec.
-const EDITABLE = ['zweck', 'status', 'verwendung', 'doDont', 'variantInfo'] as const;
+const EDITABLE = [
+	'zweck',
+	'status',
+	'verwendung',
+	'doDont',
+	'variantInfo',
+	'a11y',
+	'callouts',
+	'tastatur',
+	'wording',
+	'verwandt',
+	'doDontBeispiele'
+] as const;
 
 const isKnown = (slug: string) => CATALOG.some((c) => c.slug === slug);
 // Slug gegen den Katalog validieren → kein Path-Traversal in den fs-Pfad.
@@ -28,7 +40,12 @@ export const load = ({ params }) => {
 	const variantLabels = (entry.spec.varianten ?? []).flatMap((axis) =>
 		(axis.werte ?? []).map((w) => w.label)
 	);
-	return { slug, name: entry.spec.name ?? slug, content, variantLabels, writable: dev };
+	// Katalog-Slugs (ohne die aktuelle Komponente) als Auswahl für den verwandt-Editor.
+	const slugs = CATALOG.filter((c) => c.slug !== slug).map((c) => ({
+		slug: c.slug,
+		name: c.spec.name ?? c.slug
+	}));
+	return { slug, name: entry.spec.name ?? slug, content, variantLabels, slugs, writable: dev };
 };
 
 export const actions = {

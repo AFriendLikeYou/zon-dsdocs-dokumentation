@@ -6,12 +6,24 @@
 	// Editierbare Teilmenge, initialisiert aus content.json. Reaktiver Client-State;
 	// beim Submit als JSON in ein Hidden-Feld serialisiert (robuster als FormData-
 	// Array-Parsing). Der Server merged nur diese Keys zurück.
+	type A11yStatus = 'pass' | 'warn' | 'todo';
+	type CalloutRow = { nr: number; text: string; art?: string; optionalDurch?: string };
+	type DoDontPair = {
+		gut: { html: string; text: string };
+		schlecht: { html: string; text: string };
+	};
 	type Content = {
 		zweck: string;
 		status: string;
 		verwendung: { nutzen: string[]; nichtNutzen: string[] };
 		doDont: { do: string[]; dont: string[] };
 		variantInfo: { key: string; value: string }[];
+		a11y: { label: string; wert: string; status: A11yStatus }[];
+		tastatur: { taste: string; aktion: string }[];
+		callouts: CalloutRow[];
+		wording: { schlecht: string; gut: string; hinweis: string }[];
+		verwandt: string[];
+		doDontBeispiele: DoDontPair[];
 	};
 
 	const c = data.content as {
@@ -20,6 +32,15 @@
 		verwendung?: { nutzen?: string[]; nichtNutzen?: string[] };
 		doDont?: { do?: string[]; dont?: string[] };
 		variantInfo?: Record<string, string>;
+		a11y?: { label?: string; wert?: string; status?: string }[];
+		tastatur?: { taste?: string; aktion?: string }[];
+		callouts?: { nr?: number; text?: string; art?: string; optionalDurch?: string }[];
+		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
+		verwandt?: string[];
+		doDontBeispiele?: {
+			gut?: { html?: string; text?: string };
+			schlecht?: { html?: string; text?: string };
+		}[];
 	};
 	let state = $state<Content>({
 		zweck: c.zweck ?? '',
@@ -32,6 +53,30 @@
 		variantInfo: Object.entries(c.variantInfo ?? {}).map(([key, value]) => ({
 			key,
 			value: String(value)
+		})),
+		a11y: (c.a11y ?? []).map((r) => ({
+			label: r.label ?? '',
+			wert: r.wert ?? '',
+			status: (r.status ?? 'warn') as A11yStatus
+		})),
+		tastatur: (c.tastatur ?? []).map((r) => ({ taste: r.taste ?? '', aktion: r.aktion ?? '' })),
+		// nr/text editierbar; art/optionalDurch werden pro Zeile mitgeführt und beim
+		// Speichern erhalten (Round-Trip-sicher — keine Datenverluste an der Anatomie).
+		callouts: (c.callouts ?? []).map((r) => ({
+			nr: Number(r.nr ?? 0),
+			text: r.text ?? '',
+			...(r.art !== undefined ? { art: r.art } : {}),
+			...(r.optionalDurch !== undefined ? { optionalDurch: r.optionalDurch } : {})
+		})),
+		wording: (c.wording ?? []).map((r) => ({
+			schlecht: r.schlecht ?? '',
+			gut: r.gut ?? '',
+			hinweis: r.hinweis ?? ''
+		})),
+		verwandt: [...(c.verwandt ?? [])],
+		doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
+			gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
+			schlecht: { html: r.schlecht?.html ?? '', text: r.schlecht?.text ?? '' }
 		}))
 	});
 
@@ -49,6 +94,62 @@
 			state.variantInfo.filter((r) => r.key.trim()).map((r) => [r.key.trim(), r.value])
 		);
 		if (Object.keys(vi).length) out.variantInfo = vi;
+
+		// a11y — Zeile behalten, sobald Label oder Wert etwas enthält; status immer dabei.
+		const a11y = state.a11y
+			.filter((r) => r.label.trim() || r.wert.trim())
+			.map((r) => ({ label: r.label.trim(), wert: r.wert.trim(), status: r.status }));
+		if (a11y.length) out.a11y = a11y;
+
+		// tastatur — { taste, aktion }; leere Zeilen weglassen.
+		const tastatur = state.tastatur
+			.filter((r) => r.taste.trim() || r.aktion.trim())
+			.map((r) => ({ taste: r.taste.trim(), aktion: r.aktion.trim() }));
+		if (tastatur.length) out.tastatur = tastatur;
+
+		// callouts — nr/text; art/optionalDurch nur schreiben, wenn gesetzt (erhalten).
+		const callouts = state.callouts
+			.filter((r) => r.text.trim())
+			.map((r) => {
+				const o: Record<string, unknown> = { nr: r.nr, text: r.text.trim() };
+				if (r.art) o.art = r.art;
+				if (r.optionalDurch) o.optionalDurch = r.optionalDurch;
+				return o;
+			});
+		if (callouts.length) out.callouts = callouts;
+
+		// wording — { schlecht, gut, hinweis? }; hinweis leer → weglassen.
+		const wording = state.wording
+			.filter((r) => r.schlecht.trim() || r.gut.trim())
+			.map((r) => {
+				const o: Record<string, unknown> = { schlecht: r.schlecht.trim(), gut: r.gut.trim() };
+				const h = r.hinweis.trim();
+				if (h) o.hinweis = h;
+				return o;
+			});
+		if (wording.length) out.wording = wording;
+
+		// verwandt — Liste von Katalog-Slugs; leere/Dubletten entfernen.
+		const verwandt = [...new Set(state.verwandt.map((s) => s.trim()).filter(Boolean))];
+		if (verwandt.length) out.verwandt = verwandt;
+
+		// doDontBeispiele — Paare { gut, schlecht } je { html, text }. HTML EXAKT round-
+		// trippen (kein trim auf html!); nur der Prosa-Text wird getrimmt. Paar behalten,
+		// sobald irgendeines der vier Felder etwas enthält.
+		const doDontBeispiele = state.doDontBeispiele
+			.filter(
+				(r) =>
+					r.gut.html.trim() ||
+					r.gut.text.trim() ||
+					r.schlecht.html.trim() ||
+					r.schlecht.text.trim()
+			)
+			.map((r) => ({
+				gut: { html: r.gut.html, text: r.gut.text.trim() },
+				schlecht: { html: r.schlecht.html, text: r.schlecht.text.trim() }
+			}));
+		if (doDontBeispiele.length) out.doDontBeispiele = doDontBeispiele;
+
 		return JSON.stringify(out);
 	});
 
@@ -152,6 +253,101 @@
 			<button type="button" class="add" onclick={() => state.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button>
 		</fieldset>
 
+		<fieldset class="field">
+			<legend class="lbl">Barrierefreiheit (Label · Wert · Status)</legend>
+			{#each state.a11y as _, i}
+				<div class="row row--a11y">
+					<input class="a11y-label" bind:value={state.a11y[i].label} placeholder="Label" />
+					<input bind:value={state.a11y[i].wert} placeholder="Wert" />
+					<select class="status-sel" bind:value={state.a11y[i].status}>
+						<option value="pass">pass</option>
+						<option value="warn">warn</option>
+						<option value="todo">todo</option>
+					</select>
+					<button type="button" class="rm" onclick={() => removeFrom(state.a11y, i)} aria-label="Entfernen">×</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button>
+		</fieldset>
+
+		<fieldset class="field">
+			<legend class="lbl">Tastatur (Taste → Aktion)</legend>
+			{#each state.tastatur as _, i}
+				<div class="row">
+					<input class="kv-key" bind:value={state.tastatur[i].taste} placeholder="Taste" />
+					<input bind:value={state.tastatur[i].aktion} placeholder="Aktion" />
+					<button type="button" class="rm" onclick={() => removeFrom(state.tastatur, i)} aria-label="Entfernen">×</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button>
+		</fieldset>
+
+		<fieldset class="field">
+			<legend class="lbl">Anatomie-Callouts (Nr · Text)</legend>
+			{#each state.callouts as _, i}
+				<div class="row">
+					<input class="num" type="number" min="1" bind:value={state.callouts[i].nr} aria-label="Nummer" />
+					<input bind:value={state.callouts[i].text} placeholder="Beschreibung" />
+					<button type="button" class="rm" onclick={() => removeFrom(state.callouts, i)} aria-label="Entfernen">×</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.callouts.push({ nr: state.callouts.length + 1, text: '' })}>+ Callout</button>
+		</fieldset>
+
+		<fieldset class="field">
+			<legend class="lbl">Wording (Schlecht · Gut · Hinweis)</legend>
+			{#each state.wording as _, i}
+				<div class="row">
+					<input bind:value={state.wording[i].schlecht} placeholder="Schlecht" />
+					<input bind:value={state.wording[i].gut} placeholder="Gut" />
+					<input bind:value={state.wording[i].hinweis} placeholder="Hinweis (optional)" />
+					<button type="button" class="rm" onclick={() => removeFrom(state.wording, i)} aria-label="Entfernen">×</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button>
+		</fieldset>
+
+		<fieldset class="field">
+			<legend class="lbl">Verwandte Komponenten (Katalog-Slugs)</legend>
+			{#each state.verwandt as _, i}
+				<div class="row">
+					<select bind:value={state.verwandt[i]}>
+						<option value="" disabled>– Komponente wählen –</option>
+						{#each data.slugs as s}
+							<option value={s.slug}>{s.name} ({s.slug})</option>
+						{/each}
+					</select>
+					<button type="button" class="rm" onclick={() => removeFrom(state.verwandt, i)} aria-label="Entfernen">×</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.verwandt.push('')}>+ Slug</button>
+		</fieldset>
+
+		<fieldset class="field">
+			<legend class="lbl">Do/Don't-Beispiele (fortgeschritten)</legend>
+			<p class="hint">HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das Beispiel.</p>
+			{#each state.doDontBeispiele as _, i}
+				<div class="pair">
+					<div class="pair-grid">
+						<div class="pair-col">
+							<span class="sub-lbl">Gut — HTML</span>
+							<textarea class="mono" bind:value={state.doDontBeispiele[i].gut.html} rows="3"></textarea>
+							<span class="sub-lbl">Gut — Text</span>
+							<textarea bind:value={state.doDontBeispiele[i].gut.text} rows="2"></textarea>
+						</div>
+						<div class="pair-col">
+							<span class="sub-lbl">Schlecht — HTML</span>
+							<textarea class="mono" bind:value={state.doDontBeispiele[i].schlecht.html} rows="3"></textarea>
+							<span class="sub-lbl">Schlecht — Text</span>
+							<textarea bind:value={state.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
+						</div>
+					</div>
+					<button type="button" class="rm rm--pair" onclick={() => removeFrom(state.doDontBeispiele, i)}>× Paar entfernen</button>
+				</div>
+			{/each}
+			<button type="button" class="add" onclick={() => state.doDontBeispiele.push({ gut: { html: '', text: '' }, schlecht: { html: '', text: '' } })}>+ Beispiel-Paar</button>
+		</fieldset>
+
 		<div class="actions">
 			<button type="submit" class="save" disabled={!data.writable}>Speichern</button>
 		</div>
@@ -239,8 +435,58 @@
 		gap: var(--z-ds-space-8);
 		margin-bottom: var(--z-ds-space-8);
 	}
-	.row--kv .kv-key {
+	.row--kv .kv-key,
+	.row .kv-key {
 		max-width: 12rem;
+	}
+	.num {
+		max-width: 5rem;
+		flex: none;
+	}
+	.status-sel {
+		max-width: 8rem;
+		flex: none;
+	}
+	.row--a11y .a11y-label {
+		max-width: 12rem;
+	}
+	.pair {
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius-sm);
+		padding: var(--z-ds-space-m);
+		margin-bottom: var(--z-ds-space-m);
+	}
+	.pair-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--z-ds-space-m);
+	}
+	.pair-col {
+		display: flex;
+		flex-direction: column;
+	}
+	.sub-lbl {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		margin: var(--z-ds-space-xs) 0 var(--z-ds-space-6);
+	}
+	.pair-col .sub-lbl:first-child {
+		margin-top: 0;
+	}
+	.mono {
+		font-family: var(--z-ds-font-mono, ui-monospace, monospace);
+		font-size: var(--ds-text-xs);
+	}
+	.rm--pair {
+		width: auto;
+		margin-top: var(--z-ds-space-8);
+		padding: var(--z-ds-space-6) var(--z-ds-space-m);
+		font-size: var(--ds-text-sm);
+	}
+	@media (max-width: 34rem) {
+		.pair-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 	.rm {
 		flex: none;
