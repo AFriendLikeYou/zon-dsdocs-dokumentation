@@ -25,6 +25,17 @@
 >
 	<span class="toast__title">{toast.title}</span>
 	<span class="toast__message">{toast.message}</span>
+	{#if toast.action}
+		<button
+			class="toast__action"
+			onclick={() => {
+				toast.action?.run();
+				toastState.remove(toast.id);
+			}}
+		>
+			{toast.action.label}
+		</button>
+	{/if}
 	<button class="toast__close" onclick={() => toastState.remove(toast.id)}>
 		<span class="sr-only">Close toast</span>
 		x
@@ -37,8 +48,8 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		height: 4rem;
-		padding: 0 var(--z-ds-space-l);
+		min-height: 4rem;
+		padding: var(--z-ds-space-s) var(--z-ds-space-l);
 		border-radius: 0.375rem;
 		border: 1px solid var(--ds-border);
 		background-color: var(--ds-text);
@@ -57,6 +68,28 @@
 
 	.toast__message {
 		font-size: var(--ds-text-xs);
+	}
+
+	.toast__action {
+		align-self: flex-start;
+		margin-top: var(--z-ds-space-xs);
+		padding: 2px var(--z-ds-space-s);
+		border: 1px solid var(--ds-surface);
+		border-radius: var(--ds-radius-xs, 0.25rem);
+		background: transparent;
+		color: var(--ds-surface);
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.toast__action:hover {
+		background: rgb(from var(--ds-surface) r g b / 0.15);
+	}
+
+	.toast__action:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
 	}
 
 	.toast__close {

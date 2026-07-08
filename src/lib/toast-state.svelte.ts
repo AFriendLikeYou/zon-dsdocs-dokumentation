@@ -14,12 +14,13 @@ export class ToastState {
 		});
 	}
 
-	add(title: string, message: string, durationMs = 5000) {
+	add(title: string, message: string, durationMs = 5000, action?: ToastType['action']) {
 		const id = crypto.randomUUID();
 		this.toasts.push({
 			id,
 			title,
-			message
+			message,
+			action
 		});
 
 		this.toastToTimeoutMap.set(

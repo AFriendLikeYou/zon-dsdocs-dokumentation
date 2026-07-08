@@ -23,4 +23,6 @@ export type ToastType = {
 	id: string;
 	title: string;
 	message: string;
+	/** Optionale Aktion (z. B. „Rückgängig") — als Button im Toast gerendert. */
+	action?: { label: string; run: () => void };
 };

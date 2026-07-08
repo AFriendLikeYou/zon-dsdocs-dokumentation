@@ -13,6 +13,14 @@ export type { BadgeVariant };
 // abgeleitet (ADR-025), statt sie hier von Hand zu pflegen.
 import { CATALOG } from '$data/catalog';
 
+// Brand-Navigation: Reihenfolge + Hierarchie liegen als JSON-Config vor (Single
+// Source of Truth, ADR-028). Sowohl die Sidebar (MENU_ITEMS_BRAND unten) als auch
+// die /admin/brand-Übersicht leiten daraus ab; die Übersicht kann die Config per
+// Drag&Drop umsortieren und persistieren (dev-Write → JSON, prod → GitHub-PR).
+// Hinweis für tooling/check-nav.mjs: die Brand-Hrefs stehen nun in dieser JSON
+// (nicht mehr als href-Literale hier) — der Drift-Check liest sie zusätzlich ein.
+import brandNav from './brand-nav.json';
+
 export interface MenuItem extends FooterVisible {
 	label: string;
 	href: string;
@@ -33,110 +41,10 @@ export interface MenuSection extends FooterVisible {
 	badgeVariant?: BadgeVariant;
 }
 
-export const MENU_ITEMS_BRAND: MenuSection[] = [
-	{
-		title: 'Getting started', // Kategorie im Menü
-		isCategory: true
-	},
-	{
-		title: 'Willkommen',
-		href: '/brand',
-		isInFooter: false // Mark this item for the footer
-	},
-	{
-		title: 'Grundlagen', // Kategorie im Menü
-		isCategory: true
-	},
-	{
-		title: 'Marke',
-		items: [
-			{ label: 'Markenstrategie', href: '/brand/identity/strategy' },
-			{ label: 'Markenarchitektur', href: '/brand/identity/architecture', badge: 'Neu' },
-			{ label: 'Erscheinungsbild', href: '/brand/identity/appearance' },
-			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' },
-			{ label: 'Anwendungsbeispiele', href: '/brand/identity/examples', badge: 'Neu' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'Logo',
-		href: '/brand/logo',
-		isInFooter: true
-	},
-	{
-		title: 'Farbe',
-		href: '/brand/color',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Icons',
-		items: [
-			{ label: 'Aufbau', href: '/brand/icons/anatomy' },
-			{ label: 'Icon Library', href: '/brand/icons/library' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'Typografie',
-		href: '/brand/typography',
-		isInFooter: true
-	},
-	{
-		title: 'Primitives', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Bildsprache',
-		href: '/brand/imagery',
-		isInFooter: true
-	},
-	{
-		title: 'Sound',
-		href: '/brand/sound',
-		badge: 'Beta',
-		isInFooter: true
-	},
-	{
-		title: 'Animation',
-		href: '/brand/animation',
-		isInFooter: true
-	},
-	{
-		title: 'Accessibility',
-		items: [
-			{ label: 'Richtlinien', href: '/brand/accessibility' },
-			{ label: 'Issues & Solutions', href: '/brand/accessibility/issues' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'KI-Richtlinien',
-		href: '/brand/ai-guidelines',
-		isInFooter: true
-	},
-	{
-		title: 'Inklusion', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Pride Kommunikation',
-		href: '/brand/pride-communication',
-		isInFooter: true
-	},
-	{
-		title: 'Community', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Resources',
-		href: '/brand/resources',
-		isInFooter: true
-	}
-];
+// Aus der JSON-Config abgeleitet (SSOT, s. o.). Reihenfolge, Kategorien-Header,
+// Gruppen (mit items) und Blatt-Links stehen dort; hier nur der Typ-Cast, damit
+// Sidebar/Footer/Suche unverändert MenuSection[] konsumieren.
+export const MENU_ITEMS_BRAND: MenuSection[] = brandNav as MenuSection[];
 
 export const FLAT_MENU_ITEMS_BRAND: MenuItem[] = MENU_ITEMS_BRAND.reduce<MenuItem[]>(
 	(acc, item) => {

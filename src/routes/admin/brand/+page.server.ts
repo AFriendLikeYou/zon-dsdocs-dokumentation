@@ -1,13 +1,24 @@
 import { dev } from '$app/environment';
+import { fail } from '@sveltejs/kit';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { listBrandPages, readSvx } from './brand-fs.server';
 import { parseSvx } from './segment';
-import type { PageServerLoad } from './$types';
+import { validateBrandNav, serializeBrandNav, type NavSection } from './brand-nav';
+import type { PageServerLoad, Actions } from './$types';
 
-// /admin/brand — Brand-Prosa-Editor (Phase 2). Listet die Brand-Seiten unter
-// src/routes/brand/**. Editierbar (per [...path]-Editor) sind mdsvex-`.svx`-Seiten:
-// Frontmatter-Skalare (v. a. title) + reine Markdown-Prosa. Svelte-Inseln
-// (`<script>`, Komponenten-Tags, `<style>`) bleiben geschützt. Reine `.svelte`-
-// Brand-Seiten sind Code-Seiten und werden nur gelistet, nicht editiert.
+// SSOT-Config für Reihenfolge + Hierarchie der Brand-Sidebar (ADR-028). Von Loader
+// (lesen) und reorder-Action (schreiben) genutzt. Bewusst von der Platte gelesen (nicht
+// importiert), damit der Loader nach einem Reorder-Write immer den frischen Stand zeigt.
+const CONFIG_PATH = resolve(process.cwd(), 'src/lib/data/brand-nav.json');
+const readConfig = (): NavSection[] => JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
+
+// /admin/brand — Brand-Prosa-Editor (Phase 2). Die Übersicht spiegelt die reale
+// Sidebar-Reihenfolge + Hierarchie aus der Config und ist per Drag&Drop umsortierbar
+// (persistiert via reorder-Action). Editierbar (per [...path]-Editor) sind mdsvex-
+// `.svx`-Seiten: Frontmatter-Skalare (v. a. title) + reine Markdown-Prosa. Svelte-Inseln
+// (`<script>`, Komponenten-Tags, `<style>`) bleiben geschützt. Reine `.svelte`-Brand-
+// Seiten sind Code-Seiten und werden nur gelistet, nicht editiert.
 export const load: PageServerLoad = () => {
 	const pages = listBrandPages().map((pg) => {
 		if (pg.kind === 'svelte') {
@@ -33,5 +44,33 @@ export const load: PageServerLoad = () => {
 					: 'Frontmatter + Prosa';
 		return { path: pg.path, url: pg.url, title, kind: 'svx' as const, editable, note };
 	});
-	return { pages, writable: dev };
+	return { navTree: readConfig(), pages, writable: dev };
+};
+
+export const actions: Actions = {
+	reorder: async ({ request }) => {
+		// Prod (adapter-vercel, serverless): fs-Writes sind nicht persistent → Phase 2b
+		// öffnet stattdessen einen GitHub-PR. Im Dev schreiben wir lokal.
+		if (!dev)
+			return fail(400, {
+				message: 'Schreiben nur im Dev-Modus. Prod öffnet später einen GitHub-PR (Phase 2b).'
+			});
+
+		const data = await request.formData();
+		let incoming: unknown;
+		try {
+			incoming = JSON.parse(String(data.get('tree') ?? 'null'));
+		} catch {
+			return fail(400, { message: 'Ungültige Daten.' });
+		}
+
+		// Gegen die Live-Config validieren: strukturell korrekt UND nur umsortiert
+		// (keine Seite erfunden/verloren). Sonst nicht schreiben — ein kaputter Write
+		// würde die Sidebar der gesamten Brand-Sektion brechen.
+		const verdict = validateBrandNav(incoming, readConfig());
+		if (!verdict.ok) return fail(400, { message: `Abbruch: ${verdict.message} Nichts gespeichert.` });
+
+		writeFileSync(CONFIG_PATH, serializeBrandNav(verdict.tree));
+		return { saved: true };
+	}
 };

@@ -621,6 +621,28 @@ auf Brand-Top-Seiten (`/brand/getting-started`, `/brand/logo`). **Product bleibt
 
 ---
 
+## ADR-028 — Brand-Nav als Config-SSOT + sortierbare `/admin/brand`-Übersicht
+**Kontext:** Reihenfolge und Hierarchie der Brand-Sidebar lagen als handgepflegtes
+Array-Literal `MENU_ITEMS_BRAND` in `navigation.ts`. Umsortieren ging nur im Code, und
+die `/admin/brand`-Übersicht war eine flache, alphabetische Liste — sie spiegelte weder
+die reale Ausspielreihenfolge noch die Über-/Unterordnung.
+**Entscheidung:** Reihenfolge + 2-Ebenen-Hierarchie (Kategorie-Header · Themen-Gruppen mit
+Unterseiten · Blatt-Seiten) leben als **JSON-Config `src/lib/data/brand-nav.json` (Single
+Source of Truth)**. `navigation.ts` leitet `MENU_ITEMS_BRAND` daraus ab (Cast auf
+`MenuSection[]`) — Sidebar/Footer/Suche bleiben unverändert. Die `/admin/brand`-Übersicht
+rendert denselben Baum hierarchie-bewusst und ist per **Drag&Drop** (zwei Scopes: Top-Level
+und innerhalb einer Gruppe) plus **↑/↓** (barrierefreie Basis) umsortierbar. Persistenz per
+direktem Action-`fetch` (`?/reorder`; dev-Write → JSON, prod → GitHub-PR analog zum
+Prosa-Editor) hinter einem **validierenden Guard** (`brand-nav.ts`: Kind-Exklusivität +
+**Konservierung** — ein Reorder darf Knoten nur umsortieren, keine Seite erfinden/verlieren,
+sonst kein Write). `tooling/check-nav.mjs` liest die Brand-Hrefs zusätzlich aus der JSON.
+Nach erfolgreichem Save `invalidateAll()` + `$effect`-Resync, weil das Schreiben der (vom
+Sidebar client-importierten) Config im Dev einen Vite-HMR-Remount auslöst, der den
+Arbeits-Baum sonst auf den alten SSR-Stand zurücksetzen würde.
+**Status:** Aktiv.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

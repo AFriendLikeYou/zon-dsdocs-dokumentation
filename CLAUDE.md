@@ -42,15 +42,26 @@ npx vitest run   # Component-/Daten-Tests
 ```
 src/
 ├─ routes/
-│  ├─ brand/…                    # Brandhub-Seiten (.svx)
-│  └─ product/
-│     ├─ foundations/ tokens/ motion/
-│     └─ components/<slug>/       # eine Component-Doku pro Ordner ↓
-│        ├─ model.json            # Eingabe-Modell (co-located, kanonisch)
-│        ├─ pattern.css           # unscoped Pattern-CSS (echte z-ds-Tokens)
-│        ├─ content.json            # MENSCH — redaktionell, nie überschrieben
-│        ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
-│        └─ +page.svx             # MASCHINE — autogeneriert
+│  ├─ brand/…                    # Brandhub-Seiten (.svx) · pride-communication = Komponenten-Prüfstand
+│  ├─ product/
+│  │  ├─ foundations/ tokens/ motion/
+│  │  └─ components/<slug>/       # eine Component-Doku pro Ordner ↓
+│  │     ├─ model.json            # Eingabe-Modell (co-located, kanonisch)
+│  │     ├─ pattern.css           # unscoped Pattern-CSS (echte z-ds-Tokens)
+│  │     ├─ content.json          # MENSCH — redaktionell, nie überschrieben
+│  │     ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
+│  │     └─ +page.svx             # MASCHINE — autogeneriert
+│  └─ admin/                      # Redaktionelles CMS (dev-only Writes, Prod → GitHub-PR) ↓
+│     ├─ [slug]/                  # Editor für Component-content.json (Prop-Formulare)
+│     ├─ media/  media-fs.server.ts   # Bild-Upload + geteilte listMediaImages()
+│     └─ brand/                   # Brand-.svx-Editor ↓
+│        ├─ [...path]/+page.*     # Editor-Seite (Block-Liste, Drag&Drop, orchestriert)
+│        ├─ BlockIcon.svelte      # Icon je Komponenten-Kategorie
+│        ├─ PropField.svelte      # eine Prop-Zeile (text/select/bool/number/media + Bildvorschau)
+│        ├─ InsertMenu.svelte     # Notion-artiges „+"-Insert-Popover (Suche + Icons)
+│        ├─ segment.ts (+test)    # parseSvx / rebuild / checkIslandGuard (pure, getestet)
+│        ├─ cms-components.ts (+test)  # Registry (Leaves + Container) + Parser/Serializer/iconFor
+│        └─ brand-fs.server.ts    # findSvxPage / readSvx (nur registrierte Brand-Seiten)
 ├─ lib/                          # Aliases: $components $data $stores $config $types
 │  ├─ components/
 │  │  ├─ layout/                  # App-Chrome (Sidebar, Navbar, Footer, …)
@@ -128,6 +139,140 @@ Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 **Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Anatomie ·
 3) Verwendung/Varianten/Zustände · 4) Do & Don't.
 
+## Brand-CMS (`/admin`) — redaktionelles Editieren im Browser
+
+Zweck: Brand-Seiten und Component-Texte **ohne Code** pflegen. Alle `/admin`-Routen
+liegen hinter Basic-Auth. **Writes sind dev-only** (`writable: dev`); im Prod
+(adapter-vercel, serverless) sind fs-Writes nicht persistent → dort öffnet später
+ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.).
+
+**Editoren & Übersicht:**
+- `admin/[slug]/` — **Component-`content.json`-Editor** (DS-Doku). Editierbare Keys:
+  `zweck, status, verwendung, doDont, variantInfo, a11y, callouts, tastatur, wording,
+  verwandt, doDontBeispiele`. Client-State → verstecktes JSON-Feld → Server merged
+  **nur** diese Keys zurück (Rest der `content.json` bleibt).
+- `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub). Kern unten.
+- `admin/brand/` (Index) — **Seiten-Übersicht + Reihenfolge**: spiegelt die reale
+  Sidebar-Hierarchie (Kategorie-Header · Themen-Gruppe mit Unterseiten · Blatt-Seite)
+  aus der **Config-SSOT `src/lib/data/brand-nav.json`** und ist per **Drag&Drop**
+  (zwei Scopes: Top-Level + innerhalb einer Gruppe) und **↑/↓** umsortierbar →
+  persistiert via `?/reorder` hinter dem validierenden Guard `admin/brand/brand-nav.ts`
+  (Kind-Exklusivität + **Konservierung**: nur umsortieren, nichts erfinden/verlieren).
+  `navigation.ts` leitet `MENU_ITEMS_BRAND` aus derselben Config ab (Sidebar/Footer/Suche
+  unverändert); `tooling/check-nav.mjs` liest ihre Hrefs mit. Nach Save `invalidateAll()`
+  + `$effect`-Resync (der Config-Write löst im Dev einen HMR-Remount aus). Siehe ADR-028.
+- `admin/media/` — Bild-Upload (MIME-autoritative Endung, Traversal-Riegel, 5 MB,
+  dev-guard) + Galerie. Geteilte Medien-Liste: `admin/media-fs.server.ts`
+  (`listMediaImages()` läuft `static/media/` ab, genutzt von media **und** Brand-Editor).
+
+### Brand-`.svx`-Editor-Engine — `admin/brand/segment.ts` (pure, getestet)
+
+**`parseSvx(raw)`** zerlegt eine `.svx` lückenlos in Slices → `{ fmInner, fields
+(nur skalare Frontmatter, v. a. title), segments, serializeOk, proseClean, safe }`.
+**Round-Trip-Garantie:** Konkatenation aller Slices === `raw`; `rebuild(raw, {})
+=== raw`. `safe = serializeOk && proseClean`; ist eine Seite nicht `safe`, greift
+der **konservative Modus** (nur Frontmatter editierbar, Body verbatim = `bodyLocked`).
+
+**Segmenttypen:** `prosa` = Zeilen ganz ohne `<`, `{`, `}` (editierbar). `insel` =
+alles andere: `<script>`/`<style>`/`<svelte:head>`/`<!--…-->` (gefenced),
+Komponenten-Tags, `{#each}`-Blöcke. **≥2-Leerzeilen-Regel:** benachbarte INSEL-Blöcke,
+die durch **zwei** Leerzeilen getrennt sind, werden EIGENE Segmente (⇒ jede top-level-
+Komponente einzeln editier-/löschbar, Inserts landen sauber). Eine **einzelne**
+Leerzeile trennt nicht (z. B. innerhalb `<Grid>` bleibt der Block ein Segment).
+
+**`rebuild(raw, edits: SvxEdits)`** — der Editor nutzt das **Block-Modell**
+`edits.blocks: BlockOp[]` (WYSIWYG): eine geordnete Liste beschreibt den KOMPLETTEN
+Body → damit in EINEM Save **umsortieren, an beliebiger Stelle einfügen, löschen und
+editieren**. `BlockOp = { keep: index, prose?, component?, container? } | { insert: name,
+values } | { insertContainer: name, attrs, children } | { insertProse: text }`
+(`insert: 'Image'` = bare `<img class="img-natural">`; `insertProse` = neuer Markdown-
+Absatz; `container`/`insertContainer` tragen Attribute + Kind-Liste `ChildSpec[]`). `rebuildFromBlocks` emittiert die Blöcke normalisiert: zwei benachbarte
+INSELN erhalten ZWEI Leerzeilen (≥2-Regel ⇒ bleiben eigene Segmente), sonst EINE. Der
+Legacy-Pfad (`prose/componentEdits/inserts/dropSegments`) bleibt für Tests erhalten.
+**Import-Sync** `syncComponentImports(body, prune=true)`: fehlende registrierte Imports
+ergänzen; mit `prune` (Block-Save) ungenutzte KANONISCHE entfernen — gemergte/fremde
+(`{ Color, TextColor }`, `Callout`) NIE. Legacy synct add-only (`prune=false`) → tote
+Alt-Imports bleiben, `rebuild(raw,{})` gewahrt. Blöcke werden über `serializeComponentTag`/
+`serializeContainerTag` gebaut (Choke-Point) — nie roher Client-Text.
+
+**`checkIslandGuard(before, after)` — der Sicherheitsgurt** (verhindert Manipulation
+geschützter Inseln übers CMS). Regeln:
+- Geschützte (nicht-mutable) Inseln müssen **verbatim** erhalten bleiben.
+- **Mutable** darf add/remove/change: reines `<img …>` ODER registrierte, **rein
+  literale** Komponente.
+- `<script>` darf sich **nur** um registrierte Import-Zeilen unterscheiden. Vergleich
+  via `scriptSansImports` ist **whitespace-unempfindlich** (Zeilen getrimmt, Leerzeilen
+  raus) — sonst würde das Import-Sync bei LEEREM Script (kollabierte Leerzeile) fälschlich
+  als „geänderte Insel" gelten und den Save ablehnen (war ein Bug: Insert ⇒ kein Import).
+  `isScriptIsland = hasScriptBlock` erkennt Script auch hinter vorangehendem `<svelte:head>`.
+  Reasons: `'changed' | 'foreign-add'`.
+
+### Editierbare Komponenten — `admin/brand/cms-components.ts` (Registry)
+
+**Leaves (self-closing, feld-editierbar):** Alert, DoDont, Color, TextColor, Lightbox,
+VideoPlayer, DownloadSpecimen, BrandHero, **Card**. Prop-Typen: `text|textarea|select|
+boolean|number|media`. **Container (Attribute + editierbare Kinder):** **Grid** (→
+Color/TextColor), **DoDontGroup** (→ DoDont), **ImageGallery** (→ Lightbox); je mit
+`container: true` + `childTypes`. Plus Pseudo-Typ **„Image"** (bare `<img class="img-natural">`).
+**„Welche Komponenten editierbar" = diese Liste** — Änderung hier kaskadiert durch Parser,
+Guard, rebuild und Editor-UI.
+
+**Mutabilitätsgrenze (Sicherheit):** editierbar nur, wenn (a) registriert, (b) **nur
+Literal-Attribute** (`"…"`, `{true|false}`, `{zahl}`, bare), (c) Keys im Schema,
+(d) Enums gültig — bei Containern zusätzlich: **jedes Kind** ist eine registrierte Leaf
+aus `childTypes`. Inseln mit **dynamischem Ausdruck** (`prop={ausdruck}`) bleiben geschützt
+(Pride-`DownloadSpecimen catalog={catalog}` ⇒ kein Formular; ein `<Grid>` mit fremdem/
+Freitext-Inhalt ⇒ geschützt). **`serializeComponentTag`/`serializeContainerTag` sind der
+Choke-Point:** nur Schema-Props, HTML-Entity-kodiert — der Server traut Client-Rohtext nie.
+
+**Parser-Paar:** `parseComponentTag`/`componentIslandInfo` (self-closing Leaves) +
+`parseContainerTag`/`containerIslandInfo` (`<Name …> …Kind-Inseln… </Name>`).
+`isMutableIsland` (Guard) = Bild ODER Leaf ODER Container.
+
+**Editor-UI** — `[...path]/+page.svelte` orchestriert eine **Block-Liste** aus
+wiederverwendbaren Komponenten: `PropField` (eine Prop-Zeile je Typ, inkl. **echter
+Bildvorschau** bei `media`), `BlockIcon`, `InsertMenu` (Notion-artiges **„+"-Popover**
+mit Suche + Icons — oben „Element einfügen" ans Ende, per-Block „+" zwischen den Blöcken).
+Jede Karte hat **Drag & Drop** (dependency-frei, native HTML5; `.blk-bar` = Quelle,
+`<li>` = Ziel) UND Hoch/Runter (Tastatur-/A11y-Weg), Löschen und Inline-Formular.
+Container-Karten zeigen Attribut-Formular **plus verschachtelte Kind-Liste** (aus
+`childTypes` hinzufügen/entfernen/sortieren/editieren). Struktur-Inseln sind **gepinnt**
+(nicht ziehbar) und als **`<details>` „Code anzeigen"** eingeklappt. Reorder ist
+guard-sicher (multiset-invariant). Server-`load` klassifiziert `kind: prosa|component|
+container|img|structural|protected` + `movable`/`deletable`. Das Insert-Menü bietet neben
+Komponenten/Bild auch **„Text / Absatz"** (neuer Prosa-Block, `insertProse`). **Save-Feedback**
+über die Toast-Message (`getToastState`, `use:enhance`-Callback); danach Client-State aus
+frischem Server-Stand neu aufbauen (kein Doppel-Insert bei Folge-Saves). **Löschen zeigt einen
+Undo-Toast** („Rückgängig" — die Toast trägt jetzt eine optionale `action`); klickt man ihn,
+wird der Block an seiner ursprünglichen Position wiederhergestellt. Die sticky Insert-Leiste
+sitzt bei `top: 4rem` (unter der 64px-Navbar).
+
+**Import-Sync** synct beim Block-Save add **und** prune (`syncComponentImports(body, prune)`);
+der Legacy-`rebuild(raw,{})` synct add-only (tote Alt-Imports bleiben → Identität gewahrt).
+
+**Noch geschützt (bewusst):** ExampleStage (freier Kind-Inhalt), datengetriebene
+(SectionTiles, CardGrid, *Demo, UsageBlock …), sowie Badge/Chip (Label = `children`,
+bräuchte Kind-Text-Support). Mögliche nächste Schritte: Drag & Drop (statt Hoch/Runter,
+via `svelte-dnd-action`), ExampleStage-Freicontent, Product-Konsolidierung (geteiltes
+Feld-Widget; Do/Don't ist heute 4-fach modelliert).
+
+**Prüfstand:** `routes/brand/pride-communication/+page.svx` bindet alle Brand-Komponenten
+mit echten Medien ein — Rendering + CMS-Editieren (inkl. Reorder/Insert/Delete/Import-Sync)
+werden dort E2E getestet (`segment.test.ts` inkl. Round-Trip über ALLE 15 Brand-Seiten,
+`cms-components.test.ts`). Die Seite ist eine Testfläche — ihr Inhalt ändert sich, daher
+prüfen die E2E-Tests **Invarianten** (safe, guard-ok, Insel-Erhalt, Idempotenz), keine Fixtexte.
+
+**Newline-Kodierung (kritisch):** `serializeComponentTag` kodiert `\n` als `&#10;`, damit
+ein Attribut-Wert IMMER eine physische Zeile bleibt. Ein echter Zeilenumbruch (v. a. eine
+Leerzeile) in einem Tag-Attribut würde die mdsvex-`.svx` beim Kompilieren zerreißen
+(„Expected token ="). Mehrzeilige Redaktions-Texte (z. B. `Alert description`) sind so
+sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
+
+> Offen (spätere Politur): Drag & Drop für Container-KINDER (top-level ist da) ·
+> `svelte-dnd-action` (Keyboard-Drag) statt native DnD — Install scheiterte am Proxy-Cert ·
+> Bild-Inseln (`<img>`) feld-editierbar · Medien-Upload direkt im Prop-Formular ·
+> Product-Editor-Konsolidierung (geteiltes `PropField`).
+
 ## Neue Component dokumentieren (Workflow)
 > Vollständiger Guide + Schema-Referenz: [`tooling/zeit-de-exporter/IMPORT.md`](tooling/zeit-de-exporter/IMPORT.md)
 > und [`README.md`](tooling/zeit-de-exporter/README.md). Kurzfassung:
@@ -188,6 +333,10 @@ stateless, **kein SDK**). Route `src/routes/api/mcp/+server.ts` (dünn) → Logi
 - `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
 - `pattern.css`-Scoping (v1): **flache Regeln**, keine At-Rules (`@media`/
   `@keyframes`) — der Exporter wirft sonst.
+- **Brand-`.svx`: keine DOPPEL-Leerzeile INNERHALB eines mehrzeiligen Konstrukts**
+  (`<Grid>`, `<DoDontGroup>` …). Der CMS-Segmenter trennt Inseln bei ≥2 Leerzeilen —
+  eine Doppel-Leerzeile mitten im Block würde ihn (harmlos, aber unschön) in zwei
+  geschützte Insel-Fragmente zerlegen. Zwischen Kindern max. EINE Leerzeile.
 - Push-Remote dieses Arbeits-Repos: `github.com/AFriendLikeYou/zon-dsdocs-dokumentation`.
 
 ## Weiterführend
