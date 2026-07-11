@@ -34,6 +34,9 @@ export function validateNewPage(
 	// das YAML brechen. Lieber ehrlich ablehnen als still kaputtschreiben.
 	if (/[:"\n]/.test(title))
 		return 'Titel darf keinen Doppelpunkt und keine Anführungszeichen enthalten.';
+	// Geschweifte Klammern wären im Markdown-H1 eine Svelte-Expression → die Prosa
+	// würde vom Parser zur geschützten Insel verklebt und die Seite unspeicherbar.
+	if (/[{}]/.test(title)) return 'Titel darf keine geschweiften Klammern enthalten.';
 	if (!SLUG_RE.test(slug))
 		return 'Slug bitte nur mit Kleinbuchstaben, Zahlen und Bindestrichen (z. B. „neue-seite").';
 	if (existingHrefs.includes(`/brand/${slug}`)) return `„/brand/${slug}“ existiert bereits.`;
@@ -43,7 +46,12 @@ export function validateNewPage(
 /**
  * Minimales Seiten-Gerüst (Muster: pride-communication): Frontmatter-Titel,
  * Head-Titel, LEERER Script-Block (macht Komponenten sofort einfügbar, siehe
- * hasScript-Gate im Editor), H1 aus dem Frontmatter + Start-Absatz.
+ * hasScript-Gate im Editor), H1 + Start-Absatz.
+ *
+ * Der H1 steht bewusst LITERAL (nicht `# {title}`): eine Svelte-Expression in
+ * der Prosa würde vom Parser zur geschützten Insel verklebt — der Titel wäre im
+ * CMS uneditierbar, und der Insel-Guard bräche JEDEN Save der frischen Seite ab
+ * (E2E-Fund 2026-07-11).
  */
 export function pageTemplate(title: string): string {
 	return [
@@ -58,7 +66,7 @@ export function pageTemplate(title: string): string {
 		'<script lang="ts">',
 		'</script>',
 		'',
-		'# {title}',
+		`# ${title.trim()}`,
 		'',
 		'Inhalte folgen.',
 		''

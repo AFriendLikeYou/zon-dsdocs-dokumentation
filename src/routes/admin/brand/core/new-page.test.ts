@@ -29,14 +29,23 @@ describe('validateNewPage', () => {
 	it('lehnt Kollisionen mit bestehenden Seiten ab', () => {
 		expect(validateNewPage('Farbe', 'color', HREFS)).toMatch(/existiert bereits/);
 	});
+
+	it('lehnt geschweifte Klammern ab (Expression würde die Prosa zur Insel verkleben)', () => {
+		expect(validateNewPage('Titel {mit} Klammern', 'titel-mit-klammern', HREFS)).toMatch(
+			/geschweifte/i
+		);
+	});
 });
 
 describe('pageTemplate', () => {
-	it('erzeugt ein editierbares Gerüst mit Script-Block und H1', () => {
+	it('erzeugt ein editierbares Gerüst mit Script-Block und LITERALEM H1', () => {
 		const svx = pageTemplate('Neue Seite');
 		expect(svx).toContain('title: Neue Seite');
 		expect(svx).toContain('<script lang="ts">');
-		expect(svx).toContain('# {title}');
+		// Literal statt {title}: eine Expression in der Prosa wird vom Parser zur
+		// geschützten Insel verklebt → H1 uneditierbar, Save am Guard blockiert.
+		expect(svx).toContain('# Neue Seite');
+		expect(svx).not.toContain('# {title}');
 		expect(svx.endsWith('\n')).toBe(true);
 	});
 });
