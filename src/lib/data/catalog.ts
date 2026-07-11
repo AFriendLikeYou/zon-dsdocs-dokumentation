@@ -32,7 +32,8 @@ const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
 	input: { order: 7, badge: 'Neu' },
 	checkbox: { order: 8, badge: 'Neu' },
 	toggle: { order: 9, badge: 'Neu' },
-	stepper: { order: 10, badge: 'Neu' }
+	stepper: { order: 10, badge: 'Neu' },
+	carousel: { order: 11, badge: 'Neu' }
 };
 
 export type CatalogEntry = {
