@@ -8,7 +8,7 @@
  * nicht sauber in adapter-vercel integrieren ließe. Die Route (+server.ts) bleibt dünn;
  * die Tool-Logik ist hier als pure Funktionen testbar.
  */
-import { AGENT_CATALOG, type AgentCatalogEntry } from '$data/agent-catalog';
+import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
 
 const PROTOCOL_VERSION = '2025-06-18';
 const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.0.0' };

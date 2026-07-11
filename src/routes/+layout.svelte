@@ -4,7 +4,7 @@
 	import FooterNavigation from '$components/layout/FooterNavigation.svelte';
 	import SkipToMainContentLink from '$components/layout/SkipToMainContentLink.svelte';
 	import Toaster from '$components/layout/toast/toaster.svelte';
-	import { setToastState } from '$lib/toast-state.svelte';
+	import { setToastState } from '$stores/toast-state.svelte';
 	import Navbar from '$components/layout/Navbar.svelte';
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';

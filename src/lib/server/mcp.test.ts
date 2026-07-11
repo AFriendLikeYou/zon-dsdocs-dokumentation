@@ -1,4 +1,4 @@
-import { AGENT_CATALOG } from '$data/agent-catalog';
+import { AGENT_CATALOG } from '$lib/server/agent-catalog';
 import {
 	searchComponents,
 	getComponent,

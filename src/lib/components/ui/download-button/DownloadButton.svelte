@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
 
 	type Props = {
 		/** Direkter Download-Link. */
