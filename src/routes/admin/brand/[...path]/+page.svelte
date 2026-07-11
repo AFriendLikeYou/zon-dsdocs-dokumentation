@@ -1800,8 +1800,11 @@
 	}
 	/* Chromes UA-Style gibt ::details-content ein content-visibility — das macht
 	   das Pseudo-Element zum Containing Block für position:fixed und verschiebt
-	   die Picker-Popover (Token/Media) um den Karten-Offset. Explizit aufheben. */
-	.fields::details-content {
+	   die Picker-Popover (Token/Media) um den Karten-Offset. NUR im offenen Zustand
+	   aufheben: Popover erscheinen ohnehin nur bei offenem Panel, und im geschlossenen
+	   Zustand MUSS Chromes natives content-visibility:hidden greifen — sonst bleibt
+	   der Inhalt sichtbar und das Panel klappt nie ein. */
+	.fields[open]::details-content {
 		content-visibility: visible;
 	}
 	.fields-sum {
