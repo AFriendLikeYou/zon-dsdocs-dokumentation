@@ -4,6 +4,7 @@ Leitfaden für die Arbeit in diesem Repo. Ausführliche Begründungen (ADRs) ste
 in [`DECISIONS.md`](DECISIONS.md), der Struktur-Plan in [`STRUKTUR-PLAN.md`](STRUKTUR-PLAN.md).
 
 ## Was ist das?
+
 **ZEIT Online — Brandhub _und_ Design-System-Doku** in einer SvelteKit-App
 (mdsvex `.svx`, `adapter-vercel`). Alle Routen sind per **Basic-Auth**
 (`src/hooks.server.ts`) geschützt. Inhalte/Labels **Deutsch**, **Routen Englisch**
@@ -11,6 +12,7 @@ in [`DECISIONS.md`](DECISIONS.md), der Struktur-Plan in [`STRUKTUR-PLAN.md`](STR
 `hooks.server.ts`).
 
 Zwei Produkte, ein Repo:
+
 - **Brandhub** (`/brand/*`) — redaktionell gepflegte Markenrichtlinien, Logos,
   Assets, Downloads (für Designer & PMs).
 - **DS-Doku** (`/product/*`) — dokumentiert das **bestehende ZEIT-Designsystem**
@@ -21,6 +23,7 @@ Zwei Produkte, ein Repo:
 > Pflicht-Komponentenbibliothek.
 
 ## Setup & Befehle
+
 ```bash
 nvm use && npm install
 # .env anlegen (gitignored!) — Dev-Credentials beim Team erfragen:
@@ -31,6 +34,7 @@ npm run check    # svelte-check + Drift-Checks (nav/tokens/assets/component) →
 npm run lint     # eslint     ·     npm run format   # prettier
 npx vitest run   # Component-/Daten-Tests
 ```
+
 > Ohne `USERS` in `.env` bricht der Build ab. Auth in `hooks.server.ts` **nie**
 > überbrücken; `.env` **nie** committen. Basic-Auth blockiert Browser-Preview →
 > Absicherung über Tests + Gate; visuelle Abnahme macht der Mensch.
@@ -39,6 +43,7 @@ npx vitest run   # Component-/Daten-Tests
 > Die Drift-Checks (`tooling/check-*.mjs`) sind **warn/exit 0** (`--strict` für CI).
 
 ## Dateistruktur (aktuell)
+
 ```
 src/
 ├─ routes/
@@ -73,6 +78,7 @@ src/
 static/                          # global.css (Token-Layer) · media/ downloads/ fonts/
 tooling/                         # zeit-de-exporter/ + check-*.mjs (Drift-Gate)
 ```
+
 Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 
 ## Component-Doku-System
@@ -113,9 +119,11 @@ Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 **Exporter** `tooling/zeit-de-exporter/export.mjs` bildet das render-unabhängige
 **Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Das `model.json`
 liegt **co-located** neben der Ausgabe (Re-Export per Ordner):
+
 ```bash
 node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>
 ```
+
 Erzeugt `+page.svx` + `spec.generated.ts` (Maschine, immer neu) und einmalig den
 Stub `content.json` (Mensch, nie überschrieben). Die Seite führt beides zusammen:
 `const spec = { ...generated, ...content }` — **content gewinnt**.
@@ -136,8 +144,7 @@ Anatomy · SpecimenGrid · StateList · TokenTable · MeasureTable · A11yList �
 DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
 Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 
-**Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Anatomie ·
-3) Verwendung/Varianten/Zustände · 4) Do & Don't.
+**Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Anatomie · 3) Verwendung/Varianten/Zustände · 4) Do & Don't.
 
 ## Brand-CMS (`/admin`) — redaktionelles Editieren im Browser
 
@@ -147,9 +154,10 @@ liegen hinter Basic-Auth. **Writes sind dev-only** (`writable: dev`); im Prod
 ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.).
 
 **Editoren & Übersicht:**
+
 - `admin/[slug]/` — **Component-`content.json`-Editor** (DS-Doku). Editierbare Keys:
   `zweck, status, verwendung, doDont, variantInfo, a11y, callouts, tastatur, wording,
-  verwandt, doDontBeispiele`. Client-State → verstecktes JSON-Feld → Server merged
+verwandt, doDontBeispiele`. Client-State → verstecktes JSON-Feld → Server merged
   **nur** diese Keys zurück (Rest der `content.json` bleibt).
 - `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub, ADR-029): Notion-artige
   Block-Karten (Figma-Vorlage 689:11503) mit Slash-Command, typ-bewusster Vorschau
@@ -169,7 +177,7 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
   (Kind-Exklusivität + **Konservierung**: nur umsortieren, nichts erfinden/verlieren).
   `navigation.ts` leitet `MENU_ITEMS_BRAND` aus derselben Config ab (Sidebar/Footer/Suche
   unverändert); `tooling/check-nav.mjs` liest ihre Hrefs mit. Nach Save `invalidateAll()`
-  + `$effect`-Resync (der Config-Write löst im Dev einen HMR-Remount aus). Siehe ADR-028.
+  - `$effect`-Resync (der Config-Write löst im Dev einen HMR-Remount aus). Siehe ADR-028.
 - `admin/media/` — Bild-Upload (MIME-autoritative Endung, Traversal-Riegel, 5 MB,
   dev-guard) + Galerie. Geteilte Medien-Liste: `admin/media-fs.server.ts`
   (`listMediaImages()` läuft `static/media/` ab, genutzt von media **und** Brand-Editor).
@@ -206,6 +214,7 @@ Alt-Imports bleiben, `rebuild(raw,{})` gewahrt. Blöcke werden über `serializeC
 
 **`checkIslandGuard(before, after)` — der Sicherheitsgurt** (verhindert Manipulation
 geschützter Inseln übers CMS). Regeln:
+
 - Geschützte (nicht-mutable) Inseln müssen **verbatim** erhalten bleiben.
 - **Mutable** darf add/remove/change: reines `<img …>` ODER registrierte, **rein
   literale** Komponente.
@@ -260,7 +269,7 @@ sitzt bei `top: 4rem` (unter der 64px-Navbar).
 der Legacy-`rebuild(raw,{})` synct add-only (tote Alt-Imports bleiben → Identität gewahrt).
 
 **Noch geschützt (bewusst):** ExampleStage (freier Kind-Inhalt), datengetriebene
-(SectionTiles, CardGrid, *Demo, UsageBlock …), sowie Badge/Chip (Label = `children`,
+(SectionTiles, CardGrid, \*Demo, UsageBlock …), sowie Badge/Chip (Label = `children`,
 bräuchte Kind-Text-Support). Mögliche nächste Schritte: Drag & Drop (statt Hoch/Runter,
 via `svelte-dnd-action`), ExampleStage-Freicontent, Product-Konsolidierung (geteiltes
 Feld-Widget; Do/Don't ist heute 4-fach modelliert).
@@ -283,6 +292,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 > Product-Editor-Konsolidierung (geteiltes `PropField`).
 
 ## Neue Component dokumentieren (Workflow)
+
 > Vollständiger Guide + Schema-Referenz: [`tooling/zeit-de-exporter/IMPORT.md`](tooling/zeit-de-exporter/IMPORT.md)
 > und [`README.md`](tooling/zeit-de-exporter/README.md). Kurzfassung:
 
@@ -302,6 +312,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
 ## Konventionen / Regeln
+
 - **Semantische Token-Ebene** (`--ds-*` in `static/global.css`, auf z-ds-Tokens
   gemappt) ist der Default für die **Doku-UI**; Komponenten nutzen nur Rollen-
   Tokens. Ausnahmen: `--z-ds-space-*`/`-lineheight-*`, **originalgetreue
@@ -328,6 +339,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 
 ## MCP-Endpoint (`/api/mcp`)
+
 Die Site ist selbst ein **MCP-Server** (agent-ready): Tools `search` + `get` über die
 Komponenten-Registry. Minimaler, handgerollter JSON-RPC-2.0-Handler (Streamable HTTP,
 stateless, **kein SDK**). Route `src/routes/api/mcp/+server.ts` (dünn) → Logik
@@ -338,6 +350,7 @@ Liegt hinter Basic Auth wie alles. Details/Client-Config:
 [`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
 
 ## Stolperfallen
+
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
   `git symbolic-ref HEAD refs/heads/main`.
 - `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
@@ -350,6 +363,7 @@ Liegt hinter Basic Auth wie alles. Details/Client-Config:
 - Push-Remote dieses Arbeits-Repos: `github.com/AFriendLikeYou/zon-dsdocs-dokumentation`.
 
 ## Weiterführend
+
 - [`DECISIONS.md`](DECISIONS.md) — ADR-Log (u. a. ADR-018 Discovery/Drift,
   ADR-021 Struktur, ADR-023 Registry-Schema, ADR-024 generierter Katalog,
   ADR-025 katalog-getriebene Components-Nav).

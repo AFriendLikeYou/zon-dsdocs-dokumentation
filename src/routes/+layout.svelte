@@ -72,7 +72,6 @@
 				{/if}
 
 				{@render children()}
-
 			</main>
 			{#if showFooterNav}
 				<FooterNavigation items={flatMenuItems} />

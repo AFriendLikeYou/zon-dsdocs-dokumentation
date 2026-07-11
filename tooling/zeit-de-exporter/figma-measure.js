@@ -34,7 +34,8 @@
 const SET_ID = '<COMPONENT_SET_NODE_ID>';
 
 const set = await figma.getNodeByIdAsync(SET_ID);
-if (!set || set.type !== 'COMPONENT_SET') throw new Error('Kein Component-Set: ' + (set && set.type));
+if (!set || set.type !== 'COMPONENT_SET')
+	throw new Error('Kein Component-Set: ' + (set && set.type));
 
 // Ungebundene Werte (Fill/Gap/Radius ohne Variable) sammeln — Token-Kandidaten
 // fürs ZDS-File und ehrliches Signal für den Import (kein Token ≠ Token raten).
@@ -59,7 +60,10 @@ async function tok(bound) {
 }
 
 function hx(c) {
-	const h = (x) => Math.round(x * 255).toString(16).padStart(2, '0');
+	const h = (x) =>
+		Math.round(x * 255)
+			.toString(16)
+			.padStart(2, '0');
 	return '#' + h(c.r) + h(c.g) + h(c.b);
 }
 
@@ -69,7 +73,8 @@ async function paints(list, where) {
 	for (const p of list) {
 		if (p.visible === false) continue;
 		if (p.type === 'SOLID') {
-			const t = p.boundVariables && p.boundVariables.color ? await tok(p.boundVariables.color) : null;
+			const t =
+				p.boundVariables && p.boundVariables.color ? await tok(p.boundVariables.color) : null;
 			const e = { hex: hx(p.color) };
 			if (p.opacity !== undefined && p.opacity < 1) e.op = Math.round(p.opacity * 100) / 100;
 			if (t) e.token = t;
@@ -127,23 +132,41 @@ async function measure(node, depth) {
 		// Typo-Detail (southleft-Muster): Gewicht + Zeilenhöhe + Laufweite mitmessen.
 		if (node.fontWeight !== figma.mixed) e.text.weight = node.fontWeight;
 		if (node.lineHeight !== figma.mixed && typeof node.lineHeight === 'object')
-			e.text.lineHeight = node.lineHeight.unit === 'AUTO' ? 'auto' : node.lineHeight.value + (node.lineHeight.unit === 'PERCENT' ? '%' : 'px');
-		if (node.letterSpacing !== figma.mixed && typeof node.letterSpacing === 'object' && node.letterSpacing.value !== 0)
-			e.text.letterSpacing = node.letterSpacing.value + (node.letterSpacing.unit === 'PERCENT' ? '%' : 'px');
+			e.text.lineHeight =
+				node.lineHeight.unit === 'AUTO'
+					? 'auto'
+					: node.lineHeight.value + (node.lineHeight.unit === 'PERCENT' ? '%' : 'px');
+		if (
+			node.letterSpacing !== figma.mixed &&
+			typeof node.letterSpacing === 'object' &&
+			node.letterSpacing.value !== 0
+		)
+			e.text.letterSpacing =
+				node.letterSpacing.value + (node.letterSpacing.unit === 'PERCENT' ? '%' : 'px');
 	}
 	// Designer-Annotations (southleft-Muster) — falls im File gepflegt, redaktionelles Gold.
 	try {
 		if ('annotations' in node && Array.isArray(node.annotations) && node.annotations.length) {
 			e.annotations = node.annotations.map((a) => a.labelMarkdown || a.label).filter(Boolean);
 		}
-	} catch (err) { /* Annotations-API nicht überall verfügbar — still tolerieren */ }
+	} catch (err) {
+		/* Annotations-API nicht überall verfügbar — still tolerieren */
+	}
 	if ('children' in node && depth < 4) {
 		// Identische Geschwister kollabieren (uSpec-Muster) — hält den Output kompakt.
 		const seen = new Map();
 		const kids = [];
 		for (const c of node.children) {
 			const key =
-				c.name + '|' + c.type + '|' + Math.round(c.width) + 'x' + Math.round(c.height) + '|' + (c.visible === false ? 'h' : 'v');
+				c.name +
+				'|' +
+				c.type +
+				'|' +
+				Math.round(c.width) +
+				'x' +
+				Math.round(c.height) +
+				'|' +
+				(c.visible === false ? 'h' : 'v');
 			if (seen.has(key)) {
 				seen.get(key).count = (seen.get(key).count || 1) + 1;
 				continue;
@@ -171,4 +194,11 @@ for (const v of set.children) {
 
 // `unbound` gehört in den Report (IMPORT.md verspricht ihn) — war bis 2026-07-11
 // gesammelt, aber nie zurückgegeben.
-return { set: { id: set.id, name: set.name }, props, variantCount: variants.length, variants, unbound, mutations: 'KEINE (read-only)' };
+return {
+	set: { id: set.id, name: set.name },
+	props,
+	variantCount: variants.length,
+	variants,
+	unbound,
+	mutations: 'KEINE (read-only)'
+};

@@ -11,7 +11,9 @@
 	<div class="usage">
 		{#if verwendung.nutzen?.length}
 			<div class="usage__col usage__col--use">
-				<p class="usage__head"><span class="usage__mark" aria-hidden="true">✓</span> Wann verwenden</p>
+				<p class="usage__head">
+					<span class="usage__mark" aria-hidden="true">✓</span> Wann verwenden
+				</p>
 				<ul>
 					{#each verwendung.nutzen as item}<li>{item}</li>{/each}
 				</ul>

@@ -9,7 +9,6 @@
 	const startingIndex = items.findIndex((item) => item.href === pathname) || 0;
 	let currentIndex = $state(startingIndex);
 
-
 	function getDisplayName(item: MenuItem | MenuSection) {
 		if ('title' in item) {
 			return item.title;
@@ -69,11 +68,12 @@
 		{/if}
 
 		{#if currentIndex < items.length - 1}
-			<Button onclick={nextItem} 
-			style={
-				currentIndex === 0 ? 'margin-left: auto;' : ''
-			}
-			class="footer-nav__button" aria-label="Zur nächsten Seite">
+			<Button
+				onclick={nextItem}
+				style={currentIndex === 0 ? 'margin-left: auto;' : ''}
+				class="footer-nav__button"
+				aria-label="Zur nächsten Seite"
+			>
 				{nextElement()}
 				<svg
 					aria-hidden="true"
@@ -91,7 +91,6 @@
 {/if}
 
 <style>
-
 	.footer-nav {
 		display: flex;
 		gap: var(--z-ds-space-l);

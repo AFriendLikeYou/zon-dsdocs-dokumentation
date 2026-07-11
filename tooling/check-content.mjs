@@ -101,7 +101,9 @@ function checkContent(slug, raw) {
 const slugs = fs.existsSync(componentsDir)
 	? fs
 			.readdirSync(componentsDir, { withFileTypes: true })
-			.filter((e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'content.json')))
+			.filter(
+				(e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'content.json'))
+			)
 			.map((e) => e.name)
 			.sort()
 	: [];

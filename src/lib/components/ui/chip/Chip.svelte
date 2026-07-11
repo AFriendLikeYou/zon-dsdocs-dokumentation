@@ -30,15 +30,30 @@
 </script>
 
 {#if href}
-	<a class="chip chip--{variant} {className}" class:chip--mono={mono} class:chip--emphasis={emphasis} {href}>
+	<a
+		class="chip chip--{variant} {className}"
+		class:chip--mono={mono}
+		class:chip--emphasis={emphasis}
+		{href}
+	>
 		{@render children()}
 	</a>
 {:else if onclick}
-	<button type="button" class="chip chip--{variant} {className}" class:chip--mono={mono} class:chip--emphasis={emphasis} {onclick}>
+	<button
+		type="button"
+		class="chip chip--{variant} {className}"
+		class:chip--mono={mono}
+		class:chip--emphasis={emphasis}
+		{onclick}
+	>
 		{@render children()}
 	</button>
 {:else}
-	<span class="chip chip--{variant} {className}" class:chip--mono={mono} class:chip--emphasis={emphasis}>
+	<span
+		class="chip chip--{variant} {className}"
+		class:chip--mono={mono}
+		class:chip--emphasis={emphasis}
+	>
 		{@render children()}
 	</span>
 {/if}

@@ -7,14 +7,32 @@
 	"required": ["name"],
 	"additionalProperties": false,
 	"properties": {
-		"$schema": { "type": "string", "description": "Verweis auf dieses Schema (aktiviert Autovervollständigung im Editor). Optional." },
-		"name": { "type": "string", "description": "Anzeigename der Komponente, z. B. \"Text Button\". Pflicht. Der Ordner-/URL-Name entsteht daraus automatisch (kebab-case)." },
-		"status": { "enum": ["ready_for_dev", "completed", "changed"], "description": "Reifegrad — steuert das Badge im Hero. (Redaktionell: gehört idealerweise in content.ts.)" },
-		"kategorie": { "type": "string", "description": "Gruppe, z. B. \"Aktionen\", \"Inhalte\", \"Formulare\"." },
-		"zweck": { "type": "string", "description": "Ein bis zwei Sätze: Wofür ist die Komponente? Erscheint im Hero. (Redaktionell.)" },
+		"$schema": {
+			"type": "string",
+			"description": "Verweis auf dieses Schema (aktiviert Autovervollständigung im Editor). Optional."
+		},
+		"name": {
+			"type": "string",
+			"description": "Anzeigename der Komponente, z. B. \"Text Button\". Pflicht. Der Ordner-/URL-Name entsteht daraus automatisch (kebab-case)."
+		},
+		"status": {
+			"enum": ["ready_for_dev", "completed", "changed"],
+			"description": "Reifegrad — steuert das Badge im Hero. (Redaktionell: gehört idealerweise in content.ts.)"
+		},
+		"kategorie": {
+			"type": "string",
+			"description": "Gruppe, z. B. \"Aktionen\", \"Inhalte\", \"Formulare\"."
+		},
+		"zweck": {
+			"type": "string",
+			"description": "Ein bis zwei Sätze: Wofür ist die Komponente? Erscheint im Hero. (Redaktionell.)"
+		},
 		"figma": { "type": "string", "description": "Node-genauer Figma-Link (…?node-id=…&m=dev)." },
 		"aktualisiertAm": { "type": "string", "description": "Datum JJJJ-MM-TT." },
-		"version": { "type": "string", "description": "Versions-/Snapshot-Label im Hero, z. B. \"Figma-Node 213:12\". (Redaktionell.)" },
+		"version": {
+			"type": "string",
+			"description": "Versions-/Snapshot-Label im Hero, z. B. \"Figma-Node 213:12\". (Redaktionell.)"
+		},
 		"masse": {
 			"type": "object",
 			"description": "Außenmaße für die Anatomie-Maßlinien + Specs-Tabelle. Jeder Wert: einfacher Text ODER { px, token }.",
@@ -93,7 +111,10 @@
 			"required": ["px"],
 			"properties": {
 				"px": { "type": "string", "description": "Wert in px, z. B. \"4 px\"." },
-				"token": { "type": "string", "description": "z-ds-Token-Name, z. B. \"--z-ds-space-xxxs\" (für den px↔Token-Umschalter)." },
+				"token": {
+					"type": "string",
+					"description": "z-ds-Token-Name, z. B. \"--z-ds-space-xxxs\" (für den px↔Token-Umschalter)."
+				},
 				"herkunft": { "$ref": "#/$defs/herkunft" }
 			}
 		},
@@ -110,7 +131,10 @@
 			"additionalProperties": false,
 			"required": ["label", "px"],
 			"properties": {
-				"label": { "type": "string", "description": "Name des Abstands, z. B. \"Spitzmarke ↔ Titel\"." },
+				"label": {
+					"type": "string",
+					"description": "Name des Abstands, z. B. \"Spitzmarke ↔ Titel\"."
+				},
 				"px": { "type": "string", "description": "Wert in px." },
 				"token": { "type": "string", "description": "z-ds-Spacing-Token." },
 				"herkunft": { "$ref": "#/$defs/herkunft" }
@@ -122,9 +146,18 @@
 			"required": ["nr", "text"],
 			"properties": {
 				"nr": { "type": "integer", "description": "Nummer des Callouts (1, 2, 3 …)." },
-				"text": { "type": "string", "description": "\"Begriff — Beschreibung\" (Begriff wird fett)." },
-				"art": { "enum": ["instance", "text", "slot", "container", "structural"], "description": "Rolle des Teils → dezentes Typ-Badge in der Legende (optional)." },
-				"optionalDurch": { "type": "string", "description": "Teil ist optional; Name des steuernden Props/Controls (z. B. \"hasIconStart\") → Hinweis „optional — gesteuert über X\"." }
+				"text": {
+					"type": "string",
+					"description": "\"Begriff — Beschreibung\" (Begriff wird fett)."
+				},
+				"art": {
+					"enum": ["instance", "text", "slot", "container", "structural"],
+					"description": "Rolle des Teils → dezentes Typ-Badge in der Legende (optional)."
+				},
+				"optionalDurch": {
+					"type": "string",
+					"description": "Teil ist optional; Name des steuernden Props/Controls (z. B. \"hasIconStart\") → Hinweis „optional — gesteuert über X\"."
+				}
 			}
 		},
 		"tokenGroup": {
@@ -133,7 +166,10 @@
 			"required": ["kategorie", "items"],
 			"properties": {
 				"kategorie": { "type": "string", "description": "Gruppentitel, z. B. \"Farbe\"." },
-				"beschreibung": { "type": "string", "description": "Optionaler Satz unter dem Gruppentitel." },
+				"beschreibung": {
+					"type": "string",
+					"description": "Optionaler Satz unter dem Gruppentitel."
+				},
 				"items": {
 					"type": "array",
 					"items": {
@@ -143,7 +179,10 @@
 						"properties": {
 							"name": { "type": "string", "description": "Token-Name." },
 							"wert": { "type": "string", "description": "Wert/Beschreibung." },
-							"swatch": { "type": "string", "description": "Farb-Hex für die Vorschau (optional)." },
+							"swatch": {
+								"type": "string",
+								"description": "Farb-Hex für die Vorschau (optional)."
+							},
 							"translucent": { "type": "boolean" }
 						}
 					}
@@ -168,7 +207,10 @@
 						"additionalProperties": false,
 						"required": ["teil", "tokensProZustand"],
 						"properties": {
-							"teil": { "type": "string", "description": "Name des Teils/der Rolle, z. B. \"Hintergrund\", \"Text\", \"Rahmen\"." },
+							"teil": {
+								"type": "string",
+								"description": "Name des Teils/der Rolle, z. B. \"Hintergrund\", \"Text\", \"Rahmen\"."
+							},
 							"tokensProZustand": {
 								"type": "object",
 								"description": "Zustand-Key → --z-ds-Token oder \"none\". Keys müssen in zustaende vorkommen.",
@@ -185,7 +227,10 @@
 			"additionalProperties": false,
 			"required": ["prop", "werte"],
 			"properties": {
-				"prop": { "type": "string", "description": "Name der Achse, z. B. \"Typ\" oder \"Größe\"." },
+				"prop": {
+					"type": "string",
+					"description": "Name der Achse, z. B. \"Typ\" oder \"Größe\"."
+				},
 				"werte": {
 					"type": "array",
 					"items": {
@@ -194,7 +239,10 @@
 						"required": ["label"],
 						"properties": {
 							"label": { "type": "string" },
-							"cssClass": { "type": "string", "description": "Modifier-Klasse dieser Variante (wird gegen pattern.css geprüft)." },
+							"cssClass": {
+								"type": "string",
+								"description": "Modifier-Klasse dieser Variante (wird gegen pattern.css geprüft)."
+							},
 							"default": { "type": "boolean" }
 						}
 					}
@@ -207,7 +255,10 @@
 			"required": ["label"],
 			"properties": {
 				"label": { "type": "string" },
-				"vorhanden": { "type": "boolean", "description": "true = im Design abgedeckt (grün), sonst gestrichelt." }
+				"vorhanden": {
+					"type": "boolean",
+					"description": "true = im Design abgedeckt (grün), sonst gestrichelt."
+				}
 			}
 		},
 		"a11yItem": {
@@ -225,7 +276,10 @@
 			"additionalProperties": false,
 			"required": ["taste", "aktion"],
 			"properties": {
-				"taste": { "type": "string", "description": "Taste(n), z. B. \"Leertaste\", \"Tab\", \"Enter\", \"Esc\", \"↑ / ↓\"." },
+				"taste": {
+					"type": "string",
+					"description": "Taste(n), z. B. \"Leertaste\", \"Tab\", \"Enter\", \"Esc\", \"↑ / ↓\"."
+				},
 				"aktion": { "type": "string", "description": "Was die Taste bewirkt (Deutsch)." }
 			}
 		},
@@ -262,7 +316,10 @@
 			"additionalProperties": false,
 			"required": ["html", "text"],
 			"properties": {
-				"html": { "type": "string", "description": "Specimen-Markup (echte z-Klassen) für die Bühne." },
+				"html": {
+					"type": "string",
+					"description": "Specimen-Markup (echte z-Klassen) für die Bühne."
+				},
 				"text": { "type": "string", "description": "Kurze Erklärung unter dem Specimen." }
 			}
 		},
@@ -271,7 +328,10 @@
 			"additionalProperties": false,
 			"required": ["schlecht", "gut"],
 			"properties": {
-				"schlecht": { "type": "string", "description": "Schlechtes Beispiel (wird durchgestrichen)." },
+				"schlecht": {
+					"type": "string",
+					"description": "Schlechtes Beispiel (wird durchgestrichen)."
+				},
 				"gut": { "type": "string", "description": "Besseres Beispiel." },
 				"hinweis": { "type": "string", "description": "Kurze Begründung (optional)." }
 			}
@@ -282,7 +342,10 @@
 			"additionalProperties": false,
 			"required": ["key", "label", "type"],
 			"properties": {
-				"key": { "type": "string", "description": "Eindeutiger Schlüssel (auch in presets referenziert)." },
+				"key": {
+					"type": "string",
+					"description": "Eindeutiger Schlüssel (auch in presets referenziert)."
+				},
 				"label": { "type": "string" },
 				"type": { "enum": ["select", "toggle", "attr"] },
 				"default": { "description": "Startwert (string für select, boolean für toggle/attr)." },
@@ -300,8 +363,14 @@
 						}
 					}
 				},
-				"cssClass": { "type": "string", "description": "Für type=toggle: welche Klasse der Schalter setzt." },
-				"attr": { "type": "string", "description": "Für type=attr: welches HTML-Attribut gesetzt wird (z. B. disabled)." }
+				"cssClass": {
+					"type": "string",
+					"description": "Für type=toggle: welche Klasse der Schalter setzt."
+				},
+				"attr": {
+					"type": "string",
+					"description": "Für type=attr: welches HTML-Attribut gesetzt wird (z. B. disabled)."
+				}
 			}
 		},
 		"preset": {
@@ -310,7 +379,10 @@
 			"required": ["label", "state"],
 			"properties": {
 				"label": { "type": "string", "description": "Name des Beispiels, z. B. \"Mit Bild\"." },
-				"state": { "type": "object", "description": "Setzt Control-Werte auf einmal (Schlüssel = control.key)." }
+				"state": {
+					"type": "object",
+					"description": "Setzt Control-Werte auf einmal (Schlüssel = control.key)."
+				}
 			}
 		},
 		"render": {
@@ -318,19 +390,44 @@
 			"description": "Repo-Verdrahtung (Playground, CSS, Code) — wird beim Export vom Datenmodell abgezogen.",
 			"additionalProperties": false,
 			"properties": {
-				"controls": { "type": "array", "items": { "$ref": "#/$defs/control" }, "description": "Bedienelemente des Playgrounds." },
-				"template": { "type": "string", "description": "Logikfreies HTML mit {classes}/{attrs}-Platzhaltern — speist Vorschau UND Code." },
-				"cssFile": { "type": "string", "description": "Pfad zur co-locateten pattern.css (unscoped, echte --z-ds-*-Token)." },
-				"presets": { "type": "array", "items": { "$ref": "#/$defs/preset" }, "description": "Benannte Beispiele/„Rezepte\"." },
-				"specimen": { "type": "string", "description": "Escape-Hatch: Pfad zu einer Specimen.svelte (statt template, für Loops/Interaktion)." },
+				"controls": {
+					"type": "array",
+					"items": { "$ref": "#/$defs/control" },
+					"description": "Bedienelemente des Playgrounds."
+				},
+				"template": {
+					"type": "string",
+					"description": "Logikfreies HTML mit {classes}/{attrs}-Platzhaltern — speist Vorschau UND Code."
+				},
+				"cssFile": {
+					"type": "string",
+					"description": "Pfad zur co-locateten pattern.css (unscoped, echte --z-ds-*-Token)."
+				},
+				"presets": {
+					"type": "array",
+					"items": { "$ref": "#/$defs/preset" },
+					"description": "Benannte Beispiele/„Rezepte\"."
+				},
+				"specimen": {
+					"type": "string",
+					"description": "Escape-Hatch: Pfad zu einer Specimen.svelte (statt template, für Loops/Interaktion)."
+				},
 				"hint": { "type": "string", "description": "Hinweiszeile statt Controls." },
 				"stage": {
 					"type": "object",
 					"additionalProperties": false,
-					"properties": { "darkKey": { "type": "string", "description": "Control-Key, bei dem die Bühne dunkel startet (z. B. onImage)." } }
+					"properties": {
+						"darkKey": {
+							"type": "string",
+							"description": "Control-Key, bei dem die Bühne dunkel startet (z. B. onImage)."
+						}
+					}
 				},
 				"preview": { "type": "string", "description": "Haupt-Specimen-Markup für die Anatomie." },
-				"variant": { "type": "string", "description": "Zweites Specimen-Markup (Strip in der Anatomie)." },
+				"variant": {
+					"type": "string",
+					"description": "Zweites Specimen-Markup (Strip in der Anatomie)."
+				},
 				"matrix": {
 					"type": "array",
 					"description": "Varianten-Raster.",
@@ -368,7 +465,11 @@
 							"typ": { "type": "string" },
 							"default": { "type": "string" },
 							"beschreibung": { "type": "string" },
-							"erlaubteWerte": { "type": "array", "items": { "type": "string" }, "description": "Erlaubte Werte (z. B. select-Options) → Code-Chips in eigener Spalte." },
+							"erlaubteWerte": {
+								"type": "array",
+								"items": { "type": "string" },
+								"description": "Erlaubte Werte (z. B. select-Options) → Code-Chips in eigener Spalte."
+							},
 							"pflicht": { "type": "boolean", "description": "Pflicht-Prop → Badge am Namen." }
 						}
 					}
@@ -377,7 +478,9 @@
 				"codeNote": { "type": "string" },
 				"codeSvelte": { "description": "Svelte-Code-Beispiel (String oder Zeilen-Array)." },
 				"repoNote": { "type": "string", "description": "Hinweis zur echten Repo-Komponente." },
-				"repoCodeSvelte": { "description": "Code der echten Repo-Komponente (String oder Zeilen-Array)." },
+				"repoCodeSvelte": {
+					"description": "Code der echten Repo-Komponente (String oder Zeilen-Array)."
+				},
 				"variantInfo": { "type": "object", "additionalProperties": { "type": "string" } },
 				"version": { "type": "string" }
 			}

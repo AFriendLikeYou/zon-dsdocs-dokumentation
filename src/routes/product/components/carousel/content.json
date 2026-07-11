@@ -106,10 +106,7 @@
 			"Nicht für kritische, einzeln wichtige Elemente, die hinter dem Rand verschwinden könnten."
 		]
 	},
-	"verwandt": [
-		"cell",
-		"button"
-	],
+	"verwandt": ["cell", "button"],
 	"version": "Figma-Node 630:630 · CSS zon-carousel",
 	"variantInfo": {
 		"Small": "Kompakte Sektionsbreite (375). Kein Fader.",

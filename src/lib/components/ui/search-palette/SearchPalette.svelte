@@ -4,11 +4,7 @@
   Trigger + Dialog in einem; einfach <SearchPalette /> in die Navbar legen.
 -->
 <script lang="ts">
-	import {
-		FLAT_MENU_ITEMS_BRAND,
-		FLAT_MENU_ITEMS_PRODUCT,
-		type MenuItem
-	} from '$data/navigation';
+	import { FLAT_MENU_ITEMS_BRAND, FLAT_MENU_ITEMS_PRODUCT, type MenuItem } from '$data/navigation';
 	import { Badge } from '$components/ui/badge';
 	import { EmptyState } from '$components/ui/empty-state';
 	import { goto } from '$app/navigation';

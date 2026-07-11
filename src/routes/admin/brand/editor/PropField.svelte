@@ -192,7 +192,8 @@
 	}
 	select {
 		appearance: none;
-		background-image: linear-gradient(45deg, transparent 50%, var(--ds-text-muted) 50%),
+		background-image:
+			linear-gradient(45deg, transparent 50%, var(--ds-text-muted) 50%),
 			linear-gradient(135deg, var(--ds-text-muted) 50%, transparent 50%);
 		background-position:
 			calc(100% - 18px) 50%,

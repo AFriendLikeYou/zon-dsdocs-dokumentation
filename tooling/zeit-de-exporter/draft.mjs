@@ -48,11 +48,7 @@ const CONTEXT_PREFIX = {
  */
 export function mapVariableName(figmaName, context, known) {
 	if (!figmaName) return null;
-	const norm = String(figmaName)
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, '-')
-		.replace(/\//g, '-');
+	const norm = String(figmaName).toLowerCase().trim().replace(/\s+/g, '-').replace(/\//g, '-');
 	const prefix = CONTEXT_PREFIX[context];
 	const candidates = prefix ? [`--z-ds-${prefix}-${norm}`, `--z-ds-${norm}`] : [`--z-ds-${norm}`];
 	for (const c of candidates) if (known.has(c)) return c;
@@ -167,7 +163,8 @@ export function buildDraft(raw, known) {
 			for (const paint of [...(n.fills ?? []), ...(n.strokes ?? [])]) {
 				if (!paint.token) continue;
 				const t = mapOrFlag(paint.token, 'color', paint.hex);
-				if (t && !colorItems.has(t)) colorItems.set(t, { name: t, wert: paint.hex, swatch: paint.hex });
+				if (t && !colorItems.has(t))
+					colorItems.set(t, { name: t, wert: paint.hex, swatch: paint.hex });
 			}
 			const gt = n.layout?.gapToken;
 			if (gt) {
@@ -204,7 +201,16 @@ export function buildDraft(raw, known) {
 		zustaende = stateAxis.options.map((o) => ({ label: o.toLowerCase() }));
 		const teile = [
 			{ teil: 'Hintergrund', pick: (v) => v.fills?.[0] },
-			{ teil: 'Text', pick: (v) => { let hit; walk(v, (n) => { if (!hit && n.type === 'TEXT') hit = n.fills?.[0]; }); return hit; } },
+			{
+				teil: 'Text',
+				pick: (v) => {
+					let hit;
+					walk(v, (n) => {
+						if (!hit && n.type === 'TEXT') hit = n.fills?.[0];
+					});
+					return hit;
+				}
+			},
 			{ teil: 'Rahmen', pick: (v) => v.strokes?.[0] }
 		];
 		const elemente = [];
@@ -297,7 +303,9 @@ if (isCli) {
 	}
 	const rawPath = path.resolve(repoRoot, dir, 'figma-raw.json');
 	if (!fs.existsSync(rawPath)) {
-		console.error(`Keine figma-raw.json in ${dir} — erst messen (figma-measure.js) und Output dort speichern.`);
+		console.error(
+			`Keine figma-raw.json in ${dir} — erst messen (figma-measure.js) und Output dort speichern.`
+		);
 		process.exit(1);
 	}
 	const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
@@ -311,11 +319,16 @@ if (isCli) {
 		console.log(`✓ Entwurf geschrieben: ${path.relative(repoRoot, out)}`);
 	}
 	if (report.unmapped.length) {
-		console.log(`\n⚠️  ${report.unmapped.length} Variable(n) ohne --z-ds-Treffer (Wert behalten, Token weggelassen):`);
-		for (const u of report.unmapped) console.log(`   – ${u.figmaName} (${u.context}, Wert ${u.wert})`);
+		console.log(
+			`\n⚠️  ${report.unmapped.length} Variable(n) ohne --z-ds-Treffer (Wert behalten, Token weggelassen):`
+		);
+		for (const u of report.unmapped)
+			console.log(`   – ${u.figmaName} (${u.context}, Wert ${u.wert})`);
 	}
 	if (report.unbound.length)
-		console.log(`\nℹ️  ${report.unbound.length} ungebundene Werte aus der Messung (Token-Kandidaten fürs ZDS).`);
+		console.log(
+			`\nℹ️  ${report.unbound.length} ungebundene Werte aus der Messung (Token-Kandidaten fürs ZDS).`
+		);
 	for (const h of report.hinweise) console.log(`\nℹ️  ${h}`);
 	console.log(
 		'\nNächste Schritte: pattern.css kuratieren (cssClass-TODOs), ARIA-Template (Ebene ③),' +

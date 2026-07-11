@@ -76,10 +76,12 @@ const tpl = '<button type="submit" class="z-button{classes}"{attrs}>Click me</bu
 
 describe('Playground — Template-Modus (Registry)', () => {
 	it('instantiate(): Klassen + Attribute aus Controls-State, eine Quelle für Preview & Code', () => {
-		expect(instantiate(tpl, tplControls, { variant: 'default', fullwidth: false, disabled: false })).toBe(
-			'<button type="submit" class="z-button">Click me</button>'
-		);
-		expect(instantiate(tpl, tplControls, { variant: 'zplus', fullwidth: true, disabled: true })).toBe(
+		expect(
+			instantiate(tpl, tplControls, { variant: 'default', fullwidth: false, disabled: false })
+		).toBe('<button type="submit" class="z-button">Click me</button>');
+		expect(
+			instantiate(tpl, tplControls, { variant: 'zplus', fullwidth: true, disabled: true })
+		).toBe(
 			'<button type="submit" class="z-button z-button--zplus z-button--fullwidth" disabled>Click me</button>'
 		);
 	});
@@ -103,7 +105,9 @@ describe('Playground — Template-Modus (Registry)', () => {
 	});
 
 	it('Preset-Chip setzt mehrere Control-Werte auf einmal (Astryx-Rezept)', async () => {
-		const presets = [{ label: 'Z+ Voll', state: { variant: 'zplus', fullwidth: true, disabled: false } }];
+		const presets = [
+			{ label: 'Z+ Voll', state: { variant: 'zplus', fullwidth: true, disabled: false } }
+		];
 		const { container } = render(Playground, {
 			props: { controls: tplControls, template: tpl, presets }
 		});

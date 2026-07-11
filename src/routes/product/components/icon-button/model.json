@@ -3,11 +3,7 @@
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"zweck": "Löst eine Aktion ohne sichtbares Label aus — kompakt und ikonografisch. Da kein Text sichtbar ist, braucht jeder Icon Button ein aria-label, das die Aktion beschreibt.",
-	"verwandt": [
-		"button",
-		"text-button",
-		"button-group"
-	],
+	"verwandt": ["button", "text-button", "button-group"],
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=3334-5440",
 	"aktualisiertAm": "2026-07-07",
 	"masse": {
@@ -82,12 +78,7 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": [
-			"default",
-			"hover",
-			"focus-visible",
-			"disabled"
-		],
+		"zustaende": ["default", "hover", "focus-visible", "disabled"],
 		"elemente": [
 			{
 				"teil": "Fläche (Container)",

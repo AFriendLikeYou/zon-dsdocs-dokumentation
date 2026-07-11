@@ -217,7 +217,9 @@
 					>{creating ? 'Wird angelegt …' : 'Anlegen & bearbeiten'}</button
 				>
 				<button type="button" class="np-cancel" onclick={() => (showNew = false)}>Abbrechen</button>
-				<span class="np-hint">Erscheint am Ende der Sidebar — Position danach per Drag&nbsp;&amp;&nbsp;Drop.</span>
+				<span class="np-hint"
+					>Erscheint am Ende der Sidebar — Position danach per Drag&nbsp;&amp;&nbsp;Drop.</span
+				>
 			</div>
 		</form>
 	{/if}

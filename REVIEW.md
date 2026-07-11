@@ -52,10 +52,10 @@ für SvelteKit als ein paralleler Bereichs-Baum:
 
 ### Umgesetzt (Commit `9e19e26`)
 
-| Vorher | Nachher | Warum |
-| --- | --- | --- |
-| `lib/toast-state.svelte.ts` (lose) | `lib/stores/toast-state.svelte.ts` | Einzige State-Datei außerhalb `stores/` — jetzt aller Client-State an einem Ort, `$stores`-Alias greift. |
-| `lib/data/agent-catalog.ts` | `lib/server/agent-catalog.ts` | Trug „nur serverseitig importieren!" als **Kommentar** — in `lib/server/` verbietet SvelteKit Client-Importe **compiler-seitig**. Konvention → Garantie. |
+| Vorher                             | Nachher                            | Warum                                                                                                                                                    |
+| ---------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/toast-state.svelte.ts` (lose) | `lib/stores/toast-state.svelte.ts` | Einzige State-Datei außerhalb `stores/` — jetzt aller Client-State an einem Ort, `$stores`-Alias greift.                                                 |
+| `lib/data/agent-catalog.ts`        | `lib/server/agent-catalog.ts`      | Trug „nur serverseitig importieren!" als **Kommentar** — in `lib/server/` verbietet SvelteKit Client-Importe **compiler-seitig**. Konvention → Garantie. |
 
 ### Geprüft, bewusst belassen
 
@@ -69,14 +69,14 @@ für SvelteKit als ein paralleler Bereichs-Baum:
 
 ### Gefixt
 
-| Befund | Schwere | Fix |
-| --- | --- | --- |
-| **AnchorLinks: Listener-Leak** — `afterNavigate` hängte pro Navigation neue Copy-Buttons + mouseenter/mouseleave-Listener an alle h2/h3 (Doppel-Buttons, Akkumulation) | hoch | Idempotenz-Guard; Hover/Fokus rein per CSS; Button damit erstmals **tastaturzugänglich** (focus-visible → sichtbar) |
-| **Feld-Panel 3× dupliziert** im Brand-Editor (Komponente/Container/Kind, ~130 Zeilen, Drift bereits sichtbar) | mittel | `FieldsPanel.svelte` extrahiert (eine Quelle für Markup, Toggle, ::details-content-Fix); Editor −150 Zeilen |
-| **reduced-motion fehlte** bei toast (fly), Card (Hover-Lift), MenuCollapsible (Chevron) | mittel | RM-Blöcke ergänzt (Projektregel Emil-Skill); toast: Fade statt Fly |
-| **`$effect` als derived** (login) | niedrig | `const isLoggedIn = $derived(!!form?.success)` |
-| **5 Routen mit untypisiertem `{ data }`/`{ data, form }`** | niedrig | `PageProps` aus `./$types` (SvelteKit ≥ 2.16) |
-| **Fokus-Ringe**: `app-button`/Breadcrumbs `:focus` → `:focus-visible`; TOC-Links ohne Ring; Skip-Link ohne sichtbaren Ring | niedrig–mittel | umgestellt/ergänzt (WCAG 2.4.7) |
+| Befund                                                                                                                                                                 | Schwere        | Fix                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **AnchorLinks: Listener-Leak** — `afterNavigate` hängte pro Navigation neue Copy-Buttons + mouseenter/mouseleave-Listener an alle h2/h3 (Doppel-Buttons, Akkumulation) | hoch           | Idempotenz-Guard; Hover/Fokus rein per CSS; Button damit erstmals **tastaturzugänglich** (focus-visible → sichtbar) |
+| **Feld-Panel 3× dupliziert** im Brand-Editor (Komponente/Container/Kind, ~130 Zeilen, Drift bereits sichtbar)                                                          | mittel         | `FieldsPanel.svelte` extrahiert (eine Quelle für Markup, Toggle, ::details-content-Fix); Editor −150 Zeilen         |
+| **reduced-motion fehlte** bei toast (fly), Card (Hover-Lift), MenuCollapsible (Chevron)                                                                                | mittel         | RM-Blöcke ergänzt (Projektregel Emil-Skill); toast: Fade statt Fly                                                  |
+| **`$effect` als derived** (login)                                                                                                                                      | niedrig        | `const isLoggedIn = $derived(!!form?.success)`                                                                      |
+| **5 Routen mit untypisiertem `{ data }`/`{ data, form }`**                                                                                                             | niedrig        | `PageProps` aus `./$types` (SvelteKit ≥ 2.16)                                                                       |
+| **Fokus-Ringe**: `app-button`/Breadcrumbs `:focus` → `:focus-visible`; TOC-Links ohne Ring; Skip-Link ohne sichtbaren Ring                                             | niedrig–mittel | umgestellt/ergänzt (WCAG 2.4.7)                                                                                     |
 
 ### Bewusst nicht angefasst (Kür, siehe Roadmap)
 
@@ -104,22 +104,22 @@ check-design-parity, version-history, blame-node, comments.
 
 ### Skill-für-Skill-Empfehlung
 
-| southleft-Skill | Status | Empfehlung |
-| --- | --- | --- |
-| `figma-analyze-component-set` | ✅ installiert | behalten (State-Machine ergänzt figma-measure.js) |
-| `figma-deep-component` | ✅ installiert | behalten |
-| `figma-annotations` → als `figma-comments` | ✅ installiert (Kommentar-Richtung) | behalten; Designer-Annotations → content.json bleibt bewusst Mensch-Schritt |
-| `figma-export-tokens` | ❌ bewusst nicht | **richtig so**: Token-SSOT ist das zeit.de-npm-Paket (`styles-zds.css`), Werte werden zur Laufzeit gelesen, `check-tokens`/`check-zds-sync` sichern Drift. Ein zweiter Token-Export = zweite Wahrheit. |
-| `figma-import-tokens` / `figma-setup-design-tokens` / `figma-manage-variables` | ❌ bewusst nicht | Upstream-Sache (ADR-013). Einzig denkbare Richtung wäre Code→Figma-Sync — gehört ins zeit.de-Repo, nicht in die Doku. |
-| `figma-generate-component-doc` | ❌ bewusst nicht | **richtig so** (keine zweite Doku-Wahrheit); seine Ideen stecken in figma-measure.js/IMPORT.md |
-| `figma-design-system-inventory` | ❌ fehlt | **einziger echter Kandidat**: Katalog-Level-Coverage („welche ZDS-Figma-Komponenten existieren ohne Doku-Seite?") — heute nur manuell über PLANNED_COMPONENTS |
+| southleft-Skill                                                                | Status                              | Empfehlung                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `figma-analyze-component-set`                                                  | ✅ installiert                      | behalten (State-Machine ergänzt figma-measure.js)                                                                                                                                                      |
+| `figma-deep-component`                                                         | ✅ installiert                      | behalten                                                                                                                                                                                               |
+| `figma-annotations` → als `figma-comments`                                     | ✅ installiert (Kommentar-Richtung) | behalten; Designer-Annotations → content.json bleibt bewusst Mensch-Schritt                                                                                                                            |
+| `figma-export-tokens`                                                          | ❌ bewusst nicht                    | **richtig so**: Token-SSOT ist das zeit.de-npm-Paket (`styles-zds.css`), Werte werden zur Laufzeit gelesen, `check-tokens`/`check-zds-sync` sichern Drift. Ein zweiter Token-Export = zweite Wahrheit. |
+| `figma-import-tokens` / `figma-setup-design-tokens` / `figma-manage-variables` | ❌ bewusst nicht                    | Upstream-Sache (ADR-013). Einzig denkbare Richtung wäre Code→Figma-Sync — gehört ins zeit.de-Repo, nicht in die Doku.                                                                                  |
+| `figma-generate-component-doc`                                                 | ❌ bewusst nicht                    | **richtig so** (keine zweite Doku-Wahrheit); seine Ideen stecken in figma-measure.js/IMPORT.md                                                                                                         |
+| `figma-design-system-inventory`                                                | ❌ fehlt                            | **einziger echter Kandidat**: Katalog-Level-Coverage („welche ZDS-Figma-Komponenten existieren ohne Doku-Seite?") — heute nur manuell über PLANNED_COMPONENTS                                          |
 
 ### Automatisierungs-Lücken (priorisiert)
 
 1. **`model.json`-Entwurfs-Generator** — der teuerste manuelle Schritt ist heute
    „figma-measure-Output → von Hand model.json". Ein deterministischer Mapper
    (Messung + analyze-component-set → vorbefülltes model.json mit `herkunft:
-   "gemessen"`, Lücken als TODO) würde den Import von Stunden auf Minuten bringen,
+"gemessen"`, Lücken als TODO) würde den Import von Stunden auf Minuten bringen,
    ohne die kanonische Pipeline anzutasten. Der zds-component-import-Skill bliebe
    das erzwingende Gate.
 2. **Coverage-Inventar** (siehe oben): einmal pro Sprint `figma-design-system-inventory`
@@ -132,12 +132,12 @@ check-design-parity, version-history, blame-node, comments.
 8 von 11 Komponenten sind redaktionell voll (a11y ≥ 5, Do/Don't, Anatomie, Tokens,
 Wording, Tastatur). **Lücken:**
 
-| Komponente | Fehlt |
-| --- | --- |
+| Komponente      | Fehlt                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `page-shortcut` | praktisch alles (keine Varianten/States/Maße/Tokens/a11y/DoDont; zweck verspricht Hover/Focus, Doku zeigt sie nicht) |
-| `text-button` | zustaende (obwohl farbrollen 4 kennt), Maße, Tokens, a11y, DoDont |
-| `button-group` | zustaende (farbrollen kennt 3), Maße, Tokens, a11y, DoDont |
-| `cell` | nur `default` als State dokumentiert |
+| `text-button`   | zustaende (obwohl farbrollen 4 kennt), Maße, Tokens, a11y, DoDont                                                    |
+| `button-group`  | zustaende (farbrollen kennt 3), Maße, Tokens, a11y, DoDont                                                           |
+| `cell`          | nur `default` als State dokumentiert                                                                                 |
 
 **Neu: `tooling/check-doc-coverage.mjs`** (warn-only, im `npm run check`, `--strict`
 für CI) macht genau diese Lücken dauerhaft sichtbar — inklusive des Musters
@@ -154,12 +154,10 @@ Schreib-Aufgaben.
 Coverage-Check, carousel-Kuratierung — alles in dieser Review-Runde committet.
 
 **Empfohlen (nächste Runde):**
+
 1. `page-shortcut`, `text-button`, `button-group` per `zds-component-import` nachziehen;
    `cell`-States aus der pattern.css ableiten (`:hover`/`:focus-visible` existieren dort).
 2. `model.json`-Entwurfs-Generator (Pipeline-Lücke 1).
 3. Restliche `:focus-visible`-Kandidaten (Copy-Trigger-Familie) in einem Sweep.
 
-**Nice-to-have:**
-4. `afterNavigate`-Spiegel → `$derived(page.url)` (4 Dateien).
-5. Coverage-Inventar-Skill + sync-GitHub-Action (Workflow-Plan Schritt 3).
-6. Editor-Zerlegung (BlockCard/Savebar) — erst bei neuem Feature-Wachstum.
+**Nice-to-have:** 4. `afterNavigate`-Spiegel → `$derived(page.url)` (4 Dateien). 5. Coverage-Inventar-Skill + sync-GitHub-Action (Workflow-Plan Schritt 3). 6. Editor-Zerlegung (BlockCard/Savebar) — erst bei neuem Feature-Wachstum.

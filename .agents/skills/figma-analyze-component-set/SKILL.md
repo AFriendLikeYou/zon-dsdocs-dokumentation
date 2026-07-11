@@ -7,12 +7,13 @@ disable-model-invocation: false
 # figma-analyze-component-set — variant state machine → CSS
 
 Take a Figma `COMPONENT_SET` (the purple dashed container holding all the variants of one
-component) and turn it into a code-generation blueprint: which property axes are *state* vs *size*,
+component) and turn it into a code-generation blueprint: which property axes are _state_ vs _size_,
 how each state maps to a CSS pseudo-class or ARIA attribute, and the minimal visual delta each state
 applies on top of the default variant. This is the bridge between "Figma has 12 button variants" and
 "emit one `.btn` rule + `:hover`/`:disabled` overrides."
 
 ## Skill boundaries
+
 - **`use_figma` rules** — load the official **`figma-use`** skill first; it is the full Figma Plugin API reference. Essentials these scripts rely on: plain JS with top-level `await` + `return` (no IIFE, no `figma.closePlugin()`; `console.log` is not returned), inputs inlined as `const` at the top of each script, colors in 0–1 range, load fonts before any text op, `await figma.getNodeByIdAsync(...)`, and **atomic errors** (a failed script applies nothing — read the error, fix, retry).
 - **Full recursive tree** (unlimited depth, reactions, instance refs) → use `figma-deep-component`.
 - **Reorganizing variants into a labeled grid** → use `figma-arrange-component-set`.
@@ -23,7 +24,7 @@ applies on top of the default variant. This is the bridge between "Figma has 12 
 ## Workflow
 
 1. **Get the COMPONENT_SET id.** From the user's selection (`figma_get_selection`), a search, or a
-   node id they paste. It must be the *set*, not an individual variant — the script validates type.
+   node id they paste. It must be the _set_, not an individual variant — the script validates type.
 2. **Run** [`scripts/analyze-component-set.js`](scripts/analyze-component-set.js) via `use_figma`
    (`skillNames: "figma-analyze-component-set"`). Set `const COMPONENT_SET_ID` at the top first.
 3. **Read the result.** It returns `variantAxes` (each axis + its options), `componentProps`
@@ -37,24 +38,25 @@ applies on top of the default variant. This is the bridge between "Figma has 12 
 
 ## How states map to CSS
 
-The script normalizes the *state* axis value (case-insensitive) to a selector:
+The script normalizes the _state_ axis value (case-insensitive) to a selector:
 
-| Variant value | CSS / ARIA selector |
-| --- | --- |
-| `default` | (base rule, no selector) |
-| `hover` | `:hover` |
-| `focus` / `focused` / `focus-visible` | `:focus-visible` |
-| `active` / `pressed` | `:active` |
-| `disabled` | `:disabled, [aria-disabled="true"]` |
-| `error` / `invalid` | `[aria-invalid="true"]` |
-| `selected` | `[aria-selected="true"]` |
-| `checked` | `:checked` |
-| `loading` | `[aria-busy="true"]` |
-| `open` / `closed` | `[aria-expanded="true"|"false"]` |
-| `filled` | `.has-value` |
+| Variant value                         | CSS / ARIA selector                 |
+| ------------------------------------- | ----------------------------------- | --------- |
+| `default`                             | (base rule, no selector)            |
+| `hover`                               | `:hover`                            |
+| `focus` / `focused` / `focus-visible` | `:focus-visible`                    |
+| `active` / `pressed`                  | `:active`                           |
+| `disabled`                            | `:disabled, [aria-disabled="true"]` |
+| `error` / `invalid`                   | `[aria-invalid="true"]`             |
+| `selected`                            | `[aria-selected="true"]`            |
+| `checked`                             | `:checked`                          |
+| `loading`                             | `[aria-busy="true"]`                |
+| `open` / `closed`                     | `[aria-expanded="true"              | "false"]` |
+| `filled`                              | `.has-value`                        |
 
 ## Notes
-- **Diffs are computed against the default variant**, so a state's `diffFromDefault` lists *only* the
+
+- **Diffs are computed against the default variant**, so a state's `diffFromDefault` lists _only_ the
   properties that change (fill token, stroke, text color, opacity, effects, child visibility). Emit
   exactly those as overrides — don't re-specify unchanged properties.
 - The script resolves `boundVariables` (fills/strokes) to **token names** when available, falling

@@ -26,14 +26,14 @@ der Svelte-Wrapper kostet zur Laufzeit nichts, erlaubt aber `currentColor`
 Rohe `.svg`-Dateien bräuchten einen Import-Plugin oder `<img>` (verliert
 `currentColor`). Zum Austauschen einfach das `<svg>` in der Datei ersetzen.
 
-| Name | Datei | Einsatz |
-| --- | --- | --- |
-| plus | IconPlus.svelte | Einfügen (Gutter, Menü-Trigger) |
-| grip | IconGrip.svelte | Drag-Griff |
-| arrow-up / arrow-down | IconArrowUp/Down.svelte | Block verschieben |
-| duplicate | IconDuplicate.svelte | Block duplizieren |
-| trash | IconTrash.svelte | Block löschen |
-| close | IconClose.svelte | Entfernen/Schließen (z. B. Bild-Auswahl) |
-| link | IconLink.svelte | Markdown-Toolbar: Link |
-| list | IconList.svelte | Markdown-Toolbar: Liste |
-| text, image, gallery, alert, dodont, color, video, download, hero, card, grid, block | Icon….svelte | Blocktyp-Icons (Menüs, Kind-Karten) |
+| Name                                                                                 | Datei                   | Einsatz                                  |
+| ------------------------------------------------------------------------------------ | ----------------------- | ---------------------------------------- |
+| plus                                                                                 | IconPlus.svelte         | Einfügen (Gutter, Menü-Trigger)          |
+| grip                                                                                 | IconGrip.svelte         | Drag-Griff                               |
+| arrow-up / arrow-down                                                                | IconArrowUp/Down.svelte | Block verschieben                        |
+| duplicate                                                                            | IconDuplicate.svelte    | Block duplizieren                        |
+| trash                                                                                | IconTrash.svelte        | Block löschen                            |
+| close                                                                                | IconClose.svelte        | Entfernen/Schließen (z. B. Bild-Auswahl) |
+| link                                                                                 | IconLink.svelte         | Markdown-Toolbar: Link                   |
+| list                                                                                 | IconList.svelte         | Markdown-Toolbar: Liste                  |
+| text, image, gallery, alert, dodont, color, video, download, hero, card, grid, block | Icon….svelte            | Blocktyp-Icons (Menüs, Kind-Karten)      |

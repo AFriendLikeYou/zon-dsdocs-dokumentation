@@ -16,7 +16,11 @@
  * Bühnen-Klasse ist `spec-canvas ds-stage` (wie die Component-Seiten): so greifen die
  * gescopten Regeln, und die gepinnten Light-Token machen die Fläche theme-stabil hell.
  */
-import { instantiate, type PlaygroundControl, type PlaygroundState } from '$components/ui/playground';
+import {
+	instantiate,
+	type PlaygroundControl,
+	type PlaygroundState
+} from '$components/ui/playground';
 
 type RenderBlock = {
 	preview?: string;
@@ -84,7 +88,8 @@ function unwrapGlobal(css: string): string {
 function defaultState(controls: PlaygroundControl[]): PlaygroundState {
 	const s: PlaygroundState = {};
 	for (const c of controls) {
-		s[c.key] = c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
+		s[c.key] =
+			c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
 	}
 	return s;
 }

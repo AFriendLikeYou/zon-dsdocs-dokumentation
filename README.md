@@ -8,10 +8,10 @@
 
 **Ein Tool, zwei Produkte** (Vorbild: eBay Playbook):
 
-| Produkt | Route | Zielgruppe | Zweck |
-| --- | --- | --- | --- |
-| **Brandhub** | `/brand/*` | Designer:innen, PMs, alle Mitarbeitenden | Brand Guidelines lesen, Logos/Assets finden & herunterladen |
-| **DS-Doku** | `/product/*` | Entwickler:innen, Designer:innen | Das ZEIT-Designsystem (Figma + HTML/CSS) als Pattern-Katalog mit Playgrounds, Tokens, Specs |
+| Produkt      | Route        | Zielgruppe                               | Zweck                                                                                       |
+| ------------ | ------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Brandhub** | `/brand/*`   | Designer:innen, PMs, alle Mitarbeitenden | Brand Guidelines lesen, Logos/Assets finden & herunterladen                                 |
+| **DS-Doku**  | `/product/*` | Entwickler:innen, Designer:innen         | Das ZEIT-Designsystem (Figma + HTML/CSS) als Pattern-Katalog mit Playgrounds, Tokens, Specs |
 
 Wichtig: Die **App-UI dieser Doku ist nicht Teil des ZEIT-Designsystems** — sie ist eine
 eigene Doku-UI-Schicht. Neue Inhalte entstehen primär über **Content + Registry/Metadaten**,
@@ -86,7 +86,8 @@ minimaler, handgerollter Handler (MCP Streamable HTTP, **stateless**, JSON-RPC 2
 SDK, keine neue Abhängigkeit. Route: [`src/routes/api/mcp/+server.ts`](src/routes/api/mcp/+server.ts)
 (dünn), Logik in [`src/lib/server/mcp.ts`](src/lib/server/mcp.ts), Datenbasis
 [`src/lib/data/agent-catalog.ts`](src/lib/data/agent-catalog.ts) (Katalog inkl. `render`-Template
-+ rohem `pattern.css`, nur serverseitig).
+
+- rohem `pattern.css`, nur serverseitig).
 
 **Tools:**
 
@@ -101,12 +102,12 @@ MCP-Clients senden den `Authorization: Basic …`-Header. Beispiel-Client-Config
 
 ```jsonc
 {
-  "mcpServers": {
-    "zeit-ds-doku": {
-      "url": "https://<deploy-host>/api/mcp",
-      "headers": { "Authorization": "Basic <base64(user:pass)>" }
-    }
-  }
+	"mcpServers": {
+		"zeit-ds-doku": {
+			"url": "https://<deploy-host>/api/mcp",
+			"headers": { "Authorization": "Basic <base64(user:pass)>" }
+		}
+	}
 }
 ```
 

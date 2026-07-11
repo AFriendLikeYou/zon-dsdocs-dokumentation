@@ -64,7 +64,11 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 		const slug = slugOf(path);
 		// `render` ist Repo-Verdrahtung (Template/CSS), `$schema` nur Editor-Komfort —
 		// beides gehört nicht in den Katalog.
-		const { render: _render, $schema: _schema, ...machine } = model as Partial<ComponentSpec> & {
+		const {
+			render: _render,
+			$schema: _schema,
+			...machine
+		} = model as Partial<ComponentSpec> & {
 			render?: unknown;
 			$schema?: unknown;
 		};
@@ -82,4 +86,6 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 	})
 	.filter((e) => !e.exclude)
 	.map(({ exclude: _exclude, ...entry }) => entry)
-	.sort((a, b) => a.order - b.order || (a.spec.name ?? a.slug).localeCompare(b.spec.name ?? b.slug));
+	.sort(
+		(a, b) => a.order - b.order || (a.spec.name ?? a.slug).localeCompare(b.spec.name ?? b.slug)
+	);

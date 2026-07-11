@@ -43,9 +43,7 @@ export function collectHrefs(tree: NavSection[]): string[] {
 	return out;
 }
 
-export type ValidateResult =
-	| { ok: true; tree: NavSection[] }
-	| { ok: false; message: string };
+export type ValidateResult = { ok: true; tree: NavSection[] } | { ok: false; message: string };
 
 const HREF_RE = /^\/brand(\/.*)?$/;
 
@@ -149,7 +147,10 @@ export function validateBrandNav(value: unknown, original: NavSection[]): Valida
 	if (new Set(hrefs).size !== hrefs.length)
 		return { ok: false, message: 'Doppelte Links im Baum.' };
 	if (sortedKey(hrefs) !== sortedKey(collectHrefs(original)))
-		return { ok: false, message: 'Der Baum enthält andere Seiten als die Config (kein reines Umsortieren).' };
+		return {
+			ok: false,
+			message: 'Der Baum enthält andere Seiten als die Config (kein reines Umsortieren).'
+		};
 
 	const cats = (t: NavSection[]) => t.filter((s) => s.isCategory).map((s) => s.title);
 	const groups = (t: NavSection[]) => t.filter((s) => !s.isCategory && s.items).map((s) => s.title);
@@ -182,7 +183,8 @@ export function serializeBrandNav(tree: NavSection[]): string {
 	};
 	const clean = tree.map((s) => {
 		const ordered = orderKeys(s, SECTION_KEYS);
-		if (ordered.items) ordered.items = ordered.items.map((c) => orderKeys(c, CHILD_KEYS) as NavChild);
+		if (ordered.items)
+			ordered.items = ordered.items.map((c) => orderKeys(c, CHILD_KEYS) as NavChild);
 		return ordered;
 	});
 	return JSON.stringify(clean, null, '\t') + '\n';

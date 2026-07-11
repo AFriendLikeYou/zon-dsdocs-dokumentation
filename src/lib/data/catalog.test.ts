@@ -5,7 +5,13 @@ import { CATALOG } from './catalog';
 describe('CATALOG (generierter Pattern-Index)', () => {
 	it('entdeckt alle Registry-Einträge (model.json) automatisch', () => {
 		const slugs = CATALOG.map((e) => e.slug);
-		for (const expected of ['button', 'text-button', 'page-shortcut', 'button-group', 'icon-button']) {
+		for (const expected of [
+			'button',
+			'text-button',
+			'page-shortcut',
+			'button-group',
+			'icon-button'
+		]) {
 			expect(slugs).toContain(expected);
 		}
 	});

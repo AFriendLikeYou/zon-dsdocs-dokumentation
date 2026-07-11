@@ -3,11 +3,7 @@
 	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
 	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
-	"verwandt": [
-		"text-button",
-		"icon-button",
-		"button-group"
-	],
+	"verwandt": ["text-button", "icon-button", "button-group"],
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=298-106",
 	"aktualisiertAm": "2026-07-07",
 	"masse": {
@@ -141,11 +137,7 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": [
-			"default",
-			"hover",
-			"disabled"
-		],
+		"zustaende": ["default", "hover", "disabled"],
 		"elemente": [
 			{
 				"teil": "Default · Hintergrund",
@@ -381,11 +373,7 @@
 				"name": "variant",
 				"typ": "\"default\" | \"primary\" | \"zplus\"",
 				"default": "\"default\"",
-				"erlaubteWerte": [
-					"default",
-					"primary",
-					"zplus"
-				],
+				"erlaubteWerte": ["default", "primary", "zplus"],
 				"beschreibung": "Visuelle Gewichtung der Aktion (Modifier z-button--primary / z-button--zplus)."
 			},
 			{

@@ -14,16 +14,16 @@ heavily drifted component cannot go negative.
 The comparator in [`scripts/check-parity.js`](../scripts/check-parity.js) assigns severity by how
 visible the drift is to a user:
 
-| Category | Property | Severity | Weight |
-|----------|----------|----------|--------|
-| visual | `backgroundColor`, `borderColor` | major | −8 |
-| visual | `borderWidth`, `borderRadius`, `opacity` | minor | −3 |
-| spacing | `paddingTop/Right/Bottom/Left`, `gap` | major | −8 |
-| spacing | `width`, `height` | minor | −3 |
-| typography | `fontFamily`, `fontSize` | major | −8 |
-| typography | `fontWeight`, `lineHeight`, `letterSpacing` | minor | −3 |
-| accessibility | `supportsDisabled`, `supportsError` | minor | −3 |
-| accessibility | `annotation` (role/aria not documented) | info | −1 |
+| Category      | Property                                    | Severity | Weight |
+| ------------- | ------------------------------------------- | -------- | ------ |
+| visual        | `backgroundColor`, `borderColor`            | major    | −8     |
+| visual        | `borderWidth`, `borderRadius`, `opacity`    | minor    | −3     |
+| spacing       | `paddingTop/Right/Bottom/Left`, `gap`       | major    | −8     |
+| spacing       | `width`, `height`                           | minor    | −3     |
+| typography    | `fontFamily`, `fontSize`                    | major    | −8     |
+| typography    | `fontWeight`, `lineHeight`, `letterSpacing` | minor    | −3     |
+| accessibility | `supportsDisabled`, `supportsError`         | minor    | −3     |
+| accessibility | `annotation` (role/aria not documented)     | info     | −1     |
 
 `critical` (−15) is reserved by the parity model for the most severe mismatches; the standard
 comparators here emit major/minor/info. The score formula still honors any `critical` discrepancy you
@@ -49,36 +49,40 @@ false positives for data you didn't supply.
 
 ```jsonc
 {
-  "filePath": "src/components/Button.tsx",          // optional, for reference
-  "visual": {
-    "backgroundColor": "#3B6BFF",
-    "borderColor": "#1F2937",
-    "borderWidth": 1,
-    "borderRadius": 8,                                 // number or px string
-    "opacity": 1
-  },
-  "spacing": {
-    "paddingTop": 12, "paddingRight": 16, "paddingBottom": 12, "paddingLeft": 16,
-    "gap": 8,
-    "width": 120, "height": 40                         // number or px string
-  },
-  "typography": {
-    "fontFamily": "Inter",
-    "fontSize": 16,
-    "fontWeight": 600,                                 // number or string
-    "lineHeight": 24,                                  // px
-    "letterSpacing": 0
-  },
-  "accessibility": {
-    "role": "button",
-    "ariaLabel": "Save",
-    "focusVisible": true,
-    "supportsDisabled": true,
-    "supportsError": false,
-    "semanticElement": "button",
-    "keyboardInteractions": ["Enter", "Space"]
-  },
-  "metadata": { "name": "Button" }
+	"filePath": "src/components/Button.tsx", // optional, for reference
+	"visual": {
+		"backgroundColor": "#3B6BFF",
+		"borderColor": "#1F2937",
+		"borderWidth": 1,
+		"borderRadius": 8, // number or px string
+		"opacity": 1
+	},
+	"spacing": {
+		"paddingTop": 12,
+		"paddingRight": 16,
+		"paddingBottom": 12,
+		"paddingLeft": 16,
+		"gap": 8,
+		"width": 120,
+		"height": 40 // number or px string
+	},
+	"typography": {
+		"fontFamily": "Inter",
+		"fontSize": 16,
+		"fontWeight": 600, // number or string
+		"lineHeight": 24, // px
+		"letterSpacing": 0
+	},
+	"accessibility": {
+		"role": "button",
+		"ariaLabel": "Save",
+		"focusVisible": true,
+		"supportsDisabled": true,
+		"supportsError": false,
+		"semanticElement": "button",
+		"keyboardInteractions": ["Enter", "Space"]
+	},
+	"metadata": { "name": "Button" }
 }
 ```
 
@@ -89,20 +93,28 @@ component HTML — its `codeSpecAccessibility` output drops straight into `codeS
 
 ```jsonc
 {
-  "node": { "id": "12:34", "name": "Button", "type": "COMPONENT_SET" },
-  "summary": {
-    "totalDiscrepancies": 2,
-    "parityScore": 89,
-    "byCritical": 0, "byMajor": 1, "byMinor": 1, "byInfo": 0,
-    "categories": { "visual": 1, "spacing": 1 }
-  },
-  "discrepancies": [
-    { "category": "visual", "property": "backgroundColor", "severity": "major",
-      "designValue": "#3B6BFF", "codeValue": "#2F5BEE",
-      "message": "Background color mismatch: design=#3B6BFF, code=#2F5BEE",
-      "suggestion": "Update to match #3B6BFF" }
-  ],
-  "ai_instruction": "Review each discrepancy: update code to match designValue, or push the design to match an intentional code change, then re-run."
+	"node": { "id": "12:34", "name": "Button", "type": "COMPONENT_SET" },
+	"summary": {
+		"totalDiscrepancies": 2,
+		"parityScore": 89,
+		"byCritical": 0,
+		"byMajor": 1,
+		"byMinor": 1,
+		"byInfo": 0,
+		"categories": { "visual": 1, "spacing": 1 }
+	},
+	"discrepancies": [
+		{
+			"category": "visual",
+			"property": "backgroundColor",
+			"severity": "major",
+			"designValue": "#3B6BFF",
+			"codeValue": "#2F5BEE",
+			"message": "Background color mismatch: design=#3B6BFF, code=#2F5BEE",
+			"suggestion": "Update to match #3B6BFF"
+		}
+	],
+	"ai_instruction": "Review each discrepancy: update code to match designValue, or push the design to match an intentional code change, then re-run."
 }
 ```
 

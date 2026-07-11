@@ -95,7 +95,7 @@
 		class="tp-input"
 		class:tp-input--err={!!error}
 		type="text"
-		value={value}
+		{value}
 		placeholder="--z-ds-color-… oder #hex"
 		spellcheck="false"
 		aria-invalid={!!error}
@@ -150,14 +150,13 @@
 	}
 	/* Leer/unauflösbar: Schachbrett als „keine Farbe"-Signal. */
 	.tp-swatch--empty {
-		background:
-			conic-gradient(
-					rgb(from var(--ds-text) r g b / 0.12) 0 25%,
-					transparent 0 50%,
-					rgb(from var(--ds-text) r g b / 0.12) 0 75%,
-					transparent 0
-				)
-				0 0 / 8px 8px !important;
+		background: conic-gradient(
+				rgb(from var(--ds-text) r g b / 0.12) 0 25%,
+				transparent 0 50%,
+				rgb(from var(--ds-text) r g b / 0.12) 0 75%,
+				transparent 0
+			)
+			0 0 / 8px 8px !important;
 	}
 	.tp-input {
 		flex: 1 1 auto;

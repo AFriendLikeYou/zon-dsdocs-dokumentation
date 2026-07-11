@@ -45,7 +45,13 @@ const RAW = {
 			h: 40,
 			fills: [{ hex: '#dfdfe1', token: 'Background/20' }],
 			children: [
-				{ name: 'Label', type: 'TEXT', w: 60, h: 20, fills: [{ hex: '#252525', token: 'Text/100' }] }
+				{
+					name: 'Label',
+					type: 'TEXT',
+					w: 60,
+					h: 20,
+					fills: [{ hex: '#252525', token: 'Text/100' }]
+				}
 			]
 		},
 		{

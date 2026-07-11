@@ -82,11 +82,7 @@ export function makeLink(text: string, selStart: number, selEnd: number): Edit {
 }
 
 const escapeHtml = (s: string): string =>
-	s
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
+	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function inline(s: string): string {
 	return s

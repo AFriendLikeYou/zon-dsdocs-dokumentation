@@ -44,9 +44,7 @@ function clampLimit(limit: unknown): number {
 /** Sammelt alle durchsuchbaren Textfragmente eines Eintrags, nach Gewicht gruppiert. */
 function haystack(entry: AgentCatalogEntry) {
 	const spec = entry.spec;
-	const variantLabels = (spec.varianten ?? []).flatMap((v) =>
-		(v.werte ?? []).map((w) => w.label)
-	);
+	const variantLabels = (spec.varianten ?? []).flatMap((v) => (v.werte ?? []).map((w) => w.label));
 	const tokenNames = (spec.tokens ?? []).flatMap((g) => (g.items ?? []).map((i) => i.name));
 	return {
 		name: [spec.name ?? '', entry.slug].join(' ').toLowerCase(),
@@ -62,7 +60,9 @@ function haystack(entry: AgentCatalogEntry) {
  * `search "button"` die Komponente `button` VOR `button-group`/`icon-button`.
  */
 export function searchComponents(query: string, limit = 8): SearchHit[] {
-	const q = String(query ?? '').trim().toLowerCase();
+	const q = String(query ?? '')
+		.trim()
+		.toLowerCase();
 	if (!q) return [];
 	const terms = q.split(/\s+/).filter(Boolean);
 
@@ -113,8 +113,10 @@ function sectionOverview(e: AgentCatalogEntry): string {
 	let out = `# ${s.name ?? e.slug} (${e.slug})\n`;
 	out += line('Kategorie', s.kategorie);
 	out += line('Zweck', s.zweck);
-	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
-	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nutzen?.length)
+		out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length)
+		out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.varianten?.length) {
 		out += `Varianten:\n`;
 		for (const v of s.varianten) {
@@ -162,7 +164,8 @@ function sectionTokens(e: AgentCatalogEntry): string {
 	}
 	if (s.spacing?.length) {
 		out += `\nInnenabstände:\n`;
-		for (const sp of s.spacing) out += `  - ${sp.label}: ${sp.px}${sp.token ? ` (${sp.token})` : ''}\n`;
+		for (const sp of s.spacing)
+			out += `  - ${sp.label}: ${sp.px}${sp.token ? ` (${sp.token})` : ''}\n`;
 	}
 	return out;
 }
@@ -177,7 +180,8 @@ function sectionA11y(e: AgentCatalogEntry): string {
 	}
 	if (s.wording?.length) {
 		out += `\nWording:\n`;
-		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"${w.hinweis ? ` (${w.hinweis})` : ''}\n`;
+		for (const w of s.wording)
+			out += `  - statt "${w.schlecht}" → "${w.gut}"${w.hinweis ? ` (${w.hinweis})` : ''}\n`;
 	}
 	return out;
 }
@@ -185,8 +189,10 @@ function sectionA11y(e: AgentCatalogEntry): string {
 function sectionUsage(e: AgentCatalogEntry): string {
 	const s = e.spec;
 	let out = `# Verwendung — ${s.name ?? e.slug}\n`;
-	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
-	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nutzen?.length)
+		out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length)
+		out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.do?.length) out += `\nDo:\n${s.doDont.do.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.dont?.length) out += `Don't:\n${s.doDont.dont.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.wording?.length) {
@@ -305,7 +311,12 @@ const TOOLS = [
 
 type JsonRpcId = string | number | null;
 type JsonRpcRequest = { jsonrpc?: string; id?: JsonRpcId; method?: string; params?: unknown };
-export type JsonRpcResponse = { jsonrpc: '2.0'; id: JsonRpcId; result?: unknown; error?: { code: number; message: string } };
+export type JsonRpcResponse = {
+	jsonrpc: '2.0';
+	id: JsonRpcId;
+	result?: unknown;
+	error?: { code: number; message: string };
+};
 
 const ok = (id: JsonRpcId, result: unknown): JsonRpcResponse => ({ jsonrpc: '2.0', id, result });
 const err = (id: JsonRpcId, code: number, message: string): JsonRpcResponse => ({
@@ -326,7 +337,11 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 	// JSON-RPC-2.0-Envelope validieren, bevor wir dispatchen.
 	// Fehlendes/falsches jsonrpc ODER fehlendes/nicht-string method → -32600.
 	if (msg.jsonrpc !== '2.0' || typeof method !== 'string' || method === '') {
-		return err(id, -32600, 'Ungültige JSON-RPC-Anfrage (jsonrpc:"2.0" und method:string erforderlich).');
+		return err(
+			id,
+			-32600,
+			'Ungültige JSON-RPC-Anfrage (jsonrpc:"2.0" und method:string erforderlich).'
+		);
 	}
 
 	switch (method) {

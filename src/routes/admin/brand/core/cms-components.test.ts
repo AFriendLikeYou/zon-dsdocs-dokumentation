@@ -203,7 +203,14 @@ describe('Container: parse / serialize / info', () => {
 	it('serializeContainerTag baut sauberes Tag (Default-Attrs weg, Kinder eingerückt)', () => {
 		const out = serializeContainerTag(
 			CMS_MAP.Grid,
-			{ columns: '4', auto: true, justify: 'start', align: 'stretch', rowGap: 'md', columnGap: 'md' },
+			{
+				columns: '4',
+				auto: true,
+				justify: 'start',
+				align: 'stretch',
+				rowGap: 'md',
+				columnGap: 'md'
+			},
 			[{ name: 'Color', values: { title: 'A', description: 'a' } }]
 		);
 		expect(out).toContain('<Grid columns={4} auto={true} justify="start">');

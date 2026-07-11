@@ -780,7 +780,7 @@ describe('rebuild: Container-Block editieren/einfügen', () => {
 		const next = rebuild(DOC3, { blocks });
 		expect(next).not.toContain('<Grid');
 		// Grid ungenutzt → kanonischer Import entfernt.
-		expect(next).not.toContain("import { Grid }");
+		expect(next).not.toContain('import { Grid }');
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
 	});
 });
@@ -823,8 +823,9 @@ describe('rebuild: Block-Modell (blocks)', () => {
 		const after = parseSvx(next);
 		expect(after.safe).toBe(true);
 		// Der neue Absatz ist ein Prosa-Segment (keine Insel).
-		expect(after.segments.some((s) => s.type === 'prosa' && s.text.includes('Frisch getippter')))
-			.toBe(true);
+		expect(
+			after.segments.some((s) => s.type === 'prosa' && s.text.includes('Frisch getippter'))
+		).toBe(true);
 		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
 	});
 

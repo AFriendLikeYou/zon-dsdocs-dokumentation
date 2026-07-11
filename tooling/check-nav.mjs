@@ -85,9 +85,7 @@ for (const section of JSON.parse(fs.readFileSync(brandNavFile, 'utf8'))) {
 // (Route ohne beides) schlägt weiterhin an; Routen ohne model.json fängt zusätzlich
 // check-component-drift.mjs ab.
 const COMPONENT_ROUTE = /^\/product\/components\/([^/]+)$/;
-const plannedSlugs = new Set(
-	[...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1])
-);
+const plannedSlugs = new Set([...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
 const hasModelJson = (slug) =>
 	fs.existsSync(path.join(routesDir, 'product/components', slug, 'model.json'));
 
@@ -107,11 +105,15 @@ if (missing.length === 0) {
 	process.exit(0);
 }
 
-console.warn(`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in src/lib/data/navigation.ts:`);
+console.warn(
+	`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in src/lib/data/navigation.ts:`
+);
 for (const route of missing) {
 	console.warn(`   • ${route}  → in MENU_ITEMS_BRAND/MENU_ITEMS_PRODUCT ergänzen`);
 }
 console.warn('   (Per direkter URL erreichbar, erscheint aber nicht im Sidebar-Menü.');
-console.warn('    Absicht? Dann in die Allowlist in tooling/check-nav.mjs. Siehe DECISIONS.md ADR-007.)\n');
+console.warn(
+	'    Absicht? Dann in die Allowlist in tooling/check-nav.mjs. Siehe DECISIONS.md ADR-007.)\n'
+);
 
 process.exit(strict ? 1 : 0);

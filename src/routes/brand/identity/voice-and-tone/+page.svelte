@@ -32,7 +32,8 @@
 		{
 			schlecht: 'NEWS',
 			gut: 'Wirtschaft',
-			hinweis: 'Die Spitzmarke ist das Ressort — kurz, normale Schreibung, keine Versalien (vgl. Cell).'
+			hinweis:
+				'Die Spitzmarke ist das Ressort — kurz, normale Schreibung, keine Versalien (vgl. Cell).'
 		},
 		{
 			schlecht: 'Interessante Entwicklungen in der Politik',
@@ -67,10 +68,11 @@
 <h1>Voice & Tone</h1>
 
 <p>
-	Voice &amp; Tone beschreibt, <em>wie</em> DIE ZEIT spricht — über alle Touchpoints
-	hinweg. Die <strong>Voice</strong> (die Haltung) bleibt konstant; der
-	<strong>Tone</strong> (der konkrete Ton) passt sich dem Kontext an: eine
-	Fehlermeldung klingt anders als ein Onboarding.
+	Voice &amp; Tone beschreibt, <em>wie</em> DIE ZEIT spricht — über alle Touchpoints hinweg. Die
+	<strong>Voice</strong>
+	(die Haltung) bleibt konstant; der
+	<strong>Tone</strong> (der konkrete Ton) passt sich dem Kontext an: eine Fehlermeldung klingt anders
+	als ein Onboarding.
 </p>
 
 <Alert
@@ -81,14 +83,14 @@
 
 <h2>Unsere Voice</h2>
 <p>
-	Drei bis fünf Eigenschaften, die unsere Sprache prägen (z. B. klar, fundiert,
-	zugänglich) — jeweils mit einem Satz, was sie bedeutet und was nicht.
+	Drei bis fünf Eigenschaften, die unsere Sprache prägen (z. B. klar, fundiert, zugänglich) —
+	jeweils mit einem Satz, was sie bedeutet und was nicht.
 </p>
 
 <h2>Tone nach Kontext</h2>
 <p>
-	Wie sich der Ton je Situation verschiebt — als kurze Matrix. Pro Kontext eine
-	Tendenz und ein Beispiel:
+	Wie sich der Ton je Situation verschiebt — als kurze Matrix. Pro Kontext eine Tendenz und ein
+	Beispiel:
 </p>
 <ul>
 	<li><strong>Erfolg / Bestätigung</strong> — knapp, bestätigend.</li>
@@ -98,15 +100,15 @@
 
 <h2>Schreibweise: sag / sag nicht</h2>
 <p>
-	Konkrete Ja/Nein-Satzpaare als Richtschnur — werden hier ergänzt, sobald die
-	Voice-Eigenschaften feststehen.
+	Konkrete Ja/Nein-Satzpaare als Richtschnur — werden hier ergänzt, sobald die Voice-Eigenschaften
+	feststehen.
 </p>
 
 <h2>Konkrete Beispiele</h2>
 <p>
-	Voice &amp; Tone wird greifbar an konkreten Formulierungen. Drei Kanäle, je ein paar
-	Paare — links, was wir vermeiden, rechts die bessere Fassung. Die Beispiele bleiben
-	bewusst konsistent mit den Wording-Regeln der Komponenten.
+	Voice &amp; Tone wird greifbar an konkreten Formulierungen. Drei Kanäle, je ein paar Paare —
+	links, was wir vermeiden, rechts die bessere Fassung. Die Beispiele bleiben bewusst konsistent mit
+	den Wording-Regeln der Komponenten.
 </p>
 
 <h3>Push-Meldung</h3>

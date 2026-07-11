@@ -62,7 +62,9 @@ for (const t of targets) {
 
 	if (expected !== actual) {
 		drift++;
-		console.warn(`\n⚠️  ${t.label}: ${path.relative(root, t.generated)} weicht von der Ableitung ab.`);
+		console.warn(
+			`\n⚠️  ${t.label}: ${path.relative(root, t.generated)} weicht von der Ableitung ab.`
+		);
 		console.warn(`   → ${t.render.regenCmd} ausführen (neue/gelöschte SVG oder Hand-Edit).`);
 	} else {
 		console.log(`✓ Asset-Check: ${t.label} (${entries.length}) in Sync mit static/ + Overrides.`);

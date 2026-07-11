@@ -30,14 +30,13 @@ const DEFINITION_FILE = 'styles-zds.css';
 
 // 1) Dokumentierte Tokens aus foundation-tokens.ts (Namen-Regex; die Datei ist eine Handliste).
 const documented = new Set(
-	(fs.readFileSync(path.join(root, 'src/lib/data/foundation-tokens.ts'), 'utf8').match(TOKEN_RE) ?? [])
+	fs.readFileSync(path.join(root, 'src/lib/data/foundation-tokens.ts'), 'utf8').match(TOKEN_RE) ??
+		[]
 );
 
 // 2) Genutzte Tokens aus dem authored Site-CSS (static/*.css außer der Definitions-Datei).
 const cssDir = path.join(root, 'static');
-const cssFiles = fs
-	.readdirSync(cssDir)
-	.filter((f) => f.endsWith('.css') && f !== DEFINITION_FILE);
+const cssFiles = fs.readdirSync(cssDir).filter((f) => f.endsWith('.css') && f !== DEFINITION_FILE);
 
 /** token -> Set<datei> */
 const usedIn = new Map();
@@ -63,7 +62,9 @@ if (undocumented.length === 0) {
 		`\n⚠️  Token-Drift: ${undocumented.length} genutzte(s) --z-ds-Token ohne Eintrag in src/lib/data/foundation-tokens.ts:`
 	);
 	for (const t of undocumented) {
-		console.warn(`   • ${t}  (in ${[...usedIn.get(t)].join(', ')})  → foundation-tokens.ts ergänzen`);
+		console.warn(
+			`   • ${t}  (in ${[...usedIn.get(t)].join(', ')})  → foundation-tokens.ts ergänzen`
+		);
 	}
 	console.warn('');
 }

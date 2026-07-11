@@ -18,7 +18,7 @@
 </script>
 
 <div class="video-player">
-	<video title={title} bind:this={videoElement} bind:paused {src} autoplay loop class="video">
+	<video {title} bind:this={videoElement} bind:paused {src} autoplay loop class="video">
 		<track kind="captions" />
 		Your browser does not support the video tag.
 	</video>

@@ -76,10 +76,7 @@
 		}
 	],
 	"version": "Figma-Node 2845:5966",
-	"verwandt": [
-		"checkbox",
-		"input"
-	],
+	"verwandt": ["checkbox", "input"],
 	"variantInfo": {
 		"Off": "Ausgeschaltet — Track in Background-20, Thumb links.",
 		"On": "Eingeschaltet — Track in Text-100, Thumb rechts."

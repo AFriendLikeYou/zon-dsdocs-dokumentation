@@ -59,9 +59,7 @@
 			<a class="footer__wordmark" href="/" aria-label="ZEIT Design – zur Startseite">
 				<ZeitBrandSite />
 			</a>
-			<p class="footer__claim">
-				Brandhub und Design-System-Dokumentation für ZEIT ONLINE.
-			</p>
+			<p class="footer__claim">Brandhub und Design-System-Dokumentation für ZEIT ONLINE.</p>
 		</div>
 
 		<nav class="footer__columns" aria-label="Footer-Navigation">

@@ -11,6 +11,7 @@
 ## 1. Ziel & Nicht-Ziele
 
 ### Ziel
+
 Nicht-technische Redakteur:innen (Designer, PMs, Brand-Team) bearbeiten Inhalte
 **ohne Git-Kenntnisse, ohne lokales Setup, ohne Editor** — direkt im Browser,
 hinter der bestehenden Basic-Auth. Konkret in drei Ausbaustufen:
@@ -26,6 +27,7 @@ hinter der bestehenden Basic-Auth. Konkret in drei Ausbaustufen:
   bestätigt wird.
 
 ### Nicht-Ziele (explizit ausgenommen)
+
 - **`model.json` ist und bleibt kanonisch und NICHT CMS-editierbar.** Es ist das
   render-unabhängige Doku-Modell, das aus Figma gespeist wird (Maße, Tokens,
   Varianten-Achsen, `render`-Verdrahtung). Ändert sich Figma, wird es neu
@@ -36,13 +38,13 @@ hinter der bestehenden Basic-Auth. Konkret in drei Ausbaustufen:
   Exporter bei jedem Sync neu geschrieben; jede Handänderung (auch per CMS) ginge
   beim nächsten Re-Export verloren.
 - **Kein Verlassen von Git als Single Source of Truth.** Das CMS ist ein
-  *Schreib-Frontend auf Git*, keine zweite Datenbank. Kein Headless-SaaS als
+  _Schreib-Frontend auf Git_, keine zweite Datenbank. Kein Headless-SaaS als
   parallele Wahrheitsquelle.
 - **Keine Änderung an der `static/`+`fetch`-Asset-Architektur** (ADR-018/021).
   Medien-Upload (Phase 3) schreibt in `static/media/…` als committete Dateien.
 - **Kein WYSIWYG-Editor für Svelte-Inseln** (`<BrandHero>`, `<Alert>`,
   `<ImageGallery>`, `<DoDont>` …). Diese bleiben Code; das CMS editiert nur die
-  Prosa drumherum und die *Props stabiler, einfacher* Inseln (siehe §4).
+  Prosa drumherum und die _Props stabiler, einfacher_ Inseln (siehe §4).
 - **Keine eigene Komponentenbibliothek für die CMS-UI.** „Doku-App-UI ≠
   dokumentiertes ZEIT-DS" — das Admin-Frontend nutzt die vorhandenen `ui/`-Bausteine
   und Rollen-Tokens, wird aber nicht selbst dokumentiert.
@@ -63,11 +65,11 @@ GitHub-OAuth; jede Speicherung ist ein Commit (Decap) bzw. wahlweise ein PR
 
 - **Passung zum bestehenden Content:** Sveltia/Decap erwarten **Markdown mit
   YAML-Frontmatter** oder **JSON/YAML-Datendateien**. Genau hier reibt es:
-  - **Brand-Seiten sind `.svx`** — Markdown *plus* eingebettete Svelte-Blöcke
+  - **Brand-Seiten sind `.svx`** — Markdown _plus_ eingebettete Svelte-Blöcke
     (`<script>`, `<BrandHero>`, `<Alert>`). Decaps Markdown-Widget kann die Prosa,
     kollidiert aber mit den Svelte-Inseln (es kennt die Komponenten nicht,
     escaped/zerstört sie potenziell beim Round-Trip). Nutzbar nur, wenn die Inseln
-    als *stabile, opake Blöcke* behandelt werden (siehe §4).
+    als _stabile, opake Blöcke_ behandelt werden (siehe §4).
   - **Component-Texte sind `content.ts`** — **TypeScript, kein YAML/MD/JSON.**
     Decap/Sveltia können `.ts` **nicht** parsen. → Zwei Lösungswege:
     1. **`content.ts` → `content.json`-Migration** (empfohlen, siehe §4): Der
@@ -84,7 +86,7 @@ GitHub-OAuth; jede Speicherung ist ein Commit (Decap) bzw. wahlweise ein PR
 - **Risiken:**
   - Der `.svx`-Round-Trip ist der Knackpunkt — ohne Konvention (Inseln als
     stabile Blöcke) droht Datenverlust beim Speichern.
-  - **Zweiter Auth-Mechanismus:** Das CMS läuft über GitHub-OAuth, *nicht* über
+  - **Zweiter Auth-Mechanismus:** Das CMS läuft über GitHub-OAuth, _nicht_ über
     die Basic-Auth der Seite. Es lebt entweder als statische `admin/`-Seite (dann
     ebenfalls hinter Basic-Auth, aber der GitHub-Login kommt zusätzlich) oder
     extern. Zwei Login-Konzepte für ein kleines Team.
@@ -95,7 +97,7 @@ GitHub-OAuth; jede Speicherung ist ein Commit (Decap) bzw. wahlweise ein PR
     Generator-Script).
 - **Fazit:** Solide, wenig Eigencode, aber der `.ts`- und `.svx`-Impedance-
   Mismatch plus der zweite Auth-Weg kosten den „einfach"-Vorteil teilweise wieder
-  ein. Am stärksten *nach* der Format-Migration und für Brand-Seiten.
+  ein. Am stärksten _nach_ der Format-Migration und für Brand-Seiten.
 
 ### O2 — Eigene Admin-Route (`/admin` hinter bestehender Auth)
 
@@ -111,7 +113,7 @@ via `octokit` oder `fetch`) einen Commit auf einem Branch anlegt und einen **PR*
 öffnet — mit einem einzigen Bot-Token serverseitig (`GITHUB_TOKEN` als
 Vercel-Env, analog zu `USERS`).
 
-- **Passung zur Werkzeug-Philosophie:** Sehr hoch. Das Repo *ist* schon ein
+- **Passung zur Werkzeug-Philosophie:** Sehr hoch. Das Repo _ist_ schon ein
   Werkzeug (eigener MCP-Server, eigene Drift-Checks, eigener Exporter). Eine
   eigene Admin-Schicht bleibt im selben Stack (SvelteKit, Svelte-5-Runes,
   Rollen-Tokens, `ui/`-Bausteine), nutzt die vorhandene Auth, den vorhandenen
@@ -136,7 +138,7 @@ Vercel-Env, analog zu `USERS`).
     wie `USERS`). Scope minimal (nur dieses Repo, `contents`+`pull_requests`).
   - Kein „Preview im Editor" out of the box — dafür nutzt man den **bestehenden
     Vercel-PR-Preview** (jede:r reviewt am Preview-Link, Merge = veröffentlichen;
-    genau der in `DECISIONS.md`/Workflow-Schritt 2 vorgesehene Weg). Das *ist* der
+    genau der in `DECISIONS.md`/Workflow-Schritt 2 vorgesehene Weg). Das _ist_ der
     Review-/Freigabe-Workflow (c), fast geschenkt.
 - **Fazit:** Passt am besten zu Constraints und Philosophie. Ein Login, eine
   Schema-Quelle, Git bleibt SSOT, der Freigabe-Workflow fällt über PR-Previews
@@ -177,15 +179,15 @@ teuer wird — beide schreiben dieselben Dateien via Git, sind also kombinierbar
 
 **Begründung gegen die Constraints:**
 
-| Constraint | O2 erfüllt? |
-|---|---|
-| `model.json` kanonisch, nicht CMS-editierbar | Ja — Admin editiert nur `content.json` / `.svx`-Prosa, nie `model.json`/generated. |
-| generated/`+page.svx` bleiben Maschine | Ja — unberührt; Exporter bleibt alleiniger Autor. |
-| Git = Single Source of Truth | Ja — jede Speicherung ist ein Commit/PR ins Repo. |
-| Registry zur Build-Zeit | Ja — Änderung an `content.json` → PR → Merge → Vercel-Rebuild → Glob liest neu. Der nötige Re-Build ist **ehrlich** ein Deploy pro Merge (siehe unten). |
-| Basic-Auth | Ja — `/admin` liegt hinter derselben Auth, **ein** Login. |
-| adapter-vercel | Ja — Form-Actions + Server-Env laufen serverless; PR-Preview ist der Review-Kanal. |
-| „so simpel wie möglich" | Ja — ein Stack, eine Schema-Quelle (`ComponentSpec`), kein SaaS, kein zweiter Login. |
+| Constraint                                   | O2 erfüllt?                                                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `model.json` kanonisch, nicht CMS-editierbar | Ja — Admin editiert nur `content.json` / `.svx`-Prosa, nie `model.json`/generated.                                                                      |
+| generated/`+page.svx` bleiben Maschine       | Ja — unberührt; Exporter bleibt alleiniger Autor.                                                                                                       |
+| Git = Single Source of Truth                 | Ja — jede Speicherung ist ein Commit/PR ins Repo.                                                                                                       |
+| Registry zur Build-Zeit                      | Ja — Änderung an `content.json` → PR → Merge → Vercel-Rebuild → Glob liest neu. Der nötige Re-Build ist **ehrlich** ein Deploy pro Merge (siehe unten). |
+| Basic-Auth                                   | Ja — `/admin` liegt hinter derselben Auth, **ein** Login.                                                                                               |
+| adapter-vercel                               | Ja — Form-Actions + Server-Env laufen serverless; PR-Preview ist der Review-Kanal.                                                                      |
+| „so simpel wie möglich"                      | Ja — ein Stack, eine Schema-Quelle (`ComponentSpec`), kein SaaS, kein zweiter Login.                                                                    |
 
 **Zur Build-Zeit-Registry — ehrliche Abwägung:** Inhalts-Änderungen werden über
 `import.meta.glob` **zur Build-Zeit** eingelesen. Eine CMS-Änderung wird also erst
@@ -224,10 +226,11 @@ Collection-Definition (O1) — die **einzige** Schema-Quelle bleibt der TS-Typ (
 per JSON-Schema-Generator gespiegelt, kein handgepflegtes Duplikat).
 
 **Nötige Anpassungen (Exporter + Seite + Katalog):**
+
 1. **Exporter** (`tooling/zeit-de-exporter/export.mjs`, `renderContentStub`):
    schreibt den Stub künftig als `content.json` statt `content.ts` (der Inhalt ist
    heute schon ein `JSON.stringify(content)` — nur der TS-Wrapper `// … export const
-   content = … satisfies …` fällt weg). Die „nur beim ersten Mal / nie
+content = … satisfies …` fällt weg). Die „nur beim ersten Mal / nie
    überschreiben"-Regel bleibt identisch.
 2. **`+page.svx`** (generiert): `import { content } from './content'` →
    `import content from './content.json'` (Vite/SvelteKit können JSON nativ
@@ -254,21 +257,22 @@ Laufzeit-/CI-Check (Punkt 4) ersetzt. → **Nein.**
 
 Eine `.svx`-Seite (siehe `brand/logo/+page.svx`) mischt **drei** Ebenen:
 
-| Ebene | CMS-editierbar? |
-|---|---|
-| **Frontmatter** (`title`) | **Ja** — einfaches Key/Value-Feld. |
-| **Markdown-Prosa** (Überschriften, Fließtext, Listen, `![alt](/media/…)`) | **Ja** — Textarea/Markdown-Feld. Der Großteil des redaktionellen Inhalts. |
+| Ebene                                                                                                                                                         | CMS-editierbar?                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Frontmatter** (`title`)                                                                                                                                     | **Ja** — einfaches Key/Value-Feld.                                                                                                                                                         |
+| **Markdown-Prosa** (Überschriften, Fließtext, Listen, `![alt](/media/…)`)                                                                                     | **Ja** — Textarea/Markdown-Feld. Der Großteil des redaktionellen Inhalts.                                                                                                                  |
 | **Svelte-Inseln** (`<script>`-Block, `<BrandHero>`, `<VideoPlayer>`, `<Alert>`, `<ImageGallery>`, `<DoDontGroup>`, `<BrandAssetsGrid>`, `<DownloadSpecimen>`) | **Nein** (Code) — mit einer Ausnahme: die **Props einfacher, stabiler Inseln** (z. B. `<BrandHero title subtitle image imageAlt>`) können als **strukturierte Felder** freigegeben werden. |
 
 **Die ehrliche Grenze:** Freitext und Bild-Referenzen → CMS. Alles, was Svelte-
 Logik ist (`<script>`, Imports, interaktive/komponierte Inseln) → **bleibt Code**,
 wird vom Entwickler-Team gepflegt.
 
-**Konventions-Vorschlag (macht O1 *und* O2 tragfähig):** Inseln als **kurze,
+**Konventions-Vorschlag (macht O1 _und_ O2 tragfähig):** Inseln als **kurze,
 stabile, atomare Blöcke** halten — eine Insel = ein Tag mit flachen Props, keine
 verschachtelte Logik in der `.svx`. Dann kann das CMS die Datei als Sequenz
-behandeln: *Prosa-Blöcke* (editierbar) getrennt von *Insel-Blöcke* (opak, nur
+behandeln: _Prosa-Blöcke_ (editierbar) getrennt von _Insel-Blöcke_ (opak, nur
 deren Props ggf. als Felder). Praktisch heißt das:
+
 - Der `<script>`-Block und die Imports stehen **oben**, kompakt, unangetastet.
 - Inseln bekommen **nur flache, benannte Props** (`title`, `image`, `caption`),
   keine inline-JS-Ausdrücke, die ein CMS zerschösse.
@@ -288,6 +292,7 @@ ohne dass das CMS an den Inseln scheitert.
 > `vitest` grün.
 
 ### Phase 0 — Format-Migration `content.ts` → `content.json`
+
 - **Inhalt:** Exporter-Stub auf JSON; `+page.svx`- und `catalog.ts`-Import
   umstellen; Migrations-Script für Bestandsdateien; Laufzeit-/CI-Validierung
   (Zod aus `ComponentSpec` gespiegelt) im `check-*`-Gate.
@@ -301,6 +306,7 @@ ohne dass das CMS an den Inseln scheitert.
   (unverändert TS/JSON/CSS wie gehabt).
 
 ### Phase 1 — MVP: `/admin` für Component-Texte
+
 - **Inhalt:** Route `src/routes/admin/*` hinter Basic-Auth. Liste aus `CATALOG`;
   pro Komponente ein aus `ComponentSpec` generiertes Formular (die editorialen
   Felder). Form-Action schreibt `content.json` via GitHub-API als **PR** (Bot-
@@ -316,6 +322,7 @@ ohne dass das CMS an den Inseln scheitert.
   Preview im Editor (nutzt PR-Preview).
 
 ### Phase 2 — Review-/Freigabe-Workflow + Brand-Prosa
+
 - **Inhalt (2a Workflow):** Der PR-basierte Fluss aus Phase 1 wird zum
   **Entwurf → Review → Live** ausformuliert: `/admin` schreibt auf einen
   Draft-Branch (Entwurf), Vercel-Preview = Review-Fläche, Merge = Live. Status im
@@ -332,6 +339,7 @@ ohne dass das CMS an den Inseln scheitert.
 - **Bewusst NICHT:** Beliebige neue Inseln im Editor einfügen (bleibt Code).
 
 ### Phase 3 — Medien / Bilder
+
 - **Inhalt:** Upload von Bildern nach `static/media/brand/<seite>/…` als
   committete Dateien (GitHub-API), Einfügen als `![alt](/media/…)` bzw. als Prop
   einer stabilen Insel. Respektiert die `static/`+`fetch`-Architektur (ADR-018/021)
@@ -348,7 +356,7 @@ ohne dass das CMS an den Inseln scheitert.
 
 ## 6. Offene Entscheidungen (für den Nutzer)
 
-1. **`content.ts` → `content.json` freigeben?** Das ist die Weiche für *jede*
+1. **`content.ts` → `content.json` freigeben?** Das ist die Weiche für _jede_
    CMS-Variante. Empfehlung: ja (Phase 0). Alternative (AST-Edit) ist fragil.
 2. **O2 (eigene `/admin`) vs. O1 (Sveltia) — oder O2 für Components + Sveltia für
    Brand-Prosa?** Empfehlung: O2 als Kern, O1 optional für Brand-Prosa in Phase 2b.

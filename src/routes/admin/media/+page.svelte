@@ -82,8 +82,8 @@
 	{/if}
 	{#if !data.writable}
 		<p class="flash flash--warn">
-			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless =
-			nicht persistent → Blob-Store/GitHub, Phase 3).
+			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht
+			persistent → Blob-Store/GitHub, Phase 3).
 		</p>
 	{/if}
 
@@ -122,12 +122,7 @@
 	</form>
 
 	<div class="filter">
-		<input
-			class="search"
-			type="search"
-			placeholder="Nach Name/Pfad suchen …"
-			bind:value={query}
-		/>
+		<input class="search" type="search" placeholder="Nach Name/Pfad suchen …" bind:value={query} />
 		<div class="chips" role="group" aria-label="Ordner">
 			{#each folders as fo (fo)}
 				<button
@@ -156,13 +151,12 @@
 				</div>
 				<div class="meta">
 					<code class="path" title={f.path}>{f.path}</code>
-					<span class="size">{fmt(f.size)}{#if f.upload} · Upload{/if}</span>
+					<span class="size"
+						>{fmt(f.size)}{#if f.upload}
+							· Upload{/if}</span
+					>
 					{#if f.usedBy.length}
-						<span
-							class="usage"
-							title={f.usedBy.join('\n')}
-							>{f.usedBy.length}× verwendet</span
-						>
+						<span class="usage" title={f.usedBy.join('\n')}>{f.usedBy.length}× verwendet</span>
 					{:else}
 						<span class="usage usage--free">ungenutzt</span>
 					{/if}

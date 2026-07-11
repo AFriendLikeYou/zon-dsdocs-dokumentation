@@ -12,8 +12,8 @@ import { CATALOG } from './catalog';
 // (Basic Auth), wie catalog.test.ts.
 
 /** Slugs der Component-Routen aus den generierten Menü-Hrefs (in Reihenfolge). */
-const componentHrefs = MENU_ITEMS_PRODUCT.filter(
-	(s) => s.href?.startsWith('/product/components/')
+const componentHrefs = MENU_ITEMS_PRODUCT.filter((s) =>
+	s.href?.startsWith('/product/components/')
 ).map((s) => s.href!);
 const componentSlugs = componentHrefs.map((h) => h.replace('/product/components/', ''));
 
@@ -43,9 +43,7 @@ describe('MENU_ITEMS_PRODUCT · Components-Sektion (katalog-getrieben)', () => {
 
 	it('markiert geplante Stubs mit „Geplant" (neutral)', () => {
 		for (const planned of PLANNED_COMPONENTS) {
-			const item = MENU_ITEMS_PRODUCT.find(
-				(s) => s.href === `/product/components/${planned.slug}`
-			);
+			const item = MENU_ITEMS_PRODUCT.find((s) => s.href === `/product/components/${planned.slug}`);
 			expect(item?.badge).toBe('Geplant');
 			expect(item?.badgeVariant).toBe('neutral');
 		}

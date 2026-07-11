@@ -25,23 +25,60 @@
 <div class="alert alert--{variant}" role="note">
 	<span class="alert__icon" aria-hidden="true">
 		{#if variant === 'success'}
-			<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				viewBox="0 0 18 18"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<circle cx="9" cy="9" r="7" /><path d="M5.75 9.25 8 11.5l4.25-5" />
 			</svg>
 		{:else if variant === 'warning'}
-			<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				viewBox="0 0 18 18"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<path d="M9 2.5 16 15H2L9 2.5Z" /><path d="M9 7v3.25" /><path d="M9 12.75h.01" />
 			</svg>
 		{:else if variant === 'danger'}
-			<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				viewBox="0 0 18 18"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<circle cx="9" cy="9" r="7" /><path d="M11.5 6.5l-5 5" /><path d="M6.5 6.5l5 5" />
 			</svg>
 		{:else if variant === 'tip'}
-			<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M6.5 12a4 4 0 1 1 5 0 1.8 1.8 0 0 0-.7 1.3v.2H7.2v-.2A1.8 1.8 0 0 0 6.5 12Z" /><path d="M7.4 15.5h3.2" />
+			<svg
+				viewBox="0 0 18 18"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path
+					d="M6.5 12a4 4 0 1 1 5 0 1.8 1.8 0 0 0-.7 1.3v.2H7.2v-.2A1.8 1.8 0 0 0 6.5 12Z"
+				/><path d="M7.4 15.5h3.2" />
 			</svg>
 		{:else}
-			<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				viewBox="0 0 18 18"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<circle cx="9" cy="9" r="7" /><path d="M9 12.5V8.25" /><path d="M9 5.75h.01" />
 			</svg>
 		{/if}

@@ -15,13 +15,13 @@ siehe [`IMPORT.md`](./IMPORT.md).
 
 **Ausgabe** pro Component unter `src/routes/product/components/<kebab>/` — **vier Dateien**:
 
-| Datei | Inhalt | Bearbeiten? |
-| --- | --- | --- |
-| `+page.svx` | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets | **nie** (jeder Sync überschreibt) |
-| `spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt) |
-| `content.json` | Redaktioneller Stub: `export const content = { … }` — überschreibt Defaults | **hier** (einmalig erzeugt, nie überschrieben) |
-| `model.json` | Eingabe, co-located neben dem Output (Re-Export via Ordner) | die Eingabe selbst |
-| `pattern.css` | *(optional)* unscoped Pattern-CSS, falls `render.cssFile` gesetzt | die Eingabe selbst |
+| Datei               | Inhalt                                                                              | Bearbeiten?                                    |
+| ------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
+| `spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
+| `content.json`      | Redaktioneller Stub: `export const content = { … }` — überschreibt Defaults         | **hier** (einmalig erzeugt, nie überschrieben) |
+| `model.json`        | Eingabe, co-located neben dem Output (Re-Export via Ordner)                         | die Eingabe selbst                             |
+| `pattern.css`       | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt                   | die Eingabe selbst                             |
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
 führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json` gewinnt**.
@@ -41,39 +41,39 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
 
 ## Frontmatter-Mapping (Doku-Modell → zeit.de)
 
-| Doku-Modell | Frontmatter | Hinweis |
-| --- | --- | --- |
-| `name` | `title` | Repo nutzt `title`, das Modell `name` |
-| `status` | `status` | `ready_for_dev` \| `completed` \| `changed` |
-| `figma` | `figma` | Node-genauer Snapshot-Link |
-| `aktualisiertAm` | `aktualisiert_am` | |
-| `kategorie` | `kategorie` | |
+| Doku-Modell      | Frontmatter       | Hinweis                                     |
+| ---------------- | ----------------- | ------------------------------------------- |
+| `name`           | `title`           | Repo nutzt `title`, das Modell `name`       |
+| `status`         | `status`          | `ready_for_dev` \| `completed` \| `changed` |
+| `figma`          | `figma`           | Node-genauer Snapshot-Link                  |
+| `aktualisiertAm` | `aktualisiert_am` |                                             |
+| `kategorie`      | `kategorie`       |                                             |
 
 ## Schema-Referenz (`model.json`)
 
 ### Modell-Felder (→ `spec.generated.ts`, gerendert via Spec-UI-Kit)
 
-| Feld | Typ | Rendert |
-| --- | --- | --- |
-| `name` | string · **Pflicht** | Hero-Titel |
-| `status` | `ready_for_dev` \| `completed` \| `changed` | Hero-Badge |
-| `kategorie` | string | Hero-Meta |
-| `zweck` | string | Hero-Beschreibung |
-| `figma`, `aktualisiertAm` | string | Frontmatter |
-| `masse` | `{ hoehe?, breite?, padding?, radius? }` — Wert je `string` **oder** `{ px, token?, herkunft? }` | Anatomie-Maßlinien + `MeasureTable` (Specs) |
-| `spacing` | `{ label, px, token?, herkunft? }[]` | Anatomie-**Innenabstände** (Redlines, px↔Token-Toggle) |
-| `callouts` | `{ nr, text, art?, optionalDurch? }[]` | Anatomie-Legende (Lead vor `—` fett; `art` → dezentes Typ-Badge, `optionalDurch` → „optional — gesteuert über X") |
-| `tokens` | `{ kategorie, items: { name, wert, swatch? }[] }[]` | `TokenTable` (Specs) |
-| `farbrollen` | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }` | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill) |
-| `varianten` | `{ prop, werte: { label, cssClass?, default? }[] }[]` | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. `pattern.css`. |
-| `zustaende` | `{ label, vorhanden? }[]` | Renderbare Zustände (Matrix-Zelle **oder** Control-Klasse/Attribut vorhanden) als `SpecimenGrid`; reine Pseudoklassen-Zustände (`:hover`/`:focus`/`:active` ohne eigene Klasse) bleiben beschreibend in `StateList` (nicht gefakt). |
-| `a11y` | `{ label, wert, status: pass\|warn\|todo }[]` | `A11yList` (eigener Tab) |
-| `tastatur` | `{ taste, aktion }[]` | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur") |
-| `doDont` | `{ do?: string[], dont?: string[] }` | `DoDontList` |
-| `doDontBeispiele` | `{ gut: { html, text }, schlecht: { html, text } }[]` | `DoDontVisual` (visuelle Specimen-Paare unter der Do&Don't-Liste) |
-| `verwendung` | `{ nutzen?: string[], nichtNutzen?: string[] }` | `UsageBlock` |
-| `wording` | `{ schlecht, gut, hinweis? }[]` | `WordingList` (Texte & Wording) |
-| `verwandt` | `string[]` (Katalog-Slugs) | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen) |
+| Feld                      | Typ                                                                                                | Rendert                                                                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                    | string · **Pflicht**                                                                               | Hero-Titel                                                                                                                                                                                                                          |
+| `status`                  | `ready_for_dev` \| `completed` \| `changed`                                                        | Hero-Badge                                                                                                                                                                                                                          |
+| `kategorie`               | string                                                                                             | Hero-Meta                                                                                                                                                                                                                           |
+| `zweck`                   | string                                                                                             | Hero-Beschreibung                                                                                                                                                                                                                   |
+| `figma`, `aktualisiertAm` | string                                                                                             | Frontmatter                                                                                                                                                                                                                         |
+| `masse`                   | `{ hoehe?, breite?, padding?, radius? }` — Wert je `string` **oder** `{ px, token?, herkunft? }`   | Anatomie-Maßlinien + `MeasureTable` (Specs)                                                                                                                                                                                         |
+| `spacing`                 | `{ label, px, token?, herkunft? }[]`                                                               | Anatomie-**Innenabstände** (Redlines, px↔Token-Toggle)                                                                                                                                                                             |
+| `callouts`                | `{ nr, text, art?, optionalDurch? }[]`                                                             | Anatomie-Legende (Lead vor `—` fett; `art` → dezentes Typ-Badge, `optionalDurch` → „optional — gesteuert über X")                                                                                                                   |
+| `tokens`                  | `{ kategorie, items: { name, wert, swatch? }[] }[]`                                                | `TokenTable` (Specs)                                                                                                                                                                                                                |
+| `farbrollen`              | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }` | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill)                                                                                                             |
+| `varianten`               | `{ prop, werte: { label, cssClass?, default? }[] }[]`                                              | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. `pattern.css`.                |
+| `zustaende`               | `{ label, vorhanden? }[]`                                                                          | Renderbare Zustände (Matrix-Zelle **oder** Control-Klasse/Attribut vorhanden) als `SpecimenGrid`; reine Pseudoklassen-Zustände (`:hover`/`:focus`/`:active` ohne eigene Klasse) bleiben beschreibend in `StateList` (nicht gefakt). |
+| `a11y`                    | `{ label, wert, status: pass\|warn\|todo }[]`                                                      | `A11yList` (eigener Tab)                                                                                                                                                                                                            |
+| `tastatur`                | `{ taste, aktion }[]`                                                                              | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur")                                                                                                                                                                         |
+| `doDont`                  | `{ do?: string[], dont?: string[] }`                                                               | `DoDontList`                                                                                                                                                                                                                        |
+| `doDontBeispiele`         | `{ gut: { html, text }, schlecht: { html, text } }[]`                                              | `DoDontVisual` (visuelle Specimen-Paare unter der Do&Don't-Liste)                                                                                                                                                                   |
+| `verwendung`              | `{ nutzen?: string[], nichtNutzen?: string[] }`                                                    | `UsageBlock`                                                                                                                                                                                                                        |
+| `wording`                 | `{ schlecht, gut, hinweis? }[]`                                                                    | `WordingList` (Texte & Wording)                                                                                                                                                                                                     |
+| `verwandt`                | `string[]` (Katalog-Slugs)                                                                         | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen)                                                                                                                                                     |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)
 
@@ -99,16 +99,16 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
 
 Weitere `render`-Felder:
 
-| Feld | Zweck |
-| --- | --- |
-| `preview`, `variant` | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`) |
-| `matrix` | `{ label, html }[]` → beschriftete Specimen-Kacheln. Zellen, deren Label ein einzelner Zustands-Name ist (z. B. „Active"), speisen das **Zustände**-`SpecimenGrid`; Nicht-Zustands-Zellen dienen als **Varianten**-Fallback, falls kein `render.template` existiert. |
-| `calloutAnchors` | `{ nr, side, x?, y? }[]` → Position der Anatomie-Callouts |
-| `props` | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen |
-| `css` | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas` |
-| `codeNote`, `codeSvelte` | HTML/Svelte-Code-Beispiele (Develop) |
-| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) |
-| `version`, `variantInfo` | **redaktionell** → landen im `content.json`-Stub |
+| Feld                         | Zweck                                                                                                                                                                                                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preview`, `variant`         | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`)                                                                                                                                                                                          |
+| `matrix`                     | `{ label, html }[]` → beschriftete Specimen-Kacheln. Zellen, deren Label ein einzelner Zustands-Name ist (z. B. „Active"), speisen das **Zustände**-`SpecimenGrid`; Nicht-Zustands-Zellen dienen als **Varianten**-Fallback, falls kein `render.template` existiert. |
+| `calloutAnchors`             | `{ nr, side, x?, y? }[]` → Position der Anatomie-Callouts                                                                                                                                                                                                            |
+| `props`                      | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen                                                                                   |
+| `css`                        | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas`                                                                                                                                                                                              |
+| `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop)                                                                                                                                                                                                                                 |
+| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import)                                                                                                                                                                                                                      |
+| `version`, `variantInfo`     | **redaktionell** → landen im `content.json`-Stub                                                                                                                                                                                                                     |
 
 > `varianten[].werte[].cssClass` deklariert die Modifier-Klasse explizit —
 > `check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:

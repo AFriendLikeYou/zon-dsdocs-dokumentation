@@ -18,8 +18,7 @@
 			<p class="eyebrow">DIE ZEIT · Design System</p>
 			<h1>Marke und Produkt,<br />an einem Ort.</h1>
 			<p class="lead">
-				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und
-				agent-ready.
+				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und agent-ready.
 			</p>
 			<div class="hero__cta">
 				<a class="btn btn--primary" href="/product">Zum Design-System</a>
@@ -63,7 +62,11 @@
 							<i style="--c: var(--ds-surface-raised)"></i>
 						</div>
 						<div class="stage__lines"><span></span><span></span><span></span></div>
-						<div class="stage__cards"><div></div><div></div><div></div></div>
+						<div class="stage__cards">
+							<div></div>
+							<div></div>
+							<div></div>
+						</div>
 					</div>
 				</div>
 			</div>

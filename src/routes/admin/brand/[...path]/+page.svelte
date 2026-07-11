@@ -246,7 +246,12 @@
 		} else if (e.key === 'Escape') {
 			e.preventDefault();
 			closeSlash();
-		} else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+		} else if (
+			e.key === 'ArrowLeft' ||
+			e.key === 'ArrowRight' ||
+			e.key === 'Home' ||
+			e.key === 'End'
+		) {
 			closeSlash();
 		}
 	}
@@ -329,8 +334,7 @@
 	}
 
 	// P5: Block duplizieren — die Kopie ist immer ein „neuer" Block hinter dem Original.
-	const canDuplicate = (it: Item) =>
-		it.blockKind !== 'structural' && it.blockKind !== 'protected';
+	const canDuplicate = (it: Item) => it.blockKind !== 'structural' && it.blockKind !== 'protected';
 	function duplicate(uid: number) {
 		const i = items.findIndex((x) => x.uid === uid);
 		if (i < 0) return;
@@ -493,8 +497,7 @@
 	function initFieldsOpen(list: Item[]) {
 		for (const it of list) {
 			if (countErrors(itemErrors(it)) > 0) it.fieldsOpen = true;
-			for (const c of it.children ?? [])
-				if (countErrors(childErrors(c)) > 0) c.fieldsOpen = true;
+			for (const c of it.children ?? []) if (countErrors(childErrors(c)) > 0) c.fieldsOpen = true;
 		}
 	}
 	initFieldsOpen(untrack(() => items));
@@ -773,7 +776,6 @@
 					</p>
 				{/if}
 
-
 				{#snippet blockTools(i: number, it: Item)}
 					<div class="blk-tools">
 						<button
@@ -1049,8 +1051,8 @@
 					<div class="empty-state">
 						<p class="empty-title">Noch keine Inhalte auf dieser Seite.</p>
 						<p class="empty-hint">
-							Starte mit einem Textblock (dort fügt „/" weitere Blöcke ein) — oder wähle direkt
-							eine Komponente.
+							Starte mit einem Textblock (dort fügt „/" weitere Blöcke ein) — oder wähle direkt eine
+							Komponente.
 						</p>
 						<div class="empty-actions">
 							<button type="button" class="empty-cta" onclick={() => insertType('Prose')}
@@ -1071,7 +1073,8 @@
 						: 'Reihenfolge geändert'}</span
 				>
 				{#if errorCount > 0}
-					<span class="savebar-err">{errorCount} {errorCount === 1 ? 'Feld' : 'Felder'} prüfen</span>
+					<span class="savebar-err">{errorCount} {errorCount === 1 ? 'Feld' : 'Felder'} prüfen</span
+					>
 				{/if}
 				<button type="button" class="savebar-discard" onclick={discard}>Verwerfen</button>
 				<button
@@ -1771,5 +1774,4 @@
 		padding: 2px var(--z-ds-space-s);
 		white-space: nowrap;
 	}
-
 </style>

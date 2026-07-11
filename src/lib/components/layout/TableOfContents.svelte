@@ -100,7 +100,6 @@
 	/* Navigation styling */
 	.toc__navigation {
 		padding: 0;
-
 	}
 
 	ul {

@@ -26,7 +26,9 @@ const PKG_CSS = path.join(root, 'node_modules/@zeitonline/design-system/design-s
 const COPY_CSS = path.join(root, 'static/styles-zds.css');
 
 if (!fs.existsSync(PKG_CSS)) {
-	console.log('ℹ️  ZDS-Sync-Check übersprungen: @zeitonline/design-system nicht installiert (npm install).');
+	console.log(
+		'ℹ️  ZDS-Sync-Check übersprungen: @zeitonline/design-system nicht installiert (npm install).'
+	);
 	process.exit(0);
 }
 
@@ -51,13 +53,20 @@ if (!missing.length && !removed.length && !changed.length) {
 	const version = JSON.parse(
 		fs.readFileSync(path.join(root, 'node_modules/@zeitonline/design-system/package.json'), 'utf8')
 	).version;
-	console.log(`✓ ZDS-Sync: static/styles-zds.css deckt sich mit @zeitonline/design-system@${version} (${pkg.size} Tokens).`);
+	console.log(
+		`✓ ZDS-Sync: static/styles-zds.css deckt sich mit @zeitonline/design-system@${version} (${pkg.size} Tokens).`
+	);
 	process.exit(0);
 }
 
-console.log('\n⚠️  ZDS-Drift: static/styles-zds.css weicht vom installierten @zeitonline/design-system ab:');
+console.log(
+	'\n⚠️  ZDS-Drift: static/styles-zds.css weicht vom installierten @zeitonline/design-system ab:'
+);
 for (const t of missing) console.log(`   • NEU im Paket, fehlt in der Kopie: ${t}: ${pkg.get(t)}`);
 for (const t of removed) console.log(`   • Nur noch in der Kopie (im Paket entfernt): ${t}`);
-for (const t of changed) console.log(`   • Wert geändert: ${t}: „${copy.get(t)}" → „${pkg.get(t)}"`);
-console.log('   → Kopie aktualisieren (Paket-CSS übernehmen) und Folge-Effekte prüfen (pattern.css, foundation-tokens.ts).\n');
+for (const t of changed)
+	console.log(`   • Wert geändert: ${t}: „${copy.get(t)}" → „${pkg.get(t)}"`);
+console.log(
+	'   → Kopie aktualisieren (Paket-CSS übernehmen) und Folge-Effekte prüfen (pattern.css, foundation-tokens.ts).\n'
+);
 process.exit(strict ? 1 : 0);

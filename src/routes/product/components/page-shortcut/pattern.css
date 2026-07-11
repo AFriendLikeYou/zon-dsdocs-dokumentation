@@ -1,24 +1,26 @@
 /* z-page-shortcut — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .z-page-shortcut {
-  align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--z-ds-color-border-70);
-  border-radius: var(--z-ds-border-radius-4);
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: var(--z-ds-fontsize-16);
-  gap: var(--z-ds-space-xs);
-  line-height: 1rem;
-  margin: 0;
-  padding: var(--z-ds-space-xs);
-  transition: background-color 200ms ease-out, border-color 200ms ease-out;
-  white-space: nowrap;
+	align-items: center;
+	background-color: transparent;
+	border: 1px solid var(--z-ds-color-border-70);
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	display: inline-flex;
+	font-size: var(--z-ds-fontsize-16);
+	gap: var(--z-ds-space-xs);
+	line-height: 1rem;
+	margin: 0;
+	padding: var(--z-ds-space-xs);
+	transition:
+		background-color 200ms ease-out,
+		border-color 200ms ease-out;
+	white-space: nowrap;
 }
 .z-page-shortcut:hover,
 .z-page-shortcut:focus {
-  border-color: var(--z-ds-color-border-100);
+	border-color: var(--z-ds-color-border-100);
 }
 .z-page-shortcut:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
+	outline: 2px solid var(--z-ds-color-focus-100);
 }

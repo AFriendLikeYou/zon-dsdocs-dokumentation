@@ -25,7 +25,14 @@
  *   node tooling/migrate-content-to-json.mjs [--root <repoRoot>] [--dry] [--keep-ts]
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import {
+	readFileSync,
+	writeFileSync,
+	existsSync,
+	readdirSync,
+	statSync,
+	unlinkSync
+} from 'node:fs';
 import { resolve } from 'node:path';
 
 const ROUTE_BASE = 'src/routes/product/components';
@@ -59,7 +66,14 @@ function extractContentObject(source) {
 function canon(v) {
 	if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
 	if (v && typeof v === 'object')
-		return '{' + Object.keys(v).sort().map((k) => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+		return (
+			'{' +
+			Object.keys(v)
+				.sort()
+				.map((k) => JSON.stringify(k) + ':' + canon(v[k]))
+				.join(',') +
+			'}'
+		);
 	return JSON.stringify(v);
 }
 
@@ -104,7 +118,9 @@ function main() {
 			);
 		}
 		migrated.push({ tsPath, slug, fields: Object.keys(value).length });
-		console.log(`  ✓ ${slug}: content.json geschrieben & verifiziert (${Object.keys(value).length} Feld(er))`);
+		console.log(
+			`  ✓ ${slug}: content.json geschrieben & verifiziert (${Object.keys(value).length} Feld(er))`
+		);
 	}
 
 	if (dry) {
@@ -120,7 +136,9 @@ function main() {
 		}
 	}
 
-	console.log(`\n✓ ${migrated.length} Datei(en) migriert${keepTs ? ' (content.ts behalten)' : ''}.`);
+	console.log(
+		`\n✓ ${migrated.length} Datei(en) migriert${keepTs ? ' (content.ts behalten)' : ''}.`
+	);
 }
 
 try {

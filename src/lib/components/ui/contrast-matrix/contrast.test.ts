@@ -42,7 +42,10 @@ describe('contrastRatio (WCAG 2.1)', () => {
 	});
 
 	it('#777777 auf Weiß ≈ 4.48 (knapp AA-Fail)', () => {
-		const ratio = contrastRatio({ r: 0x77, g: 0x77, b: 0x77, a: 1 }, { r: 255, g: 255, b: 255, a: 1 });
+		const ratio = contrastRatio(
+			{ r: 0x77, g: 0x77, b: 0x77, a: 1 },
+			{ r: 255, g: 255, b: 255, a: 1 }
+		);
 		expect(ratio).toBeCloseTo(4.48, 2);
 	});
 });

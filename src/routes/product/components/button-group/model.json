@@ -5,16 +5,9 @@
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=904-800",
 	"aktualisiertAm": "2026-07-07",
 	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
-	"verwandt": [
-		"button",
-		"icon-button"
-	],
+	"verwandt": ["button", "icon-button"],
 	"farbrollen": {
-		"zustaende": [
-			"inaktiv",
-			"inaktiv+hover",
-			"aktiv"
-		],
+		"zustaende": ["inaktiv", "inaktiv+hover", "aktiv"],
 		"elemente": [
 			{
 				"teil": "Segment · Hintergrund",

@@ -1,4 +1,4 @@
-# Herkunft der figma-*-Skills
+# Herkunft der figma-\*-Skills
 
 Kuratiertes Subset (6 von 22) aus **southleft/figma-console-mcp-skills**
 (github.com/southleft/figma-console-mcp-skills, MIT — siehe FIGMA-SKILLS-LICENSE),

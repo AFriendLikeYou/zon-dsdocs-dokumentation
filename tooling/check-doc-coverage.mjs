@@ -44,9 +44,7 @@ function curatedSlugs() {
 	const src = fs.readFileSync(catalogFile, 'utf8');
 	const block = src.match(/CATALOG_OVERRIDES[^=]*=\s*\{([\s\S]*?)\n\};/);
 	if (!block) return new Set();
-	return new Set(
-		[...block[1].matchAll(/^\s*'?([\w-]+)'?\s*:/gm)].map((m) => m[1])
-	);
+	return new Set([...block[1].matchAll(/^\s*'?([\w-]+)'?\s*:/gm)].map((m) => m[1]));
 }
 
 const THIN_STUB_KEYS = new Set(['status', 'zweck', 'verwandt']);
@@ -91,8 +89,7 @@ for (const slug of slugs) {
 	if (contentKeys.length > 0 && contentKeys.every((k) => THIN_STUB_KEYS.has(k)))
 		gaps.push(`content.json ist ein Thin-Stub (nur ${contentKeys.join(', ')})`);
 
-	if (!curated.has(slug))
-		gaps.push('nicht in CATALOG_OVERRIDES kuratiert (order 999, kein Badge)');
+	if (!curated.has(slug)) gaps.push('nicht in CATALOG_OVERRIDES kuratiert (order 999, kein Badge)');
 
 	if (gaps.length) findings.push({ slug, gaps });
 }

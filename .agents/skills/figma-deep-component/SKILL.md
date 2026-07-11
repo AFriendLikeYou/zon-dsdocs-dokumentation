@@ -7,13 +7,14 @@ disable-model-invocation: false
 # figma-deep-component — unlimited-depth tree with resolved tokens
 
 Walk one node (usually a `COMPONENT` / `COMPONENT_SET` / `INSTANCE`, but any node works) recursively
-to a depth you choose, capturing at *every* level: layout (auto-layout, padding, spacing, sizing),
+to a depth you choose, capturing at _every_ level: layout (auto-layout, padding, spacing, sizing),
 visual properties (fills, strokes, stroke weight, corner radius, effects, opacity), typography for
 text nodes, `boundVariables` **resolved to token names + code syntax**, `INSTANCE` main-component
 references (including whether the main is a variant and its set), prototype `reactions`, and dev-mode
 `annotations`. This is the richest single-component read for high-fidelity code generation.
 
 ## Skill boundaries
+
 - **`use_figma` rules** — load the official **`figma-use`** skill first; it is the full Figma Plugin API reference. Essentials these scripts rely on: plain JS with top-level `await` + `return` (no IIFE, no `figma.closePlugin()`; `console.log` is not returned), inputs inlined as `const` at the top of each script, colors in 0–1 range, load fonts before any text op, `await figma.getNodeByIdAsync(...)`, and **atomic errors** (a failed script applies nothing — read the error, fix, retry).
 - **Whole-file inventory** (all tokens/components/styles at once) → use `figma-design-system-inventory`.
 - **Variant set as a CSS state machine** (per-state diffs, pseudo-class mapping) →
@@ -36,6 +37,7 @@ references (including whether the main is a variant and its set), prototype `rea
    `childCount` + `_depthLimitReached` marker) or target a smaller sub-node id.
 
 ## What each node carries
+
 - **Identity**: `id`, `name`, `type`, `visible`. Hidden non-component nodes are marked `_hidden` and
   not recursed.
 - **Layout**: `layoutMode`, axis sizing/align, `padding*`, `itemSpacing`, `counterAxisSpacing`,
@@ -52,6 +54,7 @@ references (including whether the main is a variant and its set), prototype `rea
 - **Dev**: `annotations` (label markdown + categorized properties).
 
 ## Notes
+
 - **Resolved tokens work on ANY plan** — the variable lookup is built via the Plugin API, so even
   non-Enterprise files get token names instead of opaque `VariableID:` aliases.
 - The root node echoes `_variableMapSize` and `_maxDepthUsed` for sanity-checking.

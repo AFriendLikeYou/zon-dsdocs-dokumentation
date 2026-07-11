@@ -1,50 +1,52 @@
 /* z-text-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .z-text-button {
-  align-items: center;
-  background-color: transparent;
-  border-radius: var(--z-ds-border-radius-4);
-  border-width: 0;
-  color: var(--z-ds-color-text-70);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: var(--z-ds-fontsize-14);
-  gap: var(--z-ds-space-xxxs);
-  line-height: 1.125rem;
-  margin: 0;
-  padding: var(--z-ds-space-xs);
-  transition: background-color 200ms ease-out, color 200ms ease-out;
-  white-space: nowrap;
+	align-items: center;
+	background-color: transparent;
+	border-radius: var(--z-ds-border-radius-4);
+	border-width: 0;
+	color: var(--z-ds-color-text-70);
+	cursor: pointer;
+	display: inline-flex;
+	font-size: var(--z-ds-fontsize-14);
+	gap: var(--z-ds-space-xxxs);
+	line-height: 1.125rem;
+	margin: 0;
+	padding: var(--z-ds-space-xs);
+	transition:
+		background-color 200ms ease-out,
+		color 200ms ease-out;
+	white-space: nowrap;
 }
 .z-text-button--slim {
-  padding-bottom: var(--z-ds-space-6);
-  padding-top: var(--z-ds-space-6);
+	padding-bottom: var(--z-ds-space-6);
+	padding-top: var(--z-ds-space-6);
 }
 .z-text-button--large {
-  font-size: var(--z-ds-fontsize-16);
+	font-size: var(--z-ds-fontsize-16);
 }
 .z-text-button--bold {
-  font-weight: bold;
+	font-weight: bold;
 }
 .z-text-button--active {
-  background-color: var(--z-ds-color-background-10);
-  color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-background-10);
+	color: var(--z-ds-color-text-100);
 }
 .z-text-button:hover {
-  background-color: var(--z-ds-color-background-10);
-  color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-background-10);
+	color: var(--z-ds-color-text-100);
 }
 .z-text-button:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
+	outline: 2px solid var(--z-ds-color-focus-100);
 }
 .z-text-button:disabled {
-  background-color: transparent;
-  color: var(--z-ds-color-text-55);
-  cursor: default;
+	background-color: transparent;
+	color: var(--z-ds-color-text-55);
+	cursor: default;
 }
 .z-text-button--on-image {
-  color: var(--z-ds-color-general-white-60);
+	color: var(--z-ds-color-general-white-60);
 }
 .z-text-button--on-image:hover {
-  background-color: var(--z-ds-color-general-black-60);
-  color: var(--z-ds-color-general-white-100);
+	background-color: var(--z-ds-color-general-black-60);
+	color: var(--z-ds-color-general-white-100);
 }

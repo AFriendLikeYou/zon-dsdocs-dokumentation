@@ -35,12 +35,12 @@ rote Kringel bei Fehlern (VS Code; andere Editoren via `"$schema"`-Zeile).
 Node-ID aus dem Figma-Link nehmen. **Instanz immer zum Component-Set auflösen**
 (die `focus-id`/Selektion, nicht die Wrapper-Node). Nützliche MCP-Tools:
 
-| Tool | liefert |
-| --- | --- |
-| `get_design_context` | Markup-Struktur, Varianten-Logik, Text, Layout |
+| Tool                           | liefert                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `get_design_context`           | Markup-Struktur, Varianten-Logik, Text, Layout                             |
 | `get_context_for_code_connect` | Component-Properties (VARIANT/BOOLEAN/TEXT/INSTANCE_SWAP) sauber aufgelöst |
-| `get_variable_defs` | die genutzten Design-Tokens + Werte (→ z-ds-Namen) |
-| `get_screenshot` | visueller Abgleich |
+| `get_variable_defs`            | die genutzten Design-Tokens + Werte (→ z-ds-Namen)                         |
+| `get_screenshot`               | visueller Abgleich                                                         |
 
 Ergebnis notieren: **Name**, **Varianten-Achsen** (Typ/Größe/…), **Tokens** (Farbe/
 Spacing/Radius/Typo), **Maße** (Höhe/Breite/Cover/Gaps), **Struktur** (welche Teile,

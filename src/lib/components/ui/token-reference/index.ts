@@ -1,1 +1,1 @@
-export { default as TokenReference } from "./TokenReference.svelte";
+export { default as TokenReference } from './TokenReference.svelte';

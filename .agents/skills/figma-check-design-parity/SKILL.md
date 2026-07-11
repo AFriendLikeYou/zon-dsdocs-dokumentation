@@ -14,6 +14,7 @@ code; this skill confirms the code didn't drift away from the design.
 All design reads go through `use_figma`, so it works on **any Figma plan**.
 
 ## Skill boundaries
+
 - **`use_figma` rules** — load the official **`figma-use`** skill first; it is the full Figma Plugin API reference. Essentials these scripts rely on: plain JS with top-level `await` + `return` (no IIFE, no `figma.closePlugin()`; `console.log` is not returned), inputs inlined as `const` at the top of each script, colors in 0–1 range, load fonts before any text op, `await figma.getNodeByIdAsync(...)`, and **atomic errors** (a failed script applies nothing — read the error, fix, retry).
 - **Generating code from a design** → that's the native `get_design_context`; this skill validates, not generates.
 - **CODE-side a11y to feed `codeSpec.accessibility`** → use `figma-scan-code-accessibility`
@@ -31,13 +32,14 @@ All design reads go through `use_figma`, so it works on **any Figma plan**.
    (`skillNames: "figma-check-design-parity"`). It extracts the node's fills, strokes, corner radius,
    opacity, padding/gap, and text properties, then diffs them against the codeSpec.
 3. **Read the scorecard.** `summary.parityScore` is `max(0, 100 − (critical×15 + major×8 + minor×3 +
-   info×1))`. `discrepancies[]` lists each mismatch with `category`, `property`, `severity`,
+info×1))`. `discrepancies[]` lists each mismatch with `category`, `property`, `severity`,
    `designValue`, `codeValue`, and a `suggestion`.
 4. **Decide which side to fix.** Each discrepancy says what design has vs what code has. Update code to
    match the design, or push the design to match an intentional code change (via
    `figma-manage-variables` / `figma-use`), then re-run to confirm the score rose.
 
 ## Key rules
+
 - **Colors are 0–1 in Figma**; the script converts to hex and normalizes both sides before comparing.
 - **Only filled codeSpec sections are compared.** Omit a section to skip it — no false positives for
   data you didn't provide.

@@ -46,7 +46,8 @@ describe('validateBrandNav · akzeptiert reines Umsortieren', () => {
 		const reordered = [FIXTURE[3], FIXTURE[0], FIXTURE[2], FIXTURE[1]];
 		const res = validateBrandNav(clone(reordered), FIXTURE);
 		expect(res.ok).toBe(true);
-		if (res.ok) expect(res.tree.map((s) => s.title)).toEqual(['Farbe', 'Grundlagen', 'Logo', 'Marke']);
+		if (res.ok)
+			expect(res.tree.map((s) => s.title)).toEqual(['Farbe', 'Grundlagen', 'Logo', 'Marke']);
 	});
 
 	it('nimmt ein Umsortieren der Kinder innerhalb einer Gruppe an', () => {

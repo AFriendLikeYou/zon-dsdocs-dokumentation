@@ -32,7 +32,8 @@ export function validateNewPage(
 	if (!title.trim()) return 'Bitte einen Titel angeben.';
 	// Frontmatter bleibt unquoted (wie auf allen Seiten) → diese Zeichen würden
 	// das YAML brechen. Lieber ehrlich ablehnen als still kaputtschreiben.
-	if (/[:"\n]/.test(title)) return 'Titel darf keinen Doppelpunkt und keine Anführungszeichen enthalten.';
+	if (/[:"\n]/.test(title))
+		return 'Titel darf keinen Doppelpunkt und keine Anführungszeichen enthalten.';
 	if (!SLUG_RE.test(slug))
 		return 'Slug bitte nur mit Kleinbuchstaben, Zahlen und Bindestrichen (z. B. „neue-seite").';
 	if (existingHrefs.includes(`/brand/${slug}`)) return `„/brand/${slug}“ existiert bereits.`;

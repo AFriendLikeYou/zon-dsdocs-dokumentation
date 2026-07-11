@@ -74,7 +74,8 @@ export const actions: Actions = {
 		// (keine Seite erfunden/verloren). Sonst nicht schreiben — ein kaputter Write
 		// würde die Sidebar der gesamten Brand-Sektion brechen.
 		const verdict = validateBrandNav(incoming, readConfig());
-		if (!verdict.ok) return fail(400, { message: `Abbruch: ${verdict.message} Nichts gespeichert.` });
+		if (!verdict.ok)
+			return fail(400, { message: `Abbruch: ${verdict.message} Nichts gespeichert.` });
 
 		writeFileSync(CONFIG_PATH, serializeBrandNav(verdict.tree));
 		return { saved: true };

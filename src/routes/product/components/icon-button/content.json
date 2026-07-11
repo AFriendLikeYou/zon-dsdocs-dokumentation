@@ -54,11 +54,7 @@
 		]
 	},
 	"version": "Figma-Node 3334:5440",
-	"verwandt": [
-		"button",
-		"text-button",
-		"button-group"
-	],
+	"verwandt": ["button", "text-button", "button-group"],
 	"variantInfo": {
 		"Default": "Neutrale ikonografische Aktion — helle Fläche (--z-ds-color-background-10), dunkles Icon (--z-ds-color-text-100)."
 	}

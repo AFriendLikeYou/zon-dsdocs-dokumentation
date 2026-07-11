@@ -76,7 +76,10 @@ function checkComponent(slug, model, patternCss = '') {
 	// Modifier aus CSS: `.<basis>--<mod>` (Basis je Modifier merken für korrekte Meldungen)
 	const cssModifiers = new Map(); // mod -> base
 	for (const base of bases) {
-		const re = new RegExp(`\\.${base.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}--([a-z0-9-]+)`, 'g');
+		const re = new RegExp(
+			`\\.${base.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}--([a-z0-9-]+)`,
+			'g'
+		);
 		for (const m of css.matchAll(re)) if (!cssModifiers.has(m[1])) cssModifiers.set(m[1], base);
 	}
 
@@ -156,7 +159,9 @@ for (const slug of slugs) {
 		if (fs.existsSync(cssPath)) patternCss = fs.readFileSync(cssPath, 'utf8');
 		else {
 			drift++;
-			console.warn(`\n⚠️  „${slug}": render.cssFile zeigt auf fehlende Datei (${model.render.cssFile}).`);
+			console.warn(
+				`\n⚠️  „${slug}": render.cssFile zeigt auf fehlende Datei (${model.render.cssFile}).`
+			);
 		}
 	}
 	const issues = checkComponent(slug, model, patternCss);

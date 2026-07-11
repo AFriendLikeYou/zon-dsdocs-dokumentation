@@ -559,7 +559,11 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
 		} else if (seg.type === 'insel' && op.container && isMutableContainerIsland(core)) {
 			// Container bearbeiten: Attribute + Kinder re-serialisieren.
 			const info = containerIslandInfo(core);
-			core = serializeContainerTag(info!.def, { ...info!.attrs, ...op.container.attrs }, op.container.children);
+			core = serializeContainerTag(
+				info!.def,
+				{ ...info!.attrs, ...op.container.attrs },
+				op.container.children
+			);
 		} else if (seg.type === 'insel' && op.component && isMutableComponentIsland(core)) {
 			const info = componentIslandInfo(core);
 			core = serializeComponentTag(info!.def, {

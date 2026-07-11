@@ -101,7 +101,8 @@
 	function initialState(): PlaygroundState {
 		const s: PlaygroundState = {};
 		for (const c of controls) {
-			s[c.key] = c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
+			s[c.key] =
+				c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
 		}
 		return s;
 	}

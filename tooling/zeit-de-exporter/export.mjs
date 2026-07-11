@@ -29,7 +29,7 @@ import { fileURLToPath } from 'node:url';
 
 const TARGET = 'zeit-de';
 const ROUTE_BASE = 'src/routes/product/components';
-const SPEC_COMPONENT_IMPORT = "$components/ui/specsheet";
+const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,7 +61,7 @@ const SECTION_IDS = {
 	Wording: 'wording',
 	Varianten: 'varianten',
 	Zustände: 'zustaende',
-	'Do & Don\'t': 'do-dont',
+	"Do & Don't": 'do-dont',
 	'Verwandte Komponenten': 'verwandte'
 };
 
@@ -101,7 +101,18 @@ function renderFrontmatter(model) {
 }
 
 // Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = ['zweck', 'status', 'callouts', 'a11y', 'tastatur', 'doDont', 'doDontBeispiele', 'verwendung', 'wording', 'verwandt'];
+const EDITORIAL = [
+	'zweck',
+	'status',
+	'callouts',
+	'a11y',
+	'tastatur',
+	'doDont',
+	'doDontBeispiele',
+	'verwendung',
+	'wording',
+	'verwandt'
+];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -162,7 +173,9 @@ function renderContentStub(model) {
  * flache Regeln ohne At-Rules — bewusst simpel statt CSS-Parser.
  */
 function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
-	const clean = String(css).replace(/\/\*[\s\S]*?\*\//g, '').trim();
+	const clean = String(css)
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.trim();
 	if (/^\s*@/m.test(clean)) {
 		throw new Error(
 			'pattern.css: At-Rules (@media, @keyframes, …) werden im v1-Scoping nicht unterstützt — flache Regeln verwenden.'
@@ -191,13 +204,15 @@ function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
 
 /** Für Template-Literals im generierten Script escapen. */
 function tl(s) {
-	return String(s)
-		.replace(/\\/g, '\\\\')
-		.replace(/`/g, '\\`')
-		.replace(/\$\{/g, '\\${')
-		// Verhindert, dass ein </script> oder </style> im String-Inhalt den
-		// umschließenden <script>/<style>-Block der .svx-Seite vorzeitig schließt.
-		.replace(/<\/(script|style)>/gi, '<\\/$1>');
+	return (
+		String(s)
+			.replace(/\\/g, '\\\\')
+			.replace(/`/g, '\\`')
+			.replace(/\$\{/g, '\\${')
+			// Verhindert, dass ein </script> oder </style> im String-Inhalt den
+			// umschließenden <script>/<style>-Block der .svx-Seite vorzeitig schließt.
+			.replace(/<\/(script|style)>/gi, '<\\/$1>')
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -243,7 +258,8 @@ function stateVocab(model) {
 	for (const z of Array.isArray(model.zustaende) ? model.zustaende : [])
 		for (const t of _tokens(z.label)) vocab.add(t);
 	const fr = model.farbrollen;
-	if (fr && Array.isArray(fr.zustaende)) for (const z of fr.zustaende) for (const t of _tokens(z)) vocab.add(t);
+	if (fr && Array.isArray(fr.zustaende))
+		for (const z of fr.zustaende) for (const t of _tokens(z)) vocab.add(t);
 	return vocab;
 }
 
@@ -267,7 +283,8 @@ function buildVariantItems(model) {
 	const render = model.render ?? {};
 	const template = typeof render.template === 'string' ? render.template : null;
 	const varianten = Array.isArray(model.varianten) ? model.varianten : [];
-	const info = render.variantInfo && typeof render.variantInfo === 'object' ? render.variantInfo : {};
+	const info =
+		render.variantInfo && typeof render.variantInfo === 'object' ? render.variantInfo : {};
 	const items = [];
 	if (template && varianten.length) {
 		for (const group of varianten)
@@ -388,14 +405,16 @@ function renderPage(model, { patternCss = null } = {}) {
 	const anchorsProp = anchors.length ? ` {calloutAnchors}` : '';
 
 	// CSS für die Live-Specimens (gegen .spec-canvas gescopt).
-	const css = Array.isArray(render.css) ? render.css.join('\n') : render.css ?? '';
+	const css = Array.isArray(render.css) ? render.css.join('\n') : (render.css ?? '');
 	const scopedPattern = patternCss ? scopeCss(patternCss) : '';
 	const allCss = [css, scopedPattern].filter(Boolean).join('\n\n');
 	const styleBlock = allCss ? `\n<style>\n${allCss}\n</style>\n` : '';
 
 	// Code-Beispiele (Develop): HTML/Svelte-Snippet + entscoptes CSS.
 	// `-->` im Text würde den Kommentar vorzeitig schließen → neutralisieren.
-	const note = render.codeNote ? `<!-- ${String(render.codeNote).replace(/--+>/g, '--&gt;')} -->\n` : '';
+	const note = render.codeNote
+		? `<!-- ${String(render.codeNote).replace(/--+>/g, '--&gt;')} -->\n`
+		: '';
 	const htmlBody = [render.preview, render.variant].filter(Boolean).join('\n');
 	const htmlCode = htmlBody ? note + htmlBody : '';
 	const svelteCode = Array.isArray(render.codeSvelte)
@@ -582,8 +601,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		// … reine Pseudoklassen-Zustände (kein statisches Rendering möglich) NUR beschreibend,
 		// mit Hinweis auf den Playground. Kein gefaktes Hover/Focus/Active.
 		if (hasStateRest)
-			design +=
-				`\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
+			design += `\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
 	}
 	if (hasDoDont || hasDoDontVisual) {
 		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });
@@ -611,15 +629,13 @@ function renderPage(model, { patternCss = null } = {}) {
 		if (svelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
 		if (repoCode) {
 			if (repoNote) {
-				const escNote = repoNote
-					.replace(/&/g, '&amp;')
-					.replace(/</g, '&lt;')
-					.replace(/>/g, '&gt;');
+				const escNote = repoNote.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 				develop += `\t<p>${escNote}</p>\n`;
 			}
 			develop += `\t<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />\n`;
 		}
-		if (cssForCode) develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
+		if (cssForCode)
+			develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
 		if (patternCss)
 			develop += `\t<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />\n`;
 	}
@@ -628,20 +644,24 @@ function renderPage(model, { patternCss = null } = {}) {
 	// A11yList nur bei hasA11y (der Body ist sonst leer); Tastatur-Abschnitt danach.
 	let a11y = '';
 	if (hasA11y) a11y += `\t<A11yList items={${S}.a11y} />\n`;
-	if (hasKeyboard)
-		a11y += `\n\t<h2>Tastatur</h2>\n\t<KeyboardList items={${S}.tastatur} />\n`;
+	if (hasKeyboard) a11y += `\n\t<h2>Tastatur</h2>\n\t<KeyboardList items={${S}.tastatur} />\n`;
 
 	// ---- Specs-Tab ----
 	let specs = '';
 	if (hasMasse) specs += `\t<h2>Maße</h2>\n\t<MeasureTable masse={${S}.masse} />\n`;
 	// Farbrollen-Matrix leitet die Token-Sektion ein (Teil × Zustand → Token),
 	// die volle Token-Liste folgt darunter.
-	if (hasColorRoles) specs += `\n\t<h2>Farbrollen</h2>\n\t<ColorRoleTable farbrollen={${S}.farbrollen} />\n`;
+	if (hasColorRoles)
+		specs += `\n\t<h2>Farbrollen</h2>\n\t<ColorRoleTable farbrollen={${S}.farbrollen} />\n`;
 	if (hasTokens) specs += `\n\t<h2>Tokens</h2>\n\t<TokenTable tokens={${S}.tokens} />\n`;
 
 	const bodies = { designTab: design, developTab: develop, a11yTab: a11y, specsTab: specs };
-	const snippets = tabs.map((t) => `{#snippet ${t.name}()}\n${bodies[t.name]}{/snippet}`).join('\n\n');
-	const tabsItems = tabs.map((t) => `\t\t{ label: '${t.label}', component: ${t.name} }`).join(',\n');
+	const snippets = tabs
+		.map((t) => `{#snippet ${t.name}()}\n${bodies[t.name]}{/snippet}`)
+		.join('\n\n');
+	const tabsItems = tabs
+		.map((t) => `\t\t{ label: '${t.label}', component: ${t.name} }`)
+		.join(',\n');
 
 	return (
 		`${renderFrontmatter(model)}\n` +
@@ -682,7 +702,8 @@ function parseArgs(argv) {
 		else if (a === '--root') args.root = argv[++i];
 		else if (a === '--target') {
 			const t = argv[++i];
-			if (t !== TARGET) throw new Error(`Unbekanntes Ziel "${t}" — dieser Exporter kann nur "${TARGET}".`);
+			if (t !== TARGET)
+				throw new Error(`Unbekanntes Ziel "${t}" — dieser Exporter kann nur "${TARGET}".`);
 		} else if (!a.startsWith('-')) args.input = a;
 	}
 	if (!args.input)
@@ -731,7 +752,10 @@ function validate(model, { root = process.cwd() } = {}) {
 
 	for (const [i, c] of controls.entries()) {
 		const at = `render.controls[${i}]${c?.key ? ` "${c.key}"` : ''}`;
-		if (!c || typeof c !== 'object') { errors.push(`${at}: kein Objekt`); continue; }
+		if (!c || typeof c !== 'object') {
+			errors.push(`${at}: kein Objekt`);
+			continue;
+		}
 		if (!c.key) errors.push(`${at}: key fehlt`);
 		else keys.add(c.key);
 		if (!['select', 'toggle', 'attr'].includes(c.type))
@@ -797,14 +821,12 @@ function validate(model, { root = process.cwd() } = {}) {
 	// wording: schlecht + gut sind Pflicht.
 	if (Array.isArray(model.wording))
 		for (const [i, w] of model.wording.entries())
-			if (!w?.schlecht || !w?.gut)
-				errors.push(`wording[${i}]: schlecht und gut sind nötig`);
+			if (!w?.schlecht || !w?.gut) errors.push(`wording[${i}]: schlecht und gut sind nötig`);
 
 	// tastatur: taste + aktion sind Pflicht.
 	if (Array.isArray(model.tastatur))
 		for (const [i, k] of model.tastatur.entries())
-			if (!k?.taste || !k?.aktion)
-				errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
+			if (!k?.taste || !k?.aktion) errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
 
 	// doDontBeispiele: je Paar gut+schlecht, je Seite html+text (Pflicht).
 	if (Array.isArray(model.doDontBeispiele))
@@ -828,7 +850,8 @@ function validate(model, { root = process.cwd() } = {}) {
 		if (!zust.length) warnings.push('farbrollen: zustaende ist leer — Matrix wird nicht gerendert');
 		const zustSet = new Set(zust);
 		const elemente = Array.isArray(fr.elemente) ? fr.elemente : [];
-		if (!elemente.length) warnings.push('farbrollen: elemente ist leer — Matrix wird nicht gerendert');
+		if (!elemente.length)
+			warnings.push('farbrollen: elemente ist leer — Matrix wird nicht gerendert');
 		for (const [i, el] of elemente.entries()) {
 			const at = `farbrollen.elemente[${i}]${el?.teil ? ` "${el.teil}"` : ''}`;
 			if (!el?.teil) warnings.push(`${at}: teil fehlt`);
@@ -840,7 +863,11 @@ function validate(model, { root = process.cwd() } = {}) {
 			for (const [key, token] of Object.entries(tpz)) {
 				if (!zustSet.has(key))
 					warnings.push(`${at}: Zustand-Key "${key}" ist nicht in zustaende (${zust.join(', ')})`);
-				if (token !== 'none' && !/^--z-ds-/.test(String(token)) && !/^var\(\s*--z-ds-/.test(String(token)))
+				if (
+					token !== 'none' &&
+					!/^--z-ds-/.test(String(token)) &&
+					!/^var\(\s*--z-ds-/.test(String(token))
+				)
 					warnings.push(`${at}.${key}: Token "${token}" ist weder --z-ds-* noch "none"`);
 			}
 		}
@@ -851,7 +878,9 @@ function validate(model, { root = process.cwd() } = {}) {
 		for (const slug of model.verwandt) {
 			const target = resolve(root, ROUTE_BASE, String(slug), 'model.json');
 			if (!existsSync(target))
-				warnings.push(`verwandt: "${slug}" hat kein model.json (${ROUTE_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`);
+				warnings.push(
+					`verwandt: "${slug}" hat kein model.json (${ROUTE_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`
+				);
 		}
 
 	for (const w of warnings) console.warn(`  ⚠️  ${w}`);
@@ -935,7 +964,9 @@ function scaffold(name, root) {
 	console.log('\nNächste Schritte:');
 	console.log('  1. model.json ausfüllen — der Editor zeigt Feld-Hilfe dank $schema.');
 	console.log('  2. pattern.css mit den echten z-*-Styles füllen.');
-	console.log(`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`);
+	console.log(
+		`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`
+	);
 	console.log('  4. Nav & Katalog sind katalog-getrieben (ADR-025) — kein Nav-Eintrag nötig.');
 	console.log('     Optional Reihenfolge/Badge in der Override-Map in src/lib/data/catalog.ts.');
 }

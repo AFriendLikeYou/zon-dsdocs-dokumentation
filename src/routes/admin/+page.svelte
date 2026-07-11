@@ -7,8 +7,8 @@
 <div class="admin">
 	<h1>Inhalte bearbeiten</h1>
 	<p class="lead">
-		Redaktionelle Texte der Komponenten-Doku (die <code>content.json</code>-Felder). Modell,
-		Maße und Tokens kommen aus Figma und sind hier bewusst nicht editierbar.
+		Redaktionelle Texte der Komponenten-Doku (die <code>content.json</code>-Felder). Modell, Maße
+		und Tokens kommen aus Figma und sind hier bewusst nicht editierbar.
 	</p>
 
 	<nav class="sections" aria-label="Bereiche">

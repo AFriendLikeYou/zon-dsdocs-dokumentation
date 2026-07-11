@@ -139,10 +139,7 @@
 		const doDontBeispiele = state.doDontBeispiele
 			.filter(
 				(r) =>
-					r.gut.html.trim() ||
-					r.gut.text.trim() ||
-					r.schlecht.html.trim() ||
-					r.schlecht.text.trim()
+					r.gut.html.trim() || r.gut.text.trim() || r.schlecht.html.trim() || r.schlecht.text.trim()
 			)
 			.map((r) => ({
 				gut: { html: r.gut.html, text: r.gut.text.trim() },
@@ -169,12 +166,16 @@
 	<p class="sub">Bearbeitet <code>content.json</code>. Andere Felder bleiben unverändert.</p>
 
 	{#if form?.saved}
-		<p class="flash flash--ok" role="status">Gespeichert. Die Doku-Seite zeigt die Änderung nach dem Reload.</p>
+		<p class="flash flash--ok" role="status">
+			Gespeichert. Die Doku-Seite zeigt die Änderung nach dem Reload.
+		</p>
 	{:else if form?.message}
 		<p class="flash flash--err" role="alert">{form.message}</p>
 	{/if}
 	{#if !data.writable}
-		<p class="flash flash--warn">Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).</p>
+		<p class="flash flash--warn">
+			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).
+		</p>
 	{/if}
 
 	<form method="POST" use:enhance>
@@ -199,10 +200,17 @@
 			{#each state.verwendung.nutzen as _, i}
 				<div class="row">
 					<input bind:value={state.verwendung.nutzen[i]} />
-					<button type="button" class="rm" onclick={() => removeFrom(state.verwendung.nutzen, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.verwendung.nutzen, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.verwendung.nutzen)}>+ Zeile</button>
+			<button type="button" class="add" onclick={() => addTo(state.verwendung.nutzen)}
+				>+ Zeile</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -210,10 +218,17 @@
 			{#each state.verwendung.nichtNutzen as _, i}
 				<div class="row">
 					<input bind:value={state.verwendung.nichtNutzen[i]} />
-					<button type="button" class="rm" onclick={() => removeFrom(state.verwendung.nichtNutzen, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.verwendung.nichtNutzen, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.verwendung.nichtNutzen)}>+ Zeile</button>
+			<button type="button" class="add" onclick={() => addTo(state.verwendung.nichtNutzen)}
+				>+ Zeile</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -221,7 +236,12 @@
 			{#each state.doDont.do as _, i}
 				<div class="row">
 					<input bind:value={state.doDont.do[i]} />
-					<button type="button" class="rm" onclick={() => removeFrom(state.doDont.do, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.doDont.do, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
 			<button type="button" class="add" onclick={() => addTo(state.doDont.do)}>+ Zeile</button>
@@ -232,7 +252,12 @@
 			{#each state.doDont.dont as _, i}
 				<div class="row">
 					<input bind:value={state.doDont.dont[i]} />
-					<button type="button" class="rm" onclick={() => removeFrom(state.doDont.dont, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.doDont.dont, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
 			<button type="button" class="add" onclick={() => addTo(state.doDont.dont)}>+ Zeile</button>
@@ -247,10 +272,19 @@
 				<div class="row row--kv">
 					<input class="kv-key" bind:value={state.variantInfo[i].key} placeholder="Label" />
 					<input bind:value={state.variantInfo[i].value} placeholder="Beschreibung" />
-					<button type="button" class="rm" onclick={() => removeFrom(state.variantInfo, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.variantInfo, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() => state.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -264,10 +298,19 @@
 						<option value="warn">warn</option>
 						<option value="todo">todo</option>
 					</select>
-					<button type="button" class="rm" onclick={() => removeFrom(state.a11y, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.a11y, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() => state.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -276,22 +319,47 @@
 				<div class="row">
 					<input class="kv-key" bind:value={state.tastatur[i].taste} placeholder="Taste" />
 					<input bind:value={state.tastatur[i].aktion} placeholder="Aktion" />
-					<button type="button" class="rm" onclick={() => removeFrom(state.tastatur, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.tastatur, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() => state.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
 			<legend class="lbl">Anatomie-Callouts (Nr · Text)</legend>
 			{#each state.callouts as _, i}
 				<div class="row">
-					<input class="num" type="number" min="1" bind:value={state.callouts[i].nr} aria-label="Nummer" />
+					<input
+						class="num"
+						type="number"
+						min="1"
+						bind:value={state.callouts[i].nr}
+						aria-label="Nummer"
+					/>
 					<input bind:value={state.callouts[i].text} placeholder="Beschreibung" />
-					<button type="button" class="rm" onclick={() => removeFrom(state.callouts, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.callouts, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.callouts.push({ nr: state.callouts.length + 1, text: '' })}>+ Callout</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() => state.callouts.push({ nr: state.callouts.length + 1, text: '' })}
+				>+ Callout</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -301,10 +369,19 @@
 					<input bind:value={state.wording[i].schlecht} placeholder="Schlecht" />
 					<input bind:value={state.wording[i].gut} placeholder="Gut" />
 					<input bind:value={state.wording[i].hinweis} placeholder="Hinweis (optional)" />
-					<button type="button" class="rm" onclick={() => removeFrom(state.wording, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.wording, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() => state.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
+			>
 		</fieldset>
 
 		<fieldset class="field">
@@ -317,7 +394,12 @@
 							<option value={s.slug}>{s.name} ({s.slug})</option>
 						{/each}
 					</select>
-					<button type="button" class="rm" onclick={() => removeFrom(state.verwandt, i)} aria-label="Entfernen">×</button>
+					<button
+						type="button"
+						class="rm"
+						onclick={() => removeFrom(state.verwandt, i)}
+						aria-label="Entfernen">×</button
+					>
 				</div>
 			{/each}
 			<button type="button" class="add" onclick={() => state.verwandt.push('')}>+ Slug</button>
@@ -325,27 +407,43 @@
 
 		<fieldset class="field">
 			<legend class="lbl">Do/Don't-Beispiele (fortgeschritten)</legend>
-			<p class="hint">HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das Beispiel.</p>
+			<p class="hint">
+				HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das Beispiel.
+			</p>
 			{#each state.doDontBeispiele as _, i}
 				<div class="pair">
 					<div class="pair-grid">
 						<div class="pair-col">
 							<span class="sub-lbl">Gut — HTML</span>
-							<textarea class="mono" bind:value={state.doDontBeispiele[i].gut.html} rows="3"></textarea>
+							<textarea class="mono" bind:value={state.doDontBeispiele[i].gut.html} rows="3"
+							></textarea>
 							<span class="sub-lbl">Gut — Text</span>
 							<textarea bind:value={state.doDontBeispiele[i].gut.text} rows="2"></textarea>
 						</div>
 						<div class="pair-col">
 							<span class="sub-lbl">Schlecht — HTML</span>
-							<textarea class="mono" bind:value={state.doDontBeispiele[i].schlecht.html} rows="3"></textarea>
+							<textarea class="mono" bind:value={state.doDontBeispiele[i].schlecht.html} rows="3"
+							></textarea>
 							<span class="sub-lbl">Schlecht — Text</span>
 							<textarea bind:value={state.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
 						</div>
 					</div>
-					<button type="button" class="rm rm--pair" onclick={() => removeFrom(state.doDontBeispiele, i)}>× Paar entfernen</button>
+					<button
+						type="button"
+						class="rm rm--pair"
+						onclick={() => removeFrom(state.doDontBeispiele, i)}>× Paar entfernen</button
+					>
 				</div>
 			{/each}
-			<button type="button" class="add" onclick={() => state.doDontBeispiele.push({ gut: { html: '', text: '' }, schlecht: { html: '', text: '' } })}>+ Beispiel-Paar</button>
+			<button
+				type="button"
+				class="add"
+				onclick={() =>
+					state.doDontBeispiele.push({
+						gut: { html: '', text: '' },
+						schlecht: { html: '', text: '' }
+					})}>+ Beispiel-Paar</button
+			>
 		</fieldset>
 
 		<div class="actions">

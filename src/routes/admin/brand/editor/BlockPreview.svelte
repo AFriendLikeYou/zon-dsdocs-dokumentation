@@ -50,7 +50,15 @@
 	};
 	const alertRole = $derived(ALERT_ROLE[v('variant')] ?? 'accent');
 
-	const SKIP = new Set([...MEDIA_KEYS, 'title', 'caption', 'label', 'subtitle', 'description', 'content']);
+	const SKIP = new Set([
+		...MEDIA_KEYS,
+		'title',
+		'caption',
+		'label',
+		'subtitle',
+		'description',
+		'content'
+	]);
 	function fmt(p: CmsPropDef, val: string | boolean | undefined): string {
 		if (p.type === 'boolean') return val === true || val === 'true' ? 'ja' : '';
 		return typeof val === 'string' ? val : '';
@@ -96,7 +104,8 @@
 		<span class="pv-swatch pv-swatch--text" style:color={textCol}>Aa</span>
 		<div class="pv-meta">
 			<span class="pv-title" style:color={textCol}>{title || 'Textfarbe'}</span>
-			{#if v('fontColorCustomProperty')}<span class="pv-token">{v('fontColorCustomProperty')}</span>{/if}
+			{#if v('fontColorCustomProperty')}<span class="pv-token">{v('fontColorCustomProperty')}</span
+				>{/if}
 		</div>
 	</div>
 {:else if name === 'Alert'}
@@ -212,11 +221,21 @@
 		flex-direction: column;
 		gap: 2px;
 	}
-	.pv--alert[data-role='accent'] { background: rgb(from var(--ds-accent) r g b / 0.12); }
-	.pv--alert[data-role='positive'] { background: rgb(from var(--ds-positive) r g b / 0.12); }
-	.pv--alert[data-role='negative'] { background: rgb(from var(--ds-negative) r g b / 0.12); }
-	.pv--alert[data-role='warning'] { background: rgb(from var(--ds-warning) r g b / 0.12); }
-	.pv--alert[data-role='accent-brand'] { background: rgb(from var(--ds-accent-brand) r g b / 0.12); }
+	.pv--alert[data-role='accent'] {
+		background: rgb(from var(--ds-accent) r g b / 0.12);
+	}
+	.pv--alert[data-role='positive'] {
+		background: rgb(from var(--ds-positive) r g b / 0.12);
+	}
+	.pv--alert[data-role='negative'] {
+		background: rgb(from var(--ds-negative) r g b / 0.12);
+	}
+	.pv--alert[data-role='warning'] {
+		background: rgb(from var(--ds-warning) r g b / 0.12);
+	}
+	.pv--alert[data-role='accent-brand'] {
+		background: rgb(from var(--ds-accent-brand) r g b / 0.12);
+	}
 	.pv--container {
 		display: flex;
 		align-items: center;

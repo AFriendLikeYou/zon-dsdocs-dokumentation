@@ -25,7 +25,10 @@ describe('POST /api/mcp', () => {
 	});
 
 	it('normaler Request → 200 mit JSON-Response', async () => {
-		const res = await call(POST, post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' })));
+		const res = await call(
+			POST,
+			post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }))
+		);
 		expect(res.status).toBe(200);
 		expect(res.headers.get('content-type')).toMatch(/application\/json/);
 		const json = await res.json();

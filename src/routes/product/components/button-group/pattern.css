@@ -1,45 +1,45 @@
 /* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .buttongroup {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  width: max-content;
-  max-width: 100%;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	width: max-content;
+	max-width: 100%;
 }
 .buttongroup-item {
-  background: var(--z-ds-color-background-10);
-  border: 0.125rem var(--z-ds-color-background-10) solid;
-  color: var(--z-ds-color-text-55);
-  display: inline-block;
-  font-size: var(--z-ds-fontsize-16);
-  line-height: 1.25rem;
-  position: relative;
+	background: var(--z-ds-color-background-10);
+	border: 0.125rem var(--z-ds-color-background-10) solid;
+	color: var(--z-ds-color-text-55);
+	display: inline-block;
+	font-size: var(--z-ds-fontsize-16);
+	line-height: 1.25rem;
+	position: relative;
 }
 .buttongroup-item--active .buttongroup-button {
-  background: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  cursor: default;
+	background: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-text-100);
+	cursor: default;
 }
 .buttongroup-item:first-child {
-  border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
+	border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
 }
 .buttongroup-item:last-child {
-  border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
+	border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
 }
 button.buttongroup-button {
-  background-color: transparent;
-  border-width: 0;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  margin: 0;
-  border-radius: var(--z-ds-border-radius-4);
-  display: inline-block;
-  padding: var(--z-ds-space-xs) var(--z-ds-space-m);
-  transition: background-color 300ms ease-out;
+	background-color: transparent;
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	margin: 0;
+	border-radius: var(--z-ds-border-radius-4);
+	display: inline-block;
+	padding: var(--z-ds-space-xs) var(--z-ds-space-m);
+	transition: background-color 300ms ease-out;
 }
 .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover {
-  background-color: var(--z-ds-color-background-20);
-  color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-background-20);
+	color: var(--z-ds-color-text-100);
 }

@@ -29,7 +29,7 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
 3. **Ebene ② pattern.css** aus dem echten zeit.de-CSS kuratieren (flach, keine At-Rules). Die States, die die CSS wirklich hat (`:hover`/`:focus-visible`/`:disabled`/…), bestimmen `farbrollen.zustaende` und `zustaende[]`. **Pflicht-Konsistenz: `farbrollen.zustaende` ⊇ alle State-Pseudoklassen der pattern.css.** Kein State in der Doku, den die CSS nicht hat (sonst lügt die Doku — cell-Fall).
 
-4. **Ebene ③ ARIA aus echter Produktions-HTML.** `render.template` trägt die echten Rollen/Attribute (role/aria-*/inert/aria-live), nicht nur semantisches HTML. Wenn keine Produktions-HTML vorliegt: Template als bewusst semantisch markieren, ARIA-Lücke in a11y notieren — nicht faken.
+4. **Ebene ③ ARIA aus echter Produktions-HTML.** `render.template` trägt die echten Rollen/Attribute (role/aria-\*/inert/aria-live), nicht nur semantisches HTML. Wenn keine Produktions-HTML vorliegt: Template als bewusst semantisch markieren, ARIA-Lücke in a11y notieren — nicht faken.
 
 5. **Exporter** `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>` (oder `npm run export:all`).
 

@@ -62,9 +62,9 @@
 <h1>Anwendungsbeispiele</h1>
 
 <p>
-	So wirkt die Marke, wenn ihre Elemente zusammenkommen — Logo, Schrift und Farbe im
-	Zusammenspiel. Die folgenden Layouts sind <strong>illustrative Beispiele</strong>, keine
-	Vorlagen zum Download. Echte Templates folgen, sobald das Material dafür bereitsteht.
+	So wirkt die Marke, wenn ihre Elemente zusammenkommen — Logo, Schrift und Farbe im Zusammenspiel.
+	Die folgenden Layouts sind <strong>illustrative Beispiele</strong>, keine Vorlagen zum Download.
+	Echte Templates folgen, sobald das Material dafür bereitsteht.
 </p>
 
 <section class="ex">
@@ -117,8 +117,8 @@
 </section>
 
 <p class="ex-note">
-	Hinweis: Diese Beispiele dienen der Veranschaulichung. Die gezeigten Texte sind
-	Platzhalter, keine veröffentlichten Kampagnen.
+	Hinweis: Diese Beispiele dienen der Veranschaulichung. Die gezeigten Texte sind Platzhalter, keine
+	veröffentlichten Kampagnen.
 </p>
 
 <style>

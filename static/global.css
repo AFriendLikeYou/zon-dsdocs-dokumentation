@@ -52,7 +52,9 @@
 	--ds-warning: var(--z-ds-color-background-warning); /* warn */
 
 	/* Sonderflächen */
-	--ds-surface-inverse: var(--z-ds-color-text-100); /* inverse Fläche: dunkel im Light-, hell im Dark-Mode (z. B. Login-Fehlerbox) */
+	--ds-surface-inverse: var(
+		--z-ds-color-text-100
+	); /* inverse Fläche: dunkel im Light-, hell im Dark-Mode (z. B. Login-Fehlerbox) */
 	--ds-static-white: var(--z-ds-color-general-white-100); /* theme-invariant (app-button) */
 	--ds-static-black: var(--z-ds-color-general-black-100); /* theme-invariant (app-button) */
 	--ds-border-hover: var(--z-ds-color-border-hover);
@@ -100,14 +102,16 @@
 	html:not(.color-scheme-light) {
 		--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 		--ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-		--ds-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.6), 0 30px 60px -20px rgba(0, 0, 0, 0.7),
+		--ds-shadow-lg:
+			0 12px 28px rgba(0, 0, 0, 0.6), 0 30px 60px -20px rgba(0, 0, 0, 0.7),
 			inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 	}
 }
 html.color-scheme-dark {
 	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 	--ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-	--ds-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.6), 0 30px 60px -20px rgba(0, 0, 0, 0.7),
+	--ds-shadow-lg:
+		0 12px 28px rgba(0, 0, 0, 0.6), 0 30px 60px -20px rgba(0, 0, 0, 0.7),
 		inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
