@@ -2,9 +2,9 @@
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
 	import { iconFor, CMS_CATEGORIES, type CmsPropDef } from '../cms-components';
-	import PropField from '../PropField.svelte';
+	import FieldsPanel from '../FieldsPanel.svelte';
 	import Icon from '../icons/Icon.svelte';
 	import BlockPreview from '../BlockPreview.svelte';
 	import ProseEditor from '../ProseEditor.svelte';
@@ -15,7 +15,7 @@
 	import { caretPixel } from '../caret';
 	import { matchesMedia } from '../media.svelte';
 
-	let { data } = $props();
+	let { data }: import('./$types').PageProps = $props();
 
 	const toast = getToastState();
 
@@ -900,32 +900,17 @@
 											values={it.compValues ?? {}}
 											props={it.compProps ?? []}
 										/>
-										<details
-											class="fields"
+										<FieldsPanel
+											props={it.compProps ?? []}
+											values={it.compValues ?? {}}
+											errors={errs}
+											media={data.media}
+											uploadable={data.writable}
+											{tokens}
 											open={it.fieldsOpen}
-											ontoggle={(e) => (it.fieldsOpen = e.currentTarget.open)}
-										>
-											<summary class="fields-sum"
-												>Eigenschaften bearbeiten<span
-													class="fields-n"
-													class:fields-n--err={countErrors(errs) > 0}
-													>{(it.compProps ?? []).length}</span
-												></summary
-											>
-											<div class="cmp-fields">
-												{#each it.compProps ?? [] as p (p.key)}
-													<PropField
-														prop={p}
-														value={(it.compValues ?? {})[p.key]}
-														media={data.media}
-														uploadable={data.writable}
-														{tokens}
-														error={errs[p.key]}
-														set={(v) => setComp(it, p.key, v)}
-													/>
-												{/each}
-											</div>
-										</details>
+											onToggle={(o) => (it.fieldsOpen = o)}
+											set={(key, v) => setComp(it, key, v)}
+										/>
 									{:else if it.blockKind === 'container'}
 										<BlockPreview
 											name={it.compName ?? ''}
@@ -934,32 +919,18 @@
 											childCount={(it.children ?? []).length}
 										/>
 										{#if (it.compProps ?? []).length}
-											<details
-												class="fields"
+											<FieldsPanel
+												label="Einstellungen"
+												props={it.compProps ?? []}
+												values={it.compValues ?? {}}
+												errors={errs}
+												media={data.media}
+												uploadable={data.writable}
+												{tokens}
 												open={it.fieldsOpen}
-												ontoggle={(e) => (it.fieldsOpen = e.currentTarget.open)}
-											>
-												<summary class="fields-sum"
-													>Einstellungen<span
-														class="fields-n"
-														class:fields-n--err={countErrors(errs) > 0}
-														>{(it.compProps ?? []).length}</span
-													></summary
-												>
-												<div class="cmp-fields">
-													{#each it.compProps ?? [] as p (p.key)}
-														<PropField
-															prop={p}
-															value={(it.compValues ?? {})[p.key]}
-															media={data.media}
-														uploadable={data.writable}
-															{tokens}
-															error={errs[p.key]}
-															set={(v) => setComp(it, p.key, v)}
-														/>
-													{/each}
-												</div>
-											</details>
+												onToggle={(o) => (it.fieldsOpen = o)}
+												set={(key, v) => setComp(it, key, v)}
+											/>
 										{/if}
 										<div class="children">
 											<span class="children-lbl">Elemente</span>
@@ -1003,32 +974,17 @@
 															values={child.values}
 															props={child.props}
 														/>
-														<details
-															class="fields"
+														<FieldsPanel
+															props={child.props}
+															values={child.values}
+															errors={cerrs}
+															media={data.media}
+															uploadable={data.writable}
+															{tokens}
 															open={child.fieldsOpen}
-															ontoggle={(e) => (child.fieldsOpen = e.currentTarget.open)}
-														>
-															<summary class="fields-sum"
-																>Eigenschaften bearbeiten<span
-																	class="fields-n"
-																	class:fields-n--err={countErrors(cerrs) > 0}
-																	>{child.props.length}</span
-																></summary
-															>
-															<div class="cmp-fields">
-																{#each child.props as p (p.key)}
-																	<PropField
-																		prop={p}
-																		value={child.values[p.key]}
-																		media={data.media}
-														uploadable={data.writable}
-																		{tokens}
-																		error={cerrs[p.key]}
-																		set={(v) => setChildProp(it, child.uid, p.key, v)}
-																	/>
-																{/each}
-															</div>
-														</details>
+															onToggle={(o) => (child.fieldsOpen = o)}
+															set={(key, v) => setChildProp(it, child.uid, key, v)}
+														/>
 													</div>
 												</div>
 											{/each}
@@ -1280,11 +1236,6 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-	.cmp-fields {
-		display: grid;
-		gap: var(--z-ds-space-10, 10px);
-		padding: 0;
 	}
 	/* P3: Kind-Karten — Vorschau + Aufklapp-Felder wie auf Top-Level. */
 	.child-body {
@@ -1793,64 +1744,7 @@
 		border: 1px solid var(--ds-border-soft);
 	}
 
-	/* Aufklapp-Felder („Eigenschaften bearbeiten") */
-	.fields {
-		border-top: 1px dashed var(--ds-border-soft);
-		padding-top: var(--z-ds-space-6);
-	}
-	/* Chromes UA-Style gibt ::details-content ein content-visibility — das macht
-	   das Pseudo-Element zum Containing Block für position:fixed und verschiebt
-	   die Picker-Popover (Token/Media) um den Karten-Offset. NUR im offenen Zustand
-	   aufheben: Popover erscheinen ohnehin nur bei offenem Panel, und im geschlossenen
-	   Zustand MUSS Chromes natives content-visibility:hidden greifen — sonst bleibt
-	   der Inhalt sichtbar und das Panel klappt nie ein. */
-	.fields[open]::details-content {
-		content-visibility: visible;
-	}
-	.fields-sum {
-		list-style: none;
-		cursor: pointer;
-		user-select: none;
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-6);
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: var(--ds-label-tracking);
-		font-weight: 600;
-		color: var(--ds-text-muted);
-	}
-	.fields-sum::-webkit-details-marker {
-		display: none;
-	}
-	.fields-sum::before {
-		content: '▸';
-		color: var(--ds-accent);
-		transition: transform var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.fields[open] .fields-sum::before {
-		transform: rotate(90deg);
-	}
-	.fields-sum:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.fields-n {
-		margin-left: auto;
-		font-weight: 500;
-		text-transform: none;
-		letter-spacing: normal;
-		color: var(--ds-text-muted);
-		background: var(--ds-surface-sunken, var(--ds-surface));
-		border: 1px solid var(--ds-border-soft);
-		border-radius: 999px;
-		padding: 0 var(--z-ds-space-6);
-		min-width: 1.25rem;
-		text-align: center;
-	}
-	.fields .cmp-fields {
-		margin-top: var(--z-ds-space-s);
-	}
+	/* Aufklapp-Felder („Eigenschaften bearbeiten") → FieldsPanel.svelte */
 
 	/* V1: Fehler-Zustände — Karte, Kopf-Chip, Zähler-Badge, Save-Bar. */
 	.blk--invalid > .blk-main {
@@ -1865,11 +1759,6 @@
 		padding: 1px var(--z-ds-space-8);
 		white-space: nowrap;
 	}
-	.fields-n--err {
-		color: var(--ds-negative, #b91109);
-		border-color: rgb(from var(--ds-negative, #b91109) r g b / 0.4);
-		background: rgb(from var(--ds-negative, #b91109) r g b / 0.08);
-	}
 	.child--invalid {
 		border-color: rgb(from var(--ds-negative, #b91109) r g b / 0.5);
 	}
@@ -1883,9 +1772,4 @@
 		white-space: nowrap;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.fields-sum::before {
-			transition: none;
-		}
-	}
 </style>
