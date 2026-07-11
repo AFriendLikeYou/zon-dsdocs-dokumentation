@@ -49,8 +49,8 @@
 		label: string;
 		props: CmsPropDef[];
 		values: Record<string, string | boolean>;
-		/** Frisch hinzugefügt → Felder aufgeklappt starten. */
-		isNew?: boolean;
+		/** Eigenschaften-Panel auf/zu — nutzerkontrolliert (bind:open). */
+		fieldsOpen?: boolean;
 	}
 
 	// WYSIWYG-Block-Liste: jeder Body-Block ist ein Item mit stabiler uid. Reihenfolge,
@@ -73,6 +73,8 @@
 		childTypes?: string[];
 		childPick?: string; // aktuell im Add-Kind-Dropdown gewählter Typ
 		touched?: boolean;
+		/** Eigenschaften-Panel auf/zu — nutzerkontrolliert (bind:open). */
+		fieldsOpen?: boolean;
 	}
 
 	let nextUid = 1;
@@ -156,7 +158,9 @@
 			deletable: true,
 			compName: def.name,
 			compProps: def.props,
-			compValues: values
+			compValues: values,
+			// Neue Blöcke starten mit offenem Eigenschaften-Panel (leer → ausfüllen).
+			fieldsOpen: true
 		};
 		if (def.container)
 			return {
@@ -359,7 +363,7 @@
 					...c,
 					uid: nextUid++,
 					values: { ...c.values },
-					isNew: false
+					fieldsOpen: false
 				}));
 				copy.childTypes = src.childTypes;
 				copy.childPick = src.childPick;
@@ -400,7 +404,7 @@
 			label: def.label,
 			props: def.props,
 			values,
-			isNew: true
+			fieldsOpen: true
 		};
 		it.children = [...(it.children ?? []), child];
 		it.touched = true;
@@ -482,6 +486,19 @@
 		)
 	);
 
+	// Start-Zustand der Eigenschaften-Panels: Blöcke/Kinder mit Validierungsfehlern
+	// klappen auf, der Rest bleibt zu — danach entscheidet ALLEIN der Nutzer
+	// (bind:open). Vorher war `open` berechnet: Das Panel klappte mitten im Tippen
+	// zu, sobald der letzte Fehler behoben war.
+	function initFieldsOpen(list: Item[]) {
+		for (const it of list) {
+			if (countErrors(itemErrors(it)) > 0) it.fieldsOpen = true;
+			for (const c of it.children ?? [])
+				if (countErrors(childErrors(c)) > 0) c.fieldsOpen = true;
+		}
+	}
+	initFieldsOpen(untrack(() => items));
+
 	const handleSubmit: SubmitFunction = ({ cancel }) => {
 		if (errorCount > 0) {
 			cancel();
@@ -496,6 +513,7 @@
 			if (result.type === 'success') {
 				toast?.add('Gespeichert', 'Die Änderungen wurden übernommen.');
 				items = data.segments.map(itemFromSegment);
+				initFieldsOpen(items);
 				fieldState = data.fields.map((f) => ({ ...f }));
 				savedPayload = payload;
 				try {
@@ -526,6 +544,7 @@
 	);
 	function discard() {
 		items = data.segments.map(itemFromSegment);
+		initFieldsOpen(items);
 		fieldState = data.fields.map((f) => ({ ...f }));
 		closeSlash();
 		try {
@@ -881,7 +900,11 @@
 											values={it.compValues ?? {}}
 											props={it.compProps ?? []}
 										/>
-										<details class="fields" open={it.source === 'new' || countErrors(errs) > 0}>
+										<details
+											class="fields"
+											open={it.fieldsOpen}
+											ontoggle={(e) => (it.fieldsOpen = e.currentTarget.open)}
+										>
 											<summary class="fields-sum"
 												>Eigenschaften bearbeiten<span
 													class="fields-n"
@@ -911,7 +934,11 @@
 											childCount={(it.children ?? []).length}
 										/>
 										{#if (it.compProps ?? []).length}
-											<details class="fields" open={it.source === 'new' || countErrors(errs) > 0}>
+											<details
+												class="fields"
+												open={it.fieldsOpen}
+												ontoggle={(e) => (it.fieldsOpen = e.currentTarget.open)}
+											>
 												<summary class="fields-sum"
 													>Einstellungen<span
 														class="fields-n"
@@ -976,7 +1003,11 @@
 															values={child.values}
 															props={child.props}
 														/>
-														<details class="fields" open={child.isNew || countErrors(cerrs) > 0}>
+														<details
+															class="fields"
+															open={child.fieldsOpen}
+															ontoggle={(e) => (child.fieldsOpen = e.currentTarget.open)}
+														>
 															<summary class="fields-sum"
 																>Eigenschaften bearbeiten<span
 																	class="fields-n"
