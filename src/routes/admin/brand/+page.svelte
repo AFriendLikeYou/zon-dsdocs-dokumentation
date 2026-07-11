@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
 	import { invalidateAll, goto } from '$app/navigation';
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
 	import { sectionKind, type NavSection } from './brand-nav';
 	import { slugify } from './new-page';
 
-	let { data } = $props();
+	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();
 
 	// Editierbarkeits-Lookup je öffentlicher URL (aus den gelisteten Brand-Seiten):

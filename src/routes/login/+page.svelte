@@ -4,15 +4,8 @@
 
 	let { form, data }: { form: ActionData; data: { isUserLoggedIn: boolean } } = $props();
 
-	let isLoggedIn = $state(false);
-
-	$effect(() => {
-		if (form && form.success) {
-			isLoggedIn = true;
-		} else {
-			isLoggedIn = false;
-		}
-	});
+	// Direkt ableitbar aus dem Action-Result — kein $state+$effect nötig.
+	const isLoggedIn = $derived(!!form?.success);
 </script>
 
 {#if isLoggedIn || data.isUserLoggedIn}

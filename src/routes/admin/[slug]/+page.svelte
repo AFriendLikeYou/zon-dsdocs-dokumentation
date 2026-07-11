@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 
-	let { data, form } = $props();
+	let { data, form }: import('./$types').PageProps = $props();
 
 	// Editierbare Teilmenge, initialisiert aus content.json. Reaktiver Client-State;
 	// beim Submit als JSON in ein Hidden-Feld serialisiert (robuster als FormData-

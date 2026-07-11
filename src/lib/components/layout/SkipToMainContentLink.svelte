@@ -28,5 +28,9 @@
 	.skip-to-content-link:focus {
 		left: 0;
 		opacity: 1;
+		/* Sichtbarer Ring, wenn der Link per Tab erscheint (WCAG 2.4.7). */
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+		border-radius: var(--ds-radius-sm);
 	}
 </style>

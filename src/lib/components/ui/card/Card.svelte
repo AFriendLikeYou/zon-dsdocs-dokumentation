@@ -115,4 +115,10 @@
 			flex: 1 1 100%;
 		}
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card {
+			transition: none;
+		}
+	}
 </style>

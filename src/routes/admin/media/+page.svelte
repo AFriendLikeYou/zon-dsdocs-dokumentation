@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 
-	let { data, form } = $props();
+	let { data, form }: import('./$types').PageProps = $props();
 
 	// Transientes „Pfad kopiert"-Feedback pro Galerie-Kachel.
 	let copied = $state<string | null>(null);

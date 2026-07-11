@@ -145,6 +145,11 @@
 		font-weight: 500;
 	}
 
+	.toc-link:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
+
 	.toc-empty {
 		padding: 10px 12px;
 		/* vorher hardcoded rgba(255,255,255,.6) — im Light-Mode unsichtbar */

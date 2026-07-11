@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import type { ToastType } from '$types/global';
 
@@ -12,11 +12,15 @@
 	let { toast, index, total }: Props = $props();
 
 	const toastState = getToastState();
+
+	// prefers-reduced-motion: Cross-Fade statt Fly (Bewegung raus, Feedback bleibt).
+	const reducedMotion =
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 </script>
 
 <div
-	in:fly={{ y: 20, duration: 300 }}
-	out:fade={{ duration: 200 }}
+	in:fly={{ y: reducedMotion ? 0 : 20, duration: reducedMotion ? 120 : 300 }}
+	out:fade={{ duration: reducedMotion ? 80 : 200 }}
 	class="toast"
 	style="
 		transform: translateY(calc({index} * 0.15rem));
@@ -108,5 +112,11 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 		border-radius: var(--ds-radius-xs);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.toast {
+			transition: none;
+		}
 	}
 </style>

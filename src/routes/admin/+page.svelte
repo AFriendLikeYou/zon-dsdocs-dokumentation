@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { data } = $props();
+	let { data }: import('./$types').PageProps = $props();
 </script>
 
 <svelte:head><title>Inhalte bearbeiten – Admin</title></svelte:head>

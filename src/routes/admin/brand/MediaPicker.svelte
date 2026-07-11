@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
 	import Icon from './icons/Icon.svelte';
 	import { matchesMedia } from './media.svelte';
 	import { placePopover } from './popover-position';

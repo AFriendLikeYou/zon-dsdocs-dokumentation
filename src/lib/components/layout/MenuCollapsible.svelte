@@ -325,4 +325,10 @@
 		margin-left: 8px;
 		color: var(--ds-text-muted);
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.chevron-icon {
+			transition: none;
+		}
+	}
 </style>
