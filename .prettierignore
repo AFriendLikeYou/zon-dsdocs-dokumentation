@@ -1,6 +1,8 @@
-# Generierte Dateien — Formatierung gehört dem Exporter, nicht Prettier.
+# Generierte Dateien — Formatierung gehört dem Exporter/Generator, nicht Prettier.
 src/routes/product/components/*/+page.svx
 src/routes/product/components/*/spec.generated.ts
+src/routes/product/components/*/figma-raw.json
+src/routes/product/components/*/model.draft.json
 
 # Build-/Paket-Artefakte
 .svelte-kit/

@@ -58,6 +58,10 @@ Geschwister werden kollabiert (`count`).
 
 Regeln:
 
+- **Output SPEICHERN:** Das Mess-Ergebnis gehört als **`figma-raw.json`** co-located
+  in den Component-Ordner (committen!). Zwei Gründe: die Roh-Daten sind das
+  Test-Fixture des Draft-Generators, und jedes Re-Messen erzeugt ein **Diff im PR**
+  — Design-Änderungen werden sichtbar statt still überschrieben.
 - **Read-only bleibt read-only.** Das Template mutiert nichts (keine Temp-Instanzen).
   Wer es erweitert (z. B. für Nested-Prop-Konfigurationen), misst auf einer
   Scratch-Page und räumt im selben Skript auf.
@@ -81,6 +85,23 @@ Variante), `figma-deep-component` (tiefer Baum mit Tokens), `figma-check-design-
 REST + `FIGMA_TOKEN`-Env-Var), `figma-comments` (Befunde als Kommentar an den Node
 pinnen). Muster fürs Vorgehen: **Collect (use_figma, read-only) → JSON sichern →
 deterministisch mappen** — gleiche Eingabe muss denselben `model.json`-Entwurf ergeben.
+
+### 1c · Entwurf generieren statt abtippen (`draft.mjs`)
+
+Aus der gespeicherten `figma-raw.json` erzeugt der **Draft-Generator** deterministisch
+einen `model.draft.json` — alles Messbare vorbefüllt, alles Menschliche als TODO:
+
+```bash
+npm run draft-component -- src/routes/product/components/<kebab>
+```
+
+Was er füllt: Varianten-Achsen (State-Achse → `zustaende` + `farbrollen`-Gerüst,
+Rest → `varianten`), `masse`/`spacing` (gemessen), `tokens` gruppiert (Namensregel
+gegen `styles-zds.css` **verifiziert** — kein Treffer = Wert ohne Token + Report,
+nie raten), Playground-Rumpf. Was bewusst TODO bleibt: `cssClass` (kommt aus der
+pattern.css, Ebene ②), Template-ARIA (Ebene ③), alle Mensch-Felder (Ebene ④).
+Gleiche `figma-raw.json` ⇒ identischer Entwurf. Nach Prüfung/Ergänzung den Entwurf
+zu `model.json` promoten (umbenennen bzw. mergen) — erst dann exportieren.
 
 ## 2 · `model.json` bauen (originalgetreu)
 

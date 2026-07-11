@@ -20,6 +20,7 @@
 		"gen:brand-assets": "node tooling/gen-brand-assets.mjs",
 		"gen:assets": "npm run gen:icons && npm run gen:brand-assets",
 		"new-component": "node tooling/zeit-de-exporter/export.mjs --init",
+		"draft-component": "node tooling/zeit-de-exporter/draft.mjs",
 		"export-component": "node tooling/zeit-de-exporter/export.mjs",
 		"export:all": "node tooling/zeit-de-exporter/export-all.mjs",
 		"format": "prettier --write .",

@@ -25,7 +25,7 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
 1. **Node auflösen.** Instanz → Component-Set. `figma.com/.../ZDS?...&focus-id=<X>` → nodeId. NUR das ZDS-File `noSbKhOFRaqQh8eyCEqgim` — kein Simple-Design-System-Demofile (das schleppt `--sds-*`-Platzhalter ein).
 
-2. **Ebene ① messen — NICHT abschreiben.** `get_context_for_code_connect` (Varianten-Achsen, Props, Baum) + `tooling/zeit-de-exporter/figma-measure.js` via `use_figma` (read-only: Maße, Auto-Layout mit Variablen-Bindung, `unbound[]`-Report). Ergänzend `figma-analyze-component-set` für State-Machine/`diffFromDefault`, `figma-deep-component` für tiefe Nested-Bäume. Jeder Maß-Wert bekommt `herkunft`: aus Messung = `"gemessen"`, aus CSS abgeleitet = `"abgeleitet"`, Platzhalter = `"geschätzt"`. **hoehe/breite NICHT einfach `"abgeleitet"` lassen — messen.**
+2. **Ebene ① messen — NICHT abschreiben.** `get_context_for_code_connect` (Varianten-Achsen, Props, Baum) + `tooling/zeit-de-exporter/figma-measure.js` via `use_figma` (read-only: Maße, Auto-Layout mit Variablen-Bindung, `unbound[]`-Report). **Output als `figma-raw.json` co-located speichern (committen)**, dann `npm run draft-component -- <dir>`: der Draft-Generator baut daraus deterministisch `model.draft.json` — Achsen, masse/spacing (gemessen), Tokens gegen styles-zds.css verifiziert, farbrollen-Gerüst; Mensch-Felder + `cssClass` bleiben TODO. Ergänzend `figma-analyze-component-set` für State-Machine/`diffFromDefault`, `figma-deep-component` für tiefe Nested-Bäume. Jeder Maß-Wert bekommt `herkunft`: aus Messung = `"gemessen"`, aus CSS abgeleitet = `"abgeleitet"`, Platzhalter = `"geschätzt"`. **hoehe/breite NICHT einfach `"abgeleitet"` lassen — messen.**
 
 3. **Ebene ② pattern.css** aus dem echten zeit.de-CSS kuratieren (flach, keine At-Rules). Die States, die die CSS wirklich hat (`:hover`/`:focus-visible`/`:disabled`/…), bestimmen `farbrollen.zustaende` und `zustaende[]`. **Pflicht-Konsistenz: `farbrollen.zustaende` ⊇ alle State-Pseudoklassen der pattern.css.** Kein State in der Doku, den die CSS nicht hat (sonst lügt die Doku — cell-Fall).
 
@@ -37,6 +37,8 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
 ## Pflichtfelder-Gate (vor „fertig")
 
+- [ ] `figma-raw.json` co-located committet (Mess-Output = Fixture + Drift-Diff).
+- [ ] Kein `TODO`-Marker mehr im promoteten `model.json` (Draft-Reste: cssClass/figma/kategorie/zweck).
 - [ ] `figma`-Link auf ZDS-Node (nicht Demofile, nicht leer).
 - [ ] `masse` je Wert mit `herkunft`; hoehe/breite gemessen (nicht pauschal abgeleitet).
 - [ ] `farbrollen.zustaende` deckt alle pattern.css-State-Pseudoklassen (inkl. `focus-visible`).

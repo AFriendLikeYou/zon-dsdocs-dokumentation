@@ -169,4 +169,6 @@ for (const v of set.children) {
 	variants.push(await measure(v, 0));
 }
 
-return { set: { id: set.id, name: set.name }, props, variantCount: variants.length, variants, mutations: 'KEINE (read-only)' };
+// `unbound` gehört in den Report (IMPORT.md verspricht ihn) — war bis 2026-07-11
+// gesammelt, aber nie zurückgegeben.
+return { set: { id: set.id, name: set.name }, props, variantCount: variants.length, variants, unbound, mutations: 'KEINE (read-only)' };
