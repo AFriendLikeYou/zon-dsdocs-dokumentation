@@ -2,7 +2,8 @@ import { dev } from '$app/environment';
 import { error, fail } from '@sveltejs/kit';
 import { writeFileSync } from 'node:fs';
 import { findSvxPage, readSvx, trimBlankEnds } from '../brand-fs.server';
-import { listMediaImages } from '../../media-fs.server';
+import { listMediaFiles } from '../../media-fs.server';
+import { listColorTokens } from '../tokens.server';
 import {
 	parseSvx,
 	rebuild,
@@ -185,7 +186,8 @@ export const load: PageServerLoad = ({ params }) => {
 		lastIndex,
 		components: CMS_COMPONENTS,
 		writable: dev,
-		media: listMediaImages()
+		media: listMediaFiles(),
+		colorTokens: listColorTokens()
 	};
 };
 

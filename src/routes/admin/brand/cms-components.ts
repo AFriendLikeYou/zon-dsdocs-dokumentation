@@ -13,6 +13,10 @@
 
 export type CmsPropType = 'text' | 'textarea' | 'select' | 'boolean' | 'number' | 'media';
 
+/** Menü-Kategorien fürs Einfügen (Reihenfolge = Anzeige-Reihenfolge). */
+export type CmsCategory = 'Text' | 'Medien' | 'Layout' | 'Komponenten';
+export const CMS_CATEGORIES: CmsCategory[] = ['Text', 'Medien', 'Layout', 'Komponenten'];
+
 export interface CmsPropDef {
 	key: string;
 	label: string;
@@ -22,6 +26,10 @@ export interface CmsPropDef {
 	/** Default-Wert; String für text/textarea/select/media/number, boolean für boolean. */
 	default: string | boolean;
 	required?: boolean;
+	/** Zusätzliche Validierung/Eingabehilfe: URL-Feld bzw. Farb-Token-Feld (Token-Picker). */
+	format?: 'url' | 'token-color';
+	/** Für `type: 'media'`: erwarteter Medientyp (filtert Picker + validiert). */
+	mediaKind?: 'image' | 'video';
 }
 
 export interface CmsComponentDef {
@@ -34,6 +42,8 @@ export interface CmsComponentDef {
 	container?: boolean;
 	/** Erlaubte Kind-Komponenten (nur registrierte simple Leaves), z. B. Grid → Color/TextColor. */
 	childTypes?: string[];
+	/** Menü-Kategorie fürs Einfügen (Default: 'Komponenten'). */
+	category?: CmsCategory;
 }
 
 export const CMS_COMPONENTS: CmsComponentDef[] = [
@@ -71,7 +81,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				default: 'do'
 			},
 			{ key: 'caption', label: 'Bildunterschrift', type: 'text', default: '' },
-			{ key: 'imgSrc', label: 'Bild', type: 'media', default: '' },
+			{ key: 'imgSrc', label: 'Bild', type: 'media', default: '', mediaKind: 'image' },
 			{ key: 'content', label: 'Inhalt (HTML)', type: 'textarea', default: '' },
 			{
 				key: 'strikeThrough',
@@ -92,15 +102,23 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				key: 'colorCustomProperty',
 				label: 'Farb-Token',
 				type: 'text',
-				default: ''
+				default: '',
+				format: 'token-color'
 			},
 			{
 				key: 'fontColorCustomProperty',
 				label: 'Text-Token',
 				type: 'text',
-				default: ''
+				default: '',
+				format: 'token-color'
 			},
-			{ key: 'borderColor', label: 'Rahmen-Token', type: 'text', default: '' },
+			{
+				key: 'borderColor',
+				label: 'Rahmen-Token',
+				type: 'text',
+				default: '',
+				format: 'token-color'
+			},
 			{
 				key: 'showValue',
 				label: 'Wert anzeigen',
@@ -126,7 +144,8 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				key: 'fontColorCustomProperty',
 				label: 'Text-Token',
 				type: 'text',
-				default: ''
+				default: '',
+				format: 'token-color'
 			}
 		]
 	},
@@ -134,8 +153,9 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		name: 'Lightbox',
 		label: 'Lightbox-Bild',
 		importStatement: "import { Lightbox } from '$components/ui/lightbox';",
+		category: 'Medien',
 		props: [
-			{ key: 'src', label: 'Bild', type: 'media', default: '', required: true },
+			{ key: 'src', label: 'Bild', type: 'media', default: '', required: true, mediaKind: 'image' },
 			{ key: 'alt', label: 'Alt-Text', type: 'text', default: '' },
 			{ key: 'caption', label: 'Bildunterschrift', type: 'text', default: '' }
 		]
@@ -144,13 +164,15 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		name: 'VideoPlayer',
 		label: 'Video',
 		importStatement: "import { VideoPlayer } from '$components/ui/videoplayer';",
+		category: 'Medien',
 		props: [
 			{
 				key: 'src',
 				label: 'Video-Datei',
 				type: 'media',
 				default: '',
-				required: true
+				required: true,
+				mediaKind: 'video'
 			},
 			{ key: 'title', label: 'Titel', type: 'text', default: '' }
 		]
@@ -169,7 +191,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 			},
 			{ key: 'title', label: 'Titel', type: 'text', default: '' },
 			{ key: 'subtitle', label: 'Untertitel', type: 'text', default: '' },
-			{ key: 'url', label: 'URL', type: 'text', default: '' },
+			{ key: 'url', label: 'URL', type: 'text', default: '', format: 'url' },
 			{ key: 'filename', label: 'Dateiname', type: 'text', default: '' }
 		]
 	},
@@ -185,7 +207,8 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				label: 'Bild',
 				type: 'media',
 				default: '',
-				required: true
+				required: true,
+				mediaKind: 'image'
 			},
 			{ key: 'imageAlt', label: 'Alt-Text', type: 'text', default: '' }
 		]
@@ -197,7 +220,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		props: [
 			{ key: 'title', label: 'Titel', type: 'text', default: '', required: true },
 			{ key: 'description', label: 'Beschreibung', type: 'text', default: '', required: true },
-			{ key: 'url', label: 'Link (URL)', type: 'text', default: '', required: true },
+			{ key: 'url', label: 'Link (URL)', type: 'text', default: '', required: true, format: 'url' },
 			{ key: 'badge', label: 'Badge-Text', type: 'text', default: '' },
 			{
 				key: 'badgeVariant',
@@ -214,7 +237,9 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		label: 'Raster (Grid)',
 		importStatement: "import { Grid } from '$components/ui/grid';",
 		container: true,
-		childTypes: ['Color', 'TextColor'],
+		category: 'Layout',
+		// Generischer Layout-Container: alle „kachelbaren" Leaves erlaubt.
+		childTypes: ['Color', 'TextColor', 'Card', 'Lightbox', 'DoDont', 'DownloadSpecimen'],
 		props: [
 			{ key: 'columns', label: 'Spalten', type: 'number', default: '1' },
 			{ key: 'auto', label: 'Auto-Fit', type: 'boolean', default: false },
@@ -253,6 +278,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		label: 'Do/Don’t-Gruppe',
 		importStatement: "import { DoDontGroup } from '$components/ui/dodont';",
 		container: true,
+		category: 'Layout',
 		childTypes: ['DoDont'],
 		props: [{ key: 'columns', label: 'Spalten', type: 'number', default: '2' }]
 	},
@@ -261,6 +287,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		label: 'Bildergalerie',
 		importStatement: "import { ImageGallery } from '$components/ui/imagegallery';",
 		container: true,
+		category: 'Layout',
 		childTypes: ['Lightbox'],
 		props: [
 			{ key: 'title', label: 'Titel', type: 'text', default: 'Image Gallery' },
@@ -285,7 +312,7 @@ export const CMS_LEAVES = CMS_COMPONENTS.filter((c) => !c.container);
 /** Registrierte Container (Attribute + editierbare Kinder). */
 export const CMS_CONTAINERS = CMS_COMPONENTS.filter((c) => c.container);
 
-/** Icon-Schlüssel je Komponente (für BlockIcon in der Editor-UI). Zentral pflegbar. */
+/** Icon-Schlüssel je Komponente (für `icons/Icon.svelte` in der Editor-UI). Zentral pflegbar. */
 const ICON_KEY: Record<string, string> = {
 	Image: 'image',
 	Lightbox: 'image',

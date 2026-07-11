@@ -1,10 +1,16 @@
 import { dev } from '$app/environment';
 import { fail } from '@sveltejs/kit';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { listBrandPages, readSvx } from './brand-fs.server';
 import { parseSvx } from './segment';
-import { validateBrandNav, serializeBrandNav, type NavSection } from './brand-nav';
+import {
+	collectHrefs,
+	validateBrandNav,
+	serializeBrandNav,
+	type NavSection
+} from './brand-nav';
+import { validateNewPage, pageTemplate, SLUG_RE } from './new-page';
 import type { PageServerLoad, Actions } from './$types';
 
 // SSOT-Config für Reihenfolge + Hierarchie der Brand-Sidebar (ADR-028). Von Loader
@@ -72,5 +78,34 @@ export const actions: Actions = {
 
 		writeFileSync(CONFIG_PATH, serializeBrandNav(verdict.tree));
 		return { saved: true };
+	},
+
+	// Neue Brand-Seite anlegen: legt src/routes/brand/<slug>/+page.svx aus dem
+	// Template an UND hängt den Nav-Eintrag ans Ende der SSOT-Config (erscheint
+	// damit sofort in Sidebar + Übersicht; Position danach per Drag&Drop).
+	create: async ({ request }) => {
+		if (!dev)
+			return fail(400, {
+				message: 'Anlegen nur im Dev-Modus. Prod öffnet später einen GitHub-PR (Phase 2b).'
+			});
+
+		const data = await request.formData();
+		const title = String(data.get('title') ?? '').trim();
+		const slug = String(data.get('slug') ?? '').trim();
+
+		const tree = readConfig();
+		const err = validateNewPage(title, slug, collectHrefs(tree));
+		if (err) return fail(400, { message: err });
+
+		// Doppelter Boden gegen Traversal/Kollision: Slug-Regex + FS-Check.
+		if (!SLUG_RE.test(slug)) return fail(400, { message: 'Ungültiger Slug.' });
+		const dir = resolve(process.cwd(), 'src/routes/brand', slug);
+		if (existsSync(dir)) return fail(400, { message: `Route „${slug}“ existiert bereits.` });
+
+		mkdirSync(dir);
+		writeFileSync(join(dir, '+page.svx'), pageTemplate(title));
+		const entry: NavSection = { title, href: `/brand/${slug}`, isInFooter: true };
+		writeFileSync(CONFIG_PATH, serializeBrandNav([...tree, entry]));
+		return { created: true, slug };
 	}
 };

@@ -1,5 +1,13 @@
+<!--
+  InsertMenu — Button-getriggertes Insert-Menü (Notion-artig). Desktop: Such-Popover.
+  Mobile: Bottom-Sheet mit Overlay + Scroll-Lock (Muster von Editor.js, mit unseren
+  Tokens). Die Item-Liste ist in BlockMenuList ausgelagert (geteilt mit dem Slash-Menü).
+-->
 <script lang="ts">
-	import BlockIcon from './BlockIcon.svelte';
+	import BlockMenuList from './BlockMenuList.svelte';
+	import Icon from './icons/Icon.svelte';
+	import { matchesMedia } from './media.svelte';
+	import { placePopover } from './popover-position';
 
 	type Item = { name: string; label: string; icon: string };
 	let {
@@ -14,11 +22,15 @@
 		compact?: boolean;
 	} = $props();
 
+	const mobile = matchesMedia('(max-width: 640px)');
+
 	let open = $state(false);
 	let query = $state('');
 	let activeIdx = $state(0);
 	let wrap = $state<HTMLElement | null>(null);
 	let input = $state<HTMLInputElement | null>(null);
+	let triggerEl = $state<HTMLElement | null>(null);
+	let popEl = $state<HTMLElement | null>(null);
 
 	const filtered = $derived(
 		items.filter((i) => i.label.toLowerCase().includes(query.trim().toLowerCase()))
@@ -44,12 +56,13 @@
 			close();
 			return;
 		}
+		const n = filtered.length;
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			activeIdx = Math.min(activeIdx + 1, filtered.length - 1);
+			activeIdx = n ? (activeIdx + 1) % n : 0;
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
-			activeIdx = Math.max(activeIdx - 1, 0);
+			activeIdx = n ? (activeIdx - 1 + n) % n : 0;
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
 			const it = filtered[activeIdx];
@@ -57,63 +70,101 @@
 		}
 	}
 
-	// Klick außerhalb schließt.
+	// Desktop: Klick außerhalb schließt. Mobile: das Overlay übernimmt das.
 	$effect(() => {
-		if (!open) return;
+		if (!open || mobile.value) return;
 		const onDown = (e: MouseEvent) => {
 			if (wrap && !wrap.contains(e.target as Node)) close();
 		};
 		document.addEventListener('pointerdown', onDown, true);
 		return () => document.removeEventListener('pointerdown', onDown, true);
 	});
+
+	// Auf Mobile den Body-Scroll sperren, solange das Sheet offen ist.
+	$effect(() => {
+		if (!open || !mobile.value) return;
+		const prev = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.body.style.overflow = prev;
+		};
+	});
+
+	// Desktop: fixed am Trigger platzieren (Flip + Viewport-Klammer); die Liste
+	// bekommt die verbleibende Höhe (Suche bleibt stehen). Folgt Scroll/Resize.
+	$effect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- reaktive Abhängigkeit: bei Filter-Änderung neu messen
+		filtered.length;
+		const a = triggerEl;
+		const p = popEl;
+		if (!open || mobile.value || !a || !p) return;
+		const place = () => {
+			placePopover(a, p, { gap: 4 });
+			const mh = parseFloat(p.style.maxHeight) || 300;
+			const list = p.querySelector<HTMLElement>('.opts');
+			if (list) list.style.maxHeight = `${Math.max(96, mh - 64)}px`;
+		};
+		place();
+		window.addEventListener('scroll', place, true);
+		window.addEventListener('resize', place);
+		return () => {
+			window.removeEventListener('scroll', place, true);
+			window.removeEventListener('resize', place);
+		};
+	});
 </script>
+
+{#snippet body()}
+	<input
+		bind:this={input}
+		class="search"
+		type="text"
+		placeholder="Suchen…"
+		bind:value={query}
+		oninput={() => (activeIdx = 0)}
+		onkeydown={onkey}
+	/>
+	<BlockMenuList
+		items={filtered}
+		activeIndex={activeIdx}
+		onpick={pick}
+		onhover={(i) => (activeIdx = i)}
+	/>
+{/snippet}
 
 <div class="insert-menu" bind:this={wrap}>
 	<button
 		type="button"
 		class="trigger"
 		class:trigger--compact={compact}
+		bind:this={triggerEl}
 		aria-haspopup="listbox"
 		aria-expanded={open}
 		onclick={toggle}
 	>
-		<span class="plus" aria-hidden="true">+</span>
+		<span class="plus" aria-hidden="true"><Icon name="plus" /></span>
 		{#if !compact}<span>{label}</span>{/if}
 	</button>
 
 	{#if open}
-		<div class="pop" role="dialog" aria-label={label}>
-			<input
-				bind:this={input}
-				class="search"
-				type="text"
-				placeholder="Suchen…"
-				bind:value={query}
-				oninput={() => (activeIdx = 0)}
-				onkeydown={onkey}
-			/>
-			<ul class="opts" role="listbox">
-				{#each filtered as it, i (it.name)}
-					<li>
-						<button
-							type="button"
-							class="opt"
-							class:opt--active={i === activeIdx}
-							role="option"
-							aria-selected={i === activeIdx}
-							onmouseenter={() => (activeIdx = i)}
-							onclick={() => pick(it.name)}
-						>
-							<BlockIcon key={it.icon} />
-							<span>{it.label}</span>
-						</button>
-					</li>
-				{/each}
-				{#if filtered.length === 0}
-					<li class="empty">Kein Treffer</li>
-				{/if}
-			</ul>
-		</div>
+		{#if mobile.value}
+			<div
+				class="overlay"
+				role="presentation"
+				onpointerdown={(e) => {
+					e.preventDefault();
+					close();
+				}}
+			></div>
+			<div class="sheet" role="dialog" aria-label={label}>
+				<div class="grip" aria-hidden="true"></div>
+				{@render body()}
+			</div>
+		{:else}
+			<div class="pop" role="dialog" aria-label={label} bind:this={popEl}>
+				{@render body()}
+			</div>
+		{/if}
 	{/if}
 </div>
 
@@ -149,22 +200,83 @@
 		color: var(--ds-text-muted);
 	}
 	.plus {
-		font-weight: 700;
-		line-height: 1;
+		display: inline-flex;
+		flex: none;
 	}
+
+	/* Desktop-Popover: fixed (entkommt Karten-/Viewport-Grenzen); Position setzt
+	   placePopover (Flip + Klammer + Scroll-Follow). */
 	.pop {
-		position: absolute;
-		top: calc(100% + 4px);
-		left: 0;
-		z-index: 20;
+		position: fixed;
+		z-index: 60;
 		width: 15rem;
 		max-width: 80vw;
 		background: var(--ds-surface);
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius-sm);
-		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
+		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.28);
 		padding: var(--z-ds-space-6);
+		animation: pop-in 0.13s var(--ds-ease-out, ease-out);
 	}
+	@keyframes pop-in {
+		from {
+			opacity: 0;
+			transform: translateY(-4px) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	/* Mobile: Overlay + Bottom-Sheet. */
+	.overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 49;
+		background: rgb(from var(--ds-text) r g b / 0.35);
+		animation: fade-in 0.16s var(--ds-ease-out, ease-out);
+	}
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+	.sheet {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 50;
+		max-height: 70vh;
+		overflow-y: auto;
+		background: var(--ds-surface);
+		border-top-left-radius: var(--ds-radius, 12px);
+		border-top-right-radius: var(--ds-radius, 12px);
+		box-shadow: 0 -8px 24px rgb(from var(--ds-text) r g b / 0.18);
+		padding: var(--z-ds-space-6) var(--z-ds-space-s)
+			calc(var(--z-ds-space-s) + env(safe-area-inset-bottom));
+		animation: sheet-up 0.24s var(--ds-ease-out, ease-out);
+	}
+	@keyframes sheet-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+	.grip {
+		width: 2.25rem;
+		height: 0.25rem;
+		margin: 0 auto var(--z-ds-space-6);
+		border-radius: 999px;
+		background: var(--ds-border);
+	}
+
 	.search {
 		width: 100%;
 		font: inherit;
@@ -180,33 +292,12 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.opts {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		max-height: 16rem;
-		overflow-y: auto;
-	}
-	.opt {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-s);
-		width: 100%;
-		border: none;
-		background: none;
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-s);
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		text-align: left;
-		cursor: pointer;
-	}
-	.opt--active {
-		background: rgb(from var(--ds-accent) r g b / 0.12);
-	}
-	.empty {
-		padding: var(--z-ds-space-s);
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-muted);
+
+	@media (prefers-reduced-motion: reduce) {
+		.pop,
+		.overlay,
+		.sheet {
+			animation: none;
+		}
 	}
 </style>

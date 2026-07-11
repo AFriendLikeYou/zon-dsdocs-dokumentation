@@ -643,6 +643,44 @@ Arbeits-Baum sonst auf den alten SSR-Stand zurücksetzen würde.
 
 ---
 
+## ADR-029 — Brand-CMS-Editor v2: Notion-artige Block-UX auf der Registry
+
+**Kontext:** Der Block-Editor (`/admin/brand/[...path]`, ADR-028) war funktional, wirkte
+aber wie ein Formular-Stapel; Redakteure brauchten Slash-Insert, Validierung und ein
+Sicherheitsnetz.
+
+**Entscheidung:** Ausbau in mehreren Paketen, alle co-located unter `routes/admin/brand/`
+und registry-getrieben (`cms-components.ts` bleibt die einzige Quelle für „was ist
+einfügbar/editierbar"):
+
+- **Block-UX:** Slash-Command (`slash.ts` + `SlashMenu`), Karten-Layout nach Figma-Vorlage
+  (689:11510) mit Vorschau je Blocktyp (`BlockPreview`) + Aufklapp-Feldern, Gutter (+/Griff)
+  außerhalb des Containers, Drag&Drop mit richtungs-bewusster Drop-Linie + „ans Ende"-Zone,
+  Duplizieren, Empty-State; Struktur-Blöcke (Head) als gestrichelte „automatisch verwaltet"-Box.
+- **Felder:** `PropField` gestapelt (Label oben, Controls auf `--ds-surface`), Segmented
+  Control ≤4 Optionen, Switch, `TokenPicker` (Autocomplete über echte Tokens aus
+  `global.css` via `tokens.server.ts`), `MediaPicker` (Thumbnail-Raster, filtert nach
+  `mediaKind`), Markdown-`ProseEditor` (Toolbar, Typo-Quick-Fix, sichere Vorschau in
+  `prose-md.ts`).
+- **Validierung (`validation.ts`):** Pflicht/URL/Medientyp/Token-Existenz je Prop-Schema;
+  Fehler inline + als Karten-Chip, Save-Bar blockiert bei Fehlern.
+- **Sicherheitsnetz:** Save-Bar mit Dirty-Snapshot (⌘S, beforeunload), **Undo/Redo** über
+  debounced Snapshots (⌘Z/⇧⌘Z; in Textfeldern gilt natives Undo), **lokaler Entwurf** in
+  localStorage (Restore-Banner; verfällt, wenn die Datei sich änderte), Block-Shortcuts
+  (⇧⌘D, ⌥⇧↑/↓).
+- **Seiten anlegen:** `create`-Action der Übersicht (`new-page.ts`: slugify/Template/
+  Validierung) schreibt `+page.svx` + hängt den Nav-Eintrag an die SSOT-Config (ADR-028);
+  Nur-Reorder-Konservierung der `reorder`-Action bleibt unangetastet.
+- **Icons:** alle CMS-Icons als austauschbare 16×16-Dateien unter `icons/` (Registry +
+  `<Icon name>`), Icon-Buttons einheitlich 24×24/r4.
+- **Popover-Lektionen:** `::details-content` bekommt von Chrome ein `content-visibility`
+  → Containing Block für `position: fixed` (explizit aufgehoben); Picker-Popover sind
+  fixed mit Flip/Viewport-Klammer (`popover-position.ts`).
+
+**Status:** Aktiv (Dev-only-Writes; Prod → GitHub-PR, Phase 2b).
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

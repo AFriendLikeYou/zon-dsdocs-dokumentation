@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
 	import { getToastState } from '$lib/toast-state.svelte';
 	import { sectionKind, type NavSection } from './brand-nav';
+	import { slugify } from './new-page';
 
 	let { data } = $props();
 	const toast = getToastState();
@@ -132,13 +133,95 @@
 
 	const canEdit = (href?: string) => (href ? (pageByUrl.get(href)?.editable ?? false) : false);
 	const editPath = (href: string) => pageByUrl.get(href)?.path ?? '';
+
+	// ── Neue Seite anlegen (create-Action): Slug folgt dem Titel, bis er manuell
+	// angefasst wird; nach Erfolg direkt in den Inhalts-Editor der neuen Seite. ──
+	let showNew = $state(false);
+	let newTitle = $state('');
+	let newSlug = $state('');
+	let slugTouched = $state(false);
+	let creating = $state(false);
+	const effSlug = $derived(slugTouched ? newSlug : slugify(newTitle));
+
+	async function createPage(e: SubmitEvent) {
+		e.preventDefault();
+		if (creating) return;
+		creating = true;
+		try {
+			const body = new FormData();
+			body.set('title', newTitle);
+			body.set('slug', effSlug);
+			const res = await fetch('?/create', {
+				method: 'POST',
+				headers: { 'x-sveltekit-action': 'true' },
+				body
+			});
+			const result = deserialize(await res.text());
+			if (result.type === 'success' && (result.data as { created?: boolean })?.created) {
+				toast?.add('Seite angelegt', `/brand/${effSlug} — viel Spaß beim Befüllen.`);
+				await goto(`/admin/brand/${effSlug}`);
+			} else if (result.type === 'failure') {
+				const msg = (result.data as { message?: string } | undefined)?.message;
+				toast?.add('Nicht angelegt', msg ?? 'Anlegen fehlgeschlagen.');
+			} else {
+				toast?.add('Fehler', 'Anlegen fehlgeschlagen.');
+			}
+		} catch (err) {
+			toast?.add('Fehler', err instanceof Error ? err.message : 'Anlegen fehlgeschlagen.');
+		} finally {
+			creating = false;
+		}
+	}
 </script>
 
 <svelte:head><title>Brand-Seiten – Übersicht & Reihenfolge</title></svelte:head>
 
 <div class="admin">
 	<nav class="crumb"><a href="/admin">← Admin</a></nav>
-	<h1>Brand-Seiten</h1>
+	<div class="head-row">
+		<h1>Brand-Seiten</h1>
+		{#if data.writable}
+			<button
+				type="button"
+				class="new-btn"
+				aria-expanded={showNew}
+				onclick={() => (showNew = !showNew)}>+ Neue Seite</button
+			>
+		{/if}
+	</div>
+
+	{#if showNew}
+		<form class="new-panel" onsubmit={createPage}>
+			<label class="np-field">
+				<span class="np-lbl">Titel</span>
+				<!-- svelte-ignore a11y_autofocus — bewusst: Panel öffnet auf Klick, Fokus gehört ins Feld -->
+				<input bind:value={newTitle} placeholder="Seitentitel eingeben …" autofocus />
+			</label>
+			<label class="np-field">
+				<span class="np-lbl">URL</span>
+				<span class="np-slug">
+					<span class="np-prefix">/brand/</span>
+					<input
+						value={effSlug}
+						placeholder="neue-seite"
+						spellcheck="false"
+						oninput={(e) => {
+							slugTouched = true;
+							newSlug = e.currentTarget.value;
+						}}
+					/>
+				</span>
+			</label>
+			<div class="np-actions">
+				<button type="submit" class="np-create" disabled={creating || !newTitle.trim() || !effSlug}
+					>{creating ? 'Wird angelegt …' : 'Anlegen & bearbeiten'}</button
+				>
+				<button type="button" class="np-cancel" onclick={() => (showNew = false)}>Abbrechen</button>
+				<span class="np-hint">Erscheint am Ende der Sidebar — Position danach per Drag&nbsp;&amp;&nbsp;Drop.</span>
+			</div>
+		</form>
+	{/if}
+
 	<p class="lead">
 		Diese Übersicht spiegelt die <strong>reale Reihenfolge &amp; Hierarchie</strong> der
 		Brand-Sidebar (Single Source of Truth). Ziehe Einträge am Griff
@@ -488,5 +571,121 @@
 	.nudge button:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
+	}
+
+	/* ── Neue Seite anlegen ── */
+	.head-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--z-ds-space-m);
+	}
+	.new-btn {
+		border: none;
+		background: var(--ds-accent);
+		color: var(--ds-static-white);
+		font: inherit;
+		font-size: var(--ds-text-sm);
+		font-weight: 600;
+		border-radius: 999px;
+		padding: var(--z-ds-space-8) var(--z-ds-space-l);
+		cursor: pointer;
+		white-space: nowrap;
+		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	.new-btn:hover {
+		opacity: 0.88;
+	}
+	.new-btn:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	.new-panel {
+		display: grid;
+		gap: var(--z-ds-space-s);
+		background: var(--ds-surface-raised, var(--ds-surface));
+		border-radius: var(--ds-radius, 8px);
+		padding: var(--z-ds-space-m);
+		margin: var(--z-ds-space-m) 0;
+	}
+	.np-field {
+		display: grid;
+		gap: 4px;
+	}
+	.np-lbl {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
+	.np-field input {
+		width: 100%;
+		font: inherit;
+		font-size: var(--ds-text-base);
+		color: var(--ds-text);
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius, 8px);
+		padding: 9px 12px;
+	}
+	.np-field input:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
+	.np-slug {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-6);
+	}
+	.np-prefix {
+		font-family: var(--z-ds-font-mono, monospace);
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-muted);
+		white-space: nowrap;
+	}
+	.np-slug input {
+		font-family: var(--z-ds-font-mono, monospace);
+		font-size: var(--ds-text-sm);
+	}
+	.np-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-s);
+		flex-wrap: wrap;
+	}
+	.np-create {
+		border: none;
+		background: var(--ds-accent);
+		color: var(--ds-static-white);
+		font: inherit;
+		font-size: var(--ds-text-sm);
+		font-weight: 600;
+		border-radius: 999px;
+		padding: var(--z-ds-space-8) var(--z-ds-space-l);
+		cursor: pointer;
+	}
+	.np-create:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.np-create:focus-visible,
+	.np-cancel:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	.np-cancel {
+		border: none;
+		background: none;
+		font: inherit;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-muted);
+		cursor: pointer;
+		border-radius: 999px;
+		padding: var(--z-ds-space-8) var(--z-ds-space-s);
+	}
+	.np-cancel:hover {
+		color: var(--ds-text);
+	}
+	.np-hint {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
 	}
 </style>

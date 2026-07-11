@@ -151,7 +151,16 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
   `zweck, status, verwendung, doDont, variantInfo, a11y, callouts, tastatur, wording,
   verwandt, doDontBeispiele`. Client-State → verstecktes JSON-Feld → Server merged
   **nur** diese Keys zurück (Rest der `content.json` bleibt).
-- `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub). Kern unten.
+- `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub, ADR-029): Notion-artige
+  Block-Karten (Figma-Vorlage 689:11503) mit Slash-Command, typ-bewusster Vorschau
+  (`BlockPreview`), gestapelten Feldern (`PropField` + `TokenPicker`/`MediaPicker`/
+  `ProseEditor`), Prop-Validierung (`validation.ts`, blockiert Save), Save-Bar (⌘S) +
+  Undo/Redo (⌘Z, debounced Snapshots) + localStorage-Entwurf mit Restore-Banner,
+  Block-Shortcuts (⇧⌘D, ⌥⇧↑/↓). CMS-Icons: austauschbare 16×16-Dateien unter
+  `admin/brand/icons/` (siehe dortiges README). Engine-Kern unten.
+- `admin/brand/` (Index) zusätzlich: **„+ Neue Seite"** (`?/create`, `new-page.ts`:
+  slugify/Template/Validierung) legt `+page.svx` an + hängt den Nav-Eintrag ans Ende
+  der SSOT-Config; Position danach per Drag&Drop.
 - `admin/brand/` (Index) — **Seiten-Übersicht + Reihenfolge**: spiegelt die reale
   Sidebar-Hierarchie (Kategorie-Header · Themen-Gruppe mit Unterseiten · Blatt-Seite)
   aus der **Config-SSOT `src/lib/data/brand-nav.json`** und ist per **Drag&Drop**

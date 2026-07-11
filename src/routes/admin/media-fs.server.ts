@@ -6,10 +6,12 @@ import { resolve, join, relative, sep } from 'node:path';
 // (Bild-Einfügen im Prosa-Editor) — eine Quelle statt Duplikat.
 const MEDIA_ROOT = resolve(process.cwd(), 'static/media');
 const IMG = /\.(png|jpe?g|webp|svg|gif|avif)$/i;
+const VIDEO = /\.(mp4|webm|mov|m4v)$/i;
 
-export type MediaImage = { path: string; name: string };
+export type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
 
-export function listMediaImages(): MediaImage[] {
+/** Bilder UND Videos unter static/media/, mit Typ-Kennzeichnung (für den Picker). */
+export function listMediaFiles(): MediaImage[] {
 	const out: MediaImage[] = [];
 	const walk = (dir: string) => {
 		let entries;
@@ -21,12 +23,19 @@ export function listMediaImages(): MediaImage[] {
 		for (const e of entries) {
 			const full = join(dir, e.name);
 			if (e.isDirectory()) walk(full);
-			else if (IMG.test(e.name)) {
-				const rel = relative(MEDIA_ROOT, full).split(sep).join('/');
-				out.push({ path: `/media/${rel}`, name: rel });
+			else {
+				const kind = IMG.test(e.name) ? 'image' : VIDEO.test(e.name) ? 'video' : null;
+				if (kind) {
+					const rel = relative(MEDIA_ROOT, full).split(sep).join('/');
+					out.push({ path: `/media/${rel}`, name: rel, kind });
+				}
 			}
 		}
 	};
 	walk(MEDIA_ROOT);
 	return out.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export function listMediaImages(): MediaImage[] {
+	return listMediaFiles().filter((m) => m.kind === 'image');
 }
