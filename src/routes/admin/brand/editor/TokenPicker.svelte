@@ -5,7 +5,7 @@
   Da global.css app-weit geladen ist, zeigt `var(--token)` die echte Farbe.
 -->
 <script lang="ts">
-	import { placePopover } from './popover-position';
+	import { placePopover } from '../core/popover-position';
 
 	let {
 		value = '',

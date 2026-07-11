@@ -5,7 +5,7 @@
   Elemente, sonst Titel + Prop-Chips. Rein präsentational, aus Werten abgeleitet.
 -->
 <script lang="ts">
-	import type { CmsPropDef } from './cms-components';
+	import type { CmsPropDef } from '../core/cms-components';
 
 	let {
 		name,

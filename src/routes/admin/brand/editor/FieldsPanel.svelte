@@ -6,7 +6,7 @@
   Chrome-::details-content-Fix.
 -->
 <script lang="ts">
-	import type { CmsPropDef } from './cms-components';
+	import type { CmsPropDef } from '../core/cms-components';
 	import PropField from './PropField.svelte';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };

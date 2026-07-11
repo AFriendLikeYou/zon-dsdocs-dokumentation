@@ -2,8 +2,8 @@
 	import { deserialize } from '$app/forms';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { sectionKind, type NavSection } from './brand-nav';
-	import { slugify } from './new-page';
+	import { sectionKind, type NavSection } from './core/brand-nav';
+	import { slugify } from './core/new-page';
 
 	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();

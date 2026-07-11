@@ -5,7 +5,7 @@
   durch (oninput bekommt das Textarea-Element für die Cursor-Verankerung).
 -->
 <script lang="ts">
-	import Icon from './icons/Icon.svelte';
+	import Icon from '../icons/Icon.svelte';
 	import {
 		hasHeadingTypo,
 		fixHeadings,
@@ -14,7 +14,7 @@
 		makeLink,
 		renderPreview,
 		type Edit
-	} from './prose-md';
+	} from '../core/prose-md';
 
 	let {
 		value = '',

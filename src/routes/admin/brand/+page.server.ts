@@ -2,15 +2,15 @@ import { dev } from '$app/environment';
 import { fail } from '@sveltejs/kit';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { listBrandPages, readSvx } from './brand-fs.server';
-import { parseSvx } from './segment';
+import { listBrandPages, readSvx } from './core/brand-fs.server';
+import { parseSvx } from './core/segment';
 import {
 	collectHrefs,
 	validateBrandNav,
 	serializeBrandNav,
 	type NavSection
-} from './brand-nav';
-import { validateNewPage, pageTemplate, SLUG_RE } from './new-page';
+} from './core/brand-nav';
+import { validateNewPage, pageTemplate, SLUG_RE } from './core/new-page';
 import type { PageServerLoad, Actions } from './$types';
 
 // SSOT-Config für Reihenfolge + Hierarchie der Brand-Sidebar (ADR-028). Von Loader

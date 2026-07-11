@@ -1,9 +1,9 @@
 import { dev } from '$app/environment';
 import { error, fail } from '@sveltejs/kit';
 import { writeFileSync } from 'node:fs';
-import { findSvxPage, readSvx, trimBlankEnds } from '../brand-fs.server';
+import { findSvxPage, readSvx, trimBlankEnds } from '../core/brand-fs.server';
 import { listMediaFiles } from '../../media-fs.server';
-import { listColorTokens } from '../tokens.server';
+import { listColorTokens } from '../core/tokens.server';
 import {
 	parseSvx,
 	rebuild,
@@ -11,13 +11,13 @@ import {
 	checkIslandGuard,
 	hasScriptBlock,
 	type SvxEdits
-} from '../segment';
+} from '../core/segment';
 import {
 	CMS_COMPONENTS,
 	componentIslandInfo,
 	containerIslandInfo,
 	type CmsComponentDef
-} from '../cms-components';
+} from '../core/cms-components';
 import type { PageServerLoad, Actions } from './$types';
 
 interface FieldVM {

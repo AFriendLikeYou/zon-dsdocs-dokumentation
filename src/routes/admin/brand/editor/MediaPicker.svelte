@@ -8,9 +8,9 @@
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import Icon from './icons/Icon.svelte';
-	import { matchesMedia } from './media.svelte';
-	import { placePopover } from './popover-position';
+	import Icon from '../icons/Icon.svelte';
+	import { matchesMedia } from '../core/media.svelte';
+	import { placePopover } from '../core/popover-position';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
 	let {

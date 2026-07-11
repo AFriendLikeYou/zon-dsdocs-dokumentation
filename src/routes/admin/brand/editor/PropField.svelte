@@ -6,7 +6,7 @@
   mit ∗. API unverändert: prop + value rein, set(v) raus.
 -->
 <script lang="ts">
-	import type { CmsPropDef } from './cms-components';
+	import type { CmsPropDef } from '../core/cms-components';
 	import MediaPicker from './MediaPicker.svelte';
 	import TokenPicker from './TokenPicker.svelte';
 

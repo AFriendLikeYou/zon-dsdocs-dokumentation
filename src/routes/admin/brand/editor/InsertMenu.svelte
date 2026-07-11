@@ -5,9 +5,9 @@
 -->
 <script lang="ts">
 	import BlockMenuList from './BlockMenuList.svelte';
-	import Icon from './icons/Icon.svelte';
-	import { matchesMedia } from './media.svelte';
-	import { placePopover } from './popover-position';
+	import Icon from '../icons/Icon.svelte';
+	import { matchesMedia } from '../core/media.svelte';
+	import { placePopover } from '../core/popover-position';
 
 	type Item = { name: string; label: string; icon: string };
 	let {

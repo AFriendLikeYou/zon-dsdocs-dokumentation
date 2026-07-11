@@ -3,17 +3,17 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { iconFor, CMS_CATEGORIES, type CmsPropDef } from '../cms-components';
-	import FieldsPanel from '../FieldsPanel.svelte';
+	import { iconFor, CMS_CATEGORIES, type CmsPropDef } from '../core/cms-components';
+	import FieldsPanel from '../editor/FieldsPanel.svelte';
 	import Icon from '../icons/Icon.svelte';
-	import BlockPreview from '../BlockPreview.svelte';
-	import ProseEditor from '../ProseEditor.svelte';
-	import InsertMenu from '../InsertMenu.svelte';
-	import SlashMenu from '../SlashMenu.svelte';
-	import { validateValues, countErrors } from '../validation';
-	import { readSlash } from '../slash';
-	import { caretPixel } from '../caret';
-	import { matchesMedia } from '../media.svelte';
+	import BlockPreview from '../editor/BlockPreview.svelte';
+	import ProseEditor from '../editor/ProseEditor.svelte';
+	import InsertMenu from '../editor/InsertMenu.svelte';
+	import SlashMenu from '../editor/SlashMenu.svelte';
+	import { validateValues, countErrors } from '../core/validation';
+	import { readSlash } from '../core/slash';
+	import { caretPixel } from '../core/caret';
+	import { matchesMedia } from '../core/media.svelte';
 
 	let { data }: import('./$types').PageProps = $props();
 

@@ -5,7 +5,7 @@
   Überschriften erscheinen, wenn sich `category` zwischen Nachbarn ändert (V2).
 -->
 <script lang="ts">
-	import Icon from './icons/Icon.svelte';
+	import Icon from '../icons/Icon.svelte';
 
 	type Item = { name: string; label: string; icon: string; category?: string };
 	let {

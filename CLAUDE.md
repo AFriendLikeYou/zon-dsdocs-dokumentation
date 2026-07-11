@@ -54,14 +54,14 @@ src/
 │  └─ admin/                      # Redaktionelles CMS (dev-only Writes, Prod → GitHub-PR) ↓
 │     ├─ [slug]/                  # Editor für Component-content.json (Prop-Formulare)
 │     ├─ media/  media-fs.server.ts   # Bild-Upload + geteilte listMediaImages()
-│     └─ brand/                   # Brand-.svx-Editor ↓
-│        ├─ [...path]/+page.*     # Editor-Seite (Block-Liste, Drag&Drop, orchestriert)
-│        ├─ BlockIcon.svelte      # Icon je Komponenten-Kategorie
-│        ├─ PropField.svelte      # eine Prop-Zeile (text/select/bool/number/media + Bildvorschau)
-│        ├─ InsertMenu.svelte     # Notion-artiges „+"-Insert-Popover (Suche + Icons)
-│        ├─ segment.ts (+test)    # parseSvx / rebuild / checkIslandGuard (pure, getestet)
-│        ├─ cms-components.ts (+test)  # Registry (Leaves + Container) + Parser/Serializer/iconFor
-│        └─ brand-fs.server.ts    # findSvxPage / readSvx (nur registrierte Brand-Seiten)
+│     └─ brand/                   # Brand-.svx-Editor (CMS) ↓
+│        ├─ +page.*               # Übersicht: Reihenfolge (Drag&Drop) + „Neue Seite"
+│        ├─ [...path]/+page.*     # Editor-Seite (Block-Liste, Undo/Entwurf, Save-Bar)
+│        ├─ editor/               # CMS-UI-Bausteine: PropField, FieldsPanel, Media-/
+│        │                        #   TokenPicker, ProseEditor, Slash-/InsertMenu, BlockPreview
+│        ├─ core/                 # pure Logik + Tests: segment, cms-components (Registry),
+│        │                        #   validation, slash, prose-md, new-page, brand-nav, *.server
+│        └─ icons/                # austauschbare 16×16-CMS-Icons (Registry + <Icon name>)
 ├─ lib/                          # Aliases: $components $data $stores $config $types
 │  ├─ components/
 │  │  ├─ layout/                  # App-Chrome (Sidebar, Navbar, Footer, …)
@@ -165,7 +165,7 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
   Sidebar-Hierarchie (Kategorie-Header · Themen-Gruppe mit Unterseiten · Blatt-Seite)
   aus der **Config-SSOT `src/lib/data/brand-nav.json`** und ist per **Drag&Drop**
   (zwei Scopes: Top-Level + innerhalb einer Gruppe) und **↑/↓** umsortierbar →
-  persistiert via `?/reorder` hinter dem validierenden Guard `admin/brand/brand-nav.ts`
+  persistiert via `?/reorder` hinter dem validierenden Guard `admin/brand/core/brand-nav.ts`
   (Kind-Exklusivität + **Konservierung**: nur umsortieren, nichts erfinden/verlieren).
   `navigation.ts` leitet `MENU_ITEMS_BRAND` aus derselben Config ab (Sidebar/Footer/Suche
   unverändert); `tooling/check-nav.mjs` liest ihre Hrefs mit. Nach Save `invalidateAll()`
@@ -174,7 +174,7 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
   dev-guard) + Galerie. Geteilte Medien-Liste: `admin/media-fs.server.ts`
   (`listMediaImages()` läuft `static/media/` ab, genutzt von media **und** Brand-Editor).
 
-### Brand-`.svx`-Editor-Engine — `admin/brand/segment.ts` (pure, getestet)
+### Brand-`.svx`-Editor-Engine — `admin/brand/core/segment.ts` (pure, getestet)
 
 **`parseSvx(raw)`** zerlegt eine `.svx` lückenlos in Slices → `{ fmInner, fields
 (nur skalare Frontmatter, v. a. title), segments, serializeOk, proseClean, safe }`.
@@ -216,7 +216,7 @@ geschützter Inseln übers CMS). Regeln:
   `isScriptIsland = hasScriptBlock` erkennt Script auch hinter vorangehendem `<svelte:head>`.
   Reasons: `'changed' | 'foreign-add'`.
 
-### Editierbare Komponenten — `admin/brand/cms-components.ts` (Registry)
+### Editierbare Komponenten — `admin/brand/core/cms-components.ts` (Registry)
 
 **Leaves (self-closing, feld-editierbar):** Alert, DoDont, Color, TextColor, Lightbox,
 VideoPlayer, DownloadSpecimen, BrandHero, **Card**. Prop-Typen: `text|textarea|select|
