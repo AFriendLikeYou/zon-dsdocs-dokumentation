@@ -4,6 +4,7 @@ import {
 	existsSync,
 	mkdirSync,
 	readdirSync,
+	readFileSync,
 	rmSync,
 	statSync,
 	writeFileSync
@@ -36,15 +37,15 @@ const MIME_EXT: Record<string, string> = {
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
-type MediaFile = { path: string; size: number; upload: boolean };
+type MediaFile = { path: string; size: number; upload: boolean; usedBy: string[] };
 
 function isInUploads(abs: string): boolean {
 	return abs === UPLOADS_DIR || abs.startsWith(UPLOADS_DIR + sep);
 }
 
 // Rekursiv alle Bilder unter static/media/ einsammeln (inkl. uploads/).
-function listImages(): MediaFile[] {
-	const out: MediaFile[] = [];
+function listImages(): Omit<MediaFile, 'usedBy'>[] {
+	const out: Omit<MediaFile, 'usedBy'>[] = [];
 	const walk = (absDir: string) => {
 		for (const entry of readdirSync(absDir, { withFileTypes: true })) {
 			const full = join(absDir, entry.name);
@@ -83,7 +84,48 @@ function fmtBytes(bytes: number): string {
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export const load = () => ({ files: listImages(), writable: dev });
+// ── Verwendungs-Scan: Welche Quelldateien referenzieren einen Medien-Pfad? ──
+// Textsuche über Routen + Daten (svx/svelte/ts/json/css) — grob, aber ehrlich:
+// lieber ein Löschen zu viel blockieren als eine Seite mit totem Bild. Dev-only
+// aufgerufen (load + delete-Guard), daher ist der Voll-Scan unkritisch.
+const SCAN_ROOTS = ['src/routes', 'src/lib/data', 'static'];
+const SCAN_EXT = /\.(svx|svelte|ts|json|css|md)$/;
+
+function collectSources(): { label: string; text: string }[] {
+	const out: { label: string; text: string }[] = [];
+	const walk = (absDir: string, root: string) => {
+		let entries;
+		try {
+			entries = readdirSync(absDir, { withFileTypes: true });
+		} catch {
+			return;
+		}
+		for (const e of entries) {
+			const full = join(absDir, e.name);
+			if (e.isDirectory()) walk(full, root);
+			else if (SCAN_EXT.test(e.name)) {
+				const label = relative(process.cwd(), full).split(sep).join('/');
+				try {
+					out.push({ label, text: readFileSync(full, 'utf8') });
+				} catch {
+					/* unlesbar → überspringen */
+				}
+			}
+		}
+	};
+	for (const r of SCAN_ROOTS) walk(resolve(process.cwd(), r), r);
+	return out;
+}
+
+function withUsage(files: Omit<MediaFile, 'usedBy'>[]): MediaFile[] {
+	const sources = collectSources();
+	return files.map((f) => ({
+		...f,
+		usedBy: sources.filter((s) => s.text.includes(f.path)).map((s) => s.label)
+	}));
+}
+
+export const load = () => ({ files: withUsage(listImages()), writable: dev });
 
 export const actions = {
 	upload: async ({ request }) => {
@@ -150,6 +192,16 @@ export const actions = {
 			return fail(400, { action: 'delete', message: 'Ungültiger Pfad.' });
 		if (!existsSync(target))
 			return fail(404, { action: 'delete', message: 'Datei nicht gefunden.' });
+
+		// Verwendungs-Riegel: referenzierte Dateien nicht löschen (tote Bilder).
+		const usedBy = collectSources()
+			.filter((s) => s.text.includes(path))
+			.map((s) => s.label);
+		if (usedBy.length)
+			return fail(400, {
+				action: 'delete',
+				message: `Nicht gelöscht — wird noch verwendet in: ${usedBy.slice(0, 3).join(', ')}${usedBy.length > 3 ? ' …' : ''}`
+			});
 
 		rmSync(target);
 		return { action: 'delete', deleted: true, path };

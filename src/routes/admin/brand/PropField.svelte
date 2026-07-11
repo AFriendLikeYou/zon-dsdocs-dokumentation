@@ -17,6 +17,7 @@
 		media = [],
 		tokens = [],
 		error = null,
+		uploadable = false,
 		set
 	}: {
 		prop: CmsPropDef;
@@ -24,6 +25,7 @@
 		media?: MediaImage[];
 		tokens?: readonly string[];
 		error?: string | null;
+		uploadable?: boolean;
 		set: (v: string | boolean) => void;
 	} = $props();
 
@@ -76,7 +78,14 @@
 				{/each}
 			</select>
 		{:else if prop.type === 'media'}
-			<MediaPicker value={str} {media} kind={prop.mediaKind} {error} set={(v) => set(v)} />
+			<MediaPicker
+				value={str}
+				{media}
+				kind={prop.mediaKind}
+				{error}
+				{uploadable}
+				set={(v) => set(v)}
+			/>
 		{:else if prop.format === 'token-color'}
 			<TokenPicker value={str} {tokens} {error} set={(v) => set(v)} />
 		{:else if prop.type === 'textarea'}

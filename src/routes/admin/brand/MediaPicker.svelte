@@ -5,6 +5,9 @@
   im media-PropField; API bleibt: value + set(path).
 -->
 <script lang="ts">
+	import { deserialize } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import { getToastState } from '$lib/toast-state.svelte';
 	import Icon from './icons/Icon.svelte';
 	import { matchesMedia } from './media.svelte';
 	import { placePopover } from './popover-position';
@@ -15,6 +18,7 @@
 		media = [],
 		kind = undefined,
 		error = null,
+		uploadable = false,
 		set
 	}: {
 		value?: string;
@@ -22,9 +26,12 @@
 		/** Erwarteter Medientyp — filtert das Raster (V4). */
 		kind?: 'image' | 'video';
 		error?: string | null;
+		/** Server-Wahrheit (data.writable): Upload nur, wenn Writes erlaubt sind. */
+		uploadable?: boolean;
 		set: (v: string) => void;
 	} = $props();
 
+	const toast = getToastState();
 	const mobile = matchesMedia('(max-width: 640px)');
 	const isImagePath = (p: string) => /\.(png|jpe?g|webp|svg|gif|avif)$/i.test(p);
 	const isVideoPath = (p: string) => /\.(mp4|webm|mov|m4v)$/i.test(p);
@@ -53,6 +60,63 @@
 		if (open) {
 			query = '';
 			queueMicrotask(() => input?.focus());
+		}
+	}
+
+	// ── Upload direkt im Picker (M1): Kachel, Drop aufs Raster, Paste in die Suche.
+	// Nutzt die bestehende upload-Action von /admin/media (MIME-Allowlist, 5 MB,
+	// uploads/-Gefängnis dort); nach Erfolg Liste auffrischen + direkt auswählen.
+	let fileEl = $state<HTMLInputElement | null>(null);
+	let uploading = $state(false);
+	const canUpload = $derived(uploadable && kind !== 'video');
+
+	async function uploadFile(file: File) {
+		if (uploading || !canUpload) return;
+		uploading = true;
+		try {
+			const body = new FormData();
+			body.set('file', file);
+			const res = await fetch('/admin/media?/upload', {
+				method: 'POST',
+				headers: { 'x-sveltekit-action': 'true' },
+				body
+			});
+			const result = deserialize(await res.text());
+			const path = result.type === 'success' ? (result.data as { path?: string })?.path : undefined;
+			if (path) {
+				await invalidateAll();
+				set(path);
+				toast?.add('Bild hochgeladen', path);
+				close();
+			} else if (result.type === 'failure') {
+				const msg = (result.data as { message?: string } | undefined)?.message;
+				toast?.add('Upload fehlgeschlagen', msg ?? 'Unbekannter Fehler.');
+			} else {
+				toast?.add('Upload fehlgeschlagen', 'Unbekannter Fehler.');
+			}
+		} catch (e) {
+			toast?.add('Upload fehlgeschlagen', e instanceof Error ? e.message : 'Netzwerkfehler.');
+		} finally {
+			uploading = false;
+		}
+	}
+	function onFilePick(e: Event) {
+		const el = e.currentTarget as HTMLInputElement;
+		const f = el.files?.[0];
+		if (f) uploadFile(f);
+		el.value = '';
+	}
+	function onDropUpload(e: DragEvent) {
+		if (!canUpload) return;
+		e.preventDefault();
+		const f = e.dataTransfer?.files?.[0];
+		if (f) uploadFile(f);
+	}
+	function onPasteUpload(e: ClipboardEvent) {
+		const f = e.clipboardData?.files?.[0];
+		if (f && canUpload) {
+			e.preventDefault();
+			uploadFile(f);
 		}
 	}
 	function close() {
@@ -113,15 +177,32 @@
 		bind:this={input}
 		class="mp-search"
 		type="text"
-		placeholder="Bilder durchsuchen …"
+		placeholder={canUpload ? 'Durchsuchen — oder Bild einfügen/hineinziehen …' : 'Durchsuchen …'}
 		bind:value={query}
 		onkeydown={onkey}
+		onpaste={onPasteUpload}
 	/>
-	<div class="mp-grid" bind:this={gridEl}>
-		<a class="mp-tile mp-tile--upload" href="/admin/media" title="Bild hochladen">
-			<span class="mp-up">↑</span>
-			<span class="mp-tile-name">Hochladen</span>
-		</a>
+	<div
+		class="mp-grid"
+		bind:this={gridEl}
+		role="presentation"
+		ondragover={(e) => {
+			if (canUpload) e.preventDefault();
+		}}
+		ondrop={onDropUpload}
+	>
+		{#if canUpload}
+			<button
+				type="button"
+				class="mp-tile mp-tile--upload"
+				disabled={uploading}
+				title="Bild hochladen — oder ins Raster ziehen / aus der Zwischenablage einfügen"
+				onclick={() => fileEl?.click()}
+			>
+				<span class="mp-up">{uploading ? '…' : '↑'}</span>
+				<span class="mp-tile-name">{uploading ? 'Lädt hoch' : 'Hochladen'}</span>
+			</button>
+		{/if}
 		{#each filtered as m (m.path)}
 			<button
 				type="button"
@@ -149,6 +230,13 @@
 {/snippet}
 
 <div class="mp" bind:this={wrap}>
+	<input
+		bind:this={fileEl}
+		type="file"
+		accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
+		hidden
+		onchange={onFilePick}
+	/>
 	<button
 		type="button"
 		class="mp-trigger"
@@ -371,6 +459,10 @@
 		font-size: 1.1rem;
 		line-height: 1;
 		margin-top: var(--z-ds-space-s);
+	}
+	.mp-tile--upload:disabled {
+		opacity: 0.6;
+		cursor: progress;
 	}
 	.mp-empty {
 		grid-column: 1 / -1;

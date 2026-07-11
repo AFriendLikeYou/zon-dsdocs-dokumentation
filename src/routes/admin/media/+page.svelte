@@ -25,6 +25,36 @@
 	}
 
 	const basename = (path: string) => path.split('/').pop() ?? path;
+
+	// ── Suche + Ordner-Filter (M2) ────────────────────────────────────────────
+	let query = $state('');
+	let folder = $state('alle');
+	const folderOf = (path: string) => path.split('/')[2] ?? '';
+	const folders = $derived(
+		['alle', ...new Set(data.files.map((f: { path: string }) => folderOf(f.path)))].filter(Boolean)
+	);
+	const filtered = $derived(
+		data.files.filter((f: { path: string }) => {
+			if (folder !== 'alle' && folderOf(f.path) !== folder) return false;
+			const q = query.trim().toLowerCase();
+			return !q || f.path.toLowerCase().includes(q);
+		})
+	);
+
+	// ── Drop-Upload: Datei auf die Upload-Karte ziehen → sofort hochladen. ────
+	let fileEl = $state<HTMLInputElement | null>(null);
+	let formEl = $state<HTMLFormElement | null>(null);
+	let dragging = $state(false);
+	function onDrop(e: DragEvent) {
+		e.preventDefault();
+		dragging = false;
+		const f = e.dataTransfer?.files?.[0];
+		if (!f || !fileEl || !data.writable) return;
+		const dt = new DataTransfer();
+		dt.items.add(f);
+		fileEl.files = dt.files;
+		formEl?.requestSubmit();
+	}
 </script>
 
 <svelte:head><title>Medien – Admin</title></svelte:head>
@@ -57,10 +87,27 @@
 		</p>
 	{/if}
 
-	<form class="upload" method="POST" action="?/upload" enctype="multipart/form-data" use:enhance>
+	<form
+		class="upload"
+		class:upload--drag={dragging}
+		method="POST"
+		action="?/upload"
+		enctype="multipart/form-data"
+		use:enhance
+		bind:this={formEl}
+		ondragover={(e) => {
+			if (data.writable) {
+				e.preventDefault();
+				dragging = true;
+			}
+		}}
+		ondragleave={() => (dragging = false)}
+		ondrop={onDrop}
+	>
 		<label class="field">
 			<span class="lbl">Bild hochladen</span>
 			<input
+				bind:this={fileEl}
 				type="file"
 				name="file"
 				accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
@@ -68,14 +115,41 @@
 				disabled={!data.writable}
 			/>
 		</label>
-		<p class="hint">PNG, JPG, WebP, SVG, GIF oder AVIF · max. 5 MB</p>
+		<p class="hint">
+			PNG, JPG, WebP, SVG, GIF oder AVIF · max. 5 MB — oder Datei einfach hierher ziehen.
+		</p>
 		<button type="submit" class="save" disabled={!data.writable}>Hochladen</button>
 	</form>
 
-	<h2 class="count">{data.files.length} {data.files.length === 1 ? 'Bild' : 'Bilder'}</h2>
+	<div class="filter">
+		<input
+			class="search"
+			type="search"
+			placeholder="Nach Name/Pfad suchen …"
+			bind:value={query}
+		/>
+		<div class="chips" role="group" aria-label="Ordner">
+			{#each folders as fo (fo)}
+				<button
+					type="button"
+					class="chip"
+					class:chip--on={folder === fo}
+					aria-pressed={folder === fo}
+					onclick={() => (folder = fo)}>{fo}</button
+				>
+			{/each}
+		</div>
+	</div>
+
+	<h2 class="count">
+		{filtered.length}
+		{filtered.length === 1 ? 'Bild' : 'Bilder'}{filtered.length !== data.files.length
+			? ` (von ${data.files.length})`
+			: ''}
+	</h2>
 
 	<ul class="grid">
-		{#each data.files as f (f.path)}
+		{#each filtered as f (f.path)}
 			<li class="card">
 				<div class="thumb">
 					<img src={f.path} alt={basename(f.path)} loading="lazy" />
@@ -83,6 +157,15 @@
 				<div class="meta">
 					<code class="path" title={f.path}>{f.path}</code>
 					<span class="size">{fmt(f.size)}{#if f.upload} · Upload{/if}</span>
+					{#if f.usedBy.length}
+						<span
+							class="usage"
+							title={f.usedBy.join('\n')}
+							>{f.usedBy.length}× verwendet</span
+						>
+					{:else}
+						<span class="usage usage--free">ungenutzt</span>
+					{/if}
 				</div>
 				<div class="tools">
 					<button type="button" class="tool" onclick={() => copyPath(f.path)}>
@@ -91,13 +174,23 @@
 					{#if f.upload && data.writable}
 						<form method="POST" action="?/delete" use:enhance>
 							<input type="hidden" name="path" value={f.path} />
-							<button type="submit" class="tool tool--danger">Löschen</button>
+							<button
+								type="submit"
+								class="tool tool--danger"
+								disabled={f.usedBy.length > 0}
+								title={f.usedBy.length
+									? `Wird verwendet in:\n${f.usedBy.join('\n')}`
+									: 'Datei löschen'}>Löschen</button
+							>
 						</form>
 					{/if}
 				</div>
 			</li>
 		{/each}
 	</ul>
+	{#if filtered.length === 0}
+		<p class="empty">Kein Treffer — Suche oder Ordner-Filter anpassen.</p>
+	{/if}
 </div>
 
 <style>
@@ -281,5 +374,75 @@
 	}
 	.tools form {
 		flex: 1;
+	}
+	.tool:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	/* M2: Drop-Zone, Suche + Ordner-Chips, Verwendungs-Badge */
+	.upload--drag {
+		border-color: var(--ds-accent);
+		background: rgb(from var(--ds-accent) r g b / 0.06);
+	}
+	.filter {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-m);
+		flex-wrap: wrap;
+		margin-bottom: var(--z-ds-space-m);
+	}
+	.search {
+		flex: 1 1 16rem;
+		font: inherit;
+		font-size: var(--ds-text-base);
+		color: var(--ds-text);
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius, 8px);
+		padding: 9px 12px;
+	}
+	.search:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
+	.chips {
+		display: flex;
+		gap: var(--z-ds-space-6);
+		flex-wrap: wrap;
+	}
+	.chip {
+		border: 1px solid var(--ds-border);
+		background: var(--ds-surface);
+		font: inherit;
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-body);
+		border-radius: 999px;
+		padding: 3px var(--z-ds-space-s);
+		cursor: pointer;
+		transition:
+			background var(--ds-dur) var(--ds-ease-out),
+			color var(--ds-dur) var(--ds-ease-out);
+	}
+	.chip--on {
+		background: var(--ds-surface-raised);
+		color: var(--ds-text);
+		border-color: var(--ds-border-strong, var(--ds-border));
+	}
+	.chip:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
+	.usage {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-body);
+	}
+	.usage--free {
+		color: var(--ds-text-muted);
+		font-style: italic;
+	}
+	.empty {
+		color: var(--ds-text-muted);
+		font-size: var(--ds-text-sm);
 	}
 </style>

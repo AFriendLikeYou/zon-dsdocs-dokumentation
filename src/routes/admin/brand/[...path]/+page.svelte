@@ -895,6 +895,7 @@
 														prop={p}
 														value={(it.compValues ?? {})[p.key]}
 														media={data.media}
+														uploadable={data.writable}
 														{tokens}
 														error={errs[p.key]}
 														set={(v) => setComp(it, p.key, v)}
@@ -924,6 +925,7 @@
 															prop={p}
 															value={(it.compValues ?? {})[p.key]}
 															media={data.media}
+														uploadable={data.writable}
 															{tokens}
 															error={errs[p.key]}
 															set={(v) => setComp(it, p.key, v)}
@@ -988,6 +990,7 @@
 																		prop={p}
 																		value={child.values[p.key]}
 																		media={data.media}
+														uploadable={data.writable}
 																		{tokens}
 																		error={cerrs[p.key]}
 																		set={(v) => setChildProp(it, child.uid, p.key, v)}
