@@ -1,0 +1,10 @@
+# Generierte Dateien — Formatierung gehört dem Exporter, nicht Prettier.
+src/routes/product/components/*/+page.svx
+src/routes/product/components/*/spec.generated.ts
+
+# Build-/Paket-Artefakte
+.svelte-kit/
+build/
+node_modules/
+package-lock.json
+static/styles-zds.css
