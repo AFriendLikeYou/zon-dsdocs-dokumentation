@@ -336,6 +336,42 @@ img + em {
 	font-style: normal;
 }
 
+/* ── Vertikaler Rhythmus (Brand-Inhalte) ─────────────────────────────────────
+   Abstände gehören dem Kontext, nicht den Komponenten: Innerhalb der Brand-
+   Inhaltsspalte werden Komponenten-eigene Außenabstände neutralisiert und die
+   Lücken zentral in drei Stufen geregelt — gleiches Paar, gleicher Abstand,
+   egal in welcher Reihenfolge die Blöcke aufeinander folgen.
+   Die Id im Selektor ist Absicht: höhere Spezifität als scoped Komponenten-
+   Styles (.alert.s-… etc.), damit deren margin-block hier sicher verliert. */
+#main-content[data-area='brand'] > * {
+	margin-block: 0;
+}
+/* Stufe 1 — Standard: Block ↔ Block. */
+#main-content[data-area='brand'] > * + * {
+	margin-block-start: var(--z-ds-space-24);
+}
+/* Stufe 2 — Lesefluss: Text unter Text enger. */
+#main-content[data-area='brand'] > :where(p, ul, ol) + :where(p, ul, ol) {
+	margin-block-start: var(--z-ds-space-16);
+}
+/* Stufe 3 — Sinnabschnitt: Luft VOR Überschriften … */
+#main-content[data-area='brand'] > * + :where(h2, h3, h4, h5) {
+	margin-block-start: var(--z-ds-space-32);
+}
+/* … und enger Anschluss DANACH (die Überschrift gehört zum Folgeinhalt). */
+#main-content[data-area='brand'] > :where(h1, h2, h3, h4, h5) + * {
+	margin-block-start: var(--z-ds-space-10);
+}
+/* Bilder im Fluss als Block — sonst addiert die Inline-Baseline ~7px unter dem Bild. */
+#main-content[data-area='brand'] > img {
+	display: block;
+}
+/* Bildunterschrift (img + em, siehe oben) klebt an ihrem Bild. */
+#main-content[data-area='brand'] > img + em {
+	display: block;
+	margin-block-start: var(--z-ds-space-6);
+}
+
 strong {
 	font-weight: 600;
 }
