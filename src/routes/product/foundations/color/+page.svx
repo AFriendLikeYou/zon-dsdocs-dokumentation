@@ -1,0 +1,93 @@
+---
+title: Farbe
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { ColorRoles, type RoleGroup, type ContrastPair } from '$components/ui/color-roles';
+	import { DoDontList } from '$components/ui/specsheet';
+
+	// Kuratiertes Rollen-Mapping — Quelle: static/global.css (Rollen-Block).
+	// Werte liest die Komponente zur Laufzeit (folgen dem Theme-Schalter live).
+	const groups: RoleGroup[] = [
+		{
+			titel: 'Flächen',
+			beschreibung: 'Drei Ebenen: Seite, angehobene Elemente (Pills, Hover, Bühnen), aktive/dritte Ebene.',
+			rollen: [
+				{ token: '--ds-surface', raw: '--z-ds-color-background-0', usage: 'Seite, Karten, Navbar.' },
+				{ token: '--ds-surface-raised', raw: '--z-ds-color-background-10', usage: 'Pills, Hover-Flächen, Code, Bühnen.' },
+				{ token: '--ds-surface-sunken', raw: '--z-ds-color-background-20', usage: 'Aktive bzw. dritte Ebene.' }
+			]
+		},
+		{
+			titel: 'Text',
+			beschreibung: 'Vier Stufen von primär bis disabled — Hierarchie über Helligkeit statt Größe.',
+			rollen: [
+				{ token: '--ds-text', raw: '--z-ds-color-text-100', usage: 'Überschriften, primäre UI.' },
+				{ token: '--ds-text-body', raw: '--z-ds-color-text-70', usage: 'Fließtext, sekundäre UI.' },
+				{ token: '--ds-text-muted', raw: '--z-ds-color-text-55', usage: 'Labels, Meta, Platzhalter.' },
+				{ token: '--ds-text-faint', raw: '--z-ds-color-text-40', usage: 'Tertiär, disabled.' }
+			]
+		},
+		{
+			titel: 'Linien',
+			rollen: [
+				{ token: '--ds-border', raw: '--z-ds-color-border-70', usage: 'Standard-Rahmen und Trenner.' },
+				{ token: '--ds-border-strong', raw: '--z-ds-color-border-100', usage: 'Betonte Rahmen (Hover, Fokus-Nähe).' },
+				{ token: '--ds-border-soft', raw: 'color-mix(text-100 9 %)', usage: 'Zarteste Trenner und Kachel-Ränder.' }
+			]
+		},
+		{
+			titel: 'Akzente & Fokus',
+			rollen: [
+				{ token: '--ds-accent', raw: '--z-ds-color-focus-100', usage: 'Link- und Aktiv-Akzent.' },
+				{ token: '--ds-focus-ring', raw: '--z-ds-color-focus-100', usage: ':focus-visible-Outline — nie entfernen.' },
+				{ token: '--ds-accent-brand', raw: '--z-ds-color-accent-100', usage: 'ZEIT-Rot für Badges und Tips.' }
+			]
+		},
+		{
+			titel: 'Status',
+			rollen: [
+				{ token: '--ds-positive', raw: '--z-ds-color-background-success', usage: 'Do, pass, Erfolg.' },
+				{ token: '--ds-negative', raw: '--z-ds-color-error-70', usage: 'Don’t, fail, Fehler.' },
+				{ token: '--ds-warning', raw: '--z-ds-color-background-warning', usage: 'Warnungen.' }
+			]
+		}
+	];
+
+	const pairs: ContrastPair[] = [
+		{ fg: '--ds-text', bg: '--ds-surface', label: 'Primärtext auf Seite' },
+		{ fg: '--ds-text-body', bg: '--ds-surface', label: 'Fließtext auf Seite' },
+		{ fg: '--ds-text-muted', bg: '--ds-surface', label: 'Muted auf Seite' },
+		{ fg: '--ds-text', bg: '--ds-surface-raised', label: 'Primärtext auf angehobener Fläche' },
+		{ fg: '--ds-text-body', bg: '--ds-surface-raised', label: 'Fließtext auf angehobener Fläche' }
+	];
+
+	const doDont = {
+		do: [
+			'Immer über Rollen arbeiten (<code>--ds-text-muted</code>) — nie über rohe Farbwerte.',
+			'Neue UI zuerst gegen die Kontrast-Paare unten prüfen (AA ist Pflicht).'
+		],
+		dont: [
+			'Keine rohen <code>--z-ds-color-*</code> in Doku-UI-Komponenten (Ausnahme: originalgetreue Pattern-CSS und Specimen-Bühnen).',
+			'Fokus-Ringe nie entfernen oder umfärben — <code>--ds-focus-ring</code> ist systemweit.'
+		]
+	};
+</script>
+
+# Farbe
+
+Farben der Doku-UI sind **Rollen, keine Paletten**: Jede Rolle (`--ds-*`) beschreibt einen
+Einsatzzweck und ist auf ein Foundation-Token (`--z-ds-color-*`) gemappt — die Werte kommen
+zur Laufzeit aus dem Upstream-Paket und wechseln mit dem Theme-Schalter. Die Marken-Palette
+selbst lebt im [Brandhub](/brand/color), die rohen Foundation-Tokens in der
+[Token-Referenz](/product/foundations/tokens).
+
+<ColorRoles {groups} {pairs} />
+
+## Do & Don’t
+
+<DoDontList {doDont} />

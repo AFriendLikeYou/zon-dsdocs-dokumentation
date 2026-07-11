@@ -136,6 +136,12 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 		isInFooter: true
 	},
 	{
+		title: 'Farbe',
+		href: '/product/foundations/color',
+		badge: 'Neu',
+		isInFooter: true
+	},
+	{
 		title: 'Typografie',
 		href: '/product/foundations/typography',
 		badge: 'Neu',

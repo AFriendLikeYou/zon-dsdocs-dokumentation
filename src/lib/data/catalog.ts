@@ -89,3 +89,18 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 	.sort(
 		(a, b) => a.order - b.order || (a.spec.name ?? a.slug).localeCompare(b.spec.name ?? b.slug)
 	);
+
+/**
+ * „Genutzt von"-Index: Token-Name → Komponenten-Slugs. Entsteht automatisch aus
+ * den `tokens`-Gruppen der model.json-Einträge (ADR-025-Geist: Registry statt
+ * Handpflege) — die Foundations-Seiten verlinken damit zurück zu den Komponenten,
+ * die einen Token wirklich einsetzen.
+ */
+export const TOKEN_USAGE: Record<string, string[]> = (() => {
+	const map: Record<string, string[]> = {};
+	for (const e of CATALOG)
+		for (const g of e.spec.tokens ?? [])
+			for (const it of g.items ?? []) (map[it.name] ??= []).push(e.slug);
+	for (const k of Object.keys(map)) map[k] = [...new Set(map[k])].sort();
+	return map;
+})();

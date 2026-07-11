@@ -10,6 +10,7 @@
 -->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
+	import { TOKEN_USAGE } from '$data/catalog';
 	import {
 		FOUNDATION_TOKENS,
 		tokenName,
@@ -19,7 +20,7 @@
 
 	let { groups = FOUNDATION_TOKENS }: { groups?: FoundationGroup[] } = $props();
 
-	type Item = { name: string; usage: string; wert: string; swatch?: string };
+	type Item = { name: string; usage: string; wert: string; swatch?: string; usedBy: string[] };
 	type Group = { kategorie: string; beschreibung?: string; items: Item[] };
 
 	let resolved = $state<Group[]>([]);
@@ -37,7 +38,8 @@
 					name,
 					usage: tokenUsage(t),
 					wert,
-					swatch: g.isColor ? wert : undefined
+					swatch: g.isColor ? wert : undefined,
+					usedBy: TOKEN_USAGE[name] ?? []
 				};
 			})
 		}));
@@ -68,6 +70,14 @@
 									/>
 								</span>
 								{#if t.usage}<span class="usage">{t.usage}</span>{/if}
+								{#if t.usedBy.length}
+									<span class="used-by"
+										>Genutzt von
+										{#each t.usedBy as slug, i (slug)}{#if i > 0}<span aria-hidden="true"
+												>&nbsp;·
+											</span>{/if}<a href="/product/components/{slug}">{slug}</a>{/each}</span
+									>
+								{/if}
 							</div>
 							<span class="val-line">
 								<code class="val">{t.wert}</code>
@@ -101,6 +111,23 @@
 		letter-spacing: 0.06em;
 		font-weight: 600;
 		color: var(--ds-text-muted);
+	}
+	.used-by {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
+	.used-by a {
+		color: var(--ds-text-muted);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.used-by a:hover {
+		color: var(--ds-text);
+	}
+	.used-by a:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+		border-radius: 2px;
 	}
 	.group__desc {
 		margin: 0 0 var(--z-ds-space-16);
