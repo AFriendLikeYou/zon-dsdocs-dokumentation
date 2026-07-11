@@ -21,6 +21,7 @@
 		"gen:assets": "npm run gen:icons && npm run gen:brand-assets",
 		"new-component": "node tooling/zeit-de-exporter/export.mjs --init",
 		"draft-component": "node tooling/zeit-de-exporter/draft.mjs",
+		"test:e2e": "playwright test",
 		"export-component": "node tooling/zeit-de-exporter/export.mjs",
 		"export:all": "node tooling/zeit-de-exporter/export-all.mjs",
 		"format": "prettier --write .",
@@ -37,6 +38,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@playwright/test": "^1.57.0",
 		"@sveltejs/adapter-vercel": "^5.5.2",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig(() => ({
@@ -11,6 +11,8 @@ export default defineConfig(() => ({
 	test: {
 		globals: true,
 		restoreMocks: true,
+		// e2e/ gehört Playwright — vitest würde die .spec.ts sonst mit ausführen.
+		exclude: [...configDefaults.exclude, 'e2e/**'],
 		environment: 'jsdom',
 		setupFiles: ['vitest.setup.js'],
 		passWithNoTests: true,

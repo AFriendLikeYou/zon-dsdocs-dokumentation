@@ -39,3 +39,27 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # E2E-Smoke (Playwright): CMS-Kernflüsse gegen den Dev-Server. Läuft mit den
+  # committeten Hooks (Basic-Auth aktiv) — die Tests authentifizieren sich mit
+  # den Dummy-USERS via httpCredentials (playwright.config.ts).
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      USERS: '[{"username":"ci","password":"ci-only"}]'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Playwright-Browser
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E-Smoke
+        run: npx playwright test

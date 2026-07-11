@@ -30,3 +30,7 @@ vite.config.ts.timestamp-*
 
 # Editor-Cruft
 .obsidian/
+
+# Playwright-Artefakte
+test-results/
+playwright-report/
