@@ -98,41 +98,45 @@
 		outline-offset: 2px;
 	}
 
-	/* Ruhige, redaktionelle Text-Nav mit Unterstreichungs-Indikator (kein Pill). */
+	/* Zentrierte Pill-Nav (astryx-Muster): auf Desktop mittig im Header verankert,
+	   Hover/Aktiv wie die Sidebar-Einträge (surface-raised-Pille). */
 	.navbar__nav {
 		display: flex;
 		align-items: center;
-		gap: var(--z-ds-space-m);
+		gap: var(--z-ds-space-xs);
 		margin-left: var(--z-ds-space-s);
 	}
 
+	@media (min-width: 900px) {
+		.navbar__nav {
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			margin-left: 0;
+		}
+	}
+
 	.navbar__nav-link {
-		position: relative;
 		color: var(--ds-text-body);
 		font-size: var(--ds-text-sm);
 		font-weight: 500;
 		white-space: nowrap;
-		padding-block: var(--z-ds-space-6);
+		padding: var(--z-ds-space-6) var(--z-ds-space-m);
 		border-radius: var(--ds-radius-sm);
-		/* Ruhender Zustand: transparenter Unterstrich, wird bei aktiv/hover sichtbar. */
-		border-bottom: 2px solid transparent;
 		transition:
 			color var(--ds-dur) var(--ds-ease-out),
-			border-color var(--ds-dur) var(--ds-ease-out);
+			background-color var(--ds-dur) var(--ds-ease-out);
 	}
 
 	.navbar__nav-link.is-active {
 		color: var(--ds-text);
-		border-bottom-color: var(--ds-text);
+		background-color: var(--ds-surface-raised);
 	}
 
 	@media (hover: hover) and (pointer: fine) {
 		.navbar__nav-link:hover {
 			color: var(--ds-text);
-			border-bottom-color: var(--ds-border-strong);
-		}
-		.navbar__nav-link.is-active:hover {
-			border-bottom-color: var(--ds-text);
+			background-color: var(--ds-surface-raised);
 		}
 	}
 
