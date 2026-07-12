@@ -37,6 +37,19 @@
 	// Artboard-Maße zeigen IMMER px (Blueprint-Konvention + wenig Platz in den Ecken).
 	const apx = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
 
+	// Padding-Kasten aus dem px-String parsen („10 · 16" = vertikal · horizontal,
+	// „t r b l" oder Einzelwert). Gelingt der Parse, zeigt die Maß-Ansicht den
+	// Innenabstand ALS getönte Streifen IM Specimen — die Redline sitzt damit am
+	// Ort des Geschehens statt als kontextlose Pille über dem Bauteil.
+	function parsePad(px?: string): { t: number; r: number; b: number; l: number } | null {
+		if (!px) return null;
+		const n = (px.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
+		if (n.length === 1) return { t: n[0], r: n[0], b: n[0], l: n[0] };
+		if (n.length === 2) return { t: n[0], r: n[1], b: n[0], l: n[1] };
+		if (n.length === 4) return { t: n[0], r: n[1], b: n[2], l: n[3] };
+		return null;
+	}
+
 	// Deutsches Label je Callout-Rolle (dezentes Typ-Badge in der Legende).
 	const ART_LABEL: Record<string, string> = {
 		instance: 'Instanz',
@@ -129,17 +142,35 @@
 		<div class="slot">{@render preview?.()}</div>
 
 		{#if view === 'measure' && masse}
+			{@const padBox = parsePad(apx(masse.padding))}
+			{#if padBox}
+				<!-- Innenabstand am Ort des Geschehens: vier getönte Streifen (Blueprint-Blau). -->
+				<div class="pad-box" aria-hidden="true">
+					<span class="pad-strip pad-strip--t" style="height:{padBox.t}px"></span>
+					<span class="pad-strip pad-strip--b" style="height:{padBox.b}px"></span>
+					<span
+						class="pad-strip pad-strip--l"
+						style="width:{padBox.l}px;top:{padBox.t}px;bottom:{padBox.b}px"
+					></span>
+					<span
+						class="pad-strip pad-strip--r"
+						style="width:{padBox.r}px;top:{padBox.t}px;bottom:{padBox.b}px"
+					></span>
+				</div>
+			{/if}
 			{#if masse.hoehe}<div class="dim dim-h" aria-hidden="true">
-					<span class="dl">{apx(masse.hoehe)}</span>
+					<span class="dl" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
 				</div>{/if}
 			{#if masse.breite}<div class="dim dim-w" aria-hidden="true">
-					<span class="dl">{apx(masse.breite)}</span>
+					<span class="dl" title="Breite">B&nbsp;{apx(masse.breite)}</span>
 				</div>{/if}
 			{#if masse.padding}<div class="dim dim-pad" aria-hidden="true">
-					<span class="dl">{apx(masse.padding)}</span>
+					<span class="dl" title="Innenabstand (oben/unten · links/rechts)"
+						>Padding&nbsp;{apx(masse.padding)}</span
+					>
 				</div>{/if}
 			{#if masse.radius}<div class="rad" aria-hidden="true">
-					<span>r {apx(masse.radius)}</span>
+					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}</span>
 				</div>{/if}
 		{/if}
 	</div>
@@ -313,6 +344,40 @@
 	.co--on {
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--measure) 32%, transparent);
 		z-index: 5;
+	}
+
+	/* Innenabstand-Overlay: vier getönte Streifen an den Specimen-Kanten mit
+	   gestrichelter Innenkante — der Padding-Wert oben in der Pille bekommt damit
+	   einen sichtbaren Ort. Liegt über dem Specimen, fängt aber keine Maus. */
+	.pad-box {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		pointer-events: none;
+	}
+	.pad-strip {
+		position: absolute;
+		background: color-mix(in srgb, var(--measure) 16%, transparent);
+	}
+	.pad-strip--t {
+		top: 0;
+		left: 0;
+		right: 0;
+		border-bottom: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+	}
+	.pad-strip--b {
+		bottom: 0;
+		left: 0;
+		right: 0;
+		border-top: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+	}
+	.pad-strip--l {
+		left: 0;
+		border-right: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+	}
+	.pad-strip--r {
+		right: 0;
+		border-left: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
 	}
 
 	.dim {
