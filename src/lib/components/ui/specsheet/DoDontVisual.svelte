@@ -7,6 +7,7 @@
 -->
 <script lang="ts">
 	import type { DoDontBeispiel } from '$types/spec';
+	import Mark from './Mark.svelte';
 	let { beispiele = [] }: { beispiele?: DoDontBeispiel[] } = $props();
 </script>
 
@@ -20,7 +21,7 @@
 						{@html b.gut.html}
 					</div>
 					<figcaption class="ddv-caption">
-						<span class="ddv-mark ddv-mark--good" aria-hidden="true">✓</span>
+						<Mark kind="good" class="ddv-mark" />
 						<span class="ddv-vh">Do: </span>{b.gut.text}
 					</figcaption>
 				</figure>
@@ -30,7 +31,7 @@
 						{@html b.schlecht.html}
 					</div>
 					<figcaption class="ddv-caption">
-						<span class="ddv-mark ddv-mark--bad" aria-hidden="true">✕</span>
+						<Mark kind="bad" class="ddv-mark" />
 						<span class="ddv-vh">Don't: </span>{b.schlecht.text}
 					</figcaption>
 				</figure>
@@ -87,16 +88,10 @@
 		color: var(--ds-text-body);
 		line-height: 1.5;
 	}
-	.ddv-mark {
+	/* Layout bleibt hier; Glyph/Farbe/Gewicht liefert die Mark-Komponente. */
+	.ddv-caption :global(.ddv-mark) {
 		flex: none;
-		font-weight: 700;
 		font-size: var(--ds-text-base);
-	}
-	.ddv-mark--good {
-		color: var(--ds-positive);
-	}
-	.ddv-mark--bad {
-		color: var(--ds-negative);
 	}
 	/* „Do:"/„Don't:"-Präfix trägt die Semantik für Screenreader (Farbe ist nur visuell). */
 	.ddv-vh {

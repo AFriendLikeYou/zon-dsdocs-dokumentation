@@ -108,4 +108,10 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.link {
+			transition: none;
+		}
+	}
 </style>

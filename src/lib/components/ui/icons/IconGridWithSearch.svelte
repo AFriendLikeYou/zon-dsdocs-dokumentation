@@ -173,4 +173,10 @@
 		width: 16px;
 		height: 16px;
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.search__clear-button {
+			transition: none;
+		}
+	}
 </style>

@@ -1,36 +1,25 @@
 <!-- KeyboardList.svelte — Tastatur-Bedienung als native, adaptive Liste (Barrierefreiheit-Tab). -->
 <script lang="ts">
 	import type { KeyboardRule } from '$types/spec';
+	import SpecRow from './SpecRow.svelte';
 	let { items = [] }: { items?: KeyboardRule[] } = $props();
 </script>
 
 {#if items.length}
 	<dl class="kbd-list">
 		{#each items as k}
-			<div class="row">
+			<SpecRow>
 				<dt><kbd>{k.taste}</kbd></dt>
 				<dd>{k.aktion}</dd>
-			</div>
+			</SpecRow>
 		{/each}
 	</dl>
 {/if}
 
 <style>
 	.kbd-list {
-		--kbd-key-col: 160px; /* Tasten-Spalte, bewusstes Layout-Maß ohne z-ds-Token */
 		margin: 0;
 		max-width: 640px;
-	}
-	.row {
-		display: grid;
-		grid-template-columns: var(--kbd-key-col) 1fr;
-		gap: var(--z-ds-space-16);
-		align-items: baseline;
-		padding: var(--z-ds-space-12) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	.row:last-child {
-		border-bottom: 0;
 	}
 	dt {
 		display: flex;
@@ -51,11 +40,5 @@
 		margin: 0;
 		color: var(--ds-text);
 		font-size: var(--ds-text-sm);
-	}
-	@media (max-width: 520px) {
-		.row {
-			grid-template-columns: 1fr;
-			gap: var(--z-ds-space-4);
-		}
 	}
 </style>

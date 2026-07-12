@@ -1,6 +1,7 @@
 <!-- DoDontList.svelte — Do/Don't als adaptive Liste. -->
 <script lang="ts">
 	import type { DoDont } from '$types/spec';
+	import Mark from './Mark.svelte';
 	let { doDont = null }: { doDont?: DoDont | null } = $props();
 </script>
 
@@ -8,12 +9,12 @@
 	<div class="dd">
 		{#if doDont.do?.length}
 			<ul class="do">
-				{#each doDont.do as d}<li>{d}</li>{/each}
+				{#each doDont.do as d}<li><Mark kind="good" class="dd-mark" />{d}</li>{/each}
 			</ul>
 		{/if}
 		{#if doDont.dont?.length}
 			<ul class="dont">
-				{#each doDont.dont as d}<li>{d}</li>{/each}
+				{#each doDont.dont as d}<li><Mark kind="bad" class="dd-mark" />{d}</li>{/each}
 			</ul>
 		{/if}
 	</div>
@@ -41,18 +42,10 @@
 		color: var(--ds-text);
 		line-height: 1.5;
 	}
-	.dd li::before {
+	/* Marke sitzt (wie zuvor das ::before) absolut am Zeilenanfang. */
+	.dd li :global(.dd-mark) {
 		position: absolute;
 		left: 0;
 		top: 0;
-		font-weight: 700;
-	}
-	.dd .do li::before {
-		content: '✓';
-		color: var(--ds-positive);
-	}
-	.dd .dont li::before {
-		content: '✕';
-		color: var(--ds-negative);
 	}
 </style>

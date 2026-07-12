@@ -992,4 +992,19 @@
 			display: none;
 		}
 	}
+
+	/* Alle Bühnen-/Overlay-Transitions still stellen (Highlights bleiben, nur ohne
+	   Bewegung/Fade) — Blueprint bleibt lesbar, respektiert die Nutzer-Präferenz. */
+	@media (prefers-reduced-motion: reduce) {
+		.art,
+		.co,
+		.part,
+		.part-tag,
+		.pad-strip,
+		.gap-strip,
+		.lrow,
+		.sp-item--sync {
+			transition: none;
+		}
+	}
 </style>

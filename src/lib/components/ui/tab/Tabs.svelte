@@ -152,4 +152,10 @@
 		outline-offset: -2px;
 		border-radius: 4px;
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		button {
+			transition: none;
+		}
+	}
 </style>

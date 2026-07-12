@@ -2,22 +2,25 @@
   CopyButton.svelte — kopiert einen Wert in die Zwischenablage, mit Rückmeldung.
   Konsolidiert das zuvor 5× inline gepflegte Copy-Markup (CodeBlock, Color,
   IconComponent, BrandAssetsGrid, …) inkl. des 3× hand-kopierten Copy-Icons.
+  Der Button-Look (Reset, active, focus, Icon-Button-Rahmen, reduced-motion) kommt
+  aus der gemeinsamen Basis IconActionButton — hier bleibt nur die Copy-Logik.
 
   Nutzung:
     <CopyButton value={code} label="Kopieren" />                 // inline-Feedback
     <CopyButton value={hex} ariaLabel="Farbe kopieren" feedback="toast" toastMessage="…" />
-    <CopyButton onCopy={() => copySVGToClipboard(icon)} ariaLabel="…" feedback="toast" iconButton />
+    <CopyButton oncopy={() => copySVGToClipboard(icon)} ariaLabel="…" feedback="toast" iconButton />
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { getToastState } from '$stores/toast-state.svelte';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 	import { CopyIcon, CheckIcon } from '$lib/icons';
 
 	type Props = {
-		/** Text, der kopiert wird. Alternativ `onCopy` für eigene Kopier-Logik (z. B. SVG). */
+		/** Text, der kopiert wird. Alternativ `oncopy` für eigene Kopier-Logik (z. B. SVG). */
 		value?: string;
 		/** Eigene Kopier-Logik statt `value` (z. B. copySVGToClipboard(icon)). */
-		onCopy?: () => void | Promise<void>;
+		oncopy?: () => void | Promise<void>;
 		/** Sichtbares Label; ohne Angabe = nur Copy-Icon. */
 		label?: string;
 		/** A11y-Label (für icon-only verpflichtend). */
@@ -35,7 +38,7 @@
 
 	let {
 		value,
-		onCopy,
+		oncopy,
 		label,
 		ariaLabel,
 		feedback = 'inline',
@@ -51,7 +54,7 @@
 	let timer: ReturnType<typeof setTimeout>;
 
 	async function handleCopy() {
-		if (onCopy) await onCopy();
+		if (oncopy) await oncopy();
 		else if (value != null) await navigator.clipboard?.writeText(value);
 
 		if (feedback === 'toast') {
@@ -64,13 +67,11 @@
 	}
 </script>
 
-<button
-	type="button"
-	class="copy-button {className}"
-	class:icon-button={iconButton}
-	class:is-copied={copied}
-	aria-label={ariaLabel ?? label ?? 'In die Zwischenablage kopieren'}
+<IconActionButton
+	{iconButton}
+	ariaLabel={ariaLabel ?? label ?? 'In die Zwischenablage kopieren'}
 	onclick={handleCopy}
+	class="copy-button {className}{copied ? ' is-copied' : ''}"
 >
 	{#if children}
 		{@render children()}
@@ -81,60 +82,14 @@
 	{:else}
 		<CopyIcon class="copy-button__icon" />
 	{/if}
-</button>
+</IconActionButton>
 
 <style>
-	/* Basis-Reset mit :where() (Spezifität 0) → Aufrufer können Farbe/Hintergrund/
-	   Padding/Schriftgröße per :global(.eigene-klasse) ohne Spezifitäts-Kampf setzen. */
-	:where(.copy-button) {
-		--copy-icon-size: 16px;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--z-ds-space-xs);
-		font: inherit;
-		color: inherit;
-		background: none;
-		border: none;
-		padding: 0;
-		cursor: pointer;
-		transition: color var(--ds-dur) var(--ds-ease);
-	}
-	.copy-button:active:not(:disabled) {
-		transform: scale(0.97);
-	}
-	.copy-button:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-		border-radius: var(--ds-radius-sm);
-	}
-	/* Icon liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
-	.copy-button :global(.copy-button__icon) {
-		width: var(--copy-icon-size);
-		height: var(--copy-icon-size);
+	/* Icon liegt in einer Kind-Komponente unter dem (in IconActionButton gerenderten)
+	   Button → vollständig :global, sonst greift das Scoping nicht. */
+	:global(.copy-button .copy-button__icon) {
+		width: 16px;
+		height: 16px;
 		flex: none;
-	}
-
-	/* Gerahmter Icon-Button (Icon-/Asset-Grid) — normale Spezifität, schlägt :where. */
-	.copy-button.icon-button {
-		padding: var(--z-ds-space-8);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		background: var(--ds-surface);
-		color: var(--ds-text);
-		transition:
-			background-color var(--ds-dur) var(--ds-ease),
-			transform var(--ds-dur) var(--ds-ease-out);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.copy-button.icon-button:hover {
-			background: var(--ds-surface-raised);
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.copy-button {
-			transition: none;
-		}
 	}
 </style>

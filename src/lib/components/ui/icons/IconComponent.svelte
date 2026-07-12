@@ -26,14 +26,14 @@
 
 	<div class="zon-icon__actions">
 		<DownloadButton
-			onDownload={() => downloadIcon(icon)}
+			ondownload={() => downloadIcon(icon)}
 			ariaLabel={`Download ${icon.name} icon`}
 			feedback="toast"
 			toastMessage={`Das Icon "${icon.name}" wurde heruntergeladen.`}
 			iconButton
 		/>
 		<CopyButton
-			onCopy={() => copySVGToClipboard(icon)}
+			oncopy={() => copySVGToClipboard(icon)}
 			ariaLabel={`${icon.name} in der Zwischenablage kopieren`}
 			feedback="toast"
 			toastMessage={`Das Icon "${icon.name}" wurde in die Zwischenablage kopiert.`}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	type DoDontProps = {
 		type?: 'do' | 'dont';
-		backgroundcolor: string;
+		backgroundColor?: string;
 		caption: string;
 		content?: string;
 		imgSrc?: string;
@@ -10,7 +10,7 @@
 
 	let {
 		type = 'do',
-		backgroundcolor = '',
+		backgroundColor = '',
 		caption = '',
 		content = '',
 		imgSrc = '',
@@ -28,7 +28,7 @@
 
 <div class="dodont">
 	<div class="dodont-card__content">
-		<div class="dodont-card__demo" style:background-color={backgroundcolor}>
+		<div class="dodont-card__demo" style:background-color={backgroundColor}>
 			{#if imgSrc}
 				<div class="image-container" class:strike-through={strikeThrough}>
 					<img src={imgSrc || '/placeholder.svg'} alt={caption} />

@@ -14,3 +14,5 @@ export { default as DoDontVisual } from './DoDontVisual.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';
 export { default as CodeBlock } from './CodeBlock.svelte';
+export { default as SpecRow } from './SpecRow.svelte';
+export { default as Mark } from './Mark.svelte';

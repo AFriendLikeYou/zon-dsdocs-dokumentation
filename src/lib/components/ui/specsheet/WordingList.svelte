@@ -1,6 +1,7 @@
 <!-- WordingList.svelte — UX-Writing: konkrete „statt X → besser Y"-Formulierungsregeln. -->
 <script lang="ts">
 	import type { WordingRule } from '$types/spec';
+	import Mark from './Mark.svelte';
 	let { items = [] }: { items?: WordingRule[] } = $props();
 </script>
 
@@ -9,9 +10,9 @@
 		{#each items as w}
 			<li class="wl-row">
 				<div class="wl-pair">
-					<span class="wl-bad"><span class="wl-mark">✕</span>{w.schlecht}</span>
+					<span class="wl-bad"><Mark kind="bad" class="wl-mark" />{w.schlecht}</span>
 					<span class="wl-arrow" aria-hidden="true">→</span>
-					<span class="wl-good"><span class="wl-mark">✓</span>{w.gut}</span>
+					<span class="wl-good"><Mark kind="good" class="wl-mark" />{w.gut}</span>
 				</div>
 				{#if w.hinweis}<p class="wl-note">{w.hinweis}</p>{/if}
 			</li>
@@ -45,8 +46,8 @@
 		align-items: baseline;
 		gap: 6px;
 	}
-	.wl-mark {
-		font-weight: 700;
+	/* Größe bleibt hier; Glyph/Farbe/Gewicht liefert die Mark-Komponente. */
+	.wl-pair :global(.wl-mark) {
 		font-size: var(--ds-text-sm);
 	}
 	.wl-bad {
@@ -54,16 +55,13 @@
 		text-decoration: line-through;
 		text-decoration-color: color-mix(in srgb, var(--ds-negative) 55%, transparent);
 	}
-	.wl-bad .wl-mark {
-		color: var(--ds-negative);
+	/* Marke selbst nicht durchstreichen (die Zeile hat line-through). */
+	.wl-bad :global(.wl-mark) {
 		text-decoration: none;
 	}
 	.wl-good {
 		color: var(--ds-text);
 		font-weight: 500;
-	}
-	.wl-good .wl-mark {
-		color: var(--ds-positive);
 	}
 	.wl-arrow {
 		color: var(--ds-text-faint);

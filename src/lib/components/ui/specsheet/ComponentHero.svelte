@@ -99,4 +99,10 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.figma-cta {
+			transition: none;
+		}
+	}
 </style>

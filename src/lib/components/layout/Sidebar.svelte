@@ -42,7 +42,7 @@
 					href={menu.href}
 					items={menu.items}
 					initiallyOpen={false}
-					onClick={() => {
+					onclick={() => {
 						if (!isDesktop) {
 							closeMenu();
 						}

@@ -9,7 +9,7 @@
 		href?: string;
 		items?: MenuItem[];
 		initiallyOpen?: boolean;
-		onClick?: () => void;
+		onclick?: () => void;
 		badge?: string;
 		badgeVariant?: BadgeVariant;
 		isUserLoggedIn: boolean;
@@ -20,7 +20,7 @@
 		href,
 		items = [],
 		initiallyOpen = false,
-		onClick = () => {},
+		onclick = () => {},
 		badge,
 		badgeVariant = 'ready',
 		isUserLoggedIn
@@ -71,7 +71,7 @@
 					if (items.length) {
 						toggleMenu(e);
 					} else {
-						onClick?.();
+						onclick?.();
 					}
 				}}
 				class="collapsible-link {isActive(href) ? 'active' : ''}"
@@ -103,7 +103,7 @@
 										e.preventDefault();
 										return;
 									}
-									onClick();
+									onclick();
 								}}
 								class="submenu-link {isActive(item.href) ? 'active' : ''} {item.locked &&
 								!isUserLoggedIn

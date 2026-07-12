@@ -1,36 +1,25 @@
 <!-- A11yList.svelte — Barrierefreiheit als native, adaptive Liste. -->
 <script lang="ts">
 	import type { A11yItem } from '$types/spec';
+	import SpecRow from './SpecRow.svelte';
 	let { items = [] }: { items?: A11yItem[] } = $props();
 </script>
 
 {#if items.length}
 	<dl class="a11y">
 		{#each items as a}
-			<div class="row">
+			<SpecRow>
 				<dt><span class="dot dot--{a.status}"></span>{a.label}</dt>
 				<dd>{a.wert}</dd>
-			</div>
+			</SpecRow>
 		{/each}
 	</dl>
 {/if}
 
 <style>
 	.a11y {
-		--a11y-label-col: 160px; /* Label-Spalte, bewusstes Layout-Maß ohne z-ds-Token */
 		margin: 0;
 		max-width: 640px;
-	}
-	.row {
-		display: grid;
-		grid-template-columns: var(--a11y-label-col) 1fr;
-		gap: var(--z-ds-space-16);
-		align-items: baseline;
-		padding: var(--z-ds-space-12) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	.row:last-child {
-		border-bottom: 0;
 	}
 	dt {
 		display: flex;
@@ -58,11 +47,5 @@
 	}
 	.dot--todo {
 		background: var(--ds-text-faint);
-	}
-	@media (max-width: 520px) {
-		.row {
-			grid-template-columns: 1fr;
-			gap: var(--z-ds-space-4);
-		}
 	}
 </style>

@@ -52,7 +52,7 @@
 	>
 		<CopyButton
 			class="btn-copy"
-			onCopy={() => navigator.clipboard?.writeText(copyValue())}
+			oncopy={() => navigator.clipboard?.writeText(copyValue())}
 			ariaLabel={`${copyHex ? 'Hex-Wert' : 'Token'} von „${title}" kopieren`}
 			feedback="toast"
 			toastMessage={`${copyHex ? 'Hex-Wert' : 'Token'} von „${title}" in die Zwischenablage kopiert.`}
