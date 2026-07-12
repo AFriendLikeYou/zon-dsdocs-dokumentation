@@ -693,7 +693,7 @@
 <svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
 
 <div class="edit">
-	<nav class="crumb"><a href="/admin/brand">← Alle Brand-Seiten</a></nav>
+	<nav class="crumb"><a href={data.backHref}>← {data.backLabel}</a></nav>
 	<h1>
 		{data.title}{#if !data.writable}<span class="ro-chip">Nur lesen</span>{/if}
 	</h1>

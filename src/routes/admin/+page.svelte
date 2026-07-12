@@ -41,8 +41,8 @@
 							>{item.title}{#if item.badge}<span class="badge">{item.badge}</span>{/if}</span
 						>
 						<span class="actions">
-							{#if item.editSlug}
-								<a class="act act--edit" href="/admin/{item.editSlug}">Bearbeiten</a>
+							{#if item.editHref}
+								<a class="act act--edit" href={item.editHref}>Bearbeiten</a>
 							{:else}
 								<span class="code-note" title="Diese Seite lebt im Code, nicht im CMS."
 									>Code-Seite</span
