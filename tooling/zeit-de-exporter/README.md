@@ -152,6 +152,48 @@ npm run export:all        # oder: node tooling/zeit-de-exporter/export-all.mjs [
 und Inline-Validierung. Portabel auch via `"$schema"`-Zeile im `model.json` (wird beim
 Export ignoriert, landet nicht in `spec.generated.ts`).
 
+## `fetch.mjs` (CLI) — figma-raw.json headless per REST API
+
+Vorgelagerter Schritt der Import-Pipeline
+(**Figma → `figma-raw.json` → `draft.mjs` → `model.json` → `export.mjs`**).
+`fetch.mjs` erzeugt die `figma-raw.json` exakt, headless und tokengünstig über die
+**Figma REST API** — als Alternative zur token-teuren MCP-Route (Desktop-App +
+LLM-Ausgabe). Das Ausgabeformat ist **identisch** zum figma-measure.js-Output, den
+`draft.mjs` erwartet (Top-Level: `set · props · variantCount · variants · unbound ·
+mutations`).
+
+```bash
+# Token bereitstellen (persönliches Access-Token, Scope „File content: read"):
+#   Repo-Root-.env:  FIGMA_TOKEN=…      (gitignored, NIE committen)
+#   oder:            export FIGMA_TOKEN=…
+
+# Node-URL ODER fileKey:nodeId; optionaler Zielordner (schreibt <ordner>/figma-raw.json):
+node tooling/zeit-de-exporter/fetch.mjs \
+  "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/ZDS?node-id=215-16" \
+  src/routes/product/components/button
+
+node tooling/zeit-de-exporter/fetch.mjs noSbKhOFRaqQh8eyCEqgim:215:16   # → stdout (Report auf stderr)
+```
+
+**Component-Set-Auflösung:** Eine **Instanz** folgt `componentId → componentSetId`,
+eine einzelne **Component** ihrem Set; ein **Component-Set** wird direkt gemappt
+(zweiter REST-Request nur bei Bedarf). So landen immer alle Varianten in der
+`figma-raw.json` — nie nur eine Instanz.
+
+**Grenzen — Variablen-Namen:** Die REST-Nodes liefern nur boundVariables-**IDs**.
+Die Namen (z. B. `Background/10`, die `draft.mjs` auf `--z-ds-*` mappt) kommen aus
+`GET /v1/files/:key/variables/local` — **nur mit Enterprise-Plan**. Ohne Zugriff
+(403/404) degradiert `fetch.mjs` sauber:
+
+- IDs werden als `tokenId`/`gapTokenId`/`padTokenId`/`radiusTokenId` mitgeschrieben,
+  der `token`-**Name** bleibt leer, der Report vermerkt die Anzahl,
+- **es wird nie ein Wert geraten.** Die Namen dann via Figma-MCP
+  `get_variable_defs` ergänzen, **bevor** `draft.mjs` läuft — sonst bleiben die
+  Tokens im Draft leer (die Maße/px stimmen trotzdem).
+
+Der `unbound`-Report von figma-measure.js (Token-Kandidaten fürs ZDS) wird von der
+REST-Route nicht rekonstruiert (`unbound: []`).
+
 ## Verifikation
 
 ```bash
