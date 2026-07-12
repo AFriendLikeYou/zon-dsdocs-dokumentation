@@ -116,6 +116,25 @@
 	let partRects = $state<Record<number, Rect>>({});
 	let gapRects = $state<Record<number, Rect[]>>({});
 
+	// ——— Figma ↔ Code Drift-Check ———
+	// Vergleicht DEKLARIERTE Werte (getComputedStyle: padding/gap/radius — die
+	// CSS-Absicht) mit dem Figma-Sollwert aus model.json. Bewusst KEINE
+	// Text-Bounding-Boxen: Line-Box-Metriken unterscheiden sich systematisch
+	// zwischen Figma und Browser (kein echter Drift). Höhe als einzige
+	// Box-Messung (Buttons/Cells mit fixem Maß), Toleranz ±1px, erst nach
+	// document.fonts.ready (Fallback-Font-Metriken würden falsch alarmieren).
+	type Drift = { soll: string; ist: string };
+	let drift = $state<Record<string, Drift>>({});
+	const TOL = 1;
+	const num = (s?: string) => {
+		const m = s?.match(/\d+(?:\.\d+)?/);
+		return m ? Number(m[0]) : null;
+	};
+	function checkDrift(key: string, soll: number | null, ist: number, out: Record<string, Drift>) {
+		if (soll == null) return;
+		if (Math.abs(soll - ist) > TOL) out[key] = { soll: String(soll), ist: String(Math.round(ist)) };
+	}
+
 	function measureOverlays() {
 		if (!slotEl) return;
 		const base = slotEl.getBoundingClientRect();
@@ -166,11 +185,42 @@
 			if (strips.length) gaps[i] = strips;
 		});
 		gapRects = gaps;
+
+		// Drift: deklarierte Ist-Werte am Specimen-Root bzw. Gap-Container erheben.
+		// Nur eindeutig zuordenbare Werte prüfen: masse.hoehe/radius können sich bei
+		// Komposit-Patterns (Cell: 84 = Media-Kind) auf ein Kind beziehen — Radius
+		// deshalb nur, wenn der Root selbst sichtbar rundet; Höhe (einzige
+		// Box-Messung) gar nicht. Padding (Root) und Gap (expliziter selector)
+		// sind deklariert-vs-deklariert und bleiben scharf.
+		const root = slotEl.firstElementChild;
+		const d: Record<string, Drift> = {};
+		if (root instanceof HTMLElement) {
+			const st = getComputedStyle(root);
+			if (padBox) {
+				checkDrift('pad-v', padBox.t, parseFloat(st.paddingTop), d);
+				checkDrift('pad-h', padBox.l, parseFloat(st.paddingLeft), d);
+			}
+			const radiusIst = parseFloat(st.borderTopLeftRadius);
+			if (radiusIst > 0) checkDrift('radius', num(apx(masse?.radius ?? undefined)), radiusIst, d);
+		}
+		spacing.forEach((s, i) => {
+			if (s.art !== 'gap' || !s.selector) return;
+			const cont = slotEl?.querySelector(s.selector);
+			if (!cont) return;
+			const cst = getComputedStyle(cont);
+			// gap deklariert am Container (column- oder row-gap, je nach Achse belegt).
+			const ist = parseFloat(cst.columnGap) || parseFloat(cst.rowGap);
+			if (Number.isFinite(ist)) checkDrift(`gap-${i}`, num(s.px), ist, d);
+		});
+		drift = d;
 	}
 
 	$effect(() => {
 		if (!slotEl) return;
 		measureOverlays();
+		// Nach dem Font-Load erneut messen — sonst meldet der Drift-Check
+		// Fallback-Font-Metriken als falschen Alarm.
+		document.fonts?.ready.then(measureOverlays);
 		const ro = new ResizeObserver(measureOverlays);
 		ro.observe(slotEl);
 		return () => ro.disconnect();
@@ -312,7 +362,11 @@
 					<span class="dl" title="Breite">B&nbsp;{apx(masse.breite)}</span>
 				</div>{/if}
 			{#if masse.radius}<div class="rad" aria-hidden="true">
-					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}</span>
+					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
+								class="drift-mark"
+								title="Weicht ab — gerendert {drift.radius.ist}px">&nbsp;⚠</span
+							>{/if}</span
+					>
 				</div>{/if}
 		{/if}
 	</div>
@@ -385,6 +439,14 @@
 							>{/if}
 					</span>
 					<span class="sp-val">
+						{#if key && drift[key]}
+							<!-- Figma-Soll ≠ gerendertes Ist: Vertragsverletzung sichtbar machen. -->
+							<span
+								class="drift-badge"
+								title="Figma sagt {drift[key].soll}px, das Pattern rendert {drift[key].ist}px"
+								>⚠ gerendert {drift[key].ist} px</span
+							>
+						{/if}
 						<span class="sp-px">{s.px}</span>
 						{#if s.token}<code class="sp-token">{s.token}</code>{/if}
 					</span>
@@ -880,6 +942,20 @@
 		margin-left: 6px;
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-xs);
+	}
+	/* Drift-Badge: Figma-Soll ≠ gerendertes Ist (Warn-Kanal, kein Akzentrot —
+	   es ist ein Datenbefund, kein Fehler der Seite). */
+	.drift-badge {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text);
+		background: color-mix(in srgb, var(--z-ds-color-background-warning) 30%, transparent);
+		border: 1px solid color-mix(in srgb, var(--z-ds-color-background-warning) 60%, transparent);
+		border-radius: 999px;
+		padding: 1px 8px;
+		white-space: nowrap;
+	}
+	.drift-mark {
+		cursor: help;
 	}
 	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
 	.herkunft {
