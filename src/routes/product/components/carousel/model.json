@@ -404,34 +404,6 @@
 		}
 	],
 	"render": {
-		"presets": [
-			{
-				"label": "Standard mit Controls",
-				"state": {
-					"viewMode": "standard",
-					"noControls": false
-				}
-			},
-			{
-				"label": "Ohne Controls",
-				"state": {
-					"noControls": true
-				}
-			},
-			{
-				"label": "Single",
-				"state": {
-					"viewMode": "single"
-				}
-			},
-			{
-				"label": "Overlay-Pfeile",
-				"state": {
-					"viewMode": "standard",
-					"overlay": true
-				}
-			}
-		],
 		"controls": [
 			{
 				"key": "viewMode",

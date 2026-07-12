@@ -16,7 +16,6 @@ import type { ComponentSpec } from '$types/spec';
 export type AgentRender = {
 	controls?: Array<Record<string, unknown>>;
 	template?: string;
-	presets?: Array<{ label: string; state: Record<string, unknown> }>;
 	props?: Array<{ name: string; typ: string; default?: string; beschreibung?: string }>;
 	variantInfo?: Record<string, string>;
 	[key: string]: unknown;

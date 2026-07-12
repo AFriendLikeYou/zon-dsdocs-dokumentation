@@ -126,7 +126,6 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
   = `geschätzt`. `gemessen` ist der Normalfall und darf weggelassen werden (kein Badge); nur
   Abweichungen (`abgeleitet`/`geschätzt`) bekommen ein dezentes Badge. Nie einen geschätzten
   Wert als gemessen ausgeben.
-- **`presets`** für benannte Beispiel-Kombinationen.
 - **`dokumentiertAm`/`aktualisiertAm`:** Erstdokumentation bzw. letzter Sync — speisen
   die automatischen Nav-Badges („Neu" 14 Tage ab Erstdoku, danach „Update" 14 Tage ab
   Aktualisierung; Logik `badgeFor` in `catalog.ts`, Override-Map pinnt bei Bedarf).
@@ -170,7 +169,7 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 ## Checkliste
 
 - [ ] Node zum Component-Set aufgelöst, Fakten notiert
-- [ ] `model.json` (Tokens = `--z-ds-*`, `varianten[].cssClass`, `spacing`, `presets`)
+- [ ] `model.json` (Tokens = `--z-ds-*`, `varianten[].cssClass`, `spacing`)
 - [ ] `farbrollen` aus den Figma-States gebaut (Teil × Zustand → Token; `"none"` = kein Fill)
 - [ ] `herkunft` je `masse`/`spacing` gesetzt (Figma = gemessen, berechnet = abgeleitet, Platzhalter = geschätzt)
 - [ ] `pattern.css` (flach, originalgetreu) — falls nötig

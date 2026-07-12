@@ -12,7 +12,6 @@ kategorie: Formulare
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -21,7 +20,6 @@ kategorie: Formulare
 	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"right","y":50}];
 	const playgroundControls = [{"key":"checked","label":"Checked","type":"toggle","cssClass":"z-checkbox--checked"},{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-checkbox--hover"},{"value":"focus","label":"Focus","cssClass":"z-checkbox--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-checkbox--disabled"}]}];
 	const playgroundTemplate = `<span class="z-checkbox{classes}"><span class="z-checkbox__check"></span></span>`;
-	const playgroundPresets = [{"label":"Aus","state":{"checked":false,"state":"default"}},{"label":"An","state":{"checked":true,"state":"default"}},{"label":"Fokus","state":{"checked":false,"state":"focus"}},{"label":"Deaktiviert","state":{"checked":true,"state":"disabled"}}];
 	const htmlCode = `<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>
 <span class="z-checkbox z-checkbox--focus"><span class="z-checkbox__check"></span></span>`;
 	const patternCssCode = `/* z-checkbox — Auswahlkästchen (Checkbox), originalgetreu aus Figma ❖ ZDS
@@ -99,10 +97,8 @@ kategorie: Formulare
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

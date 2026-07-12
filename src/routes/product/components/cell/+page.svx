@@ -12,7 +12,6 @@ kategorie: Inhalte
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -29,7 +28,6 @@ kategorie: Inhalte
     <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
   </div>
 </article>`;
-	const playgroundPresets = [{"label":"Standard","state":{"type":"article","small":false}},{"label":"Schlagzeile","state":{"type":"headline","small":false}},{"label":"Mit Bild","state":{"type":"artikel","small":false}},{"label":"Kompakt","state":{"type":"artikel","small":true}}];
 	const htmlCode = `<!-- Cell-Styles global einbinden (z. B. cell.css) -->
 <article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
 <article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
@@ -305,10 +303,8 @@ kategorie: Inhalte
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

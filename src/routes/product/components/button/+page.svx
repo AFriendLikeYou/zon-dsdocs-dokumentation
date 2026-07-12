@@ -12,7 +12,6 @@ kategorie: Aktionen
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, DoDontVisual, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -116,10 +115,8 @@ kategorie: Aktionen
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

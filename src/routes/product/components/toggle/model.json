@@ -215,20 +215,6 @@
 		],
 		"template": "<button class=\"z-switch{classes}\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>",
 		"cssFile": "./pattern.css",
-		"presets": [
-			{
-				"label": "Aus",
-				"state": {
-					"on": false
-				}
-			},
-			{
-				"label": "An",
-				"state": {
-					"on": true
-				}
-			}
-		],
 		"preview": "<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>",
 		"variant": "<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel\"><span class=\"z-switch__thumb\"></span></button>",
 		"calloutAnchors": [

@@ -5,7 +5,11 @@
 	let activeId = $state('');
 
 	function updateTableOfContents() {
-		headings = Array.from(document.querySelectorAll('h2') as NodeListOf<HTMLElement>).map(
+		// Nur Content-Überschriften (#main-content) — Footer-/Navigations-h2s
+		// (GRUNDLAGEN, COMPONENTS, …) gehören nicht ins Seiten-Inhaltsverzeichnis.
+		headings = Array.from(
+			document.querySelectorAll('#main-content h2') as NodeListOf<HTMLElement>
+		).map(
 			(heading) => ({
 				id: heading.id || heading.innerText.toLowerCase().replace(/\W+/g, '-'),
 				text: heading.innerText,

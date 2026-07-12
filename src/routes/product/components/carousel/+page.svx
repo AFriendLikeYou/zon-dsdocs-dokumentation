@@ -11,7 +11,6 @@ kategorie: Medien
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, StateList, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -39,7 +38,6 @@ kategorie: Medien
     </fieldset>
   </div>
 </div>`;
-	const playgroundPresets = [{"label":"Standard mit Controls","state":{"viewMode":"standard","noControls":false}},{"label":"Ohne Controls","state":{"noControls":true}},{"label":"Single","state":{"viewMode":"single"}},{"label":"Overlay-Pfeile","state":{"viewMode":"standard","overlay":true}}];
 	const htmlCode = `<div class="z-carousel"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__dots-wrapper" role="radiogroup" aria-label="Slide-Auswahl"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 3"></div></div>`;
 	const patternCssCode = `/* z-carousel — Karussell (zon-carousel), originalgetreu aus dem zeit.de-CSS
    portiert. Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
@@ -319,10 +317,8 @@ kategorie: Medien
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

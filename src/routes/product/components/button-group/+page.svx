@@ -11,12 +11,12 @@ kategorie: Aktionen
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, StateList, RelatedComponents, CodeBlock, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
-	import { SectionNav } from '$components/ui/section-nav';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
+	const htmlCode = `<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>`;
 	const patternCssCode = `/* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .buttongroup {
 	list-style: none;
@@ -80,13 +80,12 @@ button.buttongroup-button {
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Zustände","href":"#zustaende"},{"label":"Verwandte","href":"#verwandte"}]} />
-	<div id="playground" class="section-anchor">
-		<Specimen spec={spec} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Specimen spec={spec} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts}>
+		{#snippet preview()}<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>{/snippet}
 	</Anatomy>
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
@@ -99,6 +98,7 @@ button.buttongroup-button {
 {#snippet developTab()}
 
 	<h2>Code</h2>
+	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
 {/snippet}
 

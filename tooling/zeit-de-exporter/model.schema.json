@@ -348,7 +348,7 @@
 			"properties": {
 				"key": {
 					"type": "string",
-					"description": "Eindeutiger Schlüssel (auch in presets referenziert)."
+					"description": "Eindeutiger Schlüssel des Controls."
 				},
 				"label": { "type": "string" },
 				"type": { "enum": ["select", "toggle", "attr"] },
@@ -377,18 +377,6 @@
 				}
 			}
 		},
-		"preset": {
-			"type": "object",
-			"additionalProperties": false,
-			"required": ["label", "state"],
-			"properties": {
-				"label": { "type": "string", "description": "Name des Beispiels, z. B. \"Mit Bild\"." },
-				"state": {
-					"type": "object",
-					"description": "Setzt Control-Werte auf einmal (Schlüssel = control.key)."
-				}
-			}
-		},
 		"render": {
 			"type": "object",
 			"description": "Repo-Verdrahtung (Playground, CSS, Code) — wird beim Export vom Datenmodell abgezogen.",
@@ -406,11 +394,6 @@
 				"cssFile": {
 					"type": "string",
 					"description": "Pfad zur co-locateten pattern.css (unscoped, echte --z-ds-*-Token)."
-				},
-				"presets": {
-					"type": "array",
-					"items": { "$ref": "#/$defs/preset" },
-					"description": "Benannte Beispiele/„Rezepte\"."
 				},
 				"specimen": {
 					"type": "string",

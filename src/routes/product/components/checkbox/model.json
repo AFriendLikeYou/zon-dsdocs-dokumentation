@@ -285,36 +285,6 @@
 		],
 		"template": "<span class=\"z-checkbox{classes}\"><span class=\"z-checkbox__check\"></span></span>",
 		"cssFile": "./pattern.css",
-		"presets": [
-			{
-				"label": "Aus",
-				"state": {
-					"checked": false,
-					"state": "default"
-				}
-			},
-			{
-				"label": "An",
-				"state": {
-					"checked": true,
-					"state": "default"
-				}
-			},
-			{
-				"label": "Fokus",
-				"state": {
-					"checked": false,
-					"state": "focus"
-				}
-			},
-			{
-				"label": "Deaktiviert",
-				"state": {
-					"checked": true,
-					"state": "disabled"
-				}
-			}
-		],
 		"preview": "<span class=\"z-checkbox z-checkbox--checked\"><span class=\"z-checkbox__check\"></span></span>",
 		"variant": "<span class=\"z-checkbox z-checkbox--focus\"><span class=\"z-checkbox__check\"></span></span>",
 		"calloutAnchors": [

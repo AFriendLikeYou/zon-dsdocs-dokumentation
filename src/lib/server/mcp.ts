@@ -146,9 +146,6 @@ function sectionMarkup(e: AgentCatalogEntry): string {
 			out += `  - ${c.key} (${c.type})${c.cssClass ? ` → .${c.cssClass}` : ''}${c.attr ? ` → [${c.attr}]` : ''}\n`;
 		}
 	}
-	if (Array.isArray(r.presets) && r.presets.length) {
-		out += `Presets: ${r.presets.map((p) => p.label).join(', ')}\n`;
-	}
 	if (e.patternCss) out += `\npattern.css:\n${e.patternCss}\n`;
 	return out;
 }

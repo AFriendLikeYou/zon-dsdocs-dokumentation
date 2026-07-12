@@ -12,7 +12,6 @@ kategorie: Formulare
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -21,7 +20,6 @@ kategorie: Formulare
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50},{"nr":2,"side":"top","x":70}];
 	const playgroundControls = [{"key":"on","label":"An","type":"toggle","cssClass":"z-switch--on"}];
 	const playgroundTemplate = `<button class="z-switch{classes}" type="button" role="switch" aria-checked="false" aria-label="Beispiel-Schalter"><span class="z-switch__thumb"></span></button>`;
-	const playgroundPresets = [{"label":"Aus","state":{"on":false}},{"label":"An","state":{"on":true}}];
 	const htmlCode = `<button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>
 <button class="z-switch" type="button" role="switch" aria-checked="false" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>`;
 	const patternCssCode = `/* z-switch — Umschalter (Toggle, Web-Variante), aus Figma ❖ ZDS (node 2845:5966).
@@ -83,10 +81,8 @@ kategorie: Formulare
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

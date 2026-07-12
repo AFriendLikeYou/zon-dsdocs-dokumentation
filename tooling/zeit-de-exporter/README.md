@@ -90,7 +90,6 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
   "template": "<button class=\"z-button{classes}\"{attrs}>Click me</button>", // EINE Instanziierung → Preview UND Code
   "cssFile": "./pattern.css",     // UNSCOPED, co-located; wird gegen .spec-canvas / .pg-preview
                                   // gescoped (v1: flache Regeln, keine At-Rules) und verbatim im Develop-Tab gezeigt
-  "presets": [ { "label": "Primary Voll", "state": { "variant": "primary", "fullwidth": true } } ], // „Rezepte": ein Klick setzt mehrere Controls
   "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion statt template; darf NUR Registry-Daten konsumieren
   "hint": "Keine Varianten.",      // Hinweiszeile statt Controls
   "stage": { "darkKey": "onImage" }, // Bühne startet dunkel, wenn dieser Toggle aktiv ist
@@ -103,7 +102,7 @@ Weitere `render`-Felder:
 
 | Feld                         | Zweck                                                                                                                                                                                                                                                                |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `preview`, `variant`         | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`)                                                                                                                                                                                          |
+| `preview`, `variant`         | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`). Fehlt `preview`, aber es gibt ein `template`, nutzt die Anatomie das mit den Control-Defaults instanziierte Template.                                                                     |
 | `matrix`                     | `{ label, html }[]` → beschriftete Specimen-Kacheln. Zellen, deren Label ein einzelner Zustands-Name ist (z. B. „Active"), speisen das **Zustände**-`SpecimenGrid`; Nicht-Zustands-Zellen dienen als **Varianten**-Fallback, falls kein `render.template` existiert. |
 | `calloutAnchors`             | `{ nr, side, x?, y? }[]` → Position der Anatomie-Callouts                                                                                                                                                                                                            |
 | `props`                      | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen                                                                                   |
@@ -125,7 +124,7 @@ Badge (Abwesenheit = gemessen).
 
 Der Exporter **validiert** die Eingabe (harte Fehler brechen ab, weiche warnen):
 Pflichtfeld `name`, gültige `controls` (key/type/options/attr), `template` mit
-`{classes}`/`{attrs}`, `presets`-Keys gegen Controls, `wording` mit `schlecht`+`gut`.
+`{classes}`/`{attrs}`, `wording` mit `schlecht`+`gut`.
 Für `farbrollen` warnt der Exporter, wenn ein Zustand-Key in `tokensProZustand` nicht
 in `zustaende` steht oder ein Token weder `--z-ds-*` noch `"none"` ist.
 

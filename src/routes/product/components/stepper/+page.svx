@@ -12,7 +12,6 @@ kategorie: Formulare
 	import { Tabs } from '$components/ui/tab';
 	import { ComponentHero, Anatomy, SpecimenGrid, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -25,7 +24,6 @@ kategorie: Formulare
   <span class="z-stepper__val">2</span>
   <button class="z-stepper__plus" type="button" aria-label="Mehr"></button>
 </div>`;
-	const playgroundPresets = [{"label":"Standard","state":{"state":"default"}},{"label":"Fokus","state":{"state":"focus"}},{"label":"Deaktiviert","state":{"state":"disabled"}}];
 	const htmlCode = `<div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div>
 <div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div>`;
 	const patternCssCode = `/* z-stepper — Zahl-Stepper (−/Wert/+), originalgetreu aus Figma ❖ ZDS
@@ -134,10 +132,8 @@ kategorie: Formulare
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

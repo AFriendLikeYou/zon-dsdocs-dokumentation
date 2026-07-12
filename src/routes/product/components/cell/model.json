@@ -334,36 +334,6 @@
 		}
 	],
 	"render": {
-		"presets": [
-			{
-				"label": "Standard",
-				"state": {
-					"type": "article",
-					"small": false
-				}
-			},
-			{
-				"label": "Schlagzeile",
-				"state": {
-					"type": "headline",
-					"small": false
-				}
-			},
-			{
-				"label": "Mit Bild",
-				"state": {
-					"type": "artikel",
-					"small": false
-				}
-			},
-			{
-				"label": "Kompakt",
-				"state": {
-					"type": "artikel",
-					"small": true
-				}
-			}
-		],
 		"controls": [
 			{
 				"key": "type",

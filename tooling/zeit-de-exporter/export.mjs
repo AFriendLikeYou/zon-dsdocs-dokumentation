@@ -51,9 +51,10 @@ function camelCase(kebab) {
 	return kebab.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 }
 
-/** Deutschen Sektions-Titel auf eine stabile Anker-id abbilden (SectionNav, Paket C).
- *  Feste Map statt kebabCase(label), damit „Do & Don't"/„Texte & Wording" saubere,
- *  URL-freundliche ids bekommen und über Re-Exports hinweg stabil bleiben. */
+/** Deutschen Sektions-Titel auf eine stabile Anker-id abbilden (die rechte
+ *  TableOfContents des Layouts sammelt die h2[id]). Feste Map statt kebabCase(label),
+ *  damit „Do & Don't"/„Texte & Wording" saubere, URL-freundliche ids bekommen und
+ *  über Re-Exports hinweg stabil bleiben. */
 const SECTION_IDS = {
 	Playground: 'playground',
 	Anatomie: 'anatomie',
@@ -252,6 +253,20 @@ function instantiate(template, controls, state) {
 		.replaceAll('{attrs}', attrs);
 }
 
+/** Default-Zustand der Controls (für die instanziierte Anatomie-Vorschau): explizites
+ *  control.default gewinnt, sonst erster select-option-value bzw. false für toggle/attr.
+ *  Deckungsgleich mit dem Startzustand des Playgrounds. */
+function defaultControlState(controls) {
+	const state = {};
+	for (const c of Array.isArray(controls) ? controls : []) {
+		if (!c || !c.key) continue;
+		if (c.default !== undefined) state[c.key] = c.default;
+		else if (c.type === 'select') state[c.key] = c.options?.[0]?.value;
+		else state[c.key] = false;
+	}
+	return state;
+}
+
 const _norm = (s) => String(s).toLowerCase().trim();
 /** Label in Zustands-Tokens zerlegen (an ·, /, +, Komma), z. B. „Active / Focus". */
 const _tokens = (label) =>
@@ -396,7 +411,19 @@ function buildStateItems(model) {
 function renderPage(model, { patternCss = null } = {}) {
 	const render = model.render ?? {};
 	const S = 'spec'; // lokale, zusammengeführte Konstante (generated + content)
-	const previewSlot = render.preview ? `\t\t${asSnippet(render.preview, 'preview')}\n` : '';
+	// Anatomie-Specimen: explizites render.preview gewinnt; fehlt es, aber es gibt ein
+	// render.template, instanziieren wir es mit den Control-Defaults (gleicher Mirror wie
+	// der Playground) — sonst bekäme die Anatomie-Bühne nur schwebende Maß-Labels ohne Objekt.
+	const previewMarkup =
+		render.preview ??
+		(typeof render.template === 'string'
+			? instantiate(
+					render.template,
+					Array.isArray(render.controls) ? render.controls : [],
+					defaultControlState(render.controls)
+				)
+			: null);
+	const previewSlot = previewMarkup ? `\t\t${asSnippet(previewMarkup, 'preview')}\n` : '';
 	// render.variant wird bewusst NICHT mehr in die Anatomie emittiert — die Anatomie
 	// zeigt nur die Default-Version in Originalgröße; Varianten leben in der Varianten-Sektion.
 
@@ -456,7 +483,6 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Instanziierung im Playground-Harness. specimen ist die Ausnahme für Patterns mit
 	// Loop/Interaktion und darf nur Registry-Daten konsumieren.
 	const pgControls = Array.isArray(render.controls) ? render.controls : [];
-	const pgPresets = Array.isArray(render.presets) ? render.presets : [];
 	const pgTemplate = typeof render.template === 'string' ? render.template : null;
 	const pgSpecimen = typeof render.specimen === 'string' ? render.specimen : null;
 	const pgHint = typeof render.hint === 'string' ? render.hint : null;
@@ -497,19 +523,6 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse || hasColorRoles;
 
-	// In-Page-Sprungleiste (SectionNav, Paket C) nur bei ≥ 4 Design-Tab-Sektionen.
-	// Zählung deckungsgleich mit dem Aufbau des Design-Tabs weiter unten.
-	const designSectionCount =
-		(hasSpecimenPg || hasTemplatePg ? 1 : 0) +
-		(hasAnatomy ? 1 : 0) +
-		(hasUsage ? 1 : 0) +
-		(hasWording ? 1 : 0) +
-		(hasVariants ? 1 : 0) +
-		(hasStates ? 1 : 0) +
-		(hasDoDont || hasDoDontVisual ? 1 : 0) +
-		(hasRelated ? 1 : 0);
-	const hasSectionNav = designSectionCount >= 4;
-
 	// Nur tatsächlich genutzte Komponenten importieren.
 	const used = new Set(['ComponentHero']);
 	if (hasAnatomy) used.add('Anatomy');
@@ -536,7 +549,6 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
-		(hasSectionNav ? `\timport { SectionNav } from '$components/ui/section-nav';\n` : '') +
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
@@ -548,8 +560,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
 			? `\tconst playgroundControls = ${JSON.stringify(pgControls)};\n` +
-				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n` +
-				(pgPresets.length ? `\tconst playgroundPresets = ${JSON.stringify(pgPresets)};\n` : '')
+				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n`
 			: '') +
 		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
 		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
@@ -564,23 +575,20 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02):
 	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
 	// Zustände) · 4) Do/Don'ts.
-	// Nebenbei sammeln wir die vorhandenen Sektionen für die In-Page-Sprungleiste
-	// (SectionNav, Paket C): jede Sektion trägt eine stabile id + class="section-anchor".
-	const designSections = []; // [{ label, id }] in Erscheinungsreihenfolge
+	// Jede Sektion trägt eine stabile id + class="section-anchor"; die rechte
+	// TableOfContents des Layouts sammelt die h2[id] und listet sie auf.
 	let design = '';
 	if (hasSpecimenPg || hasTemplatePg) {
-		designSections.push({ label: 'Playground', id: SECTION_IDS.Playground });
+		design += `\t<h2 id="${SECTION_IDS.Playground}" class="section-anchor">Playground</h2>\n`;
 		if (hasSpecimenPg) {
-			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Specimen spec={${S}} />\n\t</div>\n`;
+			design += `\t<Specimen spec={${S}} />\n`;
 		} else {
 			const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
 			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
-			const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
-			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} align={${S}.playground?.align} resizable={${S}.playground?.resizable} />\n\t</div>\n`;
+			design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} align={${S}.playground?.align} resizable={${S}.playground?.resizable} />\n`;
 		}
 	}
 	if (hasAnatomy) {
-		designSections.push({ label: 'Anatomie', id: SECTION_IDS.Anatomie });
 		design +=
 			`\n\t<h2 id="${SECTION_IDS.Anatomie}" class="section-anchor">Anatomie</h2>\n` +
 			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
@@ -588,21 +596,17 @@ function renderPage(model, { patternCss = null } = {}) {
 			`\t</Anatomy>\n`;
 	}
 	if (hasUsage) {
-		designSections.push({ label: 'Verwendung', id: SECTION_IDS.Verwendung });
 		design += `\n\t<h2 id="${SECTION_IDS.Verwendung}" class="section-anchor">Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
 	}
 	if (hasWording) {
-		designSections.push({ label: 'Wording', id: SECTION_IDS.Wording });
 		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
 	}
 	if (hasVariants) {
-		designSections.push({ label: 'Varianten', id: SECTION_IDS.Varianten });
 		design +=
 			`\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n` +
 			`\t<SpecimenGrid items={variantItems} />\n`;
 	}
 	if (hasStates) {
-		designSections.push({ label: 'Zustände', id: SECTION_IDS.Zustände });
 		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n`;
 		// Renderbare Zustände als beschriftete Live-Kacheln …
 		if (hasStateGrid) design += `\t<SpecimenGrid items={stateItems} />\n`;
@@ -612,20 +616,12 @@ function renderPage(model, { patternCss = null } = {}) {
 			design += `\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
 	}
 	if (hasDoDont || hasDoDontVisual) {
-		designSections.push({ label: "Do & Don't", id: SECTION_IDS["Do & Don't"] });
 		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n`;
 		if (hasDoDont) design += `\t<DoDontList doDont={${S}.doDont} />\n`;
 		if (hasDoDontVisual) design += `\t<DoDontVisual beispiele={${S}.doDontBeispiele} />\n`;
 	}
 	if (hasRelated) {
-		designSections.push({ label: 'Verwandte', id: SECTION_IDS['Verwandte Komponenten'] });
 		design += `\n\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
-	}
-
-	// In-Page-Sprungleiste als erste Zeile des Tabs (hasSectionNav oben berechnet).
-	if (hasSectionNav) {
-		const navItems = designSections.map((s) => ({ label: s.label, href: `#${s.id}` }));
-		design = `\t<SectionNav items={${JSON.stringify(navItems)}} />\n` + design;
 	}
 
 	// ---- Develop-Tab ----
@@ -754,9 +750,6 @@ function validate(model, { root = process.cwd() } = {}) {
 
 	const render = model.render ?? {};
 	const controls = Array.isArray(render.controls) ? render.controls : [];
-	const keys = new Set();
-	// key → Set gültiger option-values (für preset-Wert-Prüfung); toggles nehmen true/false.
-	const optionValues = new Map();
 
 	for (const [i, c] of controls.entries()) {
 		const at = `render.controls[${i}]${c?.key ? ` "${c.key}"` : ''}`;
@@ -765,7 +758,6 @@ function validate(model, { root = process.cwd() } = {}) {
 			continue;
 		}
 		if (!c.key) errors.push(`${at}: key fehlt`);
-		else keys.add(c.key);
 		if (!['select', 'toggle', 'attr'].includes(c.type))
 			errors.push(`${at}: type muss select | toggle | attr sein (ist "${c.type}")`);
 		if (c.type === 'select') {
@@ -777,7 +769,6 @@ function validate(model, { root = process.cwd() } = {}) {
 					if (!o || o.value == null || o.label == null)
 						errors.push(`${at}.options[${j}]: value und label nötig`);
 					else values.add(o.value);
-				if (c.key) optionValues.set(c.key, values);
 				// default (wenn gesetzt) muss ein bekannter option-value sein.
 				if (c.default != null && !values.has(c.default))
 					errors.push(
@@ -795,27 +786,6 @@ function validate(model, { root = process.cwd() } = {}) {
 		errors.push('render.controls gesetzt, aber weder template noch specimen vorhanden');
 	if (typeof render.template === 'string' && !/\{classes\}|\{attrs\}/.test(render.template))
 		warnings.push('render.template hat weder {classes} noch {attrs} — Controls greifen nicht');
-
-	// presets müssen bekannte control-keys setzen.
-	if (Array.isArray(render.presets))
-		for (const [i, p] of render.presets.entries()) {
-			if (!p?.label) errors.push(`render.presets[${i}]: label fehlt`);
-			if (!p?.state || typeof p.state !== 'object')
-				errors.push(`render.presets[${i}]: state-Objekt fehlt`);
-			else
-				for (const [k, v] of Object.entries(p.state)) {
-					if (keys.size && !keys.has(k)) {
-						warnings.push(`render.presets[${i}].state: "${k}" ist kein control-key`);
-						continue;
-					}
-					// Wert gegen die gültigen option-values des select-Controls prüfen.
-					const values = optionValues.get(k);
-					if (values && !values.has(v))
-						warnings.push(
-							`render.presets[${i}].state: "${k}" = ${JSON.stringify(v)} ist kein option-value (${[...values].join(', ')})`
-						);
-				}
-		}
 
 	// variantInfo (redaktionell) ohne Varianten → wird nie gerendert.
 	if (

@@ -31,7 +31,10 @@
 	const menuItems = $derived(isProduct ? MENU_ITEMS_PRODUCT : MENU_ITEMS_BRAND);
 	const flatMenuItems = $derived(isProduct ? FLAT_MENU_ITEMS_PRODUCT : FLAT_MENU_ITEMS_BRAND);
 	const showFooterNav = $derived(section !== 'root');
-	const showTOC = $derived(section === 'brand');
+	// Rechte „Auf dieser Seite"-Spalte für Brand UND Product — auf den generierten
+	// Component-Seiten ersetzt sie die frühere SectionNav-Pill-Leiste (h2[id]-basiert;
+	// Tab-Wechsel werden über den MutationObserver der TOC erfasst).
+	const showTOC = $derived(section === 'brand' || section === 'product');
 
 	import TableOfContents from '$components/layout/TableOfContents.svelte';
 	import Footer from '$components/layout/Footer.svelte';
