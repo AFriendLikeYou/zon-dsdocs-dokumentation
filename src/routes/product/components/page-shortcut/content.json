@@ -1,4 +1,67 @@
 {
 	"zweck": "Umrandeter Shortcut zu einem Seitenziel — ein einzelner Stil mit Hover- und Focus-State, bewusst ohne Varianten.",
-	"status": "ready_for_dev"
+	"status": "ready_for_dev",
+	"verwandt": ["button", "text-button"],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "Führt der Shortcut auf ein Seitenziel, als Link (a) auszeichnen; nur bei echter Aktion als <button>.",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter (Link) bzw. Enter / Leertaste (Button) lösen nativ aus.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (in der Pattern-CSS vorhanden).",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Label",
+			"wert": "Text/100 #252525 auf Weiß ≈ 15:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Rahmen-Kontrast",
+			"wert": "Border/70 #e4e4e4 auf Weiß ≈ 1.2:1 — nicht-textlicher Indikator; Hover/Focus verstärken auf Border/100.",
+			"status": "warn"
+		},
+		{
+			"label": "Touch-Target",
+			"wert": "Höhe 34px < 44px — für Touch ggf. Trefferfläche vergrößern.",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Shortcut."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Folgt dem Ziel bzw. löst die Aktion aus (nativ)."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Als Sprungziel zu einer konkreten Seite einsetzen; Label kurz und richtungsweisend („Zur Startseite“).",
+			"Ein passendes Richtungs-/Zielsymbol im Icon-Slot ergänzen."
+		],
+		"dont": [
+			"Nicht für auslösende Aktionen (Speichern/Senden) — dafür Button.",
+			"Nicht für destruktive Aktionen verwenden."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für dezente Navigations-Shortcuts zu einer Seite (z. B. „Zur Startseite“).",
+			"Wenn ein umrandeter, ruhiger Look neben Fließtext gefragt ist."
+		],
+		"nichtNutzen": [
+			"Nicht als primäre Aktion einer Seite — dafür Button (Primary).",
+			"Nicht als Ersatz für eine Button-Group / Tabs bei mehreren gleichrangigen Zielen."
+		]
+	}
 }

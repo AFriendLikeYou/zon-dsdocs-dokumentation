@@ -2,7 +2,7 @@
 title: "Button Group"
 status: ready_for_dev
 figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=904-800
-aktualisiert_am: 2026-07-07
+aktualisiert_am: 2026-07-11
 kategorie: Aktionen
 ---
 
@@ -10,7 +10,8 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, RelatedComponents, CodeBlock, ColorRoleTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, StateList, RelatedComponents, CodeBlock, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { SectionNav } from '$components/ui/section-nav';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -18,48 +19,48 @@ kategorie: Aktionen
 	const spec = { ...generated, ...content };
 	const patternCssCode = `/* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .buttongroup {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  width: max-content;
-  max-width: 100%;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	width: max-content;
+	max-width: 100%;
 }
 .buttongroup-item {
-  background: var(--z-ds-color-background-10);
-  border: 0.125rem var(--z-ds-color-background-10) solid;
-  color: var(--z-ds-color-text-55);
-  display: inline-block;
-  font-size: var(--z-ds-fontsize-16);
-  line-height: 1.25rem;
-  position: relative;
+	background: var(--z-ds-color-background-10);
+	border: 0.125rem var(--z-ds-color-background-10) solid;
+	color: var(--z-ds-color-text-55);
+	display: inline-block;
+	font-size: var(--z-ds-fontsize-16);
+	line-height: 1.25rem;
+	position: relative;
 }
 .buttongroup-item--active .buttongroup-button {
-  background: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  cursor: default;
+	background: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-text-100);
+	cursor: default;
 }
 .buttongroup-item:first-child {
-  border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
+	border-radius: var(--z-ds-border-radius-4) 0 0 var(--z-ds-border-radius-4);
 }
 .buttongroup-item:last-child {
-  border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
+	border-radius: 0 var(--z-ds-border-radius-4) var(--z-ds-border-radius-4) 0;
 }
 button.buttongroup-button {
-  background-color: transparent;
-  border-width: 0;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  margin: 0;
-  border-radius: var(--z-ds-border-radius-4);
-  display: inline-block;
-  padding: var(--z-ds-space-xs) var(--z-ds-space-m);
-  transition: background-color 300ms ease-out;
+	background-color: transparent;
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	margin: 0;
+	border-radius: var(--z-ds-border-radius-4);
+	display: inline-block;
+	padding: var(--z-ds-space-xs) var(--z-ds-space-m);
+	transition: background-color 300ms ease-out;
 }
 .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover {
-  background-color: var(--z-ds-color-background-20);
-  color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-background-20);
+	color: var(--z-ds-color-text-100);
 }
 `;
 </script>
@@ -79,9 +80,17 @@ button.buttongroup-button {
 ]} sticky />
 
 {#snippet designTab()}
+	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Zustände","href":"#zustaende"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
 		<Specimen spec={spec} />
 	</div>
+
+	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts}>
+	</Anatomy>
+
+	<h2 id="zustaende" class="section-anchor">Zustände</h2>
+	<StateList states={[{"label":"inaktiv","vorhanden":true},{"label":"hover","vorhanden":true},{"label":"aktiv","vorhanden":true}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 	<RelatedComponents slugs={spec.verwandt} />
@@ -94,36 +103,41 @@ button.buttongroup-button {
 {/snippet}
 
 {#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
 {/snippet}
 
 <style>
 :global(.spec-canvas .buttongroup),
 :global(.pg-preview .buttongroup) {
   list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  width: max-content;
-  max-width: 100%;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	width: max-content;
+	max-width: 100%;
 }
 :global(.spec-canvas .buttongroup-item),
 :global(.pg-preview .buttongroup-item) {
   background: var(--z-ds-color-background-10);
-  border: 0.125rem var(--z-ds-color-background-10) solid;
-  color: var(--z-ds-color-text-55);
-  display: inline-block;
-  font-size: var(--z-ds-fontsize-16);
-  line-height: 1.25rem;
-  position: relative;
+	border: 0.125rem var(--z-ds-color-background-10) solid;
+	color: var(--z-ds-color-text-55);
+	display: inline-block;
+	font-size: var(--z-ds-fontsize-16);
+	line-height: 1.25rem;
+	position: relative;
 }
 :global(.spec-canvas .buttongroup-item--active .buttongroup-button),
 :global(.pg-preview .buttongroup-item--active .buttongroup-button) {
   background: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  cursor: default;
+	color: var(--z-ds-color-text-100);
+	cursor: default;
 }
 :global(.spec-canvas .buttongroup-item:first-child),
 :global(.pg-preview .buttongroup-item:first-child) {
@@ -136,19 +150,19 @@ button.buttongroup-button {
 :global(.spec-canvas button.buttongroup-button),
 :global(.pg-preview button.buttongroup-button) {
   background-color: transparent;
-  border-width: 0;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  margin: 0;
-  border-radius: var(--z-ds-border-radius-4);
-  display: inline-block;
-  padding: var(--z-ds-space-xs) var(--z-ds-space-m);
-  transition: background-color 300ms ease-out;
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	margin: 0;
+	border-radius: var(--z-ds-border-radius-4);
+	display: inline-block;
+	padding: var(--z-ds-space-xs) var(--z-ds-space-m);
+	transition: background-color 300ms ease-out;
 }
 :global(.spec-canvas .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover),
 :global(.pg-preview .buttongroup-item:not(.buttongroup-item--active) .buttongroup-button:hover) {
   background-color: var(--z-ds-color-background-20);
-  color: var(--z-ds-color-text-100);
+	color: var(--z-ds-color-text-100);
 }
 </style>

@@ -2,7 +2,7 @@
 	"name": "Cell",
 	"status": "ready_for_dev",
 	"kategorie": "Inhalte",
-	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=213-12&focus-id=4388-32445",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=1075-938",
 	"aktualisiertAm": "2026-07-07",
 	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
 	"masse": {
