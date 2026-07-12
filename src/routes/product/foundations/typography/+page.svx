@@ -8,6 +8,7 @@ title: Typography
 
 <script lang="ts">
 	import { DoDont, DoDontGroup } from '$components/ui/dodont';
+	import { DoDontList } from '$components/ui/specsheet';
 	import { TypeSpecimen, type TypeRole } from '$components/ui/type-specimen';
 
 	// Nur fontsize-Tokens, die in static/styles-zds.css existieren. Gruppiert nach Rolle.
@@ -42,6 +43,14 @@ title: Typography
 		}
 	];
 
+	// Demo-Absatz für die Fließtext-Rollen: erst mehrzeilig zeigt sich, wie
+	// Zeilenhöhe und Grauwert wirken — eine Einzelzeile kann das nicht.
+	const DEMO_ABSATZ =
+		'Guter Lauftext fällt nicht auf: Er führt ruhig durch den Inhalt, ohne die ' +
+		'Aufmerksamkeit auf sich zu ziehen. Die Zeilenhöhe gibt dem Auge Halt beim ' +
+		'Zeilenwechsel, der Grauwert bleibt gleichmäßig — so bleibt auch ein langer ' +
+		'Absatz mühelos lesbar.';
+
 	const fliesstext: TypeRole[] = [
 		{
 			token: '--z-ds-fontsize-18',
@@ -49,13 +58,15 @@ title: Typography
 			usage: 'Standard-Lauftext auf Inhaltsseiten; ruhige Zeilenhöhe für langen Lesefluss.',
 			lineHeightToken: '--z-ds-lineheight-15',
 			beispieltext:
-				'Typografie trägt bei DIE ZEIT den Großteil der Gestaltung — klare Hierarchie und ruhige Lesbarkeit gehen vor Schmuck.'
+				'Typografie trägt bei DIE ZEIT den Großteil der Gestaltung — klare Hierarchie und ruhige Lesbarkeit gehen vor Schmuck.',
+			demoText: DEMO_ABSATZ
 		},
 		{
 			token: '--z-ds-fontsize-16',
 			label: 'Text — Basis',
 			usage: 'Basisgröße für UI-Text und kompaktere Fließtext-Bereiche.',
-			lineHeightToken: '--z-ds-lineheight-15'
+			lineHeightToken: '--z-ds-lineheight-15',
+			demoText: DEMO_ABSATZ
 		}
 	];
 
@@ -106,6 +117,27 @@ steht als Token-Referenz unter
 
 <TypeSpecimen roles={label} />
 
+## Zeilenlänge
+
+Fließtext liest sich am besten bei **45–75 Zeichen pro Zeile** (optimal ≈ 66): kürzere
+Zeilen zerhacken den Lesefluss, längere lassen das Auge die nächste Zeile verlieren.
+In CSS ist `max-width: 66ch` die einfachste Umsetzung — `ch` skaliert mit der Schrift.
+
+<figure class="measure-demo">
+	<p class="measure-demo__text">
+		Diese Textspalte ist auf 66ch begrenzt — die Zeile endet, bevor das Auge den
+		Faden verliert, und der Rücksprung zur nächsten Zeile bleibt mühelos. Genau
+		deshalb begrenzen Inhaltsseiten ihre Lesespalte, statt die volle Fensterbreite
+		zu nutzen.
+	</p>
+	<figcaption class="measure-demo__cap"><code>max-width: 66ch</code></figcaption>
+</figure>
+
+<DoDontList doDont={{
+	do: ['Lesespalten begrenzen: <code>max-width: 66ch</code> für Fließtext.'],
+	dont: ['Fließtext nie über die volle Fensterbreite laufen lassen.']
+}} />
+
 ## Grundregeln
 
 <DoDontGroup columns={2}>
@@ -119,3 +151,23 @@ steht als Token-Referenz unter
 		content="<span style='color:var(--ds-accent-brand)'>Bunter</span> <span style='font-size:20px'>Größen-</span><span style='font-size:13px'>wirrwarr</span>"
 	/>
 </DoDontGroup>
+
+<style>
+	.measure-demo {
+		margin: var(--z-ds-space-16) 0;
+	}
+	.measure-demo__text {
+		max-width: 66ch;
+		margin: 0;
+		padding: var(--z-ds-space-16);
+		background: var(--ds-surface-raised);
+		border-right: 2px dashed var(--ds-accent);
+		border-radius: var(--ds-radius);
+		color: var(--ds-text-body);
+	}
+	.measure-demo__cap {
+		margin-top: var(--z-ds-space-4);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
+</style>

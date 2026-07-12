@@ -21,6 +21,10 @@
 		usage: string;
 		/** Optionaler Beispieltext (sonst Standard-Pangram-Kurzform). */
 		beispieltext?: string;
+		/** Optionaler Demo-Absatz: rendert unter der Specimen-Zeile einen mehrzeiligen
+		 *  Absatz in der Rolle (Größe/Zeilenhöhe) — zeigt Absatzwirkung statt nur einer
+		 *  Zeile. Nur für Fließtext-Rollen gedacht. */
+		demoText?: string;
 		/** Optionales lineheight-Token für die Zielzeilenhöhe. */
 		lineHeightToken?: string;
 		/** Fett rendern (Überschriften/Labels). */
@@ -56,6 +60,14 @@
 			>
 				{role.beispieltext ?? DEFAULT_TEXT}
 			</p>
+			{#if role.demoText}
+				<p
+					class="demo"
+					style={`font-size: var(${role.token});${role.lineHeightToken ? ` line-height: var(${role.lineHeightToken});` : ''}`}
+				>
+					{role.demoText}
+				</p>
+			{/if}
 			<div class="meta">
 				<span class="label">{role.label}</span>
 				<span class="usage">{role.usage}</span>
@@ -108,6 +120,21 @@
 		/* Doku-Font (TabletGothic) — dieselbe Kette wie body in global.css. */
 		font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, FreeSans, sans-serif;
 		overflow-wrap: anywhere;
+	}
+	/* Demo-Absatz: mehrzeilige Absatzwirkung der Rolle; auf Lese-Breite begrenzt.
+	   Explizit in Spalte 1 unter dem Specimen platziert — als zweites Grid-Kind
+	   würde er sonst in die Meta-Spalte rutschen. */
+	.demo {
+		grid-column: 1;
+		margin: 0;
+		max-width: 66ch;
+		color: var(--ds-text-body);
+		font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, FreeSans, sans-serif;
+	}
+	/* Meta bleibt neben dem Specimen (Zeile 1), auch wenn ein Demo-Absatz folgt. */
+	.row:has(.demo) .meta {
+		grid-column: 2;
+		grid-row: 1 / span 2;
 	}
 	.specimen.bold {
 		font-weight: 700;

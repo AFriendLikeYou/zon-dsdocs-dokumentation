@@ -4,6 +4,7 @@ title: Spacing
 
 <script lang="ts">
 	import { SpacingScale } from '$components/ui/scale';
+	import { SpacingContext } from '$components/ui/spacing-context';
 	import { DoDontList } from '$components/ui/specsheet';
 
 	const semantisch = [
@@ -67,48 +68,21 @@ passt.
 
 <SpacingScale tokens={numerisch} />
 
-## Anwendung
+## Spacing im Kontext
 
-So wirkt ein Abstands-Token in der Praxis: Die beiden Flächen sind über
-`gap: var(--z-ds-space-m)` getrennt — ändert sich der Token, verschiebt sich der
-Abstand automatisch mit.
+Die wichtigste Unterscheidung in der Praxis: **Innenabstand** (Padding — Luft
+*innerhalb* eines Elements) und **Außenabstand** (Gap/Margin — Luft *zwischen*
+Elementen). Die getönten Flächen unten sind die echten Token-Werte:
 
-<div class="spacing-example">
-	<div class="spacing-example__row">
-		<div class="spacing-example__box"></div>
-		<div class="spacing-example__box"></div>
-	</div>
-	<p class="spacing-example__label"><code>gap: var(--z-ds-space-m)</code></p>
-</div>
+<SpacingContext />
+
+Zwei Wegweiser für die Anwendung: Jede Komponenten-Seite zeigt ihre realen
+Innenabstände als **Redlines in der Anatomie** (z. B. beim
+[Button](/product/components/button), Ansicht „Measurements") — und die Abstände
+*zwischen* Inhaltsblöcken regelt auf den [Brand-Seiten](/brand) eine zentrale
+Fluss-Regel (`global.css`, „Vertikaler Rhythmus"), damit jedes Block-Paar denselben
+Abstand bekommt, egal in welcher Reihenfolge.
 
 ## Do &amp; Don't
 
 <DoDontList {doDont} />
-
-<style>
-	.spacing-example {
-		margin: var(--z-ds-space-16) 0;
-	}
-	.spacing-example__row {
-		display: flex;
-		/* Live-Anwendung: der dokumentierte Abstand als echter gap. */
-		gap: var(--z-ds-space-m);
-		padding: var(--z-ds-space-16);
-		background: var(--ds-surface-raised);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius);
-		width: fit-content;
-	}
-	.spacing-example__box {
-		width: 96px;
-		height: 64px;
-		background: var(--ds-accent-brand);
-		border-radius: var(--ds-radius-sm);
-	}
-	.spacing-example__label {
-		margin-top: var(--z-ds-space-8);
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
-</style>
