@@ -176,22 +176,26 @@
 	{:else if controls.length}
 		<div class="pg-controls">
 			{#each controls as c (c.key)}
-				{#if c.type === 'select'}
-					<span class="pg-label">{c.label}</span>
-					{#each c.options as o (o.value)}
+				<!-- Jede Control-Gruppe optisch bündeln — Trennlinie zwischen den
+				     Gruppen, damit Toggles nicht wie weitere Variant-Werte lesen. -->
+				<span class="pg-group">
+					{#if c.type === 'select'}
+						<span class="pg-label">{c.label}</span>
+						{#each c.options as o (o.value)}
+							<Chip
+								variant={values[c.key] === o.value ? 'accent' : 'neutral'}
+								emphasis={values[c.key] === o.value}
+								onclick={() => (values[c.key] = o.value)}>{o.label}</Chip
+							>
+						{/each}
+					{:else}
+						<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
 						<Chip
-							variant={values[c.key] === o.value ? 'accent' : 'neutral'}
-							emphasis={values[c.key] === o.value}
-							onclick={() => (values[c.key] = o.value)}>{o.label}</Chip
+							variant={values[c.key] ? 'accent' : 'neutral'}
+							onclick={() => (values[c.key] = !values[c.key])}>{c.label}</Chip
 						>
-					{/each}
-				{:else}
-					<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
-					<Chip
-						variant={values[c.key] ? 'accent' : 'neutral'}
-						onclick={() => (values[c.key] = !values[c.key])}>{c.label}</Chip
-					>
-				{/if}
+					{/if}
+				</span>
 			{/each}
 
 			{#if isDirty}
@@ -233,10 +237,10 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--z-ds-space-32) var(--z-ds-space-16);
-		/* Feste 16:9-Bühne (wie die Katalog-Vorschauen); Specimen bleibt zentriert,
-		   Überlauf wird geclippt. min-height als Boden für sehr schmale Viewports. */
-		aspect-ratio: 16 / 9;
-		min-height: 96px;
+		/* Bühne wächst MIT dem Specimen (Boden 240px): kleine Komponenten schwimmen
+		   nicht mehr in einer fixen 16:9-Fläche, große (Carousel, Cell) bekommen
+		   ihren Platz ohne Clipping. */
+		min-height: 240px;
 		overflow: hidden;
 		/* RAW-Token, damit Fläche UND Punktraster mit den je Bühne gepinnten Werten
 		   flippen (.ds-stage.is-dark pinnt background-10 + border-70) — kein separater
@@ -272,6 +276,17 @@
 	/* Beispiele/Rezepte sitzen zwischen Bühne und Controls — dezent abgesetzt. */
 	.pg-presets {
 		background: color-mix(in srgb, var(--ds-surface-raised) 45%, transparent);
+	}
+	/* Control-Gruppe (ein select mit Label bzw. ein Toggle) — Trennlinie zwischen
+	   den Gruppen, damit Toggles nicht wie weitere Variant-Werte lesen. */
+	.pg-group {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-8);
+	}
+	.pg-group + .pg-group {
+		border-left: 1px solid var(--ds-border-soft);
+		padding-left: var(--z-ds-space-12);
 	}
 	.pg-label {
 		font-size: var(--ds-label-size);
