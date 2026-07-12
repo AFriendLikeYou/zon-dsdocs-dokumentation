@@ -198,6 +198,10 @@ function sectionUsage(e: AgentCatalogEntry): string {
 		out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.do?.length) out += `\nDo:\n${s.doDont.do.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.dont?.length) out += `Don't:\n${s.doDont.dont.map((x) => `  - ${x}`).join('\n')}\n`;
+	// Kompositions-Hinweise: wie die Komponente mit anderen kombiniert wird — für
+	// Agenten beim Zusammensetzen von Formularen/Organismen besonders wertvoll.
+	if (s.komposition?.length)
+		out += `\nKomposition:\n${s.komposition.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.wording?.length) {
 		out += `\nWording:\n`;
 		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"\n`;

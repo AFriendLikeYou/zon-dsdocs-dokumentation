@@ -76,6 +76,10 @@
 		}
 	],
 	"version": "Figma-Node 4185:3778",
+	"komposition": [
+		"In einer Aktionsgruppe (z. B. button-group) nur eine Primary-Aktion einsetzen, weitere Aktionen als Default.",
+		"Für reine Navigation statt Button einen Link bzw. text-button verwenden."
+	],
 	"verwandt": ["text-button", "icon-button", "button-group"],
 	"variantInfo": {
 		"Default": "Neutrale Aktion — helle Fläche, dunkles Label.",

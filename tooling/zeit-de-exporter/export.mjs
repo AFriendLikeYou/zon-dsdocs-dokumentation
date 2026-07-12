@@ -112,6 +112,7 @@ const EDITORIAL = [
 	'doDontBeispiele',
 	'verwendung',
 	'wording',
+	'komposition',
 	'verwandt'
 ];
 
@@ -163,6 +164,7 @@ function renderGenerated(model) {
  *   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })
  *   verwendung       – { nutzen: [...], nichtNutzen: [...] }
  *   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })
+ *   komposition      – Hinweise, wie die Komponente mit anderen kombiniert wird (Strings)
  *   verwandt         – Querverweise auf verwandte Komponenten (Katalog-Slugs)
  */
 function renderContentStub(model) {

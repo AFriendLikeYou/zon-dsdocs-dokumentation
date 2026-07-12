@@ -17,6 +17,7 @@ const EDITABLE = [
 	'callouts',
 	'tastatur',
 	'wording',
+	'komposition',
 	'verwandt',
 	'doDontBeispiele',
 	'playground'

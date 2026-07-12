@@ -176,6 +176,13 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 **Platzhalter/geschätzt** (Beispieltexte, gerechnete a11y-Kontraste). Visuell abnehmen
 (die Seite liegt hinter Basic Auth).
 
+Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `callouts`, `a11y`,
+`tastatur`, `doDont`, `doDontBeispiele`, `verwendung`, `wording`, `komposition`,
+`verwandt`, `version`, `variantInfo` (Schema-Referenz: [README](./README.md#schema-referenz-modeljson)).
+`komposition` (`string[]`, je Eintrag ein Satz) beschreibt, wie die Komponente mit
+anderen kombiniert wird/werden darf — nützlich für Agenten bei Formularen/Organismen;
+nur befüllen, wenn fachlich sicher ableitbar.
+
 ## Checkliste
 
 - [ ] Node zum Component-Set aufgelöst, Fakten notiert

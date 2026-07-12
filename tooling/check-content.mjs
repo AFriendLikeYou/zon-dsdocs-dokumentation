@@ -46,6 +46,7 @@ const EDITORIAL_FIELDS = {
 	doDontBeispiele: { check: isArray, typ: 'array' },
 	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
 	wording: { check: isArray, typ: 'array' },
+	komposition: { check: isArray, typ: 'array (Strings)' },
 	verwandt: { check: isArray, typ: 'array' },
 	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' }
 };
@@ -66,6 +67,10 @@ function checkNested(key, value) {
 	}
 	if (key === 'verwandt' && isArray(value)) {
 		if (!value.every(isString)) issues.push('verwandt muss ein Array von Strings (Slugs) sein');
+	}
+	if (key === 'komposition' && isArray(value)) {
+		if (!value.every(isString))
+			issues.push('komposition muss ein Array von Strings (Satz-Hinweise) sein');
 	}
 	if (key === 'variantInfo' && isObject(value)) {
 		for (const [label, text] of Object.entries(value))

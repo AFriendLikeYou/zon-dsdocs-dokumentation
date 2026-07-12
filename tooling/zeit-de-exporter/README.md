@@ -32,8 +32,8 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
   `content.json` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
-  `doDontBeispiele`, `verwendung`, `wording`, `verwandt`, `version`, `variantInfo`) →
-  **`content.json` von Hand**.
+  `doDontBeispiele`, `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
+  `variantInfo`) → **`content.json` von Hand**.
 - **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
   Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Nur
   Reihenfolge/Badge (optional) in der Override-Map in
@@ -73,6 +73,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
 | `doDontBeispiele`         | `{ gut: { html, text }, schlecht: { html, text } }[]`                                              | `DoDontVisual` (visuelle Specimen-Paare unter der Do&Don't-Liste)                                                                                                                                                                   |
 | `verwendung`              | `{ nutzen?: string[], nichtNutzen?: string[] }`                                                    | `UsageBlock`                                                                                                                                                                                                                        |
 | `wording`                 | `{ schlecht, gut, hinweis? }[]`                                                                    | `WordingList` (Texte & Wording)                                                                                                                                                                                                     |
+| `komposition`             | `string[]` (je Eintrag ein Satz-Hinweis)                                                           | Kompositions-Hinweise (wie mit anderen Komponenten kombinieren) — MCP `usage`-Sektion; wichtig für Agenten bei Formularen/Organismen                                                                                                |
 | `verwandt`                | `string[]` (Katalog-Slugs)                                                                         | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen)                                                                                                                                                     |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)

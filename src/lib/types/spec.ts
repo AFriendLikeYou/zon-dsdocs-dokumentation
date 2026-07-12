@@ -168,6 +168,9 @@ export type ComponentSpec = {
 	doDontBeispiele?: DoDontBeispiel[];
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
+	/** Kompositions-Hinweise: je Eintrag ein Satz, wie die Komponente mit anderen
+	    kombiniert wird/werden darf (für Agenten bei Formularen/Organismen). */
+	komposition?: string[];
 	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
 	verwandt?: string[];
 	/** CMS-schaltbare Playground-Bühne (Ausrichtung, Resize-Handle). */

@@ -28,6 +28,7 @@
 		tastatur: { taste: string; aktion: string }[];
 		callouts: CalloutRow[];
 		wording: { schlecht: string; gut: string; hinweis: string }[];
+		komposition: string[];
 		verwandt: string[];
 		doDontBeispiele: DoDontPair[];
 		playground: { align: 'center' | 'fill'; resizable: boolean };
@@ -43,6 +44,7 @@
 		tastatur?: { taste?: string; aktion?: string }[];
 		callouts?: { nr?: number; text?: string; art?: string; optionalDurch?: string }[];
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
+		komposition?: string[];
 		verwandt?: string[];
 		doDontBeispiele?: {
 			gut?: { html?: string; text?: string };
@@ -84,6 +86,7 @@
 				gut: r.gut ?? '',
 				hinweis: r.hinweis ?? ''
 			})),
+			komposition: [...(c.komposition ?? [])],
 			verwandt: [...(c.verwandt ?? [])],
 			doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
 				gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
@@ -146,6 +149,11 @@
 				return o;
 			});
 		if (wording.length) out.wording = wording;
+
+		// komposition — Hinweise (je ein Satz), wie mit anderen Komponenten kombiniert
+		// wird; leere Zeilen weglassen.
+		const komposition = model.komposition.map((s) => s.trim()).filter(Boolean);
+		if (komposition.length) out.komposition = komposition;
 
 		// verwandt — Liste von Katalog-Slugs; leere/Dubletten entfernen.
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
@@ -478,6 +486,30 @@
 					type="button"
 					class="add"
 					onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head">
+				<span class="card-title">Komposition (Hinweise für Agenten & Devs)</span>
+			</div>
+			<div class="card-body">
+				{#each model.komposition as _, i}
+					<div class="row">
+						<input
+							bind:value={model.komposition[i]}
+							placeholder="z. B. In Formularen zusammen mit Input und Label verwenden."
+						/>
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.komposition, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button type="button" class="add" onclick={() => addTo(model.komposition)}>+ Hinweis</button
 				>
 			</div>
 		</section>
