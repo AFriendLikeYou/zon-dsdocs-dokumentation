@@ -1,7 +1,13 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { getToastState } from '$stores/toast-state.svelte';
+	import { Icon } from '$lib/icons/cms';
 
-	let { data, form }: import('./$types').PageProps = $props();
+	let { data }: import('./$types').PageProps = $props();
+
+	const toast = getToastState();
 
 	// Editierbare Teilmenge, initialisiert aus content.json. Reaktiver Client-State;
 	// beim Submit als JSON in ein Hidden-Feld serialisiert (robuster als FormData-
@@ -44,78 +50,83 @@
 		}[];
 		playground?: { align?: 'center' | 'fill'; resizable?: boolean };
 	};
-	let state = $state<Content>({
-		zweck: c.zweck ?? '',
-		status: c.status ?? 'ready_for_dev',
-		verwendung: {
-			nutzen: [...(c.verwendung?.nutzen ?? [])],
-			nichtNutzen: [...(c.verwendung?.nichtNutzen ?? [])]
-		},
-		doDont: { do: [...(c.doDont?.do ?? [])], dont: [...(c.doDont?.dont ?? [])] },
-		variantInfo: Object.entries(c.variantInfo ?? {}).map(([key, value]) => ({
-			key,
-			value: String(value)
-		})),
-		a11y: (c.a11y ?? []).map((r) => ({
-			label: r.label ?? '',
-			wert: r.wert ?? '',
-			status: (r.status ?? 'warn') as A11yStatus
-		})),
-		tastatur: (c.tastatur ?? []).map((r) => ({ taste: r.taste ?? '', aktion: r.aktion ?? '' })),
-		// nr/text editierbar; art/optionalDurch werden pro Zeile mitgeführt und beim
-		// Speichern erhalten (Round-Trip-sicher — keine Datenverluste an der Anatomie).
-		callouts: (c.callouts ?? []).map((r) => ({
-			nr: Number(r.nr ?? 0),
-			text: r.text ?? '',
-			...(r.art !== undefined ? { art: r.art } : {}),
-			...(r.optionalDurch !== undefined ? { optionalDurch: r.optionalDurch } : {})
-		})),
-		wording: (c.wording ?? []).map((r) => ({
-			schlecht: r.schlecht ?? '',
-			gut: r.gut ?? '',
-			hinweis: r.hinweis ?? ''
-		})),
-		verwandt: [...(c.verwandt ?? [])],
-		doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
-			gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
-			schlecht: { html: r.schlecht?.html ?? '', text: r.schlecht?.text ?? '' }
-		})),
-		// Playground-Bühne: Defaults center/false, wenn content.json nichts setzt.
-		playground: {
-			align: c.playground?.align === 'fill' ? 'fill' : 'center',
-			resizable: c.playground?.resizable === true
-		}
-	});
+	// Frischer Content-Zustand aus content.json — Fabrik, damit „Verwerfen" (und der
+	// Reset nach dem Speichern) exakt denselben Ausgangsstand wiederherstellen kann.
+	function makeState(): Content {
+		return {
+			zweck: c.zweck ?? '',
+			status: c.status ?? 'ready_for_dev',
+			verwendung: {
+				nutzen: [...(c.verwendung?.nutzen ?? [])],
+				nichtNutzen: [...(c.verwendung?.nichtNutzen ?? [])]
+			},
+			doDont: { do: [...(c.doDont?.do ?? [])], dont: [...(c.doDont?.dont ?? [])] },
+			variantInfo: Object.entries(c.variantInfo ?? {}).map(([key, value]) => ({
+				key,
+				value: String(value)
+			})),
+			a11y: (c.a11y ?? []).map((r) => ({
+				label: r.label ?? '',
+				wert: r.wert ?? '',
+				status: (r.status ?? 'warn') as A11yStatus
+			})),
+			tastatur: (c.tastatur ?? []).map((r) => ({ taste: r.taste ?? '', aktion: r.aktion ?? '' })),
+			// nr/text editierbar; art/optionalDurch werden pro Zeile mitgeführt und beim
+			// Speichern erhalten (Round-Trip-sicher — keine Datenverluste an der Anatomie).
+			callouts: (c.callouts ?? []).map((r) => ({
+				nr: Number(r.nr ?? 0),
+				text: r.text ?? '',
+				...(r.art !== undefined ? { art: r.art } : {}),
+				...(r.optionalDurch !== undefined ? { optionalDurch: r.optionalDurch } : {})
+			})),
+			wording: (c.wording ?? []).map((r) => ({
+				schlecht: r.schlecht ?? '',
+				gut: r.gut ?? '',
+				hinweis: r.hinweis ?? ''
+			})),
+			verwandt: [...(c.verwandt ?? [])],
+			doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
+				gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
+				schlecht: { html: r.schlecht?.html ?? '', text: r.schlecht?.text ?? '' }
+			})),
+			// Playground-Bühne: Defaults center/false, wenn content.json nichts setzt.
+			playground: {
+				align: c.playground?.align === 'fill' ? 'fill' : 'center',
+				resizable: c.playground?.resizable === true
+			}
+		};
+	}
+	let model = $state<Content>(makeState());
 
 	// State → content.json-Form. Leere Listen/Objekte weglassen, damit die Datei
 	// nicht mit leeren Feldern aufgebläht wird (und check-content sauber bleibt).
 	const payload = $derived.by(() => {
-		const out: Record<string, unknown> = { zweck: state.zweck.trim(), status: state.status };
-		const nutzen = state.verwendung.nutzen.map((s) => s.trim()).filter(Boolean);
-		const nichtNutzen = state.verwendung.nichtNutzen.map((s) => s.trim()).filter(Boolean);
+		const out: Record<string, unknown> = { zweck: model.zweck.trim(), status: model.status };
+		const nutzen = model.verwendung.nutzen.map((s) => s.trim()).filter(Boolean);
+		const nichtNutzen = model.verwendung.nichtNutzen.map((s) => s.trim()).filter(Boolean);
 		if (nutzen.length || nichtNutzen.length) out.verwendung = { nutzen, nichtNutzen };
-		const doo = state.doDont.do.map((s) => s.trim()).filter(Boolean);
-		const dont = state.doDont.dont.map((s) => s.trim()).filter(Boolean);
+		const doo = model.doDont.do.map((s) => s.trim()).filter(Boolean);
+		const dont = model.doDont.dont.map((s) => s.trim()).filter(Boolean);
 		if (doo.length || dont.length) out.doDont = { do: doo, dont };
 		const vi = Object.fromEntries(
-			state.variantInfo.filter((r) => r.key.trim()).map((r) => [r.key.trim(), r.value])
+			model.variantInfo.filter((r) => r.key.trim()).map((r) => [r.key.trim(), r.value])
 		);
 		if (Object.keys(vi).length) out.variantInfo = vi;
 
 		// a11y — Zeile behalten, sobald Label oder Wert etwas enthält; status immer dabei.
-		const a11y = state.a11y
+		const a11y = model.a11y
 			.filter((r) => r.label.trim() || r.wert.trim())
 			.map((r) => ({ label: r.label.trim(), wert: r.wert.trim(), status: r.status }));
 		if (a11y.length) out.a11y = a11y;
 
 		// tastatur — { taste, aktion }; leere Zeilen weglassen.
-		const tastatur = state.tastatur
+		const tastatur = model.tastatur
 			.filter((r) => r.taste.trim() || r.aktion.trim())
 			.map((r) => ({ taste: r.taste.trim(), aktion: r.aktion.trim() }));
 		if (tastatur.length) out.tastatur = tastatur;
 
 		// callouts — nr/text; art/optionalDurch nur schreiben, wenn gesetzt (erhalten).
-		const callouts = state.callouts
+		const callouts = model.callouts
 			.filter((r) => r.text.trim())
 			.map((r) => {
 				const o: Record<string, unknown> = { nr: r.nr, text: r.text.trim() };
@@ -126,7 +137,7 @@
 		if (callouts.length) out.callouts = callouts;
 
 		// wording — { schlecht, gut, hinweis? }; hinweis leer → weglassen.
-		const wording = state.wording
+		const wording = model.wording
 			.filter((r) => r.schlecht.trim() || r.gut.trim())
 			.map((r) => {
 				const o: Record<string, unknown> = { schlecht: r.schlecht.trim(), gut: r.gut.trim() };
@@ -137,13 +148,13 @@
 		if (wording.length) out.wording = wording;
 
 		// verwandt — Liste von Katalog-Slugs; leere/Dubletten entfernen.
-		const verwandt = [...new Set(state.verwandt.map((s) => s.trim()).filter(Boolean))];
+		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
 
 		// doDontBeispiele — Paare { gut, schlecht } je { html, text }. HTML EXAKT round-
 		// trippen (kein trim auf html!); nur der Prosa-Text wird getrimmt. Paar behalten,
 		// sobald irgendeines der vier Felder etwas enthält.
-		const doDontBeispiele = state.doDontBeispiele
+		const doDontBeispiele = model.doDontBeispiele
 			.filter(
 				(r) =>
 					r.gut.html.trim() || r.gut.text.trim() || r.schlecht.html.trim() || r.schlecht.text.trim()
@@ -157,8 +168,8 @@
 		// playground — nur schreiben, wenn von den Defaults (center + false) abgewichen wird;
 		// jeweils nur den abweichenden Key setzen, damit content.json minimal bleibt.
 		const pg: Record<string, unknown> = {};
-		if (state.playground.align === 'fill') pg.align = 'fill';
-		if (state.playground.resizable) pg.resizable = true;
+		if (model.playground.align === 'fill') pg.align = 'fill';
+		if (model.playground.resizable) pg.resizable = true;
 		if (Object.keys(pg).length) out.playground = pg;
 
 		return JSON.stringify(out);
@@ -170,312 +181,387 @@
 	function removeFrom<T>(list: T[], i: number) {
 		list.splice(i, 1);
 	}
+
+	// ── Dirty-Tracking + Save-Bar (Muster aus dem Brand-Editor) ───────────────
+	// `payload` ist die kanonische Beschreibung des Editor-Stands; ein Snapshot beim
+	// Laden/Speichern macht „dirty" zu einem einfachen String-Vergleich.
+	let formEl = $state<HTMLFormElement | null>(null);
+	let savedPayload = $state(untrack(() => payload));
+	const dirty = $derived(payload !== savedPayload);
+
+	function discard() {
+		model = makeState();
+	}
+
+	// Save-Feedback über die globale Toast-Message (wie im Brand-Editor). Nach Erfolg
+	// den Snapshot nachziehen, damit die Save-Bar verschwindet.
+	const handleSubmit: SubmitFunction = () => {
+		return async ({ result, update }) => {
+			await update({ reset: false });
+			if (result.type === 'success') {
+				toast?.add('Gespeichert', 'Die Doku-Seite zeigt die Änderung nach dem Reload.');
+				savedPayload = payload;
+			} else if (result.type === 'failure') {
+				const msg = (result.data as { message?: string } | undefined)?.message;
+				toast?.add('Nicht gespeichert', msg ?? 'Unbekannter Fehler.');
+			} else if (result.type === 'error') {
+				toast?.add('Fehler', result.error?.message ?? 'Speichern fehlgeschlagen.');
+			}
+		};
+	};
+
+	function onGlobalKeydown(e: KeyboardEvent) {
+		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+			e.preventDefault();
+			if (dirty && data.writable) formEl?.requestSubmit();
+		}
+	}
+	function onBeforeUnload(e: BeforeUnloadEvent) {
+		if (dirty) e.preventDefault();
+	}
 </script>
 
 <svelte:head><title>{data.name} bearbeiten – Admin</title></svelte:head>
+<svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
 
 <div class="edit">
 	<nav class="crumb"><a href="/admin">← Alle Komponenten</a></nav>
-	<h1>{data.name}</h1>
+	<h1>
+		{data.name}{#if !data.writable}<span class="ro-chip">Nur lesen</span>{/if}
+	</h1>
 	<p class="sub">Bearbeitet <code>content.json</code>. Andere Felder bleiben unverändert.</p>
 
-	{#if form?.saved}
-		<p class="flash flash--ok" role="status">
-			Gespeichert. Die Doku-Seite zeigt die Änderung nach dem Reload.
-		</p>
-	{:else if form?.message}
-		<p class="flash flash--err" role="alert">{form.message}</p>
-	{/if}
 	{#if !data.writable}
 		<p class="flash flash--warn">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).
 		</p>
 	{/if}
 
-	<form method="POST" use:enhance>
+	<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>
 		<input type="hidden" name="payload" value={payload} />
 
-		<label class="field">
-			<span class="lbl">Zweck</span>
-			<textarea bind:value={state.zweck} rows="3"></textarea>
-		</label>
+		<section class="card">
+			<div class="card-head"><span class="card-title">Zweck</span></div>
+			<div class="card-body">
+				<textarea bind:value={model.zweck} rows="3"></textarea>
+			</div>
+		</section>
 
-		<label class="field">
-			<span class="lbl">Status</span>
-			<select bind:value={state.status}>
-				<option value="ready_for_dev">ready_for_dev</option>
-				<option value="completed">completed</option>
-				<option value="changed">changed</option>
-			</select>
-		</label>
+		<section class="card">
+			<div class="card-head"><span class="card-title">Status</span></div>
+			<div class="card-body">
+				<select bind:value={model.status}>
+					<option value="ready_for_dev">ready_for_dev</option>
+					<option value="completed">completed</option>
+					<option value="changed">changed</option>
+				</select>
+			</div>
+		</section>
 
-		<fieldset class="field">
-			<legend class="lbl">Playground-Bühne</legend>
-			<label class="sub-lbl" for="pg-align">Ausrichtung</label>
-			<select id="pg-align" bind:value={state.playground.align}>
-				<option value="center">Zentriert (Objekt auf Bühne)</option>
-				<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
-			</select>
-			<label class="check">
-				<input type="checkbox" bind:checked={state.playground.resizable} />
-				<span>Resize-Handle anzeigen</span>
-			</label>
-		</fieldset>
+		<section class="card">
+			<div class="card-head"><span class="card-title">Playground-Bühne</span></div>
+			<div class="card-body">
+				<label class="sub-lbl" for="pg-align">Ausrichtung</label>
+				<select id="pg-align" bind:value={model.playground.align}>
+					<option value="center">Zentriert (Objekt auf Bühne)</option>
+					<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
+				</select>
+				<label class="check">
+					<input type="checkbox" bind:checked={model.playground.resizable} />
+					<span>Resize-Handle anzeigen</span>
+				</label>
+			</div>
+		</section>
 
-		<fieldset class="field">
-			<legend class="lbl">Verwendung — Wann nutzen</legend>
-			{#each state.verwendung.nutzen as _, i}
-				<div class="row">
-					<input bind:value={state.verwendung.nutzen[i]} />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.verwendung.nutzen, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.verwendung.nutzen)}
-				>+ Zeile</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Verwendung — Wann nicht</legend>
-			{#each state.verwendung.nichtNutzen as _, i}
-				<div class="row">
-					<input bind:value={state.verwendung.nichtNutzen[i]} />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.verwendung.nichtNutzen, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.verwendung.nichtNutzen)}
-				>+ Zeile</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Do</legend>
-			{#each state.doDont.do as _, i}
-				<div class="row">
-					<input bind:value={state.doDont.do[i]} />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.doDont.do, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.doDont.do)}>+ Zeile</button>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Don't</legend>
-			{#each state.doDont.dont as _, i}
-				<div class="row">
-					<input bind:value={state.doDont.dont[i]} />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.doDont.dont, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button type="button" class="add" onclick={() => addTo(state.doDont.dont)}>+ Zeile</button>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Varianten-Info (Label → Text)</legend>
-			{#if data.variantLabels.length}
-				<p class="hint">Bekannte Labels: {data.variantLabels.join(', ')}</p>
-			{/if}
-			{#each state.variantInfo as _, i}
-				<div class="row row--kv">
-					<input class="kv-key" bind:value={state.variantInfo[i].key} placeholder="Label" />
-					<input bind:value={state.variantInfo[i].value} placeholder="Beschreibung" />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.variantInfo, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() => state.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Barrierefreiheit (Label · Wert · Status)</legend>
-			{#each state.a11y as _, i}
-				<div class="row row--a11y">
-					<input class="a11y-label" bind:value={state.a11y[i].label} placeholder="Label" />
-					<input bind:value={state.a11y[i].wert} placeholder="Wert" />
-					<select class="status-sel" bind:value={state.a11y[i].status}>
-						<option value="pass">pass</option>
-						<option value="warn">warn</option>
-						<option value="todo">todo</option>
-					</select>
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.a11y, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() => state.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Tastatur (Taste → Aktion)</legend>
-			{#each state.tastatur as _, i}
-				<div class="row">
-					<input class="kv-key" bind:value={state.tastatur[i].taste} placeholder="Taste" />
-					<input bind:value={state.tastatur[i].aktion} placeholder="Aktion" />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.tastatur, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() => state.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Anatomie-Callouts (Nr · Text)</legend>
-			{#each state.callouts as _, i}
-				<div class="row">
-					<input
-						class="num"
-						type="number"
-						min="1"
-						bind:value={state.callouts[i].nr}
-						aria-label="Nummer"
-					/>
-					<input bind:value={state.callouts[i].text} placeholder="Beschreibung" />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.callouts, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() => state.callouts.push({ nr: state.callouts.length + 1, text: '' })}
-				>+ Callout</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Wording (Schlecht · Gut · Hinweis)</legend>
-			{#each state.wording as _, i}
-				<div class="row">
-					<input bind:value={state.wording[i].schlecht} placeholder="Schlecht" />
-					<input bind:value={state.wording[i].gut} placeholder="Gut" />
-					<input bind:value={state.wording[i].hinweis} placeholder="Hinweis (optional)" />
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.wording, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() => state.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
-			>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Verwandte Komponenten (Katalog-Slugs)</legend>
-			{#each state.verwandt as _, i}
-				<div class="row">
-					<select bind:value={state.verwandt[i]}>
-						<option value="" disabled>– Komponente wählen –</option>
-						{#each data.slugs as s}
-							<option value={s.slug}>{s.name} ({s.slug})</option>
-						{/each}
-					</select>
-					<button
-						type="button"
-						class="rm"
-						onclick={() => removeFrom(state.verwandt, i)}
-						aria-label="Entfernen">×</button
-					>
-				</div>
-			{/each}
-			<button type="button" class="add" onclick={() => state.verwandt.push('')}>+ Slug</button>
-		</fieldset>
-
-		<fieldset class="field">
-			<legend class="lbl">Do/Don't-Beispiele (fortgeschritten)</legend>
-			<p class="hint">
-				HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das Beispiel.
-			</p>
-			{#each state.doDontBeispiele as _, i}
-				<div class="pair">
-					<div class="pair-grid">
-						<div class="pair-col">
-							<span class="sub-lbl">Gut — HTML</span>
-							<textarea class="mono" bind:value={state.doDontBeispiele[i].gut.html} rows="3"
-							></textarea>
-							<span class="sub-lbl">Gut — Text</span>
-							<textarea bind:value={state.doDontBeispiele[i].gut.text} rows="2"></textarea>
-						</div>
-						<div class="pair-col">
-							<span class="sub-lbl">Schlecht — HTML</span>
-							<textarea class="mono" bind:value={state.doDontBeispiele[i].schlecht.html} rows="3"
-							></textarea>
-							<span class="sub-lbl">Schlecht — Text</span>
-							<textarea bind:value={state.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
-						</div>
+		<section class="card">
+			<div class="card-head"><span class="card-title">Verwendung — Wann nutzen</span></div>
+			<div class="card-body">
+				{#each model.verwendung.nutzen as _, i}
+					<div class="row">
+						<input bind:value={model.verwendung.nutzen[i]} />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.verwendung.nutzen, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
 					</div>
-					<button
-						type="button"
-						class="rm rm--pair"
-						onclick={() => removeFrom(state.doDontBeispiele, i)}>× Paar entfernen</button
-					>
-				</div>
-			{/each}
-			<button
-				type="button"
-				class="add"
-				onclick={() =>
-					state.doDontBeispiele.push({
-						gut: { html: '', text: '' },
-						schlecht: { html: '', text: '' }
-					})}>+ Beispiel-Paar</button
-			>
-		</fieldset>
+				{/each}
+				<button type="button" class="add" onclick={() => addTo(model.verwendung.nutzen)}
+					>+ Zeile</button
+				>
+			</div>
+		</section>
 
-		<div class="actions">
-			<button type="submit" class="save" disabled={!data.writable}>Speichern</button>
-		</div>
+		<section class="card">
+			<div class="card-head"><span class="card-title">Verwendung — Wann nicht</span></div>
+			<div class="card-body">
+				{#each model.verwendung.nichtNutzen as _, i}
+					<div class="row">
+						<input bind:value={model.verwendung.nichtNutzen[i]} />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.verwendung.nichtNutzen, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button type="button" class="add" onclick={() => addTo(model.verwendung.nichtNutzen)}
+					>+ Zeile</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Do</span></div>
+			<div class="card-body">
+				{#each model.doDont.do as _, i}
+					<div class="row">
+						<input bind:value={model.doDont.do[i]} />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.doDont.do, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button type="button" class="add" onclick={() => addTo(model.doDont.do)}>+ Zeile</button>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Don't</span></div>
+			<div class="card-body">
+				{#each model.doDont.dont as _, i}
+					<div class="row">
+						<input bind:value={model.doDont.dont[i]} />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.doDont.dont, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button type="button" class="add" onclick={() => addTo(model.doDont.dont)}>+ Zeile</button>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Varianten-Info (Label → Text)</span></div>
+			<div class="card-body">
+				{#if data.variantLabels.length}
+					<p class="hint">Bekannte Labels: {data.variantLabels.join(', ')}</p>
+				{/if}
+				{#each model.variantInfo as _, i}
+					<div class="row row--kv">
+						<input class="kv-key" bind:value={model.variantInfo[i].key} placeholder="Label" />
+						<input bind:value={model.variantInfo[i].value} placeholder="Beschreibung" />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.variantInfo, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() => model.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head">
+				<span class="card-title">Barrierefreiheit (Label · Wert · Status)</span>
+			</div>
+			<div class="card-body">
+				{#each model.a11y as _, i}
+					<div class="row row--a11y">
+						<input class="a11y-label" bind:value={model.a11y[i].label} placeholder="Label" />
+						<input bind:value={model.a11y[i].wert} placeholder="Wert" />
+						<select class="status-sel" bind:value={model.a11y[i].status}>
+							<option value="pass">pass</option>
+							<option value="warn">warn</option>
+							<option value="todo">todo</option>
+						</select>
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.a11y, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Tastatur (Taste → Aktion)</span></div>
+			<div class="card-body">
+				{#each model.tastatur as _, i}
+					<div class="row">
+						<input class="kv-key" bind:value={model.tastatur[i].taste} placeholder="Taste" />
+						<input bind:value={model.tastatur[i].aktion} placeholder="Aktion" />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.tastatur, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() => model.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Anatomie-Callouts (Nr · Text)</span></div>
+			<div class="card-body">
+				{#each model.callouts as _, i}
+					<div class="row">
+						<input
+							class="num"
+							type="number"
+							min="1"
+							bind:value={model.callouts[i].nr}
+							aria-label="Nummer"
+						/>
+						<input bind:value={model.callouts[i].text} placeholder="Beschreibung" />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.callouts, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() => model.callouts.push({ nr: model.callouts.length + 1, text: '' })}
+					>+ Callout</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><span class="card-title">Wording (Schlecht · Gut · Hinweis)</span></div>
+			<div class="card-body">
+				{#each model.wording as _, i}
+					<div class="row">
+						<input bind:value={model.wording[i].schlecht} placeholder="Schlecht" />
+						<input bind:value={model.wording[i].gut} placeholder="Gut" />
+						<input bind:value={model.wording[i].hinweis} placeholder="Hinweis (optional)" />
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.wording, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
+				>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head">
+				<span class="card-title">Verwandte Komponenten (Katalog-Slugs)</span>
+			</div>
+			<div class="card-body">
+				{#each model.verwandt as _, i}
+					<div class="row">
+						<select bind:value={model.verwandt[i]}>
+							<option value="" disabled>– Komponente wählen –</option>
+							{#each data.slugs as s}
+								<option value={s.slug}>{s.name} ({s.slug})</option>
+							{/each}
+						</select>
+						<button
+							type="button"
+							class="rm"
+							onclick={() => removeFrom(model.verwandt, i)}
+							aria-label="Entfernen"><Icon name="trash" /></button
+						>
+					</div>
+				{/each}
+				<button type="button" class="add" onclick={() => model.verwandt.push('')}>+ Slug</button>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-head">
+				<span class="card-title">Do/Don't-Beispiele (fortgeschritten)</span>
+			</div>
+			<div class="card-body">
+				<p class="hint">
+					HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das
+					Beispiel.
+				</p>
+				{#each model.doDontBeispiele as _, i}
+					<div class="pair">
+						<div class="pair-grid">
+							<div class="pair-col">
+								<span class="sub-lbl">Gut — HTML</span>
+								<textarea class="mono" bind:value={model.doDontBeispiele[i].gut.html} rows="3"
+								></textarea>
+								<span class="sub-lbl">Gut — Text</span>
+								<textarea bind:value={model.doDontBeispiele[i].gut.text} rows="2"></textarea>
+							</div>
+							<div class="pair-col">
+								<span class="sub-lbl">Schlecht — HTML</span>
+								<textarea class="mono" bind:value={model.doDontBeispiele[i].schlecht.html} rows="3"
+								></textarea>
+								<span class="sub-lbl">Schlecht — Text</span>
+								<textarea bind:value={model.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
+							</div>
+						</div>
+						<button
+							type="button"
+							class="rm rm--pair"
+							onclick={() => removeFrom(model.doDontBeispiele, i)}>Paar entfernen</button
+						>
+					</div>
+				{/each}
+				<button
+					type="button"
+					class="add"
+					onclick={() =>
+						model.doDontBeispiele.push({
+							gut: { html: '', text: '' },
+							schlecht: { html: '', text: '' }
+						})}>+ Beispiel-Paar</button
+				>
+			</div>
+		</section>
+
+		{#if dirty}
+			<div class="savebar" role="status">
+				<span class="savebar-info">Ungespeicherte Änderungen</span>
+				<button type="button" class="savebar-discard" onclick={discard}>Verwerfen</button>
+				<button type="submit" class="save" disabled={!data.writable}
+					>Speichern <kbd>⌘S</kbd></button
+				>
+			</div>
+		{/if}
 	</form>
 </div>
 
@@ -483,7 +569,8 @@
 	.edit {
 		max-width: 46rem;
 		margin: 0 auto;
-		padding: var(--z-ds-space-xl) var(--z-ds-space-l);
+		/* unten Luft für die schwebende Save-Bar */
+		padding: var(--z-ds-space-xl) var(--z-ds-space-l) 7rem;
 	}
 	.crumb {
 		margin-bottom: var(--z-ds-space-m);
@@ -497,54 +584,72 @@
 		color: var(--ds-text-muted);
 		margin-bottom: var(--z-ds-space-l);
 	}
+	.ro-chip {
+		display: inline-block;
+		vertical-align: middle;
+		margin-left: var(--z-ds-space-s);
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		letter-spacing: var(--ds-label-tracking);
+		text-transform: uppercase;
+		color: var(--ds-text-muted);
+		background: var(--ds-surface-raised, var(--ds-surface));
+		border: 1px solid var(--ds-border-soft);
+		border-radius: 999px;
+		padding: 2px var(--z-ds-space-s);
+	}
 	.flash {
 		padding: var(--z-ds-space-s) var(--z-ds-space-m);
 		border-radius: var(--ds-radius-sm);
 		margin-bottom: var(--z-ds-space-l);
 		font-size: var(--ds-text-sm);
 	}
-	.flash--ok {
-		background: rgb(from var(--ds-positive) r g b / 0.12);
-		color: var(--ds-text);
-	}
-	.flash--err {
-		background: rgb(from var(--ds-negative) r g b / 0.12);
-		color: var(--ds-text);
-	}
 	.flash--warn {
 		background: rgb(from var(--ds-warning) r g b / 0.15);
 		color: var(--ds-text);
 	}
-	.field {
-		display: block;
-		border: none;
-		margin: 0 0 var(--z-ds-space-l);
-		padding: 0;
+	/* Karten-Blöcke wie im Brand-Editor (Figma 689:11510): Fläche raised, radius 8,
+	   padding 12; Kopf mit Border-bottom (Label 12 bold uppercase, muted) + gestapelter
+	   Body. */
+	.card {
+		background: var(--ds-surface-raised, var(--ds-surface));
+		border-radius: var(--ds-radius, 8px);
+		padding: 12px;
+		margin-bottom: var(--z-ds-space-m);
 	}
-	.lbl {
-		display: block;
-		font-size: var(--ds-label-size);
+	.card-head {
+		padding: 0 0 8px;
+		border-bottom: 1px solid var(--ds-border);
+	}
+	.card-title {
+		font-size: var(--ds-text-xs);
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
 		color: var(--ds-text-muted);
-		margin-bottom: var(--z-ds-space-xs);
+	}
+	.card-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--z-ds-space-s);
+		padding: 8px 0 0;
 	}
 	.hint {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
-		margin: 0 0 var(--z-ds-space-xs);
+		margin: 0;
 	}
 	textarea,
 	select,
 	input {
 		width: 100%;
 		font: inherit;
+		font-size: var(--ds-text-sm);
 		color: var(--ds-text);
 		background: var(--ds-surface);
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-8) var(--z-ds-space-10);
+		padding: var(--z-ds-space-6) var(--z-ds-space-8);
 	}
 	textarea {
 		resize: vertical;
@@ -557,14 +662,13 @@
 	}
 	.row {
 		display: flex;
+		align-items: center;
 		gap: var(--z-ds-space-8);
-		margin-bottom: var(--z-ds-space-8);
 	}
 	.check {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
-		margin-top: var(--z-ds-space-m);
 		cursor: pointer;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text);
@@ -591,10 +695,10 @@
 		max-width: 12rem;
 	}
 	.pair {
-		border: 1px solid var(--ds-border);
+		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius-sm);
+		background: var(--ds-surface);
 		padding: var(--z-ds-space-m);
-		margin-bottom: var(--z-ds-space-m);
 	}
 	.pair-grid {
 		display: grid;
@@ -617,27 +721,51 @@
 		font-family: var(--z-ds-font-mono, ui-monospace, monospace);
 		font-size: var(--ds-text-xs);
 	}
-	.rm--pair {
-		width: auto;
-		margin-top: var(--z-ds-space-8);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		font-size: var(--ds-text-sm);
-	}
 	@media (max-width: 34rem) {
 		.pair-grid {
 			grid-template-columns: 1fr;
 		}
 	}
+	/* Entfernen-Icon-Button (CMS-Standard: 24×24-Quadrat, radius 4, Hover =
+	   negative Tönung — wie .blk-btn--del im Brand-Editor). */
 	.rm {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
 		flex: none;
-		width: 34px;
-		border: 1px solid var(--ds-border);
-		background: var(--ds-surface);
+		border: none;
+		background: none;
 		border-radius: var(--ds-radius-sm);
+		padding: 0;
 		color: var(--ds-text-muted);
 		cursor: pointer;
+		line-height: 1;
+		transition:
+			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
+			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
+	.rm:hover {
+		color: var(--ds-negative, var(--ds-text));
+		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
+	}
+	/* Text-Variante für „Paar entfernen" (mehr Kontext nötig als beim Icon). */
+	.rm--pair {
+		width: auto;
+		height: auto;
+		align-self: flex-start;
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius-sm);
+		padding: var(--z-ds-space-6) var(--z-ds-space-m);
+		font-size: var(--ds-text-sm);
+	}
+	.rm--pair:hover {
+		border-color: var(--ds-negative, var(--ds-border));
+	}
+	/* Hinzufügen: gestrichelter Ghost-Button (wie .ins-btn im Brand-Editor). */
 	.add {
+		align-self: flex-start;
 		background: none;
 		border: 1px dashed var(--ds-border);
 		border-radius: var(--ds-radius-sm);
@@ -645,27 +773,92 @@
 		color: var(--ds-text-body);
 		cursor: pointer;
 		font-size: var(--ds-text-sm);
+		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	.add:hover {
+		border-color: var(--ds-accent);
 	}
 	.rm:focus-visible,
 	.add:focus-visible,
-	.save:focus-visible {
+	.save:focus-visible,
+	.savebar-discard:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.actions {
-		margin-top: var(--z-ds-space-xl);
+	/* Schwebende Save-Bar bei offenen Änderungen (Muster aus dem Brand-Editor). */
+	.savebar {
+		position: fixed;
+		left: 50%;
+		bottom: 1.25rem;
+		transform: translateX(-50%);
+		z-index: 40;
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-s);
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border);
+		border-radius: 999px;
+		padding: var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-l);
+		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
+		animation: savebar-in 0.2s var(--ds-ease-out, ease-out);
+	}
+	@keyframes savebar-in {
+		from {
+			opacity: 0;
+			transform: translate(-50%, 8px);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, 0);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.savebar {
+			animation: none;
+		}
+	}
+	.savebar-info {
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-body);
+		white-space: nowrap;
+	}
+	.savebar-discard {
+		border: none;
+		background: none;
+		color: var(--ds-text-muted);
+		font-size: var(--ds-text-sm);
+		cursor: pointer;
+		padding: var(--z-ds-space-6) var(--z-ds-space-s);
+		border-radius: 999px;
+		transition:
+			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
+			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	.savebar-discard:hover {
+		background: rgb(from var(--ds-text) r g b / 0.08);
+		color: var(--ds-text);
 	}
 	.save {
 		background: var(--ds-accent);
 		color: var(--ds-static-white);
 		border: none;
 		border-radius: 999px;
-		padding: var(--z-ds-space-10) var(--z-ds-space-xl);
+		padding: var(--z-ds-space-8) var(--z-ds-space-l);
 		font-weight: 600;
 		cursor: pointer;
+		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
 	.save:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+	.savebar kbd {
+		font-family: var(--z-ds-font-mono, monospace);
+		font-size: 0.72em;
+		opacity: 0.75;
+		margin-left: 0.3em;
+		background: rgb(from var(--ds-static-white) r g b / 0.18);
+		padding: 1px 5px;
+		border-radius: 4px;
 	}
 </style>
