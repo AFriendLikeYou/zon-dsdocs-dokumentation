@@ -6,8 +6,10 @@
   Für Varianten UND statisch renderbare Zustände nebeneinander — man „sieht"
   Hover/Disabled statisch sonst nicht.
 
-  Bewusst FIXE helle Artboard-Kacheln: die Specimen-Farben kommen 1:1 aus dem
-  dokumentierten DS und brauchen eine neutrale, auch im Dark-Mode stabile Fläche.
+  Bewusst FIXE helle Artboard-Kacheln über die .ds-stage-Mechanik (pinnt die
+  RAW --z-ds-Token auf Light): so bleibt nicht nur die Fläche, sondern auch das
+  Specimen selbst auf Dark-Seiten stabil in seiner Light-Variante — vorher
+  renderten dunkle Specimen-Tokens auf erzwungen heller Fläche (Audit-Befund).
 
   `html` ist vertrauenswürdig (Repo-Registry-Daten, vom Exporter erzeugt) — daher
   {@html} mit derselben eslint-Ausnahme wie im Playground.
@@ -18,7 +20,7 @@
 </script>
 
 {#if items.length}
-	<div class="sgrid spec-canvas" style="--cell-min:{min}px">
+	<div class="sgrid spec-canvas ds-stage" style="--cell-min:{min}px">
 		{#each items as item}
 			<div class="cell">
 				<div class="stage">
@@ -36,11 +38,12 @@
 
 <style>
 	.sgrid {
-		/* fixe Artboard-Palette (siehe Kommentar oben) — auch im Dark stabil hell */
-		--art-line: #e6e7e9;
-		--art: #f6f7f8;
-		--art-label: #252525;
-		--art-note: #5b6068;
+		/* Artboard-Palette aus den je Bühne gepinnten RAW-Token (.ds-stage = Light)
+		   statt harter Hex-Werte — gleiche Quelle wie Anatomy/Playground. */
+		--art-line: var(--z-ds-color-border-70);
+		--art: var(--z-ds-color-background-10);
+		--art-label: var(--z-ds-color-text-100);
+		--art-note: var(--z-ds-color-text-55);
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(var(--cell-min, 200px), 1fr));
 		gap: 1px;
