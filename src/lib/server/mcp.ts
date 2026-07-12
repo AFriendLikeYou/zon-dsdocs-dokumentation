@@ -9,6 +9,12 @@
  * die Tool-Logik ist hier als pure Funktionen testbar.
  */
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
+import { FOUNDATION_TOKENS, tokenName, tokenUsage } from '$data/foundation-tokens';
+import { COLOR_ROLE_GROUPS } from '$data/color-roles';
+// Upstream-Token-WERTE zur Build-Zeit einbetten (?raw) — serverless-sicher
+// (kein fs-Zugriff auf static/ zur Laufzeit nötig); ändert sich nur mit dem
+// @zeitonline-Paket-Update, also genau im Build-Rhythmus.
+import zdsCss from '../../../static/styles-zds.css?raw';
 
 const PROTOCOL_VERSION = '2025-06-18';
 const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.0.0' };
@@ -246,6 +252,91 @@ export function getComponent(slug: string, section?: GetSection | string): strin
 	return budget(combined, false);
 }
 
+/** Ungekappter Volltext einer Komponente (alle Sektionen) — für llms-full.txt. */
+export function componentFullText(slug: string): string {
+	const e = find(slug);
+	if (!e) return '';
+	return SECTIONS.map((s) => RENDERERS[s](e)).join('\n\n');
+}
+
+/** Katalog-Slugs in Katalog-Reihenfolge — für llms.txt/llms-full.txt. */
+export const catalogSlugs = (): string[] => AGENT_CATALOG.map((e) => e.slug);
+
+/** Kurzinfo je Slug — für die llms.txt-Linkliste. */
+export const catalogSummaries = (): Array<{ slug: string; name: string; zweck: string }> =>
+	AGENT_CATALOG.map((e) => ({
+		slug: e.slug,
+		name: e.spec.name ?? e.slug,
+		zweck: e.spec.zweck ?? ''
+	}));
+
+// ---------------------------------------------------------------------------
+// foundations — Farb-Rollen, Tokens, Spacing, Typografie (Agenten-Text)
+// ---------------------------------------------------------------------------
+
+export type FoundationsSection = 'farben' | 'spacing' | 'typografie' | 'tokens';
+const F_SECTIONS: FoundationsSection[] = ['farben', 'spacing', 'typografie', 'tokens'];
+
+/** Token-Name → Wert aus dem eingebetteten Upstream-CSS. */
+const ZDS_VALUES: Record<string, string> = (() => {
+	const map: Record<string, string> = {};
+	for (const m of zdsCss.matchAll(/(--z-ds-[a-z0-9-]+)\s*:\s*([^;]+);/g)) map[m[1]] = m[2].trim();
+	return map;
+})();
+
+function foundationsFarben(): string {
+	let out = '# Farb-Rollen der Doku-UI (--ds-Rolle → --z-ds-Token = Wert)\n';
+	for (const g of COLOR_ROLE_GROUPS) {
+		out += `\n${g.titel}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
+		for (const r of g.rollen) {
+			const wert = ZDS_VALUES[r.raw];
+			out += `  - ${r.token} → ${r.raw}${wert ? ` = ${wert}` : ''} · ${r.usage}\n`;
+		}
+	}
+	out += '\nRegel: In UI immer Rollen-Tokens verwenden, nie rohe Farbwerte.\n';
+	return out;
+}
+
+/** Foundation-Token-Gruppen (gefiltert) als Text — Name = Wert · Einsatz. */
+function foundationsGroups(titel: string, match: (kategorie: string) => boolean): string {
+	let out = `# ${titel}\n`;
+	for (const g of FOUNDATION_TOKENS.filter((g) => match(g.kategorie.toLowerCase()))) {
+		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
+		for (const t of g.tokens) {
+			const name = tokenName(t);
+			const usage = tokenUsage(t);
+			const wert = ZDS_VALUES[name];
+			out += `  - ${name}${wert ? ` = ${wert}` : ''}${usage && usage !== '—' ? ` · ${usage}` : ''}\n`;
+		}
+	}
+	return out;
+}
+
+const F_RENDERERS: Record<FoundationsSection, () => string> = {
+	farben: foundationsFarben,
+	spacing: () => foundationsGroups('Spacing-Tokens', (k) => k.startsWith('abstand')),
+	typografie: () =>
+		foundationsGroups('Typografie-Tokens', (k) => k.includes('schrift') || k.includes('zeilen')),
+	tokens: () => foundationsGroups('Alle Foundation-Tokens', () => true)
+};
+
+/**
+ * Foundations als Agenten-Text: ohne `section` ein kompakter Einstieg
+ * (Farb-Rollen + Spacing), mit `section` gezielt eine der vier Sichten.
+ */
+export function getFoundations(section?: string): string {
+	if (section && F_SECTIONS.includes(section as FoundationsSection)) {
+		return budget(F_RENDERERS[section as FoundationsSection](), true);
+	}
+	const combined = [foundationsFarben(), F_RENDERERS.spacing()].join('\n---\n');
+	const capped =
+		combined.length <= GET_CHAR_BUDGET
+			? combined
+			: combined.slice(0, GET_CHAR_BUDGET - 60) +
+				`\n\n[…gekürzt. Gezielt abrufen mit section: ${F_SECTIONS.join(' | ')}]`;
+	return capped;
+}
+
 // ---------------------------------------------------------------------------
 // list — kompakte Katalog-Übersicht (Einstieg ohne Rate-Begriff)
 // ---------------------------------------------------------------------------
@@ -293,7 +384,7 @@ const TOOLS = [
 	{
 		name: 'get',
 		description:
-			'Liefert die Doku einer Komponente als Text. Ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage.',
+			'Liefert die Doku einer Komponente als Text. Ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage. Beispiel: { "slug": "button", "section": "markup" }.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -305,6 +396,21 @@ const TOOLS = [
 				}
 			},
 			required: ['slug']
+		}
+	},
+	{
+		name: 'foundations',
+		description:
+			'Liefert die Design-Foundations als Text: Farb-Rollen (--ds-* → --z-ds-* mit Werten), Spacing-, Typografie- und alle Foundation-Tokens. Ohne section ein kompakter Einstieg (Farben + Spacing). Beispiel: { "section": "farben" }.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				section: {
+					type: 'string',
+					enum: ['farben', 'spacing', 'typografie', 'tokens'],
+					description: 'Optionale Sicht.'
+				}
+			}
 		}
 	}
 ];
@@ -386,6 +492,9 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 					return err(id, -32602, 'Pflicht-Argument "slug" fehlt oder ist leer.');
 				}
 				return ok(id, textResult(getComponent(slug, args.section as string)));
+			}
+			if (params.name === 'foundations') {
+				return ok(id, textResult(getFoundations(args.section as string)));
 			}
 			return err(id, -32602, `Unbekanntes Tool: ${params.name}`);
 		}

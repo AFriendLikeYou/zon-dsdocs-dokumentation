@@ -2,6 +2,8 @@ import { AGENT_CATALOG } from '$lib/server/agent-catalog';
 import {
 	searchComponents,
 	getComponent,
+	getFoundations,
+	componentFullText,
 	listComponents,
 	handleRpc,
 	handleMcpBody,
@@ -23,11 +25,9 @@ describe('AGENT_CATALOG (angereicherter Index)', () => {
 	it('behält render (Template) und referenziert pattern.css', () => {
 		const input = AGENT_CATALOG.find((e) => e.slug === 'input')!;
 		expect(input.spec.render?.template).toContain('z-input');
-		// pattern.css wird per ?raw-Glob geladen (Schlüssel matcht → string, nicht null).
-		// Hinweis: Vite serviert .css im Vitest-Transform als leeren String; der ECHTE
-		// Rohtext (inkl. .z-input-Regeln) ist im Build/Dev korrekt und via curl-Smoke-Test
-		// gegen /api/mcp verifiziert.
-		expect(typeof input.patternCss).toBe('string');
+		// pattern.css wird per ?raw-Glob geladen; css:true in vite.config.ts sorgt
+		// dafür, dass Vitest den echten Rohtext liefert (statt leerer Strings).
+		expect(input.patternCss).toContain('.z-input');
 	});
 });
 
@@ -123,10 +123,22 @@ describe('JSON-RPC Dispatch', () => {
 		expect(handleRpc({ jsonrpc: '2.0', method: 'notifications/initialized' })).toBeNull();
 	});
 
-	it('tools/list liefert search + get + list', () => {
+	it('tools/list liefert search + get + list + foundations', () => {
 		const res = handleRpc({ jsonrpc: '2.0', id: 2, method: 'tools/list' })!;
 		const names = (res.result as { tools: { name: string }[] }).tools.map((t) => t.name);
-		expect(names).toEqual(expect.arrayContaining(['search', 'get', 'list']));
+		expect(names).toEqual(expect.arrayContaining(['search', 'get', 'list', 'foundations']));
+	});
+
+	it('tools/call foundations liefert Farb-Rollen mit eingebetteten Werten', () => {
+		const res = handleRpc({
+			jsonrpc: '2.0',
+			id: 21,
+			method: 'tools/call',
+			params: { name: 'foundations', arguments: { section: 'farben' } }
+		})!;
+		const text = (res.result as { content: { text: string }[] }).content[0].text;
+		expect(text).toContain('--ds-surface → --z-ds-color-background-0');
+		expect(text).toMatch(/= #?[0-9a-f]/i); // Wert aus styles-zds.css eingebettet
 	});
 
 	it('tools/call list liefert Katalog-Übersicht', () => {
@@ -234,5 +246,32 @@ describe('JSON-RPC Dispatch', () => {
 		]);
 		expect(Array.isArray(res)).toBe(true);
 		expect((res as unknown[]).length).toBe(1); // Notification liefert nichts.
+	});
+});
+
+describe('getFoundations', () => {
+	it('spacing listet die Skala mit Upstream-Werten', () => {
+		const text = getFoundations('spacing');
+		expect(text).toContain('--z-ds-space-m = 1rem');
+		expect(text).toContain('Abstand');
+	});
+
+	it('ohne section: kompakter Einstieg (Farben + Spacing) im Budget', () => {
+		const text = getFoundations();
+		expect(text).toContain('Farb-Rollen');
+		expect(text.length).toBeLessThanOrEqual(GET_CHAR_BUDGET);
+	});
+});
+
+describe('componentFullText (llms-full.txt)', () => {
+	it('liefert alle Sektionen UNGEKAPPT', () => {
+		const text = componentFullText('carousel');
+		expect(text.length).toBeGreaterThan(GET_CHAR_BUDGET);
+		expect(text).toContain('# Verwendung');
+		expect(text).toContain('# Barrierefreiheit');
+	});
+
+	it('unbekannter Slug → leer', () => {
+		expect(componentFullText('gibt-es-nicht')).toBe('');
 	});
 });

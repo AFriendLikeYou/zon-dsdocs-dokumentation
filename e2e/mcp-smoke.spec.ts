@@ -35,12 +35,22 @@ test.describe('MCP-Endpoint /api/mcp', () => {
 		expect(res.status()).toBe(202);
 	});
 
-	test('tools/list → search, get, list mit inputSchema', async ({ request }) => {
+	test('tools/list → search, get, list, foundations mit inputSchema', async ({ request }) => {
 		const res = await request.post('/api/mcp', { data: rpc('tools/list', undefined, 2) });
 		const { result } = await res.json();
 		const names = result.tools.map((t: { name: string }) => t.name).sort();
-		expect(names).toEqual(['get', 'list', 'search']);
+		expect(names).toEqual(['foundations', 'get', 'list', 'search']);
 		for (const t of result.tools) expect(t.inputSchema?.type).toBe('object');
+	});
+
+	test('foundations farben → Rollen mit eingebetteten Upstream-Werten', async ({ request }) => {
+		const res = await request.post('/api/mcp', {
+			data: rpc('tools/call', { name: 'foundations', arguments: { section: 'farben' } }, 6)
+		});
+		const { result } = await res.json();
+		const text = result.content[0].text as string;
+		expect(text).toContain('--ds-surface → --z-ds-color-background-0');
+		expect(text).toMatch(/= #?[0-9a-f]/i); // Wert aus styles-zds.css eingebettet
 	});
 
 	test('search "button" rankt die Komponente vor Verwandten', async ({ request }) => {
