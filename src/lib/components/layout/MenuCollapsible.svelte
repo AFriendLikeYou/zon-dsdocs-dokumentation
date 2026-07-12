@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import type { MenuItem, BadgeVariant } from '$data/navigation';
 	import { Badge } from '$components/ui/badge';
+	import { ChevronRightIcon, LockOpenIcon, LockClosedIcon } from '$lib/icons';
 
 	type Props = {
 		title: string;
@@ -46,21 +47,7 @@
 		{/if}
 	</span>
 	{#if items.length > 0}
-		<svg
-			class="chevron-icon {isOpen ? 'rotate' : ''}"
-			xmlns="http://www.w3.org/2000/svg"
-			width="16"
-			height="16"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<path d="m9 18 6-6-6-6" />
-		</svg>
+		<ChevronRightIcon class="chevron-icon {isOpen ? 'rotate' : ''}" />
 	{/if}
 {/snippet}
 
@@ -68,35 +55,9 @@
 {#snippet lockIcon(unlocked: boolean)}
 	<span class="lock-icon">
 		{#if unlocked}
-			<svg
-				aria-hidden="true"
-				height="16"
-				stroke-linejoin="round"
-				viewBox="0 0 16 16"
-				width="16"
-				style="color: currentcolor;"
-				><path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M14 6V4.5C14 3.39543 13.1046 2.5 12 2.5C10.8954 2.5 10 3.39543 10 4.5V6H10.5H12V7.5V12.5C12 13.8807 10.8807 15 9.5 15H2.5C1.11929 15 0 13.8807 0 12.5V7.5V6H1.5H8.5V4.5C8.5 2.567 10.067 1 12 1C13.933 1 15.5 2.567 15.5 4.5V6H14ZM10.5 7.5H10H8.5H1.5V12.5C1.5 13.0523 1.94772 13.5 2.5 13.5H9.5C10.0523 13.5 10.5 13.0523 10.5 12.5V7.5Z"
-					fill="currentColor"
-				></path></svg
-			>
+			<LockOpenIcon style="color: currentcolor;" />
 		{:else}
-			<svg
-				aria-hidden="true"
-				height="16"
-				stroke-linejoin="round"
-				viewBox="0 0 16 16"
-				width="16"
-				style="color: var(--ds-text-muted);"
-				><path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M10 4.5V6H6V4.5C6 3.39543 6.89543 2.5 8 2.5C9.10457 2.5 10 3.39543 10 4.5ZM4.5 6V4.5C4.5 2.567 6.067 1 8 1C9.933 1 11.5 2.567 11.5 4.5V6H12.5H14V7.5V12.5C14 13.8807 12.8807 15 11.5 15H4.5C3.11929 15 2 13.8807 2 12.5V7.5V6H3.5H4.5ZM11.5 7.5H10H6H4.5H3.5V12.5C3.5 13.0523 3.94772 13.5 4.5 13.5H11.5C12.0523 13.5 12.5 13.0523 12.5 12.5V7.5H11.5Z"
-					fill="currentColor"
-				></path></svg
-			>
+			<LockClosedIcon style="color: var(--ds-text-muted);" />
 		{/if}
 	</span>
 {/snippet}
@@ -236,7 +197,8 @@
 		gap: 8px;
 	}
 
-	.chevron-icon {
+	/* Chevron liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.collapsible-header :global(.chevron-icon) {
 		margin-left: 8px;
 		flex: none;
 		color: var(--ds-text-muted);
@@ -244,7 +206,7 @@
 		transform: rotate(0deg);
 	}
 
-	.chevron-icon.rotate {
+	.collapsible-header :global(.chevron-icon.rotate) {
 		transform: rotate(90deg);
 	}
 
@@ -327,7 +289,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.chevron-icon {
+		.collapsible-header :global(.chevron-icon) {
 			transition: none;
 		}
 	}

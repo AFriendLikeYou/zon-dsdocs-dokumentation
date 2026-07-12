@@ -6,6 +6,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { getToastState } from '$stores/toast-state.svelte';
+	import { DownloadIcon } from '$lib/icons';
 
 	type Props = {
 		/** Direkter Download-Link. */
@@ -67,18 +68,7 @@
 	{:else if label}
 		<span>{label}</span>
 	{:else}
-		<svg
-			class="download-button__icon"
-			viewBox="0 0 18 18"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="1.5"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<path d="M9 2V12" /><path d="M5.5 8.5 9 12l3.5-3.5" /><path d="M2.75 9v6h12.5V9" />
-		</svg>
+		<DownloadIcon class="download-button__icon" />
 	{/if}
 </button>
 
@@ -105,7 +95,8 @@
 		outline-offset: 2px;
 		border-radius: var(--ds-radius-sm);
 	}
-	.download-button__icon {
+	/* Icon liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.download-button :global(.download-button__icon) {
 		width: var(--download-icon-size);
 		height: var(--download-icon-size);
 		flex: none;

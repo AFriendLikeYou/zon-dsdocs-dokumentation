@@ -5,7 +5,7 @@
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { iconFor, CMS_CATEGORIES, type CmsPropDef } from '../core/cms-components';
 	import FieldsPanel from '../editor/FieldsPanel.svelte';
-	import Icon from '../icons/Icon.svelte';
+	import { Icon } from '$lib/icons/cms';
 	import BlockPreview from '../editor/BlockPreview.svelte';
 	import ProseEditor from '../editor/ProseEditor.svelte';
 	import InsertMenu from '../editor/InsertMenu.svelte';

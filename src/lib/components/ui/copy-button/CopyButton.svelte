@@ -11,6 +11,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { getToastState } from '$stores/toast-state.svelte';
+	import { CopyIcon, CheckIcon } from '$lib/icons';
 
 	type Props = {
 		/** Text, der kopiert wird. Alternativ `onCopy` für eigene Kopier-Logik (z. B. SVG). */
@@ -76,29 +77,9 @@
 	{:else if label}
 		<span>{copied ? 'Kopiert ✓' : label}</span>
 	{:else if copied}
-		<svg class="copy-button__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-			<path
-				d="M20 6 9 17l-5-5"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-		</svg>
+		<CheckIcon class="copy-button__icon" />
 	{:else}
-		<svg
-			class="copy-button__icon"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-			<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-		</svg>
+		<CopyIcon class="copy-button__icon" />
 	{/if}
 </button>
 
@@ -127,7 +108,8 @@
 		outline-offset: 2px;
 		border-radius: var(--ds-radius-sm);
 	}
-	.copy-button__icon {
+	/* Icon liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.copy-button :global(.copy-button__icon) {
 		width: var(--copy-icon-size);
 		height: var(--copy-icon-size);
 		flex: none;

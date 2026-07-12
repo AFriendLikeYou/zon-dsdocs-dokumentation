@@ -2,6 +2,7 @@
 	import { debounce } from '$lib/utils';
 	import type { Icon } from '$types/global';
 	import IconComponent from './IconComponent.svelte';
+	import { SearchIcon, CloseIcon } from '$lib/icons';
 
 	let { icons }: { icons: Icon[] } = $props();
 
@@ -49,22 +50,7 @@
 <div class="search__container">
 	<label for="icon-search" class="sr-only">Icons suchen</label>
 	<div class="search__input-wrapper">
-		<svg
-			class="search__icon"
-			xmlns="http://www.w3.org/2000/svg"
-			width="16"
-			height="16"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<circle cx="11" cy="11" r="8"></circle>
-			<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-		</svg>
+		<SearchIcon class="search__icon" />
 		<input
 			bind:this={input}
 			value={searchTerm}
@@ -82,22 +68,7 @@
 				aria-label="Suche zurücksetzen"
 				onclick={resetSearch}
 			>
-				<svg
-					class="search__clear-icon"
-					xmlns="http://www.w3.org/2000/svg"
-					width="16"
-					height="16"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<line x1="18" y1="6" x2="6" y2="18"></line>
-					<line x1="6" y1="6" x2="18" y2="18"></line>
-				</svg>
+				<CloseIcon class="search__clear-icon" />
 			</button>
 		{/if}
 	</div>
@@ -148,7 +119,8 @@
 		margin-bottom: var(--z-ds-space-16);
 	}
 
-	.search__icon {
+	/* Icons liegen in Kind-Komponenten → :global, sonst greift das Scoping nicht. */
+	.search__input-wrapper :global(.search__icon) {
 		position: absolute;
 		left: var(--z-ds-space-12);
 		color: var(--ds-text-body);
@@ -197,7 +169,7 @@
 		border-radius: var(--ds-radius-xs);
 	}
 
-	.search__clear-icon {
+	.search__clear-button :global(.search__clear-icon) {
 		width: 16px;
 		height: 16px;
 	}

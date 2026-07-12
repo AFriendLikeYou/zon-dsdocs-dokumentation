@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { type MenuItem, type MenuSection } from '$data/navigation';
 	import { Button } from '$components/ui/button';
+	import { ArrowLeftIcon, ArrowRightIcon } from '$lib/icons';
 
 	let { items }: { items: (MenuItem | MenuSection)[] } = $props();
 
@@ -43,16 +44,7 @@
 	<nav class="footer-nav">
 		{#if currentIndex >= 1}
 			<Button onclick={prevItem} class="footer-nav__button" aria-label="Zur vorherigen Seite">
-				<svg
-					aria-hidden="true"
-					width="14"
-					height="14"
-					viewBox="0 0 14 14"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path d="M7 1L1 7L7 13M1 7H13" stroke="currentColor" stroke-width="1.5" />
-				</svg>
+				<ArrowLeftIcon width={14} height={14} />
 				{previousElement()}
 			</Button>
 		{/if}
@@ -65,16 +57,7 @@
 				aria-label="Zur nächsten Seite"
 			>
 				{nextElement()}
-				<svg
-					aria-hidden="true"
-					width="14"
-					height="14"
-					viewBox="0 0 14 14"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path d="M7 1L13 7L7 13M13 7H1" stroke="currentColor" stroke-width="1.5" />
-				</svg>
+				<ArrowRightIcon width={14} height={14} />
 			</Button>
 		{/if}
 	</nav>

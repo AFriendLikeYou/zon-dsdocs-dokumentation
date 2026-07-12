@@ -8,6 +8,7 @@
 	import { Badge } from '$components/ui/badge';
 	import { EmptyState } from '$components/ui/empty-state';
 	import { goto } from '$app/navigation';
+	import { SearchIcon } from '$lib/icons';
 
 	/** Durchsuchbare Einträge; Default = Brand + Product zusammengeführt (dedupliziert). */
 	function combinedIndex(): MenuItem[] {
@@ -80,19 +81,7 @@
 <svelte:window onkeydown={onWindowKeydown} />
 
 <button type="button" class="search-trigger" onclick={open} aria-keyshortcuts="Meta+K Control+K">
-	<svg
-		width="16"
-		height="16"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		aria-hidden="true"
-	>
-		<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-	</svg>
+	<SearchIcon />
 	<span class="search-trigger__label">Suchen</span>
 	<kbd class="search-trigger__kbd">⌘K</kbd>
 </button>
@@ -108,19 +97,7 @@
 >
 	<div class="panel">
 		<div class="inputrow">
-			<svg
-				width="18"
-				height="18"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-			</svg>
+			<SearchIcon width={18} height={18} />
 			<input
 				bind:this={inputEl}
 				bind:value={query}

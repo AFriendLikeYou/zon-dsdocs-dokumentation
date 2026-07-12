@@ -5,7 +5,7 @@
   durch (oninput bekommt das Textarea-Element für die Cursor-Verankerung).
 -->
 <script lang="ts">
-	import Icon from '../icons/Icon.svelte';
+	import { Icon } from '$lib/icons/cms';
 	import {
 		hasHeadingTypo,
 		fixHeadings,

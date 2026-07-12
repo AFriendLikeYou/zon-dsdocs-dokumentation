@@ -11,6 +11,7 @@
 -->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
+	import { ChevronDownIcon } from '$lib/icons';
 
 	type Lang = 'html' | 'css' | 'svelte';
 	let {
@@ -129,20 +130,12 @@
 		<div class="cb-expand">
 			<button type="button" onclick={() => (expanded = !expanded)}>
 				{expanded ? 'Code einklappen' : `Code aufklappen (${lineCount} Zeilen)`}
-				<svg
-					aria-hidden="true"
-					width="10"
-					height="10"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
+				<ChevronDownIcon
+					width={10}
+					height={10}
 					stroke-width="2.5"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					style:transform={expanded ? 'rotate(180deg)' : ''}
-				>
-					<path d="m6 9 6 6 6-6" />
-				</svg>
+					style={expanded ? 'transform: rotate(180deg)' : undefined}
+				/>
 			</button>
 		</div>
 	{/if}
@@ -300,7 +293,8 @@
 		justify-content: center;
 		transition: color var(--ds-dur) var(--ds-ease);
 	}
-	.cb-expand button svg {
+	/* Chevron liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.cb-expand button :global(svg) {
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
 	@media (hover: hover) and (pointer: fine) {
@@ -315,7 +309,7 @@
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.cb-line,
-		.cb-expand button svg {
+		.cb-expand button :global(svg) {
 			transition: none;
 		}
 	}

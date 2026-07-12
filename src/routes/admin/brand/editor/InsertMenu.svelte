@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import BlockMenuList from './BlockMenuList.svelte';
-	import Icon from '../icons/Icon.svelte';
+	import { Icon } from '$lib/icons/cms';
 	import { matchesMedia } from '../core/media.svelte';
 	import { placePopover } from '../core/popover-position';
 

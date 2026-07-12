@@ -4,6 +4,8 @@
   Nutzung: <Lightbox src="…" alt="…" caption="…" />
 -->
 <script lang="ts">
+	import { CloseIcon } from '$lib/icons';
+
 	let {
 		src,
 		alt = '',
@@ -56,17 +58,7 @@
 	}}
 >
 	<button type="button" class="lightbox__close" onclick={close} aria-label="Schließen">
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-		</svg>
+		<CloseIcon />
 	</button>
 	<figure class="lightbox__figure">
 		<img {src} {alt} class="lightbox__img" />
@@ -177,7 +169,8 @@
 	.lightbox__close:active {
 		transform: scale(0.92);
 	}
-	.lightbox__close svg {
+	/* Icon liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.lightbox__close :global(svg) {
 		width: 18px;
 		height: 18px;
 	}

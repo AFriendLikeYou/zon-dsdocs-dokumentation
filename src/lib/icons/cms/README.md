@@ -1,7 +1,8 @@
 # CMS-Icons
 
-Zentraler Ort für **alle Icons der CMS-UI** (`/admin/brand`-Editor). Eine Datei pro
-Icon — zum Austauschen einfach das `<svg>` in der jeweiligen Datei ersetzen.
+Teil der zentralen Icon-Bibliothek (`$lib/icons`, s. `../README.md`): **alle Icons
+der CMS-UI** (`/admin/brand`-Editor). Import über `import { Icon } from '$lib/icons/cms'`.
+Eine Datei pro Icon — zum Austauschen einfach das `<svg>` in der jeweiligen Datei ersetzen.
 
 Konventionen:
 
