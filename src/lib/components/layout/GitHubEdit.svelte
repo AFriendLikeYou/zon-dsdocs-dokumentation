@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 
 	// Welche Datei der Stift öffnet. Default: die Seite selbst; Component-Doku-Seiten
@@ -8,11 +7,8 @@
 
 	const startRoute = 'https://github.com/ZeitOnline/zon-dsdocs/edit/main/src/routes';
 
-	let url = $state(startRoute + page.url.pathname + '/' + file);
-
-	afterNavigate(() => {
-		url = startRoute + page.url.pathname + '/' + file;
-	});
+	// `page` ist fein-granular reaktiv — direkt ableiten (statt afterNavigate-Spiegel).
+	const url = $derived(startRoute + page.url.pathname + '/' + file);
 </script>
 
 <a

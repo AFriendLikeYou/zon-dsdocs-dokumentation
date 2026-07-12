@@ -55,7 +55,14 @@ test.describe.serial('CMS-Kernflüsse', () => {
 		// einen Vite-Full-Reload aus, der beides wegreißen kann (HMR-Race). Die
 		// verlässliche Wahrheit ist das Dateisystem — dann EXPLIZIT in den Editor.
 		await expect.poll(() => fs.existsSync(path.join(pageDir, '+page.svx'))).toBe(true);
-		await page.goto(`/admin/brand/${SLUG}`);
+		// Vite kann durch die neue Route-Datei GENAU JETZT einen Full-Reload feuern,
+		// der unser goto abbricht (net::ERR_ABORTED) — einmal wiederholen reicht.
+		try {
+			await page.goto(`/admin/brand/${SLUG}`);
+		} catch {
+			await page.waitForTimeout(500);
+			await page.goto(`/admin/brand/${SLUG}`);
+		}
 		await page.waitForLoadState('networkidle');
 		await expect(page.locator('.blk')).toHaveCount(2);
 

@@ -7,7 +7,6 @@
 	import { setToastState } from '$stores/toast-state.svelte';
 	import Navbar from '$components/layout/Navbar.svelte';
 	import { page } from '$app/state';
-	import { afterNavigate } from '$app/navigation';
 	import {
 		FLAT_MENU_ITEMS_BRAND,
 		MENU_ITEMS_BRAND,
@@ -17,11 +16,9 @@
 	import Sidebar from '$components/layout/Sidebar.svelte';
 	import { initDesktopCollapsed } from '$stores/sidebar.svelte';
 
-	let url = $state(page.url.pathname);
-
-	afterNavigate(() => {
-		url = page.url.pathname;
-	});
+	// `page` (aus $app/state) ist fein-granular reaktiv — direkt ableiten
+	// (statt des früheren $state+afterNavigate-Spiegels, Review R2 Kür).
+	const url = $derived(page.url.pathname);
 
 	// Eine Quelle für die Bereichszuordnung — Menü, Footer-Navigation und TOC
 	// leiten sich daraus ab (statt drei verschiedener Routen-Checks).

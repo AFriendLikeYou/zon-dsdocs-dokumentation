@@ -132,6 +132,14 @@ const allDirs = fs.existsSync(componentsDir)
 	: [];
 const slugs = allDirs.filter((s) => fs.existsSync(path.join(componentsDir, s, 'model.json')));
 
+// Geplante Stubs (PLANNED_COMPONENTS in navigation.ts) haben BEWUSST kein
+// model.json — die sollen hier nicht bei jedem Lauf als Drift rauschen.
+const navSrc = fs.readFileSync(path.join(root, 'src/lib/data/navigation.ts'), 'utf8');
+const plannedBlock = navSrc.match(/PLANNED_COMPONENTS[^=]*=\s*\[([\s\S]*?)\n\];/);
+const planned = new Set(
+	plannedBlock ? [...plannedBlock[1].matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]) : []
+);
+
 let drift = 0;
 let checked = 0;
 
@@ -139,6 +147,10 @@ let checked = 0;
 // existiert dann nur handgeschrieben und ist für Katalog/Checks unsichtbar.
 for (const s of allDirs) {
 	if (!slugs.includes(s)) {
+		if (planned.has(s)) {
+			console.log(`ℹ️  „${s}": geplanter Stub (PLANNED_COMPONENTS) — ok, kein model.json erwartet.`);
+			continue;
+		}
 		drift++;
 		console.warn(`\n⚠️  „${s}": Component-Route ohne model.json (Registry-Entry fehlt).`);
 	}

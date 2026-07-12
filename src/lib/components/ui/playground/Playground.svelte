@@ -241,7 +241,7 @@
 		/* RAW-Token, damit Fläche UND Punktraster mit den je Bühne gepinnten Werten
 		   flippen (.ds-stage.is-dark pinnt background-10 + border-70) — kein separater
 		   is-dark-Block nötig. Abgeleitete --ds-*-Token wären auf :root aufgelöst. */
-		background-color: var(--z-ds-color-background-10);
+		background-color: var(--z-ds-color-background-0);
 		background-image: radial-gradient(circle, var(--z-ds-color-border-70) 1px, transparent 1px);
 		background-size: 12px 12px;
 		transition: background-color var(--ds-dur) var(--ds-ease);

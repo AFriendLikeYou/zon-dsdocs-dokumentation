@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { type MenuItem, type MenuSection } from '$data/navigation';
 	import { Button } from '$components/ui/button';
 
-	let pathname = $state(page.url.pathname);
 	let { items }: { items: (MenuItem | MenuSection)[] } = $props();
-	const startingIndex = items.findIndex((item) => item.href === pathname) || 0;
-	let currentIndex = $state(startingIndex);
+
+	// `page` ist fein-granular reaktiv — Index und Sichtbarkeit direkt aus der URL
+	// ableiten (statt des früheren $state+afterNavigate-Spiegels). Nebenbei gefixt:
+	// `findIndex(...) || 0` fing -1 nicht ab (−1 ist truthy) → Math.max-Klammer.
+	const pathname = $derived(page.url.pathname);
+	const currentIndex = $derived(Math.max(0, items.findIndex((item) => item.href === pathname)));
+	const showNavigation = $derived(items.some((item) => item.href === pathname));
 
 	function getDisplayName(item: MenuItem | MenuSection) {
 		if ('title' in item) {
@@ -17,36 +21,22 @@
 		}
 	}
 
-	// Navigate to the next item (circular navigation allowed)
+	// Weiter (zirkulär) / Zurück (ohne Wrap) — der Index folgt der URL nach goto.
 	function nextItem() {
-		if (currentIndex < items.length - 1) {
-			currentIndex++;
-		} else {
-			currentIndex = 0; // Start over from the beginning when reaching the last item
-		}
-		const href = items[currentIndex].href;
+		const next = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+		const href = items[next].href;
 		if (href) goto(href);
 	}
 
-	// Navigate to the previous item (no wrapping from first to last)
 	function prevItem() {
 		if (currentIndex > 0) {
-			currentIndex--;
-			const href = items[currentIndex].href;
+			const href = items[currentIndex - 1].href;
 			if (href) goto(href);
 		}
 	}
 
 	const previousElement = $derived(() => getDisplayName(items[currentIndex - 1]));
 	const nextElement = $derived(() => getDisplayName(items[currentIndex + 1]));
-	let showNavigation = $state(false);
-
-	afterNavigate(() => {
-		pathname = page.url.pathname;
-		currentIndex = items.findIndex((item) => item.href === pathname) || 0;
-		const routeIsNotInMenu = items.findIndex((item) => item.href === pathname) === -1;
-		showNavigation = !routeIsNotInMenu;
-	});
 </script>
 
 {#if showNavigation}

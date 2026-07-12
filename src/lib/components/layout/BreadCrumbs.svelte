@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	// import { LIVE_URL } from '$config';
 	import { uppercaseFirstLetter } from '$lib/utils';
@@ -35,18 +34,15 @@
 	//     return JSON.stringify(schema, null, 2);
 	// }
 
-	let showBreadcrumbs = $state(breadcrumbs().length > 1);
+	// `page` (aus $app/state) ist fein-granular reaktiv — direkt ableiten statt
+	// des früheren $state+afterNavigate-Spiegels (Review R2, Kür).
+	const showBreadcrumbs = $derived(breadcrumbs().length > 1);
 
 	// Component-Doku-Seiten werden generiert → der Stift bearbeitet die
 	// menschlich gepflegte content.ts statt der generierten +page.svx.
 	const editFile = (path: string) =>
 		/^\/product\/components\/[^/]+$/.test(path) ? 'content.ts' : '+page.svx';
-	let editTarget = $state(editFile(page.url.pathname));
-
-	afterNavigate(() => {
-		showBreadcrumbs = breadcrumbs().length > 1;
-		editTarget = editFile(page.url.pathname);
-	});
+	const editTarget = $derived(editFile(page.url.pathname));
 </script>
 
 {#if showBreadcrumbs}
