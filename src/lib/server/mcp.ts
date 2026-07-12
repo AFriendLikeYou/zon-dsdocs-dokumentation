@@ -452,7 +452,16 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 			return ok(id, {
 				protocolVersion: PROTOCOL_VERSION,
 				capabilities: { tools: {} },
-				serverInfo: SERVER_INFO
+				serverInfo: SERVER_INFO,
+				// Klassen-Grammatik als Server-Instructions (Astryx-Prinzip
+				// „vorhersagbare Muster"): Agenten können daraus das Markup
+				// unbekannter Komponenten ableiten, ohne jede einzeln zu laden.
+				instructions:
+					'ZEIT-Designsystem-Doku. Alle Patterns folgen derselben Klassen-Grammatik: ' +
+					'.z-<komponente> (Block) · .z-<komponente>__<teil> · .z-<komponente>--<variante> (Modifier, kombinierbar). ' +
+					'Zustände über native Attribute/Pseudoklassen (disabled, :hover, :focus-visible), keine State-Klassen. ' +
+					'Farben/Maße ausschließlich über --z-ds-*-Tokens. Markup ist Vanilla HTML/CSS mit eigenem pattern.css je Komponente. ' +
+					'Einstieg: list → get(slug) · Foundations: foundations(section).'
 			});
 
 		case 'notifications/initialized':

@@ -32,6 +32,16 @@ ${comps}
 - [Motion & Elevation](/product/foundations/motion): Bewegungs-Prinzipien
 - [Barrierefreiheit](/product/foundations/accessibility): Kontrast-Matrix, Richtlinien
 
+## Konventionen (für Vorhersagbarkeit)
+Alle Komponenten folgen derselben Klassen-Grammatik — das Verhalten unbekannter
+Patterns lässt sich daraus ableiten:
+- Block: \`.z-<komponente>\` (z. B. \`.z-button\`, \`.z-cell\`)
+- Teil: \`.z-<komponente>__<teil>\` (z. B. \`.z-cell__title\`)
+- Modifier: \`.z-<komponente>--<variante>\` (z. B. \`.z-button--primary\`), kombinierbar
+- Zustände: native Attribute/Pseudoklassen (\`disabled\`, \`:hover\`, \`:focus-visible\`) — keine State-Klassen
+- Farben/Maße: ausschließlich \`--z-ds-*\`-Tokens, nie Rohwerte
+- Markup ist Vanilla HTML/CSS; jede Komponente liefert ihr eigenes pattern.css
+
 ## Optional
 - [Brandhub](/brand): Markenrichtlinien (Strategie, Logo, Farbe, Bildsprache)
 - [Patterns](/product/patterns): handkuratierte Kompositionen
