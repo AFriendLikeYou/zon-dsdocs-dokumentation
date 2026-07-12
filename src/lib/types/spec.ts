@@ -124,6 +124,8 @@ export type ComponentSpec = {
 	zweck?: string;
 	figma?: string;
 	aktualisiertAm?: string;
+	/** Erstdokumentation (JJJJ-MM-TT) — speist das automatische „Neu"-Badge. */
+	dokumentiertAm?: string;
 	version?: string;
 	verwendung?: Verwendung | null;
 	masse?: Masse | null;

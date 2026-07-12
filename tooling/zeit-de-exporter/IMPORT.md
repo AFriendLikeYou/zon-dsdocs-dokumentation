@@ -124,6 +124,9 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
   Abweichungen (`abgeleitet`/`geschätzt`) bekommen ein dezentes Badge. Nie einen geschätzten
   Wert als gemessen ausgeben.
 - **`presets`** für benannte Beispiel-Kombinationen.
+- **`dokumentiertAm`/`aktualisiertAm`:** Erstdokumentation bzw. letzter Sync — speisen
+  die automatischen Nav-Badges („Neu" 14 Tage ab Erstdoku, danach „Update" 14 Tage ab
+  Aktualisierung; Logik `badgeFor` in `catalog.ts`, Override-Map pinnt bei Bedarf).
 - **Platzhalter kennzeichnen:** fehlen Assets (Bild/Cover/Avatar), neutrale Flächen
   nutzen und im `repoNote`/Kommentar als Doku-Platzhalter markieren.
 

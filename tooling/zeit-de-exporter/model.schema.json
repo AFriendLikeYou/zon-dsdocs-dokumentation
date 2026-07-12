@@ -29,6 +29,10 @@
 		},
 		"figma": { "type": "string", "description": "Node-genauer Figma-Link (…?node-id=…&m=dev)." },
 		"aktualisiertAm": { "type": "string", "description": "Datum JJJJ-MM-TT." },
+		"dokumentiertAm": {
+			"type": "string",
+			"description": "Erstdokumentation JJJJ-MM-TT — speist das automatische „Neu"-Badge (14 Tage; danach „Update" via aktualisiertAm)."
+		},
 		"version": {
 			"type": "string",
 			"description": "Versions-/Snapshot-Label im Hero, z. B. \"Figma-Node 213:12\". (Redaktionell.)"

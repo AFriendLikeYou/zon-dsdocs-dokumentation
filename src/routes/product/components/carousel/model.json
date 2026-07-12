@@ -5,6 +5,7 @@
 	"kategorie": "Medien",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=623-555&focus-id=630-630",
 	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-07",
 	"zweck": "Horizontal scrollende Slot-Leiste mit optionalen Controls (Progress-Indikatoren + Vor/Zurück-Pfeile). Slots sind Content-Container (im Produkt: Teaser, Bilder, Karten).",
 	"masse": {
 		"breite": {
@@ -191,7 +192,13 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["default", "hover", "checked", "disabled", "focus"],
+		"zustaende": [
+			"default",
+			"hover",
+			"checked",
+			"disabled",
+			"focus"
+		],
 		"elemente": [
 			{
 				"teil": "Fläche",
@@ -538,14 +545,20 @@
 				"typ": "\"default\" | \"single\" | \"continuous\"",
 				"default": "\"default\"",
 				"beschreibung": "single = eine Slide je Ansicht (kein Gap/Padding); continuous = freies Scrollen ohne Snap.",
-				"erlaubteWerte": ["single", "continuous"]
+				"erlaubteWerte": [
+					"single",
+					"continuous"
+				]
 			},
 			{
 				"name": "variant",
 				"typ": "\"kiosk\" | \"shop\" | \"merkl\"",
 				"default": "—",
 				"beschreibung": "kiosk = feste schmale Slot-Breite (12.25rem); shop = breite Slots (20rem), getönter Fader.",
-				"erlaubteWerte": ["kiosk", "shop"]
+				"erlaubteWerte": [
+					"kiosk",
+					"shop"
+				]
 			},
 			{
 				"name": "overlay-controls",

@@ -276,6 +276,7 @@ export function buildDraft(raw, known) {
 			? `https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/ZDS?node-id=TODO&focus-id=${String(raw.set.id).replace(/:/g, '-')}`
 			: 'TODO',
 		aktualisiertAm: 'TODO (JJJJ-MM-TT)',
+		dokumentiertAm: 'TODO (JJJJ-MM-TT — Erstdokumentation, speist das Neu-Badge)',
 		...(Object.keys(masse).length ? { masse } : {}),
 		...(spacing.length ? { spacing } : {}),
 		...(tokens.length ? { tokens } : {}),

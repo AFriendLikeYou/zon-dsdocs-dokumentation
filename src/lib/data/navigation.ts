@@ -82,8 +82,9 @@ export const PLANNED_COMPONENTS: PlannedComponent[] = [
 ];
 
 // Components-Sektion aus dem Katalog ableiten (ADR-025): erst die dokumentierten
-// Einträge (sortiert kommt der Katalog schon), dann die geplanten Stubs. Badges sind
-// kuratiert (Override-Map im Katalog bzw. „Geplant" hier) — keine Automatik.
+// Einträge (sortiert kommt der Katalog schon), dann die geplanten Stubs. Badges
+// kommen aus der Zeit-Automatik im Katalog (badgeFor: „Neu"/„Update", je 14 Tage);
+// „Geplant" bleibt hier kuratiert. Ein Override in CATALOG_OVERRIDES pinnt.
 const COMPONENT_MENU_ITEMS: MenuSection[] = [
 	...CATALOG.map(
 		(e): MenuSection => ({
@@ -132,49 +133,41 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Tokens',
 		href: '/product/foundations/tokens',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Farbe',
 		href: '/product/foundations/color',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Typografie',
 		href: '/product/foundations/typography',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Spacing',
 		href: '/product/foundations/spacing',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Shape',
 		href: '/product/foundations/shape',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Motion & Elevation',
 		href: '/product/foundations/motion',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Icons',
 		href: '/product/foundations/icons',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Barrierefreiheit',
 		href: '/product/foundations/accessibility',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
@@ -202,7 +195,6 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Formular',
 		href: '/product/patterns/form',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
