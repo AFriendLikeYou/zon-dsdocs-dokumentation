@@ -123,6 +123,14 @@ function renderGenerated(model) {
 	// liegen — strippen (Maschine = Fakten, Mensch = Redaktion). Merge bleibt
 	// { ...generated, ...content }: content liefert diese Felder.
 	const spec = Object.fromEntries(Object.entries(rest).filter(([k]) => !EDITORIAL.includes(k)));
+	// CMS-schaltbare Playground-Bühne: align/resizable aus dem render-Block in einen
+	// eigenen spec.playground-Block heben (nur schreiben, wenn eines gesetzt ist —
+	// undefined fällt in der Playground-Komponente auf die Defaults center/false).
+	const render = model.render ?? {};
+	const playground = {};
+	if (render.align !== undefined) playground.align = render.align;
+	if (render.resizable !== undefined) playground.resizable = render.resizable;
+	if (Object.keys(playground).length) spec.playground = playground;
 	const json = JSON.stringify(spec, null, '\t');
 	return (
 		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
@@ -568,7 +576,7 @@ function renderPage(model, { patternCss = null } = {}) {
 			const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
 			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
 			const presetsProp = pgPresets.length ? ` presets={playgroundPresets}` : '';
-			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} />\n\t</div>\n`;
+			design += `\t<div id="${SECTION_IDS.Playground}" class="section-anchor">\n\t\t<Playground controls={playgroundControls} template={playgroundTemplate}${presetsProp}${hintProp}${darkProp} align={${S}.playground?.align} resizable={${S}.playground?.resizable} />\n\t</div>\n`;
 		}
 	}
 	if (hasAnatomy) {

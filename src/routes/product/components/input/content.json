@@ -101,6 +101,10 @@
 		}
 	],
 	"version": "Figma-Node 477:3021",
+	"playground": {
+		"align": "fill",
+		"resizable": true
+	},
 	"verwandt": ["checkbox", "stepper"],
 	"variantInfo": {
 		"Default": "Ruhezustand, leeres Feld.",

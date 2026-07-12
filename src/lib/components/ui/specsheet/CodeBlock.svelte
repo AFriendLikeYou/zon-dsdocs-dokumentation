@@ -1,4 +1,14 @@
-<!-- CodeBlock.svelte — Code-Snippet mit Copy-Button + leichter Syntax-Hervorhebung. -->
+<!--
+  CodeBlock.svelte — Code-Snippet mit Copy-Button + leichter Syntax-Hervorhebung.
+
+  Zwei optionale Playground-Features:
+  - flashKey/flashLines: bei jedem flashKey-Wechsel leuchten die genannten Zeilen
+    kurz auf (Ease-out-Fade) — macht sichtbar, WAS ein Control am Code geändert
+    hat. Aktiviert zeilenweises Highlighting (kein Support für mehrzeilige
+    Kommentare — Playground-Code hat keine).
+  - collapsible: lange Snippets (> 7 Zeilen) starten auf 4 Zeilen gekappt mit
+    Fade-out + „Code aufklappen" (Mantine-Muster). Copy kopiert immer alles.
+-->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
 
@@ -6,8 +16,18 @@
 	let {
 		title = '',
 		code = '',
-		lang = 'html'
-	}: { title?: string; code?: string; lang?: Lang } = $props();
+		lang = 'html',
+		flashKey,
+		flashLines = [],
+		collapsible = false
+	}: {
+		title?: string;
+		code?: string;
+		lang?: Lang;
+		flashKey?: number;
+		flashLines?: number[];
+		collapsible?: boolean;
+	} = $props();
 
 	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -64,7 +84,26 @@
 		return out;
 	}
 
-	const highlighted = $derived(highlight(code, lang));
+	// Flash-Modus rendert zeilenweise (für gezieltes Aufleuchten), sonst am Stück.
+	const lineMode = $derived(flashKey !== undefined);
+	const highlighted = $derived(lineMode ? '' : highlight(code, lang));
+	const lines = $derived(lineMode ? code.split('\n').map((l) => highlight(l, lang)) : []);
+
+	// Aufleuchten: flashKey-Wechsel setzt die Zeilen „heiß", kurz darauf faden sie
+	// über die CSS-Transition wieder aus. flashKey 0 = Initialzustand, kein Flash.
+	let hot = $state<ReadonlySet<number>>(new Set());
+	$effect(() => {
+		if (!flashKey) return;
+		hot = new Set(flashLines);
+		const t = setTimeout(() => (hot = new Set()), 80);
+		return () => clearTimeout(t);
+	});
+
+	// Collapse: erst ab deutlicher Länge kappen, sonst bringt der Klick nichts.
+	const lineCount = $derived(code.split('\n').length);
+	const canCollapse = $derived(collapsible && lineCount > 7);
+	let expanded = $state(false);
+	const clipped = $derived(canCollapse && !expanded);
 </script>
 
 <figure class="cb">
@@ -72,7 +111,41 @@
 		<span class="cb-title">{title}</span>
 		<CopyButton class="cb-copy" value={code} label="Kopieren" />
 	</figcaption>
-	<pre class="cb-pre"><code>{@html highlighted}</code></pre>
+	<div class="cb-clip" class:clipped>
+		{#if lineMode}
+			<pre class="cb-pre"><code
+					>{#each lines as line, i (i)}<span class="cb-line" class:hot={hot.has(i)}
+							>{@html line}</span
+						>{/each}</code
+				></pre>
+		{:else}
+			<pre class="cb-pre"><code>{@html highlighted}</code></pre>
+		{/if}
+		{#if clipped}
+			<div class="cb-fade" aria-hidden="true"></div>
+		{/if}
+	</div>
+	{#if canCollapse}
+		<div class="cb-expand">
+			<button type="button" onclick={() => (expanded = !expanded)}>
+				{expanded ? 'Code einklappen' : `Code aufklappen (${lineCount} Zeilen)`}
+				<svg
+					aria-hidden="true"
+					width="10"
+					height="10"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					style:transform={expanded ? 'rotate(180deg)' : ''}
+				>
+					<path d="m6 9 6 6 6-6" />
+				</svg>
+			</button>
+		</div>
+	{/if}
 </figure>
 
 <style>
@@ -176,6 +249,75 @@
 	.cb-pre code {
 		font-family: inherit;
 		white-space: pre;
+	}
+	/* Flash: Zeile leuchtet auf (transition: none beim Setzen) und fadet dann
+	   ease-out wieder aus, sobald .hot entfernt wird. */
+	/* display:block statt Newlines: white-space:pre würde inline-Zeilen nicht
+	   umbrechen lassen (alle Spans in einer Zeile). min-height hält Leerzeilen offen. */
+	.cb-line {
+		display: block;
+		min-width: 100%;
+		min-height: 1.6em;
+		border-radius: 3px;
+		transition: background-color 0.45s var(--ds-ease-out);
+	}
+	.cb-line.hot {
+		background-color: color-mix(in srgb, var(--cb-accent) 18%, transparent);
+		transition: none;
+	}
+	/* Collapse: auf ~4 Zeilen gekappt, Fade-out-Gradient zeigt „da ist mehr". */
+	.cb-clip {
+		position: relative;
+	}
+	.cb-clip.clipped .cb-pre {
+		max-height: calc(4 * 1.6em + var(--z-ds-space-14));
+		overflow: hidden;
+	}
+	.cb-fade {
+		position: absolute;
+		inset: auto 0 0 0;
+		height: 44px;
+		background: linear-gradient(transparent, var(--cb-bg));
+		pointer-events: none;
+	}
+	.cb-expand {
+		display: flex;
+		justify-content: center;
+		border-top: 1px solid var(--cb-border);
+	}
+	.cb-expand button {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		border: none;
+		background: none;
+		font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		font-size: var(--ds-text-xs);
+		color: var(--cb-muted);
+		cursor: pointer;
+		padding: var(--z-ds-space-6) var(--z-ds-space-12);
+		width: 100%;
+		justify-content: center;
+		transition: color var(--ds-dur) var(--ds-ease);
+	}
+	.cb-expand button svg {
+		transition: transform var(--ds-dur) var(--ds-ease-out);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.cb-expand button:hover {
+			color: var(--cb-text);
+			background: color-mix(in srgb, var(--cb-muted) 8%, transparent);
+		}
+	}
+	.cb-expand button:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: -2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.cb-line,
+		.cb-expand button svg {
+			transition: none;
+		}
 	}
 	.cb-pre :global(.t-comment) {
 		color: var(--cb-comment);

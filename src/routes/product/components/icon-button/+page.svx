@@ -36,35 +36,35 @@ kategorie: Aktionen
    text-70 (hover) / text-40 (disabled), Radius 4. Flache Regeln, keine At-Rules
    (v1-Scoping). */
 .z-icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 40px;
-  height: 40px;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-radius: var(--z-ds-border-radius-4);
-  background-color: var(--z-ds-color-background-10);
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
-  transition: color 200ms ease-out;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 40px;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-10);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	transition: color 200ms ease-out;
 }
 .z-icon-button svg {
-  width: 20px;
-  height: 20px;
+	width: 20px;
+	height: 20px;
 }
 .z-icon-button:hover {
-  color: var(--z-ds-color-text-70);
+	color: var(--z-ds-color-text-70);
 }
 .z-icon-button:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
 }
 .z-icon-button:disabled {
-  pointer-events: none;
-  color: var(--z-ds-color-text-40);
+	pointer-events: none;
+	color: var(--z-ds-color-text-40);
 }
 `;
 	const variantItems = [{"label":"Default","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>","note":"Neutrale ikonografische Aktion — helle Fläche (--z-ds-color-background-10), dunkles Icon (--z-ds-color-text-100)."}];
@@ -90,7 +90,7 @@ kategorie: Aktionen
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
@@ -141,24 +141,24 @@ kategorie: Aktionen
 :global(.spec-canvas .z-icon-button),
 :global(.pg-preview .z-icon-button) {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 40px;
-  height: 40px;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-radius: var(--z-ds-border-radius-4);
-  background-color: var(--z-ds-color-background-10);
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
-  transition: color 200ms ease-out;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 40px;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-10);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	transition: color 200ms ease-out;
 }
 :global(.spec-canvas .z-icon-button svg),
 :global(.pg-preview .z-icon-button svg) {
   width: 20px;
-  height: 20px;
+	height: 20px;
 }
 :global(.spec-canvas .z-icon-button:hover),
 :global(.pg-preview .z-icon-button:hover) {
@@ -167,11 +167,11 @@ kategorie: Aktionen
 :global(.spec-canvas .z-icon-button:focus-visible),
 :global(.pg-preview .z-icon-button:focus-visible) {
   outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline-offset: 2px;
 }
 :global(.spec-canvas .z-icon-button:disabled),
 :global(.pg-preview .z-icon-button:disabled) {
   pointer-events: none;
-  color: var(--z-ds-color-text-40);
+	color: var(--z-ds-color-text-40);
 }
 </style>

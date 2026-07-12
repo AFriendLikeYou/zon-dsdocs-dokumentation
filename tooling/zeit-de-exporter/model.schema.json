@@ -417,6 +417,14 @@
 					"description": "Escape-Hatch: Pfad zu einer Specimen.svelte (statt template, für Loops/Interaktion)."
 				},
 				"hint": { "type": "string", "description": "Hinweiszeile statt Controls." },
+				"align": {
+					"enum": ["center", "fill"],
+					"description": "Playground-Bühne: 'center' (Objekt zentriert) | 'fill' (voller Seiten-Ausschnitt). Default 'center'."
+				},
+				"resizable": {
+					"type": "boolean",
+					"description": "Zeigt im Playground ein Resize-Handle zum Verändern der Vorschaubreite. Default false."
+				},
 				"stage": {
 					"type": "object",
 					"additionalProperties": false,

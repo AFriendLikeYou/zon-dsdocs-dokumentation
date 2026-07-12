@@ -113,6 +113,13 @@ export type ColorRoles = {
 export type KeyboardRule = { taste: string; aktion: string };
 
 /**
+ * CMS-schaltbare Playground-Bühnen-Optionen (aus render bzw. content.json).
+ *   align      – 'center' (Objekt zentriert auf der Bühne) | 'fill' (voller Ausschnitt)
+ *   resizable  – zeigt ein Resize-Handle zum Verändern der Vorschaubreite
+ */
+export type PlaygroundOptions = { align?: 'center' | 'fill'; resizable?: boolean };
+
+/**
  * Das gemergte Spec-Objekt (generated + content), das jede Component-Seite an die
  * Renderer reicht. Alle Felder optional: `content.ts` überschreibt partiell, die
  * Renderer guarden mit `if`/`length`.
@@ -145,4 +152,6 @@ export type ComponentSpec = {
 	variantInfo?: Record<string, string>;
 	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
 	verwandt?: string[];
+	/** CMS-schaltbare Playground-Bühne (Ausrichtung, Resize-Handle). */
+	playground?: PlaygroundOptions;
 };

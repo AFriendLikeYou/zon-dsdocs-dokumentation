@@ -51,7 +51,7 @@ describe('Playground (generischer Harness)', () => {
 	it('Toggle-Chip schaltet Boolean-State um', async () => {
 		render(Playground, { props: { controls, code, preview } });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
+		await fireEvent.click(screen.getByRole('switch', { name: 'Disabled' }));
 		expect(screen.getByText('code:primary:true')).toBeInTheDocument();
 	});
 });
@@ -100,7 +100,7 @@ describe('Playground — Template-Modus (Registry)', () => {
 		expect(container.textContent).toContain('z-button--zplus');
 
 		// attr-Control → HTML-Attribut in Preview und Code-String
-		await fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
+		await fireEvent.click(screen.getByRole('switch', { name: 'Disabled' }));
 		expect(container.querySelector('.pg-preview button')!.hasAttribute('disabled')).toBe(true);
 	});
 

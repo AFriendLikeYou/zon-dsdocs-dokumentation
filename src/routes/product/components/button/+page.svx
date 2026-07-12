@@ -46,53 +46,53 @@ kategorie: Aktionen
    Wird vom Exporter gegen die Vorschau-Flächen gescoped und im Develop-Tab
    verbatim gezeigt. Flache Regeln (v1-Scoping, keine At-Rules). */
 .z-button {
-  background-color: var(--z-ds-color-background-10);
-  border: none;
-  border-radius: var(--z-ds-border-radius-4);
-  color: var(--z-ds-color-text-100);
-  display: inline-block;
-  font-size: var(--z-ds-fontsize-16);
-  font-weight: bold;
-  line-height: 1.25rem;
-  margin: 0;
-  padding: var(--z-ds-space-10) var(--z-ds-space-16);
-  text-align: center;
-  transition: background-color 200ms ease-out;
-  white-space: nowrap;
-  cursor: pointer;
+	background-color: var(--z-ds-color-background-10);
+	border: none;
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-text-100);
+	display: inline-block;
+	font-size: var(--z-ds-fontsize-16);
+	font-weight: bold;
+	line-height: 1.25rem;
+	margin: 0;
+	padding: var(--z-ds-space-10) var(--z-ds-space-16);
+	text-align: center;
+	transition: background-color 200ms ease-out;
+	white-space: nowrap;
+	cursor: pointer;
 }
 .z-button:hover,
 .z-button:focus {
-  background-color: var(--z-ds-color-background-20);
+	background-color: var(--z-ds-color-background-20);
 }
 .z-button--fullwidth {
-  width: 100%;
+	width: 100%;
 }
 .z-button--primary {
-  background-color: var(--z-ds-color-text-100);
-  color: var(--z-ds-color-background-0);
+	background-color: var(--z-ds-color-text-100);
+	color: var(--z-ds-color-background-0);
 }
 .z-button--primary:hover,
 .z-button--primary:focus {
-  background-color: var(--z-ds-color-text-70);
-  color: var(--z-ds-color-background-0);
+	background-color: var(--z-ds-color-text-70);
+	color: var(--z-ds-color-background-0);
 }
 .z-button--zplus {
-  background-color: var(--z-ds-color-accent-100);
-  color: var(--z-ds-color-general-white-100);
+	background-color: var(--z-ds-color-accent-100);
+	color: var(--z-ds-color-general-white-100);
 }
 .z-button--zplus:hover,
 .z-button--zplus:focus {
-  background-color: var(--z-ds-color-accent-70);
-  color: var(--z-ds-color-general-white-100);
+	background-color: var(--z-ds-color-accent-70);
+	color: var(--z-ds-color-general-white-100);
 }
 .z-button:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
 }
 .z-button:disabled {
-  pointer-events: none;
-  opacity: 0.5;
+	pointer-events: none;
+	opacity: 0.5;
 }
 `;
 	const variantItems = [{"label":"Default","html":"<button type=\"submit\" class=\"z-button\">Click me</button>","note":"Neutrale Aktion — helle Fläche, dunkles Label."},{"label":"Primary","html":"<button type=\"submit\" class=\"z-button z-button--primary\">Click me</button>","note":"Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal."},{"label":"Z+","html":"<button type=\"submit\" class=\"z-button z-button--zplus\">Click me</button>","note":"Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext)."},{"label":"Fullwidth","html":"<button type=\"submit\" class=\"z-button z-button--fullwidth\">Click me</button>"}];
@@ -118,7 +118,7 @@ kategorie: Aktionen
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
@@ -178,19 +178,19 @@ kategorie: Aktionen
 :global(.spec-canvas .z-button),
 :global(.pg-preview .z-button) {
   background-color: var(--z-ds-color-background-10);
-  border: none;
-  border-radius: var(--z-ds-border-radius-4);
-  color: var(--z-ds-color-text-100);
-  display: inline-block;
-  font-size: var(--z-ds-fontsize-16);
-  font-weight: bold;
-  line-height: 1.25rem;
-  margin: 0;
-  padding: var(--z-ds-space-10) var(--z-ds-space-16);
-  text-align: center;
-  transition: background-color 200ms ease-out;
-  white-space: nowrap;
-  cursor: pointer;
+	border: none;
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-text-100);
+	display: inline-block;
+	font-size: var(--z-ds-fontsize-16);
+	font-weight: bold;
+	line-height: 1.25rem;
+	margin: 0;
+	padding: var(--z-ds-space-10) var(--z-ds-space-16);
+	text-align: center;
+	transition: background-color 200ms ease-out;
+	white-space: nowrap;
+	cursor: pointer;
 }
 :global(.spec-canvas .z-button:hover),
 :global(.pg-preview .z-button:hover),
@@ -205,35 +205,35 @@ kategorie: Aktionen
 :global(.spec-canvas .z-button--primary),
 :global(.pg-preview .z-button--primary) {
   background-color: var(--z-ds-color-text-100);
-  color: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-background-0);
 }
 :global(.spec-canvas .z-button--primary:hover),
 :global(.pg-preview .z-button--primary:hover),
 :global(.spec-canvas .z-button--primary:focus),
 :global(.pg-preview .z-button--primary:focus) {
   background-color: var(--z-ds-color-text-70);
-  color: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-background-0);
 }
 :global(.spec-canvas .z-button--zplus),
 :global(.pg-preview .z-button--zplus) {
   background-color: var(--z-ds-color-accent-100);
-  color: var(--z-ds-color-general-white-100);
+	color: var(--z-ds-color-general-white-100);
 }
 :global(.spec-canvas .z-button--zplus:hover),
 :global(.pg-preview .z-button--zplus:hover),
 :global(.spec-canvas .z-button--zplus:focus),
 :global(.pg-preview .z-button--zplus:focus) {
   background-color: var(--z-ds-color-accent-70);
-  color: var(--z-ds-color-general-white-100);
+	color: var(--z-ds-color-general-white-100);
 }
 :global(.spec-canvas .z-button:focus-visible),
 :global(.pg-preview .z-button:focus-visible) {
   outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline-offset: 2px;
 }
 :global(.spec-canvas .z-button:disabled),
 :global(.pg-preview .z-button:disabled) {
   pointer-events: none;
-  opacity: 0.5;
+	opacity: 0.5;
 }
 </style>

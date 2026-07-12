@@ -46,7 +46,8 @@ const EDITORIAL_FIELDS = {
 	doDontBeispiele: { check: isArray, typ: 'array' },
 	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
 	wording: { check: isArray, typ: 'array' },
-	verwandt: { check: isArray, typ: 'array' }
+	verwandt: { check: isArray, typ: 'array' },
+	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' }
 };
 const KNOWN_KEYS = Object.keys(EDITORIAL_FIELDS);
 
@@ -69,6 +70,15 @@ function checkNested(key, value) {
 	if (key === 'variantInfo' && isObject(value)) {
 		for (const [label, text] of Object.entries(value))
 			if (!isString(text)) issues.push(`variantInfo["${label}"] muss ein String sein`);
+	}
+	if (key === 'playground' && isObject(value)) {
+		for (const k of Object.keys(value))
+			if (k !== 'align' && k !== 'resizable')
+				issues.push(`playground: unbekannter Key „${k}" (erlaubt: align, resizable)`);
+		if (value.align !== undefined && value.align !== 'center' && value.align !== 'fill')
+			issues.push('playground.align muss "center" oder "fill" sein');
+		if (value.resizable !== undefined && typeof value.resizable !== 'boolean')
+			issues.push('playground.resizable muss ein Boolean sein');
 	}
 	return issues;
 }

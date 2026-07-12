@@ -93,7 +93,9 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
   "presets": [ { "label": "Primary Voll", "state": { "variant": "primary", "fullwidth": true } } ], // „Rezepte": ein Klick setzt mehrere Controls
   "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion statt template; darf NUR Registry-Daten konsumieren
   "hint": "Keine Varianten.",      // Hinweiszeile statt Controls
-  "stage": { "darkKey": "onImage" } // Bühne startet dunkel, wenn dieser Toggle aktiv ist
+  "stage": { "darkKey": "onImage" }, // Bühne startet dunkel, wenn dieser Toggle aktiv ist
+  "align": "fill",                 // Playground-Bühne: "center" (Default, Objekt zentriert) | "fill" (voller Seiten-Ausschnitt)
+  "resizable": true                // Resize-Handle zum Verändern der Vorschaubreite (Default false)
 }
 ```
 

@@ -94,7 +94,7 @@ kategorie: Aktionen
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" />
+		<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>

@@ -24,6 +24,7 @@
 		wording: { schlecht: string; gut: string; hinweis: string }[];
 		verwandt: string[];
 		doDontBeispiele: DoDontPair[];
+		playground: { align: 'center' | 'fill'; resizable: boolean };
 	};
 
 	const c = data.content as {
@@ -41,6 +42,7 @@
 			gut?: { html?: string; text?: string };
 			schlecht?: { html?: string; text?: string };
 		}[];
+		playground?: { align?: 'center' | 'fill'; resizable?: boolean };
 	};
 	let state = $state<Content>({
 		zweck: c.zweck ?? '',
@@ -77,7 +79,12 @@
 		doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
 			gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
 			schlecht: { html: r.schlecht?.html ?? '', text: r.schlecht?.text ?? '' }
-		}))
+		})),
+		// Playground-Bühne: Defaults center/false, wenn content.json nichts setzt.
+		playground: {
+			align: c.playground?.align === 'fill' ? 'fill' : 'center',
+			resizable: c.playground?.resizable === true
+		}
 	});
 
 	// State → content.json-Form. Leere Listen/Objekte weglassen, damit die Datei
@@ -147,6 +154,13 @@
 			}));
 		if (doDontBeispiele.length) out.doDontBeispiele = doDontBeispiele;
 
+		// playground — nur schreiben, wenn von den Defaults (center + false) abgewichen wird;
+		// jeweils nur den abweichenden Key setzen, damit content.json minimal bleibt.
+		const pg: Record<string, unknown> = {};
+		if (state.playground.align === 'fill') pg.align = 'fill';
+		if (state.playground.resizable) pg.resizable = true;
+		if (Object.keys(pg).length) out.playground = pg;
+
 		return JSON.stringify(out);
 	});
 
@@ -194,6 +208,19 @@
 				<option value="changed">changed</option>
 			</select>
 		</label>
+
+		<fieldset class="field">
+			<legend class="lbl">Playground-Bühne</legend>
+			<label class="sub-lbl" for="pg-align">Ausrichtung</label>
+			<select id="pg-align" bind:value={state.playground.align}>
+				<option value="center">Zentriert (Objekt auf Bühne)</option>
+				<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
+			</select>
+			<label class="check">
+				<input type="checkbox" bind:checked={state.playground.resizable} />
+				<span>Resize-Handle anzeigen</span>
+			</label>
+		</fieldset>
 
 		<fieldset class="field">
 			<legend class="lbl">Verwendung — Wann nutzen</legend>
@@ -532,6 +559,21 @@
 		display: flex;
 		gap: var(--z-ds-space-8);
 		margin-bottom: var(--z-ds-space-8);
+	}
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-8);
+		margin-top: var(--z-ds-space-m);
+		cursor: pointer;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text);
+	}
+	.check input[type='checkbox'] {
+		width: auto;
+		flex: none;
+		margin: 0;
+		accent-color: var(--ds-accent);
 	}
 	.row--kv .kv-key,
 	.row .kv-key {

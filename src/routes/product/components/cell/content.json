@@ -89,6 +89,10 @@
 		}
 	],
 	"version": "Figma-Node 4388:32445",
+	"playground": {
+		"align": "fill",
+		"resizable": true
+	},
 	"variantInfo": {
 		"Pinned": "In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt.",
 		"Article": "Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt.",

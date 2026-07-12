@@ -6,8 +6,9 @@ import type { ComponentSpec } from '$types/spec';
 export const generated = {
 	"name": "Cell",
 	"kategorie": "Inhalte",
-	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=213-12&focus-id=4388-32445",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=1075-938",
 	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-03",
 	"masse": {
 		"breite": {
 			"px": "343 (Wide) · Cover 84 (Small 72)",

@@ -28,38 +28,38 @@ kategorie: Formulare
    iOS nutzt das native Plattform-Control; hier die Web-Variante. Echte --z-ds-Tokens.
    (Reduced-Motion wird global in global.css abgefangen.) */
 .z-switch {
-  display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  width: 26px;
-  height: 16px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background-color: var(--z-ds-color-background-20);
-  cursor: pointer;
-  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+	display: inline-block;
+	position: relative;
+	box-sizing: border-box;
+	width: 26px;
+	height: 16px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background-color: var(--z-ds-color-background-20);
+	cursor: pointer;
+	transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .z-switch__thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background-color: var(--z-ds-color-general-white-100);
-  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 12px;
+	height: 12px;
+	border-radius: 999px;
+	background-color: var(--z-ds-color-general-white-100);
+	transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .z-switch--on {
-  background-color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-text-100);
 }
 .z-switch--on .z-switch__thumb {
-  transform: translateX(10px);
+	transform: translateX(10px);
 }
 .z-switch:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
 }
 `;
 	const variantItems = [{"label":"Off","html":"<button class=\"z-switch\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>","note":"Ausgeschaltet — Track in Background-20, Thumb links."},{"label":"On","html":"<button class=\"z-switch z-switch--on\" type=\"button\" role=\"switch\" aria-checked=\"false\" aria-label=\"Beispiel-Schalter\"><span class=\"z-switch__thumb\"></span></button>","note":"Eingeschaltet — Track in Text-100, Thumb rechts."}];
@@ -85,7 +85,7 @@ kategorie: Formulare
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
@@ -144,28 +144,28 @@ kategorie: Formulare
 :global(.spec-canvas .z-switch),
 :global(.pg-preview .z-switch) {
   display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  width: 26px;
-  height: 16px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background-color: var(--z-ds-color-background-20);
-  cursor: pointer;
-  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+	position: relative;
+	box-sizing: border-box;
+	width: 26px;
+	height: 16px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background-color: var(--z-ds-color-background-20);
+	cursor: pointer;
+	transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 :global(.spec-canvas .z-switch__thumb),
 :global(.pg-preview .z-switch__thumb) {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background-color: var(--z-ds-color-general-white-100);
-  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+	top: 2px;
+	left: 2px;
+	width: 12px;
+	height: 12px;
+	border-radius: 999px;
+	background-color: var(--z-ds-color-general-white-100);
+	transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 :global(.spec-canvas .z-switch--on),
 :global(.pg-preview .z-switch--on) {
@@ -178,6 +178,6 @@ kategorie: Formulare
 :global(.spec-canvas .z-switch:focus-visible),
 :global(.pg-preview .z-switch:focus-visible) {
   outline: 2px solid var(--z-ds-color-focus-100);
-  outline-offset: 2px;
+	outline-offset: 2px;
 }
 </style>

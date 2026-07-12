@@ -321,7 +321,7 @@ kategorie: Medien
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>

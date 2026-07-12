@@ -1,11 +1,15 @@
 <!--
-  SegmentedControl.svelte — kompakter „einer von N"-Umschalter (Pill-Segmente).
+  SegmentedControl.svelte — kompakter „einer von N"-Umschalter (Pill-Segmente)
+  mit gleitendem Aktiv-Indikator.
 
   Wiederverwendbar für View-/Modus-/Einheiten-Umschalter (z. B. Anatomie
-  Bestandteile ↔ Measurements). Nutzt RAW --z-ds-*-Token → adaptiert korrekt
-  SOWOHL im Page-Theme (styles-zds.css Dark-Block) ALS AUCH in .ds-stage-Bühnen
-  (dort gepinnte RAW-Token). Abgeleitete --ds-* wären nur auf :root aufgelöst und
-  würden in der Bühne nicht mitflippen (siehe ds-stage-raw-token-rule).
+  Bestandteile ↔ Measurements, Playground-Varianten). Nutzt RAW --z-ds-*-Token →
+  adaptiert korrekt SOWOHL im Page-Theme (styles-zds.css Dark-Block) ALS AUCH in
+  .ds-stage-Bühnen (dort gepinnte RAW-Token). Abgeleitete --ds-* wären nur auf
+  :root aufgelöst und würden in der Bühne nicht mitflippen (ds-stage-raw-token-rule).
+
+  Der Indikator (.seg-thumb) gleitet unter den aktiven Button (Position wird
+  gemessen); beim ersten Rendern und bei reduced-motion springt er ohne Animation.
 
   Nutzung:
     <SegmentedControl
@@ -27,9 +31,42 @@
 		onchange: (value: string) => void;
 		ariaLabel: string;
 	} = $props();
+
+	let groupEl: HTMLDivElement | undefined = $state();
+	let thumb = $state({ left: 0, width: 0 });
+	// Erst nach der ersten Messung animieren — sonst gleitet der Indikator beim
+	// Mount sichtbar von 0 herein.
+	let ready = $state(false);
+
+	function measure() {
+		const active = groupEl?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+		if (!active) return;
+		thumb = { left: active.offsetLeft, width: active.offsetWidth };
+	}
+
+	$effect(() => {
+		void value; // bei Wertwechsel neu messen
+		void options;
+		measure();
+		if (!ready) requestAnimationFrame(() => (ready = true));
+	});
+
+	$effect(() => {
+		if (!groupEl) return;
+		const ro = new ResizeObserver(measure);
+		ro.observe(groupEl);
+		return () => ro.disconnect();
+	});
 </script>
 
-<div class="seg" role="group" aria-label={ariaLabel}>
+<div class="seg" role="group" aria-label={ariaLabel} bind:this={groupEl}>
+	<span
+		class="seg-thumb"
+		class:ready
+		style:left="{thumb.left}px"
+		style:width="{thumb.width}px"
+		aria-hidden="true"
+	></span>
 	{#each options as o (o.value)}
 		<button
 			type="button"
@@ -42,13 +79,28 @@
 
 <style>
 	.seg {
+		position: relative;
 		display: inline-flex;
 		gap: 2px;
 		padding: 3px;
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
 	}
+	.seg-thumb {
+		position: absolute;
+		top: 3px;
+		height: 26px;
+		border-radius: 999px;
+		background: var(--z-ds-color-background-0);
+		box-shadow: var(--ds-shadow-sm);
+	}
+	.seg-thumb.ready {
+		transition:
+			left var(--ds-dur) var(--ds-ease-out),
+			width var(--ds-dur) var(--ds-ease-out);
+	}
 	.seg-btn {
+		position: relative;
 		border: none;
 		background: none;
 		border-radius: 999px;
@@ -59,14 +111,11 @@
 		color: var(--z-ds-color-text-55);
 		cursor: pointer;
 		white-space: nowrap;
-		transition:
-			color var(--ds-dur) var(--ds-ease),
-			background-color var(--ds-dur) var(--ds-ease);
+		transition: color var(--ds-dur) var(--ds-ease);
 	}
 	.seg-btn[aria-pressed='true'] {
-		background: var(--z-ds-color-background-0);
 		color: var(--z-ds-color-text-100);
-		box-shadow: var(--ds-shadow-sm);
+		font-weight: 600;
 	}
 	@media (hover: hover) and (pointer: fine) {
 		.seg-btn:hover {
@@ -76,5 +125,11 @@
 	.seg-btn:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.seg-thumb.ready,
+		.seg-btn {
+			transition: none;
+		}
 	}
 </style>

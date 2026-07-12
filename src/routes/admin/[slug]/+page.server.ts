@@ -18,7 +18,8 @@ const EDITABLE = [
 	'tastatur',
 	'wording',
 	'verwandt',
-	'doDontBeispiele'
+	'doDontBeispiele',
+	'playground'
 ] as const;
 
 const isKnown = (slug: string) => CATALOG.some((c) => c.slug === slug);

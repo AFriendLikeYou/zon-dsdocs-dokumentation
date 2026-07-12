@@ -31,81 +31,81 @@ kategorie: Formulare
 	const patternCssCode = `/* z-input — Texteingabefeld (Field / Input), originalgetreu aus Figma ❖ ZDS
    (node 477:3021). Zustände über Modifier; Rahmen/Textfarbe auf echten --z-ds-Tokens. */
 .z-input {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--z-ds-space-xs);
-  width: 292px;
-  max-width: 100%;
-  height: 40px;
-  padding: 0 var(--z-ds-space-s);
-  border: 1px solid var(--z-ds-color-border-100);
-  border-radius: var(--z-ds-border-radius-4);
-  background-color: var(--z-ds-color-background-0);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--z-ds-space-xs);
+	width: 292px;
+	max-width: 100%;
+	height: 40px;
+	padding: 0 var(--z-ds-space-s);
+	border: 1px solid var(--z-ds-color-border-100);
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-0);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
 }
 
 .z-input__field {
-  flex: 1 1 0;
-  min-width: 0;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  font: inherit;
-  font-size: var(--z-ds-fontsize-16);
-  line-height: 1;
-  color: var(--z-ds-color-text-100);
+	flex: 1 1 0;
+	min-width: 0;
+	margin: 0;
+	border: 0;
+	padding: 0;
+	background: transparent;
+	font: inherit;
+	font-size: var(--z-ds-fontsize-16);
+	line-height: 1;
+	color: var(--z-ds-color-text-100);
 }
 .z-input__field:focus {
-  outline: none;
+	outline: none;
 }
 .z-input__field::placeholder {
-  color: var(--z-ds-color-text-55);
-  opacity: 1;
+	color: var(--z-ds-color-text-55);
+	opacity: 1;
 }
 
 /* Slots: Icon links, Dropdown-Chevron rechts — je Modifier eingeblendet. */
 .z-input__lead {
-  display: none;
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--z-ds-border-radius-2);
-  background-color: var(--z-ds-color-background-10);
+	display: none;
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--z-ds-border-radius-2);
+	background-color: var(--z-ds-color-background-10);
 }
 .z-input--lead .z-input__lead {
-  display: block;
+	display: block;
 }
 .z-input__chevron {
-  display: none;
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-right: 1.5px solid var(--z-ds-color-text-55);
-  border-bottom: 1.5px solid var(--z-ds-color-text-55);
-  transform: translateY(-2px) rotate(45deg);
+	display: none;
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-right: 1.5px solid var(--z-ds-color-text-55);
+	border-bottom: 1.5px solid var(--z-ds-color-text-55);
+	transform: translateY(-2px) rotate(45deg);
 }
 .z-input--dropdown .z-input__chevron {
-  display: block;
+	display: block;
 }
 
 /* Zustände — Rahmen + Textfarbe. */
 .z-input:focus-within,
 .z-input--active {
-  border-color: var(--z-ds-color-text-55);
+	border-color: var(--z-ds-color-text-55);
 }
 .z-input--filled .z-input__field::placeholder {
-  color: var(--z-ds-color-text-100);
+	color: var(--z-ds-color-text-100);
 }
 .z-input--error {
-  border-color: var(--z-ds-color-error-70);
+	border-color: var(--z-ds-color-error-70);
 }
 .z-input--disabled {
-  border-color: var(--z-ds-color-border-100);
+	border-color: var(--z-ds-color-border-100);
 }
 .z-input--disabled .z-input__field,
 .z-input--disabled .z-input__field::placeholder {
-  color: var(--z-ds-color-text-40);
+	color: var(--z-ds-color-text-40);
 }
 `;
 	const variantItems = [{"label":"Leading Icon","html":"<div class=\"z-input z-input--lead\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>","note":"Führendes Icon, z. B. Suche."},{"label":"Dropdown","html":"<div class=\"z-input z-input--dropdown\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>","note":"Chevron als Auswahl-/Combobox-Trigger."}];
@@ -131,7 +131,7 @@ kategorie: Formulare
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
@@ -191,29 +191,29 @@ kategorie: Formulare
 :global(.spec-canvas .z-input),
 :global(.pg-preview .z-input) {
   display: inline-flex;
-  align-items: center;
-  gap: var(--z-ds-space-xs);
-  width: 292px;
-  max-width: 100%;
-  height: 40px;
-  padding: 0 var(--z-ds-space-s);
-  border: 1px solid var(--z-ds-color-border-100);
-  border-radius: var(--z-ds-border-radius-4);
-  background-color: var(--z-ds-color-background-0);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	align-items: center;
+	gap: var(--z-ds-space-xs);
+	width: 292px;
+	max-width: 100%;
+	height: 40px;
+	padding: 0 var(--z-ds-space-s);
+	border: 1px solid var(--z-ds-color-border-100);
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-0);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
 }
 :global(.spec-canvas .z-input__field),
 :global(.pg-preview .z-input__field) {
   flex: 1 1 0;
-  min-width: 0;
-  margin: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  font: inherit;
-  font-size: var(--z-ds-fontsize-16);
-  line-height: 1;
-  color: var(--z-ds-color-text-100);
+	min-width: 0;
+	margin: 0;
+	border: 0;
+	padding: 0;
+	background: transparent;
+	font: inherit;
+	font-size: var(--z-ds-fontsize-16);
+	line-height: 1;
+	color: var(--z-ds-color-text-100);
 }
 :global(.spec-canvas .z-input__field:focus),
 :global(.pg-preview .z-input__field:focus) {
@@ -222,16 +222,16 @@ kategorie: Formulare
 :global(.spec-canvas .z-input__field::placeholder),
 :global(.pg-preview .z-input__field::placeholder) {
   color: var(--z-ds-color-text-55);
-  opacity: 1;
+	opacity: 1;
 }
 :global(.spec-canvas .z-input__lead),
 :global(.pg-preview .z-input__lead) {
   display: none;
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--z-ds-border-radius-2);
-  background-color: var(--z-ds-color-background-10);
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--z-ds-border-radius-2);
+	background-color: var(--z-ds-color-background-10);
 }
 :global(.spec-canvas .z-input--lead .z-input__lead),
 :global(.pg-preview .z-input--lead .z-input__lead) {
@@ -240,12 +240,12 @@ kategorie: Formulare
 :global(.spec-canvas .z-input__chevron),
 :global(.pg-preview .z-input__chevron) {
   display: none;
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-right: 1.5px solid var(--z-ds-color-text-55);
-  border-bottom: 1.5px solid var(--z-ds-color-text-55);
-  transform: translateY(-2px) rotate(45deg);
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-right: 1.5px solid var(--z-ds-color-text-55);
+	border-bottom: 1.5px solid var(--z-ds-color-text-55);
+	transform: translateY(-2px) rotate(45deg);
 }
 :global(.spec-canvas .z-input--dropdown .z-input__chevron),
 :global(.pg-preview .z-input--dropdown .z-input__chevron) {

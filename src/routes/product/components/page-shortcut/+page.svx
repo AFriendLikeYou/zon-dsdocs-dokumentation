@@ -68,7 +68,7 @@ kategorie: Aktionen
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Zustände","href":"#zustaende"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." />
+		<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>

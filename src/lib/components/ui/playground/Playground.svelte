@@ -22,6 +22,18 @@
   2) SNIPPET-MODUS (Escape-Hatch für Loops/Interaktion, z. B. Button-Group):
      `preview`-Snippet rendert das Specimen aus dem State, `code`-Funktion liefert
      den Code-String. Lebt co-located als Specimen.svelte neben der Route.
+
+  Bühnen-Modi (CMS-schaltbar über content.json → spec.playground):
+  - align 'center' (Default): Objekt auf Bühne — zentriert, Punktraster.
+  - align 'fill': Ausschnitt aus Seite — volle Breite, ruhige Fläche ohne Raster
+    (für Patterns wie Cell/Input, die im Einsatz nie frei schweben).
+  - resizable: Drag-Handle am rechten Rand + px-Anzeige für breitenabhängige
+    Patterns (impliziert die fill-Optik).
+
+  Details: Selects rendern als SegmentedControl, Booleans als Switch; der
+  Code-Block lässt geänderte Zeilen kurz aufleuchten (flash) und kappt lange
+  Snippets (collapsible). Text-Zoom (Aa, 100→200 %) sitzt dezent unten rechts
+  auf der Bühne — WCAG-2.2-Reflow-Check direkt am Specimen.
 -->
 <script lang="ts" module>
 	export type PlaygroundOption = { value: string; label: string; cssClass?: string };
@@ -61,6 +73,17 @@
 			.replaceAll('{classes}', classes.length ? ` ${classes.join(' ')}` : '')
 			.replaceAll('{attrs}', attrs);
 	}
+
+	/** Zeilen, in denen sich zwei Code-Stände unterscheiden (für den Code-Flash). */
+	export function changedLines(prev: string, next: string): number[] {
+		const a = prev.split('\n');
+		const b = next.split('\n');
+		const out: number[] = [];
+		for (let i = 0; i < Math.max(a.length, b.length); i++) {
+			if (a[i] !== b[i]) out.push(i);
+		}
+		return out;
+	}
 </script>
 
 <script lang="ts">
@@ -68,6 +91,8 @@
 	import { Chip } from '$components/ui/chip';
 	import { CodeBlock } from '$components/ui/specsheet';
 	import { StageToggle } from '$components/ui/stage-toggle';
+	import { SegmentedControl } from '$components/ui/segmented-control';
+	import { Switch } from '$components/ui/switch';
 
 	type Props = {
 		controls?: PlaygroundControl[];
@@ -84,6 +109,10 @@
 		code?: (state: PlaygroundState) => string;
 		/** Benannte Beispiele/„Rezepte": ein Klick setzt den Control-State (Astryx-Idee). */
 		presets?: PlaygroundPreset[];
+		/** Bühnen-Modus: 'center' = Objekt auf Bühne · 'fill' = Ausschnitt aus Seite. */
+		align?: 'center' | 'fill';
+		/** Drag-Handle + px-Anzeige für breitenabhängige Patterns (impliziert fill-Optik). */
+		resizable?: boolean;
 		class?: string;
 	};
 	let {
@@ -95,6 +124,8 @@
 		preview,
 		code,
 		presets = [],
+		align = 'center',
+		resizable = false,
 		class: className = ''
 	}: Props = $props();
 
@@ -111,6 +142,20 @@
 	const html = $derived(template ? instantiate(template, controls, values) : '');
 	const codeStr = $derived(template ? html : (code?.(values) ?? ''));
 
+	// Code-Flash: bei jeder Code-Änderung die geänderten Zeilen an den CodeBlock
+	// melden. prev lebt als plain Closure-Variable — der Initialwert flasht nicht.
+	let flashKey = $state(0);
+	let flashLines = $state<number[]>([]);
+	let prevCode: string | undefined;
+	$effect(() => {
+		const next = codeStr;
+		if (prevCode !== undefined && prevCode !== next) {
+			flashLines = changedLines(prevCode, next);
+			flashKey++;
+		}
+		prevCode = next;
+	});
+
 	// Vorschau-Hintergrund: 'auto' folgt dem darkKey-Control (z. B. on-image),
 	// 'light'/'dark' überschreiben es manuell (Schalter auf der Bühne). Die Bühne
 	// pinnt in global.css die z-ds-Farbtoken je Modus → das Specimen rendert sein
@@ -119,10 +164,53 @@
 	const autoDark = $derived(!!(darkKey && values[darkKey]));
 	const isDark = $derived(themeMode === 'dark' || (themeMode === 'auto' && autoDark));
 
+	// Text-Zoom (Aa): zyklisch 100 → 130 → 150 → 200 % — CSS zoom skaliert das
+	// Specimen inkl. Layout (Reflow), wie es der WCAG-200 %-Test verlangt.
+	const ZOOM_STEPS = [1, 1.3, 1.5, 2];
+	let zoom = $state(1);
+	function cycleZoom() {
+		const i = ZOOM_STEPS.indexOf(zoom);
+		zoom = ZOOM_STEPS[(i + 1) % ZOOM_STEPS.length];
+	}
+
+	// Resize: Breite des Vorschau-Rahmens (null = volle Breite); px-Anzeige läuft
+	// über ResizeObserver mit, damit auch Fenster-Resizes stimmen.
+	const isFill = $derived(align === 'fill' || resizable);
+	let frameWidth = $state<number | null>(null);
+	let frameEl = $state<HTMLDivElement>();
+	let measuredWidth = $state(0);
+	$effect(() => {
+		if (!frameEl) return;
+		const ro = new ResizeObserver(() => {
+			if (frameEl) measuredWidth = Math.round(frameEl.getBoundingClientRect().width);
+		});
+		ro.observe(frameEl);
+		return () => ro.disconnect();
+	});
+	function startDrag(e: PointerEvent) {
+		if (!frameEl) return;
+		e.preventDefault();
+		const target = e.currentTarget as HTMLElement;
+		target.setPointerCapture(e.pointerId);
+		const left = frameEl.getBoundingClientRect().left;
+		const onMove = (ev: PointerEvent) => {
+			frameWidth = Math.max(200, Math.round(ev.clientX - left));
+		};
+		const onUp = () => {
+			target.removeEventListener('pointermove', onMove);
+			target.removeEventListener('pointerup', onUp);
+		};
+		target.addEventListener('pointermove', onMove);
+		target.addEventListener('pointerup', onUp);
+	}
+
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
 	const defaults = initialState();
 	const isDirty = $derived(
-		themeMode !== 'auto' || controls.some((c) => values[c.key] !== defaults[c.key])
+		themeMode !== 'auto' ||
+			zoom !== 1 ||
+			frameWidth !== null ||
+			controls.some((c) => values[c.key] !== defaults[c.key])
 	);
 	function setTheme(theme: 'light' | 'dark') {
 		themeMode = theme;
@@ -130,6 +218,8 @@
 	function reset() {
 		for (const c of controls) values[c.key] = defaults[c.key];
 		themeMode = 'auto';
+		zoom = 1;
+		frameWidth = null;
 	}
 
 	// Beispiel/„Rezept" anwenden: setzt (nur) die im Preset genannten Keys.
@@ -143,19 +233,56 @@
 </script>
 
 <div class="pg {className}">
-	<div class="pg-stage ds-stage" class:is-dark={isDark}>
+	<div class="pg-stage ds-stage" class:is-dark={isDark} class:is-fill={isFill}>
 		<div class="pg-toolbar">
 			<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 		</div>
-		<div class="pg-preview">
-			{#if template}
-				<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html html}
-			{:else}
-				{@render preview?.(values)}
-			{/if}
-		</div>
+
+		{#if resizable}
+			<div
+				class="pg-frame"
+				bind:this={frameEl}
+				style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
+			>
+				<div class="pg-preview" style:zoom>
+					{#if template}
+						<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html html}
+					{:else}
+						{@render preview?.(values)}
+					{/if}
+				</div>
+				<button
+					type="button"
+					class="pg-handle"
+					aria-label="Vorschau-Breite ändern (ziehen)"
+					onpointerdown={startDrag}
+				></button>
+			</div>
+			<span class="pg-width" aria-hidden="true">{measuredWidth} px</span>
+		{:else}
+			<div class="pg-preview" style:zoom>
+				{#if template}
+					<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html html}
+				{:else}
+					{@render preview?.(values)}
+				{/if}
+			</div>
+		{/if}
+
+		<button
+			type="button"
+			class="pg-zoom"
+			onclick={cycleZoom}
+			title="Text-Zoom durchschalten (WCAG-Reflow-Check)"
+			aria-label="Text-Zoom, aktuell {Math.round(zoom * 100)} Prozent"
+		>
+			<span class="pg-zoom-aa" aria-hidden="true">Aa</span>
+			{Math.round(zoom * 100)}&hairsp;%
+		</button>
 	</div>
 
 	{#if presets.length}
@@ -176,24 +303,24 @@
 	{:else if controls.length}
 		<div class="pg-controls">
 			{#each controls as c (c.key)}
-				<!-- Jede Control-Gruppe optisch bündeln — Trennlinie zwischen den
-				     Gruppen, damit Toggles nicht wie weitere Variant-Werte lesen. -->
+				<!-- Auswahl (SegmentedControl) und An/Aus (Switch) lesen sich jetzt als
+				     unterschiedliche Control-Typen — Trennlinie bündelt die Gruppen. -->
 				<span class="pg-group">
 					{#if c.type === 'select'}
 						<span class="pg-label">{c.label}</span>
-						{#each c.options as o (o.value)}
-							<Chip
-								variant={values[c.key] === o.value ? 'accent' : 'neutral'}
-								emphasis={values[c.key] === o.value}
-								onclick={() => (values[c.key] = o.value)}>{o.label}</Chip
-							>
-						{/each}
+						<SegmentedControl
+							ariaLabel={c.label}
+							options={c.options.map((o) => ({ value: o.value, label: o.label }))}
+							value={String(values[c.key])}
+							onchange={(v) => (values[c.key] = v)}
+						/>
 					{:else}
 						<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
-						<Chip
-							variant={values[c.key] ? 'accent' : 'neutral'}
-							onclick={() => (values[c.key] = !values[c.key])}>{c.label}</Chip
-						>
+						<Switch
+							label={c.label}
+							checked={!!values[c.key]}
+							onchange={(v) => (values[c.key] = v)}
+						/>
 					{/if}
 				</span>
 			{/each}
@@ -220,7 +347,7 @@
 		</div>
 	{/if}
 
-	<CodeBlock code={codeStr} {lang} />
+	<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
 </div>
 
 <style>
@@ -250,6 +377,19 @@
 		background-size: 12px 12px;
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
+	/* fill: „Ausschnitt aus Seite" statt „Objekt auf Bühne" — ruhige Fläche ohne
+	   Punktraster, Specimen über die volle Breite (Cell, Input, …). */
+	.pg-stage.is-fill {
+		background-image: none;
+		align-items: stretch;
+		justify-content: flex-start;
+		padding: var(--z-ds-space-32) var(--z-ds-space-24);
+	}
+	.pg-stage.is-fill .pg-preview {
+		justify-content: flex-start;
+		flex: 1;
+		min-width: 0;
+	}
 
 	/* Light/Dark-Schalter (StageToggle) — dezent oben rechts auf der Bühne. */
 	.pg-toolbar {
@@ -264,6 +404,98 @@
 		justify-content: center;
 		max-width: 100%;
 	}
+
+	/* Resize-Rahmen: gestrichelte Kante + Griff rechts, px-Anzeige unten links. */
+	.pg-frame {
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-width: 200px;
+		max-width: 100%;
+		border-right: 1px dashed var(--z-ds-color-border-70);
+		padding-right: var(--z-ds-space-16);
+	}
+	.pg-handle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		right: -10px;
+		width: 20px;
+		border: none;
+		background: none;
+		cursor: col-resize;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		touch-action: none;
+	}
+	.pg-handle::after {
+		content: '';
+		width: 4px;
+		height: 36px;
+		border-radius: 999px;
+		background: var(--z-ds-color-border-70);
+		transition: background-color var(--ds-dur) var(--ds-ease);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.pg-handle:hover::after {
+			background: var(--ds-measure, var(--ds-accent));
+		}
+	}
+	.pg-handle:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: -2px;
+	}
+	.pg-width {
+		position: absolute;
+		bottom: var(--z-ds-space-8);
+		left: var(--z-ds-space-8);
+		font-size: var(--ds-text-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--z-ds-color-text-55);
+		pointer-events: none;
+	}
+
+	/* Text-Zoom — leiser Zykler unten rechts; RAW-Token, flippt mit der Bühne. */
+	.pg-zoom {
+		position: absolute;
+		bottom: var(--z-ds-space-8);
+		right: var(--z-ds-space-8);
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		border: none;
+		background: none;
+		padding: 3px 8px;
+		border-radius: 999px;
+		font-size: var(--ds-text-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--z-ds-color-text-55);
+		cursor: pointer;
+		transition:
+			color var(--ds-dur) var(--ds-ease),
+			background-color var(--ds-dur) var(--ds-ease);
+	}
+	.pg-zoom-aa {
+		font-weight: 700;
+		font-size: 11px;
+		letter-spacing: 0.02em;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.pg-zoom:hover {
+			color: var(--z-ds-color-text-100);
+			background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+		}
+	}
+	.pg-zoom:active {
+		transform: scale(0.96);
+	}
+	.pg-zoom:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
 	.pg-controls,
 	.pg-presets {
 		display: flex;
@@ -277,8 +509,8 @@
 	.pg-presets {
 		background: color-mix(in srgb, var(--ds-surface-raised) 45%, transparent);
 	}
-	/* Control-Gruppe (ein select mit Label bzw. ein Toggle) — Trennlinie zwischen
-	   den Gruppen, damit Toggles nicht wie weitere Variant-Werte lesen. */
+	/* Control-Gruppe (ein select mit Label bzw. ein Switch) — Trennlinie zwischen
+	   den Gruppen, damit Booleans nicht wie weitere Variant-Werte lesen. */
 	.pg-group {
 		display: inline-flex;
 		align-items: center;
@@ -331,7 +563,9 @@
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.pg-stage {
+		.pg-stage,
+		.pg-zoom,
+		.pg-handle::after {
 			transition: none;
 		}
 	}

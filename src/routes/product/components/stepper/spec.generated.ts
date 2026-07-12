@@ -8,6 +8,7 @@ export const generated = {
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=4153-1351&m=dev",
 	"aktualisiertAm": "2026-07-03",
+	"dokumentiertAm": "2026-07-03",
 	"masse": {
 		"hoehe": {
 			"px": "38",

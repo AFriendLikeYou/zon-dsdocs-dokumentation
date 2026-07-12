@@ -113,6 +113,9 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
 - **Varianten** mit explizitem `cssClass` (Drift-Check prüft gegen `pattern.css`).
 - **Playground**: `render.controls` + `render.template` (ein gemeinsames Markup, per
   Modifier ein-/ausgeblendet) — deckt den Control-Raum ab; volle Achse in `render.matrix`.
+  Optionale Bühnen-Optionen: `render.align` (`"center"` Default | `"fill"` = voller
+  Seiten-Ausschnitt) und `render.resizable` (`true` blendet ein Resize-Handle ein).
+  Beide sind auch redaktionell in `content.json` (`playground`) überschreibbar.
 - **`spacing`** für die internen Gaps (mit Token → Anatomie-Redlines + px↔Token-Toggle).
 - **`farbrollen`** (Farbrollen-Matrix): aus den Figma-**States** (default/hover/disabled …)
   ableiten — je Teil (Hintergrund, Text, Rahmen …) das `--z-ds-*`-Token pro Zustand.

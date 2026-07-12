@@ -8,6 +8,7 @@ export const generated = {
 	"kategorie": "Medien",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=623-555&focus-id=630-630",
 	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-07",
 	"masse": {
 		"breite": {
 			"px": "375",

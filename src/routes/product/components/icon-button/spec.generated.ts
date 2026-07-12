@@ -8,6 +8,7 @@ export const generated = {
 	"kategorie": "Aktionen",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=3334-5440",
 	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-02",
 	"masse": {
 		"hoehe": {
 			"px": "40",

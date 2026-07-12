@@ -27,55 +27,55 @@ kategorie: Formulare
 	const patternCssCode = `/* z-checkbox — Auswahlkästchen (Checkbox), originalgetreu aus Figma ❖ ZDS
    (node 973:945). Zwei Achsen: checked + Interaktionszustand. Echte --z-ds-Tokens. */
 .z-checkbox {
-  display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--z-ds-color-border-100);
-  border-radius: var(--z-ds-border-radius-2);
-  background-color: var(--z-ds-color-background-0);
+	display: inline-block;
+	position: relative;
+	box-sizing: border-box;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--z-ds-color-border-100);
+	border-radius: var(--z-ds-border-radius-2);
+	background-color: var(--z-ds-color-background-0);
 }
 .z-checkbox--hover {
-  background-color: var(--z-ds-color-background-10);
+	background-color: var(--z-ds-color-background-10);
 }
 .z-checkbox--focus {
-  border: 2px solid var(--z-ds-color-focus-100);
+	border: 2px solid var(--z-ds-color-focus-100);
 }
 .z-checkbox--disabled {
-  border-color: var(--z-ds-color-border-70);
+	border-color: var(--z-ds-color-border-70);
 }
 .z-checkbox--checked {
-  background-color: var(--z-ds-color-text-100);
-  border-color: var(--z-ds-color-text-100);
+	background-color: var(--z-ds-color-text-100);
+	border-color: var(--z-ds-color-text-100);
 }
 .z-checkbox--checked.z-checkbox--hover {
-  background-color: var(--z-ds-color-text-70);
-  border-color: var(--z-ds-color-text-70);
+	background-color: var(--z-ds-color-text-70);
+	border-color: var(--z-ds-color-text-70);
 }
 .z-checkbox--checked.z-checkbox--focus {
-  background-color: var(--z-ds-color-text-100);
-  border: 2px solid var(--z-ds-color-focus-100);
+	background-color: var(--z-ds-color-text-100);
+	border: 2px solid var(--z-ds-color-focus-100);
 }
 .z-checkbox--checked.z-checkbox--disabled {
-  background-color: var(--z-ds-color-text-40);
-  border-color: var(--z-ds-color-text-40);
+	background-color: var(--z-ds-color-text-40);
+	border-color: var(--z-ds-color-text-40);
 }
 
 /* Haken — nur im checked-Zustand (CSS-Häkchen in Weiß). */
 .z-checkbox__check {
-  display: none;
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid var(--z-ds-color-general-white-100);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+	display: none;
+	position: absolute;
+	left: 5px;
+	top: 1px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--z-ds-color-general-white-100);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
 }
 .z-checkbox--checked .z-checkbox__check {
-  display: block;
+	display: block;
 }
 `;
 	const variantItems = [{"label":"Unchecked","html":"<span class=\"z-checkbox\"><span class=\"z-checkbox__check\"></span></span>","note":"Nicht ausgewählt."},{"label":"Checked","html":"<span class=\"z-checkbox z-checkbox--checked\"><span class=\"z-checkbox__check\"></span></span>","note":"Ausgewählt — dunkle Füllung mit weißem Haken."}];
@@ -101,7 +101,7 @@ kategorie: Formulare
 {#snippet designTab()}
 	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"},{"label":"Verwandte","href":"#verwandte"}]} />
 	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
+		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 	</div>
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
@@ -159,13 +159,13 @@ kategorie: Formulare
 :global(.spec-canvas .z-checkbox),
 :global(.pg-preview .z-checkbox) {
   display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--z-ds-color-border-100);
-  border-radius: var(--z-ds-border-radius-2);
-  background-color: var(--z-ds-color-background-0);
+	position: relative;
+	box-sizing: border-box;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--z-ds-color-border-100);
+	border-radius: var(--z-ds-border-radius-2);
+	background-color: var(--z-ds-color-background-0);
 }
 :global(.spec-canvas .z-checkbox--hover),
 :global(.pg-preview .z-checkbox--hover) {
@@ -182,34 +182,34 @@ kategorie: Formulare
 :global(.spec-canvas .z-checkbox--checked),
 :global(.pg-preview .z-checkbox--checked) {
   background-color: var(--z-ds-color-text-100);
-  border-color: var(--z-ds-color-text-100);
+	border-color: var(--z-ds-color-text-100);
 }
 :global(.spec-canvas .z-checkbox--checked.z-checkbox--hover),
 :global(.pg-preview .z-checkbox--checked.z-checkbox--hover) {
   background-color: var(--z-ds-color-text-70);
-  border-color: var(--z-ds-color-text-70);
+	border-color: var(--z-ds-color-text-70);
 }
 :global(.spec-canvas .z-checkbox--checked.z-checkbox--focus),
 :global(.pg-preview .z-checkbox--checked.z-checkbox--focus) {
   background-color: var(--z-ds-color-text-100);
-  border: 2px solid var(--z-ds-color-focus-100);
+	border: 2px solid var(--z-ds-color-focus-100);
 }
 :global(.spec-canvas .z-checkbox--checked.z-checkbox--disabled),
 :global(.pg-preview .z-checkbox--checked.z-checkbox--disabled) {
   background-color: var(--z-ds-color-text-40);
-  border-color: var(--z-ds-color-text-40);
+	border-color: var(--z-ds-color-text-40);
 }
 :global(.spec-canvas .z-checkbox__check),
 :global(.pg-preview .z-checkbox__check) {
   display: none;
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid var(--z-ds-color-general-white-100);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+	position: absolute;
+	left: 5px;
+	top: 1px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--z-ds-color-general-white-100);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
 }
 :global(.spec-canvas .z-checkbox--checked .z-checkbox__check),
 :global(.pg-preview .z-checkbox--checked .z-checkbox__check) {
