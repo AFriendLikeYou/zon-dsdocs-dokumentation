@@ -85,6 +85,7 @@
 		padding: 3px;
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+		backdrop-filter: blur(10px);
 	}
 	.seg-thumb {
 		position: absolute;
