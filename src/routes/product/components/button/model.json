@@ -337,7 +337,8 @@
 			{
 				"nr": 1,
 				"side": "left",
-				"y": 50
+				"y": 50,
+				"selector": ".z-button"
 			},
 			{
 				"nr": 2,

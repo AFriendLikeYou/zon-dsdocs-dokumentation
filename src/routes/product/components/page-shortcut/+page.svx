@@ -16,7 +16,7 @@ kategorie: Aktionen
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"top","x":50},{"nr":2,"side":"bottom","x":50}];
+	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-page-shortcut"},{"nr":2,"side":"bottom","x":50}];
 	const playgroundControls = [];
 	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>
   <span>Zur Startseite</span>

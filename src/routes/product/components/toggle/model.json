@@ -221,12 +221,14 @@
 			{
 				"nr": 1,
 				"side": "bottom",
-				"x": 50
+				"x": 50,
+				"selector": ".z-switch"
 			},
 			{
 				"nr": 2,
 				"side": "top",
-				"x": 70
+				"x": 70,
+				"selector": ".z-switch__thumb"
 			}
 		],
 		"matrix": [

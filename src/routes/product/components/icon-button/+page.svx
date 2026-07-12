@@ -16,7 +16,7 @@ kategorie: Aktionen
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
+	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-icon-button"},{"nr":2,"side":"top","x":50,"selector":".z-icon-button svg"}];
 	const playgroundControls = [{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
 	const playgroundTemplate = `<button class="z-icon-button{classes}" type="button" aria-label="Favorit"{attrs}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>`;
 	const htmlCode = `<!-- Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label). -->

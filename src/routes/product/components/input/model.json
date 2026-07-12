@@ -35,12 +35,16 @@
 		{
 			"label": "Icon ↔ Text ↔ Chevron",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "gap",
+			"selector": ".z-input"
 		},
 		{
 			"label": "Innenabstand links/rechts",
 			"px": "12 px",
-			"token": "--z-ds-space-s"
+			"token": "--z-ds-space-s",
+			"art": "padding",
+			"richtung": "horizontal"
 		}
 	],
 	"callouts": [
@@ -343,12 +347,14 @@
 			{
 				"nr": 1,
 				"side": "left",
-				"y": 50
+				"y": 50,
+				"selector": ".z-input"
 			},
 			{
 				"nr": 2,
 				"side": "top",
-				"x": 40
+				"x": 40,
+				"selector": ".z-input__field"
 			},
 			{
 				"nr": 3,

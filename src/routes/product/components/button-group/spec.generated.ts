@@ -29,12 +29,16 @@ export const generated = {
 		{
 			"label": "Segment-Padding vertikal",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "padding",
+			"richtung": "vertikal"
 		},
 		{
 			"label": "Segment-Padding horizontal",
 			"px": "16 px",
-			"token": "--z-ds-space-m"
+			"token": "--z-ds-space-m",
+			"art": "padding",
+			"richtung": "horizontal"
 		}
 	],
 	"tokens": [

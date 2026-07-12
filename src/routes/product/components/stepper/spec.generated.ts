@@ -33,7 +33,9 @@ export const generated = {
 		{
 			"label": "Abstand −/Wert/+",
 			"px": "6 px",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"art": "gap",
+			"selector": ".z-stepper"
 		}
 	],
 	"tokens": [

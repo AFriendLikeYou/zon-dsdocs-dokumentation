@@ -141,7 +141,19 @@
 				},
 				"px": { "type": "string", "description": "Wert in px." },
 				"token": { "type": "string", "description": "z-ds-Spacing-Token." },
-				"herkunft": { "$ref": "#/$defs/herkunft" }
+				"herkunft": { "$ref": "#/$defs/herkunft" },
+				"art": {
+					"enum": ["padding", "gap"],
+					"description": "Art des Abstands für die Bühnen-Visualisierung: 'padding' (Innenabstand einer Fläche) oder 'gap' (Lücke zwischen Teilen). Optional."
+				},
+				"richtung": {
+					"enum": ["vertikal", "horizontal"],
+					"description": "Nur bei art 'padding': welche Achse der Padding-Streifen zeigt. Optional."
+				},
+				"selector": {
+					"type": "string",
+					"description": "Nur bei art 'gap': CSS-Selektor (relativ zum Specimen-Root) des Flex-/Grid-Containers, dessen gap visualisiert wird. Optional."
+				}
 			}
 		},
 		"callout": {
@@ -444,7 +456,11 @@
 							"nr": { "type": "integer" },
 							"side": { "enum": ["top", "bottom", "left", "right"] },
 							"x": { "type": "number" },
-							"y": { "type": "number" }
+							"y": { "type": "number" },
+							"selector": {
+								"type": "string",
+								"description": "CSS-Selektor relativ zum Specimen-Root für die echte Fläche des Bestandteils (Live-Outline beim Hover/Tap). Optional."
+							}
 						}
 					}
 				},

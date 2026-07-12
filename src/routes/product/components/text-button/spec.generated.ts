@@ -29,7 +29,9 @@ export const generated = {
 		{
 			"label": "Icon ↔ Label (Gap)",
 			"px": "4 px",
-			"token": "--z-ds-space-xxxs"
+			"token": "--z-ds-space-xxxs",
+			"art": "gap",
+			"selector": ".z-text-button"
 		}
 	],
 	"tokens": [

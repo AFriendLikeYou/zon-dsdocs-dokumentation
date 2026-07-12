@@ -210,12 +210,14 @@
 			{
 				"nr": 1,
 				"side": "left",
-				"y": 50
+				"y": 50,
+				"selector": ".z-icon-button"
 			},
 			{
 				"nr": 2,
 				"side": "top",
-				"x": 50
+				"x": 50,
+				"selector": ".z-icon-button svg"
 			}
 		],
 		"matrix": [

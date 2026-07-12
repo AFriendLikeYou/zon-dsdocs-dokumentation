@@ -291,12 +291,14 @@
 			{
 				"nr": 1,
 				"side": "left",
-				"y": 50
+				"y": 50,
+				"selector": ".z-checkbox"
 			},
 			{
 				"nr": 2,
 				"side": "right",
-				"y": 50
+				"y": 50,
+				"selector": ".z-checkbox__check"
 			}
 		],
 		"matrix": [

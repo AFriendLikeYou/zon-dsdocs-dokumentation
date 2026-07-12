@@ -33,12 +33,16 @@ export const generated = {
 		{
 			"label": "Icon ↔ Text ↔ Chevron",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "gap",
+			"selector": ".z-input"
 		},
 		{
 			"label": "Innenabstand links/rechts",
 			"px": "12 px",
-			"token": "--z-ds-space-s"
+			"token": "--z-ds-space-s",
+			"art": "padding",
+			"richtung": "horizontal"
 		}
 	],
 	"tokens": [

@@ -17,7 +17,7 @@ kategorie: Formulare
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"right","y":50}];
+	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-checkbox"},{"nr":2,"side":"right","y":50,"selector":".z-checkbox__check"}];
 	const playgroundControls = [{"key":"checked","label":"Checked","type":"toggle","cssClass":"z-checkbox--checked"},{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-checkbox--hover"},{"value":"focus","label":"Focus","cssClass":"z-checkbox--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-checkbox--disabled"}]}];
 	const playgroundTemplate = `<span class="z-checkbox{classes}"><span class="z-checkbox__check"></span></span>`;
 	const htmlCode = `<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>

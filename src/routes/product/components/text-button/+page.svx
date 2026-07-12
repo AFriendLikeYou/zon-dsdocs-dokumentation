@@ -16,7 +16,7 @@ kategorie: Aktionen
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":50}];
+	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-text-button"},{"nr":2,"side":"top","x":50}];
 	const playgroundControls = [{"key":"size","label":"Size","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"slim","label":"Slim","cssClass":"z-text-button--slim"},{"value":"large","label":"Large","cssClass":"z-text-button--large"}]},{"key":"bold","label":"Bold","type":"toggle","cssClass":"z-text-button--bold"},{"key":"active","label":"Active","type":"toggle","cssClass":"z-text-button--active"},{"key":"onImage","label":"On Image","type":"toggle","cssClass":"z-text-button--on-image"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
 	const playgroundTemplate = `<button type="button" class="z-text-button{classes}"{attrs}>Mehr anzeigen</button>`;
 	const patternCssCode = `/* z-text-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */

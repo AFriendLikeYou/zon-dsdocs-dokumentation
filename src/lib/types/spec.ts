@@ -32,7 +32,18 @@ export type Masse = {
 };
 
 /** Interner Abstand (Spacing-Redline): benannter Gap zwischen Teilen, mit Token. */
-export type SpacingSpec = { label: string; px: string; token?: string; herkunft?: Herkunft };
+export type SpacingSpec = {
+	label: string;
+	px: string;
+	token?: string;
+	herkunft?: Herkunft;
+	/** Art des Abstands: 'padding' (Innenabstand einer Fläche) oder 'gap' (Lücke zwischen Teilen). */
+	art?: 'padding' | 'gap';
+	/** Nur bei art 'padding': welche Achse der Streifen visualisiert. */
+	richtung?: 'vertikal' | 'horizontal';
+	/** Nur bei art 'gap': CSS-Selektor (relativ zum Specimen-Root) des Flex-/Grid-Containers, dessen gap gezeigt wird. */
+	selector?: string;
+};
 
 /**
  * Rolle eines Anatomie-Teils (dezentes Typ-Badge in der Legende):
@@ -53,7 +64,14 @@ export type Callout = {
 	optionalDurch?: string;
 };
 
-export type CalloutAnchor = { nr: number; side: string; x?: number; y?: number };
+export type CalloutAnchor = {
+	nr: number;
+	side: string;
+	x?: number;
+	y?: number;
+	/** CSS-Selektor relativ zum Specimen-Root für die echte Fläche des Bestandteils (Live-Outline beim Hover). */
+	selector?: string;
+};
 
 export type A11yItem = { label: string; wert: string; status: 'pass' | 'warn' | 'todo' };
 

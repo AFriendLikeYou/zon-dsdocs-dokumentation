@@ -34,7 +34,9 @@
 		{
 			"label": "Abstand −/Wert/+",
 			"px": "6 px",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"art": "gap",
+			"selector": ".z-stepper"
 		}
 	],
 	"callouts": [
@@ -278,17 +280,20 @@
 			{
 				"nr": 1,
 				"side": "bottom",
-				"x": 50
+				"x": 50,
+				"selector": ".z-stepper"
 			},
 			{
 				"nr": 2,
 				"side": "top",
-				"x": 50
+				"x": 50,
+				"selector": ".z-stepper__val"
 			},
 			{
 				"nr": 3,
 				"side": "right",
-				"y": 50
+				"y": 50,
+				"selector": ".z-stepper__plus"
 			}
 		],
 		"matrix": [

@@ -117,6 +117,16 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
   Seiten-Ausschnitt) und `render.resizable` (`true` blendet ein Resize-Handle ein).
   Beide sind auch redaktionell in `content.json` (`playground`) überschreibbar.
 - **`spacing`** für die internen Gaps (mit Token → Anatomie-Redlines + px↔Token-Toggle).
+  Optional für die Bühnen-Streifen mit Zwei-Wege-Highlight: `art: 'padding' | 'gap'`.
+  Bei `padding` zusätzlich `richtung: 'vertikal' | 'horizontal'` (welche Achse der Streifen
+  zeigt); bei `gap` zusätzlich `selector` = der Flex-/Grid-Container (CSS, relativ zum
+  Specimen-Root), dessen `gap` visualisiert wird. Nur klassifizieren, wenn im `pattern.css`
+  wirklich ein `gap`/`padding` auf dem Element existiert **und** der px-Wert übereinstimmt —
+  im Zweifel unklassifiziert lassen (Fallback = reine Redline).
+- **`render.calloutAnchors[].selector`** (optional): CSS-Selektor relativ zum Specimen-Root
+  für die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur
+  echte Klassen aus `template`/`pattern.css` eintragen, die im gerenderten Anatomie-Specimen
+  vorkommen; Bestandteile ohne eigene Klasse (reine Textknoten) lassen `selector` weg.
 - **`farbrollen`** (Farbrollen-Matrix): aus den Figma-**States** (default/hover/disabled …)
   ableiten — je Teil (Hintergrund, Text, Rahmen …) das `--z-ds-*`-Token pro Zustand.
   Nur Zustände aufnehmen, die es real gibt; hat ein Zustand kein eigenes Token, den Basis-Wert

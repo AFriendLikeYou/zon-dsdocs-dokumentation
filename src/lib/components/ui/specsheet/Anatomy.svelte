@@ -23,7 +23,16 @@
 		preview?: Snippet;
 	} = $props();
 
-	let active = $state<number | null>(null);
+	// Aktiv-State für Zwei-Wege-Highlights (Legende ↔ Bühne, Tabelle ↔ Streifen).
+	// Hover ist flüchtig, Pin (Tap/Klick oder Enter/Space) hält fest — damit
+	// funktioniert das Muster auch auf Touch-Geräten und per Tastatur.
+	// Keys: 'co-<nr>' (Bestandteil) · 'pad-v'/'pad-h' (Padding) · 'gap-<i>' (Gap).
+	let hovered = $state<string | null>(null);
+	let pinned = $state<string | null>(null);
+	const activeKey = $derived(pinned ?? hovered);
+	function press(key: string) {
+		pinned = pinned === key ? null : key;
+	}
 
 	// Artboard-Hintergrund: startet hell (Blueprint-Konvention), manuell umschaltbar.
 	// Die Bühne (.ds-stage) pinnt die z-ds-Token je Modus → Specimen + Blueprint-Farben
@@ -91,6 +100,100 @@
 	const hasMeasure = $derived(!!masse || spacing.length > 0);
 	const showModeToggle = $derived(hasParts && hasMeasure);
 	const view = $derived(showModeToggle ? mode : hasParts ? 'parts' : 'measure');
+	function switchView(v: 'parts' | 'measure') {
+		mode = v;
+		pinned = null; // Pins gehören zur jeweiligen Sicht
+		hovered = null;
+	}
+
+	// ——— Live-Vermessung (Part-Outlines + Gap-Streifen) ———
+	// Anker mit `selector` und Gap-Einträge mit `selector` werden zur Laufzeit im
+	// Specimen gemessen (querySelector + getBoundingClientRect relativ zum Slot).
+	// Kein Raten, keine handgepflegten Prozentwerte — ResizeObserver hält die
+	// Overlays bei Reflows (Fonts, Fenster) aktuell.
+	type Rect = { left: number; top: number; width: number; height: number };
+	let slotEl = $state<HTMLDivElement>();
+	let partRects = $state<Record<number, Rect>>({});
+	let gapRects = $state<Record<number, Rect[]>>({});
+
+	function measureOverlays() {
+		if (!slotEl) return;
+		const base = slotEl.getBoundingClientRect();
+		const rel = (r: DOMRect): Rect => ({
+			left: r.left - base.left,
+			top: r.top - base.top,
+			width: r.width,
+			height: r.height
+		});
+
+		const parts: Record<number, Rect> = {};
+		for (const c of cs) {
+			if (!c.anchor?.selector) continue;
+			const el = slotEl.querySelector(c.anchor.selector);
+			if (el) parts[c.nr] = rel(el.getBoundingClientRect());
+		}
+		partRects = parts;
+
+		const gaps: Record<number, Rect[]> = {};
+		spacing.forEach((s, i) => {
+			if (s.art !== 'gap' || !s.selector) return;
+			const cont = slotEl?.querySelector(s.selector);
+			if (!cont) return;
+			const kids = [...cont.children]
+				.map((k) => k.getBoundingClientRect())
+				.filter((r) => r.width > 0 && r.height > 0);
+			const strips: Rect[] = [];
+			for (let j = 0; j < kids.length - 1; j++) {
+				const a = kids[j];
+				const b = kids[j + 1];
+				if (b.left - a.right > 0.5) {
+					// horizontaler Gap: Streifen zwischen rechter Kante von a und linker von b
+					strips.push({
+						left: a.right - base.left,
+						top: Math.min(a.top, b.top) - base.top,
+						width: b.left - a.right,
+						height: Math.max(a.bottom, b.bottom) - Math.min(a.top, b.top)
+					});
+				} else if (b.top - a.bottom > 0.5) {
+					strips.push({
+						left: Math.min(a.left, b.left) - base.left,
+						top: a.bottom - base.top,
+						width: Math.max(a.right, b.right) - Math.min(a.left, b.left),
+						height: b.top - a.bottom
+					});
+				}
+			}
+			if (strips.length) gaps[i] = strips;
+		});
+		gapRects = gaps;
+	}
+
+	$effect(() => {
+		if (!slotEl) return;
+		measureOverlays();
+		const ro = new ResizeObserver(measureOverlays);
+		ro.observe(slotEl);
+		return () => ro.disconnect();
+	});
+
+	// Sync-Key je Abstände-Zeile: Padding-Zeilen koppeln an die Padding-Streifen
+	// (vertikal = oben/unten, horizontal = links/rechts), Gap-Zeilen an ihre
+	// gemessenen Streifen. Zeilen ohne Kopplung bleiben passiv (kein Hover-Köder).
+	const padBox = $derived(parsePad(apx(masse?.padding ?? undefined)));
+	function rowKey(s: SpacingSpec, i: number): string | null {
+		if (s.art === 'padding' && padBox) {
+			if (s.richtung === 'vertikal') return 'pad-v';
+			if (s.richtung === 'horizontal') return 'pad-h';
+			return null;
+		}
+		if (s.art === 'gap' && gapRects[i]) return `gap-${i}`;
+		return null;
+	}
+	// Richtungs-Zusatz fürs Label („oben · unten" statt „vertikal" dekodieren müssen).
+	const RICHTUNG_LABEL: Record<string, string> = {
+		vertikal: 'oben · unten',
+		horizontal: 'links · rechts'
+	};
 </script>
 
 <div class="art spec-canvas ds-stage" class:is-dark={isDark}>
@@ -103,7 +206,7 @@
 					{ value: 'measure', label: 'Measurements' }
 				]}
 				value={view}
-				onchange={(v) => (mode = v as 'parts' | 'measure')}
+				onchange={(v) => switchView(v as 'parts' | 'measure')}
 			/>
 		</div>
 	{/if}
@@ -119,55 +222,94 @@
 					<span
 						role="presentation"
 						class="co co--anchored co--{c.anchor.side ?? 'top'}"
-						class:co--on={active === c.nr}
+						class:co--on={activeKey === `co-${c.nr}`}
 						style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null
 							? `top:${c.anchor.y}%;`
 							: ''}"
-						onmouseenter={() => (active = c.nr)}
-						onmouseleave={() => (active = null)}>{c.nr}</span
+						onmouseenter={() => (hovered = `co-${c.nr}`)}
+						onmouseleave={() => (hovered = null)}>{c.nr}</span
 					>
 				{:else}
 					<span
 						role="presentation"
 						class="co"
-						class:co--on={active === c.nr}
+						class:co--on={activeKey === `co-${c.nr}`}
 						style="--i:{i}"
-						onmouseenter={() => (active = c.nr)}
-						onmouseleave={() => (active = null)}>{c.nr}</span
+						onmouseenter={() => (hovered = `co-${c.nr}`)}
+						onmouseleave={() => (hovered = null)}>{c.nr}</span
 					>
 				{/if}
 			{/each}
 		{/if}
 
-		<div class="slot">{@render preview?.()}</div>
+		<div class="slot" bind:this={slotEl}>{@render preview?.()}</div>
+
+		{#if view === 'parts'}
+			<!-- Part-Outlines: live gemessene Flächen der Bestandteile (anchor.selector).
+			     Erscheinen beim Hover/Pin auf Legende oder Callout-Punkt. -->
+			<div class="overlays" aria-hidden="true">
+				{#each cs as c (c.nr)}
+					{#if partRects[c.nr]}
+						{@const r = partRects[c.nr]}
+						<span
+							class="part"
+							class:part--on={activeKey === `co-${c.nr}`}
+							style="left:{r.left - 4}px;top:{r.top - 4}px;width:{r.width + 8}px;height:{r.height +
+								8}px"
+						>
+							<span class="part-tag">{c.nr}{c.lead ? ` · ${c.lead}` : ''}</span>
+						</span>
+					{/if}
+				{/each}
+			</div>
+		{/if}
 
 		{#if view === 'measure' && masse}
-			{@const padBox = parsePad(apx(masse.padding))}
 			{#if padBox}
-				<!-- Innenabstand am Ort des Geschehens: vier getönte Streifen (Blueprint-Blau). -->
+				<!-- Innenabstand am Ort des Geschehens: vier schraffierte Streifen (grün).
+				     Leuchten auf, wenn die zugehörige Tabellenzeile aktiv ist. -->
 				<div class="pad-box" aria-hidden="true">
-					<span class="pad-strip pad-strip--t" style="height:{padBox.t}px"></span>
-					<span class="pad-strip pad-strip--b" style="height:{padBox.b}px"></span>
+					<span
+						class="pad-strip pad-strip--t"
+						class:strip--on={activeKey === 'pad-v'}
+						style="height:{padBox.t}px"
+					></span>
+					<span
+						class="pad-strip pad-strip--b"
+						class:strip--on={activeKey === 'pad-v'}
+						style="height:{padBox.b}px"
+					></span>
 					<span
 						class="pad-strip pad-strip--l"
+						class:strip--on={activeKey === 'pad-h'}
 						style="width:{padBox.l}px;top:{padBox.t}px;bottom:{padBox.b}px"
 					></span>
 					<span
 						class="pad-strip pad-strip--r"
+						class:strip--on={activeKey === 'pad-h'}
 						style="width:{padBox.r}px;top:{padBox.t}px;bottom:{padBox.b}px"
 					></span>
 				</div>
 			{/if}
+			<!-- Gaps zwischen den Teilen: gelb schraffierte Streifen (live gemessen). -->
+			<div class="overlays" aria-hidden="true">
+				{#each spacing as s, i (i)}
+					{#if s.art === 'gap' && gapRects[i]}
+						{#each gapRects[i] as r, j (j)}
+							<span
+								class="gap-strip"
+								class:strip--on={activeKey === `gap-${i}`}
+								style="left:{r.left}px;top:{r.top}px;width:{r.width}px;height:{r.height}px"
+							></span>
+						{/each}
+					{/if}
+				{/each}
+			</div>
 			{#if masse.hoehe}<div class="dim dim-h" aria-hidden="true">
 					<span class="dl" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
 				</div>{/if}
 			{#if masse.breite}<div class="dim dim-w" aria-hidden="true">
 					<span class="dl" title="Breite">B&nbsp;{apx(masse.breite)}</span>
-				</div>{/if}
-			{#if masse.padding}<div class="dim dim-pad" aria-hidden="true">
-					<span class="dl" title="Innenabstand (oben/unten · links/rechts)"
-						>Padding&nbsp;{apx(masse.padding)}</span
-					>
 				</div>{/if}
 			{#if masse.radius}<div class="rad" aria-hidden="true">
 					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}</span>
@@ -178,46 +320,77 @@
 
 {#if view === 'parts' && cs.length}
 	<ol class="legend">
-		{#each cs as c}
-			<li
-				class:on={active === c.nr}
-				onmouseenter={() => (active = c.nr)}
-				onmouseleave={() => (active = null)}
-			>
-				<span class="n">{c.nr}</span>
-				<span class="t">
-					{#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
-					{#if c.optionalDurch}<span class="opt"
-							>optional — gesteuert über <code>{c.optionalDurch}</code></span
-						>{/if}
-				</span>
-				{#if c.art && ART_LABEL[c.art]}<span class="art-badge">{ART_LABEL[c.art]}</span>{/if}
+		{#each cs as c (c.nr)}
+			<!-- Zeile als Button: Hover = flüchtig, Tap/Klick/Enter = Pin (Touch + Tastatur). -->
+			<li>
+				<button
+					type="button"
+					class="lrow"
+					class:on={activeKey === `co-${c.nr}`}
+					aria-pressed={pinned === `co-${c.nr}`}
+					onmouseenter={() => (hovered = `co-${c.nr}`)}
+					onmouseleave={() => (hovered = null)}
+					onclick={() => press(`co-${c.nr}`)}
+					onfocus={() => (hovered = `co-${c.nr}`)}
+					onblur={() => (hovered = null)}
+				>
+					<span class="n">{c.nr}</span>
+					<span class="t">
+						{#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
+						{#if c.optionalDurch}<span class="opt"
+								>optional — gesteuert über <code>{c.optionalDurch}</code></span
+							>{/if}
+					</span>
+					{#if c.art && ART_LABEL[c.art]}<span class="art-badge">{ART_LABEL[c.art]}</span>{/if}
+				</button>
 			</li>
 		{/each}
 	</ol>
 {/if}
 
 {#if view === 'measure' && spacing.length}
-	<!-- Innenabstände als Spec-Tabelle: px UND Token zusammen (Dev-Mode-Muster,
-       kein Umschalter). Gaps zwischen den Teilen, nicht nur Außenmaße. -->
+	<!-- Abstände als Spec-Tabelle: px UND Token zusammen (Dev-Mode-Muster).
+	     Zeilen mit Bühnen-Kopplung (Padding/Gap) sind interaktiv: Hover/Tap/Fokus
+	     highlightet die zugehörigen Streifen — Farb-Swatch verankert die Zuordnung. -->
 	<div class="sp">
 		<div class="sp-head"><span class="sp-cap">Abstände</span></div>
-		<dl class="sp-grid">
-			{#each spacing as s}
-				<div class="sp-item">
-					<dt class="sp-name">
+		<div class="sp-grid">
+			{#each spacing as s, i (i)}
+				{@const key = rowKey(s, i)}
+				<svelte:element
+					this={key ? 'button' : 'div'}
+					{...key ? { type: 'button', 'aria-pressed': pinned === key } : {}}
+					class="sp-item"
+					class:sp-item--sync={!!key}
+					class:on={!!key && activeKey === key}
+					onmouseenter={key ? () => (hovered = key) : undefined}
+					onmouseleave={key ? () => (hovered = null) : undefined}
+					onclick={key ? () => press(key) : undefined}
+					onfocus={key ? () => (hovered = key) : undefined}
+					onblur={key ? () => (hovered = null) : undefined}
+				>
+					<span class="sp-name">
+						{#if key}<span
+								class="swatch"
+								class:swatch--pad={s.art === 'padding'}
+								class:swatch--gap={s.art === 'gap'}
+								aria-hidden="true"
+							></span>{/if}
 						{s.label}
+						{#if s.art === 'padding' && s.richtung}<span class="sp-dir"
+								>{RICHTUNG_LABEL[s.richtung]}</span
+							>{/if}
 						{#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft"
 								>{HERKUNFT_LABEL[s.herkunft]}</span
 							>{/if}
-					</dt>
-					<dd class="sp-val">
+					</span>
+					<span class="sp-val">
 						<span class="sp-px">{s.px}</span>
 						{#if s.token}<code class="sp-token">{s.token}</code>{/if}
-					</dd>
-				</div>
+					</span>
+				</svelte:element>
 			{/each}
-		</dl>
+		</div>
 	</div>
 {/if}
 
@@ -230,6 +403,10 @@
        Kanal (--measure = focus-100 „Blueprint-Blau"), damit Maße nie mit
        Komponentenfarben verwechselt werden. */
 		--measure: var(--z-ds-color-focus-100);
+		/* Drei Bedeutungen, drei Farben (DevTools-Konvention): Maßlinien blau,
+		   Padding grün, Gaps gelb — echte Status-Tokens, kein neues Farbsystem. */
+		--pad-line: var(--z-ds-color-background-success);
+		--gap-line: var(--z-ds-color-background-warning);
 		position: relative;
 		background-color: var(--z-ds-color-background-10);
 		background-image: radial-gradient(circle, var(--z-ds-color-border-70) 1px, transparent 1px);
@@ -346,9 +523,54 @@
 		z-index: 5;
 	}
 
-	/* Innenabstand-Overlay: vier getönte Streifen an den Specimen-Kanten mit
-	   gestrichelter Innenkante — der Padding-Wert oben in der Pille bekommt damit
-	   einen sichtbaren Ort. Liegt über dem Specimen, fängt aber keine Maus. */
+	/* Overlay-Ebene für Part-Outlines + Gap-Streifen (live gemessen) — fängt keine Maus. */
+	.overlays {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		pointer-events: none;
+	}
+	/* Part-Outline: Kontur + getönte Fläche + Namens-Tag der aktiven Legenden-Zeile. */
+	.part {
+		position: absolute;
+		border: 1.5px solid transparent;
+		border-radius: var(--ds-radius-sm);
+		opacity: 0;
+		transition:
+			opacity var(--ds-dur) var(--ds-ease-out),
+			border-color var(--ds-dur) var(--ds-ease-out);
+	}
+	.part--on {
+		opacity: 1;
+		border-color: var(--measure);
+		background: color-mix(in srgb, var(--measure) 12%, transparent);
+	}
+	.part-tag {
+		position: absolute;
+		top: -22px;
+		left: -1.5px;
+		background: var(--measure);
+		color: var(--z-ds-color-general-white-100);
+		font-family: var(--ds-font-mono);
+		font-size: 10px;
+		font-weight: 600;
+		padding: 2px 7px;
+		border-radius: var(--ds-radius-sm);
+		white-space: nowrap;
+		opacity: 0;
+		transform: translateY(3px);
+		transition:
+			opacity var(--ds-dur) var(--ds-ease-out),
+			transform var(--ds-dur) var(--ds-ease-out);
+	}
+	.part--on .part-tag {
+		opacity: 1;
+		transform: none;
+	}
+
+	/* Innenabstand-Overlay: vier schraffierte Streifen an den Specimen-Kanten
+	   (Schraffur liest sich als „Zwischenraum", nicht als weiteres Bauteil).
+	   Liegt über dem Specimen, fängt aber keine Maus. */
 	.pad-box {
 		position: absolute;
 		inset: 0;
@@ -357,27 +579,57 @@
 	}
 	.pad-strip {
 		position: absolute;
-		background: color-mix(in srgb, var(--measure) 16%, transparent);
+		background-image: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--pad-line) 30%, transparent) 0 3px,
+			transparent 3px 7px
+		);
+		background-color: color-mix(in srgb, var(--pad-line) 10%, transparent);
+		transition:
+			box-shadow var(--ds-dur) var(--ds-ease),
+			background-color var(--ds-dur) var(--ds-ease);
 	}
 	.pad-strip--t {
 		top: 0;
 		left: 0;
 		right: 0;
-		border-bottom: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+		border-bottom: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
 	.pad-strip--b {
 		bottom: 0;
 		left: 0;
 		right: 0;
-		border-top: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+		border-top: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
 	.pad-strip--l {
 		left: 0;
-		border-right: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+		border-right: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
 	.pad-strip--r {
 		right: 0;
-		border-left: 1px dashed color-mix(in srgb, var(--measure) 45%, transparent);
+		border-left: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
+	}
+	/* Gap-Streifen: gelbe Schraffur zwischen den Teilen. */
+	.gap-strip {
+		position: absolute;
+		background-image: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--gap-line) 40%, transparent) 0 3px,
+			transparent 3px 7px
+		);
+		background-color: color-mix(in srgb, var(--gap-line) 12%, transparent);
+		transition:
+			box-shadow var(--ds-dur) var(--ds-ease),
+			background-color var(--ds-dur) var(--ds-ease);
+	}
+	/* Aktive Streifen (Tabellenzeile gehovert/gepinnt) leuchten auf. */
+	.pad-strip.strip--on {
+		box-shadow: 0 0 0 1.5px var(--pad-line);
+		background-color: color-mix(in srgb, var(--pad-line) 24%, transparent);
+	}
+	.gap-strip.strip--on {
+		box-shadow: 0 0 0 1.5px var(--gap-line);
+		background-color: color-mix(in srgb, var(--gap-line) 28%, transparent);
 	}
 
 	.dim {
@@ -447,15 +699,6 @@
 		bottom: -9px;
 		transform: translateX(-50%);
 	}
-	.dim-pad {
-		top: -30px;
-		left: 50%;
-		transform: translateX(-50%);
-	}
-	.dim-pad .dl {
-		position: static;
-		border: 1px dashed color-mix(in srgb, var(--measure) 55%, transparent);
-	}
 	.rad {
 		position: absolute;
 		top: -6px;
@@ -482,20 +725,32 @@
 		gap: 5px;
 	}
 	.legend li {
+		margin: 0 -6px;
+	}
+	/* Zeile als Button (Touch/Tastatur) — optisch wie die bisherige Zeile. */
+	.lrow {
 		display: flex;
+		width: 100%;
 		align-items: baseline;
 		gap: 9px;
 		padding: 5px 6px;
-		margin: 0 -6px;
+		border: none;
+		background: none;
 		border-radius: var(--ds-radius-sm);
+		font: inherit;
 		font-size: var(--ds-text-sm);
 		line-height: 1.45;
+		text-align: left;
 		color: var(--ds-text-muted);
 		cursor: default;
 		transition: background var(--ds-dur) var(--ds-ease);
 	}
-	.legend li.on {
+	.lrow.on {
 		background: var(--ds-surface-raised);
+	}
+	.lrow:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
 	}
 	/* Nummer im Blueprint-Blau — bindet die Legende sichtbar an die Callouts im Artboard. */
 	.legend .n {
@@ -566,15 +821,65 @@
 		align-items: baseline;
 		justify-content: space-between;
 		gap: 16px;
-		padding: 9px 0;
+		padding: 9px 6px;
+		margin: 0 -6px;
+		width: calc(100% + 12px);
+		border: none;
+		background: none;
+		font: inherit;
+		text-align: left;
 		border-top: 1px solid var(--ds-border-soft);
 		font-size: var(--ds-text-sm);
 	}
 	.sp-item:last-child {
 		border-bottom: 1px solid var(--ds-border-soft);
 	}
+	/* Interaktive Zeile (mit Bühnen-Kopplung): Hover-Pill wie in der Legende. */
+	.sp-item--sync {
+		cursor: default;
+		border-radius: var(--ds-radius-sm);
+		transition: background var(--ds-dur) var(--ds-ease);
+	}
+	.sp-item--sync.on {
+		background: var(--ds-surface-raised);
+	}
+	.sp-item--sync:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
 	.sp-name {
 		color: var(--ds-text-body);
+	}
+	/* Farb-Swatch: verankert die Zeile ↔ Streifen-Zuordnung auch ohne Hover. */
+	.swatch {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		border-radius: 3px;
+		margin-right: 7px;
+		vertical-align: -1px;
+	}
+	.swatch--pad {
+		background-image: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--z-ds-color-background-success) 45%, transparent) 0 2px,
+			transparent 2px 4px
+		);
+		background-color: color-mix(in srgb, var(--z-ds-color-background-success) 14%, transparent);
+	}
+	.swatch--gap {
+		background-image: repeating-linear-gradient(
+			45deg,
+			color-mix(in srgb, var(--z-ds-color-background-warning) 55%, transparent) 0 2px,
+			transparent 2px 4px
+		);
+		background-color: color-mix(in srgb, var(--z-ds-color-background-warning) 16%, transparent);
+	}
+	/* Richtungs-Zusatz („oben · unten") — leise, direkt hinter dem Label. */
+	.sp-dir {
+		margin-left: 6px;
+		color: var(--ds-text-faint);
+		font-size: var(--ds-text-xs);
 	}
 	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
 	.herkunft {

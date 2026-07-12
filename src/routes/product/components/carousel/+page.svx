@@ -16,7 +16,7 @@ kategorie: Medien
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"top","x":50},{"nr":2,"side":"left","y":40},{"nr":3,"side":"bottom","x":40},{"nr":4,"side":"right","y":60}];
+	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-carousel__scroll-container"},{"nr":2,"side":"left","y":40,"selector":".z-carousel__slide"},{"nr":3,"side":"bottom","x":40,"selector":".z-carousel__dots-wrapper"},{"nr":4,"side":"right","y":60}];
 	const playgroundControls = [{"key":"viewMode","label":"View Mode","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"variant","label":"Variant","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Overlay-Pfeile","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"noControls","label":"Ohne Controls","type":"toggle","cssClass":"z-carousel--no-controls"}];
 	const playgroundTemplate = `<div class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
   <div class="z-carousel__scroll-container" tabindex="-1" aria-live="polite">

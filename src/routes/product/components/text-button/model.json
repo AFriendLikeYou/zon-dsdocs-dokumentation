@@ -30,7 +30,9 @@
 		{
 			"label": "Icon ↔ Label (Gap)",
 			"px": "4 px",
-			"token": "--z-ds-space-xxxs"
+			"token": "--z-ds-space-xxxs",
+			"art": "gap",
+			"selector": ".z-text-button"
 		}
 	],
 	"callouts": [
@@ -246,7 +248,8 @@
 			{
 				"nr": 1,
 				"side": "left",
-				"y": 50
+				"y": 50,
+				"selector": ".z-text-button"
 			},
 			{
 				"nr": 2,

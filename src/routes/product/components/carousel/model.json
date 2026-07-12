@@ -32,13 +32,17 @@
 			"label": "Sektion → Track/Controls",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel"
 		},
 		{
 			"label": "Slot-Gap im Track",
 			"px": "16 px",
 			"token": "--z-ds-space-m (Wert identisch; Bindung nur am Root gesetzt)",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel__scroll-container"
 		},
 		{
 			"label": "Slot-interner Gap",
@@ -50,7 +54,9 @@
 			"label": "Progress-Punkte-Gap",
 			"px": "6 px",
 			"token": "--z-ds-space-xxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel__dots-wrapper"
 		},
 		{
 			"label": "Pfeil-Buttons-Gap",
@@ -475,17 +481,20 @@
 			{
 				"nr": 1,
 				"side": "top",
-				"x": 50
+				"x": 50,
+				"selector": ".z-carousel__scroll-container"
 			},
 			{
 				"nr": 2,
 				"side": "left",
-				"y": 40
+				"y": 40,
+				"selector": ".z-carousel__slide"
 			},
 			{
 				"nr": 3,
 				"side": "bottom",
-				"x": 40
+				"x": 40,
+				"selector": ".z-carousel__dots-wrapper"
 			},
 			{
 				"nr": 4,

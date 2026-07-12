@@ -34,7 +34,9 @@ export const generated = {
 		{
 			"label": "Titel ↔ Byline (Body-Gap)",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "gap",
+			"selector": ".z-cell__body"
 		},
 		{
 			"label": "Meta-Gap (Zeitstempel · Autor)",
@@ -44,7 +46,9 @@ export const generated = {
 		{
 			"label": "Fläche ↔ Body",
 			"px": "16 px",
-			"token": "--z-ds-space-m"
+			"token": "--z-ds-space-m",
+			"art": "gap",
+			"selector": ".z-cell"
 		}
 	],
 	"tokens": [

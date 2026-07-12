@@ -34,13 +34,17 @@ export const generated = {
 			"label": "Sektion → Track/Controls",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel"
 		},
 		{
 			"label": "Slot-Gap im Track",
 			"px": "16 px",
 			"token": "--z-ds-space-m (Wert identisch; Bindung nur am Root gesetzt)",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel__scroll-container"
 		},
 		{
 			"label": "Slot-interner Gap",
@@ -52,7 +56,9 @@ export const generated = {
 			"label": "Progress-Punkte-Gap",
 			"px": "6 px",
 			"token": "--z-ds-space-xxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "gap",
+			"selector": ".z-carousel__dots-wrapper"
 		},
 		{
 			"label": "Pfeil-Buttons-Gap",

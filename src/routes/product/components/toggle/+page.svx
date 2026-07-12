@@ -17,7 +17,7 @@ kategorie: Formulare
 	import content from './content.json';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"bottom","x":50},{"nr":2,"side":"top","x":70}];
+	const calloutAnchors = [{"nr":1,"side":"bottom","x":50,"selector":".z-switch"},{"nr":2,"side":"top","x":70,"selector":".z-switch__thumb"}];
 	const playgroundControls = [{"key":"on","label":"An","type":"toggle","cssClass":"z-switch--on"}];
 	const playgroundTemplate = `<button class="z-switch{classes}" type="button" role="switch" aria-checked="false" aria-label="Beispiel-Schalter"><span class="z-switch__thumb"></span></button>`;
 	const htmlCode = `<button class="z-switch z-switch--on" type="button" role="switch" aria-checked="true" aria-label="Beispiel"><span class="z-switch__thumb"></span></button>

@@ -30,7 +30,9 @@
 		{
 			"label": "Icon ↔ Label (Gap)",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "gap",
+			"selector": ".z-page-shortcut"
 		}
 	],
 	"callouts": [
@@ -168,7 +170,8 @@
 			{
 				"nr": 1,
 				"side": "top",
-				"x": 50
+				"x": 50,
+				"selector": ".z-page-shortcut"
 			},
 			{
 				"nr": 2,
