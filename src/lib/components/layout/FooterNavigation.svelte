@@ -36,8 +36,13 @@
 		}
 	}
 
-	const previousElement = $derived(() => getDisplayName(items[currentIndex - 1]));
-	const nextElement = $derived(() => getDisplayName(items[currentIndex + 1]));
+	// Labels an dieselben Grenzen wie die Buttons binden — sonst greift der Zugriff
+	// bei currentIndex 0 / letztem Index auf items[-1] bzw. items[length] (undefined
+	// → getDisplayName würfe). '' wenn es keinen Nachbarn gibt.
+	const previousLabel = $derived(currentIndex >= 1 ? getDisplayName(items[currentIndex - 1]) : '');
+	const nextLabel = $derived(
+		currentIndex < items.length - 1 ? getDisplayName(items[currentIndex + 1]) : ''
+	);
 </script>
 
 {#if showNavigation}
@@ -45,7 +50,7 @@
 		{#if currentIndex >= 1}
 			<Button onclick={prevItem} class="footer-nav__button" aria-label="Zur vorherigen Seite">
 				<ArrowLeftIcon width={14} height={14} />
-				{previousElement()}
+				{previousLabel}
 			</Button>
 		{/if}
 
@@ -56,7 +61,7 @@
 				class="footer-nav__button"
 				aria-label="Zur nächsten Seite"
 			>
-				{nextElement()}
+				{nextLabel}
 				<ArrowRightIcon width={14} height={14} />
 			</Button>
 		{/if}

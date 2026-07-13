@@ -1,42 +1,28 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	// import { LIVE_URL } from '$config';
 	import { uppercaseFirstLetter } from '$lib/utils';
 	import GitHubEdit from './GitHubEdit.svelte';
 
 	function formatBreadcrumbLabel(slug: string): string {
 		return slug
-			.split('-') // Replace hyphens with spaces
-			.map((word) => uppercaseFirstLetter(word)) // Capitalize each word
-			.join(' '); // Join back as a proper title
+			.split('-') // Bindestriche zu Leerzeichen
+			.map((word) => uppercaseFirstLetter(word)) // jedes Wort großschreiben
+			.join(' '); // als lesbaren Titel zusammenfügen
 	}
 
-	const breadcrumbs = () => {
-		const parts = page.url.pathname.split('/').filter(Boolean);
-		return parts.map((part, index) => {
-			const href = '/' + parts.slice(0, index + 1).join('/');
-			return { label: formatBreadcrumbLabel(part), href };
-		});
-	};
+	// `page` (aus $app/state) ist fein-granular reaktiv — die Krümel einmal ableiten
+	// (statt Mehrfachaufruf einer Funktion im Template).
+	const breadcrumbs = $derived(
+		page.url.pathname
+			.split('/')
+			.filter(Boolean)
+			.map((part, index, parts) => ({
+				label: formatBreadcrumbLabel(part),
+				href: '/' + parts.slice(0, index + 1).join('/')
+			}))
+	);
 
-	// const schema = () => {
-	//     const parts = page.url.pathname.split('/').filter(Boolean);
-	//     const schema = {
-	//         '@context': 'https://schema.org',
-	//         '@type': 'BreadcrumbList',
-	//         itemListElement: parts.map((part, index) => ({
-	//             '@type': 'ListItem',
-	//             position: index + 1,
-	//             name: formatBreadcrumbLabel(part),
-	//             item: `${LIVE_URL}/${parts.slice(0, index + 1).join('/')}`
-	//         }))
-	//     };
-	//     return JSON.stringify(schema, null, 2);
-	// }
-
-	// `page` (aus $app/state) ist fein-granular reaktiv — direkt ableiten statt
-	// des früheren $state+afterNavigate-Spiegels (Review R2, Kür).
-	const showBreadcrumbs = $derived(breadcrumbs().length > 1);
+	const showBreadcrumbs = $derived(breadcrumbs.length > 1);
 
 	// Component-Doku-Seiten werden generiert → der Stift bearbeitet die
 	// menschlich gepflegte content.ts statt der generierten +page.svx.
@@ -46,19 +32,14 @@
 </script>
 
 {#if showBreadcrumbs}
-	<!-- // TODO: fix this  -->
-	<!-- {@html `<script type="application/ld+json">${schema()}</script>`} -->
-
 	<div class="breadcrumbs__container">
 		<nav aria-label="Breadcrumb" class="breadcrumbs">
 			<ol>
-				{#each breadcrumbs() as { label, href }, index}
+				{#each breadcrumbs as { label, href }, index}
 					<li>
-						<a {href} aria-current={index === breadcrumbs().length - 1 ? 'page' : undefined}
-							>{uppercaseFirstLetter(label)}</a
-						>
+						<a {href} aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}>{label}</a>
 
-						{#if index < breadcrumbs().length - 1}
+						{#if index < breadcrumbs.length - 1}
 							<span aria-hidden="true">/</span>
 						{/if}
 					</li>

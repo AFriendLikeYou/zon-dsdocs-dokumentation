@@ -64,27 +64,17 @@
 
 <div class="collapsible-group">
 	<div class="collapsible-header">
-		{#if href}
-			<a
-				href={items.length ? '#' : href}
-				onclick={(e) => {
-					if (items.length) {
-						toggleMenu(e);
-					} else {
-						onclick?.();
-					}
-				}}
-				class="collapsible-link {isActive(href) ? 'active' : ''}"
-				aria-expanded={items.length ? isOpen : undefined}
-			>
+		{#if items.length > 0}
+			<!-- Hat Kinder → echter Disclosure-Button (statt <a href="#">) — korrekte Semantik. -->
+			<button class="collapsible-title" onclick={toggleMenu} aria-expanded={isOpen}>
+				{@render headerInner()}
+			</button>
+		{:else if href}
+			<a href={href} onclick={() => onclick?.()} class="collapsible-link {isActive(href) ? 'active' : ''}">
 				{@render headerInner()}
 			</a>
 		{:else}
-			<button
-				class="collapsible-title"
-				onclick={items.length ? toggleMenu : undefined}
-				aria-expanded={items.length ? isOpen : undefined}
-			>
+			<button class="collapsible-title">
 				{@render headerInner()}
 			</button>
 		{/if}
@@ -131,11 +121,6 @@
 		background: none;
 		cursor: pointer;
 	}
-
-	/* button .collapsible-title:active {
-		background: none;
-		cursor: pointer;
-	} */
 
 	.collapsible-group {
 		position: relative;

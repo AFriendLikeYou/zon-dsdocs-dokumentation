@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
+	import { slugify } from '$lib/utils';
 
 	const COPY_LINK_SVG = `
         <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,12 +22,8 @@
 	 */
 	function createAnchorButton(header: HTMLElement) {
 		if (header.querySelector('.anchor-copy')) return;
-		const id =
-			header.id ||
-			header.textContent
-				?.toLowerCase()
-				.replace(/\s+/g, '-')
-				.replace(/[^\w-]/g, '');
+		// Gemeinsames slugify() (identisch zu TableOfContents) statt Ad-hoc-Regex.
+		const id = header.id || slugify(header.textContent ?? '');
 		if (!id) return;
 
 		header.id = id;

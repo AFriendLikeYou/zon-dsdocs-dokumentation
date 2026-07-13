@@ -4,14 +4,20 @@
 
 	let { issues }: { issues: A11yItem[] } = $props();
 
+	type Category = A11yItem['category'];
+
+	/** Alle Kategorien in Erst-Auftritts-Reihenfolge (einmaliger Snapshot). */
+	function categoriesInOrder(items: A11yItem[]): Category[] {
+		return [...new Set(items.map((issue) => issue.category))];
+	}
+
 	let search = $state('');
 
-	let openCategories = $state<{ [category: string]: boolean }>({
-		'Status Messages': true,
-		Forms: true,
-		'Form Validation': false,
-		Meta: false
-	});
+	// Initialzustand aus den Daten abgeleitet (nicht hartkodiert): die erste
+	// vorkommende Kategorie ist offen, alle weiteren zu.
+	let openCategories = $state<Partial<Record<Category, boolean>>>(
+		Object.fromEntries(categoriesInOrder(issues).map((category, index) => [category, index === 0]))
+	);
 
 	/** Filter issues by search (title, description, solution, label, category) */
 	const filteredIssues = $derived(() =>
@@ -24,7 +30,7 @@
 
 	/** Group issues by category */
 	const groupedIssues = $derived(() => {
-		const map = new Map<string, A11yItem[]>();
+		const map = new Map<Category, A11yItem[]>();
 		for (const issue of filteredIssues()) {
 			if (!map.has(issue.category)) map.set(issue.category, []);
 			map.get(issue.category)!.push(issue);
@@ -32,57 +38,68 @@
 		return map;
 	});
 
-	function toggleCategory(category: string) {
+	function toggleCategory(category: Category) {
 		openCategories[category] = !openCategories[category];
 	}
 
-	/** Small visual chip for label */
-	function getLabelChip(label: A11yItem['label']) {
-		const text = label === 'issue' ? 'Issue' : 'Good practice';
-		const cls = label === 'issue' ? 'chip--issue' : 'chip--good';
-		return `<span class="chip ${cls}" aria-label="${text}">${text}</span>`;
+	/** Sichtbarer Text des Label-Chips (reiner Text, kein String-HTML). */
+	function getLabelText(label: A11yItem['label']): string {
+		return label === 'issue' ? 'Issue' : 'Good practice';
 	}
 
-	function getCategoryIcon(category: string): string {
-		switch (category.toLowerCase()) {
-			case 'screen reader':
-				return `
-				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-					viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-					stroke-linecap="round" stroke-linejoin="round">
-					<rect width="7" height="12" x="2" y="6" rx="1"/>
-					<path d="M13 8.32a7.43 7.43 0 0 1 0 7.36"/>
-					<path d="M16.46 6.21a11.76 11.76 0 0 1 0 11.58"/>
-					<path d="M19.91 4.1a15.91 15.91 0 0 1 .01 15.8"/>
-				</svg>
-			`;
-			case 'focus management':
-				return `
-				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-					viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-					stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="12" r="3"/>
-					<path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-					<path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-					<path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-					<path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-				</svg>
-			`;
-			case 'color':
-				return `
-				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-					viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-					stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/>
-					<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
-					<circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-					<circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-					<circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
-				</svg>
-			`;
-			default:
-				return '';
-		}
+	/** Modifier-Klasse des Label-Chips. */
+	function getLabelChipClass(label: A11yItem['label']): string {
+		return label === 'issue' ? 'chip--issue' : 'chip--good';
+	}
+
+	// Ein Icon je Kategorie — als Record über den Kategorie-Typ, damit TypeScript
+	// Drift meldet, sobald a11y-issues.ts eine Kategorie ergänzt/umbenennt.
+	const CATEGORY_ICONS: Record<Category, string> = {
+		'Status Messages': `
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+				<path d="M12 7v4"/><path d="M12 15h.01"/>
+			</svg>
+		`,
+		Forms: `
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+				<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+				<path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>
+			</svg>
+		`,
+		'Form Validation': `
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/>
+			</svg>
+		`,
+		'Screen Reader': `
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<rect width="7" height="12" x="2" y="6" rx="1"/>
+				<path d="M13 8.32a7.43 7.43 0 0 1 0 7.36"/>
+				<path d="M16.46 6.21a11.76 11.76 0 0 1 0 11.58"/>
+				<path d="M19.91 4.1a15.91 15.91 0 0 1 .01 15.8"/>
+			</svg>
+		`,
+		Meta: `
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+			</svg>
+		`
+	};
+
+	function getCategoryIcon(category: Category): string {
+		return CATEGORY_ICONS[category] ?? '';
 	}
 
 	/**
@@ -203,12 +220,9 @@
 									>
 									<h3>{@html highlightHTML(issue.title)}</h3>
 
-									<!-- Label chip -->
-									<span
-										class={`accordion__label chip ${issue.label === 'issue' ? 'chip--issue' : 'chip--good'}`}
-										aria-live="polite"
-									>
-										{@html getLabelChip(issue.label)}
+									<!-- Label chip (ein einzelnes Span, reiner Text — kein String-HTML) -->
+									<span class="accordion__label chip {getLabelChipClass(issue.label)}">
+										{getLabelText(issue.label)}
 									</span>
 
 									<!-- Links (WCAG / GitHub) -->

@@ -1,59 +1,65 @@
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { debounce, slugify } from '$lib/utils';
 
-	let headings: { id: string; text: string; level: string }[] = $state([]);
+	// Component-Seiten haben nur h2-Sektionen → wir sammeln bewusst nur h2
+	// (kein level-Feld mehr, keine h3-Verschachtelung).
+	let headings: { id: string; text: string }[] = $state([]);
 	let activeId = $state('');
 
-	function updateTableOfContents() {
-		// Nur Content-Überschriften (#main-content) — Footer-/Navigations-h2s
-		// (GRUNDLAGEN, COMPONENTS, …) gehören nicht ins Seiten-Inhaltsverzeichnis.
-		headings = Array.from(
+	let intersectionObserver: IntersectionObserver | null = null;
+
+	// Sammelt die Content-Überschriften neu, weist fehlende IDs zu und verdrahtet
+	// den IntersectionObserver. Nur #main-content — Footer-/Navigations-h2s
+	// (GRUNDLAGEN, COMPONENTS, …) gehören nicht ins Seiten-Inhaltsverzeichnis.
+	function rebuild() {
+		intersectionObserver?.disconnect();
+
+		const elements = Array.from(
 			document.querySelectorAll('#main-content h2') as NodeListOf<HTMLElement>
-		).map(
-			(heading) => ({
-				id: heading.id || heading.innerText.toLowerCase().replace(/\W+/g, '-'),
-				text: heading.innerText,
-				level: heading.tagName.toLowerCase()
-			})
 		);
 
-		const observer = new IntersectionObserver(
+		headings = elements.map((heading) => {
+			// Fallback-ID dem Element ZUWEISEN, bevor beobachtet/verlinkt wird —
+			// sonst zeigt der Anker ins Leere und der Observer findet nichts.
+			const id = heading.id || slugify(heading.innerText);
+			heading.id = id;
+			return { id, text: heading.innerText };
+		});
+
+		intersectionObserver = new IntersectionObserver(
 			(entries) => {
 				const visibleHeading = entries.find((entry) => entry.isIntersecting);
 				if (visibleHeading) activeId = visibleHeading.target.id;
 			},
-			{
-				rootMargin: '0px 0px -35% 0px'
-			}
+			{ rootMargin: '0px 0px -35% 0px' }
 		);
 
-		headings.forEach((heading) => {
-			const element = document.getElementById(heading.id);
-			if (element) observer.observe(element);
-		});
-
-		return () => observer.disconnect();
+		for (const heading of elements) intersectionObserver.observe(heading);
 	}
 
-	let cleanup = () => {};
-
 	onMount(() => {
-		cleanup = updateTableOfContents();
+		rebuild();
 
-		return () => cleanup();
+		// Tab-Wechsel auf Component-Seiten (Design → Develop) tauschen den Inhalt
+		// aus, OHNE Navigation — afterNavigate allein greift dafür nicht. Ein
+		// debounced MutationObserver fängt das ab. Beobachtet wird document.body
+		// (immer vorhanden — #main-content existiert zum onMount-Zeitpunkt evtl.
+		// noch nicht zuverlässig), der Rebuild filtert selbst auf #main-content.
+		const contentObserver = new MutationObserver(debounce(rebuild, 100));
+		contentObserver.observe(document.body, { childList: true, subtree: true });
+
+		return () => {
+			contentObserver.disconnect();
+			intersectionObserver?.disconnect();
+		};
 	});
 
-	// Update on page navigation
-	$effect(() => {
-		const mutationObserver = new MutationObserver(() => {
-			cleanup();
-			cleanup = updateTableOfContents();
-		});
-
-		mutationObserver.observe(document.body, { childList: true, subtree: true });
-
-		return () => mutationObserver.disconnect();
-	});
+	// SPA-Navigation: nach jedem Seitenwechsel zusätzlich sofort neu aufbauen
+	// (Muster wie GitHubEdit/BreadCrumbs) — deckt den Fall ab, dass der Observer
+	// den Austausch verpasst.
+	afterNavigate(() => rebuild());
 </script>
 
 {#if headings.length > 0}
@@ -64,8 +70,8 @@
 
 		<nav class="toc__navigation">
 			<ul>
-				{#each headings as { id, text, level }}
-					<li class={level}>
+				{#each headings as { id, text }}
+					<li>
 						<a href="#{id}" class="toc-link {activeId === id ? 'active' : ''}">
 							{text}
 						</a>
@@ -117,10 +123,6 @@
 		padding: 0;
 	}
 
-	li.h3 > .toc-link {
-		padding: 5px 28px;
-	}
-
 	.toc-link {
 		display: block;
 		padding: 5px 12px;
@@ -151,13 +153,6 @@
 	.toc-link:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
-	}
-
-	.toc-empty {
-		padding: 10px 12px;
-		/* vorher hardcoded rgba(255,255,255,.6) — im Light-Mode unsichtbar */
-		color: var(--ds-text-muted);
-		font-size: var(--ds-text-sm);
 	}
 
 	@media (max-width: 1280px) {

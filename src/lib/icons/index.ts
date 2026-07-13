@@ -26,6 +26,9 @@ export { default as ArrowLeftIcon } from './nav/ArrowLeftIcon.svelte';
 export { default as ArrowRightIcon } from './nav/ArrowRightIcon.svelte';
 export { default as LockOpenIcon } from './nav/LockOpenIcon.svelte';
 export { default as LockClosedIcon } from './nav/LockClosedIcon.svelte';
+export { default as ThemeSystemIcon } from './nav/ThemeSystemIcon.svelte';
+export { default as ThemeLightIcon } from './nav/ThemeLightIcon.svelte';
+export { default as ThemeDarkIcon } from './nav/ThemeDarkIcon.svelte';
 
 // cms/ — Editor-Icons via Namens-Dispatcher (eigenes Barrel, s. ./cms).
 export { Icon, CMS_ICONS } from './cms';
