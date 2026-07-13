@@ -28,7 +28,7 @@ Die Marke nutzt zwei Schriftfamilien: eine **Serifenschrift** für lange, redakt
 Texte (Editorial) und eine **serifenlose** Schrift für UI, Auszeichnungen und kurze
 Texte. Welche Schrift in welchem Kontext zum Einsatz kommt, ist Teil der Markenführung.
 
-<ExampleStage label="Schrift-Beispiel" background="grid">
+<ExampleStage title="Schrift-Beispiel" background="grid">
 	<img src="/media/brand/typography/typografie-image-2.png" alt="Schrift-Beispiele der Marke DIE ZEIT" />
 </ExampleStage>
 
