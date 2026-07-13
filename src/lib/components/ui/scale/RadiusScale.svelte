@@ -5,14 +5,14 @@
 -->
 <script lang="ts">
 	import { TokenPill } from '$components/ui/token-pill';
+	import { resolveCssVar } from '$lib/utils';
 
 	let { items = [] }: { items?: { token: string; usage?: string }[] } = $props();
 
 	let vals = $state<Record<string, string>>({});
 	$effect(() => {
-		const root = getComputedStyle(document.documentElement);
 		const m: Record<string, string> = {};
-		for (const it of items) m[it.token] = root.getPropertyValue(it.token).trim();
+		for (const it of items) m[it.token] = resolveCssVar(it.token);
 		vals = m;
 	});
 

@@ -39,7 +39,7 @@
 	let ready = $state(false);
 
 	function measure() {
-		const active = groupEl?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+		const active = groupEl?.querySelector<HTMLButtonElement>('[aria-checked="true"]');
 		if (!active) return;
 		thumb = { left: active.offsetLeft, width: active.offsetWidth };
 	}
@@ -59,10 +59,10 @@
 	});
 </script>
 
-<div class="seg" role="group" aria-label={ariaLabel} bind:this={groupEl}>
+<div class="segmented-control" role="radiogroup" aria-label={ariaLabel} bind:this={groupEl}>
 	<span
-		class="seg-thumb"
-		class:ready
+		class="segmented-control__thumb"
+		class:segmented-control__thumb--ready={ready}
 		style:left="{thumb.left}px"
 		style:width="{thumb.width}px"
 		aria-hidden="true"
@@ -70,15 +70,16 @@
 	{#each options as o (o.value)}
 		<button
 			type="button"
-			class="seg-btn"
-			aria-pressed={value === o.value}
+			class="segmented-control__option"
+			role="radio"
+			aria-checked={value === o.value}
 			onclick={() => onchange(o.value)}>{o.label}</button
 		>
 	{/each}
 </div>
 
 <style>
-	.seg {
+	.segmented-control {
 		position: relative;
 		display: inline-flex;
 		gap: 2px;
@@ -87,7 +88,7 @@
 		background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
 		backdrop-filter: blur(10px);
 	}
-	.seg-thumb {
+	.segmented-control__thumb {
 		position: absolute;
 		top: 3px;
 		height: 26px;
@@ -95,12 +96,12 @@
 		background: var(--z-ds-color-background-0);
 		box-shadow: var(--ds-shadow-sm);
 	}
-	.seg-thumb.ready {
+	.segmented-control__thumb--ready {
 		transition:
 			left var(--ds-dur) var(--ds-ease-out),
 			width var(--ds-dur) var(--ds-ease-out);
 	}
-	.seg-btn {
+	.segmented-control__option {
 		position: relative;
 		border: none;
 		background: none;
@@ -114,22 +115,22 @@
 		white-space: nowrap;
 		transition: color var(--ds-dur) var(--ds-ease);
 	}
-	.seg-btn[aria-pressed='true'] {
+	.segmented-control__option[aria-checked='true'] {
 		color: var(--z-ds-color-text-100);
 		font-weight: 600;
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.seg-btn:hover {
+		.segmented-control__option:hover {
 			color: var(--z-ds-color-text-100);
 		}
 	}
-	.seg-btn:focus-visible {
+	.segmented-control__option:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.seg-thumb.ready,
-		.seg-btn {
+		.segmented-control__thumb--ready,
+		.segmented-control__option {
 			transition: none;
 		}
 	}

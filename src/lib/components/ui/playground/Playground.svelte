@@ -225,6 +225,17 @@
 			<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 		</div>
 
+		<!-- Vorschau-Inhalt einmal definiert — resizable- und Normalzweig teilen ihn. -->
+		{#snippet previewBody()}
+			{#if template}
+				<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html html}
+			{:else}
+				{@render preview?.(values)}
+			{/if}
+		{/snippet}
+
 		{#if resizable}
 			<div
 				class="pg-frame"
@@ -232,13 +243,7 @@
 				style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
 			>
 				<div class="pg-preview" style:zoom>
-					{#if template}
-						<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						{@html html}
-					{:else}
-						{@render preview?.(values)}
-					{/if}
+					{@render previewBody()}
 				</div>
 				<button
 					type="button"
@@ -250,13 +255,7 @@
 			<span class="pg-width" aria-hidden="true">{measuredWidth} px</span>
 		{:else}
 			<div class="pg-preview" style:zoom>
-				{#if template}
-					<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html html}
-				{:else}
-					{@render preview?.(values)}
-				{/if}
+				{@render previewBody()}
 			</div>
 		{/if}
 

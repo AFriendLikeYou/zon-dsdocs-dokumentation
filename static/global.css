@@ -542,6 +542,15 @@ a[href]:not([class]) {
 	display: flex;
 }
 
+/* Scroll-Container für breite Tabellen: schmale Viewports scrollen die Tabelle im
+   eigenen Kasten, statt die ganze Seite horizontal zu schieben. Geteilt von
+   TokenTable/ColorRoleTable/MeasureTable/PropsTable. */
+.table-scroll {
+	overflow-x: auto;
+	max-width: 100%;
+	margin: 0 0 1em;
+}
+
 ul ul {
 	margin-block: var(--z-ds-space-16);
 }

@@ -10,7 +10,8 @@
 {#if states.length}
 	<div class="states">
 		{#each states as s}
-			<span class="state" class:on={s.vorhanden} class:todo={!s.vorhanden}>{s.label}</span>
+			<!-- Default = gefüllt (im Design vorhanden); --todo = gestrichelt (in Figma ergänzen). -->
+			<span class="state-chip" class:state-chip--todo={!s.vorhanden}>{s.label}</span>
 		{/each}
 	</div>
 	{#if hint}<p class="hint">{hint}</p>{/if}
@@ -22,17 +23,16 @@
 		flex-wrap: wrap;
 		gap: var(--z-ds-space-8);
 	}
-	.state {
+	.state-chip {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		padding: 5px 11px; /* bewusstes Chip-Maß ohne passendes z-ds-Token */
 		border-radius: var(--ds-radius-sm);
-	}
-	.on {
 		background: var(--ds-text);
 		color: var(--ds-surface);
 	}
-	.todo {
+	.state-chip--todo {
+		background: none;
 		color: var(--ds-text-muted);
 		border: 1px dashed var(--ds-border-strong);
 	}

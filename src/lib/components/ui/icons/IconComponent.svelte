@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { copySVGToClipboard, downloadIcon } from '$lib/utils';
 	import { CopyButton } from '$components/ui/copy-button';
-	import { DownloadButton } from '$components/ui/download-button';
+	import { AssetActions } from '$components/ui/asset-actions';
 	import type { Icon } from '$types/global';
 
 	let { icon }: { icon: Icon } = $props();
@@ -10,7 +9,6 @@
 <!-- Bewusst OHNE Enter/Exit-Transition: Such-Filtern ist hochfrequent — Blur auf
      bis zu 65 Icons pro Tastenanschlag machte die Suche träge (Frequenz-Regel). -->
 <div class="zon-icon__container">
-	<!-- <div class="bg-grid"></div> -->
 	<!-- Klick aufs Icon kopiert den Icon-NAMEN (inline-Feedback über CopyButton). -->
 	<CopyButton
 		value={icon.name}
@@ -24,22 +22,7 @@
 		<span class="zon-icon__copied" aria-hidden="true">Name kopiert ✓</span>
 	</CopyButton>
 
-	<div class="zon-icon__actions">
-		<DownloadButton
-			ondownload={() => downloadIcon(icon)}
-			ariaLabel={`Download ${icon.name} icon`}
-			feedback="toast"
-			toastMessage={`Das Icon "${icon.name}" wurde heruntergeladen.`}
-			iconButton
-		/>
-		<CopyButton
-			oncopy={() => copySVGToClipboard(icon)}
-			ariaLabel={`${icon.name} in der Zwischenablage kopieren`}
-			feedback="toast"
-			toastMessage={`Das Icon "${icon.name}" wurde in die Zwischenablage kopiert.`}
-			iconButton
-		/>
-	</div>
+	<AssetActions {icon} />
 </div>
 
 <style>
@@ -117,11 +100,6 @@
 			.zon-icon__copied {
 				transition: none;
 			}
-		}
-
-		.zon-icon__actions {
-			display: flex;
-			gap: var(--z-ds-space-8);
 		}
 	}
 </style>

@@ -10,6 +10,7 @@
 -->
 <script lang="ts">
 	import { TokenPill } from '$components/ui/token-pill';
+	import { resolveCssVar } from '$lib/utils';
 	import { TOKEN_USAGE } from '$data/catalog';
 	import {
 		FOUNDATION_TOKENS,
@@ -27,13 +28,12 @@
 
 	// Läuft nur im Browser (nach Mount) — SSR liefert erstmal leere Werte.
 	$effect(() => {
-		const root = getComputedStyle(document.documentElement);
 		resolved = groups.map((g) => ({
 			kategorie: g.kategorie,
 			beschreibung: g.beschreibung,
 			items: g.tokens.map((t) => {
 				const name = tokenName(t);
-				const wert = root.getPropertyValue(name).trim();
+				const wert = resolveCssVar(name);
 				return {
 					name,
 					usage: tokenUsage(t),

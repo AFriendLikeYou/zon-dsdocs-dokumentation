@@ -14,57 +14,49 @@
 	};
 	const herk = (m?: MasseValue) =>
 		m && typeof m !== 'string' && m.herkunft ? HERKUNFT_LABEL[m.herkunft] : undefined;
+
+	// Eine Zeile je vorhandenem Maß — Padding trägt seine Einheit selbst im Wert.
+	const rows = $derived(
+		masse
+			? (
+					[
+						{ label: 'Höhe', value: masse.hoehe, unit: ' px' },
+						{ label: 'Breite', value: masse.breite, unit: ' px' },
+						{ label: 'Padding', value: masse.padding, unit: '' },
+						{ label: 'Radius', value: masse.radius, unit: ' px' }
+					] as const
+				).filter((r) => r.value)
+			: []
+	);
 </script>
 
 {#if masse}
-	<div class="m-wrap">
-		<table class="m">
+	<div class="table-scroll">
+		<table class="measure-table">
 			<tbody>
-				{#if masse.hoehe}<tr
-						><th>Höhe</th><td
-							>{px(masse.hoehe)} px{#if herk(masse.hoehe)}<span class="herk"
-									>{herk(masse.hoehe)}</span
-								>{/if}{#if tok(masse.hoehe)}<span class="tok"><TokenPill value={tok(masse.hoehe)!} /></span>{/if}</td
-						></tr
-					>{/if}
-				{#if masse.breite}<tr
-						><th>Breite</th><td
-							>{px(masse.breite)} px{#if herk(masse.breite)}<span class="herk"
-									>{herk(masse.breite)}</span
-								>{/if}{#if tok(masse.breite)}<span class="tok"><TokenPill value={tok(masse.breite)!} /></span>{/if}</td
-						></tr
-					>{/if}
-				{#if masse.padding}<tr
-						><th>Padding</th><td
-							>{px(masse.padding)}{#if herk(masse.padding)}<span class="herk"
-									>{herk(masse.padding)}</span
-								>{/if}{#if tok(masse.padding)}<span class="tok"><TokenPill value={tok(masse.padding)!} /></span>{/if}</td
-						></tr
-					>{/if}
-				{#if masse.radius}<tr
-						><th>Radius</th><td
-							>{px(masse.radius)} px{#if herk(masse.radius)}<span class="herk"
-									>{herk(masse.radius)}</span
-								>{/if}{#if tok(masse.radius)}<span class="tok"><TokenPill value={tok(masse.radius)!} /></span>{/if}</td
-						></tr
-					>{/if}
+				{#each rows as row (row.label)}
+					<tr>
+						<th>{row.label}</th>
+						<td
+							>{px(row.value)}{row.unit}{#if herk(row.value)}<span class="measure-table__provenance"
+									>{herk(row.value)}</span
+								>{/if}{#if tok(row.value)}<span class="measure-table__token"
+									><TokenPill value={tok(row.value)!} /></span
+								>{/if}</td
+						>
+					</tr>
+				{/each}
 			</tbody>
 		</table>
 	</div>
 {/if}
 
 <style>
-	/* Schmale Viewports: Tabelle scrollt im eigenen Container statt die Seite zu schieben. */
-	.m-wrap {
-		overflow-x: auto;
-		max-width: 100%;
-		margin: 0 0 1em;
-	}
-	.m {
+	.measure-table {
 		border-collapse: collapse;
 		min-width: 260px;
 	}
-	.m th {
+	.measure-table th {
 		text-align: left;
 		font-weight: 400;
 		color: var(--ds-text-muted);
@@ -72,20 +64,20 @@
 		border-bottom: 1px solid var(--ds-border);
 		font-size: var(--ds-text-sm);
 	}
-	.m td {
+	.measure-table td {
 		text-align: right;
 		font-family: var(--ds-font-mono);
 		padding: 9px 0; /* bewusstes Zell-Padding ohne passendes z-ds-Token */
 		border-bottom: 1px solid var(--ds-border);
 		font-size: var(--ds-text-sm);
 	}
-	.tok {
+	.measure-table__token {
 		display: block;
 		color: var(--ds-text-muted);
 		font-size: var(--ds-text-xs);
 	}
 	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
-	.herk {
+	.measure-table__provenance {
 		display: block;
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-xs);

@@ -4,6 +4,8 @@
   die Bewegung mit dem jeweiligen Token ab. Respektiert prefers-reduced-motion.
 -->
 <script lang="ts">
+	import { resolveCssVar } from '$lib/utils';
+
 	type MotionToken = { label: string; cssVar: string };
 
 	let {
@@ -17,9 +19,8 @@
 
 	// Token-Werte zur Laufzeit aus dem geladenen Stylesheet lesen.
 	$effect(() => {
-		const root = getComputedStyle(document.documentElement);
 		const next: Record<string, string> = {};
-		for (const t of tokens) next[t.cssVar] = root.getPropertyValue(t.cssVar).trim();
+		for (const t of tokens) next[t.cssVar] = resolveCssVar(t.cssVar);
 		values = next;
 	});
 

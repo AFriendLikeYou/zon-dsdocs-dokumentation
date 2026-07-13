@@ -2,24 +2,29 @@
 	type Props = {
 		src: string;
 		title?: string;
+		/** Optionale Untertitel-Datei (WebVTT). Nur wenn gesetzt, wird ein <track> gerendert. */
+		captionsSrc?: string;
 		onplaypause?: (paused: boolean) => void;
 	};
-	let { src, onplaypause, title }: Props = $props();
+	let { src, onplaypause, title, captionsSrc }: Props = $props();
 
 	let paused = $state(false);
 	let videoElement = $state<HTMLVideoElement>();
 
 	function togglePlayPause() {
 		paused = !paused;
-		if (onplaypause) {
-			onplaypause(paused);
-		}
+		onplaypause?.(paused);
 	}
 </script>
 
 <div class="video-player">
+	<!-- Untertitel-Spur nur wenn eine Datei vorliegt; die Demos sind stumme Loop-Clips
+	     ohne Sprache, daher sind Captions optional. -->
+	<!-- svelte-ignore a11y_media_has_caption -->
 	<video {title} bind:this={videoElement} bind:paused {src} autoplay loop class="video">
-		<track kind="captions" />
+		{#if captionsSrc}
+			<track kind="captions" src={captionsSrc} />
+		{/if}
 		Your browser does not support the video tag.
 	</video>
 

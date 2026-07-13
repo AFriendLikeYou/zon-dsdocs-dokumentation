@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { TokenPill } from '$components/ui/token-pill';
+	import { resolveCssVar } from '$lib/utils';
 	import { contrastForPair, classifyContrast, formatRatio } from './contrast';
 	import type { ContrastLevel } from './contrast';
 
@@ -29,12 +30,6 @@
 		return token.replace(/^--z-ds-color-/, '').replace(/^--z-ds-/, '');
 	}
 
-	/** Löst einen Token-Wert live aus dem geladenen styles-zds.css auf (nur Browser). */
-	function resolve(token: string): string {
-		if (typeof window === 'undefined') return '';
-		return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
-	}
-
 	type Cell = {
 		text: TokenEntry;
 		bg: TokenEntry;
@@ -51,7 +46,7 @@
 		return texts.map((text) => ({
 			text,
 			cells: backgrounds.map((bg): Cell => {
-				const ratio = contrastForPair(resolve(text.token), resolve(bg.token));
+				const ratio = contrastForPair(resolveCssVar(text.token), resolveCssVar(bg.token));
 				return {
 					text,
 					bg,

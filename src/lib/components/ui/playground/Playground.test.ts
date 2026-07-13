@@ -30,7 +30,7 @@ describe('Playground (generischer Harness)', () => {
 		render(Playground, { props: { controls, code, preview } });
 
 		expect(screen.getByText('Variant')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Primary' })).toBeInTheDocument();
+		expect(screen.getByRole('radio', { name: 'Primary' })).toBeInTheDocument();
 		expect(screen.getByText('code:primary:false')).toBeInTheDocument();
 		// Default-State → kein Reset sichtbar
 		expect(screen.queryByRole('button', { name: /Zurücksetzen/ })).toBeNull();
@@ -39,7 +39,7 @@ describe('Playground (generischer Harness)', () => {
 	it('Select-Chip ändert State + Live-Code; Reset erscheint und stellt Default her', async () => {
 		render(Playground, { props: { controls, code, preview } });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Subtle' }));
+		await fireEvent.click(screen.getByRole('radio', { name: 'Subtle' }));
 		expect(screen.getByText('code:subtle:false')).toBeInTheDocument();
 
 		const reset = screen.getByRole('button', { name: /Zurücksetzen/ });
@@ -95,7 +95,7 @@ describe('Playground — Template-Modus (Registry)', () => {
 		expect(btn!.className).toContain('z-button--primary');
 
 		// Chip-Klick → Klasse wandert in Preview UND Code
-		await fireEvent.click(screen.getByRole('button', { name: 'Z+' }));
+		await fireEvent.click(screen.getByRole('radio', { name: 'Z+' }));
 		expect(container.querySelector('.pg-preview button')!.className).toContain('z-button--zplus');
 		expect(container.textContent).toContain('z-button--zplus');
 

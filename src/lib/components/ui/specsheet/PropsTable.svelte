@@ -8,7 +8,7 @@
 </script>
 
 {#if props.length}
-	<div class="pt-wrap">
+	<div class="table-scroll pt-wrap">
 		<table class="pt">
 			<thead>
 				<tr>
@@ -48,14 +48,17 @@
 {/if}
 
 <style>
+	/* .table-scroll liefert overflow-x/max-width; hier nur Rahmen + eigenes Bottom-Maß.
+	   Doppelklasse gewinnt gegen die globale .table-scroll-Margin (Reihenfolge-unabhängig). */
 	.pt-wrap {
 		/* bewusst kompaktere Tabellen-Maße ohne passendes z-ds-Token */
 		--pt-block-gap: 18px; /* kein z-ds-Space zwischen 16 und 20 */
 		--pt-fs-body: 13px; /* bewusst dichter als --z-ds-fontsize-12 */
 		--pt-fs-head: 11px;
-		overflow-x: auto;
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius);
+	}
+	.table-scroll.pt-wrap {
 		margin: 0 0 var(--pt-block-gap);
 	}
 	.pt {

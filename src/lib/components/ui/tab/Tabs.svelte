@@ -3,7 +3,6 @@
 
 	type TabItem = {
 		label: string;
-		value?: number;
 		component: Snippet;
 	};
 
@@ -13,14 +12,14 @@
 	};
 
 	let { items, sticky = false }: Props = $props();
-	let activeTabValue = $state(0);
+	let activeIndex = $state(0);
 
-	const handleClick = (value: number) => () => {
-		activeTabValue = value;
+	const handleClick = (index: number) => () => {
+		activeIndex = index;
 	};
 
 	const handleKeyDown = (event: KeyboardEvent) => {
-		const currentIndex = activeTabValue;
+		const currentIndex = activeIndex;
 		let nextIndex;
 
 		switch (event.key) {
@@ -41,7 +40,7 @@
 		}
 
 		event.preventDefault();
-		activeTabValue = nextIndex;
+		activeIndex = nextIndex;
 		document.getElementById(`tab-${nextIndex}`)?.focus();
 	};
 </script>
@@ -52,10 +51,10 @@
 			<button
 				id={`tab-${index}`}
 				role="tab"
-				aria-selected={activeTabValue === index}
+				aria-selected={activeIndex === index}
 				aria-controls={`panel-${index}`}
-				tabindex={activeTabValue === index ? 0 : -1}
-				class:active={activeTabValue === index}
+				tabindex={activeIndex === index ? 0 : -1}
+				class:active={activeIndex === index}
 				onclick={handleClick(index)}
 				onkeydown={handleKeyDown}
 			>
@@ -65,13 +64,13 @@
 	{/each}
 </ul>
 {#each items as item, index}
-	{#if activeTabValue == index}
+	{#if activeIndex === index}
 		<div
 			id={`panel-${index}`}
 			role="tabpanel"
 			aria-labelledby={`tab-${index}`}
 			tabindex="0"
-			class="box"
+			class="tab-panel"
 		>
 			{@render item.component()}
 		</div>
@@ -79,7 +78,7 @@
 {/each}
 
 <style>
-	.box {
+	.tab-panel {
 		padding-block: var(--z-ds-space-m);
 		max-width: var(--width-tablet);
 	}

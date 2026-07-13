@@ -1,41 +1,36 @@
 <script lang="ts">
 	interface Props {
+		/** Optionale Überschrift über der Galerie (h2). Ohne Wert entfällt der Titel. */
 		title?: string;
+		/** Abstand zwischen den Bildern (beliebige CSS-Länge). */
 		gap?: string;
 		direction?: 'row' | 'column' | 'responsive';
-		children?: import('svelte').Snippet;
+		children: import('svelte').Snippet;
 	}
 
 	let {
-		title = 'Image Gallery',
-		gap = '1rem',
+		title,
+		gap = 'var(--z-ds-space-16)',
 		direction = 'responsive',
 		children
 	}: Props = $props();
 
-	// Create a CSS variable for the gap
+	// Gap als CSS-Variable an den Container reichen.
 	let containerStyle = $derived(`--gap: ${gap};`);
 
-	// Create a class based on the direction prop
+	// Ausrichtungs-Variante als Klasse abbilden.
 	let containerClass = $derived(
 		direction === 'responsive' ? 'image-container responsive' : `image-container ${direction}`
 	);
 </script>
 
 <div class="gallery-container">
-	<h1 class="gallery-title">{title}</h1>
+	{#if title}
+		<h2 class="gallery-title">{title}</h2>
+	{/if}
 
 	<div class={containerClass} style={containerStyle}>
-		<!-- Slot allows placing content directly inside the component -->
-		{#if children}{@render children()}{:else}
-			<!-- Default content if no images are provided -->
-			<div class="image-wrapper">
-				<img src="/placeholder.svg?height=400&width=600" alt="" class="gallery-image" />
-			</div>
-			<div class="image-wrapper">
-				<img src="/placeholder.svg?height=400&width=600" alt="" class="gallery-image" />
-			</div>
-		{/if}
+		{@render children()}
 	</div>
 </div>
 
@@ -46,18 +41,18 @@
 	}
 
 	.gallery-title {
-		font-size: 1.5rem;
+		font-size: var(--ds-heading-2);
 		font-weight: 700;
-		margin-bottom: 1.5rem;
+		margin-bottom: var(--z-ds-space-24);
 	}
 
-	/* Base container styles */
+	/* Basis-Container */
 	.image-container {
 		display: flex;
-		gap: var(--gap, 1rem);
+		gap: var(--gap, var(--z-ds-space-16));
 	}
 
-	/* Direction variants */
+	/* Ausrichtungs-Varianten */
 	.image-container.responsive {
 		flex-direction: column;
 	}
@@ -70,36 +65,24 @@
 		flex-direction: column;
 	}
 
-	/* Responsive behavior */
+	/* Responsives Verhalten */
 	@media (min-width: 768px) {
 		.image-container.responsive {
 			flex-direction: row;
 		}
 	}
 
-	/* Styling for default content */
-	.image-wrapper {
-		flex: 1;
-	}
-
-	.gallery-image {
-		width: 100%;
-		height: auto;
-		object-fit: cover;
-		border-radius: 0.5rem;
-	}
-
-	/* Styling for slotted content */
+	/* Eingebettete Inhalte (Lightbox/Bilder) */
 	.image-container :global(> *) {
 		flex: 1;
-		min-width: 0; /* Prevents flex items from overflowing */
+		min-width: 0; /* verhindert das Überlaufen der Flex-Kinder */
 	}
 
 	.image-container :global(img) {
 		width: 100%;
 		height: auto;
 		object-fit: cover;
-		border-radius: 0.5rem;
-		display: block; /* Removes extra space below images */
+		border-radius: var(--ds-radius);
+		display: block; /* entfernt den Leerraum unter Bildern */
 	}
 </style>

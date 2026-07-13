@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { copySVGToClipboard, downloadIcon } from '$lib/utils';
-	import { CopyButton } from '$components/ui/copy-button';
-	import { DownloadButton } from '$components/ui/download-button';
+	import { AssetActions } from '$components/ui/asset-actions';
 	import type { Icon } from '$types/global';
 
 	let { brandAssets }: { brandAssets: Icon[] } = $props();
@@ -10,27 +8,15 @@
 <div class="grid">
 	{#each brandAssets as icon (icon.slug)}
 		<div class="zon-icon__container">
-			<div class="bg-grid"></div>
 			<div class="zon__icon">
 				{@html icon.svg}
 			</div>
 
-			<div class="zon-icon__actions">
-				<DownloadButton
-					ondownload={() => downloadIcon(icon)}
-					ariaLabel={`Download ${icon.name} icon`}
-					feedback="toast"
-					toastMessage={`Das Icon "${icon.name}" wurde heruntergeladen.`}
-					iconButton
-				/>
-				<CopyButton
-					oncopy={() => copySVGToClipboard(icon)}
-					ariaLabel={`${icon.name} in der Zwischenablage kopieren`}
-					feedback="toast"
-					toastMessage={`Asset "${icon.name}" wurde in die Zwischenablage kopiert.`}
-					iconButton
-				/>
-			</div>
+			<AssetActions
+				{icon}
+				pinBottom
+				copyToastMessage={`Asset „${icon.name}" wurde in die Zwischenablage kopiert.`}
+			/>
 		</div>
 	{/each}
 </div>
@@ -63,12 +49,6 @@
 			align-items: center;
 			flex-direction: column;
 			gap: var(--z-ds-space-8);
-		}
-
-		.zon-icon__actions {
-			display: flex;
-			gap: var(--z-ds-space-8);
-			margin-top: auto;
 		}
 	}
 </style>
