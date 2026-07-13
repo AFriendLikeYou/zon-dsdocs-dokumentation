@@ -6,28 +6,24 @@
 </script>
 
 <div class="toaster">
-	{#each toastState.toasts as toast, index}
+	{#each toastState.toasts as toast, index (toast.id)}
 		<Toast {toast} total={toastState.toasts.length} {index} />
 	{/each}
 </div>
 
 <style>
+	/* Bühne für den Stapel: feste Breite, Toasts liegen darin absolut übereinander
+	   (bottom-anchored), damit ältere hinter dem neuesten hervorlugen. */
 	.toaster {
 		position: fixed;
 		right: 3rem;
 		bottom: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
+		width: 320px;
+		height: 60px;
 		pointer-events: none;
 	}
 
 	.toaster :global(.toast) {
 		pointer-events: auto;
-		/* margin-bottom: -2.5rem; Create overlapping effect, TODO: let's talk about thissss */
-	}
-
-	.toaster :global(.toast:first-child) {
-		margin-bottom: 0;
 	}
 </style>

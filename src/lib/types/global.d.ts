@@ -23,6 +23,9 @@ export type ToastType = {
 	id: string;
 	title: string;
 	message: string;
+	/** Anzahl der zusammengefassten identischen Meldungen (Dedupe). Start bei 1;
+	 *  ab 2 zeigt die UI dezent „×N" hinter dem Titel. */
+	count: number;
 	/** Optionale Aktion (z. B. „Rückgängig") — als Button im Toast gerendert. */
 	action?: { label: string; run: () => void };
 };
