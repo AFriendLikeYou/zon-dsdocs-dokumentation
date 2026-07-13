@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { AdminPageHeader, AdminFlash, AdminEmpty } from '../ui';
 
 	let { data, form }: import('./$types').PageProps = $props();
 
@@ -60,31 +61,28 @@
 <svelte:head><title>Medien – Admin</title></svelte:head>
 
 <div class="media">
-	<nav class="crumb"><a href="/admin">← Übersicht</a></nav>
-	<h1>Medien</h1>
-	<p class="sub">
-		Bilder aus <code>static/media/</code>. Uploads landen unter
-		<code>/media/uploads/</code> und sind über ihren Pfad einbindbar (z.&nbsp;B.
-		<code>src="/media/uploads/…"</code>).
-	</p>
+	<AdminPageHeader title="Medien" crumb={{ href: '/admin', label: 'Übersicht' }}>
+		Bilder aus <code>static/media/</code>. Uploads landen unter <code>/media/uploads/</code> und sind
+		über ihren Pfad einbindbar (z.&nbsp;B. <code>src="/media/uploads/…"</code>).
+	</AdminPageHeader>
 
 	{#if form?.uploaded}
-		<p class="flash flash--ok" role="status">
+		<AdminFlash tone="ok" role="status">
 			Hochgeladen: <code>{form.path}</code>
 			<button type="button" class="link" onclick={() => copyPath(String(form?.path))}>
 				{copied === form.path ? 'Kopiert!' : 'Pfad kopieren'}
 			</button>
-		</p>
+		</AdminFlash>
 	{:else if form?.deleted}
-		<p class="flash flash--ok" role="status">Gelöscht: <code>{form.path}</code></p>
+		<AdminFlash tone="ok" role="status">Gelöscht: <code>{form.path}</code></AdminFlash>
 	{:else if form?.message}
-		<p class="flash flash--err" role="alert">{form.message}</p>
+		<AdminFlash tone="err" role="alert">{form.message}</AdminFlash>
 	{/if}
 	{#if !data.writable}
-		<p class="flash flash--warn">
-			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht
-			persistent → Blob-Store/GitHub, Phase 3).
-		</p>
+		<AdminFlash tone="warn">
+			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht persistent
+			→ Blob-Store/GitHub, Phase 3).
+		</AdminFlash>
 	{/if}
 
 	<form
@@ -183,7 +181,7 @@
 		{/each}
 	</ul>
 	{#if filtered.length === 0}
-		<p class="empty">Kein Treffer — Suche oder Ordner-Filter anpassen.</p>
+		<AdminEmpty>Kein Treffer — Suche oder Ordner-Filter anpassen.</AdminEmpty>
 	{/if}
 </div>
 
@@ -192,40 +190,6 @@
 		max-width: 60rem;
 		margin: 0 auto;
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l);
-	}
-	.crumb {
-		margin-bottom: var(--z-ds-space-m);
-	}
-	.crumb a {
-		color: var(--ds-text-muted);
-		text-decoration: none;
-		font-size: var(--ds-text-sm);
-	}
-	.sub {
-		color: var(--ds-text-muted);
-		margin-bottom: var(--z-ds-space-l);
-	}
-	.flash {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-m);
-		flex-wrap: wrap;
-		padding: var(--z-ds-space-s) var(--z-ds-space-m);
-		border-radius: var(--ds-radius-sm);
-		margin-bottom: var(--z-ds-space-l);
-		font-size: var(--ds-text-sm);
-	}
-	.flash--ok {
-		background: rgb(from var(--ds-positive) r g b / 0.12);
-		color: var(--ds-text);
-	}
-	.flash--err {
-		background: rgb(from var(--ds-negative) r g b / 0.12);
-		color: var(--ds-text);
-	}
-	.flash--warn {
-		background: rgb(from var(--ds-warning) r g b / 0.15);
-		color: var(--ds-text);
 	}
 	.link {
 		background: none;
@@ -236,12 +200,16 @@
 		cursor: pointer;
 		text-decoration: underline;
 	}
+	/* Upload-Karte: ruhige raised Fläche, weicher Rahmen — wie die Editor-Karten. */
 	.upload {
-		border: 1px solid var(--ds-border);
+		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-l);
 		margin-bottom: var(--z-ds-space-xl);
-		background: var(--ds-surface);
+		background: var(--ds-surface-raised);
+		transition:
+			border-color var(--ds-dur) var(--ds-ease-out),
+			background var(--ds-dur) var(--ds-ease-out);
 	}
 	.field {
 		display: block;
@@ -277,6 +245,10 @@
 		padding: var(--z-ds-space-10) var(--z-ds-space-xl);
 		font-weight: 600;
 		cursor: pointer;
+		transition: opacity var(--ds-dur) var(--ds-ease-out);
+	}
+	.save:hover:not(:disabled) {
+		opacity: 0.88;
 	}
 	.save:disabled {
 		opacity: 0.5;
@@ -303,6 +275,12 @@
 		background: var(--ds-surface);
 		display: flex;
 		flex-direction: column;
+		transition: border-color var(--ds-dur) var(--ds-ease-out);
+	}
+	@media (hover: hover) {
+		.card:hover {
+			border-color: var(--ds-border);
+		}
 	}
 	.thumb {
 		aspect-ratio: 4 / 3;
@@ -393,7 +371,7 @@
 		color: var(--ds-text);
 		background: var(--ds-surface);
 		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius, 8px);
+		border-radius: var(--ds-radius);
 		padding: 9px 12px;
 	}
 	.search:focus-visible {
@@ -434,9 +412,5 @@
 	.usage--free {
 		color: var(--ds-text-muted);
 		font-style: italic;
-	}
-	.empty {
-		color: var(--ds-text-muted);
-		font-size: var(--ds-text-sm);
 	}
 </style>

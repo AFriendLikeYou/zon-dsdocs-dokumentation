@@ -1,74 +1,86 @@
 <script lang="ts">
+	import { AdminPageHeader, AdminRow, AdminBadge } from './ui';
+
 	let { data }: import('./$types').PageProps = $props();
+
+	// Einstiegs-Karten in die beiden „anderen Welten" (Medien, Brand-Seiten).
+	const SECTIONS = [
+		{ href: '/admin/media', name: 'Medien', desc: 'Bilder hochladen & verwalten' },
+		{ href: '/admin/brand', name: 'Brand-Seiten', desc: 'Prosa & Frontmatter bearbeiten' }
+	];
 </script>
 
 <svelte:head><title>Inhalte bearbeiten – Admin</title></svelte:head>
 
 <div class="admin">
-	<h1>Inhalte bearbeiten</h1>
-	<p class="lead">
+	<AdminPageHeader title="Inhalte bearbeiten">
 		Redaktionelle Inhalte ohne Git/Editor pflegen. Die Liste unten spiegelt die
 		<strong>echte Produkt-Sidebar</strong> in Live-Struktur und -Reihenfolge — editierbar sind die
-		redaktionellen <code>content.json</code>-Felder der Komponenten; Modell, Maße und Tokens
-		kommen aus Figma und sind bewusst nicht editierbar.
-	</p>
+		redaktionellen <code>content.json</code>-Felder der Komponenten; Modell, Maße und Tokens kommen
+		aus Figma und sind bewusst nicht editierbar.
+	</AdminPageHeader>
 
+	<!-- Einstiegs-Karten (Caps-Titel, ruhige Fläche — wie die Editor-Karten). -->
 	<nav class="sections" aria-label="Bereiche">
-		<a class="section" href="/admin/media">
-			<span class="section-name">Medien</span>
-			<span class="section-desc">Bilder hochladen &amp; verwalten</span>
-		</a>
-		<a class="section" href="/admin/brand">
-			<span class="section-name">Brand-Seiten</span>
-			<span class="section-desc">Prosa &amp; Frontmatter bearbeiten</span>
-		</a>
+		{#each SECTIONS as s (s.href)}
+			<a class="section" href={s.href}>
+				<span class="section-name">{s.name}</span>
+				<span class="section-desc">{s.desc}</span>
+			</a>
+		{/each}
 	</nav>
 
-	<h2 class="h2">Design-System-Inhalte</h2>
-	<p class="hint">
-		Struktur &amp; Reihenfolge = Live-Sidebar. Umsortieren passiert im Code
-		(<code>navigation.ts</code> · <code>CATALOG_OVERRIDES</code>), nicht per Drag&nbsp;&amp;&nbsp;Drop.
-	</p>
+	<section class="block">
+		<div class="block-head">
+			<h2 class="block-title">Design-System-Inhalte</h2>
+			<p class="hint">
+				Struktur &amp; Reihenfolge = Live-Sidebar. Umsortieren passiert im Code
+				(<code>navigation.ts</code> · <code>CATALOG_OVERRIDES</code>), nicht per
+				Drag&nbsp;&amp;&nbsp;Drop.
+			</p>
+		</div>
 
-	<ul class="list">
-		{#each data.productNav as item (item.title + (item.href ?? ''))}
-			{#if item.isCategory}
-				<li class="cat" aria-hidden="true">{item.title}</li>
-			{:else}
-				<li>
-					<div class="row">
-						<span class="name"
-							>{item.title}{#if item.badge}<span class="badge">{item.badge}</span>{/if}</span
-						>
-						<span class="actions">
-							{#if item.editHref}
-								<a class="act act--edit" href={item.editHref}>Bearbeiten</a>
-							{:else}
-								<span class="code-note" title="Diese Seite lebt im Code, nicht im CMS."
-									>Code-Seite</span
-								>
-							{/if}
-							{#if item.href}
-								<a class="act" href={item.href} title="Live-Seite ansehen">Ansehen&nbsp;↗</a>
-							{/if}
-						</span>
-					</div>
-				</li>
-			{/if}
-		{/each}
-	</ul>
+		<ul class="list">
+			{#each data.productNav as item (item.title + (item.href ?? ''))}
+				{#if item.isCategory}
+					<li>
+						<AdminRow tag="div" interactive={false} class="cat">
+							<span class="cat-title" aria-hidden="true">{item.title}</span>
+						</AdminRow>
+					</li>
+				{:else}
+					<li>
+						<AdminRow tag="div">
+							<span class="name">
+								{item.title}
+								{#if item.badge}<AdminBadge tone="default">{item.badge}</AdminBadge>{/if}
+							</span>
+							<span class="actions">
+								{#if item.editHref}
+									<a class="act act--edit" href={item.editHref}>Bearbeiten</a>
+								{:else}
+									<AdminBadge tone="muted">Code-Seite</AdminBadge>
+								{/if}
+								{#if item.href}
+									<a class="act" href={item.href} title="Live-Seite ansehen">Ansehen&nbsp;↗</a>
+								{/if}
+							</span>
+						</AdminRow>
+					</li>
+				{/if}
+			{/each}
+		</ul>
+	</section>
 </div>
 
 <style>
 	.admin {
-		max-width: 52rem;
+		max-width: 56rem;
 		margin: 0 auto;
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l);
 	}
-	.lead {
-		color: var(--ds-text-muted);
-		margin-bottom: var(--z-ds-space-l);
-	}
+
+	/* ── Einstiegs-Karten ── */
 	.sections {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
@@ -80,9 +92,9 @@
 		flex-direction: column;
 		gap: 2px;
 		padding: var(--z-ds-space-m) var(--z-ds-space-l);
-		border: 1px solid var(--ds-border);
+		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
-		background: var(--ds-surface);
+		background: var(--ds-surface-raised);
 		text-decoration: none;
 		color: var(--ds-text);
 		transition:
@@ -91,8 +103,7 @@
 	}
 	@media (hover: hover) {
 		.section:hover {
-			border-color: var(--ds-border-strong);
-			background: var(--ds-surface-raised);
+			border-color: var(--ds-border);
 		}
 	}
 	.section:focus-visible {
@@ -106,58 +117,49 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
-	.h2 {
+
+	/* ── Listen-Block ── */
+	.block-head {
+		margin-bottom: var(--z-ds-space-s);
+	}
+	.block-title {
 		font-size: var(--ds-text-base);
 		margin: 0 0 var(--z-ds-space-xs);
 	}
 	.hint {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
-		margin: 0 0 var(--z-ds-space-s);
+		margin: 0;
+	}
+	.hint code {
+		font-family: var(--z-ds-font-mono, monospace);
 	}
 	.list {
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		display: grid;
-		gap: 1px;
-		background: var(--ds-border-soft);
-		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		overflow: hidden;
 	}
-	/* Kategorie-Zeile wie in der Sidebar: Label, kein Link. */
-	.cat {
-		background: var(--ds-surface-sunken, var(--ds-surface));
-		padding: var(--z-ds-space-s) var(--z-ds-space-l) var(--z-ds-space-4);
+	.list > li {
+		list-style: none;
+	}
+	/* Kategorie-Zeile: Abschnitts-Label wie in der Sidebar (kein Link, kein Hover). */
+	.list :global(.cat) {
+		margin-top: var(--z-ds-space-m);
+	}
+	.cat-title {
 		font-size: var(--ds-label-size, var(--ds-text-xs));
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--ds-text-muted);
 	}
-	.row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--z-ds-space-m);
-		padding: var(--z-ds-space-s) var(--z-ds-space-l);
-		background: var(--ds-surface);
-	}
 	.name {
+		flex: 1;
 		font-weight: 500;
+		color: var(--ds-text);
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
-	}
-	.badge {
-		font-size: var(--ds-text-xs);
-		font-weight: 600;
-		color: var(--ds-text-muted);
-		background: var(--ds-surface-sunken, var(--ds-surface));
-		border: 1px solid var(--ds-border-soft);
-		border-radius: 999px;
-		padding: 0 var(--z-ds-space-8);
 	}
 	.actions {
 		display: inline-flex;
@@ -184,10 +186,5 @@
 	.act:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
-	}
-	.code-note {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint, var(--ds-text-muted));
-		font-style: italic;
 	}
 </style>

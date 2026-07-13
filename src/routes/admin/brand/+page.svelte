@@ -2,6 +2,8 @@
 	import { deserialize } from '$app/forms';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
+	import { Icon } from '$lib/icons/cms';
+	import { AdminPageHeader, AdminRow, AdminFlash, AdminBadge } from '../ui';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
 
@@ -177,18 +179,23 @@
 <svelte:head><title>Brand-Seiten – Übersicht & Reihenfolge</title></svelte:head>
 
 <div class="admin">
-	<nav class="crumb"><a href="/admin">← Admin</a></nav>
-	<div class="head-row">
-		<h1>Brand-Seiten</h1>
-		{#if data.writable}
-			<button
-				type="button"
-				class="new-btn"
-				aria-expanded={showNew}
-				onclick={() => (showNew = !showNew)}>+ Neue Seite</button
-			>
-		{/if}
-	</div>
+	<AdminPageHeader title="Brand-Seiten" crumb={{ href: '/admin', label: 'Admin' }}>
+		{#snippet actions()}
+			{#if data.writable}
+				<button
+					type="button"
+					class="new-btn"
+					aria-expanded={showNew}
+					onclick={() => (showNew = !showNew)}>+ Neue Seite</button
+				>
+			{/if}
+		{/snippet}
+		Diese Übersicht spiegelt die <strong>reale Reihenfolge &amp; Hierarchie</strong> der
+		Brand-Sidebar (Single Source of Truth). Ziehe Einträge am Griff
+		<span class="grip-inline" aria-hidden="true"></span>
+		oder nutze die Pfeile, um sie umzusortieren — die Änderung wird sofort gespeichert und wirkt in der
+		ganzen Brand-Sektion. Ein Klick auf editierbare Seiten öffnet den Inhalts-Editor.
+	</AdminPageHeader>
 
 	{#if showNew}
 		<form class="new-panel" onsubmit={createPage}>
@@ -224,18 +231,10 @@
 		</form>
 	{/if}
 
-	<p class="lead">
-		Diese Übersicht spiegelt die <strong>reale Reihenfolge &amp; Hierarchie</strong> der
-		Brand-Sidebar (Single Source of Truth). Ziehe Einträge am Griff
-		<span class="grip-inline" aria-hidden="true"></span>
-		oder nutze die Pfeile, um sie umzusortieren — die Änderung wird sofort gespeichert und wirkt in der
-		ganzen Brand-Sektion. Ein Klick auf editierbare Seiten öffnet den Inhalts-Editor.
-	</p>
-
 	{#if !data.writable}
-		<p class="flash flash--warn">
+		<AdminFlash tone="warn">
 			Nur-Lese-Vorschau: Umsortieren ist im Prod-Modus deaktiviert (Phase 2b: GitHub-PR).
-		</p>
+		</AdminFlash>
 	{/if}
 
 	<ul class="tree" class:is-saving={saving}>
@@ -253,7 +252,7 @@
 			>
 				{#if kind === 'category'}
 					<!-- Kategorie = Abschnitts-Überschrift (kein Link, aber umsortierbar). -->
-					<div class="row row--cat" class:dragover={overKey === `t${i}`}>
+					<AdminRow tag="div" class="row--cat" dragover={overKey === `t${i}`}>
 						{@render grip(data.writable)}
 						<span class="cat-title">{section.title}</span>
 						{@render nudges(
@@ -262,14 +261,14 @@
 							i === 0,
 							i === tree.length - 1
 						)}
-					</div>
+					</AdminRow>
 				{:else if kind === 'group'}
 					<!-- Thema mit Unterseiten. -->
-					<div class="row row--group" class:dragover={overKey === `t${i}`}>
+					<AdminRow tag="div" class="row--group" dragover={overKey === `t${i}`}>
 						{@render grip(data.writable)}
 						<span class="icon" aria-hidden="true">{@render folderIcon()}</span>
 						<span class="name">{section.title}</span>
-						<span class="tag tag--topic">Thema</span>
+						<AdminBadge tone="accent">Thema</AdminBadge>
 						<span class="count">{section.items?.length} Seiten</span>
 						{@render nudges(
 							() => nudgeTop(i, -1),
@@ -277,17 +276,18 @@
 							i === 0,
 							i === tree.length - 1
 						)}
-					</div>
+					</AdminRow>
 					<ul class="children">
 						{#each section.items ?? [] as child, ci (child.href)}
 							{@const ed = canEdit(child.href)}
-							<li
-								class="row row--child"
-								class:dragover={overKey === `c${i}.${ci}`}
+							<AdminRow
+								tag="li"
+								indent
+								dragover={overKey === `c${i}.${ci}`}
 								draggable={data.writable}
-								ondragstart={(e) => onDragStart(e, { kind: 'child', group: i, index: ci })}
-								ondragover={(e) => onDragOver(e, { kind: 'child', group: i, index: ci })}
-								ondrop={(e) => onDrop(e, { kind: 'child', group: i, index: ci })}
+								ondragstart={(e: DragEvent) => onDragStart(e, { kind: 'child', group: i, index: ci })}
+								ondragover={(e: DragEvent) => onDragOver(e, { kind: 'child', group: i, index: ci })}
+								ondrop={(e: DragEvent) => onDrop(e, { kind: 'child', group: i, index: ci })}
 								ondragend={onDragEnd}
 							>
 								{@render grip(data.writable)}
@@ -299,7 +299,7 @@
 								{:else}
 									<span class="name name--locked">{child.label}</span>
 								{/if}
-								{#if child.badge}<span class="tag">{child.badge}</span>{/if}
+								{#if child.badge}<AdminBadge tone="default">{child.badge}</AdminBadge>{/if}
 								<span class="path">{child.href}</span>
 								{@render nudges(
 									() => nudgeChild(i, ci, -1),
@@ -307,13 +307,13 @@
 									ci === 0,
 									ci === (section.items?.length ?? 0) - 1
 								)}
-							</li>
+							</AdminRow>
 						{/each}
 					</ul>
 				{:else}
 					<!-- Blatt-Seite. -->
 					{@const ed = canEdit(section.href)}
-					<div class="row row--leaf" class:dragover={overKey === `t${i}`}>
+					<AdminRow tag="div" class="row--leaf" dragover={overKey === `t${i}`}>
 						{@render grip(data.writable)}
 						<span class="icon" aria-hidden="true">{@render pageIcon()}</span>
 						{#if ed && section.href}
@@ -323,7 +323,7 @@
 						{:else}
 							<span class="name name--locked">{section.title}</span>
 						{/if}
-						{#if section.badge}<span class="tag">{section.badge}</span>{/if}
+						{#if section.badge}<AdminBadge tone="default">{section.badge}</AdminBadge>{/if}
 						<span class="path">{section.href}</span>
 						{@render nudges(
 							() => nudgeTop(i, -1),
@@ -331,7 +331,7 @@
 							i === 0,
 							i === tree.length - 1
 						)}
-					</div>
+					</AdminRow>
 				{/if}
 			</li>
 		{/each}
@@ -367,23 +367,21 @@
 	</svg>
 {/snippet}
 
-<!-- Griff-Affordanz (6-Punkt-Raster), nur wenn schreibbar. -->
+<!-- Griff-Affordanz (CMS-Icon), nur wenn schreibbar. -->
 {#snippet grip(enabled: boolean)}
-	<span class="grip" class:grip--off={!enabled} aria-hidden="true">
-		<svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor">
-			<circle cx="2.5" cy="3" r="1.3" /><circle cx="7.5" cy="3" r="1.3" />
-			<circle cx="2.5" cy="8" r="1.3" /><circle cx="7.5" cy="8" r="1.3" />
-			<circle cx="2.5" cy="13" r="1.3" /><circle cx="7.5" cy="13" r="1.3" />
-		</svg>
-	</span>
+	<span class="grip" class:grip--off={!enabled} aria-hidden="true"><Icon name="grip" /></span>
 {/snippet}
 
-<!-- ↑/↓-Buttons (präzise, barrierefreie Umsortierung). -->
+<!-- ↑/↓-Buttons (präzise, barrierefreie Umsortierung; CMS-Pfeil-Icons). -->
 {#snippet nudges(up: () => void, down: () => void, atTop: boolean, atBottom: boolean)}
 	{#if data.writable}
 		<span class="nudge">
-			<button type="button" onclick={up} disabled={atTop} aria-label="Nach oben">↑</button>
-			<button type="button" onclick={down} disabled={atBottom} aria-label="Nach unten">↓</button>
+			<button type="button" onclick={up} disabled={atTop} aria-label="Nach oben"
+				><Icon name="arrow-up" /></button
+			>
+			<button type="button" onclick={down} disabled={atBottom} aria-label="Nach unten"
+				><Icon name="arrow-down" /></button
+			>
 		</span>
 	{/if}
 {/snippet}
@@ -394,20 +392,7 @@
 		margin: 0 auto;
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l);
 	}
-	.crumb {
-		margin-bottom: var(--z-ds-space-m);
-	}
-	.crumb a {
-		color: var(--ds-text-muted);
-		text-decoration: none;
-		font-size: var(--ds-text-sm);
-	}
-	.lead {
-		color: var(--ds-text-muted);
-		margin-bottom: var(--z-ds-space-l);
-		max-width: 46rem;
-		line-height: 1.5;
-	}
+	/* Griff-Glyphe im Beschreibungstext (erklärt die Drag-Affordanz). */
 	.grip-inline {
 		display: inline-block;
 		width: 0.6em;
@@ -416,16 +401,6 @@
 		background-image: radial-gradient(currentColor 1px, transparent 1px);
 		background-size: 0.3em 0.3em;
 		opacity: 0.5;
-	}
-	.flash {
-		padding: var(--z-ds-space-s) var(--z-ds-space-m);
-		border-radius: var(--ds-radius-sm);
-		margin-bottom: var(--z-ds-space-l);
-		font-size: var(--ds-text-sm);
-	}
-	.flash--warn {
-		background: rgb(from var(--ds-warning) r g b / 0.15);
-		color: var(--ds-text);
 	}
 
 	.tree {
@@ -447,28 +422,10 @@
 		border-left: 2px solid var(--ds-border-soft);
 	}
 
-	.row {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-s);
-		padding: var(--z-ds-space-s) var(--z-ds-space-m);
-		border: 1px solid transparent;
-		border-radius: var(--ds-radius-sm);
-	}
-	@media (hover: hover) {
-		.row:hover {
-			border-color: var(--ds-border-soft);
-			background: var(--ds-surface-raised);
-		}
-	}
-	/* Drop-Indikator: Linie oben (= „vor diesem Eintrag einfügen"). */
-	.row.dragover {
-		box-shadow: 0 -2px 0 0 var(--ds-accent);
-	}
-
-	.row--cat {
+	/* Zeilen-Gehäuse (Höhe/Radius/Hover) liegt in AdminRow. Hier nur die
+	   Brand-spezifischen Modifier auf dessen Element (daher :global). */
+	.tree :global(.row--cat) {
 		margin-top: var(--z-ds-space-m);
-		padding-top: var(--z-ds-space-s);
 	}
 	.cat-title {
 		flex: 1;
@@ -478,11 +435,8 @@
 		text-transform: uppercase;
 		color: var(--ds-text-muted);
 	}
-	.row--group .name {
+	:global(.row--group) .name {
 		font-weight: 600;
-	}
-	.row--child {
-		margin-left: var(--z-ds-space-xs);
 	}
 
 	.grip {
@@ -492,7 +446,7 @@
 		opacity: 0.3;
 		transition: opacity var(--ds-dur) var(--ds-ease-out);
 	}
-	.row:hover .grip {
+	:global(.admin-row:hover) .grip {
 		opacity: 0.7;
 	}
 	.grip:active {
@@ -525,18 +479,6 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.tag {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-body);
-		border: 1px solid var(--ds-border);
-		border-radius: 999px;
-		padding: 0 var(--z-ds-space-8);
-		white-space: nowrap;
-	}
-	.tag--topic {
-		border-color: var(--ds-accent);
-		color: var(--ds-accent);
-	}
 
 	.nudge {
 		display: inline-flex;
@@ -545,8 +487,8 @@
 		opacity: 0.35;
 		transition: opacity var(--ds-dur) var(--ds-ease-out);
 	}
-	.row:hover .nudge,
-	.row:focus-within .nudge {
+	:global(.admin-row:hover) .nudge,
+	:global(.admin-row:focus-within) .nudge {
 		opacity: 1;
 	}
 	.nudge button {
@@ -576,12 +518,6 @@
 	}
 
 	/* ── Neue Seite anlegen ── */
-	.head-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--z-ds-space-m);
-	}
 	.new-btn {
 		border: none;
 		background: var(--ds-accent);
