@@ -231,8 +231,7 @@ export function segmentBody(body: string): Segment[] {
 
 		if (cls === 'blank') {
 			// Leerzeile setzt den laufenden Typ fort; nur zählen für die ≥2-Regel.
-			if (curType === null && curParts.length === 0) curParts.push(lines[i]);
-			else curParts.push(lines[i]);
+			curParts.push(lines[i]);
 			blankRun++;
 			continue;
 		}

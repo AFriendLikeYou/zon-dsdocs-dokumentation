@@ -91,7 +91,6 @@
 		{:else if prop.type === 'textarea'}
 			<textarea
 				class:err={!!error}
-				rows={Math.max(2, str.split('\n').length)}
 				value={str}
 				{placeholder}
 				aria-invalid={!!error}

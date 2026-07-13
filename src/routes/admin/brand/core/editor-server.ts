@@ -17,6 +17,7 @@ import {
 	proseFrame,
 	checkIslandGuard,
 	hasScriptBlock,
+	IMG_ONLY_ISLAND,
 	type SvxEdits
 } from './segment';
 import { componentIslandInfo, containerIslandInfo, type CmsComponentDef } from './cms-components';
@@ -58,7 +59,6 @@ interface SegmentVM {
 }
 
 const STRUCTURAL_RE = /^<(script|style|svelte:head)[\s>]|^<!--/;
-const IMG_RE = /^<img\b[^<>]*>$/i;
 
 function classifyIsland(content: string): {
 	kind: BlockKind;
@@ -66,7 +66,8 @@ function classifyIsland(content: string): {
 	movable: boolean;
 	deletable: boolean;
 } {
-	if (IMG_RE.test(content)) return { kind: 'img', label: 'Bild', movable: true, deletable: true };
+	if (IMG_ONLY_ISLAND.test(content))
+		return { kind: 'img', label: 'Bild', movable: true, deletable: true };
 	if (STRUCTURAL_RE.test(content)) {
 		const tag = /^<(script|style|svelte:head|!--)/.exec(content)?.[1] ?? '';
 		const label =

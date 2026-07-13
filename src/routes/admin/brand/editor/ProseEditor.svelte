@@ -114,7 +114,6 @@
 			class="prosa"
 			{value}
 			placeholder="/Text eingeben oder auf „+“ eine Komponente einfügen"
-			rows={Math.max(2, value.split('\n').length + 1)}
 			oninput={(e) => oninput(e.currentTarget.value, e.currentTarget)}
 			{onkeydown}
 			{onblur}

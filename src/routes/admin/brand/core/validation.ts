@@ -5,9 +5,8 @@
  * redaktionsfreundlich formuliert — sie sagen, WIE man es richtig macht.
  */
 import type { CmsPropDef } from './cms-components';
+import { isImagePath, isVideoPath } from './media-types';
 
-const IMG_EXT = /\.(png|jpe?g|webp|svg|gif|avif)$/i;
-const VIDEO_EXT = /\.(mp4|webm|mov|m4v)$/i;
 /** URL: absolute (http/https/mailto) oder Site-relativ (/pfad) oder Anker. */
 const URL_OK = /^(https?:\/\/\S+|mailto:\S+|\/\S*|#\S+)$/i;
 /** CSS-Farbe direkt: Hex, rgb()/rgba(), hsl()/hsla(), color-mix(…). */
@@ -28,9 +27,9 @@ export function validateProp(
 		return /^-?\d+$/.test(s) ? null : 'Bitte eine ganze Zahl eingeben.';
 	}
 	if (prop.type === 'media') {
-		if (prop.mediaKind === 'image' && !IMG_EXT.test(s))
+		if (prop.mediaKind === 'image' && !isImagePath(s))
 			return 'Bitte eine Bilddatei wählen (png, jpg, webp, svg …).';
-		if (prop.mediaKind === 'video' && !VIDEO_EXT.test(s))
+		if (prop.mediaKind === 'video' && !isVideoPath(s))
 			return 'Bitte eine Videodatei wählen (mp4, webm …).';
 		return null;
 	}

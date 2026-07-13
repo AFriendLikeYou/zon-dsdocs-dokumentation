@@ -330,6 +330,20 @@ const ICON_KEY: Record<string, string> = {
 };
 export const iconFor = (name: string): string => ICON_KEY[name] ?? 'block';
 
+/**
+ * Wandelt einen Token-/Farbwert in eine CSS-`background`/`color`-taugliche Farbe.
+ * Leer → `null` (Aufrufer entscheidet über „keine Farbe"). `--token` → `var(--token)`,
+ * direkte CSS-Farbe (#/rgb/hsl) bleibt unverändert, sonst als Custom-Property `var(--x)`.
+ * EINE Quelle für alle Swatches (Vorschau, Token-Picker, …).
+ */
+export function tokenToCssColor(v: string): string | null {
+	const s = v.trim();
+	if (!s) return null;
+	if (s.startsWith('--')) return `var(${s})`;
+	if (/^(#|rgb|hsl)/i.test(s)) return s;
+	return `var(--${s})`;
+}
+
 // ---------------------------------------------------------------------------
 // Attribut-Parser / -Serializer
 // ---------------------------------------------------------------------------

@@ -1,6 +1,12 @@
 /**
+ * Breakpoint, ab dem die CMS-Popover als Bottom-Sheet erscheinen (eine Quelle
+ * statt mehrfach '(max-width: 640px)' im Code).
+ */
+export const MOBILE_QUERY = '(max-width: 640px)';
+
+/**
  * Reaktive Media-Query als Rune-Helfer. In der Komponenten-Init aufrufen:
- * `const mobile = matchesMedia('(max-width: 640px)'); … mobile.value`.
+ * `const mobile = matchesMedia(MOBILE_QUERY); … mobile.value`.
  * SSR-sicher (startet `false`, aktualisiert im Effect am Client).
  */
 export function matchesMedia(query: string): { readonly value: boolean } {

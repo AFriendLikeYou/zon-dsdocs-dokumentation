@@ -53,7 +53,8 @@
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		max-height: 16rem;
+		/* Im verankerten Popover setzt PopoverSheet die Resthöhe; sonst 16rem. */
+		max-height: var(--popover-content-max-height, 16rem);
 		overflow-y: auto;
 	}
 	.grp {

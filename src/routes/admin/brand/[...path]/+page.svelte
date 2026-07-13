@@ -13,7 +13,8 @@
 	import { validateValues, countErrors } from '../core/validation';
 	import { readSlash } from '../core/slash';
 	import { caretPixel } from '../core/caret';
-	import { matchesMedia } from '../core/media.svelte';
+	import { matchesMedia, MOBILE_QUERY } from '../core/media.svelte';
+	import { cycleIndex } from '../core/cycle';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -187,7 +188,7 @@
 	// „/" im Prosa-Textarea öffnet das Insert-Menü am Cursor; Tippen filtert,
 	// Pfeiltasten/Enter wählen, Auswahl entfernt das „/…" und fügt den Block dahinter
 	// ein. Auf Mobile erscheint es als Bottom-Sheet. Editor.js dient nur als Vorbild.
-	const mobile = matchesMedia('(max-width: 640px)');
+	const mobile = matchesMedia(MOBILE_QUERY);
 	let slashOpen = $state(false);
 	let slashUid = $state<number | null>(null);
 	let slashQuery = $state('');
@@ -234,10 +235,10 @@
 		const n = slashFiltered.length;
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			slashActive = n ? (slashActive + 1) % n : 0;
+			slashActive = cycleIndex(slashActive, n, 1);
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
-			slashActive = n ? (slashActive - 1 + n) % n : 0;
+			slashActive = cycleIndex(slashActive, n, -1);
 		} else if (e.key === 'Enter') {
 			if (n) {
 				e.preventDefault();
@@ -1094,7 +1095,6 @@
 			activeIndex={slashActive}
 			x={slashX}
 			y={slashY}
-			mobile={mobile.value}
 			onpick={pickSlash}
 			onhover={(i) => (slashActive = i)}
 			onclose={closeSlash}
