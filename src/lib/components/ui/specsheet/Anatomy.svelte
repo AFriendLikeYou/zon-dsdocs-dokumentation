@@ -2,12 +2,29 @@
   Anatomy.svelte — Blueprint-Artboard mit Specimen, Callouts, Maßlinien, Legende.
   Helle, fixe Artboard-Fläche (Komponentenfarben sind fix). Legende adaptiv (z-ds).
   Slots: preview (Haupt-Specimen), variant (optionales zweites Specimen).
+
+  Orchestrator: hält State (hover/pin, view, theme) und die Live-Vermessung.
+  Die reine Rechen-Logik liegt in ./anatomy-measure, die Legende in
+  ./AnatomyLegend und die Abstände-Tabelle in ./AnatomySpacingTable (interne
+  Nachbarn, nicht im Barrel exportiert).
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { Masse, MasseValue, SpacingSpec, Callout, CalloutAnchor } from '$types/spec';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
+	import AnatomyLegend from './AnatomyLegend.svelte';
+	import AnatomySpacingTable from './AnatomySpacingTable.svelte';
+	import {
+		apx as apxRaw,
+		parsePad,
+		splitLabel,
+		num,
+		checkDrift,
+		computeGapStrips,
+		type Rect,
+		type Drift
+	} from './anatomy-measure';
 
 	let {
 		masse = null,
@@ -43,41 +60,8 @@
 		themeMode = theme;
 	}
 
-	// Artboard-Maße zeigen IMMER px (Blueprint-Konvention + wenig Platz in den Ecken).
-	const apx = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
-
-	// Padding-Kasten aus dem px-String parsen („10 · 16" = vertikal · horizontal,
-	// „t r b l" oder Einzelwert). Gelingt der Parse, zeigt die Maß-Ansicht den
-	// Innenabstand ALS getönte Streifen IM Specimen — die Redline sitzt damit am
-	// Ort des Geschehens statt als kontextlose Pille über dem Bauteil.
-	function parsePad(px?: string): { t: number; r: number; b: number; l: number } | null {
-		if (!px) return null;
-		const n = (px.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
-		if (n.length === 1) return { t: n[0], r: n[0], b: n[0], l: n[0] };
-		if (n.length === 2) return { t: n[0], r: n[1], b: n[0], l: n[1] };
-		if (n.length === 4) return { t: n[0], r: n[1], b: n[2], l: n[3] };
-		return null;
-	}
-
-	// Deutsches Label je Callout-Rolle (dezentes Typ-Badge in der Legende).
-	const ART_LABEL: Record<string, string> = {
-		instance: 'Instanz',
-		text: 'Text',
-		slot: 'Slot',
-		container: 'Container',
-		structural: 'Struktur'
-	};
-	// Provenance-Badge: nur Abweichungen markieren (gemessen = Normalfall, kein Badge).
-	const HERKUNFT_LABEL: Record<string, string> = {
-		abgeleitet: '≈ abgeleitet',
-		geschätzt: '≈ geschätzt'
-	};
-
-	// Beschriftung „Term — Beschreibung" in Lead + Rest zerlegen (präzisere Legende).
-	function splitLabel(text: string): { lead: string; rest: string } {
-		const m = text.match(/^(.+?)\s+[—–]\s+(.+)$/);
-		return m ? { lead: m[1], rest: m[2] } : { lead: '', rest: text };
-	}
+	// Artboard-Maße zeigen IMMER px (Blueprint-Konvention). apxRaw ist DOM-frei.
+	const apx = (m?: MasseValue) => apxRaw(m);
 
 	const cs = $derived(
 		callouts.map((c, i) => {
@@ -111,29 +95,13 @@
 	// Specimen gemessen (querySelector + getBoundingClientRect relativ zum Slot).
 	// Kein Raten, keine handgepflegten Prozentwerte — ResizeObserver hält die
 	// Overlays bei Reflows (Fonts, Fenster) aktuell.
-	type Rect = { left: number; top: number; width: number; height: number };
 	let slotEl = $state<HTMLDivElement>();
 	let partRects = $state<Record<number, Rect>>({});
 	let gapRects = $state<Record<number, Rect[]>>({});
 
-	// ——— Figma ↔ Code Drift-Check ———
-	// Vergleicht DEKLARIERTE Werte (getComputedStyle: padding/gap/radius — die
-	// CSS-Absicht) mit dem Figma-Sollwert aus model.json. Bewusst KEINE
-	// Text-Bounding-Boxen: Line-Box-Metriken unterscheiden sich systematisch
-	// zwischen Figma und Browser (kein echter Drift). Höhe als einzige
-	// Box-Messung (Buttons/Cells mit fixem Maß), Toleranz ±1px, erst nach
-	// document.fonts.ready (Fallback-Font-Metriken würden falsch alarmieren).
-	type Drift = { soll: string; ist: string };
+	// Drift: DEKLARIERTE Werte (getComputedStyle) gegen den Figma-Sollwert. Details
+	// zur Konservativität (keine Text-Boxen, ±1px, nach fonts.ready) in ./anatomy-measure.
 	let drift = $state<Record<string, Drift>>({});
-	const TOL = 1;
-	const num = (s?: string) => {
-		const m = s?.match(/\d+(?:\.\d+)?/);
-		return m ? Number(m[0]) : null;
-	};
-	function checkDrift(key: string, soll: number | null, ist: number, out: Record<string, Drift>) {
-		if (soll == null) return;
-		if (Math.abs(soll - ist) > TOL) out[key] = { soll: String(soll), ist: String(Math.round(ist)) };
-	}
 
 	function measureOverlays() {
 		if (!slotEl) return;
@@ -158,30 +126,8 @@
 			if (s.art !== 'gap' || !s.selector) return;
 			const cont = slotEl?.querySelector(s.selector);
 			if (!cont) return;
-			const kids = [...cont.children]
-				.map((k) => k.getBoundingClientRect())
-				.filter((r) => r.width > 0 && r.height > 0);
-			const strips: Rect[] = [];
-			for (let j = 0; j < kids.length - 1; j++) {
-				const a = kids[j];
-				const b = kids[j + 1];
-				if (b.left - a.right > 0.5) {
-					// horizontaler Gap: Streifen zwischen rechter Kante von a und linker von b
-					strips.push({
-						left: a.right - base.left,
-						top: Math.min(a.top, b.top) - base.top,
-						width: b.left - a.right,
-						height: Math.max(a.bottom, b.bottom) - Math.min(a.top, b.top)
-					});
-				} else if (b.top - a.bottom > 0.5) {
-					strips.push({
-						left: Math.min(a.left, b.left) - base.left,
-						top: a.bottom - base.top,
-						width: Math.max(a.right, b.right) - Math.min(a.left, b.left),
-						height: b.top - a.bottom
-					});
-				}
-			}
+			const kids = [...cont.children].map((k) => k.getBoundingClientRect());
+			const strips = computeGapStrips(kids, base);
 			if (strips.length) gaps[i] = strips;
 		});
 		gapRects = gaps;
@@ -223,7 +169,19 @@
 		document.fonts?.ready.then(measureOverlays);
 		const ro = new ResizeObserver(measureOverlays);
 		ro.observe(slotEl);
+		// AUCH das Specimen-Root beobachten: der Slot behält bei internen Reflows
+		// (Hydration, spät angewandtes pattern.css) oft seine Box — die Kinder
+		// ändern sich trotzdem. Ohne das blieben Mount-Messungen mit 0-Breiten
+		// stehen und die Gap-Kopplung fiel stumm aus (live beobachteter Bug).
+		if (slotEl.firstElementChild) ro.observe(slotEl.firstElementChild);
 		return () => ro.disconnect();
+	});
+
+	// Beim Sichtwechsel (Bestandteile ↔ Measurements) einmal frisch messen —
+	// billig, und deterministischer als jede Timing-Annahme.
+	$effect(() => {
+		void view;
+		requestAnimationFrame(measureOverlays);
 	});
 
 	// Sync-Key je Abstände-Zeile: Padding-Zeilen koppeln an die Padding-Streifen
@@ -239,11 +197,8 @@
 		if (s.art === 'gap' && gapRects[i]) return `gap-${i}`;
 		return null;
 	}
-	// Richtungs-Zusatz fürs Label („oben · unten" statt „vertikal" dekodieren müssen).
-	const RICHTUNG_LABEL: Record<string, string> = {
-		vertikal: 'oben · unten',
-		horizontal: 'links · rechts'
-	};
+	// Sync-Keys parallel zu spacing — die Abstände-Tabelle bekommt sie hereingereicht.
+	const spacingKeys = $derived(spacing.map((s, i) => rowKey(s, i)));
 </script>
 
 <div class="art spec-canvas ds-stage" class:is-dark={isDark}>
@@ -373,87 +328,19 @@
 </div>
 
 {#if view === 'parts' && cs.length}
-	<ol class="legend">
-		{#each cs as c (c.nr)}
-			<!-- Zeile als Button: Hover = flüchtig, Tap/Klick/Enter = Pin (Touch + Tastatur). -->
-			<li>
-				<button
-					type="button"
-					class="lrow"
-					class:on={activeKey === `co-${c.nr}`}
-					aria-pressed={pinned === `co-${c.nr}`}
-					onmouseenter={() => (hovered = `co-${c.nr}`)}
-					onmouseleave={() => (hovered = null)}
-					onclick={() => press(`co-${c.nr}`)}
-					onfocus={() => (hovered = `co-${c.nr}`)}
-					onblur={() => (hovered = null)}
-				>
-					<span class="n">{c.nr}</span>
-					<span class="t">
-						{#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
-						{#if c.optionalDurch}<span class="opt"
-								>optional — gesteuert über <code>{c.optionalDurch}</code></span
-							>{/if}
-					</span>
-					{#if c.art && ART_LABEL[c.art]}<span class="art-badge">{ART_LABEL[c.art]}</span>{/if}
-				</button>
-			</li>
-		{/each}
-	</ol>
+	<AnatomyLegend rows={cs} {activeKey} {pinned} onhover={(k) => (hovered = k)} onpress={press} />
 {/if}
 
 {#if view === 'measure' && spacing.length}
-	<!-- Abstände als Spec-Tabelle: px UND Token zusammen (Dev-Mode-Muster).
-	     Zeilen mit Bühnen-Kopplung (Padding/Gap) sind interaktiv: Hover/Tap/Fokus
-	     highlightet die zugehörigen Streifen — Farb-Swatch verankert die Zuordnung. -->
-	<div class="sp">
-		<div class="sp-head"><span class="sp-cap">Abstände</span></div>
-		<div class="sp-grid">
-			{#each spacing as s, i (i)}
-				{@const key = rowKey(s, i)}
-				<svelte:element
-					this={key ? 'button' : 'div'}
-					{...key ? { type: 'button', 'aria-pressed': pinned === key } : {}}
-					class="sp-item"
-					class:sp-item--sync={!!key}
-					class:on={!!key && activeKey === key}
-					onmouseenter={key ? () => (hovered = key) : undefined}
-					onmouseleave={key ? () => (hovered = null) : undefined}
-					onclick={key ? () => press(key) : undefined}
-					onfocus={key ? () => (hovered = key) : undefined}
-					onblur={key ? () => (hovered = null) : undefined}
-				>
-					<span class="sp-name">
-						{#if key}<span
-								class="swatch"
-								class:swatch--pad={s.art === 'padding'}
-								class:swatch--gap={s.art === 'gap'}
-								aria-hidden="true"
-							></span>{/if}
-						{s.label}
-						{#if s.art === 'padding' && s.richtung}<span class="sp-dir"
-								>{RICHTUNG_LABEL[s.richtung]}</span
-							>{/if}
-						{#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft"
-								>{HERKUNFT_LABEL[s.herkunft]}</span
-							>{/if}
-					</span>
-					<span class="sp-val">
-						{#if key && drift[key]}
-							<!-- Figma-Soll ≠ gerendertes Ist: Vertragsverletzung sichtbar machen. -->
-							<span
-								class="drift-badge"
-								title="Figma sagt {drift[key].soll}px, das Pattern rendert {drift[key].ist}px"
-								>⚠ gerendert {drift[key].ist} px</span
-							>
-						{/if}
-						<span class="sp-px">{s.px}</span>
-						{#if s.token}<code class="sp-token">{s.token}</code>{/if}
-					</span>
-				</svelte:element>
-			{/each}
-		</div>
-	</div>
+	<AnatomySpacingTable
+		{spacing}
+		keys={spacingKeys}
+		{drift}
+		{activeKey}
+		{pinned}
+		onhover={(k) => (hovered = k)}
+		onpress={press}
+	/>
 {/if}
 
 <style>
@@ -778,210 +665,8 @@
 		height: 1px;
 		background: var(--measure);
 	}
-
-	.legend {
-		list-style: none;
-		margin: 16px 2px 0;
-		padding: 0;
-		display: grid;
-		gap: 5px;
-	}
-	.legend li {
-		margin: 0 -6px;
-	}
-	/* Zeile als Button (Touch/Tastatur) — optisch wie die bisherige Zeile. */
-	.lrow {
-		display: flex;
-		width: 100%;
-		align-items: baseline;
-		gap: 9px;
-		padding: 5px 6px;
-		border: none;
-		background: none;
-		border-radius: var(--ds-radius-sm);
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		line-height: 1.45;
-		text-align: left;
-		color: var(--ds-text-muted);
-		cursor: default;
-		transition: background var(--ds-dur) var(--ds-ease);
-	}
-	.lrow.on {
-		background: var(--ds-surface-raised);
-	}
-	.lrow:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	/* Nummer im Blueprint-Blau — bindet die Legende sichtbar an die Callouts im Artboard. */
-	.legend .n {
-		flex: none;
-		width: 18px;
-		height: 18px;
-		border-radius: 999px;
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		font-family: var(--ds-font-mono);
-		font-size: 11px;
-		font-weight: 600;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		transform: translateY(2px); /* optisch auf die erste Textzeile ausrichten */
-	}
-	/* Lead-Begriff (vor dem —) kräftig + in Primärfarbe → präzisere Beschriftung. */
-	.legend .t strong {
-		font-weight: 600;
-		color: var(--ds-text);
-	}
-	/* Dezentes Typ-Badge (Instanz/Text/Slot/…) — gemutet, rechtsbündig. */
-	.art-badge {
-		flex: none;
-		align-self: center;
-		margin-left: auto;
-		padding: 1px 7px;
-		border-radius: 999px;
-		border: 1px solid var(--ds-border);
-		font-size: var(--ds-text-xs);
-		line-height: 1.5;
-		color: var(--ds-text-muted);
-		white-space: nowrap;
-	}
-	/* „optional — gesteuert über X" — leiser Zusatz in eigener Zeile. */
-	.opt {
-		display: block;
-		margin-top: 2px;
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-	}
-	.opt code {
-		font-family: var(--ds-font-mono);
-	}
-
-	/* Abstände — aufgeräumte Spec-Tabelle: Label links, px + Token rechts (beide
-     zusammen, kein Umschalter). Dünne Trennlinien statt dekorativer Balken. */
-	.sp {
-		margin: 18px 2px 0;
-	}
-	.sp-head {
-		margin-bottom: 8px;
-	}
-	.sp-cap {
-		font-size: var(--ds-label-size);
-		text-transform: uppercase;
-		letter-spacing: var(--ds-label-tracking);
-		font-weight: 600;
-		color: var(--ds-text-muted);
-	}
-	.sp-grid {
-		margin: 0;
-		display: grid;
-	}
-	.sp-item {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 16px;
-		padding: 9px 6px;
-		margin: 0 -6px;
-		width: calc(100% + 12px);
-		border: none;
-		background: none;
-		font: inherit;
-		text-align: left;
-		border-top: 1px solid var(--ds-border-soft);
-		font-size: var(--ds-text-sm);
-	}
-	.sp-item:last-child {
-		border-bottom: 1px solid var(--ds-border-soft);
-	}
-	/* Interaktive Zeile (mit Bühnen-Kopplung): Hover-Pill wie in der Legende. */
-	.sp-item--sync {
-		cursor: default;
-		border-radius: var(--ds-radius-sm);
-		transition: background var(--ds-dur) var(--ds-ease);
-	}
-	.sp-item--sync.on {
-		background: var(--ds-surface-raised);
-	}
-	.sp-item--sync:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.sp-name {
-		color: var(--ds-text-body);
-	}
-	/* Farb-Swatch: verankert die Zeile ↔ Streifen-Zuordnung auch ohne Hover. */
-	.swatch {
-		display: inline-block;
-		width: 10px;
-		height: 10px;
-		border-radius: 3px;
-		margin-right: 7px;
-		vertical-align: -1px;
-	}
-	.swatch--pad {
-		background-image: repeating-linear-gradient(
-			45deg,
-			color-mix(in srgb, var(--z-ds-color-background-success) 45%, transparent) 0 2px,
-			transparent 2px 4px
-		);
-		background-color: color-mix(in srgb, var(--z-ds-color-background-success) 14%, transparent);
-	}
-	.swatch--gap {
-		background-image: repeating-linear-gradient(
-			45deg,
-			color-mix(in srgb, var(--z-ds-color-background-warning) 55%, transparent) 0 2px,
-			transparent 2px 4px
-		);
-		background-color: color-mix(in srgb, var(--z-ds-color-background-warning) 16%, transparent);
-	}
-	/* Richtungs-Zusatz („oben · unten") — leise, direkt hinter dem Label. */
-	.sp-dir {
-		margin-left: 6px;
-		color: var(--ds-text-faint);
-		font-size: var(--ds-text-xs);
-	}
-	/* Drift-Badge: Figma-Soll ≠ gerendertes Ist (Warn-Kanal, kein Akzentrot —
-	   es ist ein Datenbefund, kein Fehler der Seite). */
-	.drift-badge {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text);
-		background: color-mix(in srgb, var(--z-ds-color-background-warning) 30%, transparent);
-		border: 1px solid color-mix(in srgb, var(--z-ds-color-background-warning) 60%, transparent);
-		border-radius: 999px;
-		padding: 1px 8px;
-		white-space: nowrap;
-	}
 	.drift-mark {
 		cursor: help;
-	}
-	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
-	.herkunft {
-		margin-left: 8px;
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-		white-space: nowrap;
-	}
-	.sp-val {
-		margin: 0;
-		display: flex;
-		align-items: baseline;
-		gap: 10px;
-		white-space: nowrap;
-	}
-	.sp-px {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
-		color: var(--ds-text);
-	}
-	.sp-token {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-accent);
 	}
 
 	@media (max-width: 560px) {
@@ -1001,9 +686,7 @@
 		.part,
 		.part-tag,
 		.pad-strip,
-		.gap-strip,
-		.lrow,
-		.sp-item--sync {
+		.gap-strip {
 			transition: none;
 		}
 	}
