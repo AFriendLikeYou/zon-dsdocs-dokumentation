@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { iconFor, CMS_CATEGORIES, type CmsPropDef } from '../core/cms-components';
+	import { iconFor, CMS_CATEGORIES } from '../core/cms-components';
 	import FieldsPanel from '../editor/FieldsPanel.svelte';
 	import { Icon } from '$lib/icons/cms';
 	import BlockPreview from '../editor/BlockPreview.svelte';
@@ -15,6 +15,19 @@
 	import { caretPixel } from '../core/caret';
 	import { matchesMedia, MOBILE_QUERY } from '../core/media.svelte';
 	import { cycleIndex } from '../core/cycle';
+	import { blockDnd, blockDropEnd } from '../core/actions';
+	import {
+		createUidGen,
+		itemFromSegment,
+		newItem,
+		cloneItem,
+		serializeBlocks,
+		imgSrc,
+		type Def,
+		type ChildItem,
+		type Item
+	} from '../core/block-model';
+	import { EditorHistory } from '../core/editor-history.svelte';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -23,14 +36,7 @@
 	let fieldState = $state(data.fields.map((f) => ({ ...f })));
 
 	// Palette: Pseudo-Typ „Bild" (bare img-natural) + die registrierten Komponenten.
-	type Def = {
-		name: string;
-		label: string;
-		props: CmsPropDef[];
-		container?: boolean;
-		childTypes?: string[];
-		category?: string;
-	};
+	// Typen (Def/ChildItem/Item) + Block-Logik leben in ../core/block-model.
 	const IMAGE_DEF: Def = {
 		name: 'Image',
 		label: 'Bild (img-natural)',
@@ -43,80 +49,10 @@
 	const paletteDefs: Def[] = [IMAGE_DEF, ...data.components];
 	const defByName = (name: string) => paletteDefs.find((d) => d.name === name);
 
-	// Ein Container-Kind (registrierte Leaf-Komponente) mit stabiler uid.
-	interface ChildItem {
-		uid: number;
-		name: string;
-		label: string;
-		props: CmsPropDef[];
-		values: Record<string, string | boolean>;
-		/** Eigenschaften-Panel auf/zu — nutzerkontrolliert (bind:open). */
-		fieldsOpen?: boolean;
-	}
+	// Stabile uid-Vergabe für Blöcke/Kinder (überlebt Snapshot-Restore via ensureAbove).
+	const uids = createUidGen();
 
-	// WYSIWYG-Block-Liste: jeder Body-Block ist ein Item mit stabiler uid. Reihenfolge,
-	// Einfügen, Löschen, Editieren passieren auf dieser Liste; der Payload beschreibt
-	// den kompletten Body als `blocks` (der Server baut ihn daraus neu + synct Imports).
-	interface Item {
-		uid: number;
-		source: 'existing' | 'new';
-		index?: number;
-		blockKind: 'prosa' | 'component' | 'container' | 'img' | 'structural' | 'protected';
-		label: string;
-		movable: boolean;
-		deletable: boolean;
-		content?: string;
-		prose?: string;
-		compName?: string;
-		compProps?: CmsPropDef[];
-		compValues?: Record<string, string | boolean>; // Leaf-Werte bzw. Container-Attribute
-		children?: ChildItem[];
-		childTypes?: string[];
-		childPick?: string; // aktuell im Add-Kind-Dropdown gewählter Typ
-		touched?: boolean;
-		/** Eigenschaften-Panel auf/zu — nutzerkontrolliert (bind:open). */
-		fieldsOpen?: boolean;
-	}
-
-	let nextUid = 1;
-	function itemFromSegment(s: (typeof data.segments)[number]): Item {
-		const base = {
-			uid: nextUid++,
-			source: 'existing' as const,
-			index: s.index,
-			blockKind: s.kind,
-			label: s.label,
-			movable: s.movable,
-			deletable: s.deletable
-		};
-		if (s.kind === 'prosa') return { ...base, prose: s.content };
-		if (s.kind === 'component' && s.component)
-			return {
-				...base,
-				compName: s.component.name,
-				compProps: s.component.props,
-				compValues: { ...s.component.values }
-			};
-		if (s.kind === 'container' && s.container)
-			return {
-				...base,
-				compName: s.container.name,
-				compProps: s.container.props,
-				compValues: { ...s.container.values },
-				childTypes: s.container.childTypes,
-				childPick: s.container.childTypes[0],
-				children: s.container.children.map((c) => ({
-					uid: nextUid++,
-					name: c.name,
-					label: c.label,
-					props: c.props,
-					values: { ...c.values }
-				}))
-			};
-		return { ...base, content: s.content };
-	}
-
-	let items = $state<Item[]>(data.segments.map(itemFromSegment));
+	let items = $state<Item[]>(data.segments.map((s) => itemFromSegment(s, uids.next)));
 	// Ohne <script>-Block lassen sich nur Bilder einfügen (Komponenten brauchen einen Import).
 	const insertableDefs = data.hasScript
 		? paletteDefs
@@ -136,49 +72,12 @@
 		return order.indexOf(a.category) - order.indexOf(b.category);
 	});
 
-	function newItem(name: string): Item | null {
-		if (name === 'Prose')
-			return {
-				uid: nextUid++,
-				source: 'new',
-				blockKind: 'prosa',
-				label: 'Text',
-				movable: true,
-				deletable: true,
-				prose: ''
-			};
-		const def = defByName(name);
-		if (!def) return null;
-		const values: Record<string, string | boolean> = {};
-		for (const p of def.props) values[p.key] = p.default;
-		const base = {
-			uid: nextUid++,
-			source: 'new' as const,
-			label: def.label,
-			movable: true,
-			deletable: true,
-			compName: def.name,
-			compProps: def.props,
-			compValues: values,
-			// Neue Blöcke starten mit offenem Eigenschaften-Panel (leer → ausfüllen).
-			fieldsOpen: true
-		};
-		if (def.container)
-			return {
-				...base,
-				blockKind: 'container',
-				children: [],
-				childTypes: def.childTypes ?? [],
-				childPick: def.childTypes?.[0]
-			};
-		return { ...base, blockKind: 'component' };
-	}
 	function insertType(name: string) {
-		const it = newItem(name);
+		const it = newItem(name, defByName, uids.next);
 		if (it) items = [...items, it];
 	}
 	function insertAfterWith(uid: number, name: string) {
-		const it = newItem(name);
+		const it = newItem(name, defByName, uids.next);
 		if (!it) return;
 		const i = items.findIndex((x) => x.uid === uid);
 		items = [...items.slice(0, i + 1), it, ...items.slice(i + 1)];
@@ -295,10 +194,11 @@
 		items = next;
 	}
 
-	// ── Drag & Drop (dependency-frei, native HTML5). ↑/↓ bleibt Tastatur-/A11y-Weg. ──
+	// ── Drag & Drop (native HTML5, via use:blockDnd). ↑/↓ bleibt Tastatur-/A11y-Weg. ──
+	// Die Mechanik (dragstart/over/drop + Positions-Mathematik) lebt in der Action;
+	// hier bleiben nur Anzeige-State (Drop-Linie via class:) + die Datenmutation.
 	let dragUid = $state<number | null>(null);
 	let dragOverUid = $state<number | null>(null);
-	// P5: Drop-Position (obere/untere Hälfte des Ziels) + „ans Ende"-Zone.
 	let dragPos = $state<'before' | 'after'>('before');
 	let dragOverEnd = $state(false);
 	function reorder(fromUid: number, toUid: number, pos: 'before' | 'after') {
@@ -314,12 +214,6 @@
 		next.splice(at, 0, moved);
 		items = next;
 	}
-	function onDrop(uid: number) {
-		if (dragUid !== null) reorder(dragUid, uid, dragPos);
-		dragUid = null;
-		dragOverUid = null;
-		dragOverEnd = false;
-	}
 	function dropAtEnd() {
 		if (dragUid === null) return;
 		const from = items.findIndex((x) => x.uid === dragUid);
@@ -329,9 +223,6 @@
 			next.push(moved);
 			items = next;
 		}
-		dragUid = null;
-		dragOverUid = null;
-		dragOverEnd = false;
 	}
 
 	// P5: Block duplizieren — die Kopie ist immer ein „neuer" Block hinter dem Original.
@@ -339,52 +230,7 @@
 	function duplicate(uid: number) {
 		const i = items.findIndex((x) => x.uid === uid);
 		if (i < 0) return;
-		const src = items[i];
-		let copy: Item | null = null;
-		if (src.blockKind === 'prosa') {
-			copy = {
-				uid: nextUid++,
-				source: 'new',
-				blockKind: 'prosa',
-				label: 'Text',
-				movable: true,
-				deletable: true,
-				prose: src.prose ?? ''
-			};
-		} else if (src.blockKind === 'component' || src.blockKind === 'container') {
-			copy = {
-				uid: nextUid++,
-				source: 'new',
-				blockKind: src.blockKind,
-				label: src.label,
-				movable: true,
-				deletable: true,
-				compName: src.compName,
-				compProps: src.compProps,
-				compValues: { ...(src.compValues ?? {}) }
-			};
-			if (src.blockKind === 'container') {
-				copy.children = (src.children ?? []).map((c) => ({
-					...c,
-					uid: nextUid++,
-					values: { ...c.values },
-					fieldsOpen: false
-				}));
-				copy.childTypes = src.childTypes;
-				copy.childPick = src.childPick;
-			}
-		} else if (src.blockKind === 'img') {
-			// Bare <img>-Insel → Kopie als Image-Pseudo-Block (src/alt aus dem Tag).
-			const img = newItem('Image');
-			if (img) {
-				img.compValues = {
-					...(img.compValues ?? {}),
-					src: imgSrc(src.content ?? ''),
-					alt: (src.content ?? '').match(/\balt="([^"]*)"/i)?.[1] ?? ''
-				};
-				copy = img;
-			}
-		}
+		const copy = cloneItem(items[i], defByName, uids.next);
 		if (!copy) return;
 		items = [...items.slice(0, i + 1), copy, ...items.slice(i + 1)];
 	}
@@ -404,7 +250,7 @@
 		const values: Record<string, string | boolean> = {};
 		for (const p of def.props) values[p.key] = p.default;
 		const child: ChildItem = {
-			uid: nextUid++,
+			uid: uids.next(),
 			name: def.name,
 			label: def.label,
 			props: def.props,
@@ -449,25 +295,9 @@
 	const payload = $derived(
 		JSON.stringify({
 			fields: Object.fromEntries(fieldState.map((f) => [f.key, f.value])),
-			blocks: items.map((it) => {
-				const kids = (it.children ?? []).map((c) => ({ name: c.name, values: c.values }));
-				if (it.source === 'new')
-					return it.blockKind === 'prosa'
-						? { insertProse: it.prose ?? '' }
-						: it.blockKind === 'container'
-							? { insertContainer: it.compName, attrs: it.compValues, children: kids }
-							: { insert: it.compName, values: it.compValues };
-				if (it.blockKind === 'container' && it.touched)
-					return { keep: it.index, container: { attrs: it.compValues, children: kids } };
-				if (it.blockKind === 'component' && it.touched)
-					return { keep: it.index, component: it.compValues };
-				if (it.blockKind === 'prosa' && it.touched) return { keep: it.index, prose: it.prose };
-				return { keep: it.index };
-			})
+			blocks: serializeBlocks(items)
 		})
 	);
-
-	const imgSrc = (t: string) => t?.match(/\bsrc="([^"]*)"/i)?.[1] ?? '';
 
 	// Save-Feedback über die vorhandene Toast-Message. Nach Erfolg den Client-State
 	// aus dem frischen Server-Stand neu aufbauen (frische Segment-Indizes; eingefügte
@@ -516,15 +346,11 @@
 			await update({ reset: false });
 			if (result.type === 'success') {
 				toast?.add('Gespeichert', 'Die Änderungen wurden übernommen.');
-				items = data.segments.map(itemFromSegment);
+				items = data.segments.map((s) => itemFromSegment(s, uids.next));
 				initFieldsOpen(items);
 				fieldState = data.fields.map((f) => ({ ...f }));
 				savedPayload = payload;
-				try {
-					localStorage.removeItem(DRAFT_KEY);
-				} catch {
-					/* unkritisch */
-				}
+				history.clearDraft();
 			} else if (result.type === 'failure') {
 				const msg = (result.data as { message?: string } | undefined)?.message;
 				toast?.add('Nicht gespeichert', msg ?? 'Unbekannter Fehler.');
@@ -547,15 +373,11 @@
 			fieldState.filter((f, fi) => f.value !== data.fields[fi]?.value).length
 	);
 	function discard() {
-		items = data.segments.map(itemFromSegment);
+		items = data.segments.map((s) => itemFromSegment(s, uids.next));
 		initFieldsOpen(items);
 		fieldState = data.fields.map((f) => ({ ...f }));
 		closeSlash();
-		try {
-			localStorage.removeItem(DRAFT_KEY);
-		} catch {
-			/* unkritisch */
-		}
+		history.clearDraft();
 	}
 	function onGlobalKeydown(e: KeyboardEvent) {
 		const key = e.key.toLowerCase();
@@ -570,8 +392,8 @@
 		// ⌘Z/⇧⌘Z: Block-History — in Textfeldern gilt weiter das native Text-Undo.
 		if ((e.metaKey || e.ctrlKey) && key === 'z' && !inField) {
 			e.preventDefault();
-			if (e.shiftKey) redoEdit();
-			else undoEdit();
+			if (e.shiftKey) history.redo();
+			else history.undo();
 			return;
 		}
 		// ⇧⌘D: fokussierten Block duplizieren (statt Browser-Bookmark).
@@ -596,21 +418,36 @@
 		e.preventDefault();
 	}
 
-	// ── Undo/Redo + lokaler Entwurf ───────────────────────────────────────────
+	// ── Undo/Redo + lokaler Entwurf → ../core/editor-history ──────────────────
 	// Debounced Snapshots des gesamten Editor-Stands (Blöcke + Frontmatter): ⌘Z
 	// läuft über den Stack; parallel wandert derselbe Snapshot als Entwurf in
 	// localStorage und überlebt Tab-Crash/Schließen. Ein Entwurf gilt nur, solange
 	// die Datei unverändert ist (base === savedPayload) — sonst verfällt er still.
+	// Stacks/Timer/Draft-Storage kapselt EditorHistory; hier bleibt nur der
+	// Snapshot-Bauer + der host-spezifische Apply-Callback (Items/Frontmatter setzen).
 	type Snapshot = { items: Item[]; fields: { key: string; value: string }[] };
 	const snap = (): Snapshot =>
 		$state.snapshot({ items, fields: fieldState }) as unknown as Snapshot;
-	const DRAFT_KEY = `brand-cms-draft:${data.url}`;
-	let undoStack: Snapshot[] = [snap()];
-	let redoStack: Snapshot[] = [];
-	let applyingHistory = false;
-	let histTimer: ReturnType<typeof setTimeout> | null = null;
 	let activeUid = $state<number | null>(null);
-	let draftInfo = $state<{ at: number; snapshot: Snapshot } | null>(null);
+
+	const history = new EditorHistory<Snapshot>({
+		draftKey: `brand-cms-draft:${data.url}`,
+		apply: (s) => {
+			// $state.snapshot löst Reactive-Proxies — structuredClone allein würde daran
+			// mit DataCloneError scheitern; die Kombination liefert eine frische Kopie.
+			const plain = structuredClone($state.snapshot(s)) as unknown as Snapshot;
+			items = plain.items;
+			fieldState = plain.fields;
+			// uid-Kollisionen mit künftigen Einfügungen vermeiden (Entwurf aus früherer Session).
+			const maxUid = Math.max(
+				0,
+				...plain.items.flatMap((it) => [it.uid, ...(it.children ?? []).map((c) => c.uid)])
+			);
+			uids.ensureAbove(maxUid);
+			closeSlash();
+		}
+	});
+	history.seed(snap());
 
 	// Fokus-Tracking für Block-Shortcuts (⇧⌘D, ⌥⇧↑/↓): merkt sich den Block,
 	// in dem zuletzt ein Feld/Button fokussiert war.
@@ -619,74 +456,15 @@
 		activeUid = li ? Number(li.getAttribute('data-uid')) : null;
 	}
 
-	function applySnapshot(s: Snapshot) {
-		applyingHistory = true;
-		if (histTimer) clearTimeout(histTimer);
-		// $state.snapshot löst Reactive-Proxies (z. B. draftInfo) — structuredClone
-		// allein würde daran mit DataCloneError scheitern; die Kombination liefert
-		// garantiert eine frische, teilbare Kopie (Stack-Einträge bleiben unberührt).
-		const plain = structuredClone($state.snapshot(s)) as unknown as Snapshot;
-		items = plain.items;
-		fieldState = plain.fields;
-		// uid-Kollisionen mit künftigen Einfügungen vermeiden (Entwurf aus früherer Session).
-		const maxUid = Math.max(
-			0,
-			...plain.items.flatMap((it) => [it.uid, ...(it.children ?? []).map((c) => c.uid)])
-		);
-		if (maxUid >= nextUid) nextUid = maxUid + 1;
-		closeSlash();
-		setTimeout(() => (applyingHistory = false), 450);
-	}
-	function undoEdit() {
-		if (undoStack.length < 2) return;
-		redoStack.push(undoStack.pop()!);
-		applySnapshot(undoStack[undoStack.length - 1]);
-	}
-	function redoEdit() {
-		const s = redoStack.pop();
-		if (!s) return;
-		undoStack.push(s);
-		applySnapshot(s);
-	}
-
+	// Jede inhaltliche Änderung debounced auf den Undo-Stack + als Entwurf sichern.
 	$effect(() => {
 		void payload; // Abhängigkeit: jede inhaltliche Änderung
-		if (applyingHistory) return;
-		if (histTimer) clearTimeout(histTimer);
-		histTimer = setTimeout(() => {
-			const s = snap();
-			if (JSON.stringify(undoStack[undoStack.length - 1]) === JSON.stringify(s)) return;
-			undoStack.push(s);
-			if (undoStack.length > 100) undoStack.shift();
-			redoStack = [];
-			try {
-				if (dirty)
-					localStorage.setItem(
-						DRAFT_KEY,
-						JSON.stringify({ base: savedPayload, snapshot: s, at: Date.now() })
-					);
-				else localStorage.removeItem(DRAFT_KEY);
-			} catch {
-				/* Speicher voll/blockiert — Entwurf ist nur ein Bonus */
-			}
-		}, 350);
+		history.schedule(snap, { dirty, base: savedPayload });
 	});
 
 	// Einmalig beim Laden: passenden Entwurf anbieten (nur wenn Datei unverändert).
 	$effect(() => {
-		try {
-			const raw = localStorage.getItem(DRAFT_KEY);
-			if (!raw) return;
-			const d = JSON.parse(raw) as { base: string; snapshot: Snapshot; at: number };
-			if (d.base !== untrack(() => savedPayload)) {
-				localStorage.removeItem(DRAFT_KEY);
-				return;
-			}
-			if (JSON.stringify(d.snapshot) === JSON.stringify(untrack(snap))) return;
-			draftInfo = { at: d.at, snapshot: d.snapshot };
-		} catch {
-			/* kaputter Entwurf → ignorieren */
-		}
+		history.offerDraft(untrack(() => savedPayload), untrack(snap));
 	});
 </script>
 
@@ -716,33 +494,21 @@
 		</p>
 	{/if}
 
-	{#if draftInfo}
+	{#if history.draft}
 		<div class="flash flash--draft" role="status">
 			<span
-				>Ungespeicherter Entwurf von {new Date(draftInfo.at).toLocaleTimeString('de-DE', {
+				>Ungespeicherter Entwurf von {new Date(history.draft.at).toLocaleTimeString('de-DE', {
 					hour: '2-digit',
 					minute: '2-digit'
 				})}&nbsp;Uhr gefunden.</span
 			>
-			<button
-				type="button"
-				class="draft-btn"
-				onclick={() => {
-					if (draftInfo) applySnapshot(draftInfo.snapshot);
-					draftInfo = null;
-				}}>Wiederherstellen</button
+			<button type="button" class="draft-btn" onclick={() => history.applyDraft()}
+				>Wiederherstellen</button
 			>
 			<button
 				type="button"
 				class="draft-btn draft-btn--ghost"
-				onclick={() => {
-					try {
-						localStorage.removeItem(DRAFT_KEY);
-					} catch {
-						/* unkritisch */
-					}
-					draftInfo = null;
-				}}>Verwerfen</button
+				onclick={() => history.dismissDraft()}>Verwerfen</button
 			>
 		</div>
 	{/if}
@@ -778,10 +544,10 @@
 				{/if}
 
 				{#snippet blockTools(i: number, it: Item)}
-					<div class="blk-tools">
+					<div class="block-card__tools">
 						<button
 							type="button"
-							class="blk-btn"
+							class="block-card__btn"
 							disabled={!canMoveUp(i)}
 							onclick={() => move(i, -1)}
 							aria-label="nach oben"
@@ -789,7 +555,7 @@
 						>
 						<button
 							type="button"
-							class="blk-btn"
+							class="block-card__btn"
 							disabled={!canMoveDown(i)}
 							onclick={() => move(i, 1)}
 							aria-label="nach unten"
@@ -798,7 +564,7 @@
 						{#if canDuplicate(it)}
 							<button
 								type="button"
-								class="blk-btn"
+								class="block-card__btn"
 								onclick={() => duplicate(it.uid)}
 								aria-label="Duplizieren"
 								title="Duplizieren"><Icon name="duplicate" /></button
@@ -807,7 +573,7 @@
 						{#if it.deletable}
 							<button
 								type="button"
-								class="blk-btn blk-btn--del"
+								class="block-card__btn block-card__btn--del"
 								onclick={() => remove(it.uid)}
 								aria-label="Löschen"
 								title="Löschen"><Icon name="trash" /></button
@@ -817,40 +583,42 @@
 				{/snippet}
 
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions — focusin ist passives Tracking für Shortcuts -->
-				<ol class="blocks" onfocusin={onBlocksFocusin}>
+				<!-- use:blockDnd bündelt die native Drag-Mechanik (Reorder bleibt hier);
+				     die Drop-Linie rendert der Host über die class:-Bindungen unten. -->
+				<ol
+					class="blocks"
+					onfocusin={onBlocksFocusin}
+					use:blockDnd={{
+						onMove: reorder,
+						onDrag: (u) => (dragUid = u),
+						onOver: (u, p) => {
+							dragOverUid = u;
+							dragPos = p;
+						}
+					}}
+				>
 					{#each items as it, i (it.uid)}
 						{@const errs = itemErrors(it)}
 						{@const errTotal =
 							countErrors(errs) +
 							(it.children ?? []).reduce((m, c) => m + countErrors(childErrors(c)), 0)}
 						<li
-							class="blk blk--{it.blockKind}"
+							class="block-card block-card--{it.blockKind}"
 							data-uid={it.uid}
-							class:blk--invalid={errTotal > 0}
-							class:blk--dragover-before={dragOverUid === it.uid &&
+							data-movable={it.movable}
+							class:block-card--invalid={errTotal > 0}
+							class:block-card--dragover-before={dragOverUid === it.uid &&
 								dragUid !== it.uid &&
 								dragPos === 'before'}
-							class:blk--dragover-after={dragOverUid === it.uid &&
+							class:block-card--dragover-after={dragOverUid === it.uid &&
 								dragUid !== it.uid &&
 								dragPos === 'after'}
-							class:blk--dragging={dragUid === it.uid}
-							ondragover={(e) => {
-								if (dragUid !== null && it.movable) {
-									e.preventDefault();
-									dragOverUid = it.uid;
-									const r = e.currentTarget.getBoundingClientRect();
-									dragPos = e.clientY > r.top + r.height / 2 ? 'after' : 'before';
-								}
-							}}
-							ondrop={(e) => {
-								e.preventDefault();
-								onDrop(it.uid);
-							}}
+							class:block-card--dragging={dragUid === it.uid}
 						>
 							<!-- Linke Gutter-Spalte (Notion/TipTap-Stil): „+" (einfügen danach) und der
-							     Drag-Griff erscheinen bei Hover; gezogen wird am Griff. Barrierefreier
-							     Reorder bleibt über die ↑/↓-Buttons im Kopf. -->
-							<div class="blk-gutter">
+							     Drag-Griff erscheinen bei Hover; gezogen wird am Griff (data-drag-handle).
+							     Barrierefreier Reorder bleibt über die ↑/↓-Buttons im Kopf. -->
+							<div class="block-card__gutter">
 								{#if it.blockKind !== 'structural'}
 									<InsertMenu
 										items={paletteItems}
@@ -862,20 +630,16 @@
 									<span
 										class="drag-handle"
 										draggable="true"
-										ondragstart={() => (dragUid = it.uid)}
-										ondragend={() => {
-											dragUid = null;
-											dragOverUid = null;
-										}}
+										data-drag-handle
 										title="Ziehen zum Sortieren"
 										aria-hidden="true"><Icon name="grip" /></span
 									>
 								{/if}
 							</div>
 
-							<div class="blk-main">
-								<div class="blk-head">
-									<span class="blk-label">{it.label}{it.source === 'new' ? ' · neu' : ''}</span>
+							<div class="block-card__main">
+								<div class="block-card__head">
+									<span class="block-card__label">{it.label}{it.source === 'new' ? ' · neu' : ''}</span>
 									{#if it.blockKind === 'structural'}
 										<span class="tech-chip">automatisch verwaltet</span>
 									{/if}
@@ -886,7 +650,7 @@
 										{@render blockTools(i, it)}
 									{/if}
 								</div>
-								<div class="blk-body">
+								<div class="block-card__body">
 									{#if it.blockKind === 'prosa'}
 										<ProseEditor
 											value={it.prose}
@@ -941,14 +705,14 @@
 												{@const cerrs = childErrors(child)}
 												<div class="child" class:child--invalid={countErrors(cerrs) > 0}>
 													<div class="child-bar">
-														<span class="blk-ico blk-ico--sm"
+														<span class="block-card__ico block-card__ico--sm"
 															><Icon name={iconFor(child.name)} /></span
 														>
 														<span class="child-label">{child.label}</span>
-														<div class="blk-tools">
+														<div class="block-card__tools">
 															<button
 																type="button"
-																class="blk-btn"
+																class="block-card__btn"
 																disabled={ci === 0}
 																onclick={() => moveChild(it, ci, -1)}
 																aria-label="nach oben"
@@ -956,7 +720,7 @@
 															>
 															<button
 																type="button"
-																class="blk-btn"
+																class="block-card__btn"
 																disabled={ci === (it.children?.length ?? 0) - 1}
 																onclick={() => moveChild(it, ci, 1)}
 																aria-label="nach unten"
@@ -964,7 +728,7 @@
 															>
 															<button
 																type="button"
-																class="blk-btn blk-btn--del"
+																class="block-card__btn block-card__btn--del"
 																onclick={() => removeChild(it, child.uid)}
 																aria-label="Löschen"
 																title="Löschen"><Icon name="trash" /></button
@@ -1005,7 +769,7 @@
 											{/if}
 										</div>
 									{:else if it.blockKind === 'img'}
-										<div class="blk-img">
+										<div class="block-card__img">
 											<img class="insel-thumb" src={imgSrc(it.content ?? '')} alt="" />
 											<code class="insel-src">{imgSrc(it.content ?? '')}</code>
 										</div>
@@ -1016,9 +780,9 @@
 												Inhalt auf der Seite.
 											</p>
 										{/if}
-										<details class="blk-details">
-											<summary class="blk-summary">Code anzeigen</summary>
-											<pre class="blk-code"><code>{it.content}</code></pre>
+										<details class="block-card__details">
+											<summary class="block-card__summary">Code anzeigen</summary>
+											<pre class="block-card__code"><code>{it.content}</code></pre>
 										</details>
 									{/if}
 								</div>
@@ -1032,15 +796,7 @@
 						class="drop-end"
 						class:drop-end--over={dragOverEnd}
 						role="presentation"
-						ondragover={(e) => {
-							e.preventDefault();
-							dragOverEnd = true;
-						}}
-						ondragleave={() => (dragOverEnd = false)}
-						ondrop={(e) => {
-							e.preventDefault();
-							dropAtEnd();
-						}}
+						use:blockDropEnd={{ onOver: (a) => (dragOverEnd = a), onDrop: dropAtEnd }}
 					>
 						ans Ende
 					</div>
@@ -1247,7 +1003,7 @@
 		gap: var(--z-ds-space-6);
 		padding: var(--z-ds-space-8) var(--z-ds-space-8) var(--z-ds-space-8);
 	}
-	.blk-ico--sm {
+	.block-card__ico--sm {
 		width: 1.25rem;
 		height: 1.25rem;
 		font-size: 0.8rem;
@@ -1365,22 +1121,22 @@
 	}
 	/* Notion/TipTap-Stil: Blöcke bündig mit dem Content-Container; die Gutter-
 	   Controls (+/Griff) schweben links AUSSERHALB und erscheinen bei Hover. */
-	.blk {
+	.block-card {
 		position: relative;
 		display: block;
 		border-radius: var(--ds-radius-sm);
 	}
-	.blk--protected {
+	.block-card--protected {
 		opacity: 0.8;
 	}
 	/* Struktur-Blöcke (z. B. Head): technisch, nicht editierbar — bewusst anders als
 	   die Inhalts-Karten: gestrichelte Kontur statt Fläche, Chip + Erklärtext. */
-	.blk--structural > .blk-main {
+	.block-card--structural > .block-card__main {
 		border: 1px dashed var(--ds-border);
 		border-radius: var(--ds-radius, 8px);
 		padding: 8px 12px;
 	}
-	.blk--structural .blk-head {
+	.block-card--structural .block-card__head {
 		min-height: 0;
 	}
 	.tech-chip {
@@ -1404,11 +1160,11 @@
 	}
 	/* Drag & Drop: gezogener Block gedimmt, Drop-Ziel mit deutlicher Accent-Linie
 	   in der Lücke ober- bzw. unterhalb (Position folgt der Cursor-Hälfte). */
-	.blk--dragging {
+	.block-card--dragging {
 		opacity: 0.35;
 	}
-	.blk--dragover-before::before,
-	.blk--dragover-after::after {
+	.block-card--dragover-before::before,
+	.block-card--dragover-after::after {
 		content: '';
 		position: absolute;
 		left: 0;
@@ -1419,10 +1175,10 @@
 		box-shadow: 0 0 0 3px rgb(from var(--ds-accent) r g b / 0.22);
 		pointer-events: none;
 	}
-	.blk--dragover-before::before {
+	.block-card--dragover-before::before {
 		top: -8.5px;
 	}
-	.blk--dragover-after::after {
+	.block-card--dragover-after::after {
 		bottom: -8.5px;
 	}
 	/* P5: „ans Ende"-Zone, nur während eines Drags sichtbar. */
@@ -1479,7 +1235,7 @@
 
 	/* Gutter-Controls (Figma: 24px-Icon-Buttons, radius 4, auf Kopfhöhe der Karte):
 	   absolut links AUSSERHALB des Containers, bei Hover/Fokus eingeblendet. */
-	.blk-gutter {
+	.block-card__gutter {
 		position: absolute;
 		top: 10px;
 		left: -3.75rem;
@@ -1493,13 +1249,13 @@
 		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
 	@media (max-width: 64rem) {
-		.blk-gutter {
+		.block-card__gutter {
 			left: -2.75rem;
 			width: 2.5rem;
 		}
 	}
-	.blk:hover .blk-gutter,
-	.blk:focus-within .blk-gutter {
+	.block-card:hover .block-card__gutter,
+	.block-card:focus-within .block-card__gutter {
 		opacity: 1;
 	}
 	.drag-handle {
@@ -1524,36 +1280,36 @@
 	}
 
 	/* Kopfzeile: Typ-Label links, Move/Delete-Tools rechts (bei Hover eingeblendet). */
-	.blk-main {
+	.block-card__main {
 		min-width: 0;
 	}
-	.blk-head {
+	.block-card__head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--z-ds-space-m);
 		min-height: 1.4rem;
 	}
-	.blk-label {
+	.block-card__label {
 		font-size: var(--ds-text-xs);
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
 		color: var(--ds-text-muted);
 	}
-	.blk-tools {
+	.block-card__tools {
 		display: flex;
 		gap: var(--z-ds-space-6);
 		opacity: 0;
 		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.blk:hover .blk-tools,
-	.blk:focus-within .blk-tools {
+	.block-card:hover .block-card__tools,
+	.block-card:focus-within .block-card__tools {
 		opacity: 1;
 	}
 	/* Icon-Button-Standard (CMS): 16×16-Icon in 24×24-Quadrat, radius 4,
 	   Hover = dezente Text-Tönung. Gleiches Muster in ProseEditor/MediaPicker. */
-	.blk-btn {
+	.block-card__btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -1572,36 +1328,36 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.blk-btn:hover:not(:disabled) {
+	.block-card__btn:hover:not(:disabled) {
 		background: rgb(from var(--ds-text) r g b / 0.08);
 		color: var(--ds-text);
 	}
-	.blk-btn:disabled {
+	.block-card__btn:disabled {
 		opacity: 0.35;
 		cursor: not-allowed;
 	}
-	.blk-btn--del:hover:not(:disabled) {
+	.block-card__btn--del:hover:not(:disabled) {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	.blk-btn:focus-visible {
+	.block-card__btn:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.blk-body {
+	.block-card__body {
 		padding: 2px 0 var(--z-ds-space-s);
 	}
-	.blk-code {
+	.block-card__code {
 		margin: var(--z-ds-space-s) 0 0;
 		overflow-x: auto;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
 	/* Ausklappbarer Code-/Head-Block */
-	.blk-details {
+	.block-card__details {
 		font-size: var(--ds-text-sm);
 	}
-	.blk-summary {
+	.block-card__summary {
 		cursor: pointer;
 		list-style: none;
 		display: inline-flex;
@@ -1611,31 +1367,31 @@
 		color: var(--ds-text-muted);
 		user-select: none;
 	}
-	.blk-summary::-webkit-details-marker {
+	.block-card__summary::-webkit-details-marker {
 		display: none;
 	}
-	.blk-summary::before {
+	.block-card__summary::before {
 		content: '▸';
 		display: inline-block;
 		transition: transform var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.blk-details[open] .blk-summary::before {
+	.block-card__details[open] .block-card__summary::before {
 		transform: rotate(90deg);
 	}
-	.blk-summary:focus-visible {
+	.block-card__summary:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.blk-img {
+	.block-card__img {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-m);
 	}
 	/* „+"-Trigger in der Gutter-Spalte als 24px-Icon-Button (wie der Griff). */
-	.blk-gutter :global(.insert-menu) {
+	.block-card__gutter :global(.insert-menu) {
 		display: inline-flex;
 	}
-	.blk-gutter :global(.trigger) {
+	.block-card__gutter :global(.trigger) {
 		width: 1.5rem;
 		height: 1.5rem;
 		justify-content: center;
@@ -1645,11 +1401,11 @@
 		color: var(--ds-text-muted);
 		border-radius: var(--ds-radius-sm);
 	}
-	.blk-gutter :global(.trigger:hover) {
+	.block-card__gutter :global(.trigger:hover) {
 		background: rgb(from var(--ds-text) r g b / 0.08);
 		color: var(--ds-text);
 	}
-	.blk-gutter :global(.trigger .plus) {
+	.block-card__gutter :global(.trigger .plus) {
 		font-size: var(--ds-text-md, 1rem);
 	}
 
@@ -1700,41 +1456,41 @@
 	/* ── Karten nach Figma 689:11510: Fläche raised, radius 8, padding 12; Kopf mit
 	   Border-bottom (Label 12 bold uppercase, muted) + Tools; Body gestapelte Felder.
 	   Kein overflow:hidden — Popover (Media/Token) müssen herausragen dürfen. */
-	.blk--component > .blk-main,
-	.blk--container > .blk-main,
-	.blk--img > .blk-main,
-	.blk--prosa > .blk-main {
+	.block-card--component > .block-card__main,
+	.block-card--container > .block-card__main,
+	.block-card--img > .block-card__main,
+	.block-card--prosa > .block-card__main {
 		background: var(--ds-surface-raised, var(--ds-surface));
 		border-radius: var(--ds-radius, 8px);
 		padding: 12px;
 	}
-	.blk--component > .blk-main > .blk-head,
-	.blk--container > .blk-main > .blk-head,
-	.blk--img > .blk-main > .blk-head,
-	.blk--prosa > .blk-main > .blk-head {
+	.block-card--component > .block-card__main > .block-card__head,
+	.block-card--container > .block-card__main > .block-card__head,
+	.block-card--img > .block-card__main > .block-card__head,
+	.block-card--prosa > .block-card__main > .block-card__head {
 		justify-content: flex-start;
 		gap: var(--z-ds-space-8);
 		padding: 0 0 8px;
 		border-bottom: 1px solid var(--ds-border);
 	}
 	/* Tools im Karten-Header dauerhaft sichtbar (klarer als reines Hover). */
-	.blk--component > .blk-main > .blk-head .blk-tools,
-	.blk--container > .blk-main > .blk-head .blk-tools,
-	.blk--img > .blk-main > .blk-head .blk-tools,
-	.blk--prosa > .blk-main > .blk-head .blk-tools {
+	.block-card--component > .block-card__main > .block-card__head .block-card__tools,
+	.block-card--container > .block-card__main > .block-card__head .block-card__tools,
+	.block-card--img > .block-card__main > .block-card__head .block-card__tools,
+	.block-card--prosa > .block-card__main > .block-card__head .block-card__tools {
 		opacity: 1;
 		margin-left: auto;
 	}
-	.blk--component > .blk-main > .blk-body,
-	.blk--container > .blk-main > .blk-body,
-	.blk--img > .blk-main > .blk-body,
-	.blk--prosa > .blk-main > .blk-body {
+	.block-card--component > .block-card__main > .block-card__body,
+	.block-card--container > .block-card__main > .block-card__body,
+	.block-card--img > .block-card__main > .block-card__body,
+	.block-card--prosa > .block-card__main > .block-card__body {
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-s);
 		padding: 8px 0 0;
 	}
-	.blk-ico {
+	.block-card__ico {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -1750,7 +1506,7 @@
 	/* Aufklapp-Felder („Eigenschaften bearbeiten") → FieldsPanel.svelte */
 
 	/* V1: Fehler-Zustände — Karte, Kopf-Chip, Zähler-Badge, Save-Bar. */
-	.blk--invalid > .blk-main {
+	.block-card--invalid > .block-card__main {
 		box-shadow: inset 0 0 0 1px rgb(from var(--ds-negative, #b91109) r g b / 0.5);
 	}
 	.err-chip {

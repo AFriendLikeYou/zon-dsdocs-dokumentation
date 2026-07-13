@@ -64,9 +64,9 @@ test.describe.serial('CMS-Kernflüsse', () => {
 			await page.goto(`/admin/brand/${SLUG}`);
 		}
 		await page.waitForLoadState('networkidle');
-		await expect(page.locator('.blk')).toHaveCount(2);
+		await expect(page.locator('.block-card')).toHaveCount(2);
 
-		const prosa = page.locator('.blk--prosa textarea');
+		const prosa = page.locator('.block-card--prosa textarea');
 		await prosa.fill('# E2E Smoke\n\nE2E war hier.');
 		await expect(page.locator('.savebar')).toBeVisible();
 		// Der Save-POST muss mit success antworten (nicht nur ein Toast, den der
@@ -86,7 +86,7 @@ test.describe.serial('CMS-Kernflüsse', () => {
 		// Persistenz in der UI: nach Reload steht der gespeicherte Text im Editor.
 		await page.reload();
 		await page.waitForLoadState('networkidle');
-		await expect(page.locator('.blk--prosa textarea')).toHaveValue(/E2E war hier/);
+		await expect(page.locator('.block-card--prosa textarea')).toHaveValue(/E2E war hier/);
 	});
 
 	test('Medien-Verwaltung: Galerie lädt, Suche filtert', async ({ page }) => {
