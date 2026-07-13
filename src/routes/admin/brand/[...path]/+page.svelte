@@ -245,6 +245,14 @@
 		it.prose = value;
 		it.touched = true;
 	}
+
+	// Der Body-H1 vieler Bestandsseiten ist `# {title}` — er interpoliert das
+	// (editierbare) Frontmatter-Feld `title`. Meist ist die Zeile in den
+	// strukturellen Kopf-Block geglued (svelte:head + script + `# {title}`),
+	// selten ein eigener Block. Beide Male wirkt sie gesperrt, obwohl ihr Inhalt
+	// oben im Frontmatter bearbeitbar ist — wir weisen darauf hin. Matcht die
+	// Zeile IRGENDWO im Block-Inhalt (Kopf-Block) wie auch alleinstehend.
+	const TITLE_HEADING = /(^|\n)\s*#{1,6}\s+\{\s*title\s*\}\s*(\n|$)/;
 	// Rohe `<img>`-Insel bearbeiten: nur das eine Attribut im Tag ersetzen/ergänzen,
 	// den Rest des Tags verbatim lassen (round-trip-sicher, bleibt `<img>`).
 	function setImgAttr(it: Item, attr: 'src' | 'alt', value: string) {
@@ -805,8 +813,14 @@
 									{:else}
 										{#if it.blockKind === 'structural'}
 											<p class="tech-hint">
-												Technischer Seitenkopf — wird vom System gepflegt und erscheint nicht als
-												Inhalt auf der Seite.
+												Technischer Seitenkopf — wird vom System gepflegt.{#if TITLE_HEADING.test(it.content ?? '')}{' '}Die
+													sichtbare Seiten-Überschrift kommt aus dem <strong>Titel</strong>-Feld oben im
+													<strong>Frontmatter</strong>.{:else}{' '}Erscheint nicht als Inhalt auf der Seite.{/if}
+											</p>
+										{:else if TITLE_HEADING.test(it.content ?? '')}
+											<p class="tech-hint">
+												Überschrift der Seite — wird oben im Abschnitt <strong>Frontmatter</strong> über
+												das <strong>Titel</strong>-Feld bearbeitet.
 											</p>
 										{/if}
 										<details class="block-card__details">
