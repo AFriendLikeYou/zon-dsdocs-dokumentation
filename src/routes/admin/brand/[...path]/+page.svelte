@@ -5,6 +5,7 @@
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { iconFor, CMS_CATEGORIES } from '../core/cms-components';
 	import FieldsPanel from '../editor/FieldsPanel.svelte';
+	import MediaPicker from '../editor/MediaPicker.svelte';
 	import { Icon } from '$lib/icons/cms';
 	import BlockPreview from '../editor/BlockPreview.svelte';
 	import ProseEditor from '../editor/ProseEditor.svelte';
@@ -23,6 +24,8 @@
 		cloneItem,
 		serializeBlocks,
 		imgSrc,
+		imgAlt,
+		withImgAttr,
 		type Def,
 		type ChildItem,
 		type Item
@@ -240,6 +243,12 @@
 	}
 	function setProse(it: Item, value: string) {
 		it.prose = value;
+		it.touched = true;
+	}
+	// Rohe `<img>`-Insel bearbeiten: nur das eine Attribut im Tag ersetzen/ergänzen,
+	// den Rest des Tags verbatim lassen (round-trip-sicher, bleibt `<img>`).
+	function setImgAttr(it: Item, attr: 'src' | 'alt', value: string) {
+		it.content = withImgAttr(it.content ?? '', attr, value);
 		it.touched = true;
 	}
 
@@ -769,9 +778,29 @@
 											{/if}
 										</div>
 									{:else if it.blockKind === 'img'}
-										<div class="block-card__img">
-											<img class="insel-thumb" src={imgSrc(it.content ?? '')} alt="" />
-											<code class="insel-src">{imgSrc(it.content ?? '')}</code>
+										<!-- Rohe <img>-Insel: Bild via MediaPicker wechseln + Alt-Text
+										     bearbeiten. Bleibt beim Speichern ein <img>-Tag (kein Umbau zur
+										     Image-Komponente); unverändert ist der Rebuild byte-identisch. -->
+										<div class="block-card__image-fields">
+											<label class="block-card__image-field">
+												<span class="block-card__image-label">Bild</span>
+												<MediaPicker
+													value={imgSrc(it.content ?? '')}
+													media={data.media}
+													kind="image"
+													uploadable={data.writable}
+													set={(v) => setImgAttr(it, 'src', v)}
+												/>
+											</label>
+											<label class="block-card__image-field">
+												<span class="block-card__image-label">Alt-Text</span>
+												<input
+													class="block-card__image-alt"
+													value={imgAlt(it.content ?? '')}
+													placeholder="Bildbeschreibung eingeben …"
+													oninput={(e) => setImgAttr(it, 'alt', e.currentTarget.value)}
+												/>
+											</label>
 										</div>
 									{:else}
 										{#if it.blockKind === 'structural'}
@@ -979,22 +1008,23 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.insel-thumb {
-		width: 4rem;
-		height: 4rem;
-		flex: none;
-		object-fit: cover;
-		border-radius: var(--ds-radius-sm);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border-soft);
+	/* Rohe <img>-Insel: gestapelte Editierfelder (Bild-Picker + Alt-Text), Optik wie
+	   die übrigen Block-Card-Felder (Label 12px muted oben, Control volle Breite). */
+	.block-card__image-fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--z-ds-space-s);
 	}
-	.insel-src {
-		font-family: var(--z-ds-font-mono, monospace);
+	.block-card__image-field {
+		display: flex;
+		flex-direction: column;
+		gap: var(--z-ds-space-4, 4px);
+		margin: 0;
+	}
+	.block-card__image-label {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		line-height: 1.3;
 	}
 	/* P3: Kind-Karten — Vorschau + Aufklapp-Felder wie auf Top-Level. */
 	.child-body {
@@ -1381,11 +1411,6 @@
 	.block-card__summary:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
-	}
-	.block-card__img {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-m);
 	}
 	/* „+"-Trigger in der Gutter-Spalte als 24px-Icon-Button (wie der Griff). */
 	.block-card__gutter :global(.insert-menu) {

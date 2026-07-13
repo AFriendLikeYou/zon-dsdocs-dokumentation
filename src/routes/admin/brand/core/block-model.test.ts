@@ -6,6 +6,8 @@ import {
 	cloneItem,
 	serializeBlocks,
 	imgSrc,
+	imgAlt,
+	withImgAttr,
 	type Def,
 	type Item,
 	type SegmentInput
@@ -230,11 +232,70 @@ describe('serializeBlocks', () => {
 		const it = itemFromSegment(seg({ index: 7, kind: 'img', content: '<img src="x">' }), g.next);
 		expect(serializeBlocks([it])).toEqual([{ keep: 7 }]);
 	});
+
+	it('bearbeitete Bild-Insel (touched) → keep mit img-Tag', () => {
+		const g = createUidGen();
+		const it = itemFromSegment(seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }), g.next);
+		it.content = withImgAttr(it.content ?? '', 'src', 'b.png');
+		it.touched = true;
+		expect(serializeBlocks([it])).toEqual([{ keep: 7, img: '<img src="b.png" alt="A">' }]);
+	});
+
+	it('unberührte Bild-Insel → schlichtes keep (kein img-Feld)', () => {
+		const g = createUidGen();
+		const it = itemFromSegment(seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }), g.next);
+		expect(serializeBlocks([it])).toEqual([{ keep: 7 }]);
+	});
 });
 
 describe('imgSrc', () => {
 	it('zieht src aus einem img-Tag', () => {
 		expect(imgSrc('<img src="foo.png" alt="a">')).toBe('foo.png');
 		expect(imgSrc('<span>')).toBe('');
+	});
+});
+
+describe('imgAlt', () => {
+	it('zieht alt aus einem img-Tag', () => {
+		expect(imgAlt('<img src="foo.png" alt="Ein Bild">')).toBe('Ein Bild');
+		expect(imgAlt('<img src="foo.png">')).toBe('');
+	});
+});
+
+describe('withImgAttr', () => {
+	it('ersetzt ein vorhandenes src, Reihenfolge/übrige Attribute unangetastet', () => {
+		expect(withImgAttr('<img class="img-natural" src="a.png" alt="A">', 'src', 'b.png')).toBe(
+			'<img class="img-natural" src="b.png" alt="A">'
+		);
+	});
+
+	it('ersetzt ein vorhandenes alt', () => {
+		expect(withImgAttr('<img src="a.png" alt="A">', 'alt', 'Neu')).toBe(
+			'<img src="a.png" alt="Neu">'
+		);
+	});
+
+	it('fügt alt ein, wenn es fehlt (direkt hinter <img)', () => {
+		expect(withImgAttr('<img src="a.png">', 'alt', 'Neu')).toBe('<img alt="Neu" src="a.png">');
+	});
+
+	it('fügt src ein, wenn es fehlt', () => {
+		expect(withImgAttr('<img alt="A" />', 'src', 'b.png')).toBe('<img src="b.png" alt="A" />');
+	});
+
+	it('escapet Anführungszeichen (und & < >) im Wert', () => {
+		expect(withImgAttr('<img src="a.png" alt="A">', 'alt', 'Ein "Zitat" & <b>')).toBe(
+			'<img src="a.png" alt="Ein &quot;Zitat&quot; &amp; &lt;b&gt;">'
+		);
+	});
+
+	it('fasst nur das ERSTE <img> im String an', () => {
+		expect(withImgAttr('<img src="a.png"> text <img src="c.png">', 'src', 'b.png')).toBe(
+			'<img src="b.png"> text <img src="c.png">'
+		);
+	});
+
+	it('ohne <img> unverändert', () => {
+		expect(withImgAttr('<span>kein Bild</span>', 'src', 'b.png')).toBe('<span>kein Bild</span>');
 	});
 });

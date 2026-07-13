@@ -107,7 +107,31 @@ export function createUidGen(start = 1): { next: NextUid; ensureAbove: (max: num
 export const imgSrc = (t: string): string => t?.match(/\bsrc="([^"]*)"/i)?.[1] ?? '';
 
 /** alt="…" aus einem rohen <img>-Tag ziehen. */
-const imgAlt = (t: string): string => t?.match(/\balt="([^"]*)"/i)?.[1] ?? '';
+export const imgAlt = (t: string): string => t?.match(/\balt="([^"]*)"/i)?.[1] ?? '';
+
+/**
+ * Ersetzt ODER ergänzt im ERSTEN `<img …>`-Tag eines Strings das Attribut `attr`.
+ * Ist das Attribut schon vorhanden, wird nur dessen Wert getauscht (Reihenfolge und
+ * übrige Attribute bleiben unangetastet); fehlt es, wird es direkt hinter `<img`
+ * eingefügt. Der neue Wert wird html-escapet (`& < > "`), damit Anführungszeichen den
+ * Attribut-Kontext nicht sprengen können. Nur das erste `<img>` im String wird
+ * angefasst — der Rest (etwaiger umgebender Text) bleibt byte-identisch.
+ */
+export function withImgAttr(tag: string, attr: 'src' | 'alt', value: string): string {
+	const escaped = value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+	const imgMatch = /<img\b[^>]*>/i.exec(tag);
+	if (!imgMatch) return tag;
+	const original = imgMatch[0];
+	const attrRe = new RegExp(`\\b${attr}="[^"]*"`, 'i');
+	const rewritten = attrRe.test(original)
+		? original.replace(attrRe, `${attr}="${escaped}"`)
+		: original.replace(/<img\b/i, `<img ${attr}="${escaped}"`);
+	return tag.slice(0, imgMatch.index) + rewritten + tag.slice(imgMatch.index + original.length);
+}
 
 /** Server-Segment → editierbares Block-Item (existing). */
 export function itemFromSegment(s: SegmentInput, nextUid: NextUid): Item {
@@ -263,6 +287,7 @@ export type BlockPayload =
 	| { keep: number | undefined; container: { attrs?: Record<string, string | boolean>; children: unknown[] } }
 	| { keep: number | undefined; component?: Record<string, string | boolean> }
 	| { keep: number | undefined; prose?: string }
+	| { keep: number | undefined; img?: string }
 	| { keep: number | undefined };
 
 /**
@@ -283,6 +308,7 @@ export function serializeBlocks(items: Item[]): BlockPayload[] {
 			return { keep: it.index, container: { attrs: it.compValues, children: kids } };
 		if (it.blockKind === 'component' && it.touched) return { keep: it.index, component: it.compValues };
 		if (it.blockKind === 'prosa' && it.touched) return { keep: it.index, prose: it.prose };
+		if (it.blockKind === 'img' && it.touched) return { keep: it.index, img: it.content };
 		return { keep: it.index };
 	});
 }

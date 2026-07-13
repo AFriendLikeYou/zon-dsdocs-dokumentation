@@ -440,6 +440,54 @@ describe('rebuild: dropSegments (Bild löschen)', () => {
 	});
 });
 
+describe('rebuild: rohe <img>-Insel bearbeiten (blocks · op.img)', () => {
+	// Saubere Fixture: eine einzelne <img>-Insel, KEIN Script (kontrollierte
+	// Byte-Identität — kein Import-Sync im Spiel). img_natural wie auf echten Seiten.
+	const IMGDOC = `---
+title: Bildseite
+---
+
+# Überschrift
+
+<img class="img-natural" src="/media/a.png" alt="Erstes Bild" />
+
+Text nach dem Bild.
+`;
+	const before = parseSvx(IMGDOC);
+	const imgIdx = before.segments.findIndex(
+		(s) => s.type === 'insel' && s.text.includes('/media/a.png')
+	);
+	const keepAll = before.segments.map((_, i) => ({ keep: i }));
+
+	it('reine Übernahme (keep ohne Änderung) ist byte-identisch', () => {
+		expect(rebuild(IMGDOC, { blocks: keepAll })).toBe(IMGDOC);
+	});
+
+	it('touched, aber unveränderter Tag → byte-identisch (op.img === core)', () => {
+		const blocks = before.segments.map((_, i) =>
+			i === imgIdx
+				? { keep: i, img: '<img class="img-natural" src="/media/a.png" alt="Erstes Bild" />' }
+				: { keep: i }
+		);
+		expect(rebuild(IMGDOC, { blocks })).toBe(IMGDOC);
+	});
+
+	it('neuer src → Output enthält neuen <img>, Rest byte-identisch, bleibt <img>', () => {
+		const newTag = '<img class="img-natural" src="/media/b.png" alt="Erstes Bild" />';
+		const blocks = before.segments.map((_, i) => (i === imgIdx ? { keep: i, img: newTag } : { keep: i }));
+		const next = rebuild(IMGDOC, { blocks });
+		// Nur der src-Pfad ändert sich — alles andere byte-für-byte gleich.
+		expect(next).toBe(IMGDOC.replace('/media/a.png', '/media/b.png'));
+		expect(next).toContain(newTag);
+		expect(next).not.toContain('/media/a.png');
+		// Kein Umbau zur Komponente: es bleibt ein rohes <img>.
+		const after = parseSvx(next);
+		expect(after.safe).toBe(true);
+		expect(after.segments.some((s) => IMG_ONLY_ISLAND.test(s.text.trim()))).toBe(true);
+		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
+	});
+});
+
 // Doku mit einer bestehenden, editierbaren Alert-Komponente.
 const DOC2 = `---
 title: Test

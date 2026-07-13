@@ -96,6 +96,8 @@ export type BlockOp =
 			component?: Record<string, string | boolean>;
 			/** Container bearbeiten: neue Attribut-Werte + Kind-Liste (re-serialisiert). */
 			container?: { attrs: Record<string, string | boolean>; children: ChildSpec[] };
+			/** Rohe `<img>`-Insel bearbeiten: neuer `<img …>`-Tag (bleibt `<img>`, kein Umbau). */
+			img?: string;
 	  }
 	| { insert: string; values: Record<string, string | boolean> }
 	| {
@@ -569,6 +571,11 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
 				...info!.values,
 				...op.component
 			});
+		} else if (seg.type === 'insel' && op.img !== undefined && IMG_ONLY_ISLAND.test(core)) {
+			// Rohe `<img>`-Insel bearbeiten: den bearbeiteten Bild-Tag übernehmen. Bleibt
+			// eine `<img>`-Insel (kein Umbau zur Komponente) — bei unverändertem Tag ist
+			// `op.img === core`, der Rebuild also byte-identisch (Round-Trip-Invariante).
+			core = segmentCore(op.img);
 		}
 		if (core.trim() === '') continue; // geleerte Prosa fällt weg
 		parts.push({ text: core, isIsland: seg.type === 'insel' });
