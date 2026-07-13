@@ -201,9 +201,9 @@
 	const spacingKeys = $derived(spacing.map((s, i) => rowKey(s, i)));
 </script>
 
-<div class="art spec-canvas ds-stage" class:is-dark={isDark}>
+<div class="anatomy-artboard spec-canvas ds-stage" class:is-dark={isDark}>
 	{#if showModeToggle}
-		<div class="art-toolbar art-toolbar--left">
+		<div class="anatomy-artboard__toolbar anatomy-artboard__toolbar--left">
 			<SegmentedControl
 				ariaLabel="Ansicht"
 				options={[
@@ -215,7 +215,7 @@
 			/>
 		</div>
 	{/if}
-	<div class="art-toolbar">
+	<div class="anatomy-artboard__toolbar">
 		<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 	</div>
 	<div class="specimen">
@@ -226,8 +226,8 @@
 				{#if c.anchor}
 					<span
 						role="presentation"
-						class="co co--anchored co--{c.anchor.side ?? 'top'}"
-						class:co--on={activeKey === `co-${c.nr}`}
+						class="callout-dot callout-dot--anchored callout-dot--{c.anchor.side ?? 'top'}"
+						class:callout-dot--on={activeKey === `co-${c.nr}`}
 						style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null
 							? `top:${c.anchor.y}%;`
 							: ''}"
@@ -237,8 +237,8 @@
 				{:else}
 					<span
 						role="presentation"
-						class="co"
-						class:co--on={activeKey === `co-${c.nr}`}
+						class="callout-dot"
+						class:callout-dot--on={activeKey === `co-${c.nr}`}
 						style="--i:{i}"
 						onmouseenter={() => (hovered = `co-${c.nr}`)}
 						onmouseleave={() => (hovered = null)}>{c.nr}</span
@@ -275,22 +275,22 @@
 				     Leuchten auf, wenn die zugehörige Tabellenzeile aktiv ist. -->
 				<div class="pad-box" aria-hidden="true">
 					<span
-						class="pad-strip pad-strip--t"
+						class="pad-strip pad-strip--top"
 						class:strip--on={activeKey === 'pad-v'}
 						style="height:{padBox.t}px"
 					></span>
 					<span
-						class="pad-strip pad-strip--b"
+						class="pad-strip pad-strip--bottom"
 						class:strip--on={activeKey === 'pad-v'}
 						style="height:{padBox.b}px"
 					></span>
 					<span
-						class="pad-strip pad-strip--l"
+						class="pad-strip pad-strip--left"
 						class:strip--on={activeKey === 'pad-h'}
 						style="width:{padBox.l}px;top:{padBox.t}px;bottom:{padBox.b}px"
 					></span>
 					<span
-						class="pad-strip pad-strip--r"
+						class="pad-strip pad-strip--right"
 						class:strip--on={activeKey === 'pad-h'}
 						style="width:{padBox.r}px;top:{padBox.t}px;bottom:{padBox.b}px"
 					></span>
@@ -310,13 +310,13 @@
 					{/if}
 				{/each}
 			</div>
-			{#if masse.hoehe}<div class="dim dim-h" aria-hidden="true">
-					<span class="dl" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
+			{#if masse.hoehe}<div class="dimension-line dimension-line--height" aria-hidden="true">
+					<span class="dimension-label" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
 				</div>{/if}
-			{#if masse.breite}<div class="dim dim-w" aria-hidden="true">
-					<span class="dl" title="Breite">B&nbsp;{apx(masse.breite)}</span>
+			{#if masse.breite}<div class="dimension-line dimension-line--width" aria-hidden="true">
+					<span class="dimension-label" title="Breite">B&nbsp;{apx(masse.breite)}</span>
 				</div>{/if}
-			{#if masse.radius}<div class="rad" aria-hidden="true">
+			{#if masse.radius}<div class="radius-label" aria-hidden="true">
 					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
 								class="drift-mark"
 								title="Weicht ab — gerendert {drift.radius.ist}px">&nbsp;⚠</span
@@ -344,7 +344,7 @@
 {/if}
 
 <style>
-	.art {
+	.anatomy-artboard {
 		/* Fläche = dieselbe Bühne wie der Playground: background-10 + Punktraster über
        border-70. Beide Token sind in .ds-stage.is-dark gepinnt → Fläche UND Punkte
        flippen gemeinsam mit dem Light/Dark-Schalter (RAW-Token; ein --ds-*-Token
@@ -366,7 +366,7 @@
 		overflow: hidden;
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
-	.art-toolbar {
+	.anatomy-artboard__toolbar {
 		position: absolute;
 		top: var(--z-ds-space-8);
 		right: var(--z-ds-space-8);
@@ -375,7 +375,7 @@
 		align-items: center;
 		gap: 6px;
 	}
-	.art-toolbar--left {
+	.anatomy-artboard__toolbar--left {
 		right: auto;
 		left: var(--z-ds-space-8);
 	}
@@ -391,7 +391,7 @@
 		z-index: 1;
 	}
 
-	.co {
+	.callout-dot {
 		position: absolute;
 		z-index: 3;
 		width: 18px;
@@ -409,65 +409,65 @@
 		cursor: default;
 		transition: box-shadow var(--ds-dur) var(--ds-ease);
 	}
-	.co:not(.co--anchored):nth-child(odd) {
+	.callout-dot:not(.callout-dot--anchored):nth-child(odd) {
 		left: -9px;
 	}
-	.co:not(.co--anchored):nth-child(even) {
+	.callout-dot:not(.callout-dot--anchored):nth-child(even) {
 		right: -9px;
 	}
-	.co--anchored {
+	.callout-dot--anchored {
 		top: auto;
 	}
-	.co--anchored::after {
+	.callout-dot--anchored::after {
 		content: '';
 		position: absolute;
 		background: var(--measure);
 	}
-	.co--left {
+	.callout-dot--left {
 		left: -30px;
 		transform: translateY(-50%);
 	}
-	.co--left::after {
+	.callout-dot--left::after {
 		left: 18px;
 		top: 50%;
 		width: 12px;
 		height: 1px;
 		transform: translateY(-50%);
 	}
-	.co--right {
+	.callout-dot--right {
 		right: -30px;
 		transform: translateY(-50%);
 	}
-	.co--right::after {
+	.callout-dot--right::after {
 		right: 18px;
 		top: 50%;
 		width: 12px;
 		height: 1px;
 		transform: translateY(-50%);
 	}
-	.co--top {
+	.callout-dot--top {
 		top: -30px;
 		transform: translateX(-50%);
 	}
-	.co--top::after {
+	.callout-dot--top::after {
 		top: 18px;
 		left: 50%;
 		height: 12px;
 		width: 1px;
 		transform: translateX(-50%);
 	}
-	.co--bottom {
+	.callout-dot--bottom {
 		bottom: -30px;
 		transform: translateX(-50%);
 	}
-	.co--bottom::after {
+	.callout-dot--bottom::after {
 		bottom: 18px;
 		left: 50%;
 		height: 12px;
 		width: 1px;
 		transform: translateX(-50%);
 	}
-	.co--on {
+	.callout-dot--on {
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--measure) 32%, transparent);
 		z-index: 5;
 	}
@@ -538,23 +538,23 @@
 			box-shadow var(--ds-dur) var(--ds-ease),
 			background-color var(--ds-dur) var(--ds-ease);
 	}
-	.pad-strip--t {
+	.pad-strip--top {
 		top: 0;
 		left: 0;
 		right: 0;
 		border-bottom: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
-	.pad-strip--b {
+	.pad-strip--bottom {
 		bottom: 0;
 		left: 0;
 		right: 0;
 		border-top: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
-	.pad-strip--l {
+	.pad-strip--left {
 		left: 0;
 		border-right: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
-	.pad-strip--r {
+	.pad-strip--right {
 		right: 0;
 		border-left: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
@@ -581,11 +581,11 @@
 		background-color: color-mix(in srgb, var(--gap-line) 28%, transparent);
 	}
 
-	.dim {
+	.dimension-line {
 		position: absolute;
 		color: var(--measure);
 	}
-	.dl {
+	.dimension-label {
 		position: absolute;
 		font-family: var(--ds-font-mono);
 		font-size: 11px;
@@ -594,15 +594,15 @@
 		color: var(--measure);
 		white-space: nowrap;
 	}
-	.dim-h {
+	.dimension-line--height {
 		left: -26px;
 		top: 0;
 		bottom: 0;
 		width: 1px;
 		background: var(--measure);
 	}
-	.dim-h::before,
-	.dim-h::after {
+	.dimension-line--height::before,
+	.dimension-line--height::after {
 		content: '';
 		position: absolute;
 		left: -3px;
@@ -610,26 +610,26 @@
 		height: 1px;
 		background: var(--measure);
 	}
-	.dim-h::before {
+	.dimension-line--height::before {
 		top: 0;
 	}
-	.dim-h::after {
+	.dimension-line--height::after {
 		bottom: 0;
 	}
-	.dim-h .dl {
+	.dimension-line--height .dimension-label {
 		left: -30px;
 		top: 50%;
 		transform: translateY(-50%);
 	}
-	.dim-w {
+	.dimension-line--width {
 		left: 0;
 		right: 0;
 		bottom: -22px;
 		height: 1px;
 		background: var(--measure);
 	}
-	.dim-w::before,
-	.dim-w::after {
+	.dimension-line--width::before,
+	.dimension-line--width::after {
 		content: '';
 		position: absolute;
 		bottom: -3px;
@@ -637,18 +637,18 @@
 		height: 7px;
 		background: var(--measure);
 	}
-	.dim-w::before {
+	.dimension-line--width::before {
 		left: 0;
 	}
-	.dim-w::after {
+	.dimension-line--width::after {
 		right: 0;
 	}
-	.dim-w .dl {
+	.dimension-line--width .dimension-label {
 		left: 50%;
 		bottom: -9px;
 		transform: translateX(-50%);
 	}
-	.rad {
+	.radius-label {
 		position: absolute;
 		top: -6px;
 		right: -44px;
@@ -656,7 +656,7 @@
 		font-size: 11px;
 		color: var(--measure);
 	}
-	.rad::before {
+	.radius-label::before {
 		content: '';
 		position: absolute;
 		left: -12px;
@@ -670,10 +670,10 @@
 	}
 
 	@media (max-width: 560px) {
-		.art {
+		.anatomy-artboard {
 			padding: 72px 28px 40px;
 		}
-		.rad {
+		.radius-label {
 			display: none;
 		}
 	}
@@ -681,8 +681,8 @@
 	/* Alle Bühnen-/Overlay-Transitions still stellen (Highlights bleiben, nur ohne
 	   Bewegung/Fade) — Blueprint bleibt lesbar, respektiert die Nutzer-Präferenz. */
 	@media (prefers-reduced-motion: reduce) {
-		.art,
-		.co,
+		.anatomy-artboard,
+		.callout-dot,
 		.part,
 		.part-tag,
 		.pad-strip,

@@ -219,9 +219,9 @@
 
 </script>
 
-<div class="pg {className}">
-	<div class="pg-stage ds-stage" class:is-dark={isDark} class:is-fill={isFill}>
-		<div class="pg-toolbar">
+<div class="playground {className}">
+	<div class="playground__stage ds-stage" class:is-dark={isDark} class:is-fill={isFill}>
+		<div class="playground__toolbar">
 			<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 		</div>
 
@@ -238,7 +238,7 @@
 
 		{#if resizable}
 			<div
-				class="pg-frame"
+				class="playground__frame"
 				bind:this={frameEl}
 				style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
 			>
@@ -247,12 +247,12 @@
 				</div>
 				<button
 					type="button"
-					class="pg-handle"
+					class="playground__handle"
 					aria-label="Vorschau-Breite ändern (ziehen)"
 					onpointerdown={startDrag}
 				></button>
 			</div>
-			<span class="pg-width" aria-hidden="true">{measuredWidth} px</span>
+			<span class="playground__width" aria-hidden="true">{measuredWidth} px</span>
 		{:else}
 			<div class="pg-preview" style:zoom>
 				{@render previewBody()}
@@ -261,26 +261,26 @@
 
 		<button
 			type="button"
-			class="pg-zoom"
+			class="playground__zoom"
 			onclick={cycleZoom}
 			title="Text-Zoom durchschalten (WCAG-Reflow-Check)"
 			aria-label="Text-Zoom, aktuell {Math.round(zoom * 100)} Prozent"
 		>
-			<span class="pg-zoom-aa" aria-hidden="true">Aa</span>
+			<span class="playground__zoom-label" aria-hidden="true">Aa</span>
 			{Math.round(zoom * 100)}&hairsp;%
 		</button>
 	</div>
 
 	{#if hint}
-		<div class="pg-controls"><span class="pg-hint">{hint}</span></div>
+		<div class="playground__controls"><span class="playground__hint">{hint}</span></div>
 	{:else if controls.length}
-		<div class="pg-controls">
+		<div class="playground__controls">
 			{#each controls as c (c.key)}
 				<!-- Auswahl (SegmentedControl) und An/Aus (Switch) lesen sich jetzt als
 				     unterschiedliche Control-Typen — Trennlinie bündelt die Gruppen. -->
-				<span class="pg-group">
+				<span class="playground__group">
 					{#if c.type === 'select'}
-						<span class="pg-label">{c.label}</span>
+						<span class="playground__label">{c.label}</span>
 						<SegmentedControl
 							ariaLabel={c.label}
 							options={c.options.map((o) => ({ value: o.value, label: o.label }))}
@@ -299,7 +299,7 @@
 			{/each}
 
 			{#if isDirty}
-				<button type="button" class="pg-reset" onclick={reset}>
+				<button type="button" class="playground__reset" onclick={reset}>
 					<ResetIcon width={12} height={12} />
 					Zurücksetzen
 				</button>
@@ -311,14 +311,14 @@
 </div>
 
 <style>
-	.pg {
+	.playground {
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
 		overflow: hidden;
 		margin-block: var(--z-ds-space-16);
 		background: var(--ds-surface);
 	}
-	.pg-stage {
+	.playground__stage {
 		position: relative;
 		display: flex;
 		align-items: center;
@@ -339,25 +339,30 @@
 	}
 	/* fill: „Ausschnitt aus Seite" statt „Objekt auf Bühne" — ruhige Fläche ohne
 	   Punktraster, Specimen über die volle Breite (Cell, Input, …). */
-	.pg-stage.is-fill {
+	.playground__stage.is-fill {
 		background-image: none;
 		align-items: stretch;
 		justify-content: flex-start;
 		padding: var(--z-ds-space-32) var(--z-ds-space-24);
 	}
-	.pg-stage.is-fill .pg-preview {
+	.playground__stage.is-fill .pg-preview {
 		justify-content: flex-start;
 		flex: 1;
 		min-width: 0;
 	}
 
 	/* Light/Dark-Schalter (StageToggle) — dezent oben rechts auf der Bühne. */
-	.pg-toolbar {
+	.playground__toolbar {
 		position: absolute;
 		top: var(--z-ds-space-8);
 		right: var(--z-ds-space-8);
 		z-index: 1;
 	}
+	/* .pg-preview bleibt bewusst kryptisch: Es ist — wie sein Zwilling .spec-canvas —
+	   ein GLOBALER Scoping-Anker, den der Exporter (tooling/zeit-de-exporter/export.mjs,
+	   scopeCss) in jede generierte +page.svx präfixt (:global(.pg-preview .z-…)). Ein
+	   Rename hier müsste den Exporter + alle generierten Seiten mitziehen → Contract,
+	   kein dateilokaler Name. Darum wie .ds-stage/.spec-canvas von der Umbenennung ausgenommen. */
 	.pg-preview {
 		display: flex;
 		align-items: center;
@@ -366,7 +371,7 @@
 	}
 
 	/* Resize-Rahmen: gestrichelte Kante + Griff rechts, px-Anzeige unten links. */
-	.pg-frame {
+	.playground__frame {
 		position: relative;
 		display: flex;
 		align-items: center;
@@ -375,7 +380,7 @@
 		border-right: 1px dashed var(--z-ds-color-border-70);
 		padding-right: var(--z-ds-space-16);
 	}
-	.pg-handle {
+	.playground__handle {
 		position: absolute;
 		top: 0;
 		bottom: 0;
@@ -390,7 +395,7 @@
 		padding: 0;
 		touch-action: none;
 	}
-	.pg-handle::after {
+	.playground__handle::after {
 		content: '';
 		width: 4px;
 		height: 36px;
@@ -399,15 +404,15 @@
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.pg-handle:hover::after {
+		.playground__handle:hover::after {
 			background: var(--ds-measure, var(--ds-accent));
 		}
 	}
-	.pg-handle:focus-visible {
+	.playground__handle:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: -2px;
 	}
-	.pg-width {
+	.playground__width {
 		position: absolute;
 		bottom: var(--z-ds-space-8);
 		left: var(--z-ds-space-8);
@@ -418,7 +423,7 @@
 	}
 
 	/* Text-Zoom — leiser Zykler unten rechts; RAW-Token, flippt mit der Bühne. */
-	.pg-zoom {
+	.playground__zoom {
 		position: absolute;
 		bottom: var(--z-ds-space-8);
 		right: var(--z-ds-space-8);
@@ -437,26 +442,26 @@
 			color var(--ds-dur) var(--ds-ease),
 			background-color var(--ds-dur) var(--ds-ease);
 	}
-	.pg-zoom-aa {
+	.playground__zoom-label {
 		font-weight: 700;
 		font-size: 11px;
 		letter-spacing: 0.02em;
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.pg-zoom:hover {
+		.playground__zoom:hover {
 			color: var(--z-ds-color-text-100);
 			background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
 		}
 	}
-	.pg-zoom:active {
+	.playground__zoom:active {
 		transform: scale(0.96);
 	}
-	.pg-zoom:focus-visible {
+	.playground__zoom:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
 
-	.pg-controls {
+	.playground__controls {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -466,28 +471,28 @@
 	}
 	/* Control-Gruppe (ein select mit Label bzw. ein Switch) — Trennlinie zwischen
 	   den Gruppen, damit Booleans nicht wie weitere Variant-Werte lesen. */
-	.pg-group {
+	.playground__group {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.pg-group + .pg-group {
+	.playground__group + .playground__group {
 		border-left: 1px solid var(--ds-border-soft);
 		padding-left: var(--z-ds-space-12);
 	}
-	.pg-label {
+	.playground__label {
 		font-size: var(--ds-label-size);
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
 		color: var(--ds-text-muted);
 	}
-	.pg-hint {
+	.playground__hint {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
 	/* Reset — dezenter Ghost-Button, rechtsbündig, nur bei Abweichung vom Default */
-	.pg-reset {
+	.playground__reset {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
@@ -505,22 +510,22 @@
 			transform var(--ds-dur) var(--ds-ease-out);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.pg-reset:hover {
+		.playground__reset:hover {
 			color: var(--ds-text);
 			background: var(--ds-surface-raised);
 		}
 	}
-	.pg-reset:active {
+	.playground__reset:active {
 		transform: scale(0.96);
 	}
-	.pg-reset:focus-visible {
+	.playground__reset:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.pg-stage,
-		.pg-zoom,
-		.pg-handle::after {
+		.playground__stage,
+		.playground__zoom,
+		.playground__handle::after {
 			transition: none;
 		}
 	}

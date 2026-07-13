@@ -12,27 +12,27 @@
 </script>
 
 {#if beispiele.length}
-	<div class="ddv">
+	<div class="do-dont-visual">
 		{#each beispiele as b}
-			<div class="ddv-pair">
-				<figure class="ddv-card ddv-card--good">
-					<div class="spec-canvas ds-stage ddv-stage">
+			<div class="do-dont-visual__pair">
+				<figure class="do-dont-visual__card do-dont-visual__card--good">
+					<div class="spec-canvas ds-stage do-dont-visual__stage">
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html b.gut.html}
 					</div>
-					<figcaption class="ddv-caption">
-						<Mark kind="good" class="ddv-mark" />
-						<span class="ddv-vh">Do: </span>{b.gut.text}
+					<figcaption class="do-dont-visual__caption">
+						<Mark kind="good" class="do-dont-visual__mark" />
+						<span class="do-dont-visual__vh">Do: </span>{b.gut.text}
 					</figcaption>
 				</figure>
-				<figure class="ddv-card ddv-card--bad">
-					<div class="spec-canvas ds-stage ddv-stage">
+				<figure class="do-dont-visual__card do-dont-visual__card--bad">
+					<div class="spec-canvas ds-stage do-dont-visual__stage">
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html b.schlecht.html}
 					</div>
-					<figcaption class="ddv-caption">
-						<Mark kind="bad" class="ddv-mark" />
-						<span class="ddv-vh">Don't: </span>{b.schlecht.text}
+					<figcaption class="do-dont-visual__caption">
+						<Mark kind="bad" class="do-dont-visual__mark" />
+						<span class="do-dont-visual__vh">Don't: </span>{b.schlecht.text}
 					</figcaption>
 				</figure>
 			</div>
@@ -41,18 +41,18 @@
 {/if}
 
 <style>
-	.ddv {
+	.do-dont-visual {
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-24);
 		margin-block: var(--z-ds-space-16);
 	}
-	.ddv-pair {
+	.do-dont-visual__pair {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--z-ds-space-16);
 	}
-	.ddv-card {
+	.do-dont-visual__card {
 		margin: 0;
 		display: flex;
 		flex-direction: column;
@@ -62,13 +62,13 @@
 		background: var(--ds-surface);
 	}
 	/* Statusfarbe trägt ein oberer Balken (nicht die Textfarbe → Kontrast bleibt gut). */
-	.ddv-card--good {
+	.do-dont-visual__card--good {
 		border-top: 3px solid var(--ds-positive);
 	}
-	.ddv-card--bad {
+	.do-dont-visual__card--bad {
 		border-top: 3px solid var(--ds-negative);
 	}
-	.ddv-stage {
+	.do-dont-visual__stage {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -79,7 +79,7 @@
 		/* RAW-Token wie die Playground-Bühne, damit die Fläche eigenständig hell bleibt. */
 		background: var(--z-ds-color-background-10);
 	}
-	.ddv-caption {
+	.do-dont-visual__caption {
 		display: flex;
 		gap: var(--z-ds-space-8);
 		align-items: baseline;
@@ -89,17 +89,17 @@
 		line-height: 1.5;
 	}
 	/* Layout bleibt hier; Glyph/Farbe/Gewicht liefert die Mark-Komponente. */
-	.ddv-caption :global(.ddv-mark) {
+	.do-dont-visual__caption :global(.do-dont-visual__mark) {
 		flex: none;
 		font-size: var(--ds-text-base);
 	}
 	/* „Do:"/„Don't:"-Präfix trägt die Semantik für Screenreader (Farbe ist nur visuell). */
-	.ddv-vh {
+	.do-dont-visual__vh {
 		font-weight: 600;
 		color: var(--ds-text);
 	}
 	@media (max-width: 560px) {
-		.ddv-pair {
+		.do-dont-visual__pair {
 			grid-template-columns: 1fr;
 		}
 	}

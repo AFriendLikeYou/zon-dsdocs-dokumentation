@@ -27,47 +27,47 @@
 	const short = (t: string) => t.replace('--z-ds-space-', 'space-');
 </script>
 
-<div class="sc">
-	<figure class="sc-panel">
-		<figcaption class="sc-cap">Innenabstand</figcaption>
-		<div class="sc-stage">
-			<div class="sc-pad" style={`--sc-pb: var(${paddingBlock}); --sc-pi: var(${paddingInline});`}>
-				<span class="sc-core">Button</span>
+<div class="spacing-context">
+	<figure class="spacing-context__panel">
+		<figcaption class="spacing-context__caption">Innenabstand</figcaption>
+		<div class="spacing-context__stage">
+			<div class="spacing-context__pad" style={`--sc-pb: var(${paddingBlock}); --sc-pi: var(${paddingInline});`}>
+				<span class="spacing-context__core">Button</span>
 			</div>
 		</div>
-		<ul class="sc-legend">
+		<ul class="spacing-context__legend">
 			<li>
-				<span class="sc-swatch"></span><TokenPill value={paddingBlock} label={short(paddingBlock)} copy={false} />
-				<span class="sc-dim">vertikal</span>
+				<span class="spacing-context__swatch"></span><TokenPill value={paddingBlock} label={short(paddingBlock)} copy={false} />
+				<span class="spacing-context__dim">vertikal</span>
 			</li>
 			<li>
-				<span class="sc-swatch"></span><TokenPill value={paddingInline} label={short(paddingInline)} copy={false} />
-				<span class="sc-dim">horizontal</span>
+				<span class="spacing-context__swatch"></span><TokenPill value={paddingInline} label={short(paddingInline)} copy={false} />
+				<span class="spacing-context__dim">horizontal</span>
 			</li>
 		</ul>
-		<p class="sc-note">Abstand <em>innerhalb</em> eines Elements — zwischen Rahmen und Inhalt.</p>
+		<p class="spacing-context__note">Abstand <em>innerhalb</em> eines Elements — zwischen Rahmen und Inhalt.</p>
 	</figure>
 
-	<figure class="sc-panel">
-		<figcaption class="sc-cap">Außenabstand</figcaption>
-		<div class="sc-stage">
-			<div class="sc-row" style={`--sc-gap: var(${gap});`}>
-				<span class="sc-block"></span>
-				<span class="sc-block"></span>
+	<figure class="spacing-context__panel">
+		<figcaption class="spacing-context__caption">Außenabstand</figcaption>
+		<div class="spacing-context__stage">
+			<div class="spacing-context__row" style={`--sc-gap: var(${gap});`}>
+				<span class="spacing-context__block"></span>
+				<span class="spacing-context__block"></span>
 			</div>
 		</div>
-		<ul class="sc-legend">
+		<ul class="spacing-context__legend">
 			<li>
-				<span class="sc-swatch"></span><TokenPill value={gap} label={short(gap)} copy={false} />
-				<span class="sc-dim">gap</span>
+				<span class="spacing-context__swatch"></span><TokenPill value={gap} label={short(gap)} copy={false} />
+				<span class="spacing-context__dim">gap</span>
 			</li>
 		</ul>
-		<p class="sc-note">Abstand <em>zwischen</em> getrennten Elementen.</p>
+		<p class="spacing-context__note">Abstand <em>zwischen</em> getrennten Elementen.</p>
 	</figure>
 </div>
 
 <style>
-	.sc {
+	.spacing-context {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--z-ds-space-24);
@@ -77,7 +77,7 @@
 		--sc-tint: color-mix(in srgb, var(--ds-accent) 9%, transparent);
 		--sc-hatch: color-mix(in srgb, var(--ds-accent) 20%, transparent);
 	}
-	.sc-panel {
+	.spacing-context__panel {
 		margin: 0;
 		display: flex;
 		flex-direction: column;
@@ -87,12 +87,12 @@
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius);
 	}
-	.sc-cap {
+	.spacing-context__caption {
 		font-size: var(--ds-text-sm);
 		font-weight: 600;
 		color: var(--ds-text);
 	}
-	.sc-stage {
+	.spacing-context__stage {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -100,7 +100,7 @@
 		padding: var(--z-ds-space-8);
 	}
 	/* Padding-Zone: getönt + schraffiert; das echte Token-Padding ist die Fläche. */
-	.sc-pad {
+	.spacing-context__pad {
 		display: inline-flex;
 		padding: var(--sc-pb) var(--sc-pi);
 		background-color: var(--sc-tint);
@@ -112,7 +112,7 @@
 		border: 1px dashed var(--ds-accent);
 		border-radius: var(--ds-radius-sm);
 	}
-	.sc-core {
+	.spacing-context__core {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -124,7 +124,7 @@
 		border-radius: var(--ds-radius-xs);
 	}
 	/* Gap-Zone: der getönte Streifen zwischen den Blöcken IST der gap. */
-	.sc-row {
+	.spacing-context__row {
 		display: inline-flex;
 		gap: var(--sc-gap);
 		background-color: var(--sc-tint);
@@ -135,14 +135,14 @@
 		);
 		border-radius: var(--ds-radius-sm);
 	}
-	.sc-block {
+	.spacing-context__block {
 		width: 72px;
 		height: 44px;
 		background: var(--ds-surface-sunken);
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius-xs);
 	}
-	.sc-legend {
+	.spacing-context__legend {
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -150,13 +150,13 @@
 		flex-direction: column;
 		gap: 6px;
 	}
-	.sc-legend li {
+	.spacing-context__legend li {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
 		font-size: var(--ds-text-xs);
 	}
-	.sc-swatch {
+	.spacing-context__swatch {
 		flex: none;
 		width: 14px;
 		height: 14px;
@@ -169,21 +169,21 @@
 		border: 1px dashed var(--ds-accent);
 		border-radius: var(--ds-radius-xs);
 	}
-	.sc-dim {
+	.spacing-context__dim {
 		color: var(--ds-text-muted);
 	}
-	.sc-note {
+	.spacing-context__note {
 		margin: 0;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
-	.sc-note em {
+	.spacing-context__note em {
 		font-style: normal;
 		font-weight: 600;
 		color: var(--ds-text);
 	}
 	@media (max-width: 560px) {
-		.sc {
+		.spacing-context {
 			grid-template-columns: 1fr;
 		}
 	}

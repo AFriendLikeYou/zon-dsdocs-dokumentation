@@ -36,7 +36,7 @@
 		<li>
 			<button
 				type="button"
-				class="lrow"
+				class="legend-row"
 				class:on={activeKey === `co-${c.nr}`}
 				aria-pressed={pinned === `co-${c.nr}`}
 				onmouseenter={() => onhover(`co-${c.nr}`)}
@@ -45,14 +45,14 @@
 				onfocus={() => onhover(`co-${c.nr}`)}
 				onblur={() => onhover(null)}
 			>
-				<span class="n">{c.nr}</span>
-				<span class="t">
+				<span class="legend-row__number">{c.nr}</span>
+				<span class="legend-row__text">
 					{#if c.lead}<strong>{c.lead}</strong>{' — '}{/if}{c.rest}
-					{#if c.optionalDurch}<span class="opt"
+					{#if c.optionalDurch}<span class="legend-row__note"
 							>optional — gesteuert über <code>{c.optionalDurch}</code></span
 						>{/if}
 				</span>
-				{#if c.art && ART_LABEL[c.art]}<span class="art-badge">{ART_LABEL[c.art]}</span>{/if}
+				{#if c.art && ART_LABEL[c.art]}<span class="legend-row__type">{ART_LABEL[c.art]}</span>{/if}
 			</button>
 		</li>
 	{/each}
@@ -70,7 +70,7 @@
 		margin: 0 -6px;
 	}
 	/* Zeile als Button (Touch/Tastatur) — optisch wie die bisherige Zeile. */
-	.lrow {
+	.legend-row {
 		display: flex;
 		width: 100%;
 		align-items: baseline;
@@ -87,15 +87,15 @@
 		cursor: default;
 		transition: background var(--ds-dur) var(--ds-ease);
 	}
-	.lrow.on {
+	.legend-row.on {
 		background: var(--ds-surface-raised);
 	}
-	.lrow:focus-visible {
+	.legend-row:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
 	/* Nummer im Blueprint-Blau — bindet die Legende sichtbar an die Callouts im Artboard. */
-	.legend .n {
+	.legend .legend-row__number {
 		flex: none;
 		width: 18px;
 		height: 18px;
@@ -111,12 +111,12 @@
 		transform: translateY(2px); /* optisch auf die erste Textzeile ausrichten */
 	}
 	/* Lead-Begriff (vor dem —) kräftig + in Primärfarbe → präzisere Beschriftung. */
-	.legend .t strong {
+	.legend .legend-row__text strong {
 		font-weight: 600;
 		color: var(--ds-text);
 	}
 	/* Dezentes Typ-Badge (Instanz/Text/Slot/…) — gemutet, rechtsbündig. */
-	.art-badge {
+	.legend-row__type {
 		flex: none;
 		align-self: center;
 		margin-left: auto;
@@ -129,19 +129,19 @@
 		white-space: nowrap;
 	}
 	/* „optional — gesteuert über X" — leiser Zusatz in eigener Zeile. */
-	.opt {
+	.legend-row__note {
 		display: block;
 		margin-top: 2px;
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-faint);
 	}
-	.opt code {
+	.legend-row__note code {
 		font-family: var(--ds-font-mono);
 	}
 
 	/* Highlight bleibt, nur ohne Fade — respektiert die Nutzer-Präferenz. */
 	@media (prefers-reduced-motion: reduce) {
-		.lrow {
+		.legend-row {
 			transition: none;
 		}
 	}

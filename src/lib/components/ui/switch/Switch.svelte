@@ -16,17 +16,17 @@
 
 <button
 	type="button"
-	class="sw"
+	class="switch"
 	role="switch"
 	aria-checked={checked}
 	onclick={() => onchange(!checked)}
 >
-	<span class="sw-track" aria-hidden="true"></span>
-	<span class="sw-label">{label}</span>
+	<span class="switch__track" aria-hidden="true"></span>
+	<span class="switch__label">{label}</span>
 </button>
 
 <style>
-	.sw {
+	.switch {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
@@ -38,7 +38,7 @@
 		cursor: pointer;
 		border-radius: var(--ds-radius-sm);
 	}
-	.sw-track {
+	.switch__track {
 		position: relative;
 		flex: none;
 		width: 34px;
@@ -50,7 +50,7 @@
 			background-color var(--ds-dur) var(--ds-ease),
 			border-color var(--ds-dur) var(--ds-ease);
 	}
-	.sw-track::after {
+	.switch__track::after {
 		content: '';
 		position: absolute;
 		top: 2px;
@@ -62,30 +62,30 @@
 		box-shadow: var(--ds-shadow-sm);
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
-	.sw[aria-checked='true'] .sw-track {
+	.switch[aria-checked='true'] .switch__track {
 		background: var(--ds-accent);
 		border-color: var(--ds-accent);
 	}
-	.sw[aria-checked='true'] .sw-track::after {
+	.switch[aria-checked='true'] .switch__track::after {
 		transform: translateX(14px);
 		background: var(--ds-surface);
 	}
-	.sw-label {
+	.switch__label {
 		font-size: var(--ds-text-sm);
 	}
-	.sw:active .sw-track::after {
+	.switch:active .switch__track::after {
 		transform: scale(0.92);
 	}
-	.sw[aria-checked='true']:active .sw-track::after {
+	.switch[aria-checked='true']:active .switch__track::after {
 		transform: translateX(14px) scale(0.92);
 	}
-	.sw:focus-visible {
+	.switch:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.sw-track,
-		.sw-track::after {
+		.switch__track,
+		.switch__track::after {
 			transition: none;
 		}
 	}

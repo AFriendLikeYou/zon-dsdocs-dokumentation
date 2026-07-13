@@ -107,27 +107,27 @@
 	const clipped = $derived(canCollapse && !expanded);
 </script>
 
-<figure class="cb">
-	<figcaption class="cb-head">
-		<span class="cb-title">{title}</span>
-		<CopyButton class="cb-copy" value={code} label="Kopieren" />
+<figure class="code-block">
+	<figcaption class="code-block__head">
+		<span class="code-block__title">{title}</span>
+		<CopyButton class="code-block__copy" value={code} label="Kopieren" />
 	</figcaption>
-	<div class="cb-clip" class:clipped>
+	<div class="code-block__clip" class:clipped>
 		{#if lineMode}
-			<pre class="cb-pre"><code
-					>{#each lines as line, i (i)}<span class="cb-line" class:hot={hot.has(i)}
+			<pre class="code-block__pre"><code
+					>{#each lines as line, i (i)}<span class="code-block__line" class:hot={hot.has(i)}
 							>{@html line}</span
 						>{/each}</code
 				></pre>
 		{:else}
-			<pre class="cb-pre"><code>{@html highlighted}</code></pre>
+			<pre class="code-block__pre"><code>{@html highlighted}</code></pre>
 		{/if}
 		{#if clipped}
-			<div class="cb-fade" aria-hidden="true"></div>
+			<div class="code-block__fade" aria-hidden="true"></div>
 		{/if}
 	</div>
 	{#if canCollapse}
-		<div class="cb-expand">
+		<div class="code-block__expand">
 			<button type="button" onclick={() => (expanded = !expanded)}>
 				{expanded ? 'Code einklappen' : `Code aufklappen (${lineCount} Zeilen)`}
 				<ChevronDownIcon
@@ -144,13 +144,13 @@
 <style>
 	/*
     Theme-adaptiv: Struktur erbt z-ds-Tokens, die Syntax-Farben liegen als
-    Custom-Properties auf .cb und werden im Dark-Mode aufgehellt (Hue bleibt,
+    Custom-Properties auf .code-block und werden im Dark-Mode aufgehellt (Hue bleibt,
     Helligkeit steigt). So bricht der Block nicht mehr im Dark-Mode (ADR-011).
   */
-	.cb {
+	.code-block {
 		/* Struktur (theme-adaptiv über Tokens) */
 		--cb-bg: var(--ds-surface-raised);
-		--cb-head-bg: var(--ds-surface);
+		--code-block__head-bg: var(--ds-surface);
 		--cb-border: var(--ds-border-soft);
 		--cb-text: var(--ds-text);
 		--cb-muted: var(--ds-text-muted);
@@ -177,7 +177,7 @@
 	/* Syntax (Dark) — aufgehellte Varianten, gleicher Farbton.
      Der globale html-Vorfahre muss in :global(), sonst prunt Svelte den Selektor. */
 	@media (prefers-color-scheme: dark) {
-		:global(html:not(.color-scheme-light)) .cb {
+		:global(html:not(.color-scheme-light)) .code-block {
 			--cb-comment: #8b94a3;
 			--cb-tag: #7aa2f7;
 			--cb-attr: #e0af68;
@@ -188,7 +188,7 @@
 			--cb-punct: #8b94a3;
 		}
 	}
-	:global(html.color-scheme-dark) .cb {
+	:global(html.color-scheme-dark) .code-block {
 		--cb-comment: #8b94a3;
 		--cb-tag: #7aa2f7;
 		--cb-attr: #e0af68;
@@ -199,23 +199,23 @@
 		--cb-punct: #8b94a3;
 	}
 
-	.cb-head {
+	.code-block__head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--z-ds-space-12);
 		padding: var(--z-ds-space-8) var(--z-ds-space-12);
 		border-bottom: 1px solid var(--cb-border);
-		background: var(--cb-head-bg);
+		background: var(--code-block__head-bg);
 	}
-	.cb-title {
+	.code-block__title {
 		font-size: var(--ds-text-xs);
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		color: var(--cb-muted);
 	}
 	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.cb-copy) {
+	:global(.code-block__copy) {
 		font-size: var(--ds-text-xs);
 		color: var(--cb-accent);
 		padding: var(--z-ds-space-4) var(--z-ds-space-10);
@@ -224,11 +224,11 @@
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		:global(.cb-copy:hover) {
+		:global(.code-block__copy:hover) {
 			background: color-mix(in srgb, var(--cb-accent) 12%, transparent);
 		}
 	}
-	.cb-pre {
+	.code-block__pre {
 		margin: 0;
 		padding: var(--z-ds-space-14) var(--z-ds-space-16);
 		overflow: auto;
@@ -239,7 +239,7 @@
 		background: var(--cb-bg);
 		border-radius: 0;
 	}
-	.cb-pre code {
+	.code-block__pre code {
 		font-family: inherit;
 		white-space: pre;
 	}
@@ -247,38 +247,38 @@
 	   ease-out wieder aus, sobald .hot entfernt wird. */
 	/* display:block statt Newlines: white-space:pre würde inline-Zeilen nicht
 	   umbrechen lassen (alle Spans in einer Zeile). min-height hält Leerzeilen offen. */
-	.cb-line {
+	.code-block__line {
 		display: block;
 		min-width: 100%;
 		min-height: 1.6em;
 		border-radius: 3px;
 		transition: background-color 0.45s var(--ds-ease-out);
 	}
-	.cb-line.hot {
+	.code-block__line.hot {
 		background-color: color-mix(in srgb, var(--cb-accent) 18%, transparent);
 		transition: none;
 	}
 	/* Collapse: auf ~4 Zeilen gekappt, Fade-out-Gradient zeigt „da ist mehr". */
-	.cb-clip {
+	.code-block__clip {
 		position: relative;
 	}
-	.cb-clip.clipped .cb-pre {
+	.code-block__clip.clipped .code-block__pre {
 		max-height: calc(4 * 1.6em + var(--z-ds-space-14));
 		overflow: hidden;
 	}
-	.cb-fade {
+	.code-block__fade {
 		position: absolute;
 		inset: auto 0 0 0;
 		height: 44px;
 		background: linear-gradient(transparent, var(--cb-bg));
 		pointer-events: none;
 	}
-	.cb-expand {
+	.code-block__expand {
 		display: flex;
 		justify-content: center;
 		border-top: 1px solid var(--cb-border);
 	}
-	.cb-expand button {
+	.code-block__expand button {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
@@ -294,54 +294,54 @@
 		transition: color var(--ds-dur) var(--ds-ease);
 	}
 	/* Chevron liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
-	.cb-expand button :global(svg) {
+	.code-block__expand button :global(svg) {
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.cb-expand button:hover {
+		.code-block__expand button:hover {
 			color: var(--cb-text);
 			background: color-mix(in srgb, var(--cb-muted) 8%, transparent);
 		}
 	}
-	.cb-expand button:focus-visible {
+	.code-block__expand button:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: -2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.cb-line,
-		.cb-expand button :global(svg) {
+		.code-block__line,
+		.code-block__expand button :global(svg) {
 			transition: none;
 		}
 	}
-	.cb-pre :global(.t-comment) {
+	.code-block__pre :global(.t-comment) {
 		color: var(--cb-comment);
 		font-style: italic;
 	}
-	.cb-pre :global(.t-tag) {
+	.code-block__pre :global(.t-tag) {
 		color: var(--cb-tag);
 	}
-	.cb-pre :global(.t-attr) {
+	.code-block__pre :global(.t-attr) {
 		color: var(--cb-attr);
 	}
-	.cb-pre :global(.t-string) {
+	.code-block__pre :global(.t-string) {
 		color: var(--cb-string);
 	}
-	.cb-pre :global(.t-property) {
+	.code-block__pre :global(.t-property) {
 		color: var(--cb-tag);
 	}
-	.cb-pre :global(.t-func) {
+	.code-block__pre :global(.t-func) {
 		color: var(--cb-attr);
 	}
-	.cb-pre :global(.t-number) {
+	.code-block__pre :global(.t-number) {
 		color: var(--cb-number);
 	}
-	.cb-pre :global(.t-selector) {
+	.code-block__pre :global(.t-selector) {
 		color: var(--cb-selector);
 	}
-	.cb-pre :global(.t-brace) {
+	.code-block__pre :global(.t-brace) {
 		color: var(--cb-brace);
 	}
-	.cb-pre :global(.t-punct) {
+	.code-block__pre :global(.t-punct) {
 		color: var(--cb-punct);
 	}
 </style>

@@ -30,16 +30,16 @@
 	} = $props();
 </script>
 
-<div class="sp">
-	<div class="sp-head"><span class="sp-cap">Abstände</span></div>
-	<div class="sp-grid">
+<div class="spacing-table">
+	<div class="spacing-table__head"><span class="spacing-table__caption">Abstände</span></div>
+	<div class="spacing-table__grid">
 		{#each spacing as s, i (i)}
 			{@const key = keys[i]}
 			<svelte:element
 				this={key ? 'button' : 'div'}
 				{...key ? { type: 'button', 'aria-pressed': pinned === key } : {}}
-				class="sp-item"
-				class:sp-item--sync={!!key}
+				class="spacing-table__item"
+				class:spacing-table__item--sync={!!key}
 				class:on={!!key && activeKey === key}
 				onmouseenter={key ? () => onhover(key) : undefined}
 				onmouseleave={key ? () => onhover(null) : undefined}
@@ -47,7 +47,7 @@
 				onfocus={key ? () => onhover(key) : undefined}
 				onblur={key ? () => onhover(null) : undefined}
 			>
-				<span class="sp-name">
+				<span class="spacing-table__name">
 					{#if key}<span
 							class="swatch"
 							class:swatch--pad={s.art === 'padding'}
@@ -55,14 +55,14 @@
 							aria-hidden="true"
 						></span>{/if}
 					{s.label}
-					{#if s.art === 'padding' && s.richtung}<span class="sp-dir"
+					{#if s.art === 'padding' && s.richtung}<span class="spacing-table__direction"
 							>{RICHTUNG_LABEL[s.richtung]}</span
 						>{/if}
 					{#if s.herkunft && HERKUNFT_LABEL[s.herkunft]}<span class="herkunft"
 							>{HERKUNFT_LABEL[s.herkunft]}</span
 						>{/if}
 				</span>
-				<span class="sp-val">
+				<span class="spacing-table__value">
 					{#if key && drift[key]}
 						<!-- Figma-Soll ≠ gerendertes Ist: Vertragsverletzung sichtbar machen. -->
 						<span
@@ -71,7 +71,7 @@
 							>⚠ gerendert {drift[key].ist} px</span
 						>
 					{/if}
-					<span class="sp-px">{s.px}</span>
+					<span class="spacing-table__px">{s.px}</span>
 					<!-- copy={false}: Sync-Zeilen sind selbst Buttons — ein kopierbarer
 					     Pill-Button darin wäre verschachtelt (invalide). Kopieren geht
 					     über die Token-Referenz bzw. den Specs-Tab. -->
@@ -85,24 +85,24 @@
 <style>
 	/* Abstände — aufgeräumte Spec-Tabelle: Label links, px + Token rechts (beide
      zusammen, kein Umschalter). Dünne Trennlinien statt dekorativer Balken. */
-	.sp {
+	.spacing-table {
 		margin: 18px 2px 0;
 	}
-	.sp-head {
+	.spacing-table__head {
 		margin-bottom: 8px;
 	}
-	.sp-cap {
+	.spacing-table__caption {
 		font-size: var(--ds-label-size);
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
 		color: var(--ds-text-muted);
 	}
-	.sp-grid {
+	.spacing-table__grid {
 		margin: 0;
 		display: grid;
 	}
-	.sp-item {
+	.spacing-table__item {
 		display: flex;
 		align-items: baseline;
 		justify-content: space-between;
@@ -117,23 +117,23 @@
 		border-top: 1px solid var(--ds-border-soft);
 		font-size: var(--ds-text-sm);
 	}
-	.sp-item:last-child {
+	.spacing-table__item:last-child {
 		border-bottom: 1px solid var(--ds-border-soft);
 	}
 	/* Interaktive Zeile (mit Bühnen-Kopplung): Hover-Pill wie in der Legende. */
-	.sp-item--sync {
+	.spacing-table__item--sync {
 		cursor: default;
 		border-radius: var(--ds-radius-sm);
 		transition: background var(--ds-dur) var(--ds-ease);
 	}
-	.sp-item--sync.on {
+	.spacing-table__item--sync.on {
 		background: var(--ds-surface-raised);
 	}
-	.sp-item--sync:focus-visible {
+	.spacing-table__item--sync:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.sp-name {
+	.spacing-table__name {
 		color: var(--ds-text-body);
 	}
 	/* Farb-Swatch: verankert die Zeile ↔ Streifen-Zuordnung auch ohne Hover. */
@@ -162,7 +162,7 @@
 		background-color: color-mix(in srgb, var(--z-ds-color-background-warning) 16%, transparent);
 	}
 	/* Richtungs-Zusatz („oben · unten") — leise, direkt hinter dem Label. */
-	.sp-dir {
+	.spacing-table__direction {
 		margin-left: 6px;
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-xs);
@@ -186,14 +186,14 @@
 		color: var(--ds-text-faint);
 		white-space: nowrap;
 	}
-	.sp-val {
+	.spacing-table__value {
 		margin: 0;
 		display: flex;
 		align-items: baseline;
 		gap: 10px;
 		white-space: nowrap;
 	}
-	.sp-px {
+	.spacing-table__px {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		font-weight: 600;
@@ -201,7 +201,7 @@
 	}
 	/* Highlight bleibt, nur ohne Bewegung — respektiert die Nutzer-Präferenz. */
 	@media (prefers-reduced-motion: reduce) {
-		.sp-item--sync {
+		.spacing-table__item--sync {
 			transition: none;
 		}
 	}

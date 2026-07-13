@@ -8,8 +8,8 @@
 </script>
 
 {#if props.length}
-	<div class="table-scroll pt-wrap">
-		<table class="pt">
+	<div class="table-scroll props-table__wrap">
+		<table class="props-table">
 			<thead>
 				<tr>
 					<th>Prop</th>
@@ -22,24 +22,24 @@
 			<tbody>
 				{#each props as p}
 					<tr>
-						<td class="pt-name-cell">
-							<code class="pt-name">{p.name}</code>
-							{#if p.pflicht}<span class="pt-req" title="Pflicht">Pflicht</span>{/if}
+						<td class="props-table__name-cell">
+							<code class="props-table__name">{p.name}</code>
+							{#if p.pflicht}<span class="props-table__req" title="Pflicht">Pflicht</span>{/if}
 						</td>
-						<td><code class="pt-typ">{p.typ}</code></td>
+						<td><code class="props-table__typ">{p.typ}</code></td>
 						{#if hasErlaubteWerte}
-							<td class="pt-vals">
+							<td class="props-table__vals">
 								{#if p.erlaubteWerte?.length}
-									{#each p.erlaubteWerte as v}<code class="pt-chip">{v}</code>{/each}
-								{:else}<span class="pt-dash">—</span>{/if}
+									{#each p.erlaubteWerte as v}<code class="props-table__chip">{v}</code>{/each}
+								{:else}<span class="props-table__dash">—</span>{/if}
 							</td>
 						{/if}
 						<td
-							>{#if p.default}<code class="pt-def">{p.default}</code>{:else}<span class="pt-dash"
+							>{#if p.default}<code class="props-table__def">{p.default}</code>{:else}<span class="props-table__dash"
 									>—</span
 								>{/if}</td
 						>
-						<td class="pt-desc">{p.beschreibung ?? ''}</td>
+						<td class="props-table__desc">{p.beschreibung ?? ''}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -50,7 +50,7 @@
 <style>
 	/* .table-scroll liefert overflow-x/max-width; hier nur Rahmen + eigenes Bottom-Maß.
 	   Doppelklasse gewinnt gegen die globale .table-scroll-Margin (Reihenfolge-unabhängig). */
-	.pt-wrap {
+	.props-table__wrap {
 		/* bewusst kompaktere Tabellen-Maße ohne passendes z-ds-Token */
 		--pt-block-gap: 18px; /* kein z-ds-Space zwischen 16 und 20 */
 		--pt-fs-body: 13px; /* bewusst dichter als --z-ds-fontsize-12 */
@@ -58,15 +58,15 @@
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius);
 	}
-	.table-scroll.pt-wrap {
+	.table-scroll.props-table__wrap {
 		margin: 0 0 var(--pt-block-gap);
 	}
-	.pt {
+	.props-table {
 		width: 100%;
 		border-collapse: collapse;
 		font-size: var(--pt-fs-body);
 	}
-	.pt th {
+	.props-table th {
 		text-align: left;
 		font-family: var(--ds-font-mono);
 		font-size: var(--pt-fs-head);
@@ -79,28 +79,28 @@
 		border-bottom: 1px solid var(--ds-border);
 		white-space: nowrap;
 	}
-	.pt td {
+	.props-table td {
 		padding: var(--z-ds-space-10) var(--z-ds-space-14);
 		border-bottom: 1px solid var(--ds-border);
 		vertical-align: top;
 		color: var(--ds-text);
 	}
-	.pt tr:last-child td {
+	.props-table tr:last-child td {
 		border-bottom: 0;
 	}
-	.pt code {
+	.props-table code {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 	}
-	.pt-name {
+	.props-table__name {
 		color: var(--ds-text);
 		font-weight: 600;
 	}
-	.pt-name-cell {
+	.props-table__name-cell {
 		white-space: nowrap;
 	}
 	/* Pflicht-Badge am Prop-Namen — dezent, gemutet. */
-	.pt-req {
+	.props-table__req {
 		margin-left: 6px;
 		padding: 1px 6px;
 		border-radius: 999px;
@@ -113,12 +113,12 @@
 		vertical-align: middle;
 	}
 	/* Erlaubte-Werte-Spalte: Code-Chips. */
-	.pt-vals {
+	.props-table__vals {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 4px;
 	}
-	.pt-chip {
+	.props-table__chip {
 		padding: 1px 6px;
 		border-radius: var(--ds-radius-sm);
 		background: var(--ds-surface-raised);
@@ -126,16 +126,16 @@
 		color: var(--ds-text-body);
 		white-space: nowrap;
 	}
-	.pt-typ {
+	.props-table__typ {
 		color: var(--ds-accent);
 	}
-	.pt-def {
+	.props-table__def {
 		color: var(--ds-text-body);
 	}
-	.pt-dash {
+	.props-table__dash {
 		color: var(--ds-text-faint);
 	}
-	.pt-desc {
+	.props-table__desc {
 		color: var(--ds-text-body);
 		min-width: 200px;
 	}

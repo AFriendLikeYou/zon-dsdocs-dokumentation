@@ -6,27 +6,27 @@
 </script>
 
 {#if doDont}
-	<div class="dd">
+	<div class="do-dont">
 		{#if doDont.do?.length}
-			<ul class="do">
-				{#each doDont.do as d}<li><Mark kind="good" class="dd-mark" />{d}</li>{/each}
+			<ul class="do-dont__do">
+				{#each doDont.do as d}<li><Mark kind="good" class="do-dont__mark" />{d}</li>{/each}
 			</ul>
 		{/if}
 		{#if doDont.dont?.length}
-			<ul class="dont">
-				{#each doDont.dont as d}<li><Mark kind="bad" class="dd-mark" />{d}</li>{/each}
+			<ul class="do-dont__dont">
+				{#each doDont.dont as d}<li><Mark kind="bad" class="do-dont__mark" />{d}</li>{/each}
 			</ul>
 		{/if}
 	</div>
 {/if}
 
 <style>
-	.dd {
+	.do-dont {
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-16);
 	}
-	.dd ul {
+	.do-dont ul {
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -34,7 +34,7 @@
 		flex-direction: column;
 		gap: var(--z-ds-space-10);
 	}
-	.dd li {
+	.do-dont li {
 		position: relative;
 		padding-left: 26px;
 		margin: 0;
@@ -43,7 +43,7 @@
 		line-height: 1.5;
 	}
 	/* Marke sitzt (wie zuvor das ::before) absolut am Zeilenanfang. */
-	.dd li :global(.dd-mark) {
+	.do-dont li :global(.do-dont__mark) {
 		position: absolute;
 		left: 0;
 		top: 0;
