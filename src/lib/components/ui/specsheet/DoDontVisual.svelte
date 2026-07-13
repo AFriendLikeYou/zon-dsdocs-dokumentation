@@ -1,12 +1,15 @@
 <!--
-  DoDontVisual.svelte — visuelle Do/Don't-Paare (gut vs. schlecht nebeneinander).
-  Je Karte eine kleine Specimen-Bühne (spec-canvas ds-stage → das gescopte pattern.css
-  greift, die Fläche ist theme-stabil hell), darunter eine ✓/✕-Zeile mit Erklärtext.
+  DoDontVisual.svelte — Product-Erscheinung: visuelle Do/Don't-Paare (gut vs. schlecht).
+  Jede Karte ist eine dünne Spezialisierung über DoDontBase (Hülle + Farb-Kanal
+  --dd-accent aus der Basis); beigesteuert wird nur die Füllung: eine kleine
+  Specimen-Bühne (spec-canvas ds-stage → das gescopte pattern.css greift,
+  theme-stabil hell) und darunter eine ✓/✕-Zeile mit Erklärtext.
 
   Das Markup ist Registry-Daten (vertrauenswürdig) → {@html} wie im Playground.
 -->
 <script lang="ts">
 	import type { DoDontBeispiel } from '$types/spec';
+	import { DoDontBase } from '$components/ui/dodont';
 	import Mark from './Mark.svelte';
 	let { beispiele = [] }: { beispiele?: DoDontBeispiel[] } = $props();
 </script>
@@ -15,26 +18,40 @@
 	<div class="do-dont-visual">
 		{#each beispiele as b}
 			<div class="do-dont-visual__pair">
-				<figure class="do-dont-visual__card do-dont-visual__card--good">
-					<div class="spec-canvas ds-stage do-dont-visual__stage">
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						{@html b.gut.html}
-					</div>
-					<figcaption class="do-dont-visual__caption">
-						<Mark kind="good" class="do-dont-visual__mark" />
-						<span class="do-dont-visual__vh">Do: </span>{b.gut.text}
-					</figcaption>
-				</figure>
-				<figure class="do-dont-visual__card do-dont-visual__card--bad">
-					<div class="spec-canvas ds-stage do-dont-visual__stage">
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						{@html b.schlecht.html}
-					</div>
-					<figcaption class="do-dont-visual__caption">
-						<Mark kind="bad" class="do-dont-visual__mark" />
-						<span class="do-dont-visual__vh">Don't: </span>{b.schlecht.text}
-					</figcaption>
-				</figure>
+				<DoDontBase tone="do" as="figure" fill={false} class="do-dont-visual__card">
+					{#snippet body()}
+						<div class="spec-canvas ds-stage do-dont-visual__stage">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html b.gut.html}
+						</div>
+					{/snippet}
+					{#snippet footer()}
+						<!-- figcaption ist zur Laufzeit direktes Kind der <figure> aus DoDontBase;
+						     die statische Prüfung sieht das über die Snippet-Grenze nicht. -->
+						<!-- svelte-ignore a11y_figcaption_parent -->
+						<figcaption class="do-dont-visual__caption">
+							<Mark kind="good" class="do-dont-visual__mark" />
+							<span class="do-dont-visual__vh">Do: </span>{b.gut.text}
+						</figcaption>
+					{/snippet}
+				</DoDontBase>
+				<DoDontBase tone="dont" as="figure" fill={false} class="do-dont-visual__card">
+					{#snippet body()}
+						<div class="spec-canvas ds-stage do-dont-visual__stage">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html b.schlecht.html}
+						</div>
+					{/snippet}
+					{#snippet footer()}
+						<!-- figcaption ist zur Laufzeit direktes Kind der <figure> aus DoDontBase;
+						     die statische Prüfung sieht das über die Snippet-Grenze nicht. -->
+						<!-- svelte-ignore a11y_figcaption_parent -->
+						<figcaption class="do-dont-visual__caption">
+							<Mark kind="bad" class="do-dont-visual__mark" />
+							<span class="do-dont-visual__vh">Don't: </span>{b.schlecht.text}
+						</figcaption>
+					{/snippet}
+				</DoDontBase>
 			</div>
 		{/each}
 	</div>
@@ -52,21 +69,13 @@
 		grid-template-columns: 1fr 1fr;
 		gap: var(--z-ds-space-16);
 	}
-	.do-dont-visual__card {
+	/* Rahmen + Fläche ergänzen die Basis-Hülle; Statusfarbe trägt der obere Balken
+	   (nicht die Textfarbe → Kontrast bleibt gut) — einheitlich über --dd-accent. */
+	.do-dont-visual :global(.do-dont-visual__card) {
 		margin: 0;
-		display: flex;
-		flex-direction: column;
 		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		overflow: hidden;
+		border-top: 3px solid var(--dd-accent);
 		background: var(--ds-surface);
-	}
-	/* Statusfarbe trägt ein oberer Balken (nicht die Textfarbe → Kontrast bleibt gut). */
-	.do-dont-visual__card--good {
-		border-top: 3px solid var(--ds-positive);
-	}
-	.do-dont-visual__card--bad {
-		border-top: 3px solid var(--ds-negative);
 	}
 	.do-dont-visual__stage {
 		display: flex;
