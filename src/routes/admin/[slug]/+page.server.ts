@@ -30,8 +30,10 @@ const contentPath = (slug: string) =>
 
 export const load = ({ params }) => {
 	const { slug } = params;
-	if (!isKnown(slug)) throw error(404, 'Unbekannte Komponente');
-	const entry = CATALOG.find((c) => c.slug === slug)!;
+	// Ein einziges find: Katalog-Eintrag holen und zugleich als Existenz-Check nutzen
+	// (kein separater isKnown-Durchlauf mehr) → 404, wenn der Slug unbekannt ist.
+	const entry = CATALOG.find((c) => c.slug === slug);
+	if (!entry) throw error(404, 'Unbekannte Komponente');
 	let content: Record<string, unknown> = {};
 	try {
 		content = JSON.parse(readFileSync(contentPath(slug), 'utf8'));

@@ -4,6 +4,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
+	import { AdminPageHeader, AdminFlash } from '../ui';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -232,17 +233,88 @@
 <svelte:head><title>{data.name} bearbeiten – Admin</title></svelte:head>
 <svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
 
+<!--
+  stringListCard — Karte für eine flache String-Liste (Verwendung, Do/Don't,
+  Komposition). `liste` ist das reaktive Original-Array aus `model`; bind:value auf
+  `liste[i]` schreibt direkt zurück (Payload identisch zur früheren Inline-Fassung).
+-->
+{#snippet stringListCard(titel: string, liste: string[], addLabel: string, platzhalter = '')}
+	<section class="card">
+		<div class="card-head"><span class="card-title">{titel}</span></div>
+		<div class="card-body">
+			{#each liste as _, i}
+				<div class="field-row">
+					<input bind:value={liste[i]} placeholder={platzhalter} />
+					<button
+						type="button"
+						class="row-remove"
+						onclick={() => removeFrom(liste, i)}
+						aria-label="Entfernen"><Icon name="trash" /></button
+					>
+				</div>
+			{/each}
+			<button type="button" class="row-add" onclick={() => addTo(liste)}>{addLabel}</button>
+		</div>
+	</section>
+{/snippet}
+
+<!--
+  keyValueCard — Karte für eine Liste von Schlüssel/Wert-Objekten (Varianten-Info,
+  Tastatur). `keyProp`/`valProp` benennen die beiden Felder je Zeile; bind:value auf
+  `liste[i][keyProp]` mutiert das Original-Objekt (Payload identisch).
+-->
+{#snippet keyValueCard(
+	titel: string,
+	liste: Record<string, string>[],
+	keyProp: string,
+	valProp: string,
+	keyPlatzhalter: string,
+	valPlatzhalter: string,
+	addLabel: string,
+	neueZeile: Record<string, string>,
+	hinweis = ''
+)}
+	<section class="card">
+		<div class="card-head"><span class="card-title">{titel}</span></div>
+		<div class="card-body">
+			{#if hinweis}<p class="hint">{hinweis}</p>{/if}
+			{#each liste as _, i}
+				<div class="field-row field-row--pair">
+					<input class="field-row__key" bind:value={liste[i][keyProp]} placeholder={keyPlatzhalter} />
+					<input bind:value={liste[i][valProp]} placeholder={valPlatzhalter} />
+					<button
+						type="button"
+						class="row-remove"
+						onclick={() => removeFrom(liste, i)}
+						aria-label="Entfernen"><Icon name="trash" /></button
+					>
+				</div>
+			{/each}
+			<button type="button" class="row-add" onclick={() => liste.push({ ...neueZeile })}
+				>{addLabel}</button
+			>
+		</div>
+	</section>
+{/snippet}
+
+<!-- readonlyChip — Marker rechts neben dem Titel, wenn Schreiben deaktiviert ist. -->
+{#snippet readonlyChip()}
+	<span class="readonly-chip">Nur lesen</span>
+{/snippet}
+
 <div class="edit">
-	<nav class="crumb"><a href="/admin">← Alle Komponenten</a></nav>
-	<h1>
-		{data.name}{#if !data.writable}<span class="ro-chip">Nur lesen</span>{/if}
-	</h1>
-	<p class="sub">Bearbeitet <code>content.json</code>. Andere Felder bleiben unverändert.</p>
+	<AdminPageHeader
+		title={data.name}
+		crumb={{ href: '/admin', label: 'Alle Komponenten' }}
+		actions={data.writable ? undefined : readonlyChip}
+	>
+		Bearbeitet <code>content.json</code>. Andere Felder bleiben unverändert.
+	</AdminPageHeader>
 
 	{#if !data.writable}
-		<p class="flash flash--warn">
+		<AdminFlash tone="warn">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).
-		</p>
+		</AdminFlash>
 	{/if}
 
 	<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>
@@ -269,119 +341,34 @@
 		<section class="card">
 			<div class="card-head"><span class="card-title">Playground-Bühne</span></div>
 			<div class="card-body">
-				<label class="sub-lbl" for="pg-align">Ausrichtung</label>
+				<label class="sub-label" for="pg-align">Ausrichtung</label>
 				<select id="pg-align" bind:value={model.playground.align}>
 					<option value="center">Zentriert (Objekt auf Bühne)</option>
 					<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
 				</select>
-				<label class="check">
+				<label class="checkbox-field">
 					<input type="checkbox" bind:checked={model.playground.resizable} />
 					<span>Resize-Handle anzeigen</span>
 				</label>
 			</div>
 		</section>
 
-		<section class="card">
-			<div class="card-head"><span class="card-title">Verwendung — Wann nutzen</span></div>
-			<div class="card-body">
-				{#each model.verwendung.nutzen as _, i}
-					<div class="row">
-						<input bind:value={model.verwendung.nutzen[i]} />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.verwendung.nutzen, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button type="button" class="add" onclick={() => addTo(model.verwendung.nutzen)}
-					>+ Zeile</button
-				>
-			</div>
-		</section>
+		{@render stringListCard('Verwendung — Wann nutzen', model.verwendung.nutzen, '+ Zeile')}
+		{@render stringListCard('Verwendung — Wann nicht', model.verwendung.nichtNutzen, '+ Zeile')}
+		{@render stringListCard('Do', model.doDont.do, '+ Zeile')}
+		{@render stringListCard("Don't", model.doDont.dont, '+ Zeile')}
 
-		<section class="card">
-			<div class="card-head"><span class="card-title">Verwendung — Wann nicht</span></div>
-			<div class="card-body">
-				{#each model.verwendung.nichtNutzen as _, i}
-					<div class="row">
-						<input bind:value={model.verwendung.nichtNutzen[i]} />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.verwendung.nichtNutzen, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button type="button" class="add" onclick={() => addTo(model.verwendung.nichtNutzen)}
-					>+ Zeile</button
-				>
-			</div>
-		</section>
-
-		<section class="card">
-			<div class="card-head"><span class="card-title">Do</span></div>
-			<div class="card-body">
-				{#each model.doDont.do as _, i}
-					<div class="row">
-						<input bind:value={model.doDont.do[i]} />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.doDont.do, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button type="button" class="add" onclick={() => addTo(model.doDont.do)}>+ Zeile</button>
-			</div>
-		</section>
-
-		<section class="card">
-			<div class="card-head"><span class="card-title">Don't</span></div>
-			<div class="card-body">
-				{#each model.doDont.dont as _, i}
-					<div class="row">
-						<input bind:value={model.doDont.dont[i]} />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.doDont.dont, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button type="button" class="add" onclick={() => addTo(model.doDont.dont)}>+ Zeile</button>
-			</div>
-		</section>
-
-		<section class="card">
-			<div class="card-head"><span class="card-title">Varianten-Info (Label → Text)</span></div>
-			<div class="card-body">
-				{#if data.variantLabels.length}
-					<p class="hint">Bekannte Labels: {data.variantLabels.join(', ')}</p>
-				{/if}
-				{#each model.variantInfo as _, i}
-					<div class="row row--kv">
-						<input class="kv-key" bind:value={model.variantInfo[i].key} placeholder="Label" />
-						<input bind:value={model.variantInfo[i].value} placeholder="Beschreibung" />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.variantInfo, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button
-					type="button"
-					class="add"
-					onclick={() => model.variantInfo.push({ key: '', value: '' })}>+ Eintrag</button
-				>
-			</div>
-		</section>
+		{@render keyValueCard(
+			'Varianten-Info (Label → Text)',
+			model.variantInfo,
+			'key',
+			'value',
+			'Label',
+			'Beschreibung',
+			'+ Eintrag',
+			{ key: '', value: '' },
+			data.variantLabels.length ? `Bekannte Labels: ${data.variantLabels.join(', ')}` : ''
+		)}
 
 		<section class="card">
 			<div class="card-head">
@@ -389,17 +376,17 @@
 			</div>
 			<div class="card-body">
 				{#each model.a11y as _, i}
-					<div class="row row--a11y">
-						<input class="a11y-label" bind:value={model.a11y[i].label} placeholder="Label" />
+					<div class="field-row field-row--a11y">
+						<input class="field-row__key" bind:value={model.a11y[i].label} placeholder="Label" />
 						<input bind:value={model.a11y[i].wert} placeholder="Wert" />
-						<select class="status-sel" bind:value={model.a11y[i].status}>
+						<select class="field-row__status" bind:value={model.a11y[i].status}>
 							<option value="pass">pass</option>
 							<option value="warn">warn</option>
 							<option value="todo">todo</option>
 						</select>
 						<button
 							type="button"
-							class="rm"
+							class="row-remove"
 							onclick={() => removeFrom(model.a11y, i)}
 							aria-label="Entfernen"><Icon name="trash" /></button
 						>
@@ -407,42 +394,30 @@
 				{/each}
 				<button
 					type="button"
-					class="add"
+					class="row-add"
 					onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button
 				>
 			</div>
 		</section>
 
-		<section class="card">
-			<div class="card-head"><span class="card-title">Tastatur (Taste → Aktion)</span></div>
-			<div class="card-body">
-				{#each model.tastatur as _, i}
-					<div class="row">
-						<input class="kv-key" bind:value={model.tastatur[i].taste} placeholder="Taste" />
-						<input bind:value={model.tastatur[i].aktion} placeholder="Aktion" />
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.tastatur, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button
-					type="button"
-					class="add"
-					onclick={() => model.tastatur.push({ taste: '', aktion: '' })}>+ Zeile</button
-				>
-			</div>
-		</section>
+		{@render keyValueCard(
+			'Tastatur (Taste → Aktion)',
+			model.tastatur,
+			'taste',
+			'aktion',
+			'Taste',
+			'Aktion',
+			'+ Zeile',
+			{ taste: '', aktion: '' }
+		)}
 
 		<section class="card">
 			<div class="card-head"><span class="card-title">Anatomie-Callouts (Nr · Text)</span></div>
 			<div class="card-body">
 				{#each model.callouts as _, i}
-					<div class="row">
+					<div class="field-row">
 						<input
-							class="num"
+							class="field-row__number"
 							type="number"
 							min="1"
 							bind:value={model.callouts[i].nr}
@@ -451,7 +426,7 @@
 						<input bind:value={model.callouts[i].text} placeholder="Beschreibung" />
 						<button
 							type="button"
-							class="rm"
+							class="row-remove"
 							onclick={() => removeFrom(model.callouts, i)}
 							aria-label="Entfernen"><Icon name="trash" /></button
 						>
@@ -459,7 +434,7 @@
 				{/each}
 				<button
 					type="button"
-					class="add"
+					class="row-add"
 					onclick={() => model.callouts.push({ nr: model.callouts.length + 1, text: '' })}
 					>+ Callout</button
 				>
@@ -470,13 +445,13 @@
 			<div class="card-head"><span class="card-title">Wording (Schlecht · Gut · Hinweis)</span></div>
 			<div class="card-body">
 				{#each model.wording as _, i}
-					<div class="row">
+					<div class="field-row">
 						<input bind:value={model.wording[i].schlecht} placeholder="Schlecht" />
 						<input bind:value={model.wording[i].gut} placeholder="Gut" />
 						<input bind:value={model.wording[i].hinweis} placeholder="Hinweis (optional)" />
 						<button
 							type="button"
-							class="rm"
+							class="row-remove"
 							onclick={() => removeFrom(model.wording, i)}
 							aria-label="Entfernen"><Icon name="trash" /></button
 						>
@@ -484,35 +459,18 @@
 				{/each}
 				<button
 					type="button"
-					class="add"
+					class="row-add"
 					onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
 				>
 			</div>
 		</section>
 
-		<section class="card">
-			<div class="card-head">
-				<span class="card-title">Komposition (Hinweise für Agenten & Devs)</span>
-			</div>
-			<div class="card-body">
-				{#each model.komposition as _, i}
-					<div class="row">
-						<input
-							bind:value={model.komposition[i]}
-							placeholder="z. B. In Formularen zusammen mit Input und Label verwenden."
-						/>
-						<button
-							type="button"
-							class="rm"
-							onclick={() => removeFrom(model.komposition, i)}
-							aria-label="Entfernen"><Icon name="trash" /></button
-						>
-					</div>
-				{/each}
-				<button type="button" class="add" onclick={() => addTo(model.komposition)}>+ Hinweis</button
-				>
-			</div>
-		</section>
+		{@render stringListCard(
+			'Komposition (Hinweise für Agenten & Devs)',
+			model.komposition,
+			'+ Hinweis',
+			'z. B. In Formularen zusammen mit Input und Label verwenden.'
+		)}
 
 		<section class="card">
 			<div class="card-head">
@@ -520,7 +478,7 @@
 			</div>
 			<div class="card-body">
 				{#each model.verwandt as _, i}
-					<div class="row">
+					<div class="field-row">
 						<select bind:value={model.verwandt[i]}>
 							<option value="" disabled>– Komponente wählen –</option>
 							{#each data.slugs as s}
@@ -529,13 +487,14 @@
 						</select>
 						<button
 							type="button"
-							class="rm"
+							class="row-remove"
 							onclick={() => removeFrom(model.verwandt, i)}
 							aria-label="Entfernen"><Icon name="trash" /></button
 						>
 					</div>
 				{/each}
-				<button type="button" class="add" onclick={() => model.verwandt.push('')}>+ Slug</button>
+				<button type="button" class="row-add" onclick={() => model.verwandt.push('')}>+ Slug</button
+				>
 			</div>
 		</section>
 
@@ -552,30 +511,33 @@
 					<div class="pair">
 						<div class="pair-grid">
 							<div class="pair-col">
-								<span class="sub-lbl">Gut — HTML</span>
-								<textarea class="mono" bind:value={model.doDontBeispiele[i].gut.html} rows="3"
+								<span class="sub-label">Gut — HTML</span>
+								<textarea class="mono-input" bind:value={model.doDontBeispiele[i].gut.html} rows="3"
 								></textarea>
-								<span class="sub-lbl">Gut — Text</span>
+								<span class="sub-label">Gut — Text</span>
 								<textarea bind:value={model.doDontBeispiele[i].gut.text} rows="2"></textarea>
 							</div>
 							<div class="pair-col">
-								<span class="sub-lbl">Schlecht — HTML</span>
-								<textarea class="mono" bind:value={model.doDontBeispiele[i].schlecht.html} rows="3"
+								<span class="sub-label">Schlecht — HTML</span>
+								<textarea
+									class="mono-input"
+									bind:value={model.doDontBeispiele[i].schlecht.html}
+									rows="3"
 								></textarea>
-								<span class="sub-lbl">Schlecht — Text</span>
+								<span class="sub-label">Schlecht — Text</span>
 								<textarea bind:value={model.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
 							</div>
 						</div>
 						<button
 							type="button"
-							class="rm rm--pair"
+							class="row-remove row-remove--pair"
 							onclick={() => removeFrom(model.doDontBeispiele, i)}>Paar entfernen</button
 						>
 					</div>
 				{/each}
 				<button
 					type="button"
-					class="add"
+					class="row-add"
 					onclick={() =>
 						model.doDontBeispiele.push({
 							gut: { html: '', text: '' },
@@ -604,22 +566,8 @@
 		/* unten Luft für die schwebende Save-Bar */
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l) 7rem;
 	}
-	.crumb {
-		margin-bottom: var(--z-ds-space-m);
-	}
-	.crumb a {
-		color: var(--ds-text-muted);
-		text-decoration: none;
-		font-size: var(--ds-text-sm);
-	}
-	.sub {
-		color: var(--ds-text-muted);
-		margin-bottom: var(--z-ds-space-l);
-	}
-	.ro-chip {
-		display: inline-block;
-		vertical-align: middle;
-		margin-left: var(--z-ds-space-s);
+	/* Nur-Lese-Marker rechts neben dem Titel (im Aktions-Slot des AdminPageHeader). */
+	.readonly-chip {
 		font-size: var(--ds-text-xs);
 		font-weight: 600;
 		letter-spacing: var(--ds-label-tracking);
@@ -629,16 +577,6 @@
 		border: 1px solid var(--ds-border-soft);
 		border-radius: 999px;
 		padding: 2px var(--z-ds-space-s);
-	}
-	.flash {
-		padding: var(--z-ds-space-s) var(--z-ds-space-m);
-		border-radius: var(--ds-radius-sm);
-		margin-bottom: var(--z-ds-space-l);
-		font-size: var(--ds-text-sm);
-	}
-	.flash--warn {
-		background: rgb(from var(--ds-warning) r g b / 0.15);
-		color: var(--ds-text);
 	}
 	/* Karten-Blöcke wie im Brand-Editor (Figma 689:11510): Fläche raised, radius 8,
 	   padding 12; Kopf mit Border-bottom (Label 12 bold uppercase, muted) + gestapelter
@@ -692,12 +630,12 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.row {
+	.field-row {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.check {
+	.checkbox-field {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
@@ -705,26 +643,22 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text);
 	}
-	.check input[type='checkbox'] {
+	.checkbox-field input[type='checkbox'] {
 		width: auto;
 		flex: none;
 		margin: 0;
 		accent-color: var(--ds-accent);
 	}
-	.row--kv .kv-key,
-	.row .kv-key {
+	.field-row__key {
 		max-width: 12rem;
 	}
-	.num {
+	.field-row__number {
 		max-width: 5rem;
 		flex: none;
 	}
-	.status-sel {
+	.field-row__status {
 		max-width: 8rem;
 		flex: none;
-	}
-	.row--a11y .a11y-label {
-		max-width: 12rem;
 	}
 	.pair {
 		border: 1px solid var(--ds-border-soft);
@@ -741,15 +675,15 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.sub-lbl {
+	.sub-label {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		margin: var(--z-ds-space-xs) 0 var(--z-ds-space-6);
 	}
-	.pair-col .sub-lbl:first-child {
+	.pair-col .sub-label:first-child {
 		margin-top: 0;
 	}
-	.mono {
+	.mono-input {
 		font-family: var(--z-ds-font-mono, ui-monospace, monospace);
 		font-size: var(--ds-text-xs);
 	}
@@ -760,7 +694,7 @@
 	}
 	/* Entfernen-Icon-Button (CMS-Standard: 24×24-Quadrat, radius 4, Hover =
 	   negative Tönung — wie .blk-btn--del im Brand-Editor). */
-	.rm {
+	.row-remove {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -778,12 +712,12 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.rm:hover {
+	.row-remove:hover {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
 	/* Text-Variante für „Paar entfernen" (mehr Kontext nötig als beim Icon). */
-	.rm--pair {
+	.row-remove--pair {
 		width: auto;
 		height: auto;
 		align-self: flex-start;
@@ -792,11 +726,11 @@
 		padding: var(--z-ds-space-6) var(--z-ds-space-m);
 		font-size: var(--ds-text-sm);
 	}
-	.rm--pair:hover {
+	.row-remove--pair:hover {
 		border-color: var(--ds-negative, var(--ds-border));
 	}
 	/* Hinzufügen: gestrichelter Ghost-Button (wie .ins-btn im Brand-Editor). */
-	.add {
+	.row-add {
 		align-self: flex-start;
 		background: none;
 		border: 1px dashed var(--ds-border);
@@ -807,11 +741,11 @@
 		font-size: var(--ds-text-sm);
 		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.add:hover {
+	.row-add:hover {
 		border-color: var(--ds-accent);
 	}
-	.rm:focus-visible,
-	.add:focus-visible,
+	.row-remove:focus-visible,
+	.row-add:focus-visible,
 	.save:focus-visible,
 	.savebar-discard:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
