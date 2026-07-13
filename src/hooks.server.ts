@@ -1,6 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { redirect } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { USERS } from '$env/static/private';
 
 interface AuthUser {
@@ -89,4 +90,7 @@ const handleRedirects: Handle = ({ event, resolve }) => {
 
 // Auth ZUERST: Alt-URLs bleiben hinter Basic Auth geschützt (kein Route-Map-Leak
 // an Unauthentifizierte), erst danach greifen die Redirects.
-export const handle = sequence(handleAuth, handleRedirects);
+// DEV-AUSNAHME (auf Wunsch, 2026-07): im lokalen `vite dev` läuft die Browser-
+// Preview ohne Basic Auth. `dev` ist in jedem Build (Vercel/Prod) false —
+// dort bleibt die Auth-Kette unverändert aktiv.
+export const handle = dev ? handleRedirects : sequence(handleAuth, handleRedirects);

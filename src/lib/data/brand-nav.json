@@ -1,44 +1,135 @@
 [
-	{ "title": "Getting started", "isCategory": true },
-	{ "title": "Willkommen", "href": "/brand", "isInFooter": false },
-	{ "title": "Grundlagen", "isCategory": true },
+	{
+		"title": "Getting started",
+		"isCategory": true
+	},
+	{
+		"title": "Willkommen",
+		"href": "/brand",
+		"isInFooter": false
+	},
+	{
+		"title": "Grundlagen",
+		"isCategory": true
+	},
 	{
 		"title": "Marke",
 		"isInFooter": true,
 		"items": [
-			{ "label": "Markenstrategie", "href": "/brand/identity/strategy" },
-			{ "label": "Markenarchitektur", "href": "/brand/identity/architecture", "badge": "Neu" },
-			{ "label": "Erscheinungsbild", "href": "/brand/identity/appearance" },
-			{ "label": "Voice & Tone", "href": "/brand/identity/voice-and-tone" },
-			{ "label": "Anwendungsbeispiele", "href": "/brand/identity/examples", "badge": "Neu" }
+			{
+				"label": "Markenstrategie",
+				"href": "/brand/identity/strategy"
+			},
+			{
+				"label": "Markenarchitektur",
+				"href": "/brand/identity/architecture"
+			},
+			{
+				"label": "Erscheinungsbild",
+				"href": "/brand/identity/appearance"
+			},
+			{
+				"label": "Voice & Tone",
+				"href": "/brand/identity/voice-and-tone"
+			},
+			{
+				"label": "Anwendungsbeispiele",
+				"href": "/brand/identity/examples"
+			}
 		]
 	},
-	{ "title": "Logo", "href": "/brand/logo", "isInFooter": true },
-	{ "title": "Farbe", "href": "/brand/color", "badge": "Neu", "isInFooter": true },
+	{
+		"title": "Logo",
+		"href": "/brand/logo",
+		"isInFooter": true
+	},
+	{
+		"title": "Farbe",
+		"href": "/brand/color",
+		"isInFooter": true
+	},
 	{
 		"title": "Icons",
 		"isInFooter": true,
 		"items": [
-			{ "label": "Aufbau", "href": "/brand/icons/anatomy" },
-			{ "label": "Icon Library", "href": "/brand/icons/library" }
+			{
+				"label": "Aufbau",
+				"href": "/brand/icons/anatomy"
+			},
+			{
+				"label": "Icon Library",
+				"href": "/brand/icons/library"
+			}
 		]
 	},
-	{ "title": "Typografie", "href": "/brand/typography", "isInFooter": true },
-	{ "title": "Primitives", "isCategory": true, "isInFooter": true },
-	{ "title": "Bildsprache", "href": "/brand/imagery", "isInFooter": true },
-	{ "title": "Sound", "href": "/brand/sound", "badge": "Beta", "isInFooter": true },
-	{ "title": "Animation", "href": "/brand/animation", "isInFooter": true },
+	{
+		"title": "Typografie",
+		"href": "/brand/typography",
+		"isInFooter": true
+	},
+	{
+		"title": "Primitives",
+		"isCategory": true,
+		"isInFooter": true
+	},
+	{
+		"title": "Bildsprache",
+		"href": "/brand/imagery",
+		"isInFooter": true
+	},
+	{
+		"title": "Sound",
+		"href": "/brand/sound",
+		"badge": "Beta",
+		"isInFooter": true
+	},
+	{
+		"title": "Animation",
+		"href": "/brand/animation",
+		"isInFooter": true
+	},
 	{
 		"title": "Accessibility",
 		"isInFooter": true,
 		"items": [
-			{ "label": "Richtlinien", "href": "/brand/accessibility" },
-			{ "label": "Issues & Solutions", "href": "/brand/accessibility/issues" }
+			{
+				"label": "Richtlinien",
+				"href": "/brand/accessibility"
+			},
+			{
+				"label": "Issues & Solutions",
+				"href": "/brand/accessibility/issues"
+			}
 		]
 	},
-	{ "title": "KI-Richtlinien", "href": "/brand/ai-guidelines", "isInFooter": true },
-	{ "title": "Inklusion", "isCategory": true, "isInFooter": true },
-	{ "title": "Pride Kommunikation", "href": "/brand/pride-communication", "isInFooter": true },
-	{ "title": "Community", "isCategory": true, "isInFooter": true },
-	{ "title": "Resources", "href": "/brand/resources", "isInFooter": true }
+	{
+		"title": "KI-Richtlinien",
+		"href": "/brand/ai-guidelines",
+		"isInFooter": true
+	},
+	{
+		"title": "Inklusion",
+		"isCategory": true,
+		"isInFooter": true
+	},
+	{
+		"title": "Pride Kommunikation",
+		"href": "/brand/pride-communication",
+		"isInFooter": true
+	},
+	{
+		"title": "Community",
+		"isCategory": true,
+		"isInFooter": true
+	},
+	{
+		"title": "Resources",
+		"href": "/brand/resources",
+		"isInFooter": true
+	},
+	{
+		"title": "test",
+		"href": "/brand/test",
+		"isInFooter": true
+	}
 ]

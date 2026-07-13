@@ -8,31 +8,150 @@ title: Pride-Kommunikation
 
 <script lang="ts">
 	import { Alert } from '$components/ui/alert';
+	import { DoDont } from '$components/ui/dodont';
+	import { Color } from '$components/ui/colors';
+	import { TextColor } from '$components/ui/colors';
+	import { Lightbox } from '$components/ui/lightbox';
+	import { VideoPlayer } from '$components/ui/videoplayer';
+	import { DownloadSpecimen } from '$components/ui/downloadspecimen';
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
+	import { DoDontGroup } from '$components/ui/dodont';
 </script>
 
 # {title}
 
-Wie DIE ZEIT rund um Pride sichtbar und glaubwürdig kommuniziert — visuell wie
-sprachlich. Diese Seite hält die Leitplanken fest, damit die Marke im richtigen
-Ton und mit klarer Haltung auftritt.
+# Lorem ipsum
+## Headline H2
+### Headlien H3
+Das ist eine Paragraph
+Das ist **FETT**
+Das ist *Kursiv*
+Das ist ein [Link](www.zeit.de)
+Das ist eine Liste:
+- Eins
+- Zwei
+
+<img class="img-natural" src="/media/brand/icons/icon-anatomy-1.png" alt="Bild" />
+
+jo
 
 <Alert
-	variant="default"
-	title="Diese Seite ist im Aufbau"
-	description="Die verbindlichen Inhalte zur Pride-Kommunikation werden vom Brand-Team gepflegt. Unten steht die Struktur, die hier mit ZEIT-spezifischem Inhalt gefüllt wird."
+	title="Test"
+	description="Testtesttest"
 />
 
-## Haltung
 
-Wofür DIE ZEIT bei Pride steht und welche Grundsätze die Kommunikation tragen —
-jeweils mit einem Satz, was sie konkret bedeuten.
+<DoDont
+	type="dont"
+	caption="Lorem"
+	imgSrc="/media/brand/icons/icon-anatomy-2.png"
+	content="Lorem ipsum"
+	strikeThrough={true}
+/>
 
-## Visuelle Umsetzung
 
-Wie Logo, Farbe und Bildsprache im Pride-Kontext eingesetzt werden (und wo die
-Grenzen liegen) — mit Verweisen auf die jeweiligen Brand-Seiten.
+<Color
+	title="Black"
+	description="Farbe"
+	fontColorCustomProperty="#000000"
+	borderColor="#cccccc"
+	showValue={true}
+/>
 
-## Sprache & Tonalität
 
-Wie wir über Pride sprechen: respektvoll, präzise, ohne Vereinnahmung. Konkrete
-Formulierungshilfen kommen hier hin.
+<TextColor
+	title="Text Farbfeld"
+	description="Das ist ein Textfarbfeld"
+/>
+
+
+<Lightbox
+	src="/media/brand/icons/icon-anatomy-2.png"
+	alt="Text"
+	caption="Unterschrift"
+/>
+
+
+<VideoPlayer
+	src="/media/brand/animation/motion.mp4"
+	title="Video"
+/>
+
+
+<DownloadSpecimen
+	variant="figma"
+	title="Lorem"
+	subtitle="untertietel"
+	url="http://www.zeit.de"
+/>
+
+
+<Card
+	title="tet"
+	description="testest"
+	url="https://w"
+	badge="test"
+	badgeVariant="ready"
+/>
+
+
+<Grid columns={2} auto={true}>
+	<Color
+		title="eins"
+		description="text"
+		colorCustomProperty="--ds-accent"
+		fontColorCustomProperty="#ccc"
+		borderColor="--ds-accent-brand"
+		showValue={true}
+	/>
+	<Color
+		title="zwei"
+		description="text"
+		colorCustomProperty="--ds-border-soft"
+		fontColorCustomProperty="#333"
+		copyHex={false}
+	/>
+</Grid>
+
+
+<DoDontGroup columns={4}>
+	<DoDont
+		caption="do"
+		imgSrc="/media/brand/icons/icon-anatomy-1.png"
+	/>
+	<DoDont
+		type="dont"
+		caption="dont"
+		imgSrc="/media/brand/icons/icon-anatomy-2.png"
+		strikeThrough={true}
+	/>
+</DoDontGroup>
+
+
+<Grid columns={4} auto={true}>
+	<Card
+		title="jo"
+		description="jo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojo"
+		description="jojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojojo"
+		description="jojojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojojojo"
+		description="jojojojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+</Grid>
