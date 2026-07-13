@@ -8,7 +8,7 @@
   Text-auf-Fläche-Paare, live berechnet, mit AA/AAA-Badge.
 -->
 <script lang="ts">
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 
 	export type RoleItem = { token: string; raw: string; usage: string };
 	export type RoleGroup = { titel: string; beschreibung?: string; rollen: RoleItem[] };
@@ -80,8 +80,7 @@
 							<span class="sw" style="background:{r.wert}"></span>
 							<div class="ident">
 								<span class="name-line">
-									<code class="name">{r.token}</code>
-									<CopyButton value={r.token} ariaLabel={`Rolle ${r.token} kopieren`} class="ref-copy" />
+									<TokenPill value={r.token} />
 								</span>
 								<span class="usage">{r.usage}</span>
 							</div>
@@ -181,10 +180,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
-	}
-	.name {
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
+		min-width: 0;
 	}
 	.usage {
 		font-size: var(--ds-text-xs);

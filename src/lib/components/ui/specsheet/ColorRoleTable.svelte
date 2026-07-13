@@ -8,7 +8,7 @@
 -->
 <script lang="ts">
 	import type { ColorRoles } from '$types/spec';
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 
 	let { farbrollen = null }: { farbrollen?: ColorRoles | null } = $props();
 
@@ -56,15 +56,12 @@
 								{#if token === 'none'}
 									<span class="cr-cell">
 										<span class="sw sw-none" title="Kein Fill"></span>
-										<span class="cr-token cr-none">none</span>
+										<TokenPill value="none" copy={false} class="cr-none" />
 									</span>
 								{:else if token}
 									<span class="cr-cell">
 										<span class="sw" style="background:{resolved[token] || 'transparent'}"></span>
-										<span class="cr-token">
-											<code>{token}</code>
-											<CopyButton value={token} ariaLabel={`${token} kopieren`} class="cr-copy" />
-										</span>
+										<TokenPill value={token} />
 									</span>
 								{:else}
 									<span class="cr-dash">—</span>
@@ -123,22 +120,6 @@
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.cr-token {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-	}
-	.cr code {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		white-space: nowrap;
-	}
-	.cr-none {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-		font-style: italic;
-	}
 	.cr-dash {
 		color: var(--ds-text-faint);
 	}
@@ -158,15 +139,5 @@
 		color: var(--ds-text-body);
 		min-width: 180px;
 		font-size: var(--ds-text-sm);
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.cr-copy) {
-		--copy-icon-size: 13px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.cr-copy:hover) {
-			color: var(--ds-text);
-		}
 	}
 </style>

@@ -9,6 +9,8 @@
   echte --z-ds-space-*-Token, per Prop überschreibbar → wiederverwendbar.
 -->
 <script lang="ts">
+	import { TokenPill } from '$components/ui/token-pill';
+
 	let {
 		paddingBlock = '--z-ds-space-10',
 		paddingInline = '--z-ds-space-16',
@@ -35,11 +37,11 @@
 		</div>
 		<ul class="sc-legend">
 			<li>
-				<span class="sc-swatch"></span><code>{short(paddingBlock)}</code>
+				<span class="sc-swatch"></span><TokenPill value={paddingBlock} label={short(paddingBlock)} copy={false} />
 				<span class="sc-dim">vertikal</span>
 			</li>
 			<li>
-				<span class="sc-swatch"></span><code>{short(paddingInline)}</code>
+				<span class="sc-swatch"></span><TokenPill value={paddingInline} label={short(paddingInline)} copy={false} />
 				<span class="sc-dim">horizontal</span>
 			</li>
 		</ul>
@@ -56,7 +58,7 @@
 		</div>
 		<ul class="sc-legend">
 			<li>
-				<span class="sc-swatch"></span><code>{short(gap)}</code>
+				<span class="sc-swatch"></span><TokenPill value={gap} label={short(gap)} copy={false} />
 				<span class="sc-dim">gap</span>
 			</li>
 		</ul>
@@ -166,11 +168,6 @@
 		);
 		border: 1px dashed var(--ds-accent);
 		border-radius: var(--ds-radius-xs);
-	}
-	.sc-legend code {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-body);
 	}
 	.sc-dim {
 		color: var(--ds-text-muted);

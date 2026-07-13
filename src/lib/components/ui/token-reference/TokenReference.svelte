@@ -9,7 +9,7 @@
   (kein Drift zum Upstream-Paket) — dieselbe Auflösung wie foundation-tokens.ts.
 -->
 <script lang="ts">
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 	import { TOKEN_USAGE } from '$data/catalog';
 	import {
 		FOUNDATION_TOKENS,
@@ -62,12 +62,7 @@
 							{/if}
 							<div class="ident">
 								<span class="name-line">
-									<code class="name">{t.name}</code>
-									<CopyButton
-										value={t.name}
-										ariaLabel={`Token-Namen ${t.name} kopieren`}
-										class="ref-copy"
-									/>
+									<TokenPill value={t.name} />
 								</span>
 								{#if t.usage}<span class="usage">{t.usage}</span>{/if}
 								{#if t.usedBy.length}
@@ -80,13 +75,10 @@
 								{/if}
 							</div>
 							<span class="val-line">
-								<code class="val">{t.wert}</code>
 								{#if t.wert}
-									<CopyButton
-										value={t.wert}
-										ariaLabel={`Wert ${t.wert} von ${t.name} kopieren`}
-										class="ref-copy"
-									/>
+									<TokenPill value={t.wert} />
+								{:else}
+									<code class="val">{t.wert}</code>
 								{/if}
 							</span>
 						</li>
@@ -169,12 +161,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
-	}
-	.name {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		overflow-wrap: anywhere;
+		min-width: 0;
 	}
 	.usage {
 		font-size: var(--ds-text-sm);
@@ -192,16 +179,6 @@
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.ref-copy) {
-		--copy-icon-size: 14px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.ref-copy:hover) {
-			color: var(--ds-text);
-		}
 	}
 	@media (max-width: 560px) {
 		.row,

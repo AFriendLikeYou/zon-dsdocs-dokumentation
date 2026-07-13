@@ -1,6 +1,7 @@
 <!-- MeasureTable.svelte — Maße als native, adaptive Tabelle (Specs-Tab). -->
 <script lang="ts">
 	import type { Masse, MasseValue } from '$types/spec';
+	import { TokenPill } from '$components/ui/token-pill';
 	let { masse = null }: { masse?: Masse | null } = $props();
 
 	// Werte können string (nur px) ODER { px, token, herkunft } sein → beides unterstützen.
@@ -23,28 +24,28 @@
 						><th>Höhe</th><td
 							>{px(masse.hoehe)} px{#if herk(masse.hoehe)}<span class="herk"
 									>{herk(masse.hoehe)}</span
-								>{/if}{#if tok(masse.hoehe)}<span class="tok">{tok(masse.hoehe)}</span>{/if}</td
+								>{/if}{#if tok(masse.hoehe)}<span class="tok"><TokenPill value={tok(masse.hoehe)!} /></span>{/if}</td
 						></tr
 					>{/if}
 				{#if masse.breite}<tr
 						><th>Breite</th><td
 							>{px(masse.breite)} px{#if herk(masse.breite)}<span class="herk"
 									>{herk(masse.breite)}</span
-								>{/if}{#if tok(masse.breite)}<span class="tok">{tok(masse.breite)}</span>{/if}</td
+								>{/if}{#if tok(masse.breite)}<span class="tok"><TokenPill value={tok(masse.breite)!} /></span>{/if}</td
 						></tr
 					>{/if}
 				{#if masse.padding}<tr
 						><th>Padding</th><td
 							>{px(masse.padding)}{#if herk(masse.padding)}<span class="herk"
 									>{herk(masse.padding)}</span
-								>{/if}{#if tok(masse.padding)}<span class="tok">{tok(masse.padding)}</span>{/if}</td
+								>{/if}{#if tok(masse.padding)}<span class="tok"><TokenPill value={tok(masse.padding)!} /></span>{/if}</td
 						></tr
 					>{/if}
 				{#if masse.radius}<tr
 						><th>Radius</th><td
 							>{px(masse.radius)} px{#if herk(masse.radius)}<span class="herk"
 									>{herk(masse.radius)}</span
-								>{/if}{#if tok(masse.radius)}<span class="tok">{tok(masse.radius)}</span>{/if}</td
+								>{/if}{#if tok(masse.radius)}<span class="tok"><TokenPill value={tok(masse.radius)!} /></span>{/if}</td
 						></tr
 					>{/if}
 			</tbody>

@@ -10,7 +10,7 @@
   optional: lineHeightToken (--z-ds-lineheight-*) setzt die Zeilenhöhe der Rolle.
 -->
 <script lang="ts">
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 
 	export type TypeRole = {
 		/** fontsize-Token, z. B. '--z-ds-fontsize-34'. */
@@ -73,22 +73,12 @@
 				<span class="usage">{role.usage}</span>
 				<div class="tokens">
 					<span class="chip">
-						<code>{role.token}</code>
-						<CopyButton
-							value={role.token}
-							ariaLabel={`Token ${role.token} kopieren`}
-							class="ts-copy"
-						/>
+						<TokenPill value={role.token} />
 						{#if px[role.token]}<span class="px">{px[role.token]}</span>{/if}
 					</span>
 					{#if role.lineHeightToken}
 						<span class="chip">
-							<code>{role.lineHeightToken}</code>
-							<CopyButton
-								value={role.lineHeightToken}
-								ariaLabel={`Token ${role.lineHeightToken} kopieren`}
-								class="ts-copy"
-							/>
+							<TokenPill value={role.lineHeightToken} />
 						</span>
 					{/if}
 				</div>
@@ -166,25 +156,10 @@
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.chip code {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
 	.px {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-faint);
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.ts-copy) {
-		--copy-icon-size: 13px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.ts-copy:hover) {
-			color: var(--ds-text);
-		}
 	}
 	@media (max-width: 640px) {
 		.row {

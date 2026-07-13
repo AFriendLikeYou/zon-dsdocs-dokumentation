@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { TokenPill } from '$components/ui/token-pill';
 	import { contrastForPair, classifyContrast, formatRatio } from './contrast';
 	import type { ContrastLevel } from './contrast';
 
@@ -98,7 +99,7 @@
 					{#each backgrounds as bg (bg.token)}
 						<th scope="col">
 							<span class="head-label">{bg.label ?? short(bg.token)}</span>
-							<code>{bg.token}</code>
+							<TokenPill value={bg.token} copy={false} class="head-pill" />
 						</th>
 					{/each}
 				</tr>
@@ -108,7 +109,7 @@
 					<tr>
 						<th scope="row">
 							<span class="head-label">{row.text.label ?? short(row.text.token)}</span>
-							<code>{row.text.token}</code>
+							<TokenPill value={row.text.token} copy={false} class="head-pill" />
 						</th>
 						{#each row.cells as cell (cell.bg.token)}
 							<td>
@@ -183,11 +184,8 @@
 		font-size: var(--z-ds-fontsize-14);
 	}
 
-	code {
-		display: block;
-		font-size: 0.625rem;
-		font-weight: 400;
-		opacity: 0.7;
+	/* Token unter dem Kopf-Label (statische Pille) etwas absetzen. */
+	:global(.head-pill) {
 		margin-top: 0.15rem;
 	}
 

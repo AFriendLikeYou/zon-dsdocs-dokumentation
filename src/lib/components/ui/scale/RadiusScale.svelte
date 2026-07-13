@@ -4,7 +4,7 @@
   Numerischer Wert live aus dem Stylesheet (kein Drift zum DS-Paket).
 -->
 <script lang="ts">
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 
 	let { items = [] }: { items?: { token: string; usage?: string }[] } = $props();
 
@@ -30,17 +30,11 @@
 			<div class="swatch" style="border-radius: var({it.token})"></div>
 			<div class="meta">
 				<span class="name-line">
-					<code class="name">{it.token}</code>
-					<CopyButton value={it.token} ariaLabel={`Token ${it.token} kopieren`} class="rad-copy" />
+					<TokenPill value={it.token} />
 				</span>
 				<span class="val-line">
-					<span class="val">{label(vals[it.token] ?? '')}</span>
 					{#if vals[it.token]}
-						<CopyButton
-							value={vals[it.token]}
-							ariaLabel={`Wert ${vals[it.token]} von ${it.token} kopieren`}
-							class="rad-copy"
-						/>
+						<TokenPill value={vals[it.token]} label={label(vals[it.token])} />
 					{/if}
 				</span>
 				{#if it.usage}<span class="use">{it.usage}</span>{/if}
@@ -83,29 +77,9 @@
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.name {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text);
-	}
-	.val {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
 	.use {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 		margin-top: 2px;
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.rad-copy) {
-		--copy-icon-size: 13px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.rad-copy:hover) {
-			color: var(--ds-text);
-		}
 	}
 </style>

@@ -6,7 +6,7 @@
   auch bei Media-Query-abhängigen Stufen wie xxl.
 -->
 <script lang="ts">
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 
 	let { tokens = [] }: { tokens?: string[] } = $props();
 
@@ -32,18 +32,10 @@
 			<span class="step">{short(t)}</span>
 			<span class="track"><span class="bar" style="width: var({t})"></span></span>
 			<span class="info">
-				<span class="val">{px[t] ?? ''} px</span>
-				<code class="name">{t}</code>
-				<CopyButton value={t} ariaLabel={`Token ${t} kopieren`} class="scale-copy" />
 				{#if px[t]}
-					<CopyButton
-						value={`${px[t]}px`}
-						ariaLabel={`Wert ${px[t]}px von ${t} kopieren`}
-						class="scale-copy"
-					>
-						<span class="copy-px">px</span>
-					</CopyButton>
+					<TokenPill value={`${px[t]}px`} label={`${px[t]} px`} />
 				{/if}
+				<TokenPill value={t} class="name-pill" />
 			</span>
 		</li>
 	{/each}
@@ -82,41 +74,14 @@
 	}
 	.info {
 		display: flex;
-		align-items: baseline;
-		gap: var(--z-ds-space-12);
+		align-items: center;
+		gap: var(--z-ds-space-8);
 		white-space: nowrap;
 	}
-	.val {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		min-width: 3.5rem;
-	}
-	/* Plainer Mono-Name — kein Code-Pill (Grid-Spalte soll nicht überlappen). */
-	.name {
-		background: none;
-		padding: 0;
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
+	/* Token-Namen-Pille auf schmalen Viewports ausblenden (px-Wert genügt). */
 	@media (max-width: 560px) {
-		.name {
+		:global(.name-pill) {
 			display: none;
 		}
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.scale-copy) {
-		--copy-icon-size: 13px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.scale-copy:hover) {
-			color: var(--ds-text);
-		}
-	}
-	.copy-px {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
 	}
 </style>

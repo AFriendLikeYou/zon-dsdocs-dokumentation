@@ -1,7 +1,7 @@
 <!-- TokenTable.svelte — Tokens als native, adaptive Tabelle (Specs-Tab). -->
 <script lang="ts">
 	import type { TokenGroup } from '$types/spec';
-	import { CopyButton } from '$components/ui/copy-button';
+	import { TokenPill } from '$components/ui/token-pill';
 	let { tokens = [] }: { tokens?: TokenGroup[] } = $props();
 </script>
 
@@ -24,10 +24,7 @@
 								{/if}
 							</td>
 							<td>
-								<span class="name-cell">
-									<code>{t.name}</code>
-									<CopyButton value={t.name} ariaLabel={`${t.name} kopieren`} class="tok-copy" />
-								</span>
+								<TokenPill value={t.name} />
 							</td>
 							<td class="val">{t.wert}</td>
 						</tr>
@@ -70,24 +67,6 @@
 		color: var(--ds-text-body);
 		font-size: var(--ds-text-sm);
 		max-width: 60ch;
-	}
-	.tok code {
-		font-family: var(--ds-font-mono);
-	}
-	.name-cell {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
-	}
-	/* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-	:global(.tok-copy) {
-		--copy-icon-size: 14px;
-		color: var(--ds-text-faint);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		:global(.tok-copy:hover) {
-			color: var(--ds-text);
-		}
 	}
 	.val {
 		text-align: right;
