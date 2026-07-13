@@ -103,6 +103,30 @@ pattern.css, Ebene ②), Template-ARIA (Ebene ③), alle Mensch-Felder (Ebene �
 Gleiche `figma-raw.json` ⇒ identischer Entwurf. Nach Prüfung/Ergänzung den Entwurf
 zu `model.json` promoten (umbenennen bzw. mergen) — erst dann exportieren.
 
+### 1d · Headless statt MCP (`fetch.mjs`) + Ein-Befehl-Orchestrator (`import.mjs`)
+
+Statt die `figma-raw.json` aus MCP-Ausgaben zu bauen, zieht sie **`fetch.mjs`**
+headless über die Figma-REST-API (exakt, tokengünstig; `FIGMA_TOKEN` in `.env`):
+
+```bash
+node tooling/zeit-de-exporter/fetch.mjs '<figma-url>' src/routes/product/components/<kebab>
+```
+
+Grenze: Variablen-**Namen** braucht die REST-Route Enterprise. Ohne Enterprise
+schreibt sie `*TokenId`-Felder ohne Namen und meldet das — die Namen dann via
+Figma-MCP `get_variable_defs` ergänzen (nie raten).
+
+**`import.mjs`** bündelt den mechanischen Teil (`fetch` → Gate → `draft`) zu einem
+Befehl und stoppt an genau diesem Gate 1, wenn die Token-Namen fehlen:
+
+```bash
+node tooling/zeit-de-exporter/import.mjs '<figma-url>' <kebab> [--draft]
+```
+
+Ohne `--draft`: Fetch läuft, dann TODO-Ausgabe (Namen ergänzen). Sind die Namen da
+(oder `--draft` gesetzt), läuft `draft` gleich mit → `model.draft.json`. Die zwei
+menschlichen Gates (Token-Namen, dann `pattern.css`/`content.ts`) bleiben bewusst.
+
 ## 2 · `model.json` bauen (originalgetreu)
 
 Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
