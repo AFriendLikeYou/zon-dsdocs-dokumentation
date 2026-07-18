@@ -183,7 +183,7 @@
 		white-space: nowrap;
 	}
 	.block-preview__token {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-faint, var(--ds-text-muted));
 	}
@@ -209,7 +209,7 @@
 		color: var(--ds-text-body);
 	}
 	.chip__key {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		color: var(--ds-text-muted);
 		font-size: 0.9em;
 	}

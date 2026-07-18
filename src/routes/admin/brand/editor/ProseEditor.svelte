@@ -248,7 +248,7 @@
 		padding-left: 1.2em;
 	}
 	.pe-preview :global(code) {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: 0.92em;
 		background: var(--ds-surface-raised, var(--ds-surface));
 		border-radius: var(--ds-radius-xs, 0.25rem);
@@ -275,7 +275,7 @@
 		padding: var(--z-ds-space-6) var(--z-ds-space-s);
 	}
 	.pe-hint code {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 	}
 	.pe-fix {
 		border: 1px solid var(--ds-border);

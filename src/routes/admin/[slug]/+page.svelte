@@ -684,7 +684,7 @@
 		margin-top: 0;
 	}
 	.mono-input {
-		font-family: var(--z-ds-font-mono, ui-monospace, monospace);
+		font-family: var(--ds-font-mono, ui-monospace, monospace);
 		font-size: var(--ds-text-xs);
 	}
 	@media (max-width: 34rem) {
@@ -819,7 +819,7 @@
 		cursor: not-allowed;
 	}
 	.savebar kbd {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: 0.72em;
 		opacity: 0.75;
 		margin-left: 0.3em;

@@ -48,7 +48,7 @@
 		background: var(--ds-surface-raised);
 	}
 	.flash :global(code) {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: 0.9em;
 	}
 </style>

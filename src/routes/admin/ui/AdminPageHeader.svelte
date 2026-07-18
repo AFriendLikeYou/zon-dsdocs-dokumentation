@@ -88,7 +88,7 @@
 	/* :global, weil die Beschreibung als children-Snippet von der Seite kommt und
 	   deren <code>/<strong> sonst nicht vom Scope dieser Komponente erreicht wird. */
 	.lead :global(code) {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: 0.9em;
 		background: var(--ds-surface-raised);
 		border-radius: var(--ds-radius-xs);

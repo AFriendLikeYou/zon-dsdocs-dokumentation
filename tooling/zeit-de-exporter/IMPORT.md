@@ -127,6 +127,28 @@ Ohne `--draft`: Fetch läuft, dann TODO-Ausgabe (Namen ergänzen). Sind die Name
 (oder `--draft` gesetzt), läuft `draft` gleich mit → `model.draft.json`. Die zwei
 menschlichen Gates (Token-Namen, dann `pattern.css`/`content.ts`) bleiben bewusst.
 
+### 1e · Pipeline-Stufen im Blick (`import.mjs --status`)
+
+Wo steht welche Komponente? `--status` scannt `src/routes/product/components/*/`
+und zeigt je Komponente, welche Stufen-Artefakte vorliegen — ohne url/slug:
+
+```bash
+node tooling/zeit-de-exporter/import.mjs --status
+```
+
+Spalten (Reihenfolge = Pipeline): `raw` (`figma-raw.json`) · `draft`
+(`model.draft.json`) · `model` (`model.json`) · `pattern` (`pattern.css`) ·
+`content` (`content.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
+**Hinweis** meldet:
+
+- **`raw fehlt`** — kein Drift-Fixture (`figma-raw.json`) hinterlegt.
+- **`Gate 1`** — `figma-raw.json` da, aber Token-Namen fehlen (`isDegraded`); vor
+  dem Draft die `--z-ds-*`-Namen ergänzen (s. o.).
+- **`draft offen`** — ein `model.draft.json` liegt vor, ist aber noch nicht als
+  aktuelles `model.json` promotet (model fehlt oder ist neuer).
+
+Die Fußzeile summiert die Stufen (`raw-Fixtures: 3/12 · model.json: 11/12 · …`).
+
 ## 2 · `model.json` bauen (originalgetreu)
 
 Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:

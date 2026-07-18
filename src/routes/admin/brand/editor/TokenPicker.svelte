@@ -142,7 +142,7 @@
 		flex: 1 1 auto;
 		min-width: 0;
 		font: inherit;
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text);
 		background: var(--ds-surface);
@@ -195,7 +195,7 @@
 		background: rgb(from var(--ds-accent) r g b / 0.12);
 	}
 	.token-picker__name {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-body);
 		overflow: hidden;

@@ -132,7 +132,7 @@
 		margin: 0;
 	}
 	.hint code {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 	}
 	.list {
 		list-style: none;

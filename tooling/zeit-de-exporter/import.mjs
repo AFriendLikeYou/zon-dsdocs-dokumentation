@@ -3,6 +3,7 @@
  * import.mjs — dünner Orchestrator der Import-Pipeline (fetch → [Gate] → draft).
  *
  *   node tooling/zeit-de-exporter/import.mjs '<figma-url>' <slug> [--draft]
+ *   node tooling/zeit-de-exporter/import.mjs --status   # Pipeline-Stufen-Übersicht
  *
  * Bündelt den MECHANISCHEN Teil (Figma-REST-Fetch + deterministischer Draft) zu
  * EINEM Befehl und bleibt an den zwei menschlichen Kontrollpunkten bewusst
@@ -21,7 +22,7 @@
  * kein Logik-Duplikat). fetch.mjs/draft.mjs bleiben unverändert einzeln nutzbar.
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -36,8 +37,126 @@ export function isDegraded(rawText) {
 	return hasTokenIds && !hasTokenNames;
 }
 
+// ── --status: Pipeline-Stufen-Übersicht ──────────────────────────────────────
+// Zeigt pro Komponente, welche Stufen-Artefakte vorliegen. PURE Kernfunktionen
+// (Datenmodell rein → Zeilen/Summen/Tabelle); der fs-Zugriff liegt in gatherStatus().
+
+/** Reihenfolge der Stufen-Artefakte (Header-Label → Dateiname). */
+export const STAGE_COLUMNS = [
+	['raw', 'figma-raw.json'],
+	['draft', 'model.draft.json'],
+	['model', 'model.json'],
+	['pattern', 'pattern.css'],
+	['content', 'content.json'],
+	['+page', '+page.svx']
+];
+
+/**
+ * Reines Statusmodell → Zeilen + Summen. `entries`: je Komponente
+ * { slug, raw, draft, model, pattern, content, page, degraded, draftOpen } (Booleans).
+ */
+export function statusForDirs(entries) {
+	const rows = entries.map((e) => {
+		const hinweise = [];
+		if (!e.raw) hinweise.push('raw fehlt'); // kein Drift-Fixture
+		else if (e.degraded) hinweise.push('Gate 1'); // raw da, aber Token-Namen fehlen
+		if (e.draftOpen) hinweise.push('draft offen'); // draft da, model.json neuer/fehlt
+		return {
+			slug: e.slug,
+			cells: {
+				raw: e.raw,
+				draft: e.draft,
+				model: e.model,
+				pattern: e.pattern,
+				content: e.content,
+				page: e.page
+			},
+			hinweis: hinweise.join(', ')
+		};
+	});
+	const count = (pred) => entries.filter(pred).length;
+	const totals = {
+		total: entries.length,
+		raw: count((e) => e.raw),
+		model: count((e) => e.model),
+		page: count((e) => e.page),
+		gate1: count((e) => e.raw && e.degraded),
+		draftOpen: count((e) => e.draftOpen)
+	};
+	return { rows, totals };
+}
+
+/** Reines Statusmodell → druckbare Tabelle (String). */
+export function formatStatus({ rows, totals }) {
+	const keys = ['raw', 'draft', 'model', 'pattern', 'content', 'page'];
+	const labels = STAGE_COLUMNS.map(([label]) => label);
+	const glyph = (b) => (b ? '✓' : '–');
+	const width = (s) => [...s].length;
+	const pad = (s, w) => s + ' '.repeat(Math.max(0, w - width(s)));
+
+	const slugW = Math.max(width('Komponente'), ...rows.map((r) => width(r.slug)));
+	const colW = labels.map((l) => width(l));
+
+	const header = [
+		pad('Komponente', slugW),
+		...labels.map((l, i) => pad(l, colW[i])),
+		'Hinweis'
+	].join('  ');
+
+	const body = rows.map((r) => {
+		const cells = keys.map((k, i) => pad(glyph(r.cells[k]), colW[i]));
+		return [pad(r.slug, slugW), ...cells, r.hinweis].join('  ');
+	});
+
+	const footer =
+		`raw-Fixtures: ${totals.raw}/${totals.total} · ` +
+		`model.json: ${totals.model}/${totals.total} · ` +
+		`+page.svx: ${totals.page}/${totals.total} · ` +
+		`Gate 1: ${totals.gate1} · draft offen: ${totals.draftOpen}`;
+
+	return [header, ...body, '', footer].join('\n');
+}
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
+
+/** fs-Sammlung: Stufen-Artefakte je Komponentenordner → Statusmodell für statusForDirs(). */
+function gatherStatus() {
+	const base = path.join(REPO, 'src/routes/product/components');
+	if (!existsSync(base)) return [];
+	const slugs = readdirSync(base, { withFileTypes: true })
+		.filter((e) => e.isDirectory())
+		.map((e) => e.name)
+		.sort();
+	return slugs.map((slug) => {
+		const dir = path.join(base, slug);
+		const has = (f) => existsSync(path.join(dir, f));
+		const raw = has('figma-raw.json');
+		const draft = has('model.draft.json');
+		const model = has('model.json');
+		const degraded = raw && isDegraded(readFileSync(path.join(dir, 'figma-raw.json'), 'utf8'));
+		// draft offen: draft liegt vor, ist aber (noch) nicht als aktuelles model.json promotet
+		// — entweder model.json fehlt oder model.json ist neuer (draft = Altlast/offen).
+		let draftOpen = false;
+		if (draft) {
+			draftOpen = !model
+				? true
+				: statSync(path.join(dir, 'model.json')).mtimeMs >
+					statSync(path.join(dir, 'model.draft.json')).mtimeMs;
+		}
+		return {
+			slug,
+			raw,
+			draft,
+			model,
+			pattern: has('pattern.css'),
+			content: has('content.json'),
+			page: has('+page.svx'),
+			degraded,
+			draftOpen
+		};
+	});
+}
 
 /** Ein Pipeline-Skript als Child-Prozess ausführen (erbt stdio, cwd = Repo-Root). */
 function runStep(script, args) {
@@ -53,9 +172,16 @@ if (isCli) {
 	const [, , url, slug, ...rest] = process.argv;
 	const forceDraft = rest.includes('--draft');
 
+	// --status: nur Übersicht, kein url/slug nötig.
+	if (process.argv.includes('--status')) {
+		console.log(formatStatus(statusForDirs(gatherStatus())));
+		process.exit(0);
+	}
+
 	if (!url || !slug || url.startsWith('--')) {
 		console.error(
-			"Aufruf: node tooling/zeit-de-exporter/import.mjs '<figma-url>' <slug> [--draft]"
+			"Aufruf: node tooling/zeit-de-exporter/import.mjs '<figma-url>' <slug> [--draft]\n" +
+				'        node tooling/zeit-de-exporter/import.mjs --status   # Pipeline-Stufen-Übersicht'
 		);
 		process.exit(1);
 	}

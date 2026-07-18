@@ -1108,7 +1108,7 @@
 		padding: var(--z-ds-space-8) var(--z-ds-space-l);
 	}
 	.savebar kbd {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: 0.72em;
 		opacity: 0.75;
 		margin-left: 0.3em;

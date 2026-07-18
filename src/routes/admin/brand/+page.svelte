@@ -473,7 +473,7 @@
 		margin-left: auto;
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 	}
 	.count {
 		font-size: var(--ds-text-xs);
@@ -574,13 +574,13 @@
 		gap: var(--z-ds-space-6);
 	}
 	.np-prefix {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 		white-space: nowrap;
 	}
 	.np-slug input {
-		font-family: var(--z-ds-font-mono, monospace);
+		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 	}
 	.np-actions {
