@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import type { MenuItem, BadgeVariant } from '$data/navigation';
 	import { Badge } from '$components/ui/badge';
-	import { ChevronRightIcon, LockOpenIcon, LockClosedIcon } from '$lib/icons';
+	import { ChevronIcon, LockOpenIcon, LockClosedIcon } from '$lib/icons';
 
 	type Props = {
 		title: string;
@@ -47,7 +47,7 @@
 		{/if}
 	</span>
 	{#if items.length > 0}
-		<ChevronRightIcon class="chevron-icon {isOpen ? 'rotate' : ''}" />
+		<ChevronIcon direction="right" class="chevron-icon {isOpen ? 'rotate' : ''}" />
 	{/if}
 {/snippet}
 

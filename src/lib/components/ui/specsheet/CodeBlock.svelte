@@ -11,7 +11,7 @@
 -->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
-	import { ChevronDownIcon } from '$lib/icons';
+	import { ChevronIcon } from '$lib/icons';
 
 	type Lang = 'html' | 'css' | 'svelte';
 	let {
@@ -130,7 +130,7 @@
 		<div class="code-block__expand">
 			<button type="button" onclick={() => (expanded = !expanded)}>
 				{expanded ? 'Code einklappen' : `Code aufklappen (${lineCount} Zeilen)`}
-				<ChevronDownIcon
+				<ChevronIcon
 					width={10}
 					height={10}
 					stroke-width="2.5"

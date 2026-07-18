@@ -1,20 +1,27 @@
 # Icon-Bibliothek (Doku-APP-UI)
 
 Zentraler Ort für **alle UI-Icons der Doku-App** — Navbar, Sidebar, Footer,
-Playground, Specsheet, CodeBlock, CMS-Editor. Eine Datei pro Icon, gruppiert
-nach Verwendungsbereich. Zum Austauschen einfach das `<svg>` in der Datei ersetzen.
+Playground, Specsheet, CodeBlock, CMS-Editor. Eine Datei pro Icon.
 
 > **Wichtig:** Das sind die Icons der **Doku-App selbst**, NICHT das dokumentierte
 > ZEIT-Designsystem. Die dokumentierten ZEIT-DS-Icons unter `static/` bleiben
 > unangetastet (das ist Content, gerendert über `ui/icons/IconGridWithSearch`).
 
-## Bereiche
+## Konvention: flach + ein Barrel
 
-| Ordner       | Zweck                              | Beispiele                                    |
-| ------------ | ---------------------------------- | -------------------------------------------- |
-| `specsheet/` | Doku-Ansichten (Playground/Specs)  | Sun, Moon, Copy, Check, Download, Reset, ChevronDown |
-| `nav/`       | App-Chrome (Navbar/Sidebar/Footer) | Github, Search, Close, ChevronRight, Login, ArrowLeft/Right, LockOpen/Closed |
-| `cms/`       | CMS-Editor (`/admin/brand`)        | via `<Icon name="…" />`-Dispatcher (s. `cms/README.md`) |
+Alle Icons liegen **flach** in `$lib/icons` und werden über **ein** Barrel
+(`index.ts`) exportiert. Neue Icons: flach anlegen, im Barrel exportieren; die
+**Größe bestimmt der Consumer** (über `width`/`height`-Props ODER CSS), nie das
+Icon selbst. Ein Icon wird genau **einmal** angelegt und von allen Bereichen
+geteilt (kein nav-/specsheet-Duplikat mehr) — z. B. `SunIcon`/`MoonIcon` (Light/
+Dark-Symbol in ThemeSwitch **und** StageToggle) und `ChevronIcon` mit Prop
+`direction="up" | "down" | "left" | "right"` (rotiert die Glyphe am `<path>`,
+sodass Consumer das `<svg>` zusätzlich frei rotieren/animieren können).
+
+**Einzige Ausnahme:** `cms/` — der CMS-Block-Registry-Dispatcher (`<Icon
+name="…" />`, s. `cms/README.md`), ausschließlich von `admin/` konsumiert. Bleibt
+ein eigener Bounded Context mit eigenem Barrel und wird über das Haupt-Barrel
+re-exportiert.
 
 ## Konvention (eine Icon-Komponente)
 
@@ -38,8 +45,8 @@ nach Verwendungsbereich. Zum Austauschen einfach das `<svg>` in der Datei ersetz
 
 ## Neues Icon ergänzen
 
-1. Datei `<bereich>/<Name>Icon.svelte` nach obigem Muster anlegen.
-2. In `index.ts` exportieren (`export { default as <Name>Icon } from './<bereich>/<Name>Icon.svelte';`).
+1. Datei `<Name>Icon.svelte` (flach in `$lib/icons`) nach obigem Muster anlegen.
+2. In `index.ts` exportieren (`export { default as <Name>Icon } from './<Name>Icon.svelte';`).
 3. Verwenden: `import { <Name>Icon } from '$lib/icons';`.
 
 Sizing/Transform bleibt beim Aufrufer: `width`/`height` als Props ODER per CSS.

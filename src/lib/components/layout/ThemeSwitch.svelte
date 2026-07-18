@@ -3,7 +3,7 @@
 	import { setCookie } from '$lib/cookie';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { ThemeSystemIcon, ThemeLightIcon, ThemeDarkIcon } from '$lib/icons';
+	import { ThemeSystemIcon, SunIcon, MoonIcon } from '$lib/icons';
 	import type { Theme } from '$types/global';
 	let { currentTheme, type = 'radio' }: { currentTheme: Theme; type?: 'select' | 'radio' } =
 		$props();
@@ -86,7 +86,7 @@
 			/>
 			<label for="theme-switch-light">
 				<span class="sr-only">light</span>
-				<ThemeLightIcon />
+				<SunIcon />
 			</label>
 		</span>
 		<span class="theme-option">
@@ -101,7 +101,7 @@
 			/>
 			<label for="theme-switch-dark">
 				<span class="sr-only">dark</span>
-				<ThemeDarkIcon />
+				<MoonIcon />
 			</label>
 		</span>
 	</fieldset>

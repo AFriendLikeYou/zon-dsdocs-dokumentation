@@ -18,6 +18,10 @@ Seitengerüst, genau **eine** Instanz pro Seite (gemountet in `+layout.svelte`/N
 **Direktimport, keine Barrels** (Single-File-Chrome):
 `import Navbar from '$components/layout/Navbar.svelte';`
 
+`layout/` enthält auch seine **nur-intern konsumierten** Bausteine (`LoginButton`,
+`ThemeSwitch`, `GitHubEdit`, `ZeitBrandSite`, `toast/`); ein Umzug nach `ui/`
+erfolgt erst beim **zweiten** Consumer außerhalb von `layout/`.
+
 ### 2. `ui/<kebab>/` — alle wiederverwendbaren Bausteine
 
 Ein Ordner pro Modul, **jeder mit `index.ts`-Barrel**, Import immer über das Barrel:
