@@ -257,6 +257,12 @@
 		return rows;
 	});
 
+	/** Maß-Wert fürs Auge: „10 · 16" → „10 / 16", nackte Zahlen bekommen „ px" (Mockup-Duktus). */
+	const anzeigeWert = (px: string): string => {
+		const s = px.replace(/\s*·\s*/g, ' / ').trim();
+		return /[a-z%]/i.test(s) ? s : `${s} px`;
+	};
+
 	type SpacingRow = { label: string; px: string; token?: string; herkunft: Herkunft };
 	const spacingRows = $derived.by<SpacingRow[]>(() =>
 		(data.machine.spacing as { label?: string; px?: string; token?: string; herkunft?: Herkunft }[]).map(
@@ -604,7 +610,7 @@
 										<tr>
 											<td class="mz-table__label">{r.label}</td>
 											<td class="mz-table__value"
-												>{r.px}{#if r.token} <code>{r.token}</code>{/if}</td
+												>{anzeigeWert(r.px)}{#if r.token} <code>{r.token}</code>{/if}</td
 											>
 											<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
 										</tr>
@@ -620,7 +626,7 @@
 										<tr>
 											<td class="mz-table__label">{r.label}</td>
 											<td class="mz-table__value"
-												>{r.px}{#if r.token} <code>{r.token}</code>{/if}</td
+												>{anzeigeWert(r.px)}{#if r.token} <code>{r.token}</code>{/if}</td
 											>
 											<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
 										</tr>
@@ -1038,7 +1044,7 @@
 	/* ── EIN äußerer Karten-Container um den gesamten Editor (Delta 1) ──
 	   Hebt sich mit Hairline + 12px-Radius von der Seite ab. */
 	.editor-card {
-		background: var(--ds-surface);
+		background: var(--ds-surface-card);
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius-lg);
 		box-shadow: var(--ds-shadow-sm);
@@ -1252,9 +1258,10 @@
 		width: 100%;
 		border-collapse: collapse;
 	}
-	/* Maschinen-Zone → Trenner GESTRICHELT (dieselbe „nicht editierbar"-Sprache). */
+	/* Maschinen-Zone → Trenner GESTRICHELT (dieselbe „nicht editierbar"-Sprache).
+	   Zeilen-Rhythmus: kompakt, aber mit Luft (Sichtabnahme 19.07.). */
 	.mz-table td {
-		padding: var(--z-ds-space-6) var(--z-ds-space-8) var(--z-ds-space-6) 0;
+		padding: var(--z-ds-space-10) var(--z-ds-space-8) var(--z-ds-space-10) 0;
 		border-bottom: 1px dashed var(--ds-border);
 		vertical-align: middle;
 		font-size: var(--ds-text-sm);
@@ -1264,14 +1271,18 @@
 		border-bottom: none;
 	}
 	.mz-table__label {
-		color: var(--ds-text-muted);
+		/* Eine Stufe leiser als muted — die Werte tragen die Zeile, das Label ordnet nur ein. */
+		color: var(--ds-text-faint);
 		white-space: nowrap;
 		width: 1%;
+		min-width: 148px;
 		padding-right: var(--z-ds-space-m);
 	}
-	/* Wert-Spalte trägt die Zeile (Zahl + inline-Token) → nimmt den Restplatz. */
+	/* Wert-Spalte trägt die Zeile (Zahl + inline-Token) → nimmt den Restplatz;
+	   der Messwert selbst in voller Textfarbe (Mockup: Wert klar, Label gedämpft). */
 	.mz-table__value {
 		width: 100%;
+		color: var(--ds-text);
 	}
 	.mz-table__value--mono,
 	.mz-table__value code,
@@ -1295,7 +1306,12 @@
 	.mz-table__swatch {
 		width: 24px;
 	}
-	/* Token-Zeilen (Delta 5): Token-Name nimmt die Breite, Wert + Hinweis rechts. */
+	/* Token-Zeilen (Delta 5): Token-Name nimmt die Breite, Wert + Hinweis rechts.
+	   Bewusst KOMPAKTER als die Maße-Zeilen — viele Zeilen, reine Referenzliste. */
+	.mz-table--tokens td {
+		padding-top: var(--z-ds-space-8);
+		padding-bottom: var(--z-ds-space-8);
+	}
 	.mz-table--tokens .mz-table__token {
 		width: 100%;
 	}

@@ -131,6 +131,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
+		/* Nimmt den Restplatz: Chevron + Titel bleiben links beisammen, Pill rechts —
+		   sonst schiebt space-between den Titel in die Mitte. */
+		flex: 1 1 auto;
 		min-width: 0;
 	}
 	.machine-zone__title {
