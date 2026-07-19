@@ -4,15 +4,17 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
-	import { ImportIcon, PencilIcon, AlertTriangleIcon } from '$lib/icons';
-	import { Swatch } from '$components/ui/swatch';
+	import { ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
 	import { AdminFlash, Pill } from '../../../ui';
-	import ProvenanceChip from './ProvenanceChip.svelte';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
 	import CodeExamplesField from './CodeExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
+	import EditorialCard from './EditorialCard.svelte';
+	import SpecTable from './SpecTable.svelte';
+	import AnchorBar from './AnchorBar.svelte';
+	import DriftBanner from './DriftBanner.svelte';
 
 	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();
@@ -163,6 +165,54 @@
 		sec?.querySelector<HTMLElement>('.string-list__ghost, input, textarea, select')?.focus();
 	}
 
+	// Abschnitt ENTFERNEN (Gegenstück zur Ghost-Karte): leert die Felder des Abschnitts
+	// im State (Arrays → [], Strings → '') und klappt zur Ghost-Karte zurück. Kein
+	// Confirm — die Save-Bar schützt: nichts ist persistiert, bis gespeichert wird. Der
+	// leere State fällt im payload raus (delete-when-absent) → content.json bleibt schlank.
+	// Für die Override-Abschnitte (tokenHinweise/snippets) mit „leer = Maschine gewinnt"-
+	// Semantik heißt Entfernen konsequenterweise: alle Override-Inputs leeren.
+	async function removeSection(key: string, label: string) {
+		switch (key) {
+			case 'verwendung':
+				model.verwendung.nutzen = [];
+				model.verwendung.nichtNutzen = [];
+				break;
+			case 'doDont':
+				model.doDont.do = [];
+				model.doDont.dont = [];
+				break;
+			case 'wording':
+				model.wording = [];
+				break;
+			case 'a11y':
+				model.a11y = [];
+				break;
+			case 'komposition':
+				model.komposition = [];
+				break;
+			case 'verwandt':
+				model.verwandt = [];
+				break;
+			case 'codeBeispiele':
+				model.codeBeispiele = [];
+				break;
+			case 'tokenHinweise':
+				for (const name of Object.keys(model.tokenHinweise)) model.tokenHinweise[name] = '';
+				break;
+			case 'snippets':
+				model.codeSvelte = '';
+				model.repoCodeSvelte = '';
+				model.codeNote = '';
+				model.repoNote = '';
+				break;
+		}
+		expanded[key] = false;
+		toast?.add('Abschnitt geleert', `${label} — Speichern übernimmt es.`);
+		// Fokus zurück auf die Ghost-Karte (A11y: kein verwaister Fokus).
+		await tick();
+		document.getElementById(`ghost-${key}`)?.focus();
+	}
+
 	// State → content.json-Form. Leere Listen/Objekte weglassen (content.json bleibt
 	// schlank, check-content sauber). Nur editierbare Keys — Rest bleibt serverseitig.
 	const payload = $derived.by(() => {
@@ -256,12 +306,6 @@
 		}
 		return rows;
 	});
-
-	/** Maß-Wert fürs Auge: „10 · 16" → „10 / 16", nackte Zahlen bekommen „ px" (Mockup-Duktus). */
-	const anzeigeWert = (px: string): string => {
-		const s = px.replace(/\s*·\s*/g, ' / ').trim();
-		return /[a-z%]/i.test(s) ? s : `${s} px`;
-	};
 
 	type SpacingRow = { label: string; px: string; token?: string; herkunft: Herkunft };
 	const spacingRows = $derived.by<SpacingRow[]>(() =>
@@ -370,13 +414,6 @@
 		{ id: 'cluster-a11y', label: 'A11y' },
 		{ id: 'cluster-develop', label: 'Develop' }
 	];
-	function jumpTo(e: MouseEvent, id: string) {
-		e.preventDefault();
-		const el = document.getElementById(id);
-		if (!el) return;
-		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-	}
 
 	// ── Dirty-Tracking + Save-Bar (Muster aus dem Brand-/[slug]-Editor) ──────────
 	let formEl = $state<HTMLFormElement | null>(null);
@@ -412,20 +449,10 @@
 	function onBeforeUnload(e: BeforeUnloadEvent) {
 		if (dirty) e.preventDefault();
 	}
-
 </script>
 
 <svelte:head><title>{data.name} — Spec-Editor</title></svelte:head>
 <svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
-
-{#snippet herkunftBadge(h: Herkunft)}
-	{#if h === 'geschätzt'}
-		<Pill tone="estimate" icon="≈">geschätzt</Pill>
-	{:else}
-		<!-- gemessen/abgeleitet: ruhiger Klartext rechts (kein Pill) — wie im Mockup. -->
-		<span class="herkunft-text">{h}</span>
-	{/if}
-{/snippet}
 
 {#snippet miniPill(variant: 'machine' | 'editorial')}
 	<span class="mini-pill mini-pill--{variant}" aria-hidden="true">
@@ -434,32 +461,6 @@
 				height={11}
 			/>{/if}
 	</span>
-{/snippet}
-
-{#snippet ghostCard(key: string, label: string)}
-	<button type="button" class="ghost-card" onclick={() => reveal(key)}>
-		<span class="ghost-card__plus" aria-hidden="true">+</span>
-		<span class="ghost-card__label">{label} ergänzen</span>
-	</button>
-{/snippet}
-
-{#snippet ghostToggle(key: string, text: string)}
-	<button type="button" class="ghost-card" onclick={() => reveal(key)}>
-		<span class="ghost-card__plus" aria-hidden="true">+</span>
-		<span class="ghost-card__label">{text}</span>
-	</button>
-{/snippet}
-
-<!-- Verschlankter Redaktions-Kartenkopf (V3): kurzer Titel + gedämpfte Subzeile,
-     eigene ✎-Pill je Karte (kein Sammel-„Redaktion"-Monolith mehr). -->
-{#snippet editorialHead(title: string, subline?: string)}
-	<div class="card-head">
-		<span class="card-titles">
-			<span class="card-title">{title}</span>
-			{#if subline}<span class="card-subline">{subline}</span>{/if}
-		</span>
-		<ProvenanceChip variant="editorial" />
-	</div>
 {/snippet}
 
 {#snippet clusterEyebrow(id: string, label: string)}
@@ -490,6 +491,28 @@
 			{model[key].trim() ? 'Überschreibt den Maschinen-Wert' : 'leer → Maschine gewinnt'}
 		</span>
 	</div>
+{/snippet}
+
+<!-- Drift-Banner-Inhalte: Text + Aktionen kennen den Re-Import-Befehl (Seiten-Scope). -->
+{#snippet driftText()}
+	Die Figma-Roh-Daten (<code>figma-raw.json</code>) sind neuer als das
+	<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der
+	Re-Import ist bewusst ein manueller CLI-Schritt — die Doku rät nie.
+{/snippet}
+{#snippet driftActions()}
+	<button type="button" class="drift__btn" onclick={copyReImport}>
+		<ImportIcon width={13} height={13} /> Re-Import-Befehl kopieren
+	</button>
+	<a class="drift__btn" href={data.importGuideHref} target="_blank" rel="noreferrer"
+		>Zur Anleitung ↗</a
+	>
+{/snippet}
+
+<!-- „gemischt"-Meta der Barrierefreiheit-Karte (nur wenn Maschinen-Zeilen dabei sind). -->
+{#snippet a11yHeadExtra()}
+	{#if machineA11yUnedited.length}
+		<span class="card-head__meta" title="Maschinen- und Redaktions-Zeilen gemischt">gemischt</span>
+	{/if}
 {/snippet}
 
 <div class="spec-edit">
@@ -537,62 +560,41 @@
 		</header>
 
 		<!-- Cluster-Ankerleiste (V5): schmale Sprungzeile unter dem Kopf. -->
-		<nav class="anchor-bar" aria-label="Zu Abschnitt springen">
-			{#each ANCHORS as a (a.id)}
-				<a class="anchor-bar__link" href={`#${a.id}`} onclick={(e) => jumpTo(e, a.id)}>{a.label}</a>
-			{/each}
-		</nav>
+		<AnchorBar items={ANCHORS} />
 
 		<div class="editor-card__body">
 			<!-- Drift-Banner (nur wenn figma-raw.json neuer als model.json) — Delta 7. -->
 			{#if data.figmaRawNeuerAlsModel}
-				<div class="drift" role="status">
-					<span class="drift__icon" aria-hidden="true"><AlertTriangleIcon width={18} height={18} /></span>
-					<div class="drift__body">
-						<strong class="drift__title">Design hat sich seit dem letzten Import geändert</strong>
-						<p class="drift__text">
-							Die Figma-Roh-Daten (<code>figma-raw.json</code>) sind neuer als das
-							<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der
-							Re-Import ist bewusst ein manueller CLI-Schritt — die Doku rät nie.
-						</p>
-						<div class="drift__actions">
-							<button type="button" class="drift__btn" onclick={copyReImport}>
-								<ImportIcon width={13} height={13} /> Re-Import-Befehl kopieren
-							</button>
-							<a class="drift__btn" href={data.importGuideHref} target="_blank" rel="noreferrer"
-								>Zur Anleitung ↗</a
-							>
-						</div>
-					</div>
-				</div>
+				<DriftBanner
+					title="Design hat sich seit dem letzten Import geändert"
+					text={driftText}
+					actions={driftActions}
+				/>
 			{/if}
 
 			<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>
 				<input type="hidden" name="payload" value={payload} />
 
 				<!-- ① Übersicht (V4): Zweck + Status in EINER Karte; erste Karte = Anker. -->
-				<section class="card" id="cluster-overview">
-					{@render editorialHead('Übersicht', 'Zweck & Status in einer Karte')}
-					<div class="card-body">
-						<textarea
-							bind:value={model.zweck}
-							rows="3"
-							placeholder="Wozu dient die Komponente? …"
-						></textarea>
-						<div class="overview-status">
-							<span class="overview-status__label">Status</span>
-							<select
-								class="status-select status-select--{model.status}"
-								bind:value={model.status}
-								aria-label="Status"
-							>
-								<option value="ready_for_dev">ready_for_dev</option>
-								<option value="completed">completed</option>
-								<option value="changed">changed</option>
-							</select>
-						</div>
+				<EditorialCard title="Übersicht" subline="Zweck & Status in einer Karte" id="cluster-overview">
+					<textarea
+						bind:value={model.zweck}
+						rows="3"
+						placeholder="Wozu dient die Komponente? …"
+					></textarea>
+					<div class="overview-status">
+						<span class="overview-status__label">Status</span>
+						<select
+							class="status-select status-select--{model.status}"
+							bind:value={model.status}
+							aria-label="Status"
+						>
+							<option value="ready_for_dev">ready_for_dev</option>
+							<option value="completed">completed</option>
+							<option value="changed">changed</option>
+						</select>
 					</div>
-				</section>
+				</EditorialCard>
 
 				<!-- ═══ DESIGN ═══ -->
 				{@render clusterEyebrow('cluster-design', 'Design')}
@@ -604,35 +606,10 @@
 						subline="Werte aus dem Figma-Import — Änderung in Figma, dann Re-Import."
 					>
 						{#if masseRows.length}
-							<table class="mz-table">
-								<tbody>
-									{#each masseRows as r (r.label)}
-										<tr>
-											<td class="mz-table__label">{r.label}</td>
-											<td class="mz-table__value"
-												>{anzeigeWert(r.px)}{#if r.token} <code>{r.token}</code>{/if}</td
-											>
-											<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
+							<SpecTable variant="measure" rows={masseRows} />
 						{/if}
 						{#if spacingRows.length}
-							<div class="mz-subhead">Abstände</div>
-							<table class="mz-table">
-								<tbody>
-									{#each spacingRows as r, i (i)}
-										<tr>
-											<td class="mz-table__label">{r.label}</td>
-											<td class="mz-table__value"
-												>{anzeigeWert(r.px)}{#if r.token} <code>{r.token}</code>{/if}</td
-											>
-											<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
+							<SpecTable variant="measure" rows={spacingRows} subhead="Abstände" />
 						{/if}
 					</MachineZone>
 				{/if}
@@ -646,58 +623,34 @@
 						summary={tokenSummary}
 						defaultOpen={false}
 					>
-						<table class="mz-table mz-table--tokens">
-							<tbody>
-								{#each tokenView as group (group.kategorie)}
-									<tr class="mz-grouprow">
-										<td class="mz-grouprow__cell" colspan="4">{group.kategorie}</td>
-									</tr>
-									{#each group.items as t (t.name)}
-										<tr>
-											<td class="mz-table__swatch">
-												{#if t.translucent}
-													<Swatch checkerboard />
-												{:else if t.swatch}
-													<Swatch color={t.wert || t.swatch} />
-												{/if}
-											</td>
-											<td class="mz-table__token"><code>{t.name}</code></td>
-											<td class="mz-table__value mz-table__value--mono">{t.wert || '…'}</td>
-											<td class="mz-table__hinweis">{t.hinweis ?? ''}</td>
-										</tr>
-									{/each}
-								{/each}
-							</tbody>
-						</table>
+						<SpecTable variant="tokens" groups={tokenView} />
 					</MachineZone>
 				{/if}
 
 				<!-- „Hinweis je Token" DIREKT unter den Tokens, leicht eingerückt (zugehörig). -->
 				{#if flatTokens.length}
-					{#if expanded.tokenHinweise}
-						<section class="card card--attached" id="sec-tokenHinweise">
-							{@render editorialHead(
-								'Hinweis je Token',
-								'Direkt bei den Tokens — leer = Maschinen-Hinweis gewinnt'
-							)}
-							<div class="card-body">
-								{#each flatTokens as t (t.name)}
-									<div class="token-hint-row">
-										<code class="token-hint-row__name">{t.name}</code>
-										<input
-											class="token-hint-row__input"
-											bind:value={model.tokenHinweise[t.name]}
-											placeholder={t.machineHinweis || '(kein Maschinen-Hinweis)'}
-										/>
-									</div>
-								{/each}
+					<EditorialCard
+						title="Hinweis je Token"
+						subline="Direkt bei den Tokens — leer = Maschinen-Hinweis gewinnt"
+						id="sec-tokenHinweise"
+						attached
+						expanded={expanded.tokenHinweise}
+						ghostLabel="Hinweis je Token ergänzen"
+						ghostId="ghost-tokenHinweise"
+						onexpand={() => reveal('tokenHinweise')}
+						onremove={() => removeSection('tokenHinweise', 'Token-Hinweise geleert')}
+					>
+						{#each flatTokens as t (t.name)}
+							<div class="token-hint-row">
+								<code class="token-hint-row__name">{t.name}</code>
+								<input
+									class="token-hint-row__input"
+									bind:value={model.tokenHinweise[t.name]}
+									placeholder={t.machineHinweis || '(kein Maschinen-Hinweis)'}
+								/>
 							</div>
-						</section>
-					{:else}
-						<div class="ghost-attached">
-							{@render ghostToggle('tokenHinweise', 'Hinweis je Token ergänzen')}
-						</div>
-					{/if}
+						{/each}
+					</EditorialCard>
 				{/if}
 
 				<!-- ④ Varianten & Zustände (eingeklappt) -->
@@ -737,250 +690,253 @@
 				{@render clusterEyebrow('cluster-inhalt', 'Inhalt')}
 
 				<!-- ⑤ Verwendung -->
-				{#if expanded.verwendung}
-					<section class="card" id="sec-verwendung">
-						{@render editorialHead('Verwendung', 'Wann nutzen · wann nicht')}
-						<div class="card-body">
-							<div class="sublist">
-								<span class="sublist__label">Wann nutzen</span>
-								<StringListField list={model.verwendung.nutzen} />
-							</div>
-							<div class="sublist">
-								<span class="sublist__label">Wann nicht</span>
-								<StringListField list={model.verwendung.nichtNutzen} />
-							</div>
-						</div>
-					</section>
-				{:else}
-					{@render ghostCard('verwendung', 'Verwendung')}
-				{/if}
+				<EditorialCard
+					title="Verwendung"
+					subline="Wann nutzen · wann nicht"
+					id="sec-verwendung"
+					expanded={expanded.verwendung}
+					ghostLabel="Verwendung ergänzen"
+					ghostId="ghost-verwendung"
+					onexpand={() => reveal('verwendung')}
+					onremove={() => removeSection('verwendung', 'Verwendung geleert')}
+				>
+					<div class="sublist">
+						<span class="sublist__label">Wann nutzen</span>
+						<StringListField list={model.verwendung.nutzen} />
+					</div>
+					<div class="sublist">
+						<span class="sublist__label">Wann nicht</span>
+						<StringListField list={model.verwendung.nichtNutzen} />
+					</div>
+				</EditorialCard>
 
 				<!-- ⑥ Do & Don't -->
-				{#if expanded.doDont}
-					<section class="card" id="sec-doDont">
-						{@render editorialHead("Do & Don't")}
-						<div class="card-body">
-							<div class="sublist">
-								<span class="sublist__label">Do</span>
-								<StringListField list={model.doDont.do} />
-							</div>
-							<div class="sublist">
-								<span class="sublist__label">Don't</span>
-								<StringListField list={model.doDont.dont} />
-							</div>
-						</div>
-					</section>
-				{:else}
-					{@render ghostCard('doDont', "Do & Don't")}
-				{/if}
+				<EditorialCard
+					title="Do & Don't"
+					id="sec-doDont"
+					expanded={expanded.doDont}
+					ghostLabel="Do & Don't ergänzen"
+					ghostId="ghost-doDont"
+					onexpand={() => reveal('doDont')}
+					onremove={() => removeSection('doDont', "Do & Don't geleert")}
+				>
+					<div class="sublist">
+						<span class="sublist__label">Do</span>
+						<StringListField list={model.doDont.do} />
+					</div>
+					<div class="sublist">
+						<span class="sublist__label">Don't</span>
+						<StringListField list={model.doDont.dont} />
+					</div>
+				</EditorialCard>
 
 				<!-- ⑦ Wording -->
-				{#if expanded.wording}
-					<section class="card" id="sec-wording">
-						{@render editorialHead('Wording', 'Schlecht → Gut · Hinweis')}
-						<div class="card-body">
-							{#each model.wording as _, i (i)}
-								<div class="row">
-									<input
-										class="row__input"
-										bind:value={model.wording[i].schlecht}
-										placeholder="Schlecht"
-									/>
-									<span class="row__arrow" aria-hidden="true">→</span>
-									<input class="row__input" bind:value={model.wording[i].gut} placeholder="Gut" />
-									<input
-										class="row__input row__input--hint"
-										bind:value={model.wording[i].hinweis}
-										placeholder="Hinweis (optional)"
-									/>
-									<button
-										type="button"
-										class="row__remove"
-										onclick={() => model.wording.splice(i, 1)}
-										aria-label="Entfernen"><Icon name="close" /></button
-									>
-								</div>
-							{/each}
+				<EditorialCard
+					title="Wording"
+					subline="Schlecht → Gut · Hinweis"
+					id="sec-wording"
+					expanded={expanded.wording}
+					ghostLabel="Wording-Regeln ergänzen"
+					ghostId="ghost-wording"
+					onexpand={() => reveal('wording')}
+					onremove={() => removeSection('wording', 'Wording geleert')}
+				>
+					{#each model.wording as _, i (i)}
+						<div class="row">
+							<input
+								class="row__input"
+								bind:value={model.wording[i].schlecht}
+								placeholder="Schlecht"
+							/>
+							<span class="row__arrow" aria-hidden="true">→</span>
+							<input class="row__input" bind:value={model.wording[i].gut} placeholder="Gut" />
+							<input
+								class="row__input row__input--hint"
+								bind:value={model.wording[i].hinweis}
+								placeholder="Hinweis (optional)"
+							/>
 							<button
 								type="button"
-								class="row-add"
-								onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}
-								>+ Regel</button
+								class="row__remove"
+								onclick={() => model.wording.splice(i, 1)}
+								aria-label="Entfernen"><Icon name="close" /></button
 							>
 						</div>
-					</section>
-				{:else}
-					{@render ghostCard('wording', 'Wording-Regeln')}
-				{/if}
+					{/each}
+					<button
+						type="button"
+						class="row-add"
+						onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}
+						>+ Regel</button
+					>
+				</EditorialCard>
 
 				<!-- ═══ BARRIEREFREIHEIT ═══ -->
 				{@render clusterEyebrow('cluster-a11y', 'Barrierefreiheit')}
 
 				<!-- ⑧ Barrierefreiheit (gemischt) -->
-				{#if expanded.a11y}
-					<section class="card" id="sec-a11y">
-						<div class="card-head">
-							<span class="card-titles">
-								<span class="card-title">Barrierefreiheit</span>
-								<span class="card-subline">Label · Wert · Status</span>
-							</span>
-							<span class="card-head__side">
-								{#if machineA11yUnedited.length}
-									<span class="card-head__meta" title="Maschinen- und Redaktions-Zeilen gemischt"
-										>gemischt</span
-									>
-								{/if}
-								<ProvenanceChip variant="editorial" />
-							</span>
+				<EditorialCard
+					title="Barrierefreiheit"
+					subline="Label · Wert · Status"
+					id="sec-a11y"
+					expanded={expanded.a11y}
+					ghostLabel="Barrierefreiheit ergänzen"
+					ghostId="ghost-a11y"
+					onexpand={() => reveal('a11y')}
+					onremove={() => removeSection('a11y', 'Barrierefreiheit geleert')}
+					headExtra={a11yHeadExtra}
+				>
+					{#each machineA11yUnedited as m (m.label)}
+						<div class="row row--machine">
+							{@render miniPill('machine')}
+							<span class="row__static row__static--key">{m.label}</span>
+							<span class="row__static">{m.wert}</span>
+							<span class="row__prov">nicht editierbar</span>
 						</div>
-						<div class="card-body">
-							{#each machineA11yUnedited as m (m.label)}
-								<div class="row row--machine">
-									{@render miniPill('machine')}
-									<span class="row__static row__static--key">{m.label}</span>
-									<span class="row__static">{m.wert}</span>
-									<span class="row__prov">nicht editierbar</span>
-								</div>
-							{/each}
-							{#each model.a11y as _, i (i)}
-								<div class="row">
-									{@render miniPill('editorial')}
-									<input
-										class="row__input row__input--key"
-										bind:value={model.a11y[i].label}
-										placeholder="Label"
-									/>
-									<input class="row__input" bind:value={model.a11y[i].wert} placeholder="Wert" />
-									<select
-										class="status-select status-select--{model.a11y[i].status}"
-										bind:value={model.a11y[i].status}
-										aria-label="Status"
-									>
-										{#each A11Y_STATUS_OPTIONS as o (o.value)}
-											<option value={o.value}>{o.label}</option>
-										{/each}
-									</select>
-									<button
-										type="button"
-										class="row__remove"
-										onclick={() => model.a11y.splice(i, 1)}
-										aria-label="Entfernen"><Icon name="close" /></button
-									>
-								</div>
-							{/each}
+					{/each}
+					{#each model.a11y as _, i (i)}
+						<div class="row">
+							{@render miniPill('editorial')}
+							<input
+								class="row__input row__input--key"
+								bind:value={model.a11y[i].label}
+								placeholder="Label"
+							/>
+							<input class="row__input" bind:value={model.a11y[i].wert} placeholder="Wert" />
+							<select
+								class="status-select status-select--{model.a11y[i].status}"
+								bind:value={model.a11y[i].status}
+								aria-label="Status"
+							>
+								{#each A11Y_STATUS_OPTIONS as o (o.value)}
+									<option value={o.value}>{o.label}</option>
+								{/each}
+							</select>
 							<button
 								type="button"
-								class="row-add"
-								onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}
-								>+ Eintrag</button
+								class="row__remove"
+								onclick={() => model.a11y.splice(i, 1)}
+								aria-label="Entfernen"><Icon name="close" /></button
 							>
 						</div>
-					</section>
-				{:else}
-					{@render ghostCard('a11y', 'Barrierefreiheit')}
-				{/if}
+					{/each}
+					<button
+						type="button"
+						class="row-add"
+						onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}
+						>+ Eintrag</button
+					>
+				</EditorialCard>
 
 				<!-- ⑨ Komposition -->
-				{#if expanded.komposition}
-					<section class="card" id="sec-komposition">
-						{@render editorialHead('Komposition', 'Hinweise für Agenten & Devs')}
-						<div class="card-body">
-							<StringListField
-								list={model.komposition}
-								addLabel="+ Hinweis ergänzen"
-								placeholder="z. B. In Formularen mit Input und Label kombinieren."
-							/>
-						</div>
-					</section>
-				{:else}
-					{@render ghostCard('komposition', 'Komposition')}
-				{/if}
+				<EditorialCard
+					title="Komposition"
+					subline="Hinweise für Agenten & Devs"
+					id="sec-komposition"
+					expanded={expanded.komposition}
+					ghostLabel="Komposition ergänzen"
+					ghostId="ghost-komposition"
+					onexpand={() => reveal('komposition')}
+					onremove={() => removeSection('komposition', 'Komposition geleert')}
+				>
+					<StringListField
+						list={model.komposition}
+						addLabel="+ Hinweis ergänzen"
+						placeholder="z. B. In Formularen mit Input und Label kombinieren."
+					/>
+				</EditorialCard>
 
 				<!-- ⑩ Verwandte Komponenten -->
-				{#if expanded.verwandt}
-					<section class="card" id="sec-verwandt">
-						{@render editorialHead('Verwandte Komponenten', 'Katalog-Slugs')}
-						<div class="card-body">
-							{#each model.verwandt as _, i (i)}
-								{@const gueltig = data.validSlugs.includes(model.verwandt[i])}
-								<div class="row">
-									<select
-										class="row__input"
-										bind:value={model.verwandt[i]}
-										class:field-row__invalid={!gueltig}
-									>
-										<option value="" disabled>– Komponente wählen –</option>
-										{#each data.slugs as s (s)}
-											<option value={s}>{s}</option>
-										{/each}
-									</select>
-									{#if model.verwandt[i] && !gueltig}
-										<span class="field-warn" title="Kein bekannter Katalog-Slug">unbekannt</span>
-									{/if}
-									<button
-										type="button"
-										class="row__remove"
-										onclick={() => model.verwandt.splice(i, 1)}
-										aria-label="Entfernen"><Icon name="close" /></button
-									>
-								</div>
-							{/each}
-							<button type="button" class="row-add" onclick={() => model.verwandt.push('')}
-								>+ Slug</button
+				<EditorialCard
+					title="Verwandte Komponenten"
+					subline="Katalog-Slugs"
+					id="sec-verwandt"
+					expanded={expanded.verwandt}
+					ghostLabel="Verwandte Komponenten ergänzen"
+					ghostId="ghost-verwandt"
+					onexpand={() => reveal('verwandt')}
+					onremove={() => removeSection('verwandt', 'Verwandte Komponenten geleert')}
+				>
+					{#each model.verwandt as _, i (i)}
+						{@const gueltig = data.validSlugs.includes(model.verwandt[i])}
+						<div class="row">
+							<select
+								class="row__input"
+								bind:value={model.verwandt[i]}
+								class:field-row__invalid={!gueltig}
+							>
+								<option value="" disabled>– Komponente wählen –</option>
+								{#each data.slugs as s (s)}
+									<option value={s}>{s}</option>
+								{/each}
+							</select>
+							{#if model.verwandt[i] && !gueltig}
+								<span class="field-warn" title="Kein bekannter Katalog-Slug">unbekannt</span>
+							{/if}
+							<button
+								type="button"
+								class="row__remove"
+								onclick={() => model.verwandt.splice(i, 1)}
+								aria-label="Entfernen"><Icon name="close" /></button
 							>
 						</div>
-					</section>
-				{:else}
-					{@render ghostCard('verwandt', 'Verwandte Komponenten')}
-				{/if}
+					{/each}
+					<button type="button" class="row-add" onclick={() => model.verwandt.push('')}
+						>+ Slug</button
+					>
+				</EditorialCard>
 
 				<!-- ═══ DEVELOP ═══ -->
 				{@render clusterEyebrow('cluster-develop', 'Develop')}
 
 				<!-- ⑪ Code-Beispiele -->
-				{#if expanded.codeBeispiele}
-					<section class="card" id="sec-codeBeispiele">
-						{@render editorialHead('Code-Beispiele', 'Develop-Tab · zeit.de-Repo')}
-						<div class="card-body">
-							<p class="hint">
-								Redaktionelle Snippets fürs zeit.de-Repo — erscheinen im Develop-Tab unter den
-								maschinellen Code-Sektionen. Reiner Text, nie ausgeführt.
-							</p>
-							<CodeExamplesField list={model.codeBeispiele} />
-						</div>
-					</section>
-				{:else}
-					{@render ghostCard('codeBeispiele', 'Code-Beispiel')}
-				{/if}
+				<EditorialCard
+					title="Code-Beispiele"
+					subline="Develop-Tab · zeit.de-Repo"
+					id="sec-codeBeispiele"
+					expanded={expanded.codeBeispiele}
+					ghostLabel="Code-Beispiel ergänzen"
+					ghostId="ghost-codeBeispiele"
+					onexpand={() => reveal('codeBeispiele')}
+					onremove={() => removeSection('codeBeispiele', 'Code-Beispiele geleert')}
+				>
+					<p class="hint">
+						Redaktionelle Snippets fürs zeit.de-Repo — erscheinen im Develop-Tab unter den
+						maschinellen Code-Sektionen. Reiner Text, nie ausgeführt.
+					</p>
+					<CodeExamplesField list={model.codeBeispiele} />
+				</EditorialCard>
 
 				<!-- Snippets überschreiben -->
-				{#if expanded.snippets}
-					<section class="card" id="sec-snippets">
-						{@render editorialHead('Snippets überschreiben', 'Feldweise über die Maschinen-Werte')}
-						<div class="card-body">
-							<p class="hint">
-								Überschreibt die maschinellen Code-Snippets feldweise. Leer lassen = der
-								Maschinen-Wert (aus Figma/<code>render</code>) gewinnt; er steht als Platzhalter.
-							</p>
-							{@render overrideField('codeSvelte', 'Svelte-Code', data.machineSnippets.codeSvelte, true)}
-							{@render overrideField(
-								'repoCodeSvelte',
-								'Repo-Komponente (Svelte)',
-								data.machineSnippets.repoCodeSvelte,
-								true
-							)}
-							{@render overrideField('repoNote', 'Repo-Hinweis', data.machineSnippets.repoNote, true)}
-							{@render overrideField(
-								'codeNote',
-								'HTML-Kommentar (Code-Note)',
-								data.machineSnippets.codeNote,
-								false
-							)}
-						</div>
-					</section>
-				{:else}
-					{@render ghostToggle('snippets', 'Snippets überschreiben')}
-				{/if}
+				<EditorialCard
+					title="Snippets überschreiben"
+					subline="Feldweise über die Maschinen-Werte"
+					id="sec-snippets"
+					expanded={expanded.snippets}
+					ghostLabel="Snippets überschreiben"
+					ghostId="ghost-snippets"
+					onexpand={() => reveal('snippets')}
+					onremove={() => removeSection('snippets', 'Snippet-Overrides geleert')}
+				>
+					<p class="hint">
+						Überschreibt die maschinellen Code-Snippets feldweise. Leer lassen = der
+						Maschinen-Wert (aus Figma/<code>render</code>) gewinnt; er steht als Platzhalter.
+					</p>
+					{@render overrideField('codeSvelte', 'Svelte-Code', data.machineSnippets.codeSvelte, true)}
+					{@render overrideField(
+						'repoCodeSvelte',
+						'Repo-Komponente (Svelte)',
+						data.machineSnippets.repoCodeSvelte,
+						true
+					)}
+					{@render overrideField('repoNote', 'Repo-Hinweis', data.machineSnippets.repoNote, true)}
+					{@render overrideField(
+						'codeNote',
+						'HTML-Kommentar (Code-Note)',
+						data.machineSnippets.codeNote,
+						false
+					)}
+				</EditorialCard>
 
 				<!-- ⑫ Weitere Felder (read-only, eingeklappt) -->
 				{#if readonlyEditorialShown.length}
@@ -1134,37 +1090,6 @@
 		padding: var(--z-ds-space-l);
 	}
 
-	/* ── Cluster-Ankerleiste (V5): schmale Sprungzeile unter dem Kopf ── */
-	.anchor-bar {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--z-ds-space-m);
-		padding: var(--z-ds-space-6) var(--z-ds-space-l);
-		border-bottom: 1px solid var(--ds-border);
-		background: var(--ds-surface-soft);
-	}
-	.anchor-bar__link {
-		font-size: var(--ds-text-xs);
-		font-weight: 500;
-		color: var(--ds-text-muted);
-		text-decoration: none;
-		border-radius: var(--ds-radius-sm);
-		padding: 1px var(--z-ds-space-4);
-		transition: color var(--ds-dur) var(--ds-ease-out);
-	}
-	.anchor-bar__link:hover {
-		color: var(--ds-text);
-	}
-	.anchor-bar__link:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.anchor-bar__link {
-			transition: none;
-		}
-	}
-
 	/* ── Cluster-Eyebrow (V5): gedämpfte Letterspacing-Überschrift + Anker-Ziel ── */
 	.cluster-eyebrow {
 		margin: var(--z-ds-space-l) 0 var(--z-ds-space-8);
@@ -1174,179 +1099,6 @@
 		letter-spacing: 0.08em;
 		color: var(--ds-text-faint);
 		scroll-margin-top: var(--z-ds-space-l);
-	}
-	/* Erster Cluster-Anker (Übersicht-Karte) — nur Scroll-Offset, keine Optik. */
-	#cluster-overview {
-		scroll-margin-top: var(--z-ds-space-l);
-	}
-
-	/* ── Drift-Banner: getönte Warn-Fläche, Icon + fetter Titel + Erklärtext,
-	   Aktion rechts (klein, outline) — Formensprache des Mockups. ── */
-	.drift {
-		display: flex;
-		align-items: flex-start;
-		gap: var(--z-ds-space-s);
-		background: var(--ds-tint-warning-surface);
-		border: 1px solid var(--ds-tint-warning-border);
-		border-radius: var(--ds-radius);
-		padding: var(--z-ds-space-m);
-		margin-bottom: var(--z-ds-space-l);
-	}
-	.drift__icon {
-		display: inline-flex;
-		flex: none;
-		color: var(--ds-tint-warning-text);
-		margin-top: 1px;
-	}
-	.drift__body {
-		flex: 1;
-		min-width: 0;
-	}
-	.drift__title {
-		display: block;
-		font-size: var(--ds-text-base);
-		color: var(--ds-tint-warning-text);
-	}
-	.drift__text {
-		margin: var(--z-ds-space-6) 0 0;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		max-width: 44rem;
-	}
-	.drift__text code {
-		font-family: var(--ds-font-mono);
-		font-size: 0.9em;
-	}
-	/* Zwei kleine Outline-Buttons unter dem Text, links (Delta 7). */
-	.drift__actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--z-ds-space-6);
-		margin-top: var(--z-ds-space-8);
-	}
-	.drift__btn {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-4);
-		width: auto;
-		font-size: var(--ds-text-xs);
-		font-weight: 600;
-		color: var(--ds-text);
-		text-decoration: none;
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-4) var(--z-ds-space-8);
-		background: var(--ds-surface);
-		cursor: pointer;
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.drift__btn:hover {
-		border-color: var(--ds-accent);
-	}
-	.drift__btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.drift__btn {
-			transition: none;
-		}
-	}
-
-	/* ── Maschinen-Tabellen ── */
-	.mz-table {
-		width: 100%;
-		border-collapse: collapse;
-	}
-	/* Maschinen-Zone → Trenner GESTRICHELT (dieselbe „nicht editierbar"-Sprache).
-	   Zeilen-Rhythmus: kompakt, aber mit Luft (Sichtabnahme 19.07.). */
-	.mz-table td {
-		padding: var(--z-ds-space-10) var(--z-ds-space-8) var(--z-ds-space-10) 0;
-		border-bottom: 1px dashed var(--ds-border);
-		vertical-align: middle;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-	}
-	.mz-table tr:last-child td {
-		border-bottom: none;
-	}
-	.mz-table__label {
-		/* Eine Stufe leiser als muted — die Werte tragen die Zeile, das Label ordnet nur ein. */
-		color: var(--ds-text-faint);
-		white-space: nowrap;
-		width: 1%;
-		min-width: 148px;
-		padding-right: var(--z-ds-space-m);
-	}
-	/* Wert-Spalte trägt die Zeile (Zahl + inline-Token) → nimmt den Restplatz;
-	   der Messwert selbst in voller Textfarbe (Mockup: Wert klar, Label gedämpft). */
-	.mz-table__value {
-		width: 100%;
-		color: var(--ds-text);
-	}
-	.mz-table__value--mono,
-	.mz-table__value code,
-	.mz-table__token code {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-	}
-	.mz-table__value code,
-	.mz-table__token code {
-		color: var(--ds-text-muted);
-	}
-	.mz-table__herkunft {
-		text-align: right;
-		white-space: nowrap;
-	}
-	/* gemessen/abgeleitet als ruhiger Klartext rechts (kein Pill) — Delta 3. */
-	.herkunft-text {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
-	.mz-table__swatch {
-		width: 24px;
-	}
-	/* Token-Zeilen (Delta 5): Token-Name nimmt die Breite, Wert + Hinweis rechts.
-	   Bewusst KOMPAKTER als die Maße-Zeilen — viele Zeilen, reine Referenzliste. */
-	.mz-table--tokens td {
-		padding-top: var(--z-ds-space-8);
-		padding-bottom: var(--z-ds-space-8);
-	}
-	.mz-table--tokens .mz-table__token {
-		width: 100%;
-	}
-	.mz-table--tokens .mz-table__value {
-		width: auto;
-		white-space: nowrap;
-		text-align: right;
-		color: var(--ds-text-body);
-	}
-	.mz-table__hinweis {
-		color: var(--ds-text-muted);
-		white-space: nowrap;
-		text-align: right;
-		padding-left: var(--z-ds-space-m);
-	}
-	.mz-subhead {
-		margin: var(--z-ds-space-m) 0 var(--z-ds-space-6);
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--ds-text-muted);
-		font-weight: 600;
-	}
-	/* Gruppen-Eyebrow-Zeile IN der Token-Tabelle (V2: eine Tabelle statt vier Boxen). */
-	.mz-grouprow__cell {
-		padding: var(--z-ds-space-m) 0 var(--z-ds-space-6);
-		border-bottom: 1px dashed var(--ds-border);
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--ds-text-muted);
-		font-weight: 600;
-	}
-	.mz-grouprow:first-child .mz-grouprow__cell {
-		padding-top: 0;
 	}
 
 	/* ── Varianten/Zustände-Chips ── */
@@ -1390,55 +1142,7 @@
 		opacity: 0.7;
 	}
 
-	/* ── Editor-Karten (Sektions-Ebene) — auf --ds-surface-raised abgesetzt gegen
-	   die weiße äußere Karte, damit sich die Ebenen klar staffeln. ── */
-	.card {
-		background: var(--ds-surface-raised, var(--ds-surface));
-		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		padding: var(--z-ds-space-m);
-		margin-bottom: var(--z-ds-space-m);
-	}
-	/* „Hinweis je Token" gehört zur Tokens-Zone → leicht eingerückt & aufgesetzt. */
-	.card--attached {
-		margin-left: var(--z-ds-space-m);
-		margin-top: calc(-1 * var(--z-ds-space-6));
-	}
-	.ghost-attached {
-		margin-left: var(--z-ds-space-m);
-		margin-top: calc(-1 * var(--z-ds-space-6));
-	}
-	.card-head {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: var(--z-ds-space-s);
-		padding: 0 0 var(--z-ds-space-8);
-		border-bottom: 1px solid var(--ds-border-soft);
-	}
-	/* Titel + gedämpfte Subzeile gestapelt (V3). */
-	.card-titles {
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-		min-width: 0;
-	}
-	.card-title {
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
-		color: var(--ds-text);
-	}
-	.card-subline {
-		font-size: var(--ds-text-xs);
-		font-weight: 400;
-		color: var(--ds-text-muted);
-	}
-	.card-head__side {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
-		flex: none;
-	}
+	/* „gemischt"-Meta im Kopf der Barrierefreiheit-Karte (Kopf-Zusatz-Snippet). */
 	.card-head__meta {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
@@ -1454,12 +1158,6 @@
 		font-size: var(--ds-text-xs);
 		font-weight: 600;
 		color: var(--ds-text-muted);
-	}
-	.card-body {
-		display: flex;
-		flex-direction: column;
-		gap: var(--z-ds-space-s);
-		padding: 8px 0 0;
 	}
 	.hint {
 		font-size: var(--ds-text-xs);
@@ -1706,57 +1404,6 @@
 		color: var(--ds-warning-text, var(--ds-text-muted));
 	}
 
-	/* ── Ghost-Karte: leerer Abschnitt als Einladung ── */
-	.ghost-card {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
-		width: 100%;
-		text-align: left;
-		background: none;
-		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius);
-		padding: var(--z-ds-space-m);
-		margin-bottom: var(--z-ds-space-m);
-		color: var(--ds-text-muted);
-		cursor: pointer;
-		transition:
-			border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.ghost-card:hover {
-		border-color: var(--ds-accent);
-		color: var(--ds-text-body);
-		background: rgb(from var(--ds-accent) r g b / 0.04);
-	}
-	.ghost-card:active {
-		background: rgb(from var(--ds-accent) r g b / 0.08);
-	}
-	.ghost-card:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.ghost-card__plus {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		flex: none;
-		border-radius: 999px;
-		border: 1px solid var(--ds-border);
-		font-size: var(--ds-text-sm);
-		line-height: 1;
-	}
-	.ghost-card__label {
-		font-size: var(--ds-text-sm);
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.ghost-card {
-			transition: none;
-		}
-	}
 	.ro-json {
 		font-size: var(--ds-text-sm);
 	}
