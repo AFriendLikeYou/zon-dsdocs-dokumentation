@@ -31,11 +31,51 @@ import { fileURLToPath } from 'node:url';
  * schreibt fetch.mjs *TokenId-Felder OHNE "token"-Namen. Genau dann stoppen —
  * sonst liefe der Draft mit leeren Tokens. Pure Funktion → testbar.
  */
+/**
+ * @param {string} rawText
+ * @returns {boolean}
+ */
 export function isDegraded(rawText) {
 	const hasTokenIds = /"[a-zA-Z]*[tT]okenId":/.test(rawText);
 	const hasTokenNames = /"token":\s*"[^"]+"/.test(rawText);
 	return hasTokenIds && !hasTokenNames;
 }
+
+/**
+ * @typedef {object} StageEntry
+ * @property {string} slug
+ * @property {boolean} raw
+ * @property {boolean} draft
+ * @property {boolean} model
+ * @property {boolean} pattern
+ * @property {boolean} content
+ * @property {boolean} page
+ * @property {boolean} degraded
+ * @property {boolean} draftOpen
+ */
+
+/**
+ * @typedef {object} StatusRow
+ * @property {string} slug
+ * @property {{ raw: boolean, draft: boolean, model: boolean, pattern: boolean, content: boolean, page: boolean }} cells
+ * @property {string} hinweis
+ */
+
+/**
+ * @typedef {object} StatusTotals
+ * @property {number} total
+ * @property {number} raw
+ * @property {number} model
+ * @property {number} page
+ * @property {number} gate1
+ * @property {number} draftOpen
+ */
+
+/**
+ * @typedef {object} StatusModel
+ * @property {StatusRow[]} rows
+ * @property {StatusTotals} totals
+ */
 
 // ── --status: Pipeline-Stufen-Übersicht ──────────────────────────────────────
 // Zeigt pro Komponente, welche Stufen-Artefakte vorliegen. PURE Kernfunktionen
@@ -55,8 +95,13 @@ export const STAGE_COLUMNS = [
  * Reines Statusmodell → Zeilen + Summen. `entries`: je Komponente
  * { slug, raw, draft, model, pattern, content, page, degraded, draftOpen } (Booleans).
  */
+/**
+ * @param {StageEntry[]} entries
+ * @returns {StatusModel}
+ */
 export function statusForDirs(entries) {
 	const rows = entries.map((e) => {
+		/** @type {string[]} */
 		const hinweise = [];
 		if (!e.raw) hinweise.push('raw fehlt'); // kein Drift-Fixture
 		else if (e.degraded) hinweise.push('Gate 1'); // raw da, aber Token-Namen fehlen
@@ -74,6 +119,7 @@ export function statusForDirs(entries) {
 			hinweis: hinweise.join(', ')
 		};
 	});
+	/** @param {(e: StageEntry) => boolean} pred */
 	const count = (pred) => entries.filter(pred).length;
 	const totals = {
 		total: entries.length,
@@ -86,12 +132,26 @@ export function statusForDirs(entries) {
 	return { rows, totals };
 }
 
-/** Reines Statusmodell → druckbare Tabelle (String). */
+/**
+ * Reines Statusmodell → druckbare Tabelle (String).
+ * @param {StatusModel} model
+ * @returns {string}
+ */
 export function formatStatus({ rows, totals }) {
-	const keys = ['raw', 'draft', 'model', 'pattern', 'content', 'page'];
+	const keys = /** @type {(keyof StatusRow['cells'])[]} */ ([
+		'raw',
+		'draft',
+		'model',
+		'pattern',
+		'content',
+		'page'
+	]);
 	const labels = STAGE_COLUMNS.map(([label]) => label);
+	/** @param {boolean} b */
 	const glyph = (b) => (b ? '✓' : '–');
+	/** @param {string} s */
 	const width = (s) => [...s].length;
+	/** @param {string} s @param {number} w */
 	const pad = (s, w) => s + ' '.repeat(Math.max(0, w - width(s)));
 
 	const slugW = Math.max(width('Komponente'), ...rows.map((r) => width(r.slug)));
@@ -120,7 +180,10 @@ export function formatStatus({ rows, totals }) {
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
 
-/** fs-Sammlung: Stufen-Artefakte je Komponentenordner → Statusmodell für statusForDirs(). */
+/**
+ * fs-Sammlung: Stufen-Artefakte je Komponentenordner → Statusmodell für statusForDirs().
+ * @returns {StageEntry[]}
+ */
 function gatherStatus() {
 	const base = path.join(REPO, 'src/routes/product/components');
 	if (!existsSync(base)) return [];
@@ -130,6 +193,7 @@ function gatherStatus() {
 		.sort();
 	return slugs.map((slug) => {
 		const dir = path.join(base, slug);
+		/** @param {string} f */
 		const has = (f) => existsSync(path.join(dir, f));
 		const raw = has('figma-raw.json');
 		const draft = has('model.draft.json');
@@ -158,7 +222,11 @@ function gatherStatus() {
 	});
 }
 
-/** Ein Pipeline-Skript als Child-Prozess ausführen (erbt stdio, cwd = Repo-Root). */
+/**
+ * Ein Pipeline-Skript als Child-Prozess ausführen (erbt stdio, cwd = Repo-Root).
+ * @param {string} script
+ * @param {string[]} args
+ */
 function runStep(script, args) {
 	const res = spawnSync(process.execPath, [path.join(HERE, script), ...args], {
 		stdio: 'inherit',

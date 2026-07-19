@@ -22,96 +22,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+// Validierungs-Kern (EDITORIAL_FIELDS + Typ-/Struktur-Checks) liegt geteilt in
+// content-validation.mjs — derselbe Code prüft im Spec-Editor-Save. Kein Duplikat.
+import { validateContentRaw } from './content-validation.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const componentsDir = path.join(root, 'src/routes/product/components');
 const strict = process.argv.includes('--strict');
-
-const isString = (v) => typeof v === 'string';
-const isArray = (v) => Array.isArray(v);
-const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-
-// Bekannte Editorial-Top-Level-Keys + grober Erwartungstyp.
-// Spiegelt EDITORIAL (export.mjs) + version/variantInfo (render-Block) — die einzigen
-// Felder, die der Exporter in den content-Stub schreibt bzw. content beitragen darf.
-const EDITORIAL_FIELDS = {
-	zweck: { check: isString, typ: 'string' },
-	status: { check: isString, typ: 'string' },
-	version: { check: isString, typ: 'string' },
-	variantInfo: { check: isObject, typ: 'objekt (Label → Text)' },
-	callouts: { check: isArray, typ: 'array' },
-	a11y: { check: isArray, typ: 'array' },
-	tastatur: { check: isArray, typ: 'array' },
-	doDont: { check: isObject, typ: 'objekt ({ do, dont })' },
-	doDontBeispiele: { check: isArray, typ: 'array' },
-	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
-	wording: { check: isArray, typ: 'array' },
-	komposition: { check: isArray, typ: 'array (Strings)' },
-	verwandt: { check: isArray, typ: 'array' },
-	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' }
-};
-const KNOWN_KEYS = Object.keys(EDITORIAL_FIELDS);
-
-/** Feinere Prüfungen für verschachtelte Strukturen (nur grob — Phase 0). */
-function checkNested(key, value) {
-	const issues = [];
-	if (key === 'doDont' && isObject(value)) {
-		for (const side of ['do', 'dont'])
-			if (value[side] !== undefined && !isArray(value[side]))
-				issues.push(`doDont.${side} muss ein Array sein`);
-	}
-	if (key === 'verwendung' && isObject(value)) {
-		for (const side of ['nutzen', 'nichtNutzen'])
-			if (value[side] !== undefined && !isArray(value[side]))
-				issues.push(`verwendung.${side} muss ein Array sein`);
-	}
-	if (key === 'verwandt' && isArray(value)) {
-		if (!value.every(isString)) issues.push('verwandt muss ein Array von Strings (Slugs) sein');
-	}
-	if (key === 'komposition' && isArray(value)) {
-		if (!value.every(isString))
-			issues.push('komposition muss ein Array von Strings (Satz-Hinweise) sein');
-	}
-	if (key === 'variantInfo' && isObject(value)) {
-		for (const [label, text] of Object.entries(value))
-			if (!isString(text)) issues.push(`variantInfo["${label}"] muss ein String sein`);
-	}
-	if (key === 'playground' && isObject(value)) {
-		for (const k of Object.keys(value))
-			if (k !== 'align' && k !== 'resizable')
-				issues.push(`playground: unbekannter Key „${k}" (erlaubt: align, resizable)`);
-		if (value.align !== undefined && value.align !== 'center' && value.align !== 'fill')
-			issues.push('playground.align muss "center" oder "fill" sein');
-		if (value.resizable !== undefined && typeof value.resizable !== 'boolean')
-			issues.push('playground.resizable muss ein Boolean sein');
-	}
-	return issues;
-}
-
-function checkContent(slug, raw) {
-	const issues = [];
-	let data;
-	try {
-		data = JSON.parse(raw);
-	} catch (e) {
-		return [`kein valides JSON: ${e.message}`];
-	}
-	if (!isObject(data)) return ['content.json muss ein JSON-Objekt sein (kein Array/Skalar)'];
-
-	for (const [key, value] of Object.entries(data)) {
-		if (!KNOWN_KEYS.includes(key)) {
-			issues.push(`unbekannter Top-Level-Key „${key}" (erlaubt: ${KNOWN_KEYS.join(', ')})`);
-			continue;
-		}
-		const { check, typ } = EDITORIAL_FIELDS[key];
-		if (!check(value)) {
-			issues.push(`Feld „${key}" hat falschen Typ (erwartet: ${typ})`);
-			continue;
-		}
-		issues.push(...checkNested(key, value));
-	}
-	return issues;
-}
 
 const slugs = fs.existsSync(componentsDir)
 	? fs
@@ -128,7 +45,7 @@ let checked = 0;
 
 for (const slug of slugs) {
 	const raw = fs.readFileSync(path.join(componentsDir, slug, 'content.json'), 'utf8');
-	const issues = checkContent(slug, raw);
+	const issues = validateContentRaw(raw);
 	if (issues.length === 0) {
 		checked++;
 	} else {

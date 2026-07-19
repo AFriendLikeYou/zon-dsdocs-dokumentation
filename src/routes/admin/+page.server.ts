@@ -1,6 +1,7 @@
 import { CATALOG } from '$data/catalog';
 import { MENU_ITEMS_PRODUCT } from '$data/navigation';
 import { listSvxPages } from './brand/core/brand-fs.server';
+import { gatherComponentStatus } from '$lib/server/component-status';
 
 // /admin — CMS-MVP (Phase 1, PLAN-CMS Option O2): Redakteur:innen bearbeiten die
 // redaktionellen content.json-Felder ohne Git/Editor. Liegt hinter derselben
@@ -25,6 +26,9 @@ export const load = () => {
 			.map((p) => [p.url, p.path])
 	);
 	return {
+		// Pipeline-Board (Feature B): Sync-/Doku-Status je Komponente, verlinkt den
+		// neuen Spec-Editor (/admin/product/components/<slug>).
+		board: gatherComponentStatus(),
 		productNav: MENU_ITEMS_PRODUCT.map((m) => {
 			const slug = m.href?.startsWith('/product/components/')
 				? m.href.split('/').pop()
@@ -35,9 +39,10 @@ export const load = () => {
 				href: m.href,
 				isCategory: m.isCategory ?? false,
 				badge: m.badge,
+				// Komponenten → neuer Spec-Editor; handgeschriebene .svx → Prosa-Editor.
 				editHref:
 					slug && editableSlugs.has(slug)
-						? `/admin/${slug}`
+						? `/admin/product/components/${slug}`
 						: svxPath !== undefined
 							? `/admin/product/${svxPath}`
 							: null
