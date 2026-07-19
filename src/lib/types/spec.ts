@@ -196,6 +196,12 @@ export type ComponentSpec = {
 	komposition?: string[];
 	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
 	verwandt?: string[];
+	/**
+	 * Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). Überschreibt
+	 * feldweise den maschinellen `hinweis` eines Tokens (aus `model.tokens[]`) auf
+	 * der Seite: `tokenHinweise[name] ?? maschinen-hinweis`. Leer/fehlend → Maschine.
+	 */
+	tokenHinweise?: Record<string, string>;
 	/** CMS-schaltbare Playground-Bühne (Ausrichtung, Resize-Handle). */
 	playground?: PlaygroundOptions;
 	/** Redaktionelle Code-Beispiele (Develop-Tab) — Dev-Wissen übers zeit.de-Repo. */

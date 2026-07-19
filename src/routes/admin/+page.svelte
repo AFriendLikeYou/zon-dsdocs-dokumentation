@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AdminPageHeader, AdminRow, AdminBadge } from './ui';
+	import { AdminPageHeader, AdminRow, AdminBadge, Pill } from './ui';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -58,18 +58,21 @@
 			</li>
 			{#each board.rows as row (row.slug)}
 				<li>
-					<AdminRow tag="div">
+					<AdminRow tag="div" class={row.drift ? 'board-row board-row--drift' : 'board-row'}>
 						<span class="board-col board-col--name">
 							<a class="board-name" href={row.editHref}>{row.name}</a>
 						</span>
 						<span class="board-col board-col--sync">
-							<span class="sync-date">{row.aktualisiertAm ?? '—'}</span>
 							{#if !row.hasRaw}
-								<AdminBadge tone="muted">kein raw</AdminBadge>
+								<span class="sync-date">{row.aktualisiertAm ?? '—'}</span>
+								<Pill tone="planned">kein raw</Pill>
 							{:else if row.gate1}
-								<AdminBadge tone="accent">Gate 1</AdminBadge>
+								<span class="sync-date">{row.aktualisiertAm ?? '—'}</span>
+								<Pill tone="status">Gate 1</Pill>
 							{:else if row.drift}
-								<AdminBadge tone="accent">⚠ Drift</AdminBadge>
+								<span class="sync-flag sync-flag--warn">⚠ Drift</span>
+							{:else}
+								<span class="sync-flag sync-flag--ok">✓ {row.aktualisiertAm ?? '—'}</span>
 							{/if}
 						</span>
 						<span class="board-col board-col--doc">
@@ -77,9 +80,24 @@
 								class="ampel ampel--{row.doc.ampel}"
 								title="{row.doc.erfuellt}/3 Kriterien (Zustände ≥ 2, a11y ≥ 2, Do/Don't)"
 							></span>
-							<span class="ampel-label">{AMPEL_LABEL[row.doc.ampel]}</span>
+							<span class="ampel-label ampel-label--{row.doc.ampel}"
+								>{AMPEL_LABEL[row.doc.ampel]}</span
+							>
 						</span>
 						<span class="board-col board-col--hint">{row.hinweis}</span>
+					</AdminRow>
+				</li>
+			{/each}
+			{#each data.planned as p (p.slug)}
+				<li>
+					<AdminRow tag="div" interactive={false} class="board-row board-row--planned">
+						<span class="board-col board-col--name">
+							<span class="board-name board-name--planned">{p.label}</span>
+							<Pill tone="planned">Geplant</Pill>
+						</span>
+						<span class="board-col board-col--sync sync-muted">–</span>
+						<span class="board-col board-col--doc sync-muted">–</span>
+						<span class="board-col board-col--hint">wartet auf Import</span>
 					</AdminRow>
 				</li>
 			{/each}
@@ -201,16 +219,15 @@
 	}
 
 	/* ── Board-Spalten ── */
+	/* Spalten-Header: gedämpft & klein wie im Mockup (kein Uppercase/Bold). */
 	.board-head {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-s);
 		padding: 0 var(--z-ds-space-m) var(--z-ds-space-6);
 		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: var(--ds-label-tracking);
 		color: var(--ds-text-muted);
-		font-weight: 700;
+		font-weight: 400;
 	}
 	.board-col {
 		display: inline-flex;
@@ -248,6 +265,30 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
+	/* Sync-Status farbig direkt an der Zeile: ✓ synchron (grün) · ⚠ Drift (warn). */
+	.sync-flag {
+		font-size: var(--ds-text-sm);
+		font-weight: 600;
+	}
+	.sync-flag--ok {
+		color: var(--ds-tint-positive-text);
+	}
+	.sync-flag--warn {
+		color: var(--ds-tint-warning-text);
+	}
+	/* Auffällige Drift-Zeile leicht abgesenkt (wie im Mockup). Global, weil die
+	   Klasse auf dem von AdminRow gerenderten Element sitzt. */
+	.list :global(.board-row--drift) {
+		background: var(--ds-surface-sunken);
+	}
+	/* Geplant-Zeile: gedämpfte Ghost-Zeile am Board-Ende. */
+	.board-name--planned {
+		color: var(--ds-text-muted);
+		font-weight: 500;
+	}
+	.sync-muted {
+		color: var(--ds-text-faint);
+	}
 	.ampel {
 		display: inline-block;
 		width: 10px;
@@ -268,6 +309,14 @@
 	.ampel-label {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
+	}
+	.ampel-label--vollstaendig {
+		color: var(--ds-tint-positive-text);
+		font-weight: 600;
+	}
+	.ampel-label--teilweise {
+		color: var(--ds-tint-warning-text);
+		font-weight: 600;
 	}
 	.board-legend {
 		margin-top: var(--z-ds-space-s);

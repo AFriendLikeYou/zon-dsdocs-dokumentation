@@ -78,6 +78,32 @@
 	--ds-radius: var(--z-ds-border-radius-8);
 	--ds-radius-sm: var(--z-ds-border-radius-4);
 	--ds-radius-xs: var(--z-ds-border-radius-2);
+	/* Größere Karten-Rundung (Product-CMS-Karten/Zonen). Site-lokal wie --ds-font-mono:
+	   das DS liefert nur radius-2/-4/-8, die abgenommene Referenz nutzt 12px. */
+	--ds-radius-lg: 12px;
+
+	/* ── Getönte Herkunfts-Pills (Product-CMS) ────────────────────────────────
+	   Pill-Familien für die Provenance-Kennzeichnung (⇣ aus Figma · ✎ Redaktion ·
+	   ≈ geschätzt): getönte Fläche + kräftiger Text DERSELBEN Farbfamilie. Der Text
+	   mischt die Rollenfarbe gegen --ds-text → in Light dunkel, in Dark hell; der
+	   Kontrast folgt dem Theme automatisch, weil der Dark-Block upstream --ds-text/
+	   --ds-accent/--ds-positive/--ds-warning neu bindet. Bewusst NUR über bestehende
+	   --ds-*-Rollen gemischt (kein neues rohes --z-ds-*, Token-Check bleibt grün). */
+	--ds-tint-info-surface: color-mix(in srgb, var(--ds-accent) 14%, transparent);
+	--ds-tint-info-text: color-mix(in srgb, var(--ds-accent) 62%, var(--ds-text));
+	--ds-tint-positive-surface: color-mix(in srgb, var(--ds-positive) 16%, transparent);
+	--ds-tint-positive-text: color-mix(in srgb, var(--ds-positive) 58%, var(--ds-text));
+	--ds-tint-warning-surface: color-mix(in srgb, var(--ds-warning) 20%, transparent);
+	--ds-tint-warning-text: color-mix(in srgb, var(--ds-warning) 58%, var(--ds-text));
+	/* Rückwärtskompatibler Alias: bisher via var(--ds-warning-text, …) gefallbackt. */
+	--ds-warning-text: var(--ds-tint-warning-text);
+	/* Kräftigere Tint-Flächen für Icon-Mini-Pills (runde Fläche mit nur einem
+	   Icon) — brauchen mehr Deckung als die Text-Pill-Flächen, damit das kleine
+	   Icon trägt. Und die Kontur des Drift-Banners (Warn-Fläche mit sichtbarer
+	   Rahmenlinie). Alle über bestehende --ds-*-Rollen gemischt (Token-Check grün). */
+	--ds-tint-info-strong: color-mix(in srgb, var(--ds-accent) 20%, transparent);
+	--ds-tint-positive-strong: color-mix(in srgb, var(--ds-positive) 24%, transparent);
+	--ds-tint-warning-border: color-mix(in srgb, var(--ds-warning) 40%, transparent);
 
 	/* Weiche Oberflächen */
 	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);

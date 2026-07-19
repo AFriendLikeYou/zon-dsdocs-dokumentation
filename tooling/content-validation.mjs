@@ -43,6 +43,9 @@ export const EDITORIAL_FIELDS = {
 	wording: { check: isArray, typ: 'array' },
 	komposition: { check: isArray, typ: 'array (Strings)' },
 	verwandt: { check: isArray, typ: 'array' },
+	// Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). Überschreibt
+	// feldweise den maschinellen Token-hinweis (model.tokens[].hinweis) auf der Seite.
+	tokenHinweise: { check: isObject, typ: 'objekt (Token-Name → Hinweis-String)' },
 	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' },
 	// Redaktionelle Code-Beispiele (Dev-Wissen übers zeit.de-Repo) — Develop-Tab.
 	codeBeispiele: { check: isArray, typ: 'array (Objekte { label, code, sprache?, hinweis? })' },
@@ -86,6 +89,10 @@ export function checkNested(key, value) {
 	if (key === 'variantInfo' && isObject(value)) {
 		for (const [label, text] of Object.entries(value))
 			if (!isString(text)) issues.push(`variantInfo["${label}"] muss ein String sein`);
+	}
+	if (key === 'tokenHinweise' && isObject(value)) {
+		for (const [name, text] of Object.entries(value))
+			if (!isString(text)) issues.push(`tokenHinweise["${name}"] muss ein String sein`);
 	}
 	if (key === 'codeBeispiele' && isArray(value)) {
 		// Jedes Beispiel: label+code Pflicht (String), sprache/hinweis optional (String),

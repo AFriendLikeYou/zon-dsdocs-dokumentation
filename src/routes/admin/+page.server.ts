@@ -1,5 +1,5 @@
 import { CATALOG } from '$data/catalog';
-import { MENU_ITEMS_PRODUCT } from '$data/navigation';
+import { MENU_ITEMS_PRODUCT, PLANNED_COMPONENTS } from '$data/navigation';
 import { listSvxPages } from './brand/core/brand-fs.server';
 import { gatherComponentStatus } from '$lib/server/component-status';
 
@@ -29,6 +29,8 @@ export const load = () => {
 		// Pipeline-Board (Feature B): Sync-/Doku-Status je Komponente, verlinkt den
 		// neuen Spec-Editor (/admin/product/components/<slug>).
 		board: gatherComponentStatus(),
+		// Geplante Stubs (noch ohne Import) → Ghost-Zeilen am Board-Ende (Mockup).
+		planned: PLANNED_COMPONENTS.map((p) => ({ label: p.label, slug: p.slug })),
 		productNav: MENU_ITEMS_PRODUCT.map((m) => {
 			const slug = m.href?.startsWith('/product/components/')
 				? m.href.split('/').pop()

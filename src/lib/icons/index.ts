@@ -24,6 +24,11 @@ export { default as ArrowRightIcon } from './ArrowRightIcon.svelte';
 export { default as LockOpenIcon } from './LockOpenIcon.svelte';
 export { default as LockClosedIcon } from './LockClosedIcon.svelte';
 export { default as ThemeSystemIcon } from './ThemeSystemIcon.svelte';
+// Product-CMS / Spec-Editor: Herkunft (Import/Redaktion), Drift, Legende.
+export { default as ImportIcon } from './ImportIcon.svelte';
+export { default as PencilIcon } from './PencilIcon.svelte';
+export { default as AlertTriangleIcon } from './AlertTriangleIcon.svelte';
+export { default as InfoIcon } from './InfoIcon.svelte';
 
 // cms/ — Editor-Icons via Namens-Dispatcher (eigenes Barrel, s. ./cms).
 export { Icon, CMS_ICONS } from './cms';

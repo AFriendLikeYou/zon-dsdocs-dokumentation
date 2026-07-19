@@ -8,7 +8,9 @@
   an den Trigger zurück; aria-haspopup/-expanded verknüpfen Trigger und Dialog.
 -->
 <script lang="ts">
+	import { InfoIcon } from '$lib/icons';
 	import PopoverSheet from '../../../brand/editor/PopoverSheet.svelte';
+	import { Pill } from '../../../ui';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 
 	let open = $state(false);
@@ -41,7 +43,7 @@
 	aria-label="Legende: Herkunft der Angaben"
 	onclick={toggle}
 >
-	<span aria-hidden="true">ⓘ</span>
+	<InfoIcon width={16} height={16} />
 </button>
 
 <PopoverSheet {open} label="Legende: Herkunft der Angaben" anchor={triggerEl} width="20rem" onclose={close}>
@@ -54,11 +56,11 @@
 		</p>
 		<hr class="legend-pop__sep" />
 		<p class="legend-pop__row">
-			<span class="legend-pop__badge legend-pop__badge--abgeleitet">abgeleitet</span>
+			<Pill tone="neutral">abgeleitet</Pill>
 			aus anderen Werten berechnet
 		</p>
 		<p class="legend-pop__row">
-			<span class="legend-pop__badge legend-pop__badge--geschaetzt">≈ geschätzt</span>
+			<Pill tone="estimate" icon="≈">geschätzt</Pill>
 			Platzhalter, noch nicht aus Figma
 		</p>
 		<p class="legend-pop__note">Maße ohne Badge sind direkt aus Figma gemessen.</p>
@@ -119,22 +121,6 @@
 		margin: var(--z-ds-space-6) 0;
 		border: none;
 		border-top: 1px solid var(--ds-border);
-	}
-	.legend-pop__badge {
-		display: inline-flex;
-		align-items: center;
-		flex: none;
-		font-size: var(--ds-text-xs);
-		border-radius: 999px;
-		padding: 1px var(--z-ds-space-8);
-		border: 1px solid var(--ds-border-soft);
-		color: var(--ds-text-body);
-		background: var(--ds-surface-raised, var(--ds-surface));
-	}
-	.legend-pop__badge--geschaetzt {
-		color: var(--ds-warning-text, var(--ds-text));
-		border-color: rgb(from var(--ds-warning) r g b / 0.5);
-		background: rgb(from var(--ds-warning) r g b / 0.15);
 	}
 	.legend-pop__note {
 		margin: 0;

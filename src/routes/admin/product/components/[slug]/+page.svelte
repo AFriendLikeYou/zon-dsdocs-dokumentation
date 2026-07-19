@@ -4,10 +4,10 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
+	import { ImportIcon, PencilIcon, AlertTriangleIcon } from '$lib/icons';
 	import { Swatch } from '$components/ui/swatch';
-	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { resolveCssVar } from '$lib/utils';
-	import { AdminPageHeader, AdminBadge, AdminFlash } from '../../../ui';
+	import { AdminFlash, Pill } from '../../../ui';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
@@ -16,6 +16,26 @@
 
 	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();
+
+	// ── Re-Import ist bewusst ein CLI-Schritt: der Button kopiert nur den fertigen
+	// Befehl (Muster wie CopyButton → Toast-Feedback), er führt nichts aus. ────────
+	const reImportCommand = $derived(
+		data.figmaUrl
+			? `node tooling/zeit-de-exporter/import.mjs '${data.figmaUrl}' ${data.slug}`
+			: ''
+	);
+	async function copyReImport() {
+		if (!reImportCommand) {
+			toast?.add('Kein Re-Import möglich', 'Im model.json ist keine Figma-URL hinterlegt.');
+			return;
+		}
+		try {
+			await navigator.clipboard?.writeText(reImportCommand);
+			toast?.add('Befehl kopiert', 'Re-Import-Befehl in der Zwischenablage — im Terminal ausführen.');
+		} catch {
+			toast?.add('Nicht kopiert', 'Zwischenablage nicht verfügbar.');
+		}
+	}
 
 	// ── Redaktioneller Editor-Zustand (nur die editierbaren Felder) ──────────────
 	type A11yStatus = 'pass' | 'warn' | 'todo';
@@ -28,6 +48,8 @@
 		a11y: { label: string; wert: string; status: A11yStatus }[];
 		wording: { schlecht: string; gut: string; hinweis: string }[];
 		verwandt: string[];
+		/** Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). */
+		tokenHinweise: Record<string, string>;
 		codeBeispiele: { label: string; sprache: string; code: string; hinweis: string }[];
 		codeSvelte: string;
 		repoCodeSvelte: string;
@@ -47,6 +69,7 @@
 		a11y?: { label?: string; wert?: string; status?: string }[];
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
 		verwandt?: string[];
+		tokenHinweise?: Record<string, string>;
 		codeBeispiele?: { label?: string; sprache?: string; code?: string; hinweis?: string }[];
 		codeSvelte?: string;
 		repoCodeSvelte?: string;
@@ -76,6 +99,15 @@
 				hinweis: r.hinweis ?? ''
 			})),
 			verwandt: [...(c.verwandt ?? [])],
+			// Alle Token-Namen mit '' vorbelegen (stabile bind:value-Ziele), dann die
+			// vorhandenen Redaktions-Overrides darüberlegen. Leere Keys fallen im
+			// payload wieder raus → Maschinen-hinweis gewinnt (delete-when-absent).
+			tokenHinweise: (() => {
+				const seed: Record<string, string> = {};
+				for (const g of (data.machine.tokens as { items?: { name: string }[] }[]) ?? [])
+					for (const t of g.items ?? []) seed[t.name] = '';
+				return { ...seed, ...(c.tokenHinweise ?? {}) };
+			})(),
 			codeBeispiele: (c.codeBeispiele ?? []).map((b) => ({
 				label: b.label ?? '',
 				sprache: b.sprache ?? 'svelte',
@@ -109,6 +141,7 @@
 			a11y: !!c.a11y?.length,
 			wording: !!c.wording?.length,
 			verwandt: !!c.verwandt?.length,
+			tokenHinweise: !!(c.tokenHinweise && Object.keys(c.tokenHinweise).length),
 			codeBeispiele: !!c.codeBeispiele?.length,
 			snippets: !!(c.codeSvelte || c.repoCodeSvelte || c.codeNote || c.repoNote)
 		};
@@ -158,6 +191,14 @@
 		if (wording.length) out.wording = wording;
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
+		// Token-Hinweise: nur nicht-leere Einträge; leere → Key raus → Maschinen-hinweis
+		// gewinnt wieder (delete-when-absent im EDITABLE-Muster).
+		const tokenHinweise: Record<string, string> = {};
+		for (const [name, txt] of Object.entries(model.tokenHinweise)) {
+			const t = (txt ?? '').trim();
+			if (t) tokenHinweise[name] = t;
+		}
+		if (Object.keys(tokenHinweise).length) out.tokenHinweise = tokenHinweise;
 		// Code-Beispiele: nur Einträge mit Titel UND Code; Code am Ende getrimmt
 		// (Zeilenstruktur bleibt). sprache immer mitschreiben, hinweis nur wenn gesetzt.
 		const codeBeispiele = model.codeBeispiele
@@ -257,6 +298,36 @@
 	const varianten = data.machine.varianten as VariantGroup[];
 	const zustaende = data.machine.zustaende as { label: string; vorhanden?: boolean }[];
 
+	// ── Flache Token-Liste (alle Gruppen) für die „Hinweis je Token"-Redaktionskarte:
+	// je Token der Maschinen-hinweis als gedämpfter Platzhalter, Override als Wert. ──
+	type FlatToken = { name: string; machineHinweis: string };
+	// tokenGroups ist stabil (aus data) → plain const; kein $derived nötig. Token-Namen
+	// können über Gruppen hinweg mehrfach vorkommen (z. B. --z-ds-color-text-100 als
+	// Label und als Fläche) → je Name nur EINE Zeile (erste gewinnt), sonst doppelter
+	// {#each}-Key. Der Redaktions-Hinweis ist ohnehin je Token-Name eindeutig.
+	const flatTokens: FlatToken[] = (() => {
+		const seen = new Set<string>();
+		const out: FlatToken[] = [];
+		for (const g of tokenGroups)
+			for (const t of g.items ?? []) {
+				if (seen.has(t.name)) continue;
+				seen.add(t.name);
+				out.push({ name: t.name, machineHinweis: t.hinweis ?? '' });
+			}
+		return out;
+	})();
+
+	// ── Gemischte A11y-Liste: Maschinen-Angaben (model.a11y), die die Redaktion NICHT
+	// per Label überschreibt, erscheinen read-only mit ⇣-Mini-Pill („nicht editierbar").
+	type MachineA11y = { label: string; wert: string; status?: string };
+	const machineA11y = data.machine.a11y as MachineA11y[];
+	const editorialA11yLabels = $derived(
+		new Set(model.a11y.map((r) => r.label.trim().toLowerCase()).filter(Boolean))
+	);
+	const machineA11yUnedited = $derived(
+		machineA11y.filter((m) => !editorialA11yLabels.has((m.label ?? '').trim().toLowerCase()))
+	);
+
 	// v1-read-only Editorial-Felder als JSON-Hinweis („im Code pflegen").
 	const readonlyEditorialShown = $derived.by(() => {
 		const r = data.readonlyEditorial;
@@ -311,11 +382,21 @@
 <svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
 
 {#snippet herkunftBadge(h: Herkunft)}
-	{#if h === 'abgeleitet'}
-		<span class="herkunft herkunft--abgeleitet">abgeleitet</span>
-	{:else if h === 'geschätzt'}
-		<span class="herkunft herkunft--geschaetzt">≈ geschätzt</span>
+	{#if h === 'geschätzt'}
+		<Pill tone="estimate" icon="≈">geschätzt</Pill>
+	{:else}
+		<!-- gemessen/abgeleitet: ruhiger Klartext rechts (kein Pill) — wie im Mockup. -->
+		<span class="herkunft-text">{h}</span>
 	{/if}
+{/snippet}
+
+{#snippet miniPill(variant: 'machine' | 'editorial')}
+	<span class="mini-pill mini-pill--{variant}" aria-hidden="true">
+		{#if variant === 'machine'}<ImportIcon width={11} height={11} />{:else}<PencilIcon
+				width={11}
+				height={11}
+			/>{/if}
+	</span>
 {/snippet}
 
 {#snippet ghostCard(key: string, label: string)}
@@ -359,24 +440,7 @@
 {/snippet}
 
 <div class="spec-edit">
-	<!-- 1 · Kopfzeile -->
-	<AdminPageHeader
-		title={data.name}
-		crumb={{ href: '/admin', label: 'Alle Komponenten' }}
-	>
-		{#snippet actions()}
-			<LegendPopover />
-		{/snippet}
-		<span class="head-meta">
-			{#if data.status}<AdminBadge tone="default">{data.status}</AdminBadge>{/if}
-			<span class="head-sync">
-				Sync: Figma-Node <code>{data.nodeId ?? '—'}</code>
-				{#if data.aktualisiertAm}· Stand {data.aktualisiertAm}{/if}
-			</span>
-			<a class="head-link" href={data.viewHref} title="Öffentliche Doku-Seite">Doku-Seite ansehen ↗</a>
-			{#if data.figmaUrl}<a class="head-link" href={data.figmaUrl} target="_blank" rel="noreferrer">Figma ↗</a>{/if}
-		</span>
-	</AdminPageHeader>
+	<nav class="crumb"><a href="/admin">← Alle Komponenten</a></nav>
 
 	{#if !data.writable}
 		<AdminFlash tone="warn">
@@ -384,24 +448,66 @@
 		</AdminFlash>
 	{/if}
 
-	<!-- 2 · Drift-Banner (nur wenn figma-raw.json neuer als model.json) -->
-	{#if data.figmaRawNeuerAlsModel}
-		<div class="drift" role="status">
-			<div class="drift__body">
-				<strong class="drift__title">Design hat sich seit dem letzten Import geändert</strong>
-				<p class="drift__text">
-					Die Figma-Roh-Daten (<code>figma-raw.json</code>) sind neuer als das
-					<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der
-					Re-Import ist bewusst ein manueller CLI-Schritt — die Doku rät nie.
-				</p>
+	<!-- EIN äußerer Karten-Container um den gesamten Editor (Delta 1). -->
+	<article class="editor-card">
+		<!-- Kompakte Kopf-Leiste: Name + Status links · Sync-Meta + Re-Import rechts. -->
+		<header class="editor-card__head">
+			<div class="editor-card__ident">
+				<span class="editor-card__name">{data.name}</span>
+				{#if data.status}<Pill tone="status">{data.status}</Pill>{/if}
 			</div>
-			<a class="drift__cta" href={data.importGuideHref} target="_blank" rel="noreferrer"
-				>Zur Anleitung ↗</a
-			>
-		</div>
-	{/if}
+			<div class="editor-card__meta">
+				<span class="editor-card__sync">
+					Sync: Figma-Node <code>{data.nodeId ?? '—'}</code>{#if data.aktualisiertAm}
+						· Stand {data.aktualisiertAm}{/if}
+				</span>
+				<a class="editor-card__link" href={data.viewHref} title="Öffentliche Doku-Seite"
+					>Doku-Seite ↗</a
+				>
+				{#if data.figmaUrl}<a
+						class="editor-card__link"
+						href={data.figmaUrl}
+						target="_blank"
+						rel="noreferrer">Figma ↗</a
+					>{/if}
+				<LegendPopover />
+				<button
+					type="button"
+					class="reimport-btn"
+					onclick={copyReImport}
+					title="Re-Import ist ein CLI-Schritt — Befehl kopieren"
+					aria-label="Re-Import ist ein CLI-Schritt — Befehl in die Zwischenablage kopieren"
+				>
+					<ImportIcon width={13} height={13} /> Re-Import
+				</button>
+			</div>
+		</header>
 
-	<!-- 3 · Maschinen-Zonen (read-only, aus Figma) -->
+		<div class="editor-card__body">
+			<!-- Drift-Banner (nur wenn figma-raw.json neuer als model.json) — Delta 7. -->
+			{#if data.figmaRawNeuerAlsModel}
+				<div class="drift" role="status">
+					<span class="drift__icon" aria-hidden="true"><AlertTriangleIcon width={18} height={18} /></span>
+					<div class="drift__body">
+						<strong class="drift__title">Design hat sich seit dem letzten Import geändert</strong>
+						<p class="drift__text">
+							Die Figma-Roh-Daten (<code>figma-raw.json</code>) sind neuer als das
+							<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der
+							Re-Import ist bewusst ein manueller CLI-Schritt — die Doku rät nie.
+						</p>
+						<div class="drift__actions">
+							<button type="button" class="drift__btn" onclick={copyReImport}>
+								<ImportIcon width={13} height={13} /> Re-Import-Befehl kopieren
+							</button>
+							<a class="drift__btn" href={data.importGuideHref} target="_blank" rel="noreferrer"
+								>Zur Anleitung ↗</a
+							>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			<!-- Maschinen-Zonen (read-only, aus Figma) -->
 	{#if masseRows.length || spacingRows.length}
 		<MachineZone
 			title="Maße & Spacing"
@@ -413,8 +519,9 @@
 						{#each masseRows as r (r.label)}
 							<tr>
 								<td class="mz-table__label">{r.label}</td>
-								<td class="mz-table__value">{r.px}</td>
-								<td class="mz-table__token">{#if r.token}<code>{r.token}</code>{/if}</td>
+								<td class="mz-table__value"
+									>{r.px}{#if r.token} <code>{r.token}</code>{/if}</td
+								>
 								<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
 							</tr>
 						{/each}
@@ -428,8 +535,9 @@
 						{#each spacingRows as r, i (i)}
 							<tr>
 								<td class="mz-table__label">{r.label}</td>
-								<td class="mz-table__value">{r.px}</td>
-								<td class="mz-table__token">{#if r.token}<code>{r.token}</code>{/if}</td>
+								<td class="mz-table__value"
+									>{r.px}{#if r.token} <code>{r.token}</code>{/if}</td
+								>
 								<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
 							</tr>
 						{/each}
@@ -584,23 +692,41 @@
 			<section class="card" id="sec-a11y">
 				<div class="card-head">
 					<span class="card-title">Barrierefreiheit (Label · Wert · Status)</span>
+					{#if machineA11yUnedited.length}
+						<span class="card-head__meta" title="Maschinen- und Redaktions-Zeilen gemischt"
+							>gemischt</span
+						>
+					{/if}
 				</div>
 				<div class="card-body">
+					<!-- Maschinen-Angaben (aus Figma), nicht editierbar — blaue ⇣-Mini-Pill. -->
+					{#each machineA11yUnedited as m (m.label)}
+						<div class="row row--machine">
+							{@render miniPill('machine')}
+							<span class="row__static row__static--key">{m.label}</span>
+							<span class="row__static">{m.wert}</span>
+							<span class="row__prov">nicht editierbar</span>
+						</div>
+					{/each}
+					<!-- Redaktionelle Zeilen — grüne ✎-Mini-Pill, Status als kompaktes Select. -->
 					{#each model.a11y as _, i (i)}
 						<div class="row">
-							<span class="row__dot row__dot--{model.a11y[i].status}" aria-hidden="true"></span>
+							{@render miniPill('editorial')}
 							<input
 								class="row__input row__input--key"
 								bind:value={model.a11y[i].label}
 								placeholder="Label"
 							/>
 							<input class="row__input" bind:value={model.a11y[i].wert} placeholder="Wert" />
-							<SegmentedControl
-								ariaLabel="Status"
-								options={A11Y_STATUS_OPTIONS}
-								value={model.a11y[i].status}
-								onchange={(v) => (model.a11y[i].status = v as A11yStatus)}
-							/>
+							<select
+								class="status-select status-select--{model.a11y[i].status}"
+								bind:value={model.a11y[i].status}
+								aria-label="Status"
+							>
+								{#each A11Y_STATUS_OPTIONS as o (o.value)}
+									<option value={o.value}>{o.label}</option>
+								{/each}
+							</select>
 							<button
 								type="button"
 								class="row__remove"
@@ -696,6 +822,34 @@
 			{@render ghostCard('verwandt', 'Verwandte Komponenten')}
 		{/if}
 
+		<!-- Hinweis je Token (Delta 6): je Token eine Zeile mono-Name + Input;
+		     Maschinen-hinweis als gedämpfter Platzhalter, Override als Wert. -->
+		{#if flatTokens.length}
+			{#if expanded.tokenHinweise}
+				<section class="card" id="sec-tokenHinweise">
+					<div class="card-head"><span class="card-title">Hinweis je Token</span></div>
+					<div class="card-body">
+						<p class="hint">
+							Überschreibt den maschinellen Token-Hinweis feldweise. Leer lassen = der
+							Maschinen-Wert (aus Figma) gewinnt; er steht als Platzhalter.
+						</p>
+						{#each flatTokens as t (t.name)}
+							<div class="token-hint-row">
+								<code class="token-hint-row__name">{t.name}</code>
+								<input
+									class="token-hint-row__input"
+									bind:value={model.tokenHinweise[t.name]}
+									placeholder={t.machineHinweis || '(kein Maschinen-Hinweis)'}
+								/>
+							</div>
+						{/each}
+					</div>
+				</section>
+			{:else}
+				{@render ghostToggle('tokenHinweise', 'Hinweis je Token ergänzen')}
+			{/if}
+		{/if}
+
 		<!-- Code-Beispiele (Develop-Tab) -->
 		{#if expanded.codeBeispiele}
 			<section class="card" id="sec-codeBeispiele">
@@ -773,58 +927,154 @@
 				<button type="submit" class="save" disabled={!data.writable}>Speichern <kbd>⌘S</kbd></button>
 			</div>
 		{/if}
-	</form>
+			</form>
+		</div>
+	</article>
 </div>
 
 <style>
 	.spec-edit {
 		max-width: 52rem;
 		margin: 0 auto;
-		padding: var(--z-ds-space-xl) var(--z-ds-space-l) 7rem;
+		padding: var(--z-ds-space-l) var(--z-ds-space-l) 7rem;
 	}
 
-	/* ── Kopfzeile-Meta ── */
-	.head-meta {
+	/* ── „← Alle Komponenten" klein oberhalb der Karte ── */
+	.crumb {
+		margin-bottom: var(--z-ds-space-m);
+	}
+	.crumb a {
+		color: var(--ds-text-muted);
+		text-decoration: none;
+		font-size: var(--ds-text-sm);
+		transition: color var(--ds-dur) var(--ds-ease-out);
+	}
+	.crumb a:hover {
+		color: var(--ds-text);
+	}
+	.crumb a:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
+	/* ── EIN äußerer Karten-Container um den gesamten Editor (Delta 1) ──
+	   Hebt sich mit Hairline + 12px-Radius von der Seite ab. */
+	.editor-card {
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius-lg);
+		overflow: hidden;
+	}
+	/* Kompakte Kopf-Leiste: Name+Status links, Sync-Meta+Re-Import rechts,
+	   Hairline darunter. */
+	.editor-card__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--z-ds-space-m);
+		flex-wrap: wrap;
+		padding: var(--z-ds-space-s) var(--z-ds-space-l);
+		border-bottom: 1px solid var(--ds-border);
+	}
+	.editor-card__ident {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-s);
+		min-width: 0;
+	}
+	.editor-card__name {
+		font-size: var(--ds-text-base);
+		font-weight: 700;
+		color: var(--ds-text);
+	}
+	.editor-card__meta {
 		display: inline-flex;
 		align-items: center;
 		flex-wrap: wrap;
 		gap: var(--z-ds-space-m);
 	}
-	.head-sync {
-		font-size: var(--ds-text-sm);
+	.editor-card__sync {
+		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.head-sync code {
+	.editor-card__sync code {
 		font-family: var(--ds-font-mono);
 	}
-	.head-link {
-		font-size: var(--ds-text-sm);
+	.editor-card__link {
+		font-size: var(--ds-text-xs);
 		color: var(--ds-accent);
 		text-decoration: none;
 	}
-	.head-link:hover {
+	.editor-card__link:hover {
 		text-decoration: underline;
 	}
-	.head-link:focus-visible {
+	.editor-card__link:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
+	/* Re-Import: kleiner Outline-Button (kopiert den CLI-Befehl, führt nichts aus). */
+	.reimport-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-4);
+		width: auto;
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		color: var(--ds-text);
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border-strong);
+		border-radius: var(--ds-radius-sm);
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
+		cursor: pointer;
+		transition:
+			border-color var(--ds-dur) var(--ds-ease-out),
+			background var(--ds-dur) var(--ds-ease-out);
+	}
+	.reimport-btn:hover {
+		border-color: var(--ds-accent);
+	}
+	.reimport-btn:active {
+		background: var(--ds-surface-sunken);
+	}
+	.reimport-btn:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.reimport-btn {
+			transition: none;
+		}
+	}
+	.editor-card__body {
+		padding: var(--z-ds-space-l);
+	}
 
-	/* ── Drift-Banner ── */
+	/* ── Drift-Banner: getönte Warn-Fläche, Icon + fetter Titel + Erklärtext,
+	   Aktion rechts (klein, outline) — Formensprache des Mockups. ── */
 	.drift {
 		display: flex;
 		align-items: flex-start;
-		gap: var(--z-ds-space-m);
-		background: rgb(from var(--ds-warning) r g b / 0.15);
-		border: 1px solid rgb(from var(--ds-warning) r g b / 0.4);
-		border-radius: var(--ds-radius, 8px);
+		gap: var(--z-ds-space-s);
+		background: var(--ds-tint-warning-surface);
+		border: 1px solid var(--ds-tint-warning-border);
+		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-m);
 		margin-bottom: var(--z-ds-space-l);
+	}
+	.drift__icon {
+		display: inline-flex;
+		flex: none;
+		color: var(--ds-tint-warning-text);
+		margin-top: 1px;
+	}
+	.drift__body {
+		flex: 1;
+		min-width: 0;
 	}
 	.drift__title {
 		display: block;
 		font-size: var(--ds-text-base);
-		color: var(--ds-text);
+		color: var(--ds-tint-warning-text);
 	}
 	.drift__text {
 		margin: var(--z-ds-space-6) 0 0;
@@ -836,26 +1086,40 @@
 		font-family: var(--ds-font-mono);
 		font-size: 0.9em;
 	}
-	.drift__cta {
-		flex: none;
-		align-self: center;
-		font-size: var(--ds-text-sm);
+	/* Zwei kleine Outline-Buttons unter dem Text, links (Delta 7). */
+	.drift__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--z-ds-space-6);
+		margin-top: var(--z-ds-space-8);
+	}
+	.drift__btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-4);
+		width: auto;
+		font-size: var(--ds-text-xs);
 		font-weight: 600;
 		color: var(--ds-text);
 		text-decoration: none;
-		border: 1px solid var(--ds-border);
-		border-radius: 999px;
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
+		border: 1px solid var(--ds-border-strong);
+		border-radius: var(--ds-radius-sm);
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
 		background: var(--ds-surface);
-		white-space: nowrap;
+		cursor: pointer;
 		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.drift__cta:hover {
+	.drift__btn:hover {
 		border-color: var(--ds-accent);
 	}
-	.drift__cta:focus-visible {
+	.drift__btn:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.drift__btn {
+			transition: none;
+		}
 	}
 
 	/* ── Maschinen-Tabellen ── */
@@ -863,22 +1127,34 @@
 		width: 100%;
 		border-collapse: collapse;
 	}
+	/* Maschinen-Zone → Trenner GESTRICHELT (dieselbe „nicht editierbar"-Sprache). */
 	.mz-table td {
 		padding: var(--z-ds-space-6) var(--z-ds-space-8) var(--z-ds-space-6) 0;
-		border-bottom: 1px solid var(--ds-border);
+		border-bottom: 1px dashed var(--ds-border);
 		vertical-align: middle;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
+	.mz-table tr:last-child td {
+		border-bottom: none;
+	}
 	.mz-table__label {
-		color: var(--ds-text);
+		color: var(--ds-text-muted);
 		white-space: nowrap;
+		width: 1%;
+		padding-right: var(--z-ds-space-m);
+	}
+	/* Wert-Spalte trägt die Zeile (Zahl + inline-Token) → nimmt den Restplatz. */
+	.mz-table__value {
+		width: 100%;
 	}
 	.mz-table__value--mono,
+	.mz-table__value code,
 	.mz-table__token code {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 	}
+	.mz-table__value code,
 	.mz-table__token code {
 		color: var(--ds-text-muted);
 	}
@@ -886,11 +1162,29 @@
 		text-align: right;
 		white-space: nowrap;
 	}
+	/* gemessen/abgeleitet als ruhiger Klartext rechts (kein Pill) — Delta 3. */
+	.herkunft-text {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
 	.mz-table__swatch {
 		width: 24px;
 	}
+	/* Token-Zeilen (Delta 5): Token-Name nimmt die Breite, Wert + Hinweis rechts. */
+	.mz-table--tokens .mz-table__token {
+		width: 100%;
+	}
+	.mz-table--tokens .mz-table__value {
+		width: auto;
+		white-space: nowrap;
+		text-align: right;
+		color: var(--ds-text-body);
+	}
 	.mz-table__hinweis {
 		color: var(--ds-text-muted);
+		white-space: nowrap;
+		text-align: right;
+		padding-left: var(--z-ds-space-m);
 	}
 	.mz-subhead {
 		margin: var(--z-ds-space-m) 0 var(--z-ds-space-6);
@@ -899,26 +1193,6 @@
 		letter-spacing: 0.06em;
 		color: var(--ds-text-muted);
 		font-weight: 600;
-	}
-
-	/* ── Herkunft-Badges ── */
-	.herkunft {
-		display: inline-flex;
-		align-items: center;
-		font-size: var(--ds-text-xs);
-		border-radius: 999px;
-		padding: 1px var(--z-ds-space-8);
-		border: 1px solid var(--ds-border-soft);
-		color: var(--ds-text-muted);
-		background: var(--ds-surface-raised, var(--ds-surface));
-	}
-	.herkunft--abgeleitet {
-		color: var(--ds-text-body);
-	}
-	.herkunft--geschaetzt {
-		color: var(--ds-warning-text, var(--ds-text));
-		border-color: rgb(from var(--ds-warning) r g b / 0.5);
-		background: rgb(from var(--ds-warning) r g b / 0.15);
 	}
 
 	/* ── Varianten/Zustände-Chips ── */
@@ -977,7 +1251,8 @@
 	/* ── Editor-Karten (wie Brand-/[slug]-Editor) ── */
 	.card {
 		background: var(--ds-surface-raised, var(--ds-surface));
-		border-radius: var(--ds-radius, 8px);
+		border: 1px solid var(--ds-border-soft);
+		border-radius: var(--ds-radius);
 		padding: 12px;
 		margin-bottom: var(--z-ds-space-m);
 	}
@@ -998,6 +1273,10 @@
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
+		color: var(--ds-text-muted);
+	}
+	.card-head__meta {
+		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
 	.card-body {
@@ -1068,6 +1347,35 @@
 		color: var(--ds-text-faint);
 	}
 
+	/* ── Hinweis je Token (Delta 6): mono-Name + Inline-Input je Zeile ── */
+	.token-hint-row {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-s);
+		border-bottom: 1px solid var(--ds-border-soft);
+	}
+	.token-hint-row__name {
+		flex: 0 1 16rem;
+		min-width: 0;
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.token-hint-row__input {
+		flex: 1;
+		min-width: 0;
+		background: transparent;
+		border: none;
+		padding: var(--z-ds-space-6) var(--z-ds-space-6);
+	}
+	.token-hint-row__input:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: -2px;
+	}
+
 	/* ── Gruppierte Unterlisten (Verwendung, Do & Don't) ── */
 	.sublist {
 		display: flex;
@@ -1108,21 +1416,69 @@
 		flex: 0 1 12rem;
 		color: var(--ds-text-muted);
 	}
-	.row__dot {
+	/* Icon-only Mini-Pill am Zeilenanfang (Delta 4): runde Tint-Fläche NUR mit Icon.
+	   blau = Maschine (⇣), grün = Redaktion (✎). */
+	.mini-pill {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.15rem;
+		height: 1.15rem;
 		flex: none;
-		width: 9px;
-		height: 9px;
-		border-radius: 50%;
-		background: var(--ds-text-faint);
+		border-radius: 999px;
 	}
-	.row__dot--pass {
-		background: var(--ds-positive);
+	.mini-pill--machine {
+		color: var(--ds-tint-info-text);
+		background: var(--ds-tint-info-strong);
 	}
-	.row__dot--warn {
-		background: var(--ds-warning);
+	.mini-pill--editorial {
+		color: var(--ds-tint-positive-text);
+		background: var(--ds-tint-positive-strong);
 	}
-	.row__dot--todo {
-		background: var(--ds-text-faint);
+	/* Read-only Maschinen-Zeile in gemischter Liste: gedämpft, „nicht editierbar". */
+	.row--machine {
+		color: var(--ds-text-body);
+	}
+	.row__static {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--ds-text-sm);
+		padding: var(--z-ds-space-6) var(--z-ds-space-6);
+	}
+	.row__static--key {
+		flex: 0 1 11rem;
+		color: var(--ds-text);
+	}
+	.row__prov {
+		flex: none;
+		margin-left: auto;
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+	}
+	/* Status als kompaktes Select im Pill-Look (Mockup „pass ▾"). */
+	.status-select {
+		flex: none;
+		width: auto;
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		border-radius: 999px;
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
+		border: 1px solid transparent;
+		background: var(--ds-surface-sunken);
+		color: var(--ds-text-body);
+		cursor: pointer;
+	}
+	.status-select--pass {
+		color: var(--ds-tint-positive-text);
+		background: var(--ds-tint-positive-surface);
+	}
+	.status-select--warn {
+		color: var(--ds-tint-warning-text);
+		background: var(--ds-tint-warning-surface);
+	}
+	.status-select:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
 	}
 	.row__arrow {
 		flex: none;
@@ -1188,7 +1544,7 @@
 		text-align: left;
 		background: none;
 		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius, 8px);
+		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-m);
 		margin-bottom: var(--z-ds-space-m);
 		color: var(--ds-text-muted);

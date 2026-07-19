@@ -20,9 +20,20 @@ describe('content-validation · checkContentData', () => {
 			doDont: { do: ['x'], dont: ['y'] },
 			verwandt: ['text-button'],
 			komposition: ['Satz.'],
-			variantInfo: { Default: 'neutral' }
+			variantInfo: { Default: 'neutral' },
+			tokenHinweise: { '--z-ds-color-background-10': 'Fläche Default' }
 		};
 		expect(checkContentData(data)).toEqual([]);
+	});
+
+	it('tokenHinweise mit Nicht-String-Wert → Befund', () => {
+		const issues = checkContentData({ tokenHinweise: { '--z-ds-color-text-100': 42 } });
+		expect(issues.some((i) => i.includes('tokenHinweise'))).toBe(true);
+	});
+
+	it('tokenHinweise als Array statt Objekt → Befund', () => {
+		const issues = checkContentData({ tokenHinweise: ['x'] });
+		expect(issues[0]).toContain('falschen Typ');
 	});
 
 	it('unbekannter Top-Level-Key → Befund', () => {

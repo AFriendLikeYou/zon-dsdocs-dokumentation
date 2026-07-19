@@ -25,6 +25,8 @@ const EDITABLE = [
 	'a11y',
 	'wording',
 	'verwandt',
+	// Redaktioneller Hinweis-Text je Token (Token-Name → Freitext).
+	'tokenHinweise',
 	// Redaktionelle Code-Beispiele (Develop-Tab) + feldweise Snippet-Overrides.
 	'codeBeispiele',
 	'codeSvelte',
@@ -125,7 +127,10 @@ export const load = ({ params }) => {
 			spacing: Array.isArray(model.spacing) ? model.spacing : [],
 			tokens: Array.isArray(model.tokens) ? model.tokens : [],
 			varianten: Array.isArray(model.varianten) ? model.varianten : [],
-			zustaende: Array.isArray(model.zustaende) ? model.zustaende : []
+			zustaende: Array.isArray(model.zustaende) ? model.zustaende : [],
+			// Maschinelle A11y-Angaben (aus Figma/model) — read-only Zeilen der
+			// gemischten Barrierefreiheit-Liste; content.a11y bleibt editierbar.
+			a11y: Array.isArray(model.a11y) ? model.a11y : []
 		},
 		// ── Redaktionelle Rohdaten (content.json) ──
 		content,
