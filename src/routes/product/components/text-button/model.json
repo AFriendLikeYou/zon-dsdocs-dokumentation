@@ -53,22 +53,22 @@
 			"items": [
 				{
 					"name": "--z-ds-color-text-70",
-					"wert": "#444444 · Label Default",
+					"hinweis": "Label Default",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Label Hover/Active",
+					"hinweis": "Label Hover/Active",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"wert": "#69696c · Label Disabled",
+					"hinweis": "Label Disabled",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Fläche Hover/Active",
+					"hinweis": "Fläche Hover/Active",
 					"swatch": "#eeeeee"
 				}
 			]
@@ -78,17 +78,17 @@
 			"items": [
 				{
 					"name": "--z-ds-color-general-white-60",
-					"wert": "rgba(#fff, 0.6) · Label On-Image Default",
+					"hinweis": "rgba(#fff, 0.6) · Label On-Image Default",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Label On-Image Hover",
+					"hinweis": "Label On-Image Hover",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-general-black-60",
-					"wert": "rgba(#000, 0.6) · Fläche On-Image Hover",
+					"hinweis": "rgba(#000, 0.6) · Fläche On-Image Hover",
 					"swatch": "#000000"
 				}
 			]
@@ -98,7 +98,7 @@
 			"items": [
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · :focus-visible-Outline (2px)",
+					"hinweis": ":focus-visible-Outline (2px)",
 					"swatch": "#005fcc"
 				}
 			]
@@ -108,11 +108,11 @@
 			"items": [
 				{
 					"name": "--z-ds-space-xs",
-					"wert": "8px · Innenabstand"
+					"hinweis": "8px · Innenabstand"
 				},
 				{
 					"name": "--z-ds-space-xxxs",
-					"wert": "4px · Icon ↔ Label"
+					"hinweis": "4px · Icon ↔ Label"
 				}
 			]
 		},
@@ -121,7 +121,7 @@
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -130,11 +130,11 @@
 			"items": [
 				{
 					"name": "--z-ds-fontsize-14",
-					"wert": "Tablet Gothic 14 · Default"
+					"hinweis": "Tablet Gothic 14 · Default"
 				},
 				{
 					"name": "--z-ds-fontsize-16",
-					"wert": "Tablet Gothic 16 · Large"
+					"hinweis": "Tablet Gothic 16 · Large"
 				}
 			]
 		}

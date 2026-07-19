@@ -44,27 +44,27 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen",
+					"hinweis": "Rahmen",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Wert & Icons",
+					"hinweis": "Wert & Icons",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · Disabled",
+					"hinweis": "Disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Hover-Fläche",
+					"hinweis": "Hover-Fläche",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus",
+					"hinweis": "Fokus",
 					"swatch": "#005fcc"
 				}
 			]
@@ -74,11 +74,11 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-xxs",
-					"wert": "6px · Padding + Gap"
+					"hinweis": "6px · Padding + Gap"
 				},
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -87,7 +87,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "Label/Regular/14px",
-					"wert": "Tablet Gothic Regular 14/1"
+					"hinweis": "Tablet Gothic Regular 14/1"
 				}
 			]
 		}

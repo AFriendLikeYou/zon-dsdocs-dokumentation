@@ -26,6 +26,7 @@
 import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSync } from 'node:fs';
 import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateModelSchema } from './schema-validate.mjs';
 
 const TARGET = 'zeit-de';
 const ROUTE_BASE = 'src/routes/product/components';
@@ -960,6 +961,13 @@ function main() {
 	const { input, root, dry } = parsed;
 	const modelPath = resolveModelPath(input);
 	const model = JSON.parse(readFileSync(modelPath, 'utf8'));
+	// Struktur-Gate: erst das Schema (der Vertrag), dann die Semantik-Checks.
+	const schemaErrors = validateModelSchema(model);
+	if (schemaErrors.length) {
+		throw new Error(
+			`model.json verletzt model.schema.json:\n${schemaErrors.map((e) => `  • ${e}`).join('\n')}`
+		);
+	}
 	validate(model, { root });
 
 	const kebab = kebabCase(model.name);

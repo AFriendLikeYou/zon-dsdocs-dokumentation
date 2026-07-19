@@ -77,7 +77,15 @@ export type A11yItem = { label: string; wert: string; status: 'pass' | 'warn' | 
 
 export type SpecState = { label: string; vorhanden?: boolean };
 
-export type TokenItem = { name: string; wert: string; swatch?: string; translucent?: boolean };
+/**
+ * Ein Token-Eintrag der Specs-Tabelle. Kein `wert`-Feld mehr — der Wert ist die
+ * eine Quelle (static/styles-zds.css) und wird zur Laufzeit/Buildzeit über den
+ * `name` aufgelöst (Client: getComputedStyle · Server: ZDS_VALUES).
+ *   hinweis  – freier Beschreibungstext neben dem aufgelösten Wert
+ *   swatch   – Hex als SSR-Platzhalter + Flag „zeige Swatch"; Live-Farbe kommt
+ *              aus dem aufgelösten Token (folgt Light/Dark)
+ */
+export type TokenItem = { name: string; hinweis?: string; swatch?: string; translucent?: boolean };
 export type TokenGroup = { kategorie: string; beschreibung?: string; items: TokenItem[] };
 
 export type VariantGroup = {

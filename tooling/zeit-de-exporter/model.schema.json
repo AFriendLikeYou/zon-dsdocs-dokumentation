@@ -31,7 +31,7 @@
 		"aktualisiertAm": { "type": "string", "description": "Datum JJJJ-MM-TT." },
 		"dokumentiertAm": {
 			"type": "string",
-			"description": "Erstdokumentation JJJJ-MM-TT — speist das automatische „Neu"-Badge (14 Tage; danach „Update" via aktualisiertAm)."
+			"description": "Erstdokumentation JJJJ-MM-TT — speist das automatische „Neu\"-Badge (14 Tage; danach „Update\" via aktualisiertAm)."
 		},
 		"version": {
 			"type": "string",
@@ -191,13 +191,16 @@
 					"items": {
 						"type": "object",
 						"additionalProperties": false,
-						"required": ["name", "wert"],
+						"required": ["name"],
 						"properties": {
-							"name": { "type": "string", "description": "Token-Name." },
-							"wert": { "type": "string", "description": "Wert/Beschreibung." },
+							"name": { "type": "string", "description": "Token-Name (--z-ds-*). Einzige Quelle des Werts — der wird zur Laufzeit/Buildzeit aus static/styles-zds.css aufgelöst, NICHT im Modell hinterlegt." },
+							"hinweis": {
+								"type": "string",
+								"description": "Freier Beschreibungstext neben dem aufgelösten Wert, z. B. \"Fläche Default\". Optional. (Kein Wert — Werte kommen aus der einen Quelle.)"
+							},
 							"swatch": {
 								"type": "string",
-								"description": "Farb-Hex für die Vorschau (optional)."
+								"description": "Farb-Hex als SSR-Platzhalter + Flag \"zeige Swatch\". Die angezeigte Swatch-Farbe stammt live aus dem aufgelösten Token (folgt Light/Dark). Optional."
 							},
 							"translucent": { "type": "boolean" }
 						}

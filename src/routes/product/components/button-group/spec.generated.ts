@@ -47,32 +47,32 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Fläche inaktiv & Rahmen",
+					"hinweis": "Fläche inaktiv & Rahmen",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-background-20",
-					"wert": "#dfdfe1 · Fläche inaktiv Hover",
+					"hinweis": "Fläche inaktiv Hover",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-background-0",
-					"wert": "#ffffff · Fläche aktiv",
+					"hinweis": "Fläche aktiv",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"wert": "#69696c · Label inaktiv",
+					"hinweis": "Label inaktiv",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Label aktiv/Hover",
+					"hinweis": "Label aktiv/Hover",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Trennstrich",
+					"hinweis": "Trennstrich",
 					"swatch": "#cccccf"
 				}
 			]
@@ -82,11 +82,11 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-xs",
-					"wert": "8px · Segment-Padding vertikal"
+					"hinweis": "8px · Segment-Padding vertikal"
 				},
 				{
 					"name": "--z-ds-space-m",
-					"wert": "16px · Segment-Padding horizontal"
+					"hinweis": "16px · Segment-Padding horizontal"
 				}
 			]
 		},
@@ -95,7 +95,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -104,7 +104,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-fontsize-16",
-					"wert": "Tablet Gothic 16"
+					"hinweis": "Tablet Gothic 16"
 				}
 			]
 		}

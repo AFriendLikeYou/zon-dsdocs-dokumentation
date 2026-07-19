@@ -45,42 +45,42 @@
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen unchecked",
+					"hinweis": "Rahmen unchecked",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-border-70",
-					"wert": "#e4e4e4 · Rahmen disabled",
+					"hinweis": "Rahmen disabled",
 					"swatch": "#e4e4e4"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Hover-Fläche",
+					"hinweis": "Hover-Fläche",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Füllung checked",
+					"hinweis": "Füllung checked",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"wert": "#444444 · checked Hover",
+					"hinweis": "checked Hover",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · disabled",
+					"hinweis": "disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus-Rahmen",
+					"hinweis": "Fokus-Rahmen",
 					"swatch": "#005fcc"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Haken",
+					"hinweis": "Haken",
 					"swatch": "#ffffff"
 				}
 			]
@@ -90,7 +90,7 @@
 			"items": [
 				{
 					"name": "--z-ds-border-radius-2",
-					"wert": "2px"
+					"hinweis": "2px"
 				}
 			]
 		}

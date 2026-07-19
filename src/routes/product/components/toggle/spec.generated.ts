@@ -39,22 +39,22 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-background-20",
-					"wert": "#dfdfe1 · Track Off",
+					"hinweis": "Track Off",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Track On",
+					"hinweis": "Track On",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Thumb",
+					"hinweis": "Thumb",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus-Ring",
+					"hinweis": "Fokus-Ring",
 					"swatch": "#005fcc"
 				}
 			]

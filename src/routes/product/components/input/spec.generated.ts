@@ -51,27 +51,27 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen (Default/Filled/Disabled)",
+					"hinweis": "Rahmen (Default/Filled/Disabled)",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"wert": "#69696c · Platzhalter, Rahmen aktiv",
+					"hinweis": "Platzhalter, Rahmen aktiv",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · gefüllter Text",
+					"hinweis": "gefüllter Text",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · Disabled",
+					"hinweis": "Disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-error-70",
-					"wert": "#bf4040 · Rahmen Error",
+					"hinweis": "Rahmen Error",
 					"swatch": "#bf4040"
 				}
 			]
@@ -81,11 +81,11 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-s",
-					"wert": "12px · Innenabstand"
+					"hinweis": "12px · Innenabstand"
 				},
 				{
 					"name": "--z-ds-space-xs",
-					"wert": "8px · Gap zu Icon/Chevron"
+					"hinweis": "8px · Gap zu Icon/Chevron"
 				}
 			]
 		},
@@ -94,7 +94,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -103,7 +103,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "Label/Regular/16px",
-					"wert": "Tablet Gothic Regular 16/1"
+					"hinweis": "Tablet Gothic Regular 16/1"
 				}
 			]
 		}

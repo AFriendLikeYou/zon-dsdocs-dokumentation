@@ -83,7 +83,15 @@ const round = (n) => Math.round(Number(n) * 100) / 100;
 /* ── Entwurf bauen ────────────────────────────────────────────────────────── */
 
 export function buildDraft(raw, known) {
-	const report = { unmapped: [], unbound: raw.unbound ?? [], hinweise: [] };
+	const report = { unmapped: [], unbound: raw.unbound ?? [], hinweise: [], tokenHerkunft: [] };
+	const seenHerkunft = new Set();
+	// Figma-Hex ist Herkunft, KEIN Modellwert (der wird aus styles-zds.css aufgelöst) —
+	// nur in den Report, nie ins model.json.
+	const flagHerkunft = (name, figmaHex) => {
+		if (!figmaHex || seenHerkunft.has(name)) return;
+		seenHerkunft.add(name);
+		report.tokenHerkunft.push({ name, figmaHex });
+	};
 	const seenUnmapped = new Set();
 	const flagUnmapped = (figmaName, context, wert) => {
 		const key = `${context}:${figmaName}`;
@@ -163,29 +171,38 @@ export function buildDraft(raw, known) {
 			for (const paint of [...(n.fills ?? []), ...(n.strokes ?? [])]) {
 				if (!paint.token) continue;
 				const t = mapOrFlag(paint.token, 'color', paint.hex);
-				if (t && !colorItems.has(t))
-					colorItems.set(t, { name: t, wert: paint.hex, swatch: paint.hex });
+				if (t && !colorItems.has(t)) {
+					// swatch = Figma-Hex als SSR-Platzhalter (Live-Farbe kommt aus dem Token),
+					// kein wert im Modell; die Herkunft landet im Report.
+					colorItems.set(t, { name: t, swatch: paint.hex });
+					flagHerkunft(t, paint.hex);
+				}
 			}
 			const gt = n.layout?.gapToken;
 			if (gt) {
 				const t = mapOrFlag(gt, 'space', String(n.layout.gap));
-				if (t && !spaceItems.has(t)) spaceItems.set(t, { name: t, wert: `${n.layout.gap}px` });
+				// Kein wert — der Abstand wird aus dem Token aufgelöst (eine Quelle).
+				if (t && !spaceItems.has(t)) spaceItems.set(t, { name: t });
 			}
 			const pt = n.layout?.padToken;
 			if (pt) {
 				const t = mapOrFlag(pt, 'space', String(n.layout.pad?.[3] ?? ''));
-				if (t && !spaceItems.has(t)) spaceItems.set(t, { name: t, wert: `${n.layout.pad?.[3]}px` });
+				if (t && !spaceItems.has(t)) spaceItems.set(t, { name: t });
 			}
 			if (n.radiusToken) {
 				const t = mapOrFlag(n.radiusToken, 'radius', String(n.radius));
-				if (t && !radiusItems.has(t)) radiusItems.set(t, { name: t, wert: `${n.radius}px` });
+				if (t && !radiusItems.has(t)) radiusItems.set(t, { name: t });
 			}
 			if (n.text?.size !== undefined) {
 				// Schriftgrößen sind in Figma selten variablen-gebunden — die Größe selbst
 				// ist aber ein deterministischer Kandidat: 16 → --z-ds-fontsize-16 (falls existent).
+				// Die Größe kommt aus dem Token; die Font/Weight-Angabe (nicht token-gebunden)
+				// bleibt als redaktioneller hinweis erhalten.
 				const t = mapVariableName(String(n.text.size), 'fontsize', known);
-				if (t && !typoItems.has(t))
-					typoItems.set(t, { name: t, wert: `${n.text.size}px · ${n.text.font ?? ''}`.trim() });
+				if (t && !typoItems.has(t)) {
+					const font = String(n.text.font ?? '').trim();
+					typoItems.set(t, { name: t, ...(font ? { hinweis: font } : {}) });
+				}
 			}
 		});
 	const tokens = [];
@@ -326,6 +343,11 @@ if (isCli) {
 		for (const u of report.unmapped)
 			console.log(`   – ${u.figmaName} (${u.context}, Wert ${u.wert})`);
 	}
+	if (report.tokenHerkunft.length)
+		console.log(
+			`\nℹ️  ${report.tokenHerkunft.length} Farb-Token mit Figma-Hex (nur Herkunft — Werte kommen aus styles-zds.css):` +
+				`\n   ${report.tokenHerkunft.map((h) => `${h.name} (${h.figmaHex})`).join('\n   ')}`
+		);
 	if (report.unbound.length)
 		console.log(
 			`\nℹ️  ${report.unbound.length} ungebundene Werte aus der Messung (Token-Kandidaten fürs ZDS).`

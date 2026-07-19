@@ -40,22 +40,22 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-border-70",
-					"wert": "#e4e4e4 · Rahmen Default",
+					"hinweis": "Rahmen Default",
 					"swatch": "#e4e4e4"
 				},
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen Hover/Focus",
+					"hinweis": "Rahmen Hover/Focus",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Label",
+					"hinweis": "Label",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · :focus-visible-Outline (2px)",
+					"hinweis": ":focus-visible-Outline (2px)",
 					"swatch": "#005fcc"
 				}
 			]
@@ -65,7 +65,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-xs",
-					"wert": "8px · Padding & Icon-Gap"
+					"hinweis": "8px · Padding & Icon-Gap"
 				}
 			]
 		},
@@ -74,7 +74,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -83,7 +83,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-fontsize-16",
-					"wert": "Tablet Gothic 16"
+					"hinweis": "Tablet Gothic 16"
 				}
 			]
 		}

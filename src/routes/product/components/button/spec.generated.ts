@@ -30,17 +30,17 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Fläche Default",
+					"hinweis": "Fläche Default",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-background-20",
-					"wert": "#dfdfe1 · Fläche Hover/Focus",
+					"hinweis": "Fläche Hover/Focus",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Label",
+					"hinweis": "Label",
 					"swatch": "#252525"
 				}
 			]
@@ -50,17 +50,17 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Fläche Default",
+					"hinweis": "Fläche Default",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"wert": "#444444 · Fläche Hover/Focus",
+					"hinweis": "Fläche Hover/Focus",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-background-0",
-					"wert": "#ffffff · Label",
+					"hinweis": "Label",
 					"swatch": "#ffffff"
 				}
 			]
@@ -70,17 +70,17 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-accent-100",
-					"wert": "#b91109 · Fläche Default (ZEIT-Rot)",
+					"hinweis": "Fläche Default (ZEIT-Rot)",
 					"swatch": "#b91109"
 				},
 				{
 					"name": "--z-ds-color-accent-70",
-					"wert": "#880d07 · Fläche Hover/Focus",
+					"hinweis": "Fläche Hover/Focus",
 					"swatch": "#880d07"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Label",
+					"hinweis": "Label",
 					"swatch": "#ffffff"
 				}
 			]
@@ -90,7 +90,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · :focus-visible-Outline (2px)",
+					"hinweis": ":focus-visible-Outline (2px)",
 					"swatch": "#005fcc"
 				}
 			]
@@ -100,11 +100,11 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-10",
-					"wert": "10px · Innenabstand vertikal"
+					"hinweis": "10px · Innenabstand vertikal"
 				},
 				{
 					"name": "--z-ds-space-16",
-					"wert": "16px · Innenabstand horizontal"
+					"hinweis": "16px · Innenabstand horizontal"
 				}
 			]
 		},
@@ -113,7 +113,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -122,7 +122,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-fontsize-16",
-					"wert": "Tablet Gothic Bold 16 · fett"
+					"hinweis": "Tablet Gothic Bold 16 · fett"
 				}
 			]
 		}

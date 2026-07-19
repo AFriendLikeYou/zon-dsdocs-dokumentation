@@ -42,22 +42,22 @@
 			"items": [
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Fläche",
+					"hinweis": "Fläche",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Icon (default)",
+					"hinweis": "Icon (default)",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"wert": "#444444 · Icon (hover)",
+					"hinweis": "Icon (hover)",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · Icon (disabled)",
+					"hinweis": "Icon (disabled)",
 					"swatch": "#999999"
 				}
 			]
@@ -67,7 +67,7 @@
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -76,7 +76,7 @@
 			"items": [
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · :focus-visible-Outline (2px)",
+					"hinweis": ":focus-visible-Outline (2px)",
 					"swatch": "#005fcc"
 				}
 			]

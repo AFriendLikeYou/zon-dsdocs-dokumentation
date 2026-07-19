@@ -135,6 +135,20 @@ describe('buildDraft', () => {
 		expect(typo.items[0].name).toBe('--z-ds-fontsize-16');
 	});
 
+	it('emittiert das wert-lose Token-Shape: kein wert, swatch als Platzhalter, Font als hinweis', () => {
+		const farbe = draft.tokens.find((g) => g.kategorie === 'Farbe');
+		// Keine hartkodierten Werte mehr im Modell (eine Quelle: styles-zds.css) …
+		expect(farbe.items.every((i) => !('wert' in i))).toBe(true);
+		// … aber der Figma-Hex bleibt als SSR-Swatch-Platzhalter erhalten.
+		const bg = farbe.items.find((i) => i.name === '--z-ds-color-background-10');
+		expect(bg.swatch).toBe('#eeeeee');
+		const typo = draft.tokens.find((g) => g.kategorie === 'Typografie');
+		expect(typo.items[0]).not.toHaveProperty('wert');
+		expect(typo.items[0].hinweis).toBe('Tablet Gothic Bold');
+		const abstand = draft.tokens.find((g) => g.kategorie === 'Abstand');
+		expect(abstand.items.every((i) => !('wert' in i))).toBe(true);
+	});
+
 	it('markiert Mensch-Felder als TODO und baut den Playground-Rumpf', () => {
 		expect(draft.zweck).toMatch(/^TODO/);
 		expect(draft.kategorie).toBe('TODO');
@@ -144,8 +158,12 @@ describe('buildDraft', () => {
 		expect(keys).toEqual(['type', 'fullwidth']);
 	});
 
-	it('reportet Unmapped + reicht unbound durch', () => {
+	it('reportet Unmapped + reicht unbound durch + Farb-Herkunft (Figma-Hex → Report)', () => {
 		expect(report.unmapped.map((u) => u.figmaName)).toContain('Fancy/99');
 		expect(report.unbound).toHaveLength(1);
+		// Figma-Hex steht im Report (Herkunft), nicht im Modell.
+		expect(report.tokenHerkunft.find((h) => h.name === '--z-ds-color-background-10')?.figmaHex).toBe(
+			'#eeeeee'
+		);
 	});
 });

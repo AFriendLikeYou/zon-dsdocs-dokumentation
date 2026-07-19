@@ -144,4 +144,42 @@ if (problems === 0) {
 	console.warn('\n   (content.json korrigieren — nur Editorial-Keys, korrekte Typen.)\n');
 }
 
-process.exit(problems > 0 && strict ? 1 : 0);
+// ── model.json gegen model.schema.json (ajv) ────────────────────────────────
+// Der Exporter erzwingt das Schema beim Generieren hart; dieser Check macht
+// nachträgliche Hand-/CMS-Änderungen an bereits exportierten model.json sichtbar.
+const { validateModelSchema } = await import('./zeit-de-exporter/schema-validate.mjs');
+
+let modelProblems = 0;
+let modelChecked = 0;
+const modelSlugs = fs.existsSync(componentsDir)
+	? fs
+			.readdirSync(componentsDir, { withFileTypes: true })
+			.filter((e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'model.json')))
+			.map((e) => e.name)
+			.sort()
+	: [];
+
+for (const slug of modelSlugs) {
+	let issues;
+	try {
+		const model = JSON.parse(fs.readFileSync(path.join(componentsDir, slug, 'model.json'), 'utf8'));
+		issues = validateModelSchema(model);
+	} catch (e) {
+		issues = [`kein valides JSON: ${e.message}`];
+	}
+	if (issues.length === 0) {
+		modelChecked++;
+	} else {
+		modelProblems += issues.length;
+		console.warn(`\n⚠️  model.json verletzt das Schema in „${slug}":`);
+		for (const i of issues) console.warn(`   • ${i}`);
+	}
+}
+
+if (modelProblems === 0) {
+	console.log(`✓ Schema-Check: ${modelChecked} model.json entsprechen model.schema.json (ajv).`);
+} else {
+	console.warn('\n   (model.json an tooling/zeit-de-exporter/model.schema.json ausrichten.)\n');
+}
+
+process.exit((problems > 0 || modelProblems > 0) && strict ? 1 : 0);

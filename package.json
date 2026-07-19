@@ -46,6 +46,7 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.8",
 		"@types/testing-library__jest-dom": "^5.14.9",
+		"ajv": "^8.20.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^2.46.1",
