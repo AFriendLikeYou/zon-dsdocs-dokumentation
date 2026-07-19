@@ -1,3 +1,4 @@
+<!-- LoginButton.svelte — Icon-Link zur Login-Seite; wird von der Navbar eingehängt (nur für ausgeloggte Nutzer). -->
 <script lang="ts">
 	import { LoginIcon } from '$lib/icons';
 </script>

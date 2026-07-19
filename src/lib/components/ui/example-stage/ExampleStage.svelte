@@ -16,10 +16,14 @@
 		background = 'surface',
 		padded = true
 	}: {
+		/** Demo-Inhalt der Bühne. */
 		children: Snippet;
+		/** Überschrift der Bühne (Eyebrow oben). */
 		title?: string;
+		/** Unterschrift zum Beispiel (unten). */
 		caption?: string;
 		background?: 'surface' | 'muted' | 'grid';
+		/** Innenabstand der Fläche (Default an). */
 		padded?: boolean;
 	} = $props();
 </script>

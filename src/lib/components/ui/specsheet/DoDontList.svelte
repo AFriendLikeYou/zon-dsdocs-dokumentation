@@ -2,7 +2,10 @@
 <script lang="ts">
 	import type { DoDont } from '$types/spec';
 	import Mark from './Mark.svelte';
-	let { doDont = null }: { doDont?: DoDont | null } = $props();
+	let { doDont = null }: {
+		/** Do- und Don't-Regeln als Textlisten; null blendet den Block aus. */
+		doDont?: DoDont | null;
+	} = $props();
 </script>
 
 {#if doDont}

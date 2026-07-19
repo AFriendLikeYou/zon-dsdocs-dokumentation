@@ -1,3 +1,8 @@
+<!--
+  DownloadSpecimen.svelte — Download-Kachel mit Format-Icon (PDF/Figma), Titel und
+  Untertitel. Verwendet auf Brand-Seiten (Logo, Pride) und als CMS-Block „Download"
+  (cms-components.ts); für reine Icon-Downloads nimm DownloadButton.
+-->
 <script lang="ts">
 	// Standard Svelte props declaration
 	type CatalogProps = {
@@ -5,11 +10,17 @@
 	};
 
 	interface Props {
+		/** Format-Erscheinung: PDF-Download oder Figma-Link (bestimmt Icon + Ton). */
 		variant: 'pdf' | 'figma';
+		/** Optionaler Katalog-Kontext (publicPath wird der URL vorangestellt). */
 		catalog?: CatalogProps | undefined;
+		/** Titel der Kachel. */
 		title?: string;
+		/** Untertitel/Beschreibung unter dem Titel. */
 		subtitle?: string;
+		/** Download-/Ziel-URL (relativ; ggf. mit catalog.publicPath kombiniert). */
 		url: string;
+		/** Dateiname fürs download-Attribut; leer = Browser-Default. */
 		filename?: string | undefined;
 	}
 

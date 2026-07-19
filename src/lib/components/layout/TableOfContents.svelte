@@ -1,3 +1,4 @@
+<!-- TableOfContents.svelte — „Auf dieser Seite"-Verzeichnis aus den h2-Überschriften des Hauptinhalts mit Scroll-Spy; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';

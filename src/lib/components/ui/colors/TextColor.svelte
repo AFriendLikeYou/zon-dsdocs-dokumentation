@@ -1,7 +1,15 @@
+<!--
+  TextColor.svelte — kleines Specimen für Textfarb-Tokens (Titel + Beschreibung
+  in der Tokenfarbe). Verwendet auf /brand/color und als CMS-Block „Textfarbe"
+  (cms-components.ts).
+-->
 <script lang="ts">
 	type Props = {
+		/** Token der Textfarbe (--z-ds-* oder --ds-*), als CSS-Custom-Property. */
 		fontColorCustomProperty: string;
+		/** Kurzbeschreibung unter dem Titel. */
 		description: string;
+		/** Anzeigename des Specimens. */
 		title: string;
 	};
 

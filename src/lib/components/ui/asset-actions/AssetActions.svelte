@@ -10,7 +10,9 @@
 	import type { Icon } from '$types/global';
 
 	let {
+		/** Asset/Icon mit name, slug und svg. */
 		icon,
+		/** Toast-Text nach dem Kopieren; Default nennt den Icon-Namen. */
 		copyToastMessage = `Das Icon „${icon.name}" wurde in die Zwischenablage kopiert.`,
 		/** schiebt die Aktionen an den unteren Kartenrand (für Karten gleicher Höhe). */
 		pinBottom = false

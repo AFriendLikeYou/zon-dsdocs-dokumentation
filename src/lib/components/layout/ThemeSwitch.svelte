@@ -1,3 +1,8 @@
+<!--
+  ThemeSwitch — Light/Dark/System-Umschalter für die Doku-App-Chrome.
+  Setzt Cookie + `color-scheme-*`-Klasse aufs <html> (einziger Schreibpfad für
+  beide Erscheinungen). Wird vom Footer eingehängt.
+-->
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { setCookie } from '$lib/cookie';
@@ -5,8 +10,12 @@
 	import { fade } from 'svelte/transition';
 	import { ThemeSystemIcon, SunIcon, MoonIcon } from '$lib/icons';
 	import type { Theme } from '$types/global';
-	let { currentTheme, type = 'radio' }: { currentTheme: Theme; type?: 'select' | 'radio' } =
-		$props();
+	let {
+		/** Aktuell aktives Theme (bindbar über Cookie-gestützten Wert). */
+		currentTheme,
+		/** Erscheinungs-Achse: kompaktes `select` oder segmentierte `radio`-Icons. */
+		variant = 'radio'
+	}: { currentTheme: Theme; variant?: 'select' | 'radio' } = $props();
 	let isMounted = $state(false);
 
 	afterNavigate(() => {
@@ -40,7 +49,7 @@
 	<meta name="color-scheme" content={currentTheme == 'system' ? 'light dark' : currentTheme} />
 </svelte:head>
 
-{#if type == 'select'}
+{#if variant == 'select'}
 	{#if isMounted}
 		<select
 			in:fade
@@ -56,7 +65,7 @@
 	{/if}
 {/if}
 
-{#if type == 'radio'}
+{#if variant == 'radio'}
 	<fieldset class="theme-switcher">
 		<legend class="sr-only">Select a display theme:</legend>
 		<span class="theme-option">

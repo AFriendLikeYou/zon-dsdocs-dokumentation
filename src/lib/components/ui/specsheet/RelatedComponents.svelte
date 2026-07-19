@@ -5,7 +5,10 @@
 	import { CATALOG } from '$data/catalog';
 	import { CardGrid } from '$components/ui/card';
 
-	let { slugs = [] }: { slugs?: string[] } = $props();
+	let { slugs = [] }: {
+		/** Katalog-Slugs verwandter Komponenten; unbekannte werden still übersprungen. */
+		slugs?: string[];
+	} = $props();
 
 	/** zweck auf einen knappen Kartentext kürzen (erster Satz, hart gedeckelt). */
 	function shorten(text: string | undefined): string {

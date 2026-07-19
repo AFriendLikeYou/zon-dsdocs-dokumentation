@@ -155,11 +155,11 @@ Intro-Prosa.
 
 <DoDontGroup columns={2}>
 	<DoDont
-		type="do"
+		variant="do"
 		caption="ok"
 	/>
 	<DoDont
-		type="dont"
+		variant="dont"
 		caption="nein"
 		strikeThrough={true}
 	/>
@@ -806,8 +806,8 @@ describe('rebuild: Container-Block editieren/einfügen', () => {
 				insertContainer: 'DoDontGroup',
 				attrs: { columns: '2' },
 				children: [
-					{ name: 'DoDont', values: { type: 'do', caption: 'ok' } },
-					{ name: 'DoDont', values: { type: 'dont', caption: 'nein' } }
+					{ name: 'DoDont', values: { variant: 'do', caption: 'ok' } },
+					{ name: 'DoDont', values: { variant: 'dont', caption: 'nein' } }
 				]
 			}
 		];

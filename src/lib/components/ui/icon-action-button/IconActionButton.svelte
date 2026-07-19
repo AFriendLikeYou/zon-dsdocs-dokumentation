@@ -13,10 +13,13 @@
 	import type { Snippet } from 'svelte';
 
 	type Props = {
+		/** A11y-Label (für icon-only verpflichtend). */
 		ariaLabel?: string;
 		/** Gerahmter Icon-Button-Look (Border + Hover) — wie Icon-/Asset-Grid. */
 		iconButton?: boolean;
+		/** Klick-Handler des Buttons. */
 		onclick?: (event: MouseEvent) => void;
+		/** Button-Inhalt (Icon oder Label). */
 		children: Snippet;
 		class?: string;
 	};

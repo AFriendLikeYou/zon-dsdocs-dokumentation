@@ -4,7 +4,10 @@
 -->
 <script lang="ts">
 	import type { Verwendung } from '$types/spec';
-	let { verwendung = null }: { verwendung?: Verwendung | null } = $props();
+	let {
+		/** Redaktionelles Verwendung-Feld (nutzen/nichtNutzen) aus content.ts. */
+		verwendung = null
+	}: { verwendung?: Verwendung | null } = $props();
 </script>
 
 {#if verwendung && (verwendung.nutzen?.length || verwendung.nichtNutzen?.length)}

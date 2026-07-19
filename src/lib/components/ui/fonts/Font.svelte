@@ -1,12 +1,22 @@
+<!--
+  Font.svelte — einfache Typografie-Probe (ein Satz in Gewicht/Größe). Verwendet auf
+  /product/foundations/fonts und /brand/typography; für Rollen-Specimen mit Maßen
+  nimm TypeSpecimen.
+-->
 <script lang="ts">
 	// Typografie-Probe für die Fonts-Foundation-Seite. Redaktionelle Aufrufer geben
 	// `weight` als sprechendes 'regular' | 'bold' an — hier auf die CSS-Gewichte
 	// 400/700 gemappt. `size` darf Zahl oder String sein (die .svx übergibt Strings).
 	type Props = {
+		/** Semantik/Element der Probe: 'label' → <p>, 'headline' → <h2>. */
 		style: 'label' | 'headline';
+		/** Anzuzeigender Probetext. */
 		title: string;
+		/** Sprechendes Gewicht, gemappt auf 400/700. */
 		weight: 'regular' | 'bold';
+		/** Schriftgröße in px (Zahl oder String aus .svx). */
 		size: number | string;
+		/** line-height als CSS-Wert (Default '1'). */
 		lineheight?: string;
 	};
 

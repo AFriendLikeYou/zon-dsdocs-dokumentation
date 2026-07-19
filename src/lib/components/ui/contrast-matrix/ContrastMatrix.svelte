@@ -1,3 +1,8 @@
+<!--
+  ContrastMatrix.svelte — live berechnete Kontrast-Matrix (Text-Tokens × Hintergrund-
+  Tokens) mit WCAG-Einstufung, reagiert auf den Light/Dark-Schalter. Token-Namen
+  werden als TokenPill gerendert. Genau ein Consumer: /product/foundations/accessibility.
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { TokenPill } from '$components/ui/token-pill';

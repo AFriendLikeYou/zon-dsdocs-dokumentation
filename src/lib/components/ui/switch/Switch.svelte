@@ -8,8 +8,11 @@
 -->
 <script lang="ts">
 	let {
+		/** Beschriftung neben dem Schalter. */
 		label,
+		/** An/Aus-Zustand. */
 		checked = false,
+		/** Callback beim Umschalten (neuer Zustand). */
 		onchange
 	}: { label: string; checked?: boolean; onchange: (checked: boolean) => void } = $props();
 </script>

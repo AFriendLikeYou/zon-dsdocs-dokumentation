@@ -20,7 +20,10 @@
 		});
 	}
 
-	let { items = combinedIndex() }: { items?: MenuItem[] } = $props();
+	let {
+		/** Durchsuchbare Menü-Einträge; Default = kombinierter Brand+Product-Index. */
+		items = combinedIndex()
+	}: { items?: MenuItem[] } = $props();
 
 	let dialog = $state<HTMLDialogElement>();
 	let inputEl = $state<HTMLInputElement>();

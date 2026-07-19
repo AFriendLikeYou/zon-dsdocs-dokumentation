@@ -1,3 +1,4 @@
+<!-- AnchorLinks.svelte — hängt per DOM an jede Content-h2/h3 einen Copy-Link-Button; global vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { slugify } from '$lib/utils';

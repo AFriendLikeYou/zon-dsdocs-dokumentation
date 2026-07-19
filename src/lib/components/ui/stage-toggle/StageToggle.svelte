@@ -7,8 +7,11 @@
 	import { SunIcon, MoonIcon } from '$lib/icons';
 
 	let {
+		/** Ob die Bühne aktuell dunkel ist (steuert aria-pressed). */
 		isDark = false,
+		/** Callback für „hellen Hintergrund". */
 		onlight,
+		/** Callback für „dunklen Hintergrund". */
 		ondark
 	}: { isDark?: boolean; onlight: () => void; ondark: () => void } = $props();
 </script>

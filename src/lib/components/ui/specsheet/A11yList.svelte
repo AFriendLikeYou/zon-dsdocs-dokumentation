@@ -2,7 +2,10 @@
 <script lang="ts">
 	import type { A11yItem } from '$types/spec';
 	import SpecRow from './SpecRow.svelte';
-	let { items = [] }: { items?: A11yItem[] } = $props();
+	let { items = [] }: {
+		/** Barrierefreiheits-Einträge (Label, Wert, Status-Punkt pass/warn/todo). */
+		items?: A11yItem[];
+	} = $props();
 </script>
 
 {#if items.length}

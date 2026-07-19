@@ -2,7 +2,10 @@
 <script lang="ts">
 	import type { KeyboardRule } from '$types/spec';
 	import SpecRow from './SpecRow.svelte';
-	let { items = [] }: { items?: KeyboardRule[] } = $props();
+	let { items = [] }: {
+		/** Tastatur-Regeln (Taste + Aktion). */
+		items?: KeyboardRule[];
+	} = $props();
 </script>
 
 {#if items.length}

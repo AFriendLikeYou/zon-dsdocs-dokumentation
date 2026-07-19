@@ -2,7 +2,10 @@
 <script lang="ts">
 	import type { Masse, MasseValue } from '$types/spec';
 	import { TokenPill } from '$components/ui/token-pill';
-	let { masse = null }: { masse?: Masse | null } = $props();
+	let { masse = null }: {
+		/** Maße (Höhe/Breite/Padding/Radius) als Spec-Zeilen; null blendet die Tabelle aus. */
+		masse?: Masse | null;
+	} = $props();
 
 	// Werte können string (nur px) ODER { px, token, herkunft } sein → beides unterstützen.
 	const px = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);

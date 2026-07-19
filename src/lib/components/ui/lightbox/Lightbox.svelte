@@ -7,9 +7,13 @@
 	import { CloseIcon } from '$lib/icons';
 
 	let {
+		/** Bildquelle; wird für Trigger und Detailansicht genutzt. */
 		src,
+		/** Alt-Text; leer = dekorativ. */
 		alt = '',
+		/** Optionale Bildunterschrift in der Detailansicht. */
 		caption,
+		/** Zusätzliche CSS-Klasse für den Trigger. */
 		class: className = ''
 	}: { src: string; alt?: string; caption?: string; class?: string } = $props();
 

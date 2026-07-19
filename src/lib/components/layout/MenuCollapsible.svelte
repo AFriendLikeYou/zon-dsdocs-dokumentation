@@ -1,3 +1,4 @@
+<!-- MenuCollapsible.svelte — aufklappbare Sidebar-Navigationsgruppe (Titel + optionale Sub-Links, Lock-Glyph für gesperrte Einträge); wird von der Sidebar eingehängt. -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { MenuItem, BadgeVariant } from '$data/navigation';
@@ -5,13 +6,21 @@
 	import { ChevronIcon, LockOpenIcon, LockClosedIcon } from '$lib/icons';
 
 	type Props = {
+		/** Titel der Gruppe (Header-Zeile). */
 		title: string;
+		/** Ziel-URL, wenn die Gruppe selbst ein Link ohne Kinder ist. */
 		href?: string;
+		/** Sub-Einträge; ab einem Eintrag wird die Gruppe ein Disclosure-Toggle. */
 		items?: MenuItem[];
+		/** Ob die Gruppe initial aufgeklappt startet. */
 		initiallyOpen?: boolean;
+		/** Callback bei Klick auf einen Link (z. B. Drawer auf Mobile schließen). */
 		onclick?: () => void;
+		/** Optionaler Badge-Text an der Header-Zeile. */
 		badge?: string;
+		/** Farbvariante des Badges. */
 		badgeVariant?: BadgeVariant;
+		/** Login-Status; steuert gesperrte Sub-Links und das Schloss-Glyph. */
 		isUserLoggedIn: boolean;
 	};
 

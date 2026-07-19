@@ -1,9 +1,16 @@
+<!--
+  IconComponent.svelte — einzelne Icon-Kachel der Icon-Library (Name-Copy per Klick
+  + SVG-Copy/Download über AssetActions). Genau ein Consumer: IconGridWithSearch.
+-->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
 	import { AssetActions } from '$components/ui/asset-actions';
 	import type { Icon } from '$types/global';
 
-	let { icon }: { icon: Icon } = $props();
+	let {
+		/** Icon-Datensatz (name/slug/svg/tags). */
+		icon
+	}: { icon: Icon } = $props();
 </script>
 
 <!-- Bewusst OHNE Enter/Exit-Transition: Such-Filtern ist hochfrequent — Blur auf

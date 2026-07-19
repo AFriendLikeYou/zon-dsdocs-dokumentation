@@ -1,9 +1,17 @@
+<!--
+	VideoPlayer.svelte — schlichter Video-Loop mit Play/Pause-Button (stumme
+	Demo-Clips, autoplay/loop). Genutzt auf Brand-Seiten (strategy, animation, logo,
+	pride-communication) und als CMS-Block (cms-components.ts).
+-->
 <script lang="ts">
 	type Props = {
+		/** Videoquelle (z. B. mp4). */
 		src: string;
+		/** Titel/Tooltip des <video>. */
 		title?: string;
 		/** Optionale Untertitel-Datei (WebVTT). Nur wenn gesetzt, wird ein <track> gerendert. */
 		captionsSrc?: string;
+		/** Callback bei Play/Pause (aktueller paused-Zustand). */
 		onplaypause?: (paused: boolean) => void;
 	};
 	let { src, onplaypause, title, captionsSrc }: Props = $props();

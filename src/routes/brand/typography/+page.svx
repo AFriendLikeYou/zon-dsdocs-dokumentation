@@ -45,7 +45,7 @@ Texte. Welche Schrift in welchem Kontext zum Einsatz kommt, ist Teil der Markenf
 		imgSrc="/media/brand/typography/typografie-do-3.png"
 	/>
 	<DoDont
-		type="dont"
+		variant="dont"
 		caption="Keine zu vielen Schriftgrößen mischen oder Hierarchie über Farbe erzwingen."
 		imgSrc="/media/brand/typography/typografie-dont-4.png"
 	/>

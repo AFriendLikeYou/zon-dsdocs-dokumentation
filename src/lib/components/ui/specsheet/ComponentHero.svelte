@@ -6,7 +6,12 @@
 	import { Badge } from '$components/ui/badge';
 	import type { ComponentSpec, BadgeVariant } from '$types/spec';
 
-	let { spec, version = '' }: { spec: ComponentSpec; version?: string } = $props();
+	let { spec, version = '' }: {
+		/** Component-Spec (Kategorie, Status, Zweck, Figma-Link, Stand). */
+		spec: ComponentSpec;
+		/** Versions-Label neben dem Status-Badge. */
+		version?: string;
+	} = $props();
 
 	const STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
 		ready_for_dev: { label: 'Ready for dev', variant: 'ready' },

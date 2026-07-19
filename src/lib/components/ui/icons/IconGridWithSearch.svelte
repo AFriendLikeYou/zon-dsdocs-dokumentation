@@ -1,10 +1,18 @@
+<!--
+  IconGridWithSearch.svelte — durchsuchbares Icon-Raster (debounced Filter über
+  Name/Slug/Tags, Live-Region für Screenreader); rendert IconComponent-Kacheln.
+  Verwendet auf /brand/icons/library und /product/foundations/icons.
+-->
 <script lang="ts">
 	import { debounce } from '$lib/utils';
 	import type { Icon } from '$types/global';
 	import IconComponent from './IconComponent.svelte';
 	import { SearchIcon, CloseIcon } from '$lib/icons';
 
-	let { icons }: { icons: Icon[] } = $props();
+	let {
+		/** Vollständige Icon-Liste; Filterung/Sortierung passiert intern. */
+		icons
+	}: { icons: Icon[] } = $props();
 
 	const DEBOUNCE_TIME = 250;
 	const RESTORE_FOCUS_DELAY = 500;

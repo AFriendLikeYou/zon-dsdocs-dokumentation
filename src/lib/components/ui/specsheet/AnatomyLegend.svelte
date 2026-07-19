@@ -22,10 +22,15 @@
 		onhover,
 		onpress
 	}: {
+		/** Vorverarbeitete Legenden-Zeilen (aus dem Anatomy-Orchestrator). */
 		rows: LegendRow[];
+		/** Aktuell aktiver Sync-Key (Pin oder Hover) für das Zwei-Wege-Highlight. */
 		activeKey: string | null;
+		/** Festgepinnter Key (steuert aria-pressed der Zeile). */
 		pinned: string | null;
+		/** Meldet flüchtigen Hover/Fokus an den Orchestrator (null = aus). */
 		onhover: (key: string | null) => void;
+		/** Meldet Tap/Klick/Enter (Pin umschalten). */
 		onpress: (key: string) => void;
 	} = $props();
 </script>

@@ -64,6 +64,27 @@ Motion nach dem emil-design-eng-Skill (`.agents/skills/`): Tokens
 `--ds-dur`/`--ds-ease*`, nie `transition: all`, Hover hinter `(hover: hover)`,
 `:active`-Feedback auf Pressables.
 
+## Prop-API-Styleguide (fünf Regeln)
+
+Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann die
+übrigen erraten — Mensch wie Agent.
+
+1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Alert`, `Badge`,
+   `DoDont`, …) — nie `type`/`kind`/`appearance`. `type` bleibt nativen
+   HTML-Attributen vorbehalten (`<button type>`, `<input type>`).
+2. **Text-Slots nach fester Bedeutung:** `title` = Überschrift eines Inhalts ·
+   `label` = Beschriftung eines Bedienelements · `caption` = Unterschrift zu
+   Medien/Beispielen · `description` = ergänzender Fließtext.
+3. **Form-Controls vs. Container:** Controls nehmen Wert + Callback
+   (`value`/`checked` + `onchange`); Container/Darsteller nehmen
+   `children: Snippet`. Nicht mischen.
+4. **`class`-Passthrough** für Leaf-Komponenten, die in fremde Layouts
+   eingebettet werden (Icons, Pills, Buttons) — via Prop `class` oder
+   `...restProps`, dokumentiert im JSDoc.
+5. **JSDoc ist Pflicht:** Header-Kommentar mit Zweck + Kompositions-Hinweis
+   („Wird von X verwendet; für icon-only nimm `IconActionButton`") und `/** */`
+   je Prop — Muster: `ui/token-pill/TokenPill.svelte`, `ui/copy-button/CopyButton.svelte`.
+
 ## Faustregel beim Anlegen
 
 1. Seitengerüst / einmal pro Seite? → `layout/` (Direktimport).

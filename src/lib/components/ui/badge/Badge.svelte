@@ -6,7 +6,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { BadgeVariant } from '$types/spec';
-	let { variant = 'neutral', children }: { variant?: BadgeVariant; children?: Snippet } = $props();
+	let {
+		/** Farbrolle der Pille (neutral/ready/done/warn/accent). */
+		variant = 'neutral',
+		/** Sichtbarer Pill-Inhalt (Text). */
+		children
+	}: { variant?: BadgeVariant; children?: Snippet } = $props();
 </script>
 
 <span class="badge badge--{variant}">{@render children?.()}</span>

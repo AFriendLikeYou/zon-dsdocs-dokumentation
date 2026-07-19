@@ -1,8 +1,16 @@
+<!--
+  BrandAssetsGrid.svelte — Raster aus SVG-Assets (Logo-Varianten u. ä.) mit
+  Copy/Download über AssetActions. Verwendet auf /brand/logo und
+  /product/foundations/assets.
+-->
 <script lang="ts">
 	import { AssetActions } from '$components/ui/asset-actions';
 	import type { Icon } from '$types/global';
 
-	let { brandAssets }: { brandAssets: Icon[] } = $props();
+	let {
+		/** Anzuzeigende Assets (Icon-Objekte mit slug/name/svg). */
+		brandAssets
+	}: { brandAssets: Icon[] } = $props();
 </script>
 
 <div class="grid">

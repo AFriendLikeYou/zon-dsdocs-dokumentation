@@ -8,7 +8,10 @@
 <script lang="ts">
 	import { TokenPill } from '$components/ui/token-pill';
 
-	let { tokens = [] }: { tokens?: string[] } = $props();
+	let {
+		/** Spacing-Tokens (--z-ds-space-*); jeder rendert einen maßstabsgetreuen Balken. */
+		tokens = []
+	}: { tokens?: string[] } = $props();
 
 	let listEl: HTMLUListElement;
 	let px = $state<Record<string, number>>({});

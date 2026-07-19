@@ -16,14 +16,22 @@
 	import type { BadgeVariant } from '$types/spec';
 
 	export type SectionTile = {
+		/** Ziel-URL der Kachel. */
 		href: string;
+		/** Kachel-Überschrift. */
 		title: string;
+		/** Optionaler Beschreibungstext. */
 		description?: string;
+		/** Optionaler Badge-Text (z. B. „Im Aufbau"). */
 		badge?: string;
+		/** Badge-Variante; Default = 'neutral'. */
 		badgeVariant?: BadgeVariant;
 	};
 
-	let { tiles = [] }: { tiles?: SectionTile[] } = $props();
+	let {
+		/** Datensatz der darzustellenden Kacheln. */
+		tiles = []
+	}: { tiles?: SectionTile[] } = $props();
 </script>
 
 {#if tiles.length}

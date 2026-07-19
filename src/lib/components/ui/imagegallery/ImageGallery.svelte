@@ -1,10 +1,17 @@
+<!--
+  ImageGallery.svelte — flexbox-Bildergalerie mit optionalem Titel und steuerbarer
+  Ausrichtung. Verwendet auf /brand/logo und als CMS-Container „Bildergalerie"
+  (cms-components.ts).
+-->
 <script lang="ts">
 	interface Props {
 		/** Optionale Überschrift über der Galerie (h2). Ohne Wert entfällt der Titel. */
 		title?: string;
 		/** Abstand zwischen den Bildern (beliebige CSS-Länge). */
 		gap?: string;
+		/** Anordnung: Zeile, Spalte oder responsive (Zeile → Spalte auf schmal). */
 		direction?: 'row' | 'column' | 'responsive';
+		/** Bild-Elemente der Galerie. */
 		children: import('svelte').Snippet;
 	}
 

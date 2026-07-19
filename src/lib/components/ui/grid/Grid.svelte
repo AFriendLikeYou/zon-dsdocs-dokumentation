@@ -1,12 +1,25 @@
+<!--
+  Grid.svelte — generisches CSS-Grid für redaktionelle Seiten (Brand-.svx) und als
+  CMS-Container „Grid" (cms-components.ts). Gaps laufen über eine Spacing-Scale
+  auf z-ds-Space-Tokens.
+-->
 <script lang="ts">
 	interface Props {
+		/** Spaltenzahl (1–12); wird bei `auto` ignoriert. */
 		columns?: number;
+		/** true = auto-fit-Spalten (minmax 100px) statt fester Spaltenzahl. */
 		auto?: boolean;
+		/** Zeilenabstand: Scale-Schlüssel (none/xs/sm/md/lg/xl) oder CSS-Wert. */
 		rowGap?: string;
+		/** Spaltenabstand: Scale-Schlüssel oder CSS-Wert. */
 		columnGap?: string;
+		/** justify-items-Wert. */
 		justify?: string;
+		/** align-items-Wert. */
 		align?: string;
+		/** true = Debug-Rahmen um Zellen. */
 		debug?: boolean;
+		/** Grid-Inhalt. */
 		children?: import('svelte').Snippet;
 	}
 

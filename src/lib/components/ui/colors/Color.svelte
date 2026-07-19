@@ -1,12 +1,22 @@
+<!--
+  Color.svelte — Farb-Swatch mit Token-Name, optionalem Hex-Wert und Copy-Button.
+  Verwendet auf den Brand-Farbseiten (color, pride-communication) und als
+  CMS-Block „Farbfeld" (cms-components.ts); Copy läuft über CopyButton.
+-->
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
 	import { resolveCssVar } from '$lib/utils';
 
 	type Props = {
+		/** Token der Füllfarbe (--z-ds-* oder --ds-*), als CSS-Custom-Property. */
 		colorCustomProperty: string;
+		/** Token der Textfarbe auf der Fläche (optional). */
 		fontColorCustomProperty?: string;
+		/** Rahmenfarbe; leer = Rahmen erbt die Füllfarbe. */
 		borderColor?: string;
+		/** Kurzbeschreibung unter dem Titel. */
 		description: string;
+		/** Anzeigename des Swatch. */
 		title: string;
 		/** true = aufgelösten Hex-Wert kopieren (Brand-Hub-Default), false = Token-Namen. */
 		copyHex?: boolean;

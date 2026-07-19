@@ -1,10 +1,19 @@
+<!-- GitHubEdit.svelte — „Auf GitHub bearbeiten"-Link zur aktuellen Route; wird von BreadCrumbs eingehängt. -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import { GithubIcon } from '$lib/icons';
 
 	// Welche Datei der Stift öffnet. Default: die Seite selbst; Component-Doku-Seiten
 	// übergeben die menschlich gepflegte Inhalts-Datei (content.ts).
-	let { file = '+page.svx', label = '' }: { file?: string; label?: string } = $props();
+	let {
+		file = '+page.svx',
+		label = ''
+	}: {
+		/** Zu bearbeitende Datei relativ zur Route (z. B. '+page.svx' oder 'content.ts'). */
+		file?: string;
+		/** Optionales sichtbares Label neben dem Icon; leer = nur Icon. */
+		label?: string;
+	} = $props();
 
 	const startRoute = 'https://github.com/ZeitOnline/zon-dsdocs/edit/main/src/routes';
 

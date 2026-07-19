@@ -14,8 +14,11 @@
 		description,
 		children
 	}: {
+		/** Ton/Semantik der Box. */
 		variant?: Variant;
+		/** Fette Titelzeile (optional). */
 		title?: string;
+		/** Fließtext-Inhalt; ignoriert, wenn children gesetzt ist. */
 		description?: string;
 		/** Reicher Inhalt statt description (z. B. Markup in .svx). */
 		children?: Snippet;

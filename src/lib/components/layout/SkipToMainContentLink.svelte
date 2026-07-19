@@ -1,3 +1,4 @@
+<!-- SkipToMainContentLink.svelte — visuell versteckter Skip-Link, der bei Tab-Fokus zum Hauptinhalt springt (WCAG 2.4.1); vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	const moveFocusToNextElement = () => {
 		const main = document.querySelector('#main-content') as HTMLElement;

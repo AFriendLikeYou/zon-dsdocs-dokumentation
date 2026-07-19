@@ -1,3 +1,4 @@
+<!-- Sidebar.svelte — Navigations-Sidebar (Desktop-Panel + mobiler Off-Canvas-Drawer); vom Root-Layout (+layout.svelte) eingehängt, rendert je Sektion eine MenuCollapsible. -->
 <script lang="ts">
 	import { type MenuSection } from '$data/navigation';
 	import { useMediaQuery } from '$stores/media-query.svelte';
@@ -5,7 +6,15 @@
 	import { closeSidebar, desktopCollapsed, sidebarState } from '$stores/sidebar.svelte';
 	import { trapFocus } from '$lib/actions';
 
-	let { items, isUserLoggedIn }: { items: MenuSection[]; isUserLoggedIn: boolean } = $props();
+	let {
+		items,
+		isUserLoggedIn
+	}: {
+		/** Navigationssektionen; Kategorien werden als Labels, der Rest als MenuCollapsible gerendert. */
+		items: MenuSection[];
+		/** Login-Status; an die MenuCollapsible für gesperrte Einträge durchgereicht. */
+		isUserLoggedIn: boolean;
+	} = $props();
 
 	const mq = useMediaQuery('(min-width: 768px)');
 	const isDesktop = $derived(mq.matches);

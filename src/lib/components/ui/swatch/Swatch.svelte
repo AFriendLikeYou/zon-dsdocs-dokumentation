@@ -6,8 +6,11 @@
 -->
 <script lang="ts">
 	let {
+		/** Vollflächen-Farbe der Probe. */
 		color,
+		/** Schachbrett-Muster statt Fill (für „kein Fill"/transluzente Token). */
 		checkerboard = false,
+		/** Tooltip-Text der Probe. */
 		title
 	}: { color?: string; checkerboard?: boolean; title?: string } = $props();
 </script>

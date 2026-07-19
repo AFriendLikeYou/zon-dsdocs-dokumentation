@@ -1,7 +1,10 @@
 <!-- PropsTable.svelte — Props/API-Tabelle (Develop-Tab). Adaptiv über z-ds-Tokens. -->
 <script lang="ts">
 	import type { PropRow } from '$types/spec';
-	let { props = [] }: { props?: PropRow[] } = $props();
+	let { props = [] }: {
+		/** Props/API-Zeilen (Name, Typ, erlaubte Werte, Default, Beschreibung, Pflicht). */
+		props?: PropRow[];
+	} = $props();
 
 	// Spalte „Erlaubte Werte" nur zeigen, wenn irgendein Prop welche deklariert.
 	const hasErlaubteWerte = $derived(props.some((p) => p.erlaubteWerte?.length));

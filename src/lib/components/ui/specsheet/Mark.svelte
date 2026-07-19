@@ -5,7 +5,11 @@
   über die durchgereichte `class` (per :global gestylt).
 -->
 <script lang="ts">
-	let { kind, class: className = '' }: { kind: 'good' | 'bad'; class?: string } = $props();
+	let { kind, class: className = '' }: {
+		/** Glyph + Statusfarbe: 'good' = ✓ (--ds-positive), 'bad' = ✕ (--ds-negative). */
+		kind: 'good' | 'bad';
+		class?: string;
+	} = $props();
 </script>
 
 <span class="mark mark--{kind} {className}" aria-hidden="true">{kind === 'good' ? '✓' : '✕'}</span>

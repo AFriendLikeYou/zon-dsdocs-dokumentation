@@ -100,15 +100,15 @@ die Marke bereits etabliert ist — etwa als App-Icon oder Avatar.
 
 ## Do and Don't
 <DoDontGroup columns={2}>
-  <DoDont 
-    type="dont"
+  <DoDont
+    variant="dont"
     caption="Das Logo darf nicht verzerrt werden."
     imgSrc="/media/brand/logo/dont-1.png"
     strikeThrough={true}
   />
 
   <DoDont
-    type="dont"
+    variant="dont"
     caption="Das Logo darf nicht gedreht werden."
     imgSrc="/media/brand/logo/dont-2.png"
   />

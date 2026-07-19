@@ -2,25 +2,31 @@
   DoDont.svelte — Brand-Erscheinung: illustrative Bild-Karte (Anatomie-Demo + Kante + Caption).
   Dünne Spezialisierung über DoDontBase — beigesteuert wird nur die Füllung
   (dotted Demo-Bühne / Bild-Strike / „Do"-„Don't"-Caption). Hülle, Radius und der
-  Farb-Kanal (--dd-accent) kommen aus der Basis.
+  Farb-Kanal (--dd-accent) kommen aus der Basis. Wird von den Brand-.svx-Seiten
+  (Logo, Typografie …) und dem CMS-Editor über DoDontGroup gruppiert.
 
-  ÖFFENTLICHE API ist eingefroren (type/backgroundColor/caption/content/imgSrc/
-  strikeThrough) — Brand-Aufrufer verlassen sich darauf.
+  Erscheinungs-Achse heißt projektweit `variant` (do/dont).
 -->
 <script lang="ts">
 	import DoDontBase from './DoDontBase.svelte';
 
 	type DoDontProps = {
-		type?: 'do' | 'dont';
+		/** Erscheinungs-Achse: „Do"-Karte (positiv) oder „Don't"-Karte (negativ). */
+		variant?: 'do' | 'dont';
+		/** Optionale Hintergrundfarbe der Demo-Bühne (CSS-Farbe). */
 		backgroundColor?: string;
+		/** Bildunterschrift unter der Kante. */
 		caption: string;
+		/** Roh-HTML-Inhalt der Bühne, falls kein `imgSrc` gesetzt ist. */
 		content?: string;
+		/** Bildquelle für die Demo-Bühne (schlägt `content`). */
 		imgSrc?: string;
+		/** Zeichnet die diagonale Streichung über das Bild (typischer „Don't"). */
 		strikeThrough?: boolean;
 	};
 
 	let {
-		type = 'do',
+		variant = 'do',
 		backgroundColor = '',
 		caption = '',
 		content = '',
@@ -30,7 +36,7 @@
 </script>
 
 <!-- `class="dodont"` behält den Hook, über den DoDontGroup die Karten-Breite steuert. -->
-<DoDontBase tone={type} class="dodont">
+<DoDontBase tone={variant} class="dodont">
 	{#snippet body()}
 		<div class="dodont-card__content">
 			<div class="dodont-card__demo" style:background-color={backgroundColor}>
@@ -49,9 +55,9 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<div class="dodont-card__caption dodont-card__caption--{type.toLowerCase()}">
+		<div class="dodont-card__caption dodont-card__caption--{variant.toLowerCase()}">
 			<div class="dodont-card__title">
-				{type === 'do' ? 'Do' : "Don't"}
+				{variant === 'do' ? 'Do' : "Don't"}
 			</div>
 			{caption}
 		</div>

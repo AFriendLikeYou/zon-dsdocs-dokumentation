@@ -1,3 +1,8 @@
+<!--
+  Changelog.svelte — tabellarisches Change log (Version / Datum / Notes) mit rowspan
+  je Version. Genau ein Consumer: /product/changelog (+page.svx), Daten aus
+  $lib/data/changelog.ts.
+-->
 <script lang="ts">
 	type ChangeLogNote = string;
 
@@ -13,7 +18,10 @@
 
 	type ChangeLog = ChangeLogVersion[];
 
-	let { changelog }: { changelog: ChangeLog } = $props();
+	let {
+		/** Versionen mit Datums-Einträgen und Notiz-Listen (neueste zuerst). */
+		changelog
+	}: { changelog: ChangeLog } = $props();
 </script>
 
 <section class="changelog">

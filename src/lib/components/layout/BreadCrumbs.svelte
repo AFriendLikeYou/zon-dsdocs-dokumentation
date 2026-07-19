@@ -1,3 +1,4 @@
+<!-- BreadCrumbs.svelte — Pfad-Krümel aus der URL plus GitHub-Edit-Stift; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import { uppercaseFirstLetter } from '$lib/utils';

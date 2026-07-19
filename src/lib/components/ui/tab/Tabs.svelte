@@ -1,13 +1,22 @@
+<!--
+	Tabs.svelte — barrierefreie Tab-Leiste (ARIA tablist, Pfeiltasten/Home/End) mit
+	gleitendem Aktiv-Unterstrich. Strukturiert u. a. die Design-Tabs der
+	Component-Doku-Seiten (src/routes/product/components/*/+page.svx).
+-->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
 	type TabItem = {
+		/** Beschriftung des Tab-Buttons. */
 		label: string;
+		/** Inhalt des zugehörigen Panels (Svelte-Snippet). */
 		component: Snippet;
 	};
 
 	type Props = {
+		/** Tabs mit Label + Panel-Snippet. */
 		items: TabItem[];
+		/** Tab-Leiste beim Scrollen oben andocken. */
 		sticky?: boolean;
 	};
 

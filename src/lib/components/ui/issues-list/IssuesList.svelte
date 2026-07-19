@@ -1,8 +1,16 @@
+<!--
+  IssuesList.svelte — durchsuchbare, nach Kategorie gruppierte A11y-Issue-Liste
+  (Akkordeon je Kategorie, Issue/Good-practice-Chips). Genau ein Consumer:
+  /brand/accessibility/issues; Daten aus $data/a11y-issues.
+-->
 <script lang="ts">
 	import type { A11yItem } from '$data/a11y-issues';
 	import { GithubIcon } from '$lib/icons';
 
-	let { issues }: { issues: A11yItem[] } = $props();
+	let {
+		/** A11y-Einträge (Kategorie, Titel, Beschreibung, Lösung, Links). */
+		issues
+	}: { issues: A11yItem[] } = $props();
 
 	type Category = A11yItem['category'];
 

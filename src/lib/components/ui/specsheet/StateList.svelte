@@ -4,7 +4,12 @@
 	let {
 		states = [],
 		hint = 'Gefüllt = im Design vorhanden, gestrichelt = in Figma ergänzen.'
-	}: { states?: SpecState[]; hint?: string } = $props();
+	}: {
+		/** Zustände als Chips; vorhanden=false rendert gestrichelt (in Figma ergänzen). */
+		states?: SpecState[];
+		/** Erläuterung unter den Chips; leer blendet sie aus. */
+		hint?: string;
+	} = $props();
 </script>
 
 {#if states.length}

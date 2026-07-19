@@ -7,7 +7,10 @@
 	import { TokenPill } from '$components/ui/token-pill';
 	import { resolveCssVar } from '$lib/utils';
 
-	let { items = [] }: { items?: { token: string; usage?: string }[] } = $props();
+	let {
+		/** Radius-Tokens mit optionalem Einsatzzweck; jeder rendert einen eigenen Swatch. */
+		items = []
+	}: { items?: { token: string; usage?: string }[] } = $props();
 
 	let vals = $state<Record<string, string>>({});
 	$effect(() => {

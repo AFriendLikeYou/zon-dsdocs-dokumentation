@@ -1,3 +1,4 @@
+<!-- Footer.svelte — kuratierter Seiten-Footer (verflachte Top-Level-Links je Kategorie) mit Wortmarke und Theme-Switch; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import type { MenuSection, BadgeVariant } from '$data/navigation';
 	import type { Theme } from '$types/global';
@@ -5,7 +6,15 @@
 	import ZeitBrandSite from './ZeitBrandSite.svelte';
 	import { Badge } from '$components/ui/badge';
 
-	let { items, currentTheme }: { items: MenuSection[]; currentTheme: Theme } = $props();
+	let {
+		items,
+		currentTheme
+	}: {
+		/** Navigationsstruktur; wird zu kuratierten Footer-Spalten verflacht. */
+		items: MenuSection[];
+		/** Aktuelles Theme für den eingebetteten Theme-Switch. */
+		currentTheme: Theme;
+	} = $props();
 
 	type FooterLink = { label: string; href: string; badge?: string; badgeVariant?: BadgeVariant };
 	type FooterColumn = { title: string; links: FooterLink[] };

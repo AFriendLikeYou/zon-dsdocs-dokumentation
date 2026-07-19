@@ -19,7 +19,10 @@
 		type FoundationGroup
 	} from '$data/foundation-tokens';
 
-	let { groups = FOUNDATION_TOKENS }: { groups?: FoundationGroup[] } = $props();
+	let {
+		/** Foundation-Token-Gruppen; Default = kuratierte FOUNDATION_TOKENS. */
+		groups = FOUNDATION_TOKENS
+	}: { groups?: FoundationGroup[] } = $props();
 
 	type Item = { name: string; usage: string; wert: string; swatch?: string; usedBy: string[] };
 	type Group = { kategorie: string; beschreibung?: string; items: Item[] };

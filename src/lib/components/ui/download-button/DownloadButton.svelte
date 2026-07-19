@@ -13,16 +13,21 @@
 	type Props = {
 		/** Direkter Download-Link. */
 		href?: string;
+		/** Dateiname für den Download (bei href). */
 		filename?: string;
 		/** Eigene Download-Logik statt href (z. B. downloadIcon(icon)). */
 		ondownload?: () => void | Promise<void>;
+		/** Sichtbares Label; ohne Angabe = nur Download-Icon. */
 		label?: string;
+		/** A11y-Label (für icon-only verpflichtend). */
 		ariaLabel?: string;
+		/** Rückmeldung: 'none' oder 'toast'. */
 		feedback?: 'none' | 'toast';
 		toastTitle?: string;
 		toastMessage?: string;
 		/** Gerahmter Icon-Button-Look (wie Icon-/Asset-Grid). */
 		iconButton?: boolean;
+		/** Eigenes Trigger-Markup statt Standard-Icon/-Label. */
 		children?: Snippet;
 		class?: string;
 	};

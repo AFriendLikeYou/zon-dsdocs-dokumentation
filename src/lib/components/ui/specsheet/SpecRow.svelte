@@ -7,7 +7,10 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	let { children }: { children: Snippet } = $props();
+	let { children }: {
+		/** Zwei Zellen (Label/Wert) vom Aufrufer; behalten ihr zellenspezifisches Styling. */
+		children: Snippet;
+	} = $props();
 </script>
 
 <div class="row">{@render children()}</div>

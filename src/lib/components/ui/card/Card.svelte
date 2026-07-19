@@ -1,11 +1,20 @@
+<!--
+  Card.svelte — verlinkte Übersichts-Karte (Platzhalter-Illustration + Titel + Badge +
+  Beschreibung). Wird ausschließlich vom CardGrid gerendert; Status-Pill kommt aus Badge.
+-->
 <script lang="ts">
 	import { Badge } from '$components/ui/badge';
 
 	type Props = {
+		/** Link-Ziel der gesamten Karte. */
 		url: string;
+		/** Karten-Überschrift. */
 		title: string;
+		/** Kurzbeschreibung unter dem Titel. */
 		description: string;
+		/** Optionaler Badge-Text neben dem Titel (leer = kein Badge). */
 		badge?: string;
+		/** Farbrolle des Badges. */
 		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
 	};
 

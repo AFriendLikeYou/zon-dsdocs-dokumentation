@@ -233,7 +233,7 @@ describe('Container: parse / serialize / info', () => {
 	});
 
 	it('DoDontGroup mit DoDont-Kindern ist editierbar', () => {
-		const dg = `<DoDontGroup columns={2}>\n\t<DoDont type="do" caption="ok" />\n\t<DoDont type="dont" caption="nein" strikeThrough={true} />\n</DoDontGroup>`;
+		const dg = `<DoDontGroup columns={2}>\n\t<DoDont variant="do" caption="ok" />\n\t<DoDont variant="dont" caption="nein" strikeThrough={true} />\n</DoDontGroup>`;
 		const info = containerIslandInfo(dg);
 		expect(info?.def.name).toBe('DoDontGroup');
 		expect(info?.children.length).toBe(2);

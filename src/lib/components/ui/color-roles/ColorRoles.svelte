@@ -14,7 +14,12 @@
 	export type RoleGroup = { titel: string; beschreibung?: string; rollen: RoleItem[] };
 	export type ContrastPair = { fg: string; bg: string; label: string };
 
-	let { groups, pairs = [] }: { groups: RoleGroup[]; pairs?: ContrastPair[] } = $props();
+	let {
+		/** Rollen-Gruppen (Titel + Rollen-Liste). */
+		groups,
+		/** Optionale Kontrast-Paare (fg/bg) für die WCAG-Sektion. */
+		pairs = []
+	}: { groups: RoleGroup[]; pairs?: ContrastPair[] } = $props();
 
 	type ResolvedRole = RoleItem & { wert: string };
 	type ResolvedPair = ContrastPair & { ratio: number | null };

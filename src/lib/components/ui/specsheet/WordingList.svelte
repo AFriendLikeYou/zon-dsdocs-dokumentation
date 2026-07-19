@@ -2,7 +2,10 @@
 <script lang="ts">
 	import type { WordingRule } from '$types/spec';
 	import Mark from './Mark.svelte';
-	let { items = [] }: { items?: WordingRule[] } = $props();
+	let { items = [] }: {
+		/** Formulierungsregeln („statt schlecht → besser gut" + optionaler Hinweis). */
+		items?: WordingRule[];
+	} = $props();
 </script>
 
 {#if items.length}

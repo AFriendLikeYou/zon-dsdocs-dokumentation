@@ -11,7 +11,10 @@
 	import type { DoDontBeispiel } from '$types/spec';
 	import { DoDontBase } from '$components/ui/dodont';
 	import Mark from './Mark.svelte';
-	let { beispiele = [] }: { beispiele?: DoDontBeispiel[] } = $props();
+	let { beispiele = [] }: {
+		/** Visuelle Do/Don't-Paare (je gut vs. schlecht mit Specimen-HTML + Text). */
+		beispiele?: DoDontBeispiel[];
+	} = $props();
 </script>
 
 {#if beispiele.length}

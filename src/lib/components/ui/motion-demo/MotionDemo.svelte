@@ -6,9 +6,15 @@
 <script lang="ts">
 	import { resolveCssVar } from '$lib/utils';
 
-	type MotionToken = { label: string; cssVar: string };
+	type MotionToken = {
+		/** Angezeigter Name des Tokens. */
+		label: string;
+		/** CSS-Variablenname, dessen Wert live gelesen wird. */
+		cssVar: string;
+	};
 
 	let {
+		/** Abspielbare Motion-Tokens (Label + CSS-Variable). */
 		tokens = [],
 		/** Welche Eigenschaft das Token steuert: Kurve (easing) oder Dauer (duration). */
 		type = 'easing'

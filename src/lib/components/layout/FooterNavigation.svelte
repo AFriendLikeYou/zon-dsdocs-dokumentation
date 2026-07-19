@@ -1,3 +1,4 @@
+<!-- FooterNavigation.svelte — Zurück/Weiter-Blättern zwischen den Seiten einer Nav-Sektion; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -5,7 +6,10 @@
 	import { Button } from '$components/ui/button';
 	import { ArrowLeftIcon, ArrowRightIcon } from '$lib/icons';
 
-	let { items }: { items: (MenuItem | MenuSection)[] } = $props();
+	let {
+		/** Geordnete Seiten der aktuellen Sektion; die aktive URL bestimmt Vor-/Zurück-Nachbarn. */
+		items
+	}: { items: (MenuItem | MenuSection)[] } = $props();
 
 	// `page` ist fein-granular reaktiv — Index und Sichtbarkeit direkt aus der URL
 	// ableiten (statt des früheren $state+afterNavigate-Spiegels). Nebenbei gefixt:

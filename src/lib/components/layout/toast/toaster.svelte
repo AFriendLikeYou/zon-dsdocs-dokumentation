@@ -1,3 +1,4 @@
+<!-- toaster.svelte — Bühne für den Toast-Stapel; liest den globalen Toast-State und rendert je Eintrag eine toast.svelte; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { getToastState } from '$stores/toast-state.svelte';
 	import Toast from './toast.svelte';

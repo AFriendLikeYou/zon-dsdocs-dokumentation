@@ -33,10 +33,15 @@
 		calloutAnchors = [],
 		preview
 	}: {
+		/** Maße (Höhe/Breite/Padding/Radius) für Maßlinien und Drift-Check; null = keine Measurements-Sicht. */
 		masse?: Masse | null;
+		/** Abstände (Padding/Gap) für die Measurements-Sicht und die gekoppelten Streifen. */
 		spacing?: SpacingSpec[];
+		/** Nummerierte Bestandteil-Beschriftungen für die Bestandteile-Sicht. */
 		callouts?: Callout[];
+		/** Verankerung der Callouts am Specimen (Position bzw. selector für die Live-Vermessung). */
 		calloutAnchors?: CalloutAnchor[];
+		/** Haupt-Specimen, das auf der Bühne gerendert und vermessen wird. */
 		preview?: Snippet;
 	} = $props();
 

@@ -74,7 +74,7 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		importStatement: "import { DoDont } from '$components/ui/dodont';",
 		props: [
 			{
-				key: 'type',
+				key: 'variant',
 				label: 'Typ',
 				type: 'select',
 				options: ['do', 'dont'],

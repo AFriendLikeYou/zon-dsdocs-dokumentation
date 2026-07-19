@@ -6,9 +6,13 @@
 -->
 <script lang="ts">
 	type Props = {
+		/** Große Überschrift (h1). */
 		title: string;
+		/** Unterzeile unter dem Titel. */
 		subtitle?: string;
+		/** Bildpfad (aus static/media/brand). */
 		image: string;
+		/** Alt-Text des Bildes. */
 		imageAlt?: string;
 	};
 	let { title, subtitle = '', image, imageAlt = '' }: Props = $props();

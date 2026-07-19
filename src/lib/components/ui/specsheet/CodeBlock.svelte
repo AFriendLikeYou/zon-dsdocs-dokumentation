@@ -22,11 +22,17 @@
 		flashLines = [],
 		collapsible = false
 	}: {
+		/** Überschrift in der Kopfzeile des Blocks. */
 		title?: string;
+		/** Anzuzeigender und (immer vollständig) kopierbarer Quelltext. */
 		code?: string;
+		/** Sprache für die Syntax-Hervorhebung (html/css/svelte). */
 		lang?: Lang;
+		/** Wechselt der Wert, leuchten die flashLines kurz auf; aktiviert den zeilenweisen Modus. */
 		flashKey?: number;
+		/** Zeilenindizes (0-basiert), die beim flashKey-Wechsel aufleuchten. */
 		flashLines?: number[];
+		/** Lange Snippets (> 7 Zeilen) starten gekappt mit „Code aufklappen". */
 		collapsible?: boolean;
 	} = $props();
 

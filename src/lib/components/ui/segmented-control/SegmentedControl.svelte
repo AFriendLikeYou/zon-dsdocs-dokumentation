@@ -19,11 +19,20 @@
       onchange={(v) => (current = v)} />
 -->
 <script lang="ts">
-	type Option = { value: string; label: string };
+	type Option = {
+		/** Interner Wert des Segments. */
+		value: string;
+		/** Sichtbare Beschriftung. */
+		label: string;
+	};
 	let {
+		/** Auswahloptionen (je ein Pill-Segment). */
 		options,
+		/** Aktuell gewählter Wert (`value` einer Option). */
 		value,
+		/** Callback bei Auswahl eines Segments. */
 		onchange,
+		/** A11y-Label der Radiogruppe. */
 		ariaLabel
 	}: {
 		options: Option[];

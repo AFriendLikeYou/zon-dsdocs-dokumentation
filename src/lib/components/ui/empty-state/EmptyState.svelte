@@ -11,7 +11,9 @@
 		icon,
 		action
 	}: {
+		/** Titelzeile des Leerzustands. */
 		title: string;
+		/** Erläuternder Text (optional). */
 		description?: string;
 		/** Optionales Icon/Illustration. */
 		icon?: Snippet;

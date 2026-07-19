@@ -1,3 +1,4 @@
+<!-- SidebarButton.svelte — Toggle für die Navigation (Desktop: Panel ein-/ausklappen, Mobile: Drawer öffnen); wird von der Navbar eingehängt. -->
 <script lang="ts">
 	import { useMediaQuery } from '$stores/media-query.svelte';
 	import {

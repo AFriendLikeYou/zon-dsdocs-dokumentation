@@ -1,3 +1,4 @@
+<!-- toast.svelte — einzelner Toast im Sonner-Stapel (Titel, Nachricht, optionale Aktion, Schließen); wird von toaster.svelte gerendert. -->
 <script lang="ts">
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { fade, fly } from 'svelte/transition';
@@ -6,8 +7,11 @@
 	import type { ToastType } from '$types/global';
 
 	type Props = {
+		/** Anzuzeigender Toast (Titel, Nachricht, Count, optionale Aktion). */
 		toast: ToastType;
+		/** Position im Stapel; bestimmt Tiefe, Versatz und Skalierung. */
 		index: number;
+		/** Gesamtzahl der Toasts im Stapel. */
 		total: number;
 	};
 

@@ -19,13 +19,19 @@
 		onhover,
 		onpress
 	}: {
+		/** Abstände-Zeilen (Padding/Gap) mit px + Token. */
 		spacing: SpacingSpec[];
 		// Sync-Key je Zeile (parallel zu spacing) oder null für passive Zeilen.
 		keys: (string | null)[];
+		/** Drift-Befunde je Key (Figma-Soll ≠ gerendertes Ist). */
 		drift: Record<string, Drift>;
+		/** Aktuell aktiver Sync-Key (Pin oder Hover). */
 		activeKey: string | null;
+		/** Festgepinnter Key (steuert aria-pressed der Zeile). */
 		pinned: string | null;
+		/** Meldet flüchtigen Hover/Fokus an den Orchestrator (null = aus). */
 		onhover: (key: string | null) => void;
+		/** Meldet Tap/Klick/Enter (Pin umschalten). */
 		onpress: (key: string) => void;
 	} = $props();
 </script>

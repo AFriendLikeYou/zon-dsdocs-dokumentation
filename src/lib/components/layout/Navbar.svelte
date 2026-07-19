@@ -1,3 +1,4 @@
+<!-- Navbar.svelte — Sticky-Kopfzeile mit Wortmarke, Haupt-Nav (Brandhub/Design-System), Suche und Login; vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import LoginButton from './LoginButton.svelte';
 	import ZeitBrandSite from './ZeitBrandSite.svelte';
@@ -7,7 +8,15 @@
 
 	// `section` kommt aus derselben Quelle wie im Layout abgeleitet
 	// (+layout.svelte) — keine zweite Routen-Logik hier.
-	let { isUserLoggedIn, section }: { isUserLoggedIn: boolean; section: Section } = $props();
+	let {
+		isUserLoggedIn,
+		section
+	}: {
+		/** Login-Status; blendet den Login-Button aus, wenn eingeloggt. */
+		isUserLoggedIn: boolean;
+		/** Aktive Top-Level-Welt; markiert die Haupt-Nav und blendet den Burger auf `root` aus. */
+		section: Section;
+	} = $props();
 
 	// Hauptnavigation: die zwei „Welten" wie auf der Landing/Footer benannt.
 	const MAIN_NAV: { label: string; href: string; section: Section }[] = [

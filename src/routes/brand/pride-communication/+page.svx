@@ -43,7 +43,7 @@ jo
 
 
 <DoDont
-	type="dont"
+	variant="dont"
 	caption="Lorem"
 	imgSrc="/media/brand/icons/icon-anatomy-2.png"
 	content="Lorem ipsum"
@@ -121,7 +121,7 @@ jo
 		imgSrc="/media/brand/icons/icon-anatomy-1.png"
 	/>
 	<DoDont
-		type="dont"
+		variant="dont"
 		caption="dont"
 		imgSrc="/media/brand/icons/icon-anatomy-2.png"
 		strikeThrough={true}
