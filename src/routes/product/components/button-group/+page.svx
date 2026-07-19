@@ -14,9 +14,13 @@ kategorie: Aktionen
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import content from './content.json';
+	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const htmlCode = `<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>`;
+	const editorial = content as Partial<ComponentSpec>;
+	const htmlBody = `<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>`;
+	const codeNote = editorial.codeNote ?? ``;
+	const htmlCode = codeNote ? `<!-- ${codeNote} -->\n${htmlBody}` : htmlBody;
 	const patternCssCode = `/* buttongroup — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .buttongroup {
 	list-style: none;
@@ -100,6 +104,15 @@ button.buttongroup-button {
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
 {/snippet}
 
 {#snippet specsTab()}

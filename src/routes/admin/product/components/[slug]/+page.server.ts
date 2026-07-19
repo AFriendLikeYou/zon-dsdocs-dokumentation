@@ -24,7 +24,13 @@ const EDITABLE = [
 	'komposition',
 	'a11y',
 	'wording',
-	'verwandt'
+	'verwandt',
+	// Redaktionelle Code-Beispiele (Develop-Tab) + feldweise Snippet-Overrides.
+	'codeBeispiele',
+	'codeSvelte',
+	'repoCodeSvelte',
+	'codeNote',
+	'repoNote'
 ] as const;
 
 const COMPONENTS_DIR = 'src/routes/product/components';
@@ -78,6 +84,18 @@ export const load = ({ params }) => {
 	const model = readJson(resolve(dir, 'model.json'));
 	const content = readJson(resolve(dir, 'content.json'));
 
+	// Maschinelle Snippet-Werte aus dem render-Block — als gedämpfte Platzhalter/
+	// Vorbelegung der Override-Felder im Editor („leer = Maschine gewinnt").
+	const render = (model.render ?? {}) as Record<string, unknown>;
+	const joinCode = (v: unknown): string =>
+		Array.isArray(v) ? v.join('\n') : typeof v === 'string' ? v : '';
+	const machineSnippets = {
+		codeSvelte: joinCode(render.codeSvelte),
+		repoCodeSvelte: joinCode(render.repoCodeSvelte),
+		codeNote: typeof render.codeNote === 'string' ? render.codeNote : '',
+		repoNote: typeof render.repoNote === 'string' ? render.repoNote : ''
+	};
+
 	// Drift: figma-raw.json vorhanden UND neuer als model.json? (fehlt raw → null)
 	const rawPath = resolve(dir, 'figma-raw.json');
 	const modelPath = resolve(dir, 'model.json');
@@ -111,6 +129,7 @@ export const load = ({ params }) => {
 		},
 		// ── Redaktionelle Rohdaten (content.json) ──
 		content,
+		machineSnippets,
 		// v1-read-only Editorial-Felder, die dieser Editor NICHT als Formular zeigt.
 		readonlyEditorial: {
 			variantInfo: content.variantInfo ?? null,
@@ -146,8 +165,14 @@ export const actions = {
 		const path = resolve(componentDir(slug), 'content.json');
 		const full = readJson(path);
 		// Nur die editierbaren Keys übernehmen — der Rest (v1-read-only Felder aus
-		// dem Code) bleibt byte-genau erhalten.
-		for (const k of EDITABLE) if (k in patch) full[k] = patch[k];
+		// dem Code) bleibt byte-genau erhalten. Fehlt ein editierbarer Key im Patch,
+		// wird er entfernt: so lässt sich ein Feld leeren (bei den Snippet-Overrides
+		// bedeutet leer „Maschine gewinnt wieder"). Der Editor verwaltet ALLE
+		// EDITABLE-Keys, darum ist Löschen-bei-Abwesenheit hier sicher.
+		for (const k of EDITABLE) {
+			if (k in patch) full[k] = patch[k];
+			else delete full[k];
+		}
 
 		// Gegen die EDITORIAL_FIELDS-Regeln validieren (derselbe Kern wie das
 		// check-content-Gate) — BEVOR geschrieben wird.

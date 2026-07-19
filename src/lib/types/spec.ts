@@ -139,6 +139,21 @@ export type ColorRoles = {
 export type KeyboardRule = { taste: string; aktion: string };
 
 /**
+ * Ein redaktionelles Code-Beispiel (Develop-Tab): Dev-Wissen übers zeit.de-Repo,
+ * das rein als Text durch den CodeBlock gerendert wird (escaped, nie ausgeführt).
+ *   label    – Überschrift des Beispiels
+ *   code     – anzuzeigender Quelltext
+ *   sprache  – Syntax-Hervorhebung im CodeBlock (Default: svelte)
+ *   hinweis  – optionaler Erklärtext unter der Überschrift
+ */
+export type CodeBeispiel = {
+	label: string;
+	code: string;
+	sprache?: 'svelte' | 'html' | 'css' | 'js';
+	hinweis?: string;
+};
+
+/**
  * CMS-schaltbare Playground-Bühnen-Optionen (aus render bzw. content.json).
  *   align      – 'center' (Objekt zentriert auf der Bühne) | 'fill' (voller Ausschnitt)
  *   resizable  – zeigt ein Resize-Handle zum Verändern der Vorschaubreite
@@ -183,4 +198,15 @@ export type ComponentSpec = {
 	verwandt?: string[];
 	/** CMS-schaltbare Playground-Bühne (Ausrichtung, Resize-Handle). */
 	playground?: PlaygroundOptions;
+	/** Redaktionelle Code-Beispiele (Develop-Tab) — Dev-Wissen übers zeit.de-Repo. */
+	codeBeispiele?: CodeBeispiel[];
+	/**
+	 * Feldweise Editorial-Overrides der maschinellen Snippet-Felder (aus `render.*`).
+	 * Gesetzt in `content.json` gewinnen sie auf der Seite feldweise über den
+	 * gleichnamigen `render`-Wert; leer/fehlend → der Maschinen-Wert bleibt.
+	 */
+	codeSvelte?: string;
+	repoCodeSvelte?: string;
+	codeNote?: string;
+	repoNote?: string;
 };

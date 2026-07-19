@@ -224,7 +224,10 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 
 Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `callouts`, `a11y`,
 `tastatur`, `doDont`, `doDontBeispiele`, `verwendung`, `wording`, `komposition`,
-`verwandt`, `version`, `variantInfo` (Schema-Referenz: [README](./README.md#schema-referenz-modeljson)).
+`verwandt`, `version`, `variantInfo`, `codeBeispiele` sowie die feldweisen
+Snippet-Overrides `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` (gewinnen
+feldweise über die gleichnamigen `render`-Werte; leer = Maschine gewinnt)
+(Schema-Referenz: [README](./README.md#schema-referenz-modeljson)).
 `komposition` (`string[]`, je Eintrag ein Satz) beschreibt, wie die Komponente mit
 anderen kombiniert wird/werden darf — nützlich für Agenten bei Formularen/Organismen;
 nur befüllen, wenn fachlich sicher ableitbar.

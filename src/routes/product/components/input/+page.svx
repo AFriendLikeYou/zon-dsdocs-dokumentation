@@ -15,6 +15,7 @@ kategorie: Formulare
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
+	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-input"},{"nr":2,"side":"top","x":40,"selector":".z-input__field"},{"nr":3,"side":"right","y":50}];
@@ -24,8 +25,11 @@ kategorie: Formulare
   <input class="z-input__field" type="text" placeholder="Platzhalter" aria-label="Beispiel-Eingabe" />
   <span class="z-input__chevron" aria-hidden="true"></span>
 </div>`;
-	const htmlCode = `<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>
+	const editorial = content as Partial<ComponentSpec>;
+	const htmlBody = `<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>
 <div class="z-input z-input--error"><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>`;
+	const codeNote = editorial.codeNote ?? ``;
+	const htmlCode = codeNote ? `<!-- ${codeNote} -->\n${htmlBody}` : htmlBody;
 	const patternCssCode = `/* z-input — Texteingabefeld (Field / Input), originalgetreu aus Figma ❖ ZDS
    (node 477:3021). Zustände über Modifier; Rahmen/Textfarbe auf echten --z-ds-Tokens. */
 .z-input {
@@ -163,6 +167,15 @@ kategorie: Formulare
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
 {/snippet}
 
 {#snippet a11yTab()}

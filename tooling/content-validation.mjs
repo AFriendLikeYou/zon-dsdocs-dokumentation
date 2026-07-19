@@ -43,7 +43,15 @@ export const EDITORIAL_FIELDS = {
 	wording: { check: isArray, typ: 'array' },
 	komposition: { check: isArray, typ: 'array (Strings)' },
 	verwandt: { check: isArray, typ: 'array' },
-	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' }
+	playground: { check: isObject, typ: 'objekt ({ align?, resizable? })' },
+	// Redaktionelle Code-Beispiele (Dev-Wissen übers zeit.de-Repo) — Develop-Tab.
+	codeBeispiele: { check: isArray, typ: 'array (Objekte { label, code, sprache?, hinweis? })' },
+	// Feldweise Editorial-Overrides der maschinellen Snippet-Felder (render.*): wenn
+	// gesetzt, gewinnen sie auf der Seite feldweise über den gleichnamigen render-Wert.
+	codeSvelte: { check: isString, typ: 'string' },
+	repoCodeSvelte: { check: isString, typ: 'string' },
+	codeNote: { check: isString, typ: 'string' },
+	repoNote: { check: isString, typ: 'string' }
 };
 
 /** @type {string[]} */
@@ -78,6 +86,26 @@ export function checkNested(key, value) {
 	if (key === 'variantInfo' && isObject(value)) {
 		for (const [label, text] of Object.entries(value))
 			if (!isString(text)) issues.push(`variantInfo["${label}"] muss ein String sein`);
+	}
+	if (key === 'codeBeispiele' && isArray(value)) {
+		// Jedes Beispiel: label+code Pflicht (String), sprache/hinweis optional (String),
+		// keine Fremdkeys je Item.
+		const erlaubt = new Set(['label', 'code', 'sprache', 'hinweis']);
+		for (const [i, item] of value.entries()) {
+			if (!isObject(item)) {
+				issues.push(`codeBeispiele[${i}] muss ein Objekt sein`);
+				continue;
+			}
+			if (!isString(item.label)) issues.push(`codeBeispiele[${i}].label muss ein String sein`);
+			if (!isString(item.code)) issues.push(`codeBeispiele[${i}].code muss ein String sein`);
+			if (item.sprache !== undefined && !isString(item.sprache))
+				issues.push(`codeBeispiele[${i}].sprache muss ein String sein`);
+			if (item.hinweis !== undefined && !isString(item.hinweis))
+				issues.push(`codeBeispiele[${i}].hinweis muss ein String sein`);
+			for (const k of Object.keys(item))
+				if (!erlaubt.has(k))
+					issues.push(`codeBeispiele[${i}]: unbekannter Key „${k}" (erlaubt: label, code, sprache, hinweis)`);
+		}
 	}
 	if (key === 'playground' && isObject(value)) {
 		for (const k of Object.keys(value))

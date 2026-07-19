@@ -448,26 +448,32 @@ function renderPage(model, { patternCss = null } = {}) {
 	const allCss = [css, scopedPattern].filter(Boolean).join('\n\n');
 	const styleBlock = allCss ? `\n<style>\n${allCss}\n</style>\n` : '';
 
-	// Code-Beispiele (Develop): HTML/Svelte-Snippet + entscoptes CSS.
-	// `-->` im Text würde den Kommentar vorzeitig schließen → neutralisieren.
-	const note = render.codeNote
-		? `<!-- ${String(render.codeNote).replace(/--+>/g, '--&gt;')} -->\n`
-		: '';
-	const htmlBody = [render.preview, render.variant].filter(Boolean).join('\n');
-	const htmlCode = htmlBody ? note + htmlBody : '';
-	const svelteCode = Array.isArray(render.codeSvelte)
+	// Code-Beispiele (Develop): maschinelle Snippets aus render.*. Die redaktionellen
+	// Editorial-Overrides (content.json: codeSvelte/repoCodeSvelte/codeNote/repoNote)
+	// gewinnen feldweise ZUR LAUFZEIT über diese Maschinen-Werte (`editorial.X ?? …`) —
+	// dasselbe Auflösungsmuster wie `version` über `content.version`. Die Struktur des
+	// Generats bleibt bewusst content-unabhängig (Idempotenz: das Generat referenziert
+	// `editorial.X` symbolisch, es backt nie content.json-Werte ein).
+	// `-->` im Text würde den gezeigten HTML-Kommentar vorzeitig schließen → neutralisieren.
+	const machineCodeNote =
+		typeof render.codeNote === 'string' ? String(render.codeNote).replace(/--+>/g, '--&gt;') : '';
+	const htmlBodyMachine = [render.preview, render.variant].filter(Boolean).join('\n');
+	const hasHtmlCode = Boolean(htmlBodyMachine);
+	const svelteMachine = Array.isArray(render.codeSvelte)
 		? render.codeSvelte.join('\n')
 		: typeof render.codeSvelte === 'string'
 			? render.codeSvelte
 			: '';
+	const hasSvelteCode = Boolean(svelteMachine);
 	// Optionale Repo-Brücke: zeigt zusätzlich, wie die ECHTE Repo-Komponente heißt
 	// (z. B. Button.svelte / .app-button), nicht nur die Figma-/sds-Referenz.
-	const repoCode = Array.isArray(render.repoCodeSvelte)
+	const repoMachine = Array.isArray(render.repoCodeSvelte)
 		? render.repoCodeSvelte.join('\n')
 		: typeof render.repoCodeSvelte === 'string'
 			? render.repoCodeSvelte
 			: '';
-	const repoNote = typeof render.repoNote === 'string' ? render.repoNote : '';
+	const hasRepoCode = Boolean(repoMachine);
+	const repoNoteMachine = typeof render.repoNote === 'string' ? render.repoNote : '';
 	const cssForCode = css.replace(/:global\(\.[\w-]+\s+([^)]+)\)/g, '$1');
 	const props = Array.isArray(render.props) ? render.props : [];
 	const hasVersion = typeof render.version === 'string';
@@ -505,7 +511,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasStates = hasStateGrid || hasStateRest;
 	const hasDoDont = Boolean(model.doDont);
 	const hasDoDontVisual = Array.isArray(model.doDontBeispiele) && model.doDontBeispiele.length > 0;
-	const anyCode = Boolean(htmlCode || svelteCode || cssForCode || repoCode || patternCss);
+	const anyCode = Boolean(hasHtmlCode || hasSvelteCode || cssForCode || hasRepoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
 	const hasKeyboard = Array.isArray(model.tastatur) && model.tastatur.length > 0;
@@ -535,7 +541,9 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasDoDontVisual) used.add('DoDontVisual');
 	if (hasWording) used.add('WordingList');
 	if (hasRelated) used.add('RelatedComponents');
-	if (anyCode) used.add('CodeBlock');
+	// CodeBlock rendert sowohl die Maschinen-Snippets als auch die redaktionellen
+	// codeBeispiele (laufzeit-gated im Develop-Tab) → immer bei vorhandenem Develop-Tab.
+	if (hasDevelop) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
 	if (hasA11y) used.add('A11yList');
 	if (hasKeyboard) used.add('KeyboardList');
@@ -555,7 +563,8 @@ function renderPage(model, { patternCss = null } = {}) {
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
-		`\timport content from './content.json';\n`;
+		`\timport content from './content.json';\n` +
+		(hasDevelop ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
 
 	const decls =
 		`\t// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.\n` +
@@ -565,9 +574,21 @@ function renderPage(model, { patternCss = null } = {}) {
 			? `\tconst playgroundControls = ${JSON.stringify(pgControls)};\n` +
 				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n`
 			: '') +
-		(htmlCode ? `\tconst htmlCode = \`${tl(htmlCode)}\`;\n` : '') +
-		(svelteCode ? `\tconst svelteCode = \`${tl(svelteCode)}\`;\n` : '') +
-		(repoCode ? `\tconst repoCode = \`${tl(repoCode)}\`;\n` : '') +
+		// editorial = content.json als Partial<ComponentSpec> — Träger der feldweisen
+		// Snippet-Overrides und der redaktionellen codeBeispiele (content gewinnt).
+		(hasDevelop ? `\tconst editorial = content as Partial<ComponentSpec>;\n` : '') +
+		(hasHtmlCode
+			? `\tconst htmlBody = \`${tl(htmlBodyMachine)}\`;\n` +
+				`\tconst codeNote = editorial.codeNote ?? \`${tl(machineCodeNote)}\`;\n` +
+				`\tconst htmlCode = codeNote ? \`<!-- \${codeNote} -->\\n\${htmlBody}\` : htmlBody;\n`
+			: '') +
+		(hasSvelteCode
+			? `\tconst svelteCode = editorial.codeSvelte ?? \`${tl(svelteMachine)}\`;\n`
+			: '') +
+		(hasRepoCode
+			? `\tconst repoCode = editorial.repoCodeSvelte ?? \`${tl(repoMachine)}\`;\n` +
+				`\tconst repoNote = editorial.repoNote ?? \`${tl(repoNoteMachine)}\`;\n`
+			: '') +
 		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
 		(patternCss ? `\tconst patternCssCode = \`${tl(patternCss)}\`;\n` : '') +
 		(hasVariants ? `\tconst variantItems = ${serializeItems(variantItems)};\n` : '') +
@@ -632,19 +653,32 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasProps) develop += `\t<h2>Properties</h2>\n\t<PropsTable props={propsData} />\n`;
 	if (anyCode) {
 		develop += `\n\t<h2>Code</h2>\n`;
-		if (htmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
-		if (svelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
-		if (repoCode) {
-			if (repoNote) {
-				const escNote = repoNote.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-				develop += `\t<p>${escNote}</p>\n`;
-			}
+		if (hasHtmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
+		if (hasSvelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
+		if (hasRepoCode) {
+			// repoNote (content-Override gewinnt über Maschine) als Fließtext über dem
+			// Repo-Snippet; {repoNote} wird von Svelte escaped. Nur zeigen, wenn nicht leer.
+			develop += `\t{#if repoNote}\n\t\t<p>{repoNote}</p>\n\t{/if}\n`;
 			develop += `\t<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />\n`;
 		}
 		if (cssForCode)
 			develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
 		if (patternCss)
 			develop += `\t<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />\n`;
+	}
+	// Redaktionelle Code-Beispiele (content.json → editorial) UNTER den maschinellen
+	// Code-Sektionen. Reiner Text durch den CodeBlock (escaped, nie ausgeführt).
+	// Laufzeit-gated (`{#if …length}`) → die Generat-Struktur bleibt content-unabhängig.
+	if (hasDevelop) {
+		develop +=
+			`\n\t{#if (editorial.codeBeispiele ?? []).length}\n` +
+			`\t\t<h2>Redaktionelle Code-Beispiele</h2>\n` +
+			`\t\t{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}\n` +
+			`\t\t\t<h3>{beispiel.label}</h3>\n` +
+			`\t\t\t{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}\n` +
+			`\t\t\t<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />\n` +
+			`\t\t{/each}\n` +
+			`\t{/if}\n`;
 	}
 
 	// ---- Barrierefreiheit-Tab ----

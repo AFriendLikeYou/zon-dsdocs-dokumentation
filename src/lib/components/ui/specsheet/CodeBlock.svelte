@@ -13,7 +13,7 @@
 	import { CopyButton } from '$components/ui/copy-button';
 	import { ChevronIcon } from '$lib/icons';
 
-	type Lang = 'html' | 'css' | 'svelte';
+	type Lang = 'html' | 'css' | 'svelte' | 'js';
 	let {
 		title = '',
 		code = '',
@@ -62,6 +62,13 @@
 			['number', /#[0-9a-fA-F]{3,8}\b|\b\d+(?:\.\d+)?(?:px|rem|em|%|s|ms)?\b/],
 			['selector', /\.[\w-]+|::?[\w-]+|[\w-]+(?=\s*\{)/],
 			['punct', /[{}();:,]/]
+		],
+		js: [
+			['comment', /\/\/[^\n]*|\/\*[\s\S]*?\*\//],
+			['string', /"[^"]*"|'[^']*'|`[^`]*`/],
+			['tag', /\b(?:const|let|var|function|return|import|export|from|if|else|await|async|new|class)\b/],
+			['number', /\b\d+(?:\.\d+)?\b/],
+			['punct', /[{}()[\];:,.=]/]
 		]
 	};
 

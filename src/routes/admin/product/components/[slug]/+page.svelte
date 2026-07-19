@@ -11,6 +11,7 @@
 	import ProvenanceChip from './ProvenanceChip.svelte';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
+	import CodeExamplesField from './CodeExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
 
 	let { data }: import('./$types').PageProps = $props();
@@ -27,7 +28,15 @@
 		a11y: { label: string; wert: string; status: A11yStatus }[];
 		wording: { schlecht: string; gut: string; hinweis: string }[];
 		verwandt: string[];
+		codeBeispiele: { label: string; sprache: string; code: string; hinweis: string }[];
+		codeSvelte: string;
+		repoCodeSvelte: string;
+		codeNote: string;
+		repoNote: string;
 	};
+
+	/** Die vier feldweisen Snippet-Override-Keys (leer = Maschine gewinnt). */
+	type OverrideKey = 'codeSvelte' | 'repoCodeSvelte' | 'codeNote' | 'repoNote';
 
 	const c = data.content as {
 		zweck?: string;
@@ -38,6 +47,11 @@
 		a11y?: { label?: string; wert?: string; status?: string }[];
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
 		verwandt?: string[];
+		codeBeispiele?: { label?: string; sprache?: string; code?: string; hinweis?: string }[];
+		codeSvelte?: string;
+		repoCodeSvelte?: string;
+		codeNote?: string;
+		repoNote?: string;
 	};
 
 	// Fabrik → „Verwerfen"/Reset stellen exakt den Ausgangsstand wieder her.
@@ -61,7 +75,17 @@
 				gut: r.gut ?? '',
 				hinweis: r.hinweis ?? ''
 			})),
-			verwandt: [...(c.verwandt ?? [])]
+			verwandt: [...(c.verwandt ?? [])],
+			codeBeispiele: (c.codeBeispiele ?? []).map((b) => ({
+				label: b.label ?? '',
+				sprache: b.sprache ?? 'svelte',
+				code: b.code ?? '',
+				hinweis: b.hinweis ?? ''
+			})),
+			codeSvelte: c.codeSvelte ?? '',
+			repoCodeSvelte: c.repoCodeSvelte ?? '',
+			codeNote: c.codeNote ?? '',
+			repoNote: c.repoNote ?? ''
 		};
 	}
 	let model = $state<Editorial>(makeState());
@@ -84,7 +108,9 @@
 			komposition: !!c.komposition?.length,
 			a11y: !!c.a11y?.length,
 			wording: !!c.wording?.length,
-			verwandt: !!c.verwandt?.length
+			verwandt: !!c.verwandt?.length,
+			codeBeispiele: !!c.codeBeispiele?.length,
+			snippets: !!(c.codeSvelte || c.repoCodeSvelte || c.codeNote || c.repoNote)
 		};
 	}
 	let expanded = $state<Record<string, boolean>>(initialExpanded());
@@ -98,6 +124,8 @@
 		else if (key === 'wording' && model.wording.length === 0)
 			model.wording.push({ schlecht: '', gut: '', hinweis: '' });
 		else if (key === 'verwandt' && model.verwandt.length === 0) model.verwandt.push('');
+		else if (key === 'codeBeispiele' && model.codeBeispiele.length === 0)
+			model.codeBeispiele.push({ label: '', sprache: 'svelte', code: '', hinweis: '' });
 		await tick();
 		const sec = document.getElementById(`sec-${key}`);
 		sec?.querySelector<HTMLElement>('.string-list__ghost, input, textarea, select')?.focus();
@@ -130,6 +158,31 @@
 		if (wording.length) out.wording = wording;
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
+		// Code-Beispiele: nur Einträge mit Titel UND Code; Code am Ende getrimmt
+		// (Zeilenstruktur bleibt). sprache immer mitschreiben, hinweis nur wenn gesetzt.
+		const codeBeispiele = model.codeBeispiele
+			.filter((b) => b.label.trim() && b.code.trim())
+			.map((b) => {
+				const o: Record<string, unknown> = {
+					label: b.label.trim(),
+					code: b.code.replace(/\s+$/, '')
+				};
+				if (b.sprache) o.sprache = b.sprache;
+				const h = b.hinweis.trim();
+				if (h) o.hinweis = h;
+				return o;
+			});
+		if (codeBeispiele.length) out.codeBeispiele = codeBeispiele;
+		// Snippet-Overrides: nur schreiben, wenn gefüllt — leer bedeutet „Maschine gewinnt"
+		// (der Key fehlt dann in content.json, der Server löscht ihn beim Speichern).
+		const codeSvelte = model.codeSvelte.replace(/\s+$/, '');
+		if (codeSvelte.trim()) out.codeSvelte = codeSvelte;
+		const repoCodeSvelte = model.repoCodeSvelte.replace(/\s+$/, '');
+		if (repoCodeSvelte.trim()) out.repoCodeSvelte = repoCodeSvelte;
+		const codeNote = model.codeNote.trim();
+		if (codeNote) out.codeNote = codeNote;
+		const repoNote = model.repoNote.trim();
+		if (repoNote) out.repoNote = repoNote;
 		return JSON.stringify(out);
 	});
 
@@ -270,6 +323,39 @@
 		<span class="ghost-card__plus" aria-hidden="true">+</span>
 		<span class="ghost-card__label">{label} ergänzen</span>
 	</button>
+{/snippet}
+
+{#snippet ghostToggle(key: string, text: string)}
+	<button type="button" class="ghost-card" onclick={() => reveal(key)}>
+		<span class="ghost-card__plus" aria-hidden="true">+</span>
+		<span class="ghost-card__label">{text}</span>
+	</button>
+{/snippet}
+
+{#snippet overrideField(key: OverrideKey, label: string, machine: string, multiline: boolean)}
+	<div class="override">
+		<label class="override__label" for="ov-{key}">{label}</label>
+		{#if multiline}
+			<textarea
+				id="ov-{key}"
+				class="override__input override__input--mono"
+				rows="4"
+				spellcheck="false"
+				bind:value={model[key]}
+				placeholder={machine || '(kein Maschinen-Wert)'}
+			></textarea>
+		{:else}
+			<input
+				id="ov-{key}"
+				class="override__input"
+				bind:value={model[key]}
+				placeholder={machine || '(kein Maschinen-Wert)'}
+			/>
+		{/if}
+		<span class="override__note">
+			{model[key].trim() ? 'Überschreibt den Maschinen-Wert' : 'leer → Maschine gewinnt'}
+		</span>
+	</div>
 {/snippet}
 
 <div class="spec-edit">
@@ -610,6 +696,51 @@
 			{@render ghostCard('verwandt', 'Verwandte Komponenten')}
 		{/if}
 
+		<!-- Code-Beispiele (Develop-Tab) -->
+		{#if expanded.codeBeispiele}
+			<section class="card" id="sec-codeBeispiele">
+				<div class="card-head"><span class="card-title">Code-Beispiele (Develop-Tab)</span></div>
+				<div class="card-body">
+					<p class="hint">
+						Redaktionelle Snippets fürs zeit.de-Repo — erscheinen im Develop-Tab unter den
+						maschinellen Code-Sektionen. Reiner Text, nie ausgeführt.
+					</p>
+					<CodeExamplesField list={model.codeBeispiele} />
+				</div>
+			</section>
+		{:else}
+			{@render ghostCard('codeBeispiele', 'Code-Beispiel')}
+		{/if}
+
+		<!-- Snippets überschreiben: feldweise Overrides über die Maschinen-Werte -->
+		{#if expanded.snippets}
+			<section class="card" id="sec-snippets">
+				<div class="card-head"><span class="card-title">Snippets überschreiben</span></div>
+				<div class="card-body">
+					<p class="hint">
+						Überschreibt die maschinellen Code-Snippets feldweise. Leer lassen = der
+						Maschinen-Wert (aus Figma/<code>render</code>) gewinnt; er steht als Platzhalter.
+					</p>
+					{@render overrideField('codeSvelte', 'Svelte-Code', data.machineSnippets.codeSvelte, true)}
+					{@render overrideField(
+						'repoCodeSvelte',
+						'Repo-Komponente (Svelte)',
+						data.machineSnippets.repoCodeSvelte,
+						true
+					)}
+					{@render overrideField('repoNote', 'Repo-Hinweis', data.machineSnippets.repoNote, true)}
+					{@render overrideField(
+						'codeNote',
+						'HTML-Kommentar (Code-Note)',
+						data.machineSnippets.codeNote,
+						false
+					)}
+				</div>
+			</section>
+		{:else}
+			{@render ghostToggle('snippets', 'Snippets überschreiben')}
+		{/if}
+
 		<!-- v1-read-only Editorial-Felder: nur Hinweis, Pflege im Code -->
 		{#if readonlyEditorialShown.length}
 			<section class="card card--readonly">
@@ -907,6 +1038,34 @@
 	/* Kurzes Feld (Status) nicht über die volle Breite ziehen. */
 	.field--short {
 		max-width: 16rem;
+	}
+
+	/* ── Snippet-Override-Felder ── */
+	.override {
+		display: flex;
+		flex-direction: column;
+		gap: var(--z-ds-space-6);
+	}
+	.override + .override {
+		margin-top: var(--z-ds-space-s);
+		padding-top: var(--z-ds-space-s);
+		border-top: 1px solid var(--ds-border-soft);
+	}
+	.override__label {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		font-weight: 600;
+	}
+	.override__input--mono {
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		line-height: 1.6;
+		white-space: pre;
+		resize: vertical;
+	}
+	.override__note {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
 	}
 
 	/* ── Gruppierte Unterlisten (Verwendung, Do & Don't) ── */

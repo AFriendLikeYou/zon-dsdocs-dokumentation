@@ -15,6 +15,7 @@ kategorie: Inhalte
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
+	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-cell__media"},{"nr":2,"side":"top","x":55,"selector":".z-cell__kicker"},{"nr":3,"side":"right","y":45,"selector":".z-cell__title"},{"nr":4,"side":"bottom","x":55,"selector":".z-cell__byline"}];
@@ -28,10 +29,12 @@ kategorie: Inhalte
     <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
   </div>
 </article>`;
-	const htmlCode = `<!-- Cell-Styles global einbinden (z. B. cell.css) -->
-<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
+	const editorial = content as Partial<ComponentSpec>;
+	const htmlBody = `<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
 <article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
-	const svelteCode = `<script>
+	const codeNote = editorial.codeNote ?? `Cell-Styles global einbinden (z. B. cell.css)`;
+	const htmlCode = codeNote ? `<!-- ${codeNote} -->\n${htmlBody}` : htmlBody;
+	const svelteCode = editorial.codeSvelte ?? `<script>
   // 'article' | 'headline' | 'artikel' | 'author' | 'podcast-series' | 'anzeige' | 'pinned'
   export let type = 'article';
   export let size = 'wide';
@@ -335,6 +338,15 @@ kategorie: Inhalte
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
 {/snippet}
 
 {#snippet a11yTab()}

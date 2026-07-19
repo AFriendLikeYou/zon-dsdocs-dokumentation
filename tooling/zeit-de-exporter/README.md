@@ -108,9 +108,25 @@ Weitere `render`-Felder:
 | `calloutAnchors`             | `{ nr, side, x?, y?, selector? }[]` → Position der Anatomie-Callouts. `selector` (CSS, relativ zum Specimen-Root) benennt die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur echte Klassen aus `template`/`pattern.css`; ohne eigene Klasse (reine Textknoten) weglassen. |
 | `props`                      | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen                                                                                   |
 | `css`                        | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas`                                                                                                                                                                                              |
-| `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop)                                                                                                                                                                                                                                 |
-| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import)                                                                                                                                                                                                                      |
+| `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop) — **feldweise in `content.json` überschreibbar** (s. u.)                                                                                                                                                                          |
+| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) — **feldweise in `content.json` überschreibbar** (s. u.)                                                                                                                                                              |
 | `version`, `variantInfo`     | **redaktionell** → landen im `content.json`-Stub                                                                                                                                                                                                                     |
+
+**Redaktionelle Code-Snippets (`content.json`).** Snippets sind Dev-Redaktion (Wissen
+übers zeit.de-Repo). Zwei Wege, sie ohne Re-Export zu pflegen:
+
+- **Feldweise Overrides:** `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` sind
+  erlaubte Top-Level-Keys in `content.json`. Ist einer gesetzt, gewinnt er auf der Seite
+  **feldweise** über den gleichnamigen `render`-Wert (`editorial.X ?? Maschine` — dasselbe
+  Auflösungsmuster wie `version` über `content.version`); leer/fehlend → der Maschinen-Wert
+  bleibt. **Kein** Block-Merge von `render`; `template`/`controls`/`specimen`/`pattern.css`
+  bleiben unantastbar Maschine.
+- **Zusätzliche Beispiele:** `codeBeispiele` (`content.json`-only) ist ein Array
+  `{ label, code, sprache?, hinweis? }` (`label`+`code` Pflicht; `sprache` ∈
+  `svelte`|`html`|`css`|`js`, Default `svelte`). Sie erscheinen im Develop-Tab als
+  zusätzliche `CodeBlock`s **unter** den maschinellen Code-Sektionen (`label` als
+  Überschrift, `hinweis` als Text darunter). Reiner Text durch den `CodeBlock` (escaped,
+  nie ausgeführt).
 
 > `varianten[].werte[].cssClass` deklariert die Modifier-Klasse explizit —
 > `check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:

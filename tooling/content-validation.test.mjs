@@ -56,9 +56,48 @@ describe('content-validation · checkContentData', () => {
 		expect(checkContentData([])[0]).toContain('JSON-Objekt');
 	});
 
+	it('gültige codeBeispiele + Snippet-Overrides → keine Befunde', () => {
+		const data = {
+			codeBeispiele: [
+				{ label: 'Svelte im zeit.de-Repo', sprache: 'svelte', code: '<Button />', hinweis: 'ok' },
+				{ label: 'Nur Pflichtfelder', code: '<div/>' }
+			],
+			codeSvelte: '<Button/>',
+			repoCodeSvelte: '<AppButton/>',
+			codeNote: 'Hinweis',
+			repoNote: 'Repo-Hinweis'
+		};
+		expect(checkContentData(data)).toEqual([]);
+	});
+
+	it('codeBeispiele: fehlendes label/code → Befund', () => {
+		const issues = checkContentData({ codeBeispiele: [{ sprache: 'html' }] });
+		expect(issues.some((i) => i.includes('codeBeispiele[0].label'))).toBe(true);
+		expect(issues.some((i) => i.includes('codeBeispiele[0].code'))).toBe(true);
+	});
+
+	it('codeBeispiele: Fremdkey je Item → Befund', () => {
+		const issues = checkContentData({
+			codeBeispiele: [{ label: 'A', code: 'x', render: {} }]
+		});
+		expect(issues.some((i) => i.includes('unbekannter Key'))).toBe(true);
+	});
+
+	it('codeBeispiele: Nicht-Objekt-Item → Befund', () => {
+		const issues = checkContentData({ codeBeispiele: ['kein objekt'] });
+		expect(issues.some((i) => i.includes('codeBeispiele[0] muss ein Objekt sein'))).toBe(true);
+	});
+
+	it('Snippet-Override mit falschem Typ → Befund', () => {
+		const issues = checkContentData({ codeSvelte: 42 });
+		expect(issues[0]).toContain('falschen Typ');
+	});
+
 	it('KNOWN_KEYS enthält die Kern-Editorial-Felder', () => {
 		expect(KNOWN_KEYS).toContain('zweck');
 		expect(KNOWN_KEYS).toContain('verwandt');
+		expect(KNOWN_KEYS).toContain('codeBeispiele');
+		expect(KNOWN_KEYS).toContain('repoNote');
 		expect(KNOWN_KEYS).not.toContain('masse');
 	});
 });
