@@ -37,9 +37,14 @@ describe('manifest · buildManifest', () => {
 			name: string;
 			wert?: string | null;
 		}>;
-		const bg10 = items.find((i) => i.name === '--z-ds-color-background-10');
+		const bg10 = items.find((i) => i.name === '--z-ds-color-background-10') as {
+			wert?: string | null;
+			wertDark?: string | null;
+		};
 		expect(bg10?.wert).toBeTruthy();
-		expect(items.every((i) => 'wert' in i)).toBe(true);
+		// Additiv: jeder Token trägt zusätzlich den Dark-Wert (apiVersion bleibt 1).
+		expect(bg10?.wertDark).toBeTruthy();
+		expect(items.every((i) => 'wert' in i && 'wertDark' in i)).toBe(true);
 	});
 
 	it('Konventionen enthalten die Klassen-Grammatik strukturiert', () => {
@@ -50,18 +55,31 @@ describe('manifest · buildManifest', () => {
 describe('manifest · foundations', () => {
 	const f = manifestFoundations();
 
-	it('Farb-Rollen sind auf Upstream-Werte aufgelöst', () => {
+	it('Farb-Rollen sind auf Upstream-Werte aufgelöst (Light UND Dark)', () => {
 		const flaechen = f.farbRollen.find((g) => g.titel === 'Flächen');
 		const surface = flaechen?.rollen.find((r) => r.token === '--ds-surface');
 		expect(surface?.raw).toBe('--z-ds-color-background-0');
-		expect(surface?.wert).toMatch(/^#|^rgb|^light-dark/);
+		// wert = Light (kanonischer Default), wertDark = Dark.
+		expect(surface?.wert).toBe('#ffffff');
+		expect(surface?.wertDark).toBe('#121212');
 	});
 
-	it('Foundation-Tokens tragen aufgelöste Werte (oder explizit null)', () => {
+	it('Foundation-Tokens tragen Light- UND Dark-Wert (background-0: #ffffff / #121212)', () => {
 		const alle = f.tokens.flatMap((g) => g.tokens);
-		const bg10 = alle.find((t) => t.name === '--z-ds-color-background-10');
-		expect(bg10?.wert).toBeTruthy();
-		for (const t of alle) expect(t).toHaveProperty('wert');
+		const bg0 = alle.find((t) => t.name === '--z-ds-color-background-0');
+		expect(bg0?.wert).toBe('#ffffff');
+		expect(bg0?.wertDark).toBe('#121212');
+		for (const t of alle) {
+			expect(t).toHaveProperty('wert');
+			expect(t).toHaveProperty('wertDark');
+		}
+	});
+
+	it('theme-invariantes Token: wert === wertDark (general-white-100 bleibt #ffffff)', () => {
+		const alle = f.tokens.flatMap((g) => g.tokens);
+		const white = alle.find((t) => t.name === '--z-ds-color-general-white-100');
+		expect(white?.wert).toBe('#ffffff');
+		expect(white?.wertDark).toBe('#ffffff');
 	});
 });
 

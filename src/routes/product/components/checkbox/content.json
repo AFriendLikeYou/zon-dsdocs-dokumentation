@@ -75,6 +75,23 @@
 			"hinweis": "Checkbox-Labels positiv formulieren — angehakt = zutreffend."
 		}
 	],
+	"komposition": [
+		"Immer mit nativem <input type=checkbox> + <label> verdrahten — siehe Code-Beispiele."
+	],
+	"codeBeispiele": [
+		{
+			"label": "Natives Wiring (Empfehlung der Doku)",
+			"sprache": "html",
+			"hinweis": "Empfehlung der Doku, nicht offizielles DS-Markup: Das Pattern (.z-checkbox + Modifier) liefert nur die Optik. Fürs echte Verhalten ein verstecktes natives <input type=checkbox> mit <label> verdrahten — Zustände (checked/focus/disabled) kommen dann nativ, nicht über State-Klassen. Die Hilfsklassen liegen bewusst außerhalb des z-*-Namespace (der gehört dem DS).",
+			"code": "<!-- Verstecktes natives <input> steuert die Optik; <label> macht die ganze Fläche klickbar. -->\n<label class=\"checkbox-field\">\n  <input type=\"checkbox\" class=\"checkbox-native\" />\n  <span class=\"z-checkbox\" aria-hidden=\"true\">\n    <span class=\"z-checkbox__check\"></span>\n  </span>\n  Benachrichtigungen erhalten\n</label>"
+		},
+		{
+			"label": "Natives Wiring — Zustands-Kopplung (CSS)",
+			"sprache": "css",
+			"hinweis": "Koppelt die nativen Pseudoklassen (:checked, :focus-visible, :hover, :disabled) an die dokumentierten Token-Looks. Die Modifier-Klassen des Patterns (.z-checkbox--checked …) bleiben die Referenz-Optik; hier werden sie durch native Zustände ersetzt. Nur dokumentierte --z-ds-*-Tokens.",
+			"code": "/* Natives <input> steuert die dokumentierte Optik über Pseudoklassen —\n   die Modifier-Klassen (.z-checkbox--*) werden hier NICHT gesetzt. */\n.checkbox-field {\n  display: inline-flex;\n  align-items: center;\n  gap: var(--z-ds-space-8);\n  cursor: pointer;\n}\n\n/* Natives Steuerelement visuell verstecken, aber fokussier- und bedienbar lassen. */\n.checkbox-native {\n  position: absolute;\n  width: 16px;\n  height: 16px;\n  margin: 0;\n  opacity: 0;\n}\n\n/* Hover wie .z-checkbox--hover. */\n.checkbox-native:hover ~ .z-checkbox {\n  background-color: var(--z-ds-color-background-10);\n}\n\n/* Tastaturfokus wie .z-checkbox--focus: 2px-Rahmen in Focus-100. */\n.checkbox-native:focus-visible ~ .z-checkbox {\n  border: 2px solid var(--z-ds-color-focus-100);\n}\n\n/* Checked wie .z-checkbox--checked: dunkle Füllung, Haken sichtbar. */\n.checkbox-native:checked ~ .z-checkbox {\n  background-color: var(--z-ds-color-text-100);\n  border-color: var(--z-ds-color-text-100);\n}\n.checkbox-native:checked ~ .z-checkbox .z-checkbox__check {\n  display: block;\n}\n\n/* Disabled wie .z-checkbox--disabled. */\n.checkbox-native:disabled ~ .z-checkbox {\n  border-color: var(--z-ds-color-border-70);\n}\n.checkbox-native:checked:disabled ~ .z-checkbox {\n  background-color: var(--z-ds-color-text-40);\n  border-color: var(--z-ds-color-text-40);\n}"
+		}
+	],
 	"version": "Figma-Node 973:945",
 	"verwandt": ["toggle", "input"],
 	"variantInfo": {

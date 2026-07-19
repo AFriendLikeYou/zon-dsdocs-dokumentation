@@ -14,7 +14,7 @@
  * structuredContent.
  */
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
-import { ZDS_VALUES } from '$lib/server/zds-values';
+import { ZDS_VALUES_LIGHT, ZDS_VALUES_DARK } from '$lib/server/zds-values';
 import { FOUNDATION_TOKENS, tokenName, tokenUsage } from '$data/foundation-tokens';
 import { COLOR_ROLE_GROUPS } from '$data/color-roles';
 
@@ -28,15 +28,20 @@ export type ManifestComponent = {
 	patternCss: string | null;
 };
 
-/** Foundation-Token mit live aufgelöstem Upstream-Wert (null = Wert unbekannt). */
-export type ManifestToken = { name: string; wert: string | null; usage?: string };
+/**
+ * Foundation-Token mit live aufgelösten Upstream-Werten (null = Wert unbekannt).
+ * `wert` ist der LIGHT-Wert (kanonischer Default), `wertDark` der DARK-Wert; bei
+ * theme-invarianten Tokens sind beide gleich. Additiv — apiVersion bleibt 1.
+ */
+export type ManifestToken = { name: string; wert: string | null; wertDark: string | null; usage?: string };
 
 /**
- * Reichert die tokens-Gruppen eines Specs um den aufgelösten `wert` an (aus
- * ZDS_VALUES, der einen Quelle) — das Modell selbst trägt keinen Wert mehr, aber
- * Agenten sollen im Manifest weiterhin konkrete Werte sehen. Bewusst nicht-mutierend:
- * neu gemappt, das Original-Spec bleibt unberührt. Nur die tokens werden ersetzt;
- * alle übrigen Spec-Felder bleiben referenzgleich.
+ * Reichert die tokens-Gruppen eines Specs um die aufgelösten Werte an (`wert` =
+ * LIGHT, `wertDark` = DARK, aus ZDS_VALUES_LIGHT/DARK, der einen Quelle) — das
+ * Modell selbst trägt keinen Wert mehr, aber Agenten sollen im Manifest weiterhin
+ * konkrete Werte sehen. Bewusst nicht-mutierend: neu gemappt, das Original-Spec
+ * bleibt unberührt. Nur die tokens werden ersetzt; alle übrigen Spec-Felder
+ * bleiben referenzgleich.
  */
 function enrichSpecTokens(spec: AgentCatalogEntry['spec']): AgentCatalogEntry['spec'] {
 	if (!spec.tokens?.length) return spec;
@@ -44,7 +49,11 @@ function enrichSpecTokens(spec: AgentCatalogEntry['spec']): AgentCatalogEntry['s
 		...spec,
 		tokens: spec.tokens.map((g) => ({
 			...g,
-			items: (g.items ?? []).map((i) => ({ ...i, wert: ZDS_VALUES[i.name] ?? null }))
+			items: (g.items ?? []).map((i) => ({
+				...i,
+				wert: ZDS_VALUES_LIGHT[i.name] ?? null,
+				wertDark: ZDS_VALUES_DARK[i.name] ?? null
+			}))
 		}))
 	};
 }
@@ -70,7 +79,8 @@ export function manifestFoundations() {
 			rollen: g.rollen.map((r) => ({
 				token: r.token,
 				raw: r.raw,
-				wert: ZDS_VALUES[r.raw] ?? null,
+				wert: ZDS_VALUES_LIGHT[r.raw] ?? null,
+				wertDark: ZDS_VALUES_DARK[r.raw] ?? null,
 				usage: r.usage
 			}))
 		})),
@@ -81,7 +91,12 @@ export function manifestFoundations() {
 			tokens: g.tokens.map((t): ManifestToken => {
 				const name = tokenName(t);
 				const usage = tokenUsage(t);
-				return { name, wert: ZDS_VALUES[name] ?? null, ...(usage ? { usage } : {}) };
+				return {
+					name,
+					wert: ZDS_VALUES_LIGHT[name] ?? null,
+					wertDark: ZDS_VALUES_DARK[name] ?? null,
+					...(usage ? { usage } : {})
+				};
 			})
 		}))
 	};

@@ -11,7 +11,7 @@
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
 import { FOUNDATION_TOKENS, tokenName, tokenUsage } from '$data/foundation-tokens';
 import { COLOR_ROLE_GROUPS } from '$data/color-roles';
-import { ZDS_VALUES } from '$lib/server/zds-values';
+import { ZDS_VALUES_LIGHT, ZDS_VALUES_DARK } from '$lib/server/zds-values';
 import { manifestComponent, manifestFoundations } from '$lib/server/manifest';
 
 const PROTOCOL_VERSION = '2025-06-18';
@@ -107,6 +107,19 @@ export function searchComponents(query: string, limit = 8): SearchHit[] {
 
 const find = (slug: string) => AGENT_CATALOG.find((e) => e.slug === String(slug));
 
+/**
+ * Kompakte Light+Dark-Wertdarstellung eines --z-ds-Tokens für den Agenten-Text:
+ * '#ffffff · dark #121212', wenn sich der Dark-Wert unterscheidet; nur '#ffffff'
+ * bei theme-invarianten Tokens (identisch) oder wenn kein Dark-Wert existiert.
+ * Leerer String, wenn der Token gar keinen Wert hat.
+ */
+function zdsValueText(name: string): string {
+	const light = ZDS_VALUES_LIGHT[name];
+	const dark = ZDS_VALUES_DARK[name];
+	if (!light) return dark ?? '';
+	return dark && dark !== light ? `${light} · dark ${dark}` : light;
+}
+
 function line(label: string, value: unknown): string {
 	if (value == null || value === '') return '';
 	return `${label}: ${value}\n`;
@@ -153,9 +166,9 @@ function sectionTokens(e: AgentCatalogEntry): string {
 	let out = `# Tokens & Maße — ${s.name ?? e.slug}\n`;
 	for (const g of s.tokens ?? []) {
 		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
-		// Wert aus der einen Quelle (ZDS_VALUES) auflösen — nicht mehr im Modell.
+		// Wert aus der einen Quelle (Light + ggf. Dark) auflösen — nicht mehr im Modell.
 		for (const i of g.items ?? [])
-			out += `  - ${i.name}: ${ZDS_VALUES[i.name] ?? '?'}${i.hinweis ? ' · ' + i.hinweis : ''}\n`;
+			out += `  - ${i.name}: ${zdsValueText(i.name) || '?'}${i.hinweis ? ' · ' + i.hinweis : ''}\n`;
 	}
 	if (s.masse) {
 		out += `\nMaße:\n`;
@@ -279,11 +292,11 @@ export type FoundationsSection = 'farben' | 'spacing' | 'typografie' | 'tokens';
 const F_SECTIONS: FoundationsSection[] = ['farben', 'spacing', 'typografie', 'tokens'];
 
 function foundationsFarben(): string {
-	let out = '# Farb-Rollen der Doku-UI (--ds-Rolle → --z-ds-Token = Wert)\n';
+	let out = '# Farb-Rollen der Doku-UI (--ds-Rolle → --z-ds-Token = Wert · dark Dark-Wert)\n';
 	for (const g of COLOR_ROLE_GROUPS) {
 		out += `\n${g.titel}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
 		for (const r of g.rollen) {
-			const wert = ZDS_VALUES[r.raw];
+			const wert = zdsValueText(r.raw);
 			out += `  - ${r.token} → ${r.raw}${wert ? ` = ${wert}` : ''} · ${r.usage}\n`;
 		}
 	}
@@ -291,7 +304,7 @@ function foundationsFarben(): string {
 	return out;
 }
 
-/** Foundation-Token-Gruppen (gefiltert) als Text — Name = Wert · Einsatz. */
+/** Foundation-Token-Gruppen (gefiltert) als Text — Name = Wert(e) · Einsatz. */
 function foundationsGroups(titel: string, match: (kategorie: string) => boolean): string {
 	let out = `# ${titel}\n`;
 	for (const g of FOUNDATION_TOKENS.filter((g) => match(g.kategorie.toLowerCase()))) {
@@ -299,8 +312,27 @@ function foundationsGroups(titel: string, match: (kategorie: string) => boolean)
 		for (const t of g.tokens) {
 			const name = tokenName(t);
 			const usage = tokenUsage(t);
-			const wert = ZDS_VALUES[name];
+			const wert = zdsValueText(name);
 			out += `  - ${name}${wert ? ` = ${wert}` : ''}${usage && usage !== '—' ? ` · ${usage}` : ''}\n`;
+		}
+	}
+	return out;
+}
+
+/**
+ * Alle Foundation-Token KOMPAKT: nur `name = wert(e)` je Zeile, ohne Usage-Sätze
+ * und ohne Gruppen-Beschreibung — damit ALLE Gruppen (inkl. Radius/Schriftgröße)
+ * ins GET_CHAR_BUDGET passen. Die Usage-Sätze bleiben den spezifischen Sichten
+ * (farben/spacing/typografie) vorbehalten.
+ */
+function foundationsAllCompact(): string {
+	let out = '# Alle Foundation-Tokens (Name = Wert · dark abweichender Dark-Wert)\n';
+	for (const g of FOUNDATION_TOKENS) {
+		out += `\n${g.kategorie}\n`;
+		for (const t of g.tokens) {
+			const name = tokenName(t);
+			const wert = zdsValueText(name);
+			out += `  - ${name}${wert ? ` = ${wert}` : ''}\n`;
 		}
 	}
 	return out;
@@ -311,7 +343,7 @@ const F_RENDERERS: Record<FoundationsSection, () => string> = {
 	spacing: () => foundationsGroups('Spacing-Tokens', (k) => k.startsWith('abstand')),
 	typografie: () =>
 		foundationsGroups('Typografie-Tokens', (k) => k.includes('schrift') || k.includes('zeilen')),
-	tokens: () => foundationsGroups('Alle Foundation-Tokens', () => true)
+	tokens: foundationsAllCompact
 };
 
 /**
@@ -443,7 +475,7 @@ const TOOLS = [
 	{
 		name: 'foundations',
 		description:
-			'Liefert die Design-Foundations: als Text (Farb-Rollen --ds-* → --z-ds-* mit Werten, Spacing-, Typografie- und alle Foundation-Tokens; ohne section ein kompakter Einstieg) UND als structuredContent alle Rollen + Token-Gruppen mit aufgelösten Werten — unabhängig von section. Beispiel: { "section": "farben" }.',
+			'Liefert die Design-Foundations: als Text (Farb-Rollen --ds-* → --z-ds-* mit Light- UND Dark-Werten, Spacing-, Typografie- und alle Foundation-Tokens; abweichende Dark-Werte als " · dark <wert>"; ohne section ein kompakter Einstieg) UND als structuredContent alle Rollen + Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark) — unabhängig von section. Beispiel: { "section": "farben" }.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -457,8 +489,14 @@ const TOOLS = [
 		outputSchema: {
 			type: 'object',
 			properties: {
-				farbRollen: { type: 'array', description: 'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + Wert + Usage.' },
-				tokens: { type: 'array', description: 'Foundation-Token-Gruppen mit aufgelösten Werten.' }
+				farbRollen: {
+					type: 'array',
+					description: 'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + wert (Light) + wertDark (Dark) + Usage.'
+				},
+				tokens: {
+					type: 'array',
+					description: 'Foundation-Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark).'
+				}
 			},
 			required: ['farbRollen', 'tokens']
 		}

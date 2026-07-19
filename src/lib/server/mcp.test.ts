@@ -261,6 +261,28 @@ describe('getFoundations', () => {
 		expect(text).toContain('Farb-Rollen');
 		expect(text.length).toBeLessThanOrEqual(GET_CHAR_BUDGET);
 	});
+
+	it('tokens: alle Gruppen (inkl. Radius + Schriftgröße) passen ins Budget', () => {
+		const text = getFoundations('tokens');
+		expect(text.length).toBeLessThanOrEqual(GET_CHAR_BUDGET);
+		// Regression Fund ③: früher riss der Text vor Radius/Schrift ab.
+		expect(text).toContain('Radius');
+		expect(text).toContain('fontsize');
+		expect(text).not.toContain('gekürzt');
+	});
+
+	it('farben: differierender Token zeigt Light + Dark, invarianter nur einen Wert', () => {
+		const text = getFoundations('farben');
+		// background-0 unterscheidet sich je Theme → beide Werte kompakt.
+		expect(text).toContain('--z-ds-color-background-0 = #ffffff · dark #121212');
+		// background-success ist theme-invariant → kein Dark-Suffix.
+		const successLine = text
+			.split('\n')
+			.find((l) => l.includes('--z-ds-color-background-success'));
+		expect(successLine).toBeTruthy();
+		expect(successLine).toContain('#09864d');
+		expect(successLine).not.toContain('dark');
+	});
 });
 
 describe('componentFullText (llms-full.txt)', () => {
