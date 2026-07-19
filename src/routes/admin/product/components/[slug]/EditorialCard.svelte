@@ -28,7 +28,8 @@
   - children:    Karten-Inhalt (Body).
 -->
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import { cubicOut } from 'svelte/easing';
 	import { CloseIcon } from '$lib/icons';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 	import GhostCard from './GhostCard.svelte';
@@ -60,12 +61,36 @@
 		headExtra?: Snippet;
 		children: Snippet;
 	} = $props();
+
+	// Übergang Ghost ↔ Karte (Delta B6): Height + Opacity, ease-out (--ds-dur-slow).
+	// Erst NACH dem Mount aktiv (kein Aufklappen beim Laden) und bei
+	// prefers-reduced-motion sofort (instant). Beide Zweige teilen die Transition →
+	// Expandieren blendet die Karte auf, Entfernen blendet zur Ghost-Karte zurück.
+	let mounted = $state(false);
+	onMount(() => {
+		mounted = true;
+	});
+
+	function ghostReveal(node: HTMLElement) {
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (!mounted || reduce) return { duration: 0 };
+		const h = node.offsetHeight;
+		const mb = parseFloat(getComputedStyle(node).marginBottom) || 0;
+		return {
+			duration: 260,
+			easing: cubicOut,
+			css: (t: number) =>
+				`overflow: hidden; opacity: ${t}; height: ${t * h}px; margin-bottom: ${t * mb}px;`
+		};
+	}
 </script>
 
 {#if onexpand && !expanded}
-	<GhostCard label={ghostLabel ?? title} {onexpand} id={ghostId} {attached} />
+	<div class="ghost-wrap" transition:ghostReveal>
+		<GhostCard label={ghostLabel ?? title} {onexpand} id={ghostId} {attached} />
+	</div>
 {:else}
-	<section class="card" class:card--attached={attached} {id}>
+	<section class="card" class:card--attached={attached} {id} transition:ghostReveal>
 		<div class="card-head">
 			<span class="card-titles">
 				<span class="card-title">{title}</span>
@@ -101,8 +126,9 @@
 		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-m);
 		margin-bottom: var(--z-ds-space-m);
-		/* Scroll-Ziel des ersten Cluster-Ankers („cluster-overview") — nur Offset. */
-		scroll-margin-top: var(--z-ds-space-l);
+		/* Scroll-Ziel des ersten Cluster-Ankers („cluster-overview") und der Deep-Link-
+		   Chips (#sec-a11y / #sec-doDont): unter der Sticky-Navbar landen. */
+		scroll-margin-top: calc(var(--header-height, 4rem) + var(--z-ds-space-m));
 	}
 	/* „Hinweis je Token" gehört zur Tokens-Zone → leicht eingerückt & aufgesetzt. */
 	.card--attached {

@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { Icon } from '$lib/icons/cms';
 	import { ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
 	import { AdminFlash, Pill } from '../../../ui';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
+	import RowListField from './RowListField.svelte';
+	import RelatedField from './RelatedField.svelte';
+	import SnippetOverridesField from './SnippetOverridesField.svelte';
+	import SaveBar from './SaveBar.svelte';
 	import CodeExamplesField from './CodeExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
 	import EditorialCard from './EditorialCard.svelte';
@@ -22,9 +25,7 @@
 	// ── Re-Import ist bewusst ein CLI-Schritt: der Button kopiert nur den fertigen
 	// Befehl (Muster wie CopyButton → Toast-Feedback), er führt nichts aus. ────────
 	const reImportCommand = $derived(
-		data.figmaUrl
-			? `node tooling/zeit-de-exporter/import.mjs '${data.figmaUrl}' ${data.slug}`
-			: ''
+		data.figmaUrl ? `node tooling/zeit-de-exporter/import.mjs '${data.figmaUrl}' ${data.slug}` : ''
 	);
 	async function copyReImport() {
 		if (!reImportCommand) {
@@ -33,7 +34,10 @@
 		}
 		try {
 			await navigator.clipboard?.writeText(reImportCommand);
-			toast?.add('Befehl kopiert', 'Re-Import-Befehl in der Zwischenablage — im Terminal ausführen.');
+			toast?.add(
+				'Befehl kopiert',
+				'Re-Import-Befehl in der Zwischenablage — im Terminal ausführen.'
+			);
 		} catch {
 			toast?.add('Nicht kopiert', 'Zwischenablage nicht verfügbar.');
 		}
@@ -58,9 +62,6 @@
 		codeNote: string;
 		repoNote: string;
 	};
-
-	/** Die vier feldweisen Snippet-Override-Keys (leer = Maschine gewinnt). */
-	type OverrideKey = 'codeSvelte' | 'repoCodeSvelte' | 'codeNote' | 'repoNote';
 
 	const c = data.content as {
 		zweck?: string;
@@ -131,6 +132,15 @@
 		{ value: 'todo', label: 'todo' }
 	];
 
+	// Spalten-Schemata für den gemeinsamen RowListField (Wording · A11y): definieren den
+	// leeren Ghost-Entwurf + die Leerprüfung; die Inputs selbst liefern die row-Snippets.
+	const WORDING_COLUMNS = [{ key: 'schlecht' }, { key: 'gut' }, { key: 'hinweis' }] as const;
+	const A11Y_COLUMNS = [
+		{ key: 'label' },
+		{ key: 'wert' },
+		{ key: 'status', type: 'select', options: A11Y_STATUS_OPTIONS }
+	] as const;
+
 	// ── Ghost-Karten: leere Redaktions-Abschnitte einladend statt als leeres Formular ──
 	// Ein Abschnitt gilt als „aufgeklappt“, sobald er beim Laden Inhalt hatte ODER die
 	// Ghost-Karte angeklickt wurde. So klappt er beim Leeren nicht mitten im Tippen zu.
@@ -149,20 +159,22 @@
 	}
 	let expanded = $state<Record<string, boolean>>(initialExpanded());
 
-	// Abschnitt aufklappen; leere Mehrfeld-Abschnitte bekommen die erste Zeile, dann
-	// wandert der Fokus in die erste Ghost-Zeile / das erste Feld des Abschnitts.
+	// Abschnitt aufklappen; danach wandert der Fokus in die erste Ghost-Zeile bzw. das
+	// erste Feld des Abschnitts. Wording/A11y/Verwandt legen NICHTS vorab an — dort
+	// übernimmt die Ghost-Zeile (RowListField) bzw. das Hinzufügen-Select das Anlegen.
+	// Der Fokus wartet auf das Animationsende (Ghost ↔ Karte), damit er nicht ruckelt.
 	async function reveal(key: string) {
 		expanded[key] = true;
-		if (key === 'a11y' && model.a11y.length === 0)
-			model.a11y.push({ label: '', wert: '', status: 'warn' });
-		else if (key === 'wording' && model.wording.length === 0)
-			model.wording.push({ schlecht: '', gut: '', hinweis: '' });
-		else if (key === 'verwandt' && model.verwandt.length === 0) model.verwandt.push('');
-		else if (key === 'codeBeispiele' && model.codeBeispiele.length === 0)
+		if (key === 'codeBeispiele' && model.codeBeispiele.length === 0)
 			model.codeBeispiele.push({ label: '', sprache: 'svelte', code: '', hinweis: '' });
 		await tick();
-		const sec = document.getElementById(`sec-${key}`);
-		sec?.querySelector<HTMLElement>('.string-list__ghost, input, textarea, select')?.focus();
+		const focusFirst = () => {
+			const sec = document.getElementById(`sec-${key}`);
+			sec?.querySelector<HTMLElement>('.string-list__ghost, input, textarea, select')?.focus();
+		};
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (reduce) focusFirst();
+		else setTimeout(focusFirst, REVEAL_MS);
 	}
 
 	// Abschnitt ENTFERNEN (Gegenstück zur Ghost-Karte): leert die Felder des Abschnitts
@@ -309,14 +321,14 @@
 
 	type SpacingRow = { label: string; px: string; token?: string; herkunft: Herkunft };
 	const spacingRows = $derived.by<SpacingRow[]>(() =>
-		(data.machine.spacing as { label?: string; px?: string; token?: string; herkunft?: Herkunft }[]).map(
-			(s) => ({
-				label: s.label ?? '',
-				px: s.px ?? '',
-				token: s.token,
-				herkunft: s.herkunft ?? 'gemessen'
-			})
-		)
+		(
+			data.machine.spacing as { label?: string; px?: string; token?: string; herkunft?: Herkunft }[]
+		).map((s) => ({
+			label: s.label ?? '',
+			px: s.px ?? '',
+			token: s.token,
+			herkunft: s.herkunft ?? 'gemessen'
+		}))
 	);
 
 	// ── Maschinen-Zonen: Tokens live auflösen (wie TokenTable) ───────────────────
@@ -354,7 +366,8 @@
 	);
 	const variantSummary = $derived.by(() => {
 		const parts: string[] = [];
-		if (varianten.length) parts.push(`${varianten.length} ${varianten.length === 1 ? 'Achse' : 'Achsen'}`);
+		if (varianten.length)
+			parts.push(`${varianten.length} ${varianten.length === 1 ? 'Achse' : 'Achsen'}`);
 		if (zustaende.length)
 			parts.push(`${zustaende.length} ${zustaende.length === 1 ? 'Zustand' : 'Zustände'}`);
 		return parts.join(' · ');
@@ -415,6 +428,27 @@
 		{ id: 'cluster-develop', label: 'Develop' }
 	];
 
+	// Dauer der Ghost↔Karte-Animation (≈ --ds-dur-slow) — steuert den Fokus-Delay in
+	// reveal() (Fokus erst nach dem Aufklappen) und die Karten-Transition.
+	const REVEAL_MS = 260;
+
+	// ── Deep-Links aus der /admin-Übersicht (Delta B2) ───────────────────────────
+	// Landet die Seite mit #sec-<key> (Doku-Lücken-Chip), wird ein zugehöriger Ghost-
+	// Abschnitt automatisch aufgeklappt und sauber unter die Sticky-Navbar gescrollt.
+	onMount(async () => {
+		const hash = location.hash.slice(1);
+		if (!hash) return;
+		const key = hash.startsWith('sec-') ? hash.slice(4) : null;
+		if (key && key in expanded && !expanded[key]) {
+			expanded[key] = true;
+			await tick();
+		}
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		document
+			.getElementById(hash)
+			?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+	});
+
 	// ── Dirty-Tracking + Save-Bar (Muster aus dem Brand-/[slug]-Editor) ──────────
 	let formEl = $state<HTMLFormElement | null>(null);
 	let savedPayload = $state(untrack(() => payload));
@@ -467,37 +501,50 @@
 	<div class="cluster-eyebrow" {id}>{label}</div>
 {/snippet}
 
-{#snippet overrideField(key: OverrideKey, label: string, machine: string, multiline: boolean)}
-	<div class="override">
-		<label class="override__label" for="ov-{key}">{label}</label>
-		{#if multiline}
-			<textarea
-				id="ov-{key}"
-				class="override__input override__input--mono"
-				rows="4"
-				spellcheck="false"
-				bind:value={model[key]}
-				placeholder={machine || '(kein Maschinen-Wert)'}
-			></textarea>
-		{:else}
-			<input
-				id="ov-{key}"
-				class="override__input"
-				bind:value={model[key]}
-				placeholder={machine || '(kein Maschinen-Wert)'}
-			/>
-		{/if}
-		<span class="override__note">
-			{model[key].trim() ? 'Überschreibt den Maschinen-Wert' : 'leer → Maschine gewinnt'}
-		</span>
-	</div>
+<!-- Zeilen-Snippets für den gemeinsamen RowListField (Wording · Barrierefreiheit).
+     Das Zeilen-Objekt ist flach getippt (Record<string, string>) — passend zum
+     generischen Feld; die Feld-Keys entsprechen den Spalten-Schemata. -->
+{#snippet wordingRow(entry: Record<string, string>)}
+	<input
+		class="row__input"
+		bind:value={entry.schlecht}
+		placeholder="Schlecht"
+		aria-label="Schlecht"
+	/>
+	<span class="row__arrow" aria-hidden="true">→</span>
+	<input class="row__input" bind:value={entry.gut} placeholder="Gut" aria-label="Gut" />
+	<input
+		class="row__input row__input--hint"
+		bind:value={entry.hinweis}
+		placeholder="Hinweis (optional)"
+		aria-label="Hinweis"
+	/>
+{/snippet}
+{#snippet a11yRow(entry: Record<string, string>)}
+	{@render miniPill('editorial')}
+	<input
+		class="row__input row__input--key"
+		bind:value={entry.label}
+		placeholder="Label"
+		aria-label="Label"
+	/>
+	<input class="row__input" bind:value={entry.wert} placeholder="Wert" aria-label="Wert" />
+	<select
+		class="status-select status-select--{entry.status}"
+		bind:value={entry.status}
+		aria-label="Status"
+	>
+		{#each A11Y_STATUS_OPTIONS as o (o.value)}
+			<option value={o.value}>{o.label}</option>
+		{/each}
+	</select>
 {/snippet}
 
 <!-- Drift-Banner-Inhalte: Text + Aktionen kennen den Re-Import-Befehl (Seiten-Scope). -->
 {#snippet driftText()}
 	Die Figma-Roh-Daten (<code>figma-raw.json</code>) sind neuer als das
-	<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der
-	Re-Import ist bewusst ein manueller CLI-Schritt — die Doku rät nie.
+	<code>model.json</code>. Maße, Tokens und Varianten unten könnten veraltet sein. Der Re-Import ist
+	bewusst ein manueller CLI-Schritt — die Doku rät nie.
 {/snippet}
 {#snippet driftActions()}
 	<button type="button" class="drift__btn" onclick={copyReImport}>
@@ -520,7 +567,8 @@
 
 	{#if !data.writable}
 		<AdminFlash tone="warn">
-			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Prod öffnet später einen GitHub-PR).
+			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Prod öffnet später einen
+			GitHub-PR).
 		</AdminFlash>
 	{/if}
 
@@ -576,11 +624,12 @@
 				<input type="hidden" name="payload" value={payload} />
 
 				<!-- ① Übersicht (V4): Zweck + Status in EINER Karte; erste Karte = Anker. -->
-				<EditorialCard title="Übersicht" subline="Zweck & Status in einer Karte" id="cluster-overview">
-					<textarea
-						bind:value={model.zweck}
-						rows="3"
-						placeholder="Wozu dient die Komponente? …"
+				<EditorialCard
+					title="Übersicht"
+					subline="Zweck & Status in einer Karte"
+					id="cluster-overview"
+				>
+					<textarea bind:value={model.zweck} rows="3" placeholder="Wozu dient die Komponente? …"
 					></textarea>
 					<div class="overview-status">
 						<span class="overview-status__label">Status</span>
@@ -622,6 +671,7 @@
 						collapsible
 						summary={tokenSummary}
 						defaultOpen={false}
+						persistKey="{data.slug}:tokens"
 					>
 						<SpecTable variant="tokens" groups={tokenView} />
 					</MachineZone>
@@ -660,6 +710,7 @@
 						collapsible
 						summary={variantSummary}
 						defaultOpen={false}
+						persistKey="{data.slug}:varianten"
 					>
 						{#if varianten.length}
 							<div class="mz-chips">
@@ -667,7 +718,10 @@
 									<div class="mz-chips__row">
 										<span class="mz-chips__label">{axis.prop}</span>
 										{#each axis.werte as w (w.label)}
-											<span class="mz-chip">{w.label}{#if w.default} ·default{/if}</span>
+											<span class="mz-chip"
+												>{w.label}{#if w.default}
+													·default{/if}</span
+											>
 										{/each}
 									</div>
 								{/each}
@@ -678,7 +732,8 @@
 								<span class="mz-chips__label">Zustände</span>
 								{#each zustaende as z (z.label)}
 									<span class="mz-chip" class:mz-chip--off={!z.vorhanden}>
-										{z.vorhanden ? '✓' : '–'} {z.label}
+										{z.vorhanden ? '✓' : '–'}
+										{z.label}
 									</span>
 								{/each}
 							</div>
@@ -741,34 +796,12 @@
 					onexpand={() => reveal('wording')}
 					onremove={() => removeSection('wording', 'Wording geleert')}
 				>
-					{#each model.wording as _, i (i)}
-						<div class="row">
-							<input
-								class="row__input"
-								bind:value={model.wording[i].schlecht}
-								placeholder="Schlecht"
-							/>
-							<span class="row__arrow" aria-hidden="true">→</span>
-							<input class="row__input" bind:value={model.wording[i].gut} placeholder="Gut" />
-							<input
-								class="row__input row__input--hint"
-								bind:value={model.wording[i].hinweis}
-								placeholder="Hinweis (optional)"
-							/>
-							<button
-								type="button"
-								class="row__remove"
-								onclick={() => model.wording.splice(i, 1)}
-								aria-label="Entfernen"><Icon name="close" /></button
-							>
-						</div>
-					{/each}
-					<button
-						type="button"
-						class="row-add"
-						onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}
-						>+ Regel</button
-					>
+					<RowListField
+						list={model.wording}
+						columns={WORDING_COLUMNS}
+						row={wordingRow}
+						addLabel="Wording-Regel ergänzen"
+					/>
 				</EditorialCard>
 
 				<!-- ═══ BARRIEREFREIHEIT ═══ -->
@@ -794,38 +827,12 @@
 							<span class="row__prov">nicht editierbar</span>
 						</div>
 					{/each}
-					{#each model.a11y as _, i (i)}
-						<div class="row">
-							{@render miniPill('editorial')}
-							<input
-								class="row__input row__input--key"
-								bind:value={model.a11y[i].label}
-								placeholder="Label"
-							/>
-							<input class="row__input" bind:value={model.a11y[i].wert} placeholder="Wert" />
-							<select
-								class="status-select status-select--{model.a11y[i].status}"
-								bind:value={model.a11y[i].status}
-								aria-label="Status"
-							>
-								{#each A11Y_STATUS_OPTIONS as o (o.value)}
-									<option value={o.value}>{o.label}</option>
-								{/each}
-							</select>
-							<button
-								type="button"
-								class="row__remove"
-								onclick={() => model.a11y.splice(i, 1)}
-								aria-label="Entfernen"><Icon name="close" /></button
-							>
-						</div>
-					{/each}
-					<button
-						type="button"
-						class="row-add"
-						onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}
-						>+ Eintrag</button
-					>
+					<RowListField
+						list={model.a11y}
+						columns={A11Y_COLUMNS}
+						row={a11yRow}
+						addLabel="Barrierefreiheits-Eintrag ergänzen"
+					/>
 				</EditorialCard>
 
 				<!-- ⑨ Komposition -->
@@ -857,33 +864,12 @@
 					onexpand={() => reveal('verwandt')}
 					onremove={() => removeSection('verwandt', 'Verwandte Komponenten geleert')}
 				>
-					{#each model.verwandt as _, i (i)}
-						{@const gueltig = data.validSlugs.includes(model.verwandt[i])}
-						<div class="row">
-							<select
-								class="row__input"
-								bind:value={model.verwandt[i]}
-								class:field-row__invalid={!gueltig}
-							>
-								<option value="" disabled>– Komponente wählen –</option>
-								{#each data.slugs as s (s)}
-									<option value={s}>{s}</option>
-								{/each}
-							</select>
-							{#if model.verwandt[i] && !gueltig}
-								<span class="field-warn" title="Kein bekannter Katalog-Slug">unbekannt</span>
-							{/if}
-							<button
-								type="button"
-								class="row__remove"
-								onclick={() => model.verwandt.splice(i, 1)}
-								aria-label="Entfernen"><Icon name="close" /></button
-							>
-						</div>
-					{/each}
-					<button type="button" class="row-add" onclick={() => model.verwandt.push('')}
-						>+ Slug</button
-					>
+					<RelatedField
+						list={model.verwandt}
+						slugs={data.slugs}
+						validSlugs={data.validSlugs}
+						names={data.slugNames}
+					/>
 				</EditorialCard>
 
 				<!-- ═══ DEVELOP ═══ -->
@@ -919,23 +905,10 @@
 					onremove={() => removeSection('snippets', 'Snippet-Overrides geleert')}
 				>
 					<p class="hint">
-						Überschreibt die maschinellen Code-Snippets feldweise. Leer lassen = der
-						Maschinen-Wert (aus Figma/<code>render</code>) gewinnt; er steht als Platzhalter.
+						Überschreibt die maschinellen Code-Snippets feldweise. Leer lassen = der Maschinen-Wert
+						(aus Figma/<code>render</code>) gewinnt; er steht als Platzhalter.
 					</p>
-					{@render overrideField('codeSvelte', 'Svelte-Code', data.machineSnippets.codeSvelte, true)}
-					{@render overrideField(
-						'repoCodeSvelte',
-						'Repo-Komponente (Svelte)',
-						data.machineSnippets.repoCodeSvelte,
-						true
-					)}
-					{@render overrideField('repoNote', 'Repo-Hinweis', data.machineSnippets.repoNote, true)}
-					{@render overrideField(
-						'codeNote',
-						'HTML-Kommentar (Code-Note)',
-						data.machineSnippets.codeNote,
-						false
-					)}
+					<SnippetOverridesField {model} machine={data.machineSnippets} />
 				</EditorialCard>
 
 				<!-- ⑫ Weitere Felder (read-only, eingeklappt) -->
@@ -948,6 +921,7 @@
 						summary={weitereSummary}
 						defaultOpen={false}
 						pillTitle="In v1 nur im Code (content.json) pflegen — kein Formular"
+						persistKey="{data.slug}:weitere"
 					>
 						{#each readonlyEditorialShown as [key, value] (key)}
 							<details class="ro-json">
@@ -959,13 +933,7 @@
 				{/if}
 
 				{#if dirty}
-					<div class="savebar" role="status">
-						<span class="savebar-info">Ungespeicherte Änderungen</span>
-						<button type="button" class="savebar-discard" onclick={discard}>Verwerfen</button>
-						<button type="submit" class="save" disabled={!data.writable}
-							>Speichern <kbd>⌘S</kbd></button
-						>
-					</div>
+					<SaveBar writable={data.writable} ondiscard={discard} />
 				{/if}
 			</form>
 		</div>
@@ -1098,7 +1066,9 @@
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--ds-text-faint);
-		scroll-margin-top: var(--z-ds-space-l);
+		/* Deep-Link-Ziel (z. B. #cluster-design aus einem Doku-Lücken-Chip): unter der
+		   Sticky-Navbar landen, nicht darunter verschwinden. */
+		scroll-margin-top: calc(var(--header-height, 4rem) + var(--z-ds-space-m));
 	}
 
 	/* ── Varianten/Zustände-Chips ── */
@@ -1188,34 +1158,6 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	/* ── Snippet-Override-Felder ── */
-	.override {
-		display: flex;
-		flex-direction: column;
-		gap: var(--z-ds-space-6);
-	}
-	.override + .override {
-		margin-top: var(--z-ds-space-s);
-		padding-top: var(--z-ds-space-s);
-		border-top: 1px solid var(--ds-border-soft);
-	}
-	.override__label {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-		font-weight: 600;
-	}
-	.override__input--mono {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		line-height: 1.6;
-		white-space: pre;
-		resize: vertical;
-	}
-	.override__note {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-	}
-
 	/* ── Hinweis je Token (Delta 6): mono-Name + Inline-Input je Zeile ── */
 	.token-hint-row {
 		display: flex;
@@ -1354,56 +1296,6 @@
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-sm);
 	}
-	.row__remove {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		flex: none;
-		border: none;
-		background: none;
-		border-radius: var(--ds-radius-sm);
-		padding: 0;
-		color: var(--ds-text-muted);
-		cursor: pointer;
-		line-height: 1;
-		opacity: 0;
-		transition:
-			opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.row:hover .row__remove,
-	.row:focus-within .row__remove {
-		opacity: 1;
-	}
-	.row__remove:hover {
-		color: var(--ds-negative, var(--ds-text));
-		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
-	}
-	.row__remove:focus-visible {
-		opacity: 1;
-	}
-	@media (hover: none) {
-		.row__remove {
-			opacity: 1;
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.row__remove {
-			transition: none;
-		}
-	}
-	.field-row__invalid {
-		border-color: var(--ds-warning, var(--ds-border));
-	}
-	.field-warn {
-		flex: none;
-		font-size: var(--ds-text-xs);
-		color: var(--ds-warning-text, var(--ds-text-muted));
-	}
-
 	.ro-json {
 		font-size: var(--ds-text-sm);
 	}
@@ -1422,103 +1314,5 @@
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-body);
-	}
-	.row-add {
-		align-self: flex-start;
-		background: none;
-		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		color: var(--ds-text-body);
-		cursor: pointer;
-		font-size: var(--ds-text-sm);
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.row-add:hover {
-		border-color: var(--ds-accent);
-	}
-	.row-add:focus-visible,
-	.save:focus-visible,
-	.savebar-discard:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-
-	/* ── Save-Bar (Muster aus dem Brand-Editor) ── */
-	.savebar {
-		position: fixed;
-		left: 50%;
-		bottom: 1.25rem;
-		transform: translateX(-50%);
-		z-index: 40;
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-s);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: 999px;
-		padding: var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-l);
-		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
-		animation: savebar-in 0.2s var(--ds-ease-out, ease-out);
-	}
-	@keyframes savebar-in {
-		from {
-			opacity: 0;
-			transform: translate(-50%, 8px);
-		}
-		to {
-			opacity: 1;
-			transform: translate(-50%, 0);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.savebar {
-			animation: none;
-		}
-	}
-	.savebar-info {
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		white-space: nowrap;
-	}
-	.savebar-discard {
-		border: none;
-		background: none;
-		color: var(--ds-text-muted);
-		font-size: var(--ds-text-sm);
-		cursor: pointer;
-		padding: var(--z-ds-space-6) var(--z-ds-space-s);
-		border-radius: 999px;
-		transition:
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.savebar-discard:hover {
-		background: rgb(from var(--ds-text) r g b / 0.08);
-		color: var(--ds-text);
-	}
-	.save {
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		border: none;
-		border-radius: 999px;
-		padding: var(--z-ds-space-8) var(--z-ds-space-l);
-		font-weight: 600;
-		cursor: pointer;
-		width: auto;
-		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.save:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-	.savebar kbd {
-		font-family: var(--ds-font-mono);
-		font-size: 0.72em;
-		opacity: 0.75;
-		margin-left: 0.3em;
-		background: rgb(from var(--ds-static-white) r g b / 0.18);
-		padding: 1px 5px;
-		border-radius: 4px;
 	}
 </style>

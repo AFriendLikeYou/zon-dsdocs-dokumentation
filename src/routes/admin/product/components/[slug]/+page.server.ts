@@ -11,6 +11,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 import { resolve } from 'node:path';
 import { isDegraded } from '../../../../../../tooling/zeit-de-exporter/import.mjs';
 import { validateContentRaw } from '$lib/server/content-validation';
+import { CATALOG } from '$data/catalog';
 
 // Redaktionelle Felder, die DIESER Editor schreiben darf. Teilmenge der
 // EDITORIAL_FIELDS (content-validation). Nicht gelistete Felder (variantInfo,
@@ -144,6 +145,12 @@ export const load = ({ params }) => {
 		},
 		slugs,
 		validSlugs: allSlugs(),
+		// Slug → Anzeige-Name (aus dem Katalog) für die Verwandt-Chips; unbekannte Slugs
+		// fallen im Client auf den Slug zurück. Kleinster sauberer Weg (kein Client-Fetch).
+		slugNames: Object.fromEntries(CATALOG.map((e) => [e.slug, e.spec.name ?? e.slug])) as Record<
+			string,
+			string
+		>,
 		writable: dev
 	};
 };

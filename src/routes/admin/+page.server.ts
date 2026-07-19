@@ -25,22 +25,40 @@ export const load = () => {
 			.filter((p) => p.kind === 'svx')
 			.map((p) => [p.url, p.path])
 	);
+	// EINE Liste (Nutzer-Fund): der Komponenten-Status wandert als kompakte Chips an
+	// die Sidebar-Spiegelung; die frühere separate Board-Sektion entfällt. Der Status
+	// je Slug kommt map-freundlich aus dem Board (component-status.bySlug).
+	const board = gatherComponentStatus();
+	const plannedSlugs = new Set(PLANNED_COMPONENTS.map((p) => p.slug));
+
 	return {
-		// Pipeline-Board (Feature B): Sync-/Doku-Status je Komponente, verlinkt den
-		// neuen Spec-Editor (/admin/product/components/<slug>).
-		board: gatherComponentStatus(),
-		// Geplante Stubs (noch ohne Import) → Ghost-Zeilen am Board-Ende (Mockup).
-		planned: PLANNED_COMPONENTS.map((p) => ({ label: p.label, slug: p.slug })),
+		// Summen-Meta (raw x/y · vollständig x/y · Drift n) — klein im Kopf der Sektion.
+		totals: board.totals,
 		productNav: MENU_ITEMS_PRODUCT.map((m) => {
-			const slug = m.href?.startsWith('/product/components/')
-				? m.href.split('/').pop()
-				: undefined;
+			const isComponentHref = m.href?.startsWith('/product/components/') ?? false;
+			const slug = isComponentHref ? m.href!.split('/').pop() : undefined;
 			const svxPath = m.href ? svxByUrl.get(m.href) : undefined;
+			const status = slug ? (board.bySlug[slug] ?? null) : null;
 			return {
 				title: m.title,
 				href: m.href,
 				isCategory: m.isCategory ?? false,
 				badge: m.badge,
+				// Komponenten-Zeile? (→ Status-Chips statt Bearbeiten/Ansehen-Aktionen).
+				isComponent: isComponentHref,
+				// Geplante Komponente ohne model.json (z. B. date-picker) → „Geplant"-Ghost-Chip.
+				planned: isComponentHref && (status === null || (slug ? plannedSlugs.has(slug) : false)),
+				// Kompakter Status je Komponente (Drift/Gate/Doku-Lücken) — Chips an der Zeile.
+				status: status
+					? {
+							hasRaw: status.hasRaw,
+							drift: status.drift,
+							gate1: status.gate1,
+							aktualisiertAm: status.aktualisiertAm ?? null,
+							ampel: status.doc.ampel,
+							kriterien: status.doc.kriterien
+						}
+					: null,
 				// Komponenten → neuer Spec-Editor; handgeschriebene .svx → Prosa-Editor.
 				editHref:
 					slug && editableSlugs.has(slug)

@@ -88,6 +88,11 @@ export interface ComponentStatusRow {
 
 export interface ComponentBoard {
 	rows: ComponentStatusRow[];
+	/**
+	 * Zeilen nach Slug indexiert — map-freundlicher Zugriff für die /admin-Übersicht,
+	 * die den Status je Komponente an ihrer Sidebar-Zeile andockt (statt eigener Liste).
+	 */
+	bySlug: Record<string, ComponentStatusRow>;
 	totals: {
 		total: number;
 		/** Komponenten mit raw-Fixture. */
@@ -132,8 +137,11 @@ export function buildBoard(inputs: ComponentStatusInput[]): ComponentBoard {
 		};
 	});
 	const count = (pred: (r: ComponentStatusRow) => boolean) => rows.filter(pred).length;
+	const bySlug: Record<string, ComponentStatusRow> = {};
+	for (const r of rows) bySlug[r.slug] = r;
 	return {
 		rows,
+		bySlug,
 		totals: {
 			total: rows.length,
 			raw: count((r) => r.hasRaw),
@@ -162,7 +170,7 @@ function readJson(file: string): Record<string, unknown> | null {
  * kein Neu-Erfinden der raw/Gate-1-Zählung.
  */
 export function gatherComponentStatus(): ComponentBoard {
-	if (!existsSync(COMPONENTS_DIR)) return { rows: [], totals: emptyTotals() };
+	if (!existsSync(COMPONENTS_DIR)) return { rows: [], bySlug: {}, totals: emptyTotals() };
 
 	const slugs = readdirSync(COMPONENTS_DIR, { withFileTypes: true })
 		.filter((e) => e.isDirectory() && existsSync(resolve(COMPONENTS_DIR, e.name, 'model.json')))
@@ -202,7 +210,8 @@ export function gatherComponentStatus(): ComponentBoard {
 		let rawNewerThanModel = false;
 		if (stage.raw && stage.model) {
 			rawNewerThanModel =
-				statSync(resolve(dir, 'figma-raw.json')).mtimeMs > statSync(resolve(dir, 'model.json')).mtimeMs;
+				statSync(resolve(dir, 'figma-raw.json')).mtimeMs >
+				statSync(resolve(dir, 'model.json')).mtimeMs;
 		}
 
 		const zustaende = Array.isArray(model.zustaende) ? model.zustaende : [];

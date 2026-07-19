@@ -9,15 +9,87 @@
 		{ href: '/admin/brand', name: 'Brand-Seiten', desc: 'Prosa & Frontmatter bearbeiten' }
 	];
 
-	const board = $derived(data.board);
-	const AMPEL_LABEL = {
-		vollstaendig: 'vollständig',
-		teilweise: 'unvollständig',
-		leer: 'leer'
-	} as const;
+	const totals = $derived(data.totals);
+
+	// ── Doku-Lücken → Chips mit Deep-Link in den passenden Editor-Abschnitt ──────
+	// Jedes fehlende Kriterium ergibt EINEN kleinen warn-Chip, der genau auf seinen
+	// Abschnitt springt (a11y → sec-a11y, Zustände → Design-Cluster, Do/Don't →
+	// sec-doDont). Vollständig = keine Lücke = kein Chip (Ruhe ist der Normalzustand).
+	type Kriterien = { zustaende: boolean; a11y: boolean; doDont: boolean };
+	type Gap = { label: string; anchor: string; title: string };
+	function docGaps(k: Kriterien): Gap[] {
+		const gaps: Gap[] = [];
+		if (!k.zustaende)
+			gaps.push({
+				label: 'Zustände',
+				anchor: 'cluster-design',
+				title:
+					'Weniger als 2 Zustände dokumentiert — im Design-Cluster prüfen (Varianten & Zustände).'
+			});
+		if (!k.a11y)
+			gaps.push({
+				label: 'a11y',
+				anchor: 'sec-a11y',
+				title: 'Weniger als 2 Barrierefreiheits-Einträge — im Editor ergänzen.'
+			});
+		if (!k.doDont)
+			gaps.push({
+				label: 'Do/Don’t',
+				anchor: 'sec-doDont',
+				title: 'Kein Do & Don’t dokumentiert — im Editor ergänzen.'
+			});
+		return gaps;
+	}
 </script>
 
 <svelte:head><title>Inhalte bearbeiten – Admin</title></svelte:head>
+
+<!-- Ein kleiner Status-Chip an der Komponenten-Zeile (nur bei Handlungsbedarf). -->
+{#snippet componentChips(
+	status: {
+		hasRaw: boolean;
+		drift: boolean;
+		gate1: boolean;
+		aktualisiertAm: string | null;
+		kriterien: Kriterien;
+	},
+	editHref: string | null
+)}
+	<span class="chips">
+		{#if status.drift}
+			{#if editHref}
+				<a
+					class="chip-link"
+					href="{editHref}#cluster-design"
+					title="Design-Drift — figma-raw.json ist neuer als model.json. Re-Import prüfen."
+				>
+					<Pill tone="estimate" icon="⚠">Drift</Pill>
+				</a>
+			{:else}
+				<Pill tone="estimate" icon="⚠" title="Design-Drift — Re-Import prüfen.">Drift</Pill>
+			{/if}
+		{/if}
+		{#if !status.hasRaw}
+			<Pill tone="planned" title="Kein figma-raw.json — Design-Drift lässt sich nicht prüfen."
+				>kein raw</Pill
+			>
+		{:else if status.gate1}
+			<Pill tone="planned" title="Gate 1 — Import unvollständig, Token-Namen fehlen.">Gate 1</Pill>
+		{/if}
+		{#each docGaps(status.kriterien) as gap (gap.anchor)}
+			{#if editHref}
+				<a class="chip-link" href="{editHref}#{gap.anchor}" title={gap.title}>
+					<Pill tone="estimate">{gap.label}</Pill>
+				</a>
+			{:else}
+				<Pill tone="estimate" title={gap.title}>{gap.label}</Pill>
+			{/if}
+		{/each}
+	</span>
+	{#if status.aktualisiertAm}
+		<span class="sync-quiet" title="Letzter Figma-Sync">{status.aktualisiertAm}</span>
+	{/if}
+{/snippet}
 
 <div class="admin">
 	<AdminPageHeader title="Inhalte bearbeiten">
@@ -37,85 +109,21 @@
 		{/each}
 	</nav>
 
-	<!-- Pipeline-Board (Feature B): Komponenten-Status aus Figma-Import + Doku-Ampel. -->
-	<section class="block">
-		<div class="block-head block-head--board">
-			<h2 class="block-title">Komponenten</h2>
-			<p class="totals">
-				raw {board.totals.raw}/{board.totals.total} · vollständig {board.totals.vollstaendig}/{board
-					.totals.total}
-				{#if board.totals.gate1}· <span class="totals__warn">Gate 1: {board.totals.gate1}</span>{/if}
-				{#if board.totals.drift}· <span class="totals__warn">Drift: {board.totals.drift}</span>{/if}
-			</p>
-		</div>
-
-		<ul class="list">
-			<li class="board-head" aria-hidden="true">
-				<span class="board-col board-col--name">Komponente</span>
-				<span class="board-col board-col--sync">Figma-Sync</span>
-				<span class="board-col board-col--doc">Doku</span>
-				<span class="board-col board-col--hint">Hinweis</span>
-			</li>
-			{#each board.rows as row (row.slug)}
-				<li>
-					<AdminRow tag="div" class={row.drift ? 'board-row board-row--drift' : 'board-row'}>
-						<span class="board-col board-col--name">
-							<a class="board-name" href={row.editHref}>{row.name}</a>
-						</span>
-						<span class="board-col board-col--sync">
-							{#if !row.hasRaw}
-								<span class="sync-date">{row.aktualisiertAm ?? '—'}</span>
-								<Pill tone="planned">kein raw</Pill>
-							{:else if row.gate1}
-								<span class="sync-date">{row.aktualisiertAm ?? '—'}</span>
-								<Pill tone="status">Gate 1</Pill>
-							{:else if row.drift}
-								<span class="sync-flag sync-flag--warn">⚠ Drift</span>
-							{:else}
-								<span class="sync-flag sync-flag--ok">✓ {row.aktualisiertAm ?? '—'}</span>
-							{/if}
-						</span>
-						<span class="board-col board-col--doc">
-							<span
-								class="ampel ampel--{row.doc.ampel}"
-								title="{row.doc.erfuellt}/3 Kriterien (Zustände ≥ 2, a11y ≥ 2, Do/Don't)"
-							></span>
-							<span class="ampel-label ampel-label--{row.doc.ampel}"
-								>{AMPEL_LABEL[row.doc.ampel]}</span
-							>
-						</span>
-						<span class="board-col board-col--hint">{row.hinweis}</span>
-					</AdminRow>
-				</li>
-			{/each}
-			{#each data.planned as p (p.slug)}
-				<li>
-					<AdminRow tag="div" interactive={false} class="board-row board-row--planned">
-						<span class="board-col board-col--name">
-							<span class="board-name board-name--planned">{p.label}</span>
-							<Pill tone="planned">Geplant</Pill>
-						</span>
-						<span class="board-col board-col--sync sync-muted">–</span>
-						<span class="board-col board-col--doc sync-muted">–</span>
-						<span class="board-col board-col--hint">wartet auf Import</span>
-					</AdminRow>
-				</li>
-			{/each}
-		</ul>
-		<p class="hint board-legend">
-			Doku-Ampel: grün = alle 3 Kriterien (Zustände&nbsp;≥&nbsp;2, a11y&nbsp;≥&nbsp;2, Do/Don't),
-			gelb = teils, rot = keins. Vollprüfung macht
-			<code>tooling/check-doc-coverage.mjs</code>.
-		</p>
-	</section>
-
+	<!-- EINE Liste: Design-System-Inhalte spiegeln die Sidebar; Komponenten tragen ihren
+	     Sync-/Doku-Status als kompakte Chips (nur bei Handlungsbedarf) direkt an der Zeile. -->
 	<section class="block">
 		<div class="block-head">
 			<h2 class="block-title">Design-System-Inhalte</h2>
 			<p class="hint">
-				Struktur &amp; Reihenfolge = Live-Sidebar. Umsortieren passiert im Code
-				(<code>navigation.ts</code> · <code>CATALOG_OVERRIDES</code>), nicht per
-				Drag&nbsp;&amp;&nbsp;Drop.
+				Struktur &amp; Reihenfolge = Live-Sidebar. Umsortieren passiert im Code (<code
+					>navigation.ts</code
+				>
+				· <code>CATALOG_OVERRIDES</code>), nicht per Drag&nbsp;&amp;&nbsp;Drop.
+			</p>
+			<p class="totals">
+				raw {totals.raw}/{totals.total} · vollständig {totals.vollstaendig}/{totals.total}
+				{#if totals.gate1}· <span class="totals__warn">Gate 1: {totals.gate1}</span>{/if}
+				{#if totals.drift}· <span class="totals__warn">Drift: {totals.drift}</span>{/if}
 			</p>
 		</div>
 
@@ -125,6 +133,31 @@
 					<li>
 						<AdminRow tag="div" interactive={false} class="cat">
 							<span class="cat-title" aria-hidden="true">{item.title}</span>
+						</AdminRow>
+					</li>
+				{:else if item.isComponent}
+					<!-- Komponenten-Zeile: EIN Eintrag, Status als Chips, Link auf den Spec-Editor. -->
+					<li>
+						<AdminRow tag="div">
+							<span class="name">
+								{#if item.editHref}
+									<a class="comp-name" href={item.editHref}>{item.title}</a>
+								{:else}
+									<span class="comp-name comp-name--muted">{item.title}</span>
+								{/if}
+							</span>
+							{#if item.planned}
+								<span class="chips">
+									<Pill tone="planned" title="Geplant — wartet auf den Figma-Import.">Geplant</Pill>
+								</span>
+							{:else if item.status}
+								{@render componentChips(item.status, item.editHref)}
+							{/if}
+							{#if item.href}
+								<a class="act act--view" href={item.href} title="Live-Seite ansehen"
+									>Ansehen&nbsp;↗</a
+								>
+							{/if}
 						</AdminRow>
 					</li>
 				{:else}
@@ -149,6 +182,13 @@
 				{/if}
 			{/each}
 		</ul>
+		<p class="hint list-legend">
+			Chips erscheinen nur bei Handlungsbedarf: <strong>Drift</strong> (Figma neuer als Modell),
+			<strong>Gate&nbsp;1</strong>/<strong>kein&nbsp;raw</strong> (Import unvollständig) und
+			Doku-Lücken (<strong>Zustände</strong>, <strong>a11y</strong>, <strong>Do/Don’t</strong>) —
+			ein Klick springt in den passenden Editor-Abschnitt. Vollprüfung macht
+			<code>tooling/check-doc-coverage.mjs</code>.
+		</p>
 	</section>
 </div>
 
@@ -201,142 +241,18 @@
 	.block-head {
 		margin-bottom: var(--z-ds-space-s);
 	}
-	.block-head--board {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--z-ds-space-m);
-		flex-wrap: wrap;
+	.block-title {
+		font-size: var(--ds-text-base);
+		margin: 0 0 var(--z-ds-space-xs);
 	}
 	.totals {
-		margin: 0;
+		margin: var(--z-ds-space-6) 0 0;
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
 	.totals__warn {
-		color: var(--ds-warning-text, var(--ds-text-body));
+		color: var(--ds-tint-warning-text, var(--ds-text-body));
 		font-weight: 600;
-	}
-
-	/* ── Board-Spalten ── */
-	/* Spalten-Header: gedämpft & klein wie im Mockup (kein Uppercase/Bold). */
-	.board-head {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-s);
-		padding: 0 var(--z-ds-space-m) var(--z-ds-space-6);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-		font-weight: 400;
-	}
-	.board-col {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
-		min-width: 0;
-	}
-	.board-col--name {
-		flex: 1 1 10rem;
-	}
-	.board-col--sync {
-		flex: 0 0 11rem;
-	}
-	.board-col--doc {
-		flex: 0 0 9rem;
-	}
-	.board-col--hint {
-		flex: 2 1 12rem;
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-	}
-	.board-name {
-		font-weight: 500;
-		color: var(--ds-accent);
-		text-decoration: none;
-	}
-	.board-name:hover {
-		text-decoration: underline;
-	}
-	.board-name:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.sync-date {
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-	}
-	/* Sync-Status farbig direkt an der Zeile: ✓ synchron (grün) · ⚠ Drift (warn). */
-	.sync-flag {
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
-	}
-	.sync-flag--ok {
-		color: var(--ds-tint-positive-text);
-	}
-	.sync-flag--warn {
-		color: var(--ds-tint-warning-text);
-	}
-	/* Auffällige Drift-Zeile leicht abgesenkt (wie im Mockup). Global, weil die
-	   Klasse auf dem von AdminRow gerenderten Element sitzt. */
-	.list :global(.board-row--drift) {
-		background: var(--ds-surface-sunken);
-	}
-	/* Geplant-Zeile: gedämpfte Ghost-Zeile am Board-Ende. */
-	.board-name--planned {
-		color: var(--ds-text-muted);
-		font-weight: 500;
-	}
-	.sync-muted {
-		color: var(--ds-text-faint);
-	}
-	.ampel {
-		display: inline-block;
-		width: 10px;
-		height: 10px;
-		border-radius: 999px;
-		flex: none;
-		background: var(--ds-text-muted);
-	}
-	.ampel--vollstaendig {
-		background: var(--ds-positive, #2e7d32);
-	}
-	.ampel--teilweise {
-		background: var(--ds-warning, #e6a700);
-	}
-	.ampel--leer {
-		background: var(--ds-negative, #c62828);
-	}
-	.ampel-label {
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-	}
-	.ampel-label--vollstaendig {
-		color: var(--ds-tint-positive-text);
-		font-weight: 600;
-	}
-	.ampel-label--teilweise {
-		color: var(--ds-tint-warning-text);
-		font-weight: 600;
-	}
-	.board-legend {
-		margin-top: var(--z-ds-space-s);
-	}
-	.board-legend code {
-		font-family: var(--ds-font-mono);
-	}
-	@media (max-width: 40rem) {
-		.board-head {
-			display: none;
-		}
-		.board-col--sync,
-		.board-col--doc,
-		.board-col--hint {
-			flex-basis: auto;
-		}
-	}
-	.block-title {
-		font-size: var(--ds-text-base);
-		margin: 0 0 var(--z-ds-space-xs);
 	}
 	.hint {
 		font-size: var(--ds-text-xs);
@@ -345,6 +261,9 @@
 	}
 	.hint code {
 		font-family: var(--ds-font-mono);
+	}
+	.list-legend {
+		margin-top: var(--z-ds-space-s);
 	}
 	.list {
 		list-style: none;
@@ -372,6 +291,46 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
+		min-width: 0;
+	}
+	/* Komponenten-Name = Link in den Spec-Editor. */
+	.comp-name {
+		color: var(--ds-accent);
+		text-decoration: none;
+		font-weight: 500;
+	}
+	.comp-name:hover {
+		text-decoration: underline;
+	}
+	.comp-name:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+		border-radius: var(--ds-radius-xs);
+	}
+	.comp-name--muted {
+		color: var(--ds-text-muted);
+	}
+	/* Status-Chips: kompakt, rechts vor der Ansehen-Aktion; Wrap auf Schmal. */
+	.chips {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--z-ds-space-6);
+		flex: none;
+	}
+	.chip-link {
+		text-decoration: none;
+		border-radius: 999px;
+	}
+	.chip-link:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	.sync-quiet {
+		flex: none;
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		white-space: nowrap;
 	}
 	.actions {
 		display: inline-flex;
@@ -389,6 +348,10 @@
 	.act--edit {
 		color: var(--ds-accent);
 		font-weight: 600;
+	}
+	.act--view {
+		flex: none;
+		white-space: nowrap;
 	}
 	@media (hover: hover) {
 		.act:hover {

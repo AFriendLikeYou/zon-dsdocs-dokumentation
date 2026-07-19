@@ -66,6 +66,14 @@ describe('component-status · buildBoard', () => {
 		expect(g.rows[0].hinweis).toContain('Gate 1');
 	});
 
+	it('bySlug: Zeilen nach Slug indexiert (map-freundlich für /admin)', () => {
+		const board = buildBoard([base, { ...base, slug: 'a' }, { ...base, slug: 'b' }]);
+		expect(Object.keys(board.bySlug).sort()).toEqual(['a', 'b', 'button']);
+		expect(board.bySlug.button).toBe(board.rows[0]);
+		expect(board.bySlug.a.editHref).toBe('/admin/product/components/a');
+		expect(board.bySlug.zzz).toBeUndefined();
+	});
+
 	it('Summen: total, raw, vollständig, gate1, drift', () => {
 		const board = buildBoard([
 			base, // vollständig, raw, kein Drift/Gate

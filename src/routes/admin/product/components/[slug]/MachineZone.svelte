@@ -6,8 +6,9 @@
 
   Große Maschinen-Zonen (Tokens, Varianten, Weitere Felder) starten EINGEKLAPPT:
   `collapsible` macht den Kopf zu einem Disclosure-Toggle mit Summary + Chevron
-  (Rotation wie MenuCollapsible, Emil-Motion via grid-template-rows). Der Zustand
-  wird bewusst NICHT persistiert (v1) — jeder Reload startet im `defaultOpen`-Stand.
+  (Rotation wie MenuCollapsible, Emil-Motion via grid-template-rows). Mit `persistKey`
+  merkt sich die Zone offen/zu je Sitzung (sessionStorage); ohne Key startet jeder
+  Reload deterministisch im `defaultOpen`-Stand.
 
   Props:
   - title:       Zonen-Überschrift.
@@ -17,10 +18,13 @@
   - summary?:    Kurzfassung im eingeklappten Zustand (z. B. „14 Tokens · …").
   - defaultOpen?: Startzustand, wenn `collapsible` (Default: true).
   - pillTitle?:  Tooltip-Override der ⇣-Herkunfts-Pill.
+  - persistKey?: stabiler Schlüssel (z. B. „button:tokens") — merkt den offen/zu-Zustand
+                 je Zone in sessionStorage. Server-Render bleibt deterministisch
+                 (`defaultOpen`); der Restore nach Mount springt ohne Animation.
   - children:    der read-only Zoneninhalt.
 -->
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { ChevronIcon } from '$lib/icons';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 
@@ -32,6 +36,7 @@
 		summary,
 		defaultOpen = true,
 		pillTitle,
+		persistKey,
 		children
 	}: {
 		title: string;
@@ -41,11 +46,40 @@
 		summary?: string;
 		defaultOpen?: boolean;
 		pillTitle?: string;
+		persistKey?: string;
 		children: Snippet;
 	} = $props();
 
 	let open = $state(collapsible ? defaultOpen : true);
+	// Animationen erst NACH dem Restore freigeben — so springt der wiederhergestellte
+	// Zustand ohne Layout-Ruckeln (kein Auf-/Zuklapp beim Laden), erst Nutzer-Klicks
+	// animieren.
+	let animated = $state(false);
 	const contentId = `mz-${Math.random().toString(36).slice(2, 8)}`;
+	const storeKey = $derived(persistKey ? `speceditor:${persistKey}` : null);
+
+	onMount(() => {
+		if (collapsible && storeKey) {
+			try {
+				const saved = sessionStorage.getItem(storeKey);
+				if (saved === '1' || saved === '0') open = saved === '1';
+			} catch {
+				/* sessionStorage nicht verfügbar → Default-Zustand bleibt */
+			}
+		}
+		requestAnimationFrame(() => (animated = true));
+	});
+
+	function toggle() {
+		open = !open;
+		if (collapsible && storeKey) {
+			try {
+				sessionStorage.setItem(storeKey, open ? '1' : '0');
+			} catch {
+				/* ignorieren — Persistenz ist nice-to-have */
+			}
+		}
+	}
 </script>
 
 {#snippet head()}
@@ -56,14 +90,18 @@
 	<span class="machine-zone__pill"><ProvenanceChip variant="machine" title={pillTitle} /></span>
 {/snippet}
 
-<section class="machine-zone" class:machine-zone--collapsible={collapsible}>
+<section
+	class="machine-zone"
+	class:machine-zone--collapsible={collapsible}
+	class:is-animated={animated}
+>
 	{#if collapsible}
 		<button
 			type="button"
 			class="machine-zone__head machine-zone__head--toggle"
 			aria-expanded={open}
 			aria-controls={contentId}
-			onclick={() => (open = !open)}
+			onclick={toggle}
 		>
 			<ChevronIcon direction="right" class="machine-zone__chevron {open ? 'rotate' : ''}" />
 			{@render head()}
@@ -156,6 +194,11 @@
 		margin-right: var(--z-ds-space-8);
 		color: var(--ds-text-muted);
 		transform: rotate(0deg);
+		/* Transition erst nach dem Restore (is-animated) — sonst dreht das Chevron beim
+		   Laden aus dem wiederhergestellten Zustand. */
+		transition: none;
+	}
+	.machine-zone.is-animated .machine-zone__head :global(.machine-zone__chevron) {
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
 	.machine-zone__head :global(.machine-zone__chevron.rotate) {
@@ -164,8 +207,7 @@
 	/* Summary-Zeile im eingeklappten Zustand (z. B. „14 Tokens · Farbe / …"). */
 	.machine-zone__summary {
 		margin: 0;
-		padding: 0 var(--z-ds-space-m) var(--z-ds-space-8)
-			calc(var(--z-ds-space-m) + 1.4rem);
+		padding: 0 var(--z-ds-space-m) var(--z-ds-space-8) calc(var(--z-ds-space-m) + 1.4rem);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
@@ -173,6 +215,9 @@
 	.machine-zone__wrap {
 		display: grid;
 		grid-template-rows: 0fr;
+		transition: none;
+	}
+	.machine-zone.is-animated .machine-zone__wrap {
 		transition: grid-template-rows var(--ds-dur-slow) var(--ds-ease-out);
 	}
 	.machine-zone__wrap.open {

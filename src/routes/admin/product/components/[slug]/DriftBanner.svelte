@@ -45,7 +45,7 @@
 		align-items: flex-start;
 		gap: var(--z-ds-space-s);
 		background: var(--ds-tint-warning-surface);
-		border: 1px solid var(--ds-tint-warning-border);
+		border: 0px solid var(--ds-tint-warning-border);
 		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-m);
 		margin-bottom: var(--z-ds-space-l);
