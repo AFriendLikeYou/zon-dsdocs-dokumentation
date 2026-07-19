@@ -18,7 +18,10 @@ export const GET: RequestHandler = () => {
 > Dokumentation des ZEIT-Designsystems (HTML/CSS-Pattern-Katalog auf --z-ds-Tokens,
 > gespiegelt aus Figma) plus redaktioneller Brandhub. Für Agenten: Volltext unter
 > /llms-full.txt, maschinenlesbar per MCP unter POST /api/mcp (Tools: list, search,
-> get, foundations — JSON-RPC 2.0, Streamable HTTP, Basic Auth).
+> get, foundations — JSON-RPC 2.0, Streamable HTTP, Basic Auth, Ergebnisse mit
+> structuredContent) sowie als JSON-Manifest unter GET /api/manifest.json
+> (Komponenten inkl. render-Template + pattern.css, Foundations mit Live-Werten,
+> Konventionen; einzeln: ?component=<slug>).
 
 ## Komponenten
 ${comps}

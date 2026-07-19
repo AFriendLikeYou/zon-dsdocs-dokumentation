@@ -11,13 +11,11 @@
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
 import { FOUNDATION_TOKENS, tokenName, tokenUsage } from '$data/foundation-tokens';
 import { COLOR_ROLE_GROUPS } from '$data/color-roles';
-// Upstream-Token-WERTE zur Build-Zeit einbetten (?raw) — serverless-sicher
-// (kein fs-Zugriff auf static/ zur Laufzeit nötig); ändert sich nur mit dem
-// @zeitonline-Paket-Update, also genau im Build-Rhythmus.
-import zdsCss from '../../../static/styles-zds.css?raw';
+import { ZDS_VALUES } from '$lib/server/zds-values';
+import { manifestComponent, manifestFoundations } from '$lib/server/manifest';
 
 const PROTOCOL_VERSION = '2025-06-18';
-const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.0.0' };
+const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.1.0' };
 
 /** Kontext-Budget pro `get`-Antwort (Astryx-Muster): lange Ausgaben kappen. */
 export const GET_CHAR_BUDGET = 4000;
@@ -155,7 +153,9 @@ function sectionTokens(e: AgentCatalogEntry): string {
 	let out = `# Tokens & Maße — ${s.name ?? e.slug}\n`;
 	for (const g of s.tokens ?? []) {
 		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
-		for (const i of g.items ?? []) out += `  - ${i.name}: ${i.wert}\n`;
+		// Wert aus der einen Quelle (ZDS_VALUES) auflösen — nicht mehr im Modell.
+		for (const i of g.items ?? [])
+			out += `  - ${i.name}: ${ZDS_VALUES[i.name] ?? '?'}${i.hinweis ? ' · ' + i.hinweis : ''}\n`;
 	}
 	if (s.masse) {
 		out += `\nMaße:\n`;
@@ -278,13 +278,6 @@ export const catalogSummaries = (): Array<{ slug: string; name: string; zweck: s
 export type FoundationsSection = 'farben' | 'spacing' | 'typografie' | 'tokens';
 const F_SECTIONS: FoundationsSection[] = ['farben', 'spacing', 'typografie', 'tokens'];
 
-/** Token-Name → Wert aus dem eingebetteten Upstream-CSS. */
-const ZDS_VALUES: Record<string, string> = (() => {
-	const map: Record<string, string> = {};
-	for (const m of zdsCss.matchAll(/(--z-ds-[a-z0-9-]+)\s*:\s*([^;]+);/g)) map[m[1]] = m[2].trim();
-	return map;
-})();
-
 function foundationsFarben(): string {
 	let out = '# Farb-Rollen der Doku-UI (--ds-Rolle → --z-ds-Token = Wert)\n';
 	for (const g of COLOR_ROLE_GROUPS) {
@@ -363,7 +356,25 @@ const TOOLS = [
 		name: 'list',
 		description:
 			'Listet alle dokumentierten Komponenten des ZEIT-Designsystems kompakt (slug · name · kategorie je Zeile). Parameterlos — Einstiegspunkt, wenn kein Suchbegriff bekannt ist.',
-		inputSchema: { type: 'object', properties: {} }
+		inputSchema: { type: 'object', properties: {} },
+		outputSchema: {
+			type: 'object',
+			properties: {
+				components: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							slug: { type: 'string' },
+							name: { type: 'string' },
+							kategorie: { type: 'string' }
+						},
+						required: ['slug', 'name']
+					}
+				}
+			},
+			required: ['components']
+		}
 	},
 	{
 		name: 'search',
@@ -380,12 +391,31 @@ const TOOLS = [
 				}
 			},
 			required: ['query']
+		},
+		outputSchema: {
+			type: 'object',
+			properties: {
+				hits: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							slug: { type: 'string' },
+							name: { type: 'string' },
+							kategorie: { type: 'string' },
+							zweck: { type: 'string' }
+						},
+						required: ['slug', 'name']
+					}
+				}
+			},
+			required: ['hits']
 		}
 	},
 	{
 		name: 'get',
 		description:
-			'Liefert die Doku einer Komponente als Text. Ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage. Beispiel: { "slug": "button", "section": "markup" }.',
+			'Liefert die Doku einer Komponente: als Text (ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage) UND als structuredContent den vollen Manifest-Eintrag { slug, spec, patternCss } — unabhängig von section. Beispiel: { "slug": "button", "section": "markup" }.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -393,25 +423,44 @@ const TOOLS = [
 				section: {
 					type: 'string',
 					enum: SECTIONS,
-					description: 'Optionaler Ausschnitt.'
+					description: 'Optionaler Ausschnitt (nur für den Text-Teil).'
 				}
 			},
 			required: ['slug']
+		},
+		outputSchema: {
+			type: 'object',
+			description:
+				'Voller Manifest-Eintrag der Komponente — identisch zu GET /api/manifest.json?component=<slug>.',
+			properties: {
+				slug: { type: 'string' },
+				spec: { type: 'object', description: 'Gemergter Spec (model.json + content.json) inkl. render.' },
+				patternCss: { type: ['string', 'null'], description: 'Rohes, unscoped pattern.css.' }
+			},
+			required: ['slug', 'spec']
 		}
 	},
 	{
 		name: 'foundations',
 		description:
-			'Liefert die Design-Foundations als Text: Farb-Rollen (--ds-* → --z-ds-* mit Werten), Spacing-, Typografie- und alle Foundation-Tokens. Ohne section ein kompakter Einstieg (Farben + Spacing). Beispiel: { "section": "farben" }.',
+			'Liefert die Design-Foundations: als Text (Farb-Rollen --ds-* → --z-ds-* mit Werten, Spacing-, Typografie- und alle Foundation-Tokens; ohne section ein kompakter Einstieg) UND als structuredContent alle Rollen + Token-Gruppen mit aufgelösten Werten — unabhängig von section. Beispiel: { "section": "farben" }.',
 		inputSchema: {
 			type: 'object',
 			properties: {
 				section: {
 					type: 'string',
 					enum: ['farben', 'spacing', 'typografie', 'tokens'],
-					description: 'Optionale Sicht.'
+					description: 'Optionale Sicht (nur für den Text-Teil).'
 				}
 			}
+		},
+		outputSchema: {
+			type: 'object',
+			properties: {
+				farbRollen: { type: 'array', description: 'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + Wert + Usage.' },
+				tokens: { type: 'array', description: 'Foundation-Token-Gruppen mit aufgelösten Werten.' }
+			},
+			required: ['farbRollen', 'tokens']
 		}
 	}
 ];
@@ -431,7 +480,15 @@ const err = (id: JsonRpcId, code: number, message: string): JsonRpcResponse => (
 	id,
 	error: { code, message }
 });
-const textResult = (text: string) => ({ content: [{ type: 'text', text }] });
+/**
+ * Tool-Ergebnis: Text-Serialisierung (immer) + optional structuredContent
+ * (MCP-Spec: muss zum deklarierten outputSchema des Tools passen). Text bleibt
+ * budgetiert; structuredContent ist der volle, unkappte Vertrag.
+ */
+const textResult = (text: string, structuredContent?: unknown) => ({
+	content: [{ type: 'text', text }],
+	...(structuredContent !== undefined ? { structuredContent } : {})
+});
 
 /**
  * Verarbeitet EINE JSON-RPC-Nachricht. Notifications (ohne id) liefern `null`
@@ -465,7 +522,8 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 					'.z-<komponente> (Block) · .z-<komponente>__<teil> · .z-<komponente>--<variante> (Modifier, kombinierbar). ' +
 					'Zustände über native Attribute/Pseudoklassen (disabled, :hover, :focus-visible), keine State-Klassen. ' +
 					'Farben/Maße ausschließlich über --z-ds-*-Tokens. Markup ist Vanilla HTML/CSS mit eigenem pattern.css je Komponente. ' +
-					'Einstieg: list → get(slug) · Foundations: foundations(section).'
+					'Einstieg: list → get(slug) · Foundations: foundations(section). ' +
+					'Tool-Ergebnisse enthalten structuredContent (voller JSON-Vertrag); Gesamt-Manifest: GET /api/manifest.json.'
 			});
 
 		case 'notifications/initialized':
@@ -482,7 +540,12 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 			const params = (msg.params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
 			const args = params.arguments ?? {};
 			if (params.name === 'list') {
-				return ok(id, textResult(listComponents()));
+				const components = AGENT_CATALOG.map((e) => ({
+					slug: e.slug,
+					name: e.spec.name ?? e.slug,
+					kategorie: e.spec.kategorie ?? ''
+				}));
+				return ok(id, textResult(listComponents(), { components }));
 			}
 			if (params.name === 'search') {
 				// Pflicht-Argument erzwingen: fehlend/leer/kein-String → -32602 statt Pseudo-Erfolg.
@@ -494,17 +557,19 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 				const text = hits.length
 					? hits.map((h) => `- ${h.slug} · ${h.name} (${h.kategorie}): ${h.zweck}`).join('\n')
 					: `Keine Treffer für "${query}".`;
-				return ok(id, textResult(text));
+				return ok(id, textResult(text, { hits }));
 			}
 			if (params.name === 'get') {
 				const slug = typeof args.slug === 'string' ? args.slug.trim() : '';
 				if (!slug) {
 					return err(id, -32602, 'Pflicht-Argument "slug" fehlt oder ist leer.');
 				}
-				return ok(id, textResult(getComponent(slug, args.section as string)));
+				// structuredContent nur bei Treffer — der Nicht-gefunden-Fall bleibt reiner Text.
+				const entry = manifestComponent(slug);
+				return ok(id, textResult(getComponent(slug, args.section as string), entry ?? undefined));
 			}
 			if (params.name === 'foundations') {
-				return ok(id, textResult(getFoundations(args.section as string)));
+				return ok(id, textResult(getFoundations(args.section as string), manifestFoundations()));
 			}
 			return err(id, -32602, `Unbekanntes Tool: ${params.name}`);
 		}
