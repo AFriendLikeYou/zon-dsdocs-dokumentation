@@ -105,6 +105,17 @@
 	--ds-tint-positive-strong: color-mix(in srgb, var(--ds-positive) 24%, transparent);
 	--ds-tint-warning-border: color-mix(in srgb, var(--ds-warning) 40%, transparent);
 
+	/* ── Zwischen-Flächen (Product-CMS-Spec-Editor) ───────────────────────────
+	   Angesoftete Ebenen, damit sich Seite → äußere Karte → Sektions-Karte → Feld
+	   klar staffeln. --ds-surface-soft = etwas mehr abgesetzt als --ds-surface-raised
+	   (Maschinen-Zonen-Fläche, „ein Tick zurückgesetzt"). --ds-surface-inset = zur
+	   Basis hin gemischter Input-Hintergrund, damit ein Feld auf der Karten-Fläche
+	   „eingelassen" wirkt. Beide NUR über bestehende --ds-*-Rollen gemischt (kein
+	   rohes --z-ds-*, Token-Check bleibt grün) und folgen dem Theme automatisch,
+	   weil --ds-surface/-raised/-sunken upstream je Modus neu gebunden werden. */
+	--ds-surface-soft: color-mix(in srgb, var(--ds-surface-raised) 55%, var(--ds-surface-sunken));
+	--ds-surface-inset: color-mix(in srgb, var(--ds-surface) 45%, var(--ds-surface-raised));
+
 	/* Weiche Oberflächen */
 	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
 	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
