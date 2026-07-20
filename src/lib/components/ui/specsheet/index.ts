@@ -13,5 +13,5 @@ export { default as DoDontList } from './DoDontList.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';
 // CodeBlock ist nach `$components/ui/code-block` umgezogen (eigener Barrel).
-export { default as SpecRow } from './SpecRow.svelte';
+// SpecRow ist in K9 aufgegangen: A11yList/KeyboardList laufen jetzt über `ui/table`.
 export { default as Mark } from './Mark.svelte';

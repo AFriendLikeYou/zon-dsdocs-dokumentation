@@ -8,9 +8,14 @@
   damit rem→px korrekt und drift-frei ist — dieselbe Auflösungs-Idee wie SpacingScale.
 
   optional: lineHeightToken (--z-ds-lineheight-*) setzt die Zeilenhöhe der Rolle.
+
+  Struktur: DÜNNER WRAPPER um `ui/table` (K9). Zwei Spalten — links die Schriftprobe
+  (Bühne: Specimen-Zeile + optionaler Demo-Absatz), rechts die Rolle mit Einsatzzweck
+  und Tokens. Die Probe ist Zellinhalt, kein eigenes Layout mehr.
 -->
 <script lang="ts">
 	import { Chip } from '$components/ui/chip';
+	import { Table } from '$components/ui/table';
 
 	export type TypeRole = {
 		/** fontsize-Token, z. B. '--z-ds-fontsize-34'. */
@@ -38,6 +43,11 @@
 	let specimenEls: HTMLElement[] = $state([]);
 	let px = $state<Record<string, string>>({});
 
+	// Zeilen tragen ihren Index mit, damit das Snippet das richtige Specimen-Element
+	// binden kann (die px-Messung liest aus dem gerenderten Element).
+	type Row = TypeRole & { index: number };
+	const rows = $derived(roles.map((r, index) => ({ ...r, index })));
+
 	// px live aus dem gerenderten Specimen lesen (rem→px, drift-frei). Nur im Browser.
 	$effect(() => {
 		const m: Record<string, string> = {};
@@ -47,63 +57,69 @@
 		});
 		px = m;
 	});
+
+	const fontStyle = (role: TypeRole) =>
+		`font-size: var(${role.token});${role.lineHeightToken ? ` line-height: var(${role.lineHeightToken});` : ''}`;
+
+	const columns = [
+		{ key: 'specimen', label: 'Schriftprobe', width: '61%', render: specimenCell },
+		{ key: 'label', label: 'Rolle, Einsatzzweck und Tokens', header: true, render: metaCell }
+	];
 </script>
 
-<ul class="specimens">
-	{#each roles as role, i (role.token)}
-		<li class="row">
-			<p
-				bind:this={specimenEls[i]}
-				class="specimen"
-				class:bold={role.bold}
-				style={`font-size: var(${role.token});${role.lineHeightToken ? ` line-height: var(${role.lineHeightToken});` : ''}`}
-			>
-				{role.beispieltext ?? DEFAULT_TEXT}
-			</p>
-			{#if role.demoText}
-				<p
-					class="demo"
-					style={`font-size: var(${role.token});${role.lineHeightToken ? ` line-height: var(${role.lineHeightToken});` : ''}`}
-				>
-					{role.demoText}
-				</p>
+{#snippet specimenCell(role: Row)}
+	<p
+		bind:this={specimenEls[role.index]}
+		class="type-specimen__specimen"
+		class:type-specimen__specimen--bold={role.bold}
+		style={fontStyle(role)}
+	>
+		{role.beispieltext ?? DEFAULT_TEXT}
+	</p>
+	{#if role.demoText}
+		<p class="type-specimen__demo" style={fontStyle(role)}>{role.demoText}</p>
+	{/if}
+{/snippet}
+
+{#snippet metaCell(role: Row)}
+	<span class="type-specimen__meta">
+		<span class="type-specimen__label">{role.label}</span>
+		<span class="type-specimen__usage">{role.usage}</span>
+		<span class="type-specimen__tokens">
+			<span class="type-specimen__chip">
+				<Chip value={role.token} />
+				{#if px[role.token]}<span class="type-specimen__px">{px[role.token]}</span>{/if}
+			</span>
+			{#if role.lineHeightToken}
+				<span class="type-specimen__chip"><Chip value={role.lineHeightToken} /></span>
 			{/if}
-			<div class="meta">
-				<span class="label">{role.label}</span>
-				<span class="usage">{role.usage}</span>
-				<div class="tokens">
-					<span class="chip">
-						<Chip value={role.token} />
-						{#if px[role.token]}<span class="px">{px[role.token]}</span>{/if}
-					</span>
-					{#if role.lineHeightToken}
-						<span class="chip">
-							<Chip value={role.lineHeightToken} />
-						</span>
-					{/if}
-				</div>
-			</div>
-		</li>
-	{/each}
-</ul>
+		</span>
+	</span>
+{/snippet}
+
+<div class="type-specimen">
+	<Table
+		{columns}
+		{rows}
+		density="none"
+		showHeader="sr-only"
+		caption="Text-Rollen mit Schriftprobe, Einsatzzweck und Tokens"
+	/>
+</div>
 
 <style>
-	.specimens {
-		list-style: none;
+	.type-specimen {
 		margin: 0 0 1em;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
 	}
-	.row {
-		display: grid;
-		grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-		align-items: center;
-		gap: var(--z-ds-space-24);
-		padding: var(--z-ds-space-20) 0;
+	/* ── Skin: Zeilen-Rhythmus + Trenner (vor der Migration am <li>). ── */
+	.type-specimen :global(.ds-table__cell) {
+		padding: var(--z-ds-space-20) var(--z-ds-space-24) var(--z-ds-space-20) 0;
 		border-bottom: 1px solid var(--ds-border);
 	}
-	.specimen {
+	.type-specimen :global(.ds-table__cell:last-child) {
+		padding-right: 0;
+	}
+	.type-specimen__specimen {
 		margin: 0;
 		color: var(--ds-text);
 		line-height: 1.2;
@@ -111,60 +127,58 @@
 		font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, FreeSans, sans-serif;
 		overflow-wrap: anywhere;
 	}
+	.type-specimen__specimen--bold {
+		font-weight: 700;
+	}
 	/* Demo-Absatz: mehrzeilige Absatzwirkung der Rolle; auf Lese-Breite begrenzt.
-	   Explizit in Spalte 1 unter dem Specimen platziert — als zweites Grid-Kind
-	   würde er sonst in die Meta-Spalte rutschen. */
-	.demo {
-		grid-column: 1;
-		margin: 0;
+	   Steht jetzt schlicht unter dem Specimen IN DERSELBEN ZELLE — der frühere
+	   grid-column/grid-row-Zirkus entfällt. */
+	.type-specimen__demo {
+		/* Abstand zur Specimen-Zeile — trug früher der row-gap des Zeilen-Grids. */
+		margin: var(--z-ds-space-24) 0 0;
 		max-width: 66ch;
 		color: var(--ds-text-body);
 		font-family: 'TabletGothic', 'Helvetica Neue', Helvetica, Arial, FreeSans, sans-serif;
 	}
-	/* Meta bleibt neben dem Specimen (Zeile 1), auch wenn ein Demo-Absatz folgt. */
-	.row:has(.demo) .meta {
-		grid-column: 2;
-		grid-row: 1 / span 2;
-	}
-	.specimen.bold {
-		font-weight: 700;
-	}
-	.meta {
+	.type-specimen__meta {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
 		min-width: 0;
 	}
-	.label {
+	.type-specimen__label {
 		font-size: var(--ds-text-sm);
 		font-weight: 600;
 		color: var(--ds-text);
 	}
-	.usage {
+	.type-specimen__usage {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 		max-width: 48ch;
 	}
-	.tokens {
+	.type-specimen__tokens {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--z-ds-space-12);
 		margin-top: 4px;
 	}
-	.chip {
+	.type-specimen__chip {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.px {
+	.type-specimen__px {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-faint);
 	}
+	/* Schmale Viewports: feste Spaltenbreite aufheben, Spalten flexibel verteilen. */
 	@media (max-width: 640px) {
-		.row {
-			grid-template-columns: 1fr;
-			gap: var(--z-ds-space-12);
+		.type-specimen :global(.ds-table__cell:first-child) {
+			width: auto;
+		}
+		.type-specimen :global(.ds-table__cell) {
+			padding-right: var(--z-ds-space-12);
 		}
 	}
 </style>

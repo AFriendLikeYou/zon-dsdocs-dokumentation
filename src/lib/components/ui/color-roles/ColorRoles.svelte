@@ -6,9 +6,15 @@
   dahinterliegende --z-ds-Foundation-Token (kuratiert aus global.css) + ein
   Einsatz-Satz. Optional eine Kontrast-Sektion: WCAG-Ratio für kuratierte
   Text-auf-Fläche-Paare, live berechnet, mit AA/AAA-Badge.
+
+  Struktur: DÜNNER WRAPPER um `ui/table` (K9). Je Gruppe eine eigene Tabelle —
+  die sichtbare Gruppen-Überschrift bleibt <h3> über der Tabelle (nicht der
+  Table-Eyebrow), damit die „Karten"-Optik (gerahmter Block je Gruppe) erhalten
+  bleibt. Spalten-Zuordnung kommt über eine sr-only-Kopfzeile.
 -->
 <script lang="ts">
 	import { Chip } from '$components/ui/chip';
+	import { Table } from '$components/ui/table';
 
 	export type RoleItem = { token: string; raw: string; usage: string };
 	export type RoleGroup = { titel: string; beschreibung?: string; rollen: RoleItem[] };
@@ -71,71 +77,103 @@
 		}));
 		resolvedPairs = pairs.map((p) => ({ ...p, ratio: contrast(val(p.fg), val(p.bg)) }));
 	});
+
+	// Spalten: Vorschau · Rolle+Verwendung (Zeilenkopf) · Wert+Foundation-Token.
+	// Verwendung bzw. Foundation-Token bleiben BEWUSST in der jeweiligen Zelle
+	// gestapelt (statt eigener Spalte) — sonst bricht die Zeilen-Optik.
+	const roleColumns = [
+		{ key: 'swatch', label: 'Vorschau', width: '2rem', render: roleSwatchCell },
+		{ key: 'token', label: 'Rolle und Verwendung', header: true, render: roleIdentCell },
+		{ key: 'wert', label: 'Aufgelöster Wert und Foundation-Token', render: roleValueCell }
+	];
+	const pairColumns = [
+		{ key: 'demo', label: 'Vorschau', width: '2.5rem', render: pairDemoCell },
+		{ key: 'label', label: 'Farbpaar', header: true, render: pairIdentCell },
+		{ key: 'ratio', label: 'Kontrastverhältnis und WCAG-Stufe', render: pairRatioCell }
+	];
 </script>
 
+{#snippet roleSwatchCell(r: ResolvedRole)}
+	<span class="color-roles__swatch" style="background:{r.wert}"></span>
+{/snippet}
+{#snippet roleIdentCell(r: ResolvedRole)}
+	<span class="color-roles__ident">
+		<span class="color-roles__name-line"><Chip value={r.token} /></span>
+		<span class="color-roles__usage">{r.usage}</span>
+	</span>
+{/snippet}
+{#snippet roleValueCell(r: ResolvedRole)}
+	<span class="color-roles__right">
+		<code class="color-roles__val">{r.wert}</code>
+		<code class="color-roles__raw" title="Foundation-Token hinter der Rolle">{r.raw}</code>
+	</span>
+{/snippet}
+
+{#snippet pairDemoCell(p: ResolvedPair)}
+	<span class="color-roles__pair-demo" style="background:var({p.bg});color:var({p.fg})">Aa</span>
+{/snippet}
+{#snippet pairIdentCell(p: ResolvedPair)}
+	<span class="color-roles__ident">
+		<span class="color-roles__pair-label">{p.label}</span>
+		<span class="color-roles__usage"><code>{p.fg}</code> auf <code>{p.bg}</code></span>
+	</span>
+{/snippet}
+{#snippet pairRatioCell(p: ResolvedPair)}
+	<span class="color-roles__right">
+		<span class="color-roles__ratio">{p.ratio ?? '—'} : 1</span>
+		<span class="color-roles__wcag" class:color-roles__wcag--fail={badge(p.ratio) === 'fail'}
+			>{badge(p.ratio)}</span
+		>
+	</span>
+{/snippet}
+
 {#if resolved.length}
-	<div class="roles">
+	<div class="color-roles">
 		{#each resolved as group (group.titel)}
-			<section class="group">
-				<h3 class="group__title">{group.titel}</h3>
-				{#if group.beschreibung}<p class="group__desc">{group.beschreibung}</p>{/if}
-				<ul class="rows">
-					{#each group.rollen as r (r.token)}
-						<li class="row">
-							<span class="sw" style="background:{r.wert}"></span>
-							<div class="ident">
-								<span class="name-line">
-									<Chip value={r.token} />
-								</span>
-								<span class="usage">{r.usage}</span>
-							</div>
-							<div class="right">
-								<code class="val">{r.wert}</code>
-								<code class="raw" title="Foundation-Token hinter der Rolle">{r.raw}</code>
-							</div>
-						</li>
-					{/each}
-				</ul>
+			<section class="color-roles__group">
+				<h3 class="color-roles__group-title">{group.titel}</h3>
+				{#if group.beschreibung}<p class="color-roles__group-desc">{group.beschreibung}</p>{/if}
+				<div class="color-roles__frame">
+					<Table
+						columns={roleColumns}
+						rows={group.rollen}
+						density="none"
+						showHeader="sr-only"
+						caption={`Farbrollen — ${group.titel}`}
+					/>
+				</div>
 			</section>
 		{/each}
 
 		{#if resolvedPairs.length}
-			<section class="group">
-				<h3 class="group__title">Kontrast (live, aktuelles Theme)</h3>
-				<p class="group__desc">
-					WCAG-Kontrastverhältnisse der wichtigsten Text-auf-Fläche-Paare — mit dem
-					Theme-Schalter wechseln die Werte live mit.
+			<section class="color-roles__group">
+				<h3 class="color-roles__group-title">Kontrast (live, aktuelles Theme)</h3>
+				<p class="color-roles__group-desc">
+					WCAG-Kontrastverhältnisse der wichtigsten Text-auf-Fläche-Paare — mit dem Theme-Schalter
+					wechseln die Werte live mit.
 				</p>
-				<ul class="rows">
-					{#each resolvedPairs as p (p.label)}
-						<li class="row row--pair">
-							<span class="pair-demo" style="background:var({p.bg});color:var({p.fg})">Aa</span>
-							<div class="ident">
-								<span class="pair-label">{p.label}</span>
-								<span class="usage"><code>{p.fg}</code> auf <code>{p.bg}</code></span>
-							</div>
-							<div class="right">
-								<span class="ratio">{p.ratio ?? '—'} : 1</span>
-								<span class="wcag" class:wcag--fail={badge(p.ratio) === 'fail'}
-									>{badge(p.ratio)}</span
-								>
-							</div>
-						</li>
-					{/each}
-				</ul>
+				<div class="color-roles__frame">
+					<Table
+						columns={pairColumns}
+						rows={resolvedPairs}
+						density="none"
+						showHeader="sr-only"
+						caption="Kontrastverhältnisse der Text-auf-Fläche-Paare im aktuellen Theme"
+					/>
+				</div>
 			</section>
 		{/if}
 	</div>
 {/if}
 
 <style>
-	.roles {
+	.color-roles {
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-32);
 		margin: 0 0 1em;
 	}
-	.group__title {
+	.color-roles__group-title {
 		margin: 0 0 var(--z-ds-space-8);
 		font-size: var(--ds-text-xs);
 		text-transform: uppercase;
@@ -143,97 +181,98 @@
 		font-weight: 600;
 		color: var(--ds-text-muted);
 	}
-	.group__desc {
+	.color-roles__group-desc {
 		margin: 0 0 var(--z-ds-space-16);
 		max-width: 60ch;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
-	.rows {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 1px;
-		background: var(--ds-border-soft);
+	/* Gerahmter Block je Gruppe — ersetzt den früheren 1px-grid-gap-Trick der <ul>. */
+	.color-roles__frame {
+		background: var(--ds-surface);
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
 		overflow: hidden;
 	}
-	.row {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-m);
-		padding: var(--z-ds-space-s) var(--z-ds-space-m);
-		background: var(--ds-surface);
+	/* ── Skin auf die .ds-table-Hooks: Zeilen-Rhythmus + Hairline-Trenner. ── */
+	.color-roles__frame :global(.ds-table__cell) {
+		padding: var(--z-ds-space-s) var(--z-ds-space-m) var(--z-ds-space-s) 0;
 	}
-	.sw {
-		flex: none;
+	.color-roles__frame :global(.ds-table__cell:first-child) {
+		padding-left: var(--z-ds-space-m);
+	}
+	.color-roles__frame :global(.ds-table__row + .ds-table__row .ds-table__cell) {
+		border-top: 1px solid var(--ds-border-soft);
+	}
+	/* Wert-Spalte so schmal wie ihr Inhalt (früher: flex: none). */
+	.color-roles__frame :global(.ds-table__cell:last-child) {
+		width: 1%;
+		white-space: nowrap;
+	}
+	.color-roles__swatch {
+		display: block;
 		width: 2rem;
 		height: 2rem;
 		border-radius: var(--ds-radius-sm);
 		border: 1px solid var(--ds-border-soft);
 	}
-	.ident {
+	.color-roles__ident {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 		min-width: 0;
-		flex: 1;
 	}
-	.name-line {
+	.color-roles__name-line {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
 		min-width: 0;
 	}
-	.usage {
+	.color-roles__usage {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.right {
+	.color-roles__right {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
 		gap: 2px;
-		flex: none;
 	}
-	.val {
+	.color-roles__val {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-body);
 	}
-	.raw {
+	.color-roles__raw {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-faint, var(--ds-text-muted));
 	}
-	.pair-demo {
-		flex: none;
+	.color-roles__pair-demo {
+		display: grid;
+		place-items: center;
 		width: 2.5rem;
 		height: 2rem;
 		border-radius: var(--ds-radius-sm);
 		border: 1px solid var(--ds-border-soft);
-		display: grid;
-		place-items: center;
 		font-weight: 600;
 	}
-	.pair-label {
+	.color-roles__pair-label {
 		font-size: var(--ds-text-sm);
 		font-weight: 600;
 	}
-	.ratio {
+	.color-roles__ratio {
 		font-size: var(--ds-text-sm);
 		font-variant-numeric: tabular-nums;
 	}
-	.wcag {
+	.color-roles__wcag {
 		font-size: var(--ds-text-xs);
 		font-weight: 600;
 		color: var(--ds-positive, green);
 	}
-	.wcag--fail {
+	.color-roles__wcag--fail {
 		color: var(--ds-negative, #b91109);
 	}
 	@media (max-width: 640px) {
-		.right {
+		.color-roles__frame :global(.ds-table__cell:last-child) {
 			display: none;
 		}
 	}

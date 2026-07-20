@@ -2,8 +2,13 @@
   MotionDemo.svelte — macht die Motion-Tokens (--ds-ease-* / --ds-dur-*) erlebbar.
   Werte werden live aus dem geladenen Stylesheet gelesen (kein Hardcode). Klick spielt
   die Bewegung mit dem jeweiligen Token ab. Respektiert prefers-reduced-motion.
+
+  Struktur: DÜNNER WRAPPER um `ui/table` (K9). Zwei Spalten — Token (Zeilenkopf:
+  Label, CSS-Variable, aufgelöster Wert) und die abspielbare Demo-Bühne. Die Bühne
+  ist Zellinhalt; die Table kennt sie nicht.
 -->
 <script lang="ts">
+	import { Table } from '$components/ui/table';
 	import { resolveCssVar } from '$lib/utils';
 
 	type MotionToken = {
@@ -33,69 +38,86 @@
 	function play(cssVar: string) {
 		flipped[cssVar] = !flipped[cssVar];
 	}
+
+	const columns = [
+		{ key: 'label', label: 'Token', width: '33%', header: true, render: metaCell },
+		{ key: 'demo', label: 'Demo (Klick spielt die Bewegung ab)', render: demoCell }
+	];
 </script>
 
+{#snippet metaCell(t: MotionToken)}
+	<span class="motion-demo__meta">
+		<span class="motion-demo__label">{t.label}</span>
+		<code class="motion-demo__var">{t.cssVar}</code>
+		<span class="motion-demo__val">{values[t.cssVar]}</span>
+	</span>
+{/snippet}
+
+{#snippet demoCell(t: MotionToken)}
+	<button
+		type="button"
+		class="motion-demo__track"
+		onclick={() => play(t.cssVar)}
+		aria-label={`„${t.label}" abspielen`}
+	>
+		<span
+			class="motion-demo__dot"
+			class:motion-demo__dot--end={flipped[t.cssVar]}
+			style={type === 'easing'
+				? `transition: transform 700ms var(${t.cssVar});`
+				: `transition: transform var(${t.cssVar}) var(--ds-ease-out);`}
+		></span>
+	</button>
+{/snippet}
+
 <div class="motion-demo">
-	{#each tokens as t (t.cssVar)}
-		<div class="row">
-			<div class="meta">
-				<span class="label">{t.label}</span>
-				<code>{t.cssVar}</code>
-				<span class="val">{values[t.cssVar]}</span>
-			</div>
-			<button
-				type="button"
-				class="track"
-				onclick={() => play(t.cssVar)}
-				aria-label={`„${t.label}" abspielen`}
-			>
-				<span
-					class="dot"
-					class:end={flipped[t.cssVar]}
-					style={type === 'easing'
-						? `transition: transform 700ms var(${t.cssVar});`
-						: `transition: transform var(${t.cssVar}) var(--ds-ease-out);`}
-				></span>
-			</button>
-		</div>
-	{/each}
+	<Table
+		{columns}
+		rows={tokens}
+		density="none"
+		showHeader="sr-only"
+		caption={type === 'easing'
+			? 'Beschleunigungskurven zum Abspielen'
+			: 'Dauer-Tokens zum Abspielen'}
+	/>
 </div>
 
 <style>
 	.motion-demo {
-		display: flex;
-		flex-direction: column;
-		gap: var(--z-ds-space-16);
 		margin-block: var(--z-ds-space-16);
 	}
-	.row {
-		display: grid;
-		grid-template-columns: minmax(200px, 1fr) 2fr;
-		gap: var(--z-ds-space-16);
-		align-items: center;
+	/* ── Skin: 16px Zeilen- und Spaltenabstand (früher grid gap). ── */
+	.motion-demo :global(.ds-table__cell) {
+		padding: var(--z-ds-space-8) var(--z-ds-space-16) var(--z-ds-space-8) 0;
 	}
-	.meta {
+	.motion-demo :global(.ds-table__cell:last-child) {
+		padding-right: 0;
+	}
+	.motion-demo__meta {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
+		min-width: 200px;
 	}
-	.label {
+	.motion-demo__label {
 		font-weight: 500;
 		font-size: var(--ds-text-sm);
 	}
-	.meta code {
+	.motion-demo__var {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-body);
 	}
-	.val {
+	.motion-demo__val {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.track {
+	.motion-demo__track {
 		all: unset;
+		display: block;
 		position: relative;
+		width: 100%;
 		height: 40px;
 		border-radius: var(--ds-radius);
 		background: var(--ds-surface-raised);
@@ -103,11 +125,11 @@
 		overflow: hidden;
 		container-type: inline-size;
 	}
-	.track:focus-visible {
+	.motion-demo__track:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.dot {
+	.motion-demo__dot {
 		position: absolute;
 		top: 50%;
 		left: 8px;
@@ -119,12 +141,12 @@
 		transform: translateX(0);
 	}
 	/* cqi = Track-Breite → Punkt läuft per transform über die volle Strecke (minus Dot + Padding). */
-	.dot.end {
+	.motion-demo__dot--end {
 		transform: translateX(calc(100cqi - 24px - 16px));
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.dot {
+		.motion-demo__dot {
 			transition: none !important;
 		}
 	}

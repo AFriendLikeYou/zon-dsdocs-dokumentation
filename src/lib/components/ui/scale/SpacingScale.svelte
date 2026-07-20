@@ -4,20 +4,25 @@
   die Visualisierung IST der Wert. Der px-Wert wird aus der GERENDERTEN Balkenbreite
   gelesen (nicht aus dem Roh-Token) — so stimmt er immer mit dem Balken überein,
   auch bei Media-Query-abhängigen Stufen wie xxl.
+
+  Struktur: DÜNNER WRAPPER um `ui/table` (K9). Drei Spalten — Stufe (Zeilenkopf),
+  maßstabsgetreue Balken-Probe, aufgelöster Wert + Token-Name. Der Balken ist
+  Zellinhalt (Bühne), die Table kennt ihn nicht.
 -->
 <script lang="ts">
 	import { Chip } from '$components/ui/chip';
+	import { Table } from '$components/ui/table';
 
 	let {
 		/** Spacing-Tokens (--z-ds-space-*); jeder rendert einen maßstabsgetreuen Balken. */
 		tokens = []
 	}: { tokens?: string[] } = $props();
 
-	let listEl: HTMLUListElement;
+	let listEl: HTMLDivElement;
 	let px = $state<Record<string, number>>({});
 	$effect(() => {
 		if (!listEl) return;
-		const bars = listEl.querySelectorAll('.bar');
+		const bars = listEl.querySelectorAll('.spacing-scale__bar');
 		const m: Record<string, number> = {};
 		tokens.forEach((t, i) => {
 			const b = bars[i] as HTMLElement | undefined;
@@ -27,63 +32,83 @@
 	});
 
 	const short = (t: string) => t.replace('--z-ds-space-', '');
+
+	type Row = { token: string };
+	const rows = $derived(tokens.map((token) => ({ token })));
+
+	const columns = [
+		{
+			key: 'step',
+			label: 'Stufe',
+			width: '2.5rem',
+			align: 'right' as const,
+			header: true,
+			render: stepCell
+		},
+		{ key: 'bar', label: 'Maßstabsgetreue Probe', render: barCell },
+		{ key: 'value', label: 'Wert und Token', render: valueCell }
+	];
 </script>
 
-<ul class="scale" bind:this={listEl}>
-	{#each tokens as t (t)}
-		<li class="row">
-			<span class="step">{short(t)}</span>
-			<span class="track"><span class="bar" style="width: var({t})"></span></span>
-			<span class="info">
-				{#if px[t]}
-					<Chip value={`${px[t]}px`} label={`${px[t]} px`} />
-				{/if}
-				<Chip value={t} class="name-pill" />
-			</span>
-		</li>
-	{/each}
-</ul>
+{#snippet stepCell(row: Row)}<span class="spacing-scale__step">{short(row.token)}</span>{/snippet}
+{#snippet barCell(row: Row)}
+	<span class="spacing-scale__track"
+		><span class="spacing-scale__bar" style="width: var({row.token})"></span></span
+	>
+{/snippet}
+{#snippet valueCell(row: Row)}
+	<span class="spacing-scale__info">
+		{#if px[row.token]}
+			<Chip value={`${px[row.token]}px`} label={`${px[row.token]} px`} />
+		{/if}
+		<Chip value={row.token} class="spacing-scale__name-pill" />
+	</span>
+{/snippet}
+
+<div class="spacing-scale" bind:this={listEl}>
+	<Table
+		{columns}
+		{rows}
+		density="none"
+		showHeader="sr-only"
+		caption="Abstands-Skala mit maßstabsgetreuen Balken"
+	/>
+</div>
 
 <style>
-	.scale {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 10px;
+	/* ── Skin: 10px Zeilenabstand (früher grid gap) + 16px Spaltenabstand. ── */
+	.spacing-scale :global(.ds-table__cell) {
+		padding: 5px var(--z-ds-space-16) 5px 0;
 	}
-	.row {
-		display: grid;
-		grid-template-columns: 2.5rem minmax(3rem, 1fr) auto;
-		align-items: center;
-		gap: var(--z-ds-space-16);
+	.spacing-scale :global(.ds-table__cell:last-child) {
+		width: 1%;
+		padding-right: 0;
+		white-space: nowrap;
 	}
-	.step {
+	.spacing-scale__step {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
-		text-align: right;
 	}
-	.track {
+	.spacing-scale__track {
 		display: block;
-		min-width: 0;
+		min-width: 3rem;
 	}
-	.bar {
+	.spacing-scale__bar {
 		display: block;
 		height: 16px;
 		max-width: 100%;
 		border-radius: var(--ds-radius-xs);
 		background: var(--ds-accent-brand);
 	}
-	.info {
+	.spacing-scale__info {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
-		white-space: nowrap;
 	}
 	/* Token-Namen-Pille auf schmalen Viewports ausblenden (px-Wert genügt). */
 	@media (max-width: 560px) {
-		:global(.name-pill) {
+		:global(.spacing-scale__name-pill) {
 			display: none;
 		}
 	}

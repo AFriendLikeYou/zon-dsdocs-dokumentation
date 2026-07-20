@@ -11,14 +11,18 @@
   Chip/Badge/Swatch in Zellen, ohne dass Table diese Atome kennt.
 
   Props:
-    · columns  — Spaltendefinition: { key, label?, width?, align?, render? }.
-                 `render?: Snippet<[row]>` bestimmt den Zellinhalt (sonst row[key]).
-    · rows     — flache Zeilen ODER
-    · groups   — Gruppen { label?, count?, description?, rows } mit Gruppen-Kopfzeile
-                 (Eyebrow links, Counter rechts) — wie die Token-Gruppen der SpecTable.
-    · density  — 'compact' | 'comfortable' (Default) — vertikaler Zeilen-Rhythmus.
-    · caption  — a11y-Beschriftung (sr-only <caption>); `label` als Alias.
-    · class    — Passthrough (Skin-Klasse des Wrappers landet am <table>).
+    · columns    — Spaltendefinition: { key, label?, width?, align?, header?, render? }.
+                   `render?: Snippet<[row]>` bestimmt den Zellinhalt (sonst row[key]).
+                   `header: true` macht die Zelle zum Zeilenkopf (<th scope="row">).
+    · rows       — flache Zeilen ODER
+    · groups     — Gruppen { label?, count?, description?, rows } mit Gruppen-Kopfzeile
+                   (Eyebrow links, Counter rechts) — wie die Token-Gruppen der SpecTable.
+    · density    — 'compact' | 'comfortable' (Default) | 'none' — vertikaler Rhythmus.
+    · showHeader — false (Default) · true (sichtbare Kopfzeile) · 'sr-only'
+                   (Kopfzeile nur für Screenreader — Spalten-Zuordnung ohne Optik).
+    · valign     — Zell-Ausrichtung vertikal: 'middle' (Default) | 'top' | 'baseline'.
+    · caption    — a11y-Beschriftung (sr-only <caption>); `label` als Alias.
+    · class      — Passthrough (Skin-Klasse des Wrappers landet am <table>).
 
   Genau EINE Zeilenquelle nutzen (`rows` ODER `groups`). Für die Optik NICHT hier
   Farben/Border setzen — das macht der Wrapper.
@@ -35,6 +39,12 @@
 		width?: string;
 		/** Zell-Ausrichtung. */
 		align?: 'left' | 'right' | 'center';
+		/**
+		 * Diese Zelle ist der Zeilenkopf: rendert `<th scope="row">` statt `<td>`.
+		 * Screenreader lesen die Zelle als Bezeichner der übrigen Zellen der Zeile.
+		 * Optisch identisch zu `<td>` (Gewicht/Ausrichtung werden zurückgesetzt).
+		 */
+		header?: boolean;
 		/** Zellinhalt als Snippet (bekommt die Zeile) — für Chip/Badge/Swatch. */
 		render?: Snippet<[Row]>;
 	};
@@ -54,6 +64,7 @@
 		groups,
 		density = 'comfortable',
 		showHeader = false,
+		valign = 'middle',
 		caption,
 		label,
 		class: className = ''
@@ -61,9 +72,16 @@
 		columns: Column[];
 		rows?: Row[];
 		groups?: Group[];
-		density?: 'compact' | 'comfortable';
-		/** Sichtbare Kopfzeile aus den Spalten-Labels rendern. */
-		showHeader?: boolean;
+		/** Vertikaler Zeilen-Rhythmus; 'none' überlässt das Zell-Padding der Skin. */
+		density?: 'compact' | 'comfortable' | 'none';
+		/**
+		 * Kopfzeile aus den Spalten-Labels rendern:
+		 * `false` gar nicht · `true` sichtbar · `'sr-only'` nur für Screenreader.
+		 * `'sr-only'` gibt Listen-Optiken echte Spalten-Zuordnung, ohne die Optik zu ändern.
+		 */
+		showHeader?: boolean | 'sr-only';
+		/** Vertikale Ausrichtung der Zellinhalte (Proben/Demos brauchen oft 'top'). */
+		valign?: 'middle' | 'top' | 'baseline';
 		caption?: string;
 		label?: string;
 		class?: string;
@@ -71,15 +89,33 @@
 
 	const colCount = $derived(columns.length);
 	const captionText = $derived(caption ?? label);
+	const headMode = $derived(showHeader === 'sr-only' ? 'sr' : showHeader ? 'visible' : 'none');
 	const classes = $derived(
-		['ds-table', `ds-table--${density}`, className].filter(Boolean).join(' ')
+		['ds-table', `ds-table--${density}`, `ds-table--valign-${valign}`, className]
+			.filter(Boolean)
+			.join(' ')
 	);
 </script>
 
+{#snippet cellInner(col: Column, row: Row)}{#if col.render}{@render col.render(row)}{:else}{(row[
+			col.key
+		] ?? '') as string}{/if}{/snippet}
+
 {#snippet cell(col: Column, row: Row)}
-	<td class="ds-table__cell" data-align={col.align ?? 'left'} style:width={col.width}>
-		{#if col.render}{@render col.render(row)}{:else}{(row[col.key] ?? '') as string}{/if}
-	</td>
+	{#if col.header}
+		<th
+			class="ds-table__cell ds-table__cell--row-header"
+			scope="row"
+			data-align={col.align ?? 'left'}
+			style:width={col.width}
+		>
+			{@render cellInner(col, row)}
+		</th>
+	{:else}
+		<td class="ds-table__cell" data-align={col.align ?? 'left'} style:width={col.width}>
+			{@render cellInner(col, row)}
+		</td>
+	{/if}
 {/snippet}
 
 {#snippet bodyRows(list: Row[])}
@@ -94,11 +130,13 @@
 
 <table class={classes}>
 	{#if captionText}<caption class="sr-only">{captionText}</caption>{/if}
-	{#if showHeader}
-		<thead>
+	{#if headMode !== 'none'}
+		<thead class:ds-table__thead--sr={headMode === 'sr'}>
 			<tr class="ds-table__head">
 				{#each columns as col (col.key)}
-					<th data-align={col.align ?? 'left'} style:width={col.width}>{col.label ?? ''}</th>
+					<th scope="col" data-align={col.align ?? 'left'} style:width={col.width}
+						>{col.label ?? ''}</th
+					>
 				{/each}
 			</tr>
 		</thead>
@@ -143,9 +181,34 @@
 	}
 	.ds-table__cell,
 	.ds-table th {
-		vertical-align: middle;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
+	}
+	.ds-table--valign-middle :is(.ds-table__cell, th) {
+		vertical-align: middle;
+	}
+	.ds-table--valign-top :is(.ds-table__cell, th) {
+		vertical-align: top;
+	}
+	.ds-table--valign-baseline :is(.ds-table__cell, th) {
+		vertical-align: baseline;
+	}
+	/* Zeilenkopf ist semantisch <th>, optisch aber eine normale Zelle. */
+	.ds-table__cell--row-header {
+		font-weight: inherit;
+		text-align: left;
+	}
+	/* Kopfzeile nur für Screenreader: aus dem Layout genommen, DOM-Struktur bleibt. */
+	.ds-table__thead--sr {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 	.ds-table__cell[data-align='right'],
 	.ds-table th[data-align='right'] {
@@ -164,6 +227,10 @@
 	}
 	.ds-table--compact .ds-table__cell {
 		padding: var(--z-ds-space-8) var(--z-ds-space-8) var(--z-ds-space-8) 0;
+	}
+	/* 'none': kein eigener Rhythmus — die Skin des Wrappers setzt das Padding. */
+	.ds-table--none .ds-table__cell {
+		padding: 0;
 	}
 	.ds-table__group-cell,
 	.ds-table__group-desc {

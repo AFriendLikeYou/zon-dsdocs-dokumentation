@@ -116,7 +116,7 @@ prüfen** — in dieser Reihenfolge:
    Status-Flächen; Radiogroup + roving tabindex + Pfeiltasten. StatusSegmentedControl
    (✓/⚠/○) ist ein dünner Wrapper darüber, PropField nutzt `variant="flat"`),
    `ui/tab/` (Tabs — barrierefreies Panel-Umschalter-Atom: `tabs: {id?,label,icon?,
-   component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
+component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    roving tabindex + Pfeiltasten/Home/End. NICHT die AnchorBar-Sprungnavigation,
    die bleibt Scrollspy-`<nav>`), `ui/resize-handle/` (Zieh-Griff für Breite/Höhe —
    `direction`, `onresize(delta)`, `label`, Tastatur-Schritte; Consumer hält min/max.
@@ -135,10 +135,11 @@ prüfen** — in dieser Reihenfolge:
    aria-describedby, kein Tooltip auf Touch; Badge/IconActionButton/SegmentedControl
    heben ihr `title`-Prop intern darauf),
    `ui/table/` (DER daten-getriebene Tabellen-Renderer — `columns` mit
-   `render`-Snippets je Zelle, `rows` ODER `groups` mit Eyebrow+Counter,
-   `density`, sr-only `caption`/`label`; Optik bringt der Wrapper als Skin-Klasse.
-   SpecTable (Editor, mz-Optik) und TokenTable/MeasureTable (öffentliches Specsheet)
-   sind dünne Wrapper darüber — löst die frühere v2-Notiz M3 ein),
+   `render`-Snippets je Zelle und `header: true` für Zeilenköpfe (`<th scope="row">`),
+   `rows` ODER `groups` mit Eyebrow+Counter, `density: compact|comfortable|none`,
+   `valign: middle|top|baseline`, `showHeader: false|true|'sr-only'`, sr-only
+   `caption`/`label`; Optik bringt der Wrapper als Skin-Klasse. **Jede tabellarische
+   Oberfläche der Doku-App läuft hierüber** — keine `<ul class="rows">`-Grids mehr),
    Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/banner/` (Hinweis-/Status-Banner — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
@@ -151,10 +152,33 @@ prüfen** — in dieser Reihenfolge:
 Fokus-Ringe für Neubauten über die Utility `.focus-ring` (`global.css`, 2px/2px);
 abweichende Offsets nur mit Kommentar-Begründung.
 
-**Tabellen (ehem. v2-Notiz M3, eingelöst in K8):** `ui/table/` ist der gemeinsame
-daten-getriebene Renderer der Tabellen-Zwillinge. `SpecTable` (Spec-Editor,
-Maschinen-Optik: gestrichelte Trenner, machine-Chips, Gruppen+Counter) und
-`TokenTable`/`MeasureTable` (öffentliches Specsheet) sind dünne Wrapper darüber —
-Name + API unverändert, die generierten `.svx` importieren weiter aus
-`ui/specsheet/`. Neue Tabellen-Oberflächen bauen direkt auf `ui/table` auf
-(Skin-Klasse per `class`-Prop, Zellinhalte per `render`-Snippet).
+**Tabellen (ehem. v2-Notiz M3, eingelöst in K8, vollendet in K9):** `ui/table/` ist
+der gemeinsame daten-getriebene Renderer ALLER tabellarischen Oberflächen. Wrapper
+sind dünn: Struktur + Semantik kommen aus dem Renderer, die je Bühne unterschiedliche
+Optik bringt eine scoped Skin-Klasse über die `.ds-table__*`-Hooks.
+
+Consumer (alle mit unveränderter öffentlicher API — die generierten `.svx` importieren
+weiter aus `ui/specsheet/`):
+
+| Wrapper                             | Spaltenmodell                                                         |
+| ----------------------------------- | --------------------------------------------------------------------- |
+| `admin/…/SpecTable`                 | Maschinen-Optik: gestrichelte Trenner, machine-Chips, Gruppen+Counter |
+| `ui/specsheet/TokenTable`           | Swatch · Name · Hinweis · Wert (Gruppen mit Kategorie-Eyebrow)        |
+| `ui/specsheet/MeasureTable`         | Maß · Wert (+Token/Herkunft)                                          |
+| `ui/specsheet/A11yList`             | Kriterium (Zeilenkopf, Status-Punkt) · Befund                         |
+| `ui/specsheet/KeyboardList`         | Taste (Zeilenkopf) · Aktion                                           |
+| `ui/color-roles/ColorRoles`         | Vorschau · Rolle+Verwendung (Zeilenkopf) · Wert+Foundation-Token      |
+| `ui/token-reference/TokenReference` | (Swatch ·) Token+Einsatzzweck (Zeilenkopf) · Wert                     |
+| `ui/type-specimen/TypeSpecimen`     | Schriftprobe · Rolle+Einsatzzweck+Tokens (Zeilenkopf)                 |
+| `ui/scale/SpacingScale`             | Stufe (Zeilenkopf) · Balken-Probe · Wert+Token                        |
+| `ui/motion-demo/MotionDemo`         | Token (Zeilenkopf) · abspielbare Demo-Bühne                           |
+
+Proben/Bühnen (Schriftmuster, Spacing-Balken, Motion-Kacheln, Swatches) sind
+**Zellinhalt per `render`-Snippet** — die Table kennt diese Atome nicht.
+
+**Bewusst KEINE Tabelle:** `ui/scale/RadiusScale` (responsives Karten-Raster, keine
+Zeilen/Spalten-Zuordnung) und `ui/specsheet/ComponentHero` (Seiten-Kopf aus Eyebrow,
+Badge-Zeile, Zweck-Absatz und CTA — Layout, keine Datenzeilen).
+
+Neue Tabellen-Oberflächen bauen direkt auf `ui/table` auf (Skin-Klasse per
+`class`-Prop bzw. Wrapper-`:global`, Zellinhalte per `render`-Snippet).

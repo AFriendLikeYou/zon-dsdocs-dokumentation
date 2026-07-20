@@ -1,34 +1,59 @@
-<!-- KeyboardList.svelte — Tastatur-Bedienung als native, adaptive Liste (Barrierefreiheit-Tab). -->
+<!--
+  KeyboardList.svelte — Tastatur-Bedienung als native, adaptive Tabelle
+  (Barrierefreiheit-Tab).
+
+  DÜNNER WRAPPER um `ui/table` (K9): war vorher eine <dl> aus SpecRow-Grids. Zwei
+  Spalten — Taste (Zeilenkopf) und Aktion.
+-->
 <script lang="ts">
 	import type { KeyboardRule } from '$types/spec';
-	import SpecRow from './SpecRow.svelte';
-	let { items = [] }: {
+	import { Table } from '$components/ui/table';
+	let {
+		items = []
+	}: {
 		/** Tastatur-Regeln (Taste + Aktion). */
 		items?: KeyboardRule[];
 	} = $props();
+
+	const columns = [
+		{ key: 'taste', label: 'Taste', width: '160px', header: true, render: tasteCell },
+		{ key: 'aktion', label: 'Aktion', render: aktionCell }
+	];
 </script>
 
+{#snippet tasteCell(k: KeyboardRule)}<kbd class="keyboard-list__key">{k.taste}</kbd>{/snippet}
+{#snippet aktionCell(k: KeyboardRule)}<span class="keyboard-list__action">{k.aktion}</span
+	>{/snippet}
+
 {#if items.length}
-	<dl class="kbd-list">
-		{#each items as k}
-			<SpecRow>
-				<dt><kbd>{k.taste}</kbd></dt>
-				<dd>{k.aktion}</dd>
-			</SpecRow>
-		{/each}
-	</dl>
+	<div class="keyboard-list">
+		<Table
+			{columns}
+			rows={items}
+			density="none"
+			valign="baseline"
+			showHeader="sr-only"
+			caption="Tastatur-Bedienung — Tasten und Aktionen"
+		/>
+	</div>
 {/if}
 
 <style>
-	.kbd-list {
-		margin: 0;
+	.keyboard-list {
 		max-width: 640px;
 	}
-	dt {
-		display: flex;
-		align-items: center;
+	/* ── Skin: Zeilen-Rhythmus + Trenner (früher SpecRow). ── */
+	.keyboard-list :global(.ds-table__cell) {
+		padding: var(--z-ds-space-12) var(--z-ds-space-16) var(--z-ds-space-12) 0;
+		border-bottom: 1px solid var(--ds-border);
 	}
-	kbd {
+	.keyboard-list :global(.ds-table__cell:last-child) {
+		padding-right: 0;
+	}
+	.keyboard-list :global(.ds-table__row:last-child .ds-table__cell) {
+		border-bottom: 0;
+	}
+	.keyboard-list__key {
 		font-family: var(--ds-font-mono, ui-monospace, monospace);
 		font-size: var(--ds-text-xs);
 		line-height: 1;
@@ -39,8 +64,7 @@
 		padding: var(--z-ds-space-4) var(--z-ds-space-8);
 		white-space: nowrap;
 	}
-	dd {
-		margin: 0;
+	.keyboard-list__action {
 		color: var(--ds-text);
 		font-size: var(--ds-text-sm);
 	}
