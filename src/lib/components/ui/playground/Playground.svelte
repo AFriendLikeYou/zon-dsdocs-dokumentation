@@ -282,7 +282,7 @@
 					{#if c.type === 'select'}
 						<span class="playground__label">{c.label}</span>
 						<SegmentedControl
-							ariaLabel={c.label}
+							label={c.label}
 							options={c.options.map((o) => ({ value: o.value, label: o.label }))}
 							value={String(values[c.key])}
 							onchange={(v) => (values[c.key] = v)}

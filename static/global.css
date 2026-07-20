@@ -9,9 +9,11 @@
 	   in Gruppe 3 (Mapping), in den originalgetreuen DS-Kopien (Playground-Specimens)
 	   und bei Abständen/Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind
 	   bereits semantisch).
-	   AUSNAHME (bewusst): ui/SegmentedControl und ui/StageToggle greifen direkt auf
-	   rohe --z-ds-*, damit sie sich der jeweiligen Bühne anpassen (Bühnen-Adaptivität)
-	   statt dem Seiten-Theme zu folgen. ══════════════════════════════════════════ */
+	   AUSNAHME (bewusst): ui/StageToggle greift direkt auf rohe --z-ds-*, damit es
+	   sich der jeweiligen Bühne anpasst (Bühnen-Adaptivität) statt dem Seiten-Theme
+	   zu folgen. ui/SegmentedControl selbst referenziert KEINE RAW-Token mehr,
+	   sondern eigene --seg-*-Variablen; deren Bühnen-Remapping steht unten im
+	   `.ds-stage`-Block. ═════════════════════════════════════════════════════════ */
 
 	/* ── (1) SITE-LOKAL ───────────────────────────────────────────────────────
 	   Eigene Werte der Doku-App ohne z-ds-Herkunft. */
@@ -139,6 +141,19 @@
 	--ds-tint-positive-surface-strong: color-mix(in srgb, var(--ds-positive) 24%, transparent);
 	/* Kontur des Drift-Banners (Warn-Fläche mit sichtbarer Rahmenlinie) — echte Border. */
 	--ds-tint-warning-border: color-mix(in srgb, var(--ds-warning) 40%, transparent);
+
+	/* ── ui/SegmentedControl — Kontext-Variablen ──────────────────────────────
+	   Default (Pill-Optik) auf :root, NICHT auf der Komponente selbst: so kann ein
+	   .ds-stage-Vorfahre sie per Vererbung überschreiben (siehe .ds-stage-Block) —
+	   eine Deklaration am Komponenten-Element würde die Vererbung ausschalten. Die
+	   flat-Variante und Wrapper (StatusSegmentedControl) überschreiben ihren Teil. */
+	--seg-track-bg: color-mix(in srgb, var(--ds-text) 7%, transparent);
+	--seg-radius: 999px;
+	--seg-pad: 3px;
+	--seg-blur: 10px;
+	--seg-text: var(--ds-text-muted);
+	--seg-text-active: var(--ds-text);
+	--seg-thumb-bg: var(--ds-surface);
 }
 
 /* Mobile: zweizeilige Navbar (Hauptnav als eigene Zeile) → Header ist höher.
@@ -217,6 +232,15 @@ html.color-scheme-dark {
 	--z-ds-color-focus-100: #005fcc;
 	--z-ds-color-error-70: #bf4040;
 	--z-ds-color-background-warning: #ffe246;
+
+	/* ui/SegmentedControl (Pill) auf der Bühne: die --seg-*-Kontextvariablen auf die
+	   hier gepinnten ROHEN --z-ds-* umlenken → die Pill flippt mit der Bühne, nicht
+	   mit dem Seiten-Theme (ds-stage-raw-token-rule). Die Komponente selbst bleibt
+	   RAW-frei und nutzt off-stage denselben Satz über --ds-*-Rollen. */
+	--seg-track-bg: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+	--seg-text: var(--z-ds-color-text-55);
+	--seg-text-active: var(--z-ds-color-text-100);
+	--seg-thumb-bg: var(--z-ds-color-background-0);
 }
 .ds-stage.is-dark {
 	color-scheme: dark;

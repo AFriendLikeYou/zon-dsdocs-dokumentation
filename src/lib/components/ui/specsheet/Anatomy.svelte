@@ -210,7 +210,7 @@
 	{#if showModeToggle}
 		<div class="anatomy-artboard__toolbar anatomy-artboard__toolbar--left">
 			<SegmentedControl
-				ariaLabel="Ansicht"
+				label="Ansicht"
 				options={[
 					{ value: 'parts', label: 'Bestandteile' },
 					{ value: 'measure', label: 'Measurements' }

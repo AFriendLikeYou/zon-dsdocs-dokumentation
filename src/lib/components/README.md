@@ -106,6 +106,11 @@ prüfen** — in dieser Reihenfolge:
    Label-Chips — Achsen `tone: default|accent|machine|editorial|warn|ghost` und
    `font: mono|text`; Default = neutraler Figma-Chip 845:14187, Optik folgt der
    Figma-Vorlage 845:14173/14186),
+   `ui/segmented-control/` (EIN „einer von N"-Umschalter — Achsen
+   `variant: pill|flat` (pill = Bühnen-Optik mit gleitendem Thumb/Blur,
+   flat = Editor-Rechteck Figma 689:11510) und optionales `tone` je Option für
+   Status-Flächen; Radiogroup + roving tabindex + Pfeiltasten. StatusSegmentedControl
+   (✓/⚠/○) ist ein dünner Wrapper darüber, PropField nutzt `variant="flat"`),
    Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),

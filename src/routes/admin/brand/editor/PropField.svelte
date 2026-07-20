@@ -10,6 +10,7 @@
 	import MediaPicker from './MediaPicker.svelte';
 	import TokenPicker from './TokenPicker.svelte';
 	import { Field, Select } from '$components/ui/field';
+	import { SegmentedControl } from '$components/ui/segmented-control';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
 	let {
@@ -61,17 +62,13 @@
 				oninput={(e) => set(e.currentTarget.value)}
 			/>
 		{:else if segmented}
-			<span class="seg" role="group" aria-label={prop.label}>
-				{#each prop.options ?? [] as o (o)}
-					<button
-						type="button"
-						class="seg-opt"
-						class:seg-opt--on={str === o}
-						aria-pressed={str === o}
-						onclick={() => set(o)}>{o}</button
-					>
-				{/each}
-			</span>
+			<SegmentedControl
+				variant="flat"
+				label={prop.label}
+				options={(prop.options ?? []).map((o) => ({ value: o, label: o }))}
+				value={str}
+				onchange={(v) => set(v)}
+			/>
 		{:else if prop.type === 'select'}
 			<Select value={str} onchange={(e) => set(e.currentTarget.value)}>
 				{#each prop.options ?? [] as o (o)}
@@ -152,20 +149,15 @@
 		padding-left: 2px;
 	}
 
-	/* Text-/Zahl-/Auswahl-Controls kommen jetzt aus den geteilten Atomen
-	   Field/Select (field-base.css, density=comfortable). Hier bleibt bewusst das
-	   PropField-Eigene: Switch (Boolean) + Segmented Control (kurze Enums).
+	/* Text-/Zahl-/Auswahl-Controls kommen aus den geteilten Atomen Field/Select
+	   (field-base.css). Kurze Enums rendert jetzt ui/SegmentedControl variant="flat"
+	   (dieselbe Figma-689:11510-Optik: Rechteck, radius 8, --ds-surface/--ds-border) —
+	   die frühere lokale .seg-Kopie ist entfallen.
 
-	   Warum NICHT ui/SegmentedControl / ui/Switch (Paket 3, D4):
-	   - ui/SegmentedControl ist eine Pill-Optik (999px, halbtransparent, backdrop-blur)
-	     auf RAW --z-ds-Token für Bühnen-Adaptivität. PropField folgt der Figma-Vorlage
-	     689:11510 (Rechteck, radius 8, --ds-surface/--ds-border). Der Editor hat KEINE
-	     .ds-stage → ein Tausch würde die Form sichtbar verändern (verschlimmbessern),
-	     ohne Adaptivitäts-Gewinn. Darum bleibt .seg lokal.
-	   - ui/Switch bündelt sein eigenes Label (label-Prop, text-sm). PropField setzt das
-	     Label separat als .pf-lbl (text-xs, muted, order:1 in der Boolean-Zeile). Ein
-	     Tausch brächte doppeltes/abweichend gestyltes Label → auch hier bleibt .switch
-	     lokal, damit die Boolean-Zeile der Vorlage treu bleibt. */
+	   Bewusst PropField-lokal bleibt der Switch (Boolean): ui/Switch bündelt sein
+	   eigenes Label (label-Prop, text-sm), PropField setzt das Label separat als
+	   .pf-lbl (text-xs, muted, order:1 in der Boolean-Zeile). Ein Tausch brächte
+	   doppeltes/abweichend gestyltes Label → .switch bleibt vorlagentreu lokal. */
 
 	/* Switch statt Checkbox. */
 	.switch {
@@ -211,46 +203,9 @@
 		outline-offset: 2px;
 	}
 
-	/* Segmented Control für kurze Enums. */
-	.seg {
-		display: inline-flex;
-		gap: 2px;
-		padding: 2px;
-		border-radius: var(--ds-radius, 8px);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		align-self: start;
-	}
-	.seg-opt {
-		border: none;
-		background: none;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-muted);
-		padding: 5px var(--z-ds-space-m);
-		border-radius: calc(var(--ds-radius, 8px) - 3px);
-		cursor: pointer;
-		transition:
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.seg-opt:hover {
-		color: var(--ds-text);
-	}
-	.seg-opt--on {
-		background: var(--ds-surface-raised, var(--ds-surface));
-		color: var(--ds-text);
-		box-shadow: 0 1px 2px rgb(from var(--ds-text) r g b / 0.15);
-	}
-	.seg-opt:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
 		.switch,
-		.switch::after,
-		.seg-opt {
+		.switch::after {
 			transition: none;
 		}
 	}
