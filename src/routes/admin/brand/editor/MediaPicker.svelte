@@ -12,6 +12,7 @@
 	import { Icon } from '$lib/icons/cms';
 	import { PopoverSheet } from '../../ui';
 	import { Field } from '$components/ui/field';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 	import { isImagePath, isVideoPath } from '../core/media-types';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
@@ -159,11 +160,8 @@
 		>
 	</button>
 	{#if value}
-		<button
-			type="button"
-			class="media-picker__clear"
-			onclick={() => set('')}
-			aria-label="Bild entfernen"><Icon name="close" /></button
+		<IconActionButton class="media-picker__clear" onclick={() => set('')} ariaLabel="Bild entfernen"
+			><Icon name="close" /></IconActionButton
 		>
 	{/if}
 
@@ -303,31 +301,22 @@
 	.media-picker__name--empty {
 		color: var(--ds-text-muted);
 	}
-	/* Icon-Button-Standard (CMS): 24×24-Quadrat, radius 4. */
-	.media-picker__clear {
+	/* Icon-Button-Standard (CMS): 24×24-Quadrat, radius 4. Der Button ist jetzt
+	   ui/IconActionButton → die Optik landet auf dem Kind-<button> und braucht :global. */
+	:global(.media-picker__clear) {
 		flex: none;
 		width: 1.5rem;
 		height: 1.5rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border: none;
-		background: none;
 		border-radius: var(--ds-radius-sm);
 		color: var(--ds-text-muted);
 		font-size: var(--ds-text-xs);
-		cursor: pointer;
 		transition:
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.media-picker__clear:hover {
+	:global(.media-picker__clear:hover) {
 		background: rgb(from var(--ds-text) r g b / 0.08);
 		color: var(--ds-negative, var(--ds-text));
-	}
-	.media-picker__clear:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 
 	/* Suchfeld ist jetzt ui/Field (Fläche/Kontur/Fokus trägt das Atom); hier bleibt

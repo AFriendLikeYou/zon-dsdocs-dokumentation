@@ -7,6 +7,8 @@
 	import { AdminPageHeader } from '../ui';
 	import { Alert } from '$components/ui/alert';
 	import { Checkbox } from '$components/ui/checkbox';
+	import { Field, Select } from '$components/ui/field';
+	import { Button } from '$components/ui/button';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -219,7 +221,7 @@
 		<div class="card-body">
 			{#each liste as _, i}
 				<div class="field-row">
-					<input bind:value={liste[i]} placeholder={platzhalter} />
+					<Field density="compact" bind:value={liste[i]} placeholder={platzhalter} />
 					<button
 						type="button"
 						class="row-remove"
@@ -228,7 +230,7 @@
 					>
 				</div>
 			{/each}
-			<button type="button" class="row-add" onclick={() => addTo(liste)}>{addLabel}</button>
+			<Button dashed onclick={() => addTo(liste)}>{addLabel}</Button>
 		</div>
 	</section>
 {/snippet}
@@ -255,12 +257,13 @@
 			{#if hinweis}<p class="hint">{hinweis}</p>{/if}
 			{#each liste as _, i}
 				<div class="field-row field-row--pair">
-					<input
+					<Field
 						class="field-row__key"
+						density="compact"
 						bind:value={liste[i][keyProp]}
 						placeholder={keyPlatzhalter}
 					/>
-					<input bind:value={liste[i][valProp]} placeholder={valPlatzhalter} />
+					<Field density="compact" bind:value={liste[i][valProp]} placeholder={valPlatzhalter} />
 					<button
 						type="button"
 						class="row-remove"
@@ -269,9 +272,7 @@
 					>
 				</div>
 			{/each}
-			<button type="button" class="row-add" onclick={() => liste.push({ ...neueZeile })}
-				>{addLabel}</button
-			>
+			<Button dashed onclick={() => liste.push({ ...neueZeile })}>{addLabel}</Button>
 		</div>
 	</section>
 {/snippet}
@@ -302,18 +303,22 @@
 		<section class="card">
 			<div class="card-head"><span class="card-title">Zweck</span></div>
 			<div class="card-body">
-				<textarea bind:value={model.zweck} rows="3"></textarea>
+				<Field density="compact" multiline rows={3} bind:value={model.zweck} />
 			</div>
 		</section>
 
 		<section class="card">
 			<div class="card-head"><span class="card-title">Status</span></div>
 			<div class="card-body">
-				<select bind:value={model.status}>
-					<option value="ready_for_dev">ready_for_dev</option>
-					<option value="completed">completed</option>
-					<option value="changed">changed</option>
-				</select>
+				<Select
+					density="compact"
+					bind:value={model.status}
+					options={[
+						{ value: 'ready_for_dev', label: 'ready_for_dev' },
+						{ value: 'completed', label: 'completed' },
+						{ value: 'changed', label: 'changed' }
+					]}
+				/>
 			</div>
 		</section>
 
@@ -321,10 +326,15 @@
 			<div class="card-head"><span class="card-title">Playground-Bühne</span></div>
 			<div class="card-body">
 				<label class="sub-label" for="pg-align">Ausrichtung</label>
-				<select id="pg-align" bind:value={model.playground.align}>
-					<option value="center">Zentriert (Objekt auf Bühne)</option>
-					<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
-				</select>
+				<Select
+					id="pg-align"
+					density="compact"
+					bind:value={model.playground.align}
+					options={[
+						{ value: 'center', label: 'Zentriert (Objekt auf Bühne)' },
+						{ value: 'fill', label: 'Volle Breite (Ausschnitt aus Seite)' }
+					]}
+				/>
 				<Checkbox bind:checked={model.playground.resizable} label="Resize-Handle anzeigen" />
 			</div>
 		</section>
@@ -353,13 +363,18 @@
 			<div class="card-body">
 				{#each model.a11y as _, i}
 					<div class="field-row field-row--a11y">
-						<input class="field-row__key" bind:value={model.a11y[i].label} placeholder="Label" />
-						<input bind:value={model.a11y[i].wert} placeholder="Wert" />
-						<select class="field-row__status" bind:value={model.a11y[i].status}>
-							<option value="pass">pass</option>
-							<option value="warn">warn</option>
-							<option value="todo">todo</option>
-						</select>
+						<Field class="field-row__key" density="compact" bind:value={model.a11y[i].label} placeholder="Label" />
+						<Field density="compact" bind:value={model.a11y[i].wert} placeholder="Wert" />
+						<Select
+							class="field-row__status"
+							density="compact"
+							bind:value={model.a11y[i].status}
+							options={[
+								{ value: 'pass', label: 'pass' },
+								{ value: 'warn', label: 'warn' },
+								{ value: 'todo', label: 'todo' }
+							]}
+						/>
 						<button
 							type="button"
 							class="row-remove"
@@ -368,10 +383,8 @@
 						>
 					</div>
 				{/each}
-				<button
-					type="button"
-					class="row-add"
-					onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}>+ Eintrag</button
+				<Button dashed onclick={() => model.a11y.push({ label: '', wert: '', status: 'warn' })}
+					>+ Eintrag</Button
 				>
 			</div>
 		</section>
@@ -392,6 +405,8 @@
 			<div class="card-body">
 				{#each model.callouts as _, i}
 					<div class="field-row">
+						<!-- Nummer: nacktes number-Input (justiert) — Field ist string-typisiert,
+						     nr ist numerisch und geht so 1:1 wieder in content.json. -->
 						<input
 							class="field-row__number"
 							type="number"
@@ -399,7 +414,7 @@
 							bind:value={model.callouts[i].nr}
 							aria-label="Nummer"
 						/>
-						<input bind:value={model.callouts[i].text} placeholder="Beschreibung" />
+						<Field density="compact" bind:value={model.callouts[i].text} placeholder="Beschreibung" />
 						<button
 							type="button"
 							class="row-remove"
@@ -408,11 +423,10 @@
 						>
 					</div>
 				{/each}
-				<button
-					type="button"
-					class="row-add"
+				<Button
+					dashed
 					onclick={() => model.callouts.push({ nr: model.callouts.length + 1, text: '' })}
-					>+ Callout</button
+					>+ Callout</Button
 				>
 			</div>
 		</section>
@@ -424,9 +438,9 @@
 			<div class="card-body">
 				{#each model.wording as _, i}
 					<div class="field-row">
-						<input bind:value={model.wording[i].schlecht} placeholder="Schlecht" />
-						<input bind:value={model.wording[i].gut} placeholder="Gut" />
-						<input bind:value={model.wording[i].hinweis} placeholder="Hinweis (optional)" />
+						<Field density="compact" bind:value={model.wording[i].schlecht} placeholder="Schlecht" />
+						<Field density="compact" bind:value={model.wording[i].gut} placeholder="Gut" />
+						<Field density="compact" bind:value={model.wording[i].hinweis} placeholder="Hinweis (optional)" />
 						<button
 							type="button"
 							class="row-remove"
@@ -435,10 +449,8 @@
 						>
 					</div>
 				{/each}
-				<button
-					type="button"
-					class="row-add"
-					onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}>+ Regel</button
+				<Button dashed onclick={() => model.wording.push({ schlecht: '', gut: '', hinweis: '' })}
+					>+ Regel</Button
 				>
 			</div>
 		</section>
@@ -457,12 +469,12 @@
 			<div class="card-body">
 				{#each model.verwandt as _, i}
 					<div class="field-row">
-						<select bind:value={model.verwandt[i]}>
+						<Select density="compact" bind:value={model.verwandt[i]}>
 							<option value="" disabled>– Komponente wählen –</option>
 							{#each data.slugs as s}
 								<option value={s.slug}>{s.name} ({s.slug})</option>
 							{/each}
-						</select>
+						</Select>
 						<button
 							type="button"
 							class="row-remove"
@@ -471,8 +483,7 @@
 						>
 					</div>
 				{/each}
-				<button type="button" class="row-add" onclick={() => model.verwandt.push('')}>+ Slug</button
-				>
+				<Button dashed onclick={() => model.verwandt.push('')}>+ Slug</Button>
 			</div>
 		</section>
 
@@ -537,9 +548,8 @@
 		color: var(--ds-text-muted);
 		margin: 0;
 	}
-	textarea,
-	select,
-	input {
+	/* Nacktes number-Input (Callout-Nummer) — die einzige rohe Feld-Optik, die bleibt. */
+	input[type='number'] {
 		width: 100%;
 		font: inherit;
 		font-size: var(--ds-text-sm);
@@ -549,12 +559,7 @@
 		border-radius: var(--ds-radius-sm);
 		padding: var(--z-ds-space-6) var(--z-ds-space-8);
 	}
-	textarea {
-		resize: vertical;
-	}
-	textarea:focus-visible,
-	select:focus-visible,
-	input:focus-visible {
+	input[type='number']:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
@@ -563,14 +568,15 @@
 		align-items: center;
 		gap: var(--z-ds-space-8);
 	}
-	.field-row__key {
+	/* Breiten-Begrenzungen liegen auf den Field/Select-Wrappern (Kind-Komponente) → :global. */
+	:global(.field-row__key) {
 		max-width: 12rem;
 	}
 	.field-row__number {
 		max-width: 5rem;
 		flex: none;
 	}
-	.field-row__status {
+	:global(.field-row__status) {
 		max-width: 8rem;
 		flex: none;
 	}
@@ -603,23 +609,11 @@
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	/* Hinzufügen: gestrichelter Ghost-Button (wie .ins-btn im Brand-Editor). */
-	.row-add {
+	/* „+ …"-Buttons sind jetzt ui/Button dashed; nur die Ausrichtung bleibt hier. */
+	.card-body :global(.app-button--dashed) {
 		align-self: flex-start;
-		background: none;
-		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		color: var(--ds-text-body);
-		cursor: pointer;
-		font-size: var(--ds-text-sm);
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.row-add:hover {
-		border-color: var(--ds-accent);
 	}
 	.row-remove:focus-visible,
-	.row-add:focus-visible,
 	.save:focus-visible,
 	.savebar-discard:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);

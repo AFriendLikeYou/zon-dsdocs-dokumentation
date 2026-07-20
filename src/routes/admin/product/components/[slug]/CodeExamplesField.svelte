@@ -13,6 +13,8 @@
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
 	import { IconActionButton } from '$components/ui/icon-action-button';
+	import { Button } from '$components/ui/button';
+	import { Field, Select } from '$components/ui/field';
 
 	type Beispiel = { label: string; sprache: string; code: string; hinweis: string };
 
@@ -35,40 +37,46 @@
 	{#each list as _, i (i)}
 		<div class="code-examples__item">
 			<div class="code-examples__head">
-				<input
+				<Field
 					class="code-examples__label"
+					density="compact"
 					bind:value={list[i].label}
 					placeholder="Titel des Beispiels, z. B. „Svelte im zeit.de-Repo“"
 					aria-label="Titel"
 				/>
-				<select class="code-examples__lang" bind:value={list[i].sprache} aria-label="Sprache">
-					{#each SPRACHEN as s (s.value)}
-						<option value={s.value}>{s.label}</option>
-					{/each}
-				</select>
+				<Select
+					class="code-examples__lang"
+					density="compact"
+					bind:value={list[i].sprache}
+					options={SPRACHEN}
+					aria-label="Sprache"
+				/>
 				<IconActionButton
 					class="code-examples__remove"
 					onclick={() => list.splice(i, 1)}
 					ariaLabel="Beispiel entfernen"><Icon name="close" /></IconActionButton
 				>
 			</div>
-			<textarea
+			<Field
 				class="code-examples__code"
+				density="compact"
+				font="mono"
+				multiline
+				rows={5}
 				bind:value={list[i].code}
-				rows="5"
 				spellcheck="false"
 				placeholder="Code-Snippet (wird als Text gezeigt, nie ausgeführt)"
 				aria-label="Code"
-			></textarea>
-			<input
-				class="code-examples__hint"
+			/>
+			<Field
+				density="compact"
 				bind:value={list[i].hinweis}
 				placeholder="Hinweis (optional) — erklärt das Beispiel"
 				aria-label="Hinweis"
 			/>
 		</div>
 	{/each}
-	<button type="button" class="code-examples__add" onclick={add}>+ Code-Beispiel</button>
+	<Button dashed onclick={add}>+ Code-Beispiel</Button>
 </div>
 
 <style>
@@ -91,60 +99,20 @@
 		align-items: center;
 		gap: var(--z-ds-space-6);
 	}
-	.code-examples__label {
+	/* Titel-Feld wächst, Sprach-Select bleibt schmal (Field/Select tragen die Optik). */
+	:global(.code-examples__label) {
 		flex: 1;
 		min-width: 0;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: transparent;
-		border: none;
-		border-bottom: 1px solid var(--ds-border-soft);
-		border-radius: 0;
-		padding: var(--z-ds-space-6) var(--z-ds-space-4);
 	}
-	.code-examples__lang {
+	:global(.code-examples__lang) {
 		flex: 0 0 auto;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-raised, var(--ds-surface));
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-4) var(--z-ds-space-6);
+		width: auto;
 	}
-	.code-examples__code {
-		width: 100%;
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		line-height: 1.6;
-		color: var(--ds-text);
-		background: var(--ds-surface-raised, var(--ds-surface));
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-8);
-		resize: vertical;
+	/* Code-Textarea (Field, mono): über die volle Breite, Umbruch aus (Code-Zeilen). */
+	:global(.code-examples__code .field__control) {
 		white-space: pre;
 		overflow-wrap: normal;
 		tab-size: 2;
-	}
-	.code-examples__hint {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-muted);
-		background: transparent;
-		border: none;
-		border-top: 1px solid var(--ds-border-soft);
-		border-radius: 0;
-		padding: var(--z-ds-space-6) var(--z-ds-space-4);
-	}
-	.code-examples__label:focus-visible,
-	.code-examples__lang:focus-visible,
-	.code-examples__code:focus-visible,
-	.code-examples__hint:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: -1px;
 	}
 	/* Entfernen-Button = ui/IconActionButton (Klasse durchgereicht) → Passthrough-Regeln
 	   als :global unter dem scoped .code-examples__head (kein globaler Leak). */
@@ -174,22 +142,8 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.code-examples__add {
+	/* „+ Code-Beispiel" = ui/Button dashed; nur die Ausrichtung bleibt hier. */
+	.code-examples :global(.app-button) {
 		align-self: flex-start;
-		background: none;
-		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		color: var(--ds-text-body);
-		cursor: pointer;
-		font-size: var(--ds-text-sm);
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.code-examples__add:hover {
-		border-color: var(--ds-accent);
-	}
-	.code-examples__add:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
 	}
 </style>

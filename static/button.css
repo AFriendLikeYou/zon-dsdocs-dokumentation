@@ -107,6 +107,22 @@
 	color: var(--ds-negative, var(--ds-text));
 }
 
+/*
+ * dashed — „hier entsteht Neues": ghost-Fläche mit gestrichelter Kontur (Row-Add
+ * in Editoren, konsistent zur GhostCard). Self-contained (setzt die Fläche selbst),
+ * damit der `dashed`-Prop allein den Look trägt — Button.svelte fügt keine
+ * Extra-ghost-Klasse hinzu.
+ */
+.app-button--dashed {
+	background-color: transparent;
+	border: 1px dashed var(--ds-border);
+	color: var(--ds-text-body);
+}
+.app-button--dashed:hover {
+	background-color: transparent;
+	border-color: var(--ds-accent);
+}
+
 /* Deaktiviert-Look für den <a>-Zweig (echtes <button>:disabled greift oben). */
 .app-button--disabled {
 	pointer-events: none;

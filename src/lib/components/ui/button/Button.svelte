@@ -39,6 +39,8 @@
 		variant?: Variant;
 		/** Größe aus den realen Padding-Clustern: sm (Default) | md | lg. */
 		size?: Size;
+		/** Gestrichelte Ghost-Kontur („hier entsteht Neues", Row-Add in Editoren). */
+		dashed?: boolean;
 		/** Wenn gesetzt: rendert <a href> statt <button> (gleiche Optik). */
 		href?: string;
 		/** Deaktiviert-Zustand (bei <a> via aria-disabled). */
@@ -60,6 +62,7 @@
 	let {
 		variant = 'default',
 		size = 'sm',
+		dashed = false,
 		href,
 		disabled = false,
 		iconLeft,
@@ -79,6 +82,7 @@
 			variant === 'danger' && 'app-button--danger',
 			size === 'md' && 'app-button--md',
 			size === 'lg' && 'app-button--lg',
+			dashed && 'app-button--dashed',
 			disabled && 'app-button--disabled',
 			className
 		]

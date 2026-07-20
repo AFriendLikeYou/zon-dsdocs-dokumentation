@@ -31,6 +31,9 @@ import { validateModelSchema } from './schema-validate.mjs';
 const TARGET = 'zeit-de';
 const ROUTE_BASE = 'src/routes/product/components';
 const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
+// CodeBlock lebt eigenständig unter ui/code-block (aus dem specsheet-Barrel gelöst) —
+// wird separat importiert, nicht mehr über das Spec-UI-Kit.
+const CODE_BLOCK_IMPORT = '$components/ui/code-block';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -552,9 +555,12 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasA11y || hasKeyboard) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
 	if (hasSpecs) tabs.push({ label: 'Specs', name: 'specsTab' });
 
+	// CodeBlock aus dem Spec-UI-Kit-Import lösen — es hat einen eigenen Barrel.
+	const usedSpec = [...used].filter((c) => c !== 'CodeBlock');
 	const imports =
 		`\timport { Tabs } from '$components/ui/tab';\n` +
-		`\timport { ${[...used].join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
+		`\timport { ${usedSpec.join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
+		(used.has('CodeBlock') ? `\timport { CodeBlock } from '${CODE_BLOCK_IMPORT}';\n` : '') +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
 		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +

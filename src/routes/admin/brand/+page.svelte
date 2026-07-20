@@ -7,6 +7,7 @@
 	import { Badge } from '$components/ui/badge';
 	import { Alert } from '$components/ui/alert';
 	import { Button } from '$components/ui/button';
+	import { Field } from '$components/ui/field';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
 
@@ -204,22 +205,23 @@
 			<label class="np-field">
 				<span class="np-lbl">Titel</span>
 				<!-- svelte-ignore a11y_autofocus — bewusst: Panel öffnet auf Klick, Fokus gehört ins Feld -->
-				<input bind:value={newTitle} placeholder="Seitentitel eingeben …" autofocus />
+				<Field bind:value={newTitle} placeholder="Seitentitel eingeben …" autofocus />
 			</label>
 			<label class="np-field">
 				<span class="np-lbl">URL</span>
-				<span class="np-slug">
-					<span class="np-prefix">/brand/</span>
-					<input
-						value={effSlug}
-						placeholder="neue-seite"
-						spellcheck="false"
-						oninput={(e) => {
-							slugTouched = true;
-							newSlug = e.currentTarget.value;
-						}}
-					/>
-				</span>
+				<Field
+					class="np-slug"
+					font="mono"
+					value={effSlug}
+					placeholder="neue-seite"
+					spellcheck="false"
+					oninput={(e) => {
+						slugTouched = true;
+						newSlug = e.currentTarget.value;
+					}}
+				>
+					{#snippet icon()}<span class="np-prefix">/brand/</span>{/snippet}
+				</Field>
 			</label>
 			<div class="np-actions">
 				<Button
@@ -539,34 +541,13 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.np-field input {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-base);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius, 8px);
-		padding: 9px 12px;
-	}
-	.np-field input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.np-slug {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-6);
-	}
+	/* Titel/URL-Felder = ui/Field (Fläche/Kontur/Fokus trägt das Atom). Der /brand/-Präfix
+	   sitzt als führendes Icon im Slug-Feld; hier bleibt nur seine Typografie. */
 	.np-prefix {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 		white-space: nowrap;
-	}
-	.np-slug input {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-sm);
 	}
 	.np-actions {
 		display: flex;

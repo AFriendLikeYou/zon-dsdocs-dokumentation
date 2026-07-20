@@ -735,15 +735,16 @@
 						rel="noreferrer">Figma ↗</a
 					>{/if}
 				<LegendPopover />
-				<button
-					type="button"
-					class="reimport-btn"
+				<Button
+					size="sm"
+					variant="ghost"
 					onclick={copyReImport}
 					title="Re-Import ist ein CLI-Schritt — Befehl kopieren"
 					aria-label="Re-Import ist ein CLI-Schritt — Befehl in die Zwischenablage kopieren"
 				>
-					<ImportIcon width={13} height={13} /> Re-Import
-				</button>
+					{#snippet iconLeft()}<ImportIcon width={13} height={13} />{/snippet}
+					Re-Import
+				</Button>
 			</div>
 		</header>
 
@@ -1246,38 +1247,6 @@
 		outline-offset: 2px;
 	}
 	/* Re-Import: kleiner Outline-Button (kopiert den CLI-Befehl, führt nichts aus). */
-	.reimport-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-4);
-		width: auto;
-		font-size: var(--ds-text-xs);
-		font-weight: 600;
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-4) var(--z-ds-space-8);
-		cursor: pointer;
-		transition:
-			border-color var(--ds-dur) var(--ds-ease-out),
-			background var(--ds-dur) var(--ds-ease-out);
-	}
-	.reimport-btn:hover {
-		border-color: var(--ds-accent);
-	}
-	.reimport-btn:active {
-		background: var(--ds-surface-sunken);
-	}
-	.reimport-btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.reimport-btn {
-			transition: none;
-		}
-	}
 	.editor-card__body {
 		padding: var(--z-ds-space-l);
 	}

@@ -13,16 +13,16 @@
       <option value="ready">ready</option>
     </Select>
 -->
-<script lang="ts">
+<script lang="ts" generics="T extends string = string">
 	import type { Snippet } from 'svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import './field-base.css';
 
-	type Option = { value: string; label: string };
+	type Option = { value: T; label: string };
 
 	type Props = {
-		/** Ausgewählter Wert (bind:value-fähig). */
-		value?: string;
+		/** Ausgewählter Wert (bind:value-fähig). Der Wert-Typ folgt den options. */
+		value?: T;
 		/** Dichte: kompaktes Editor-Feld oder komfortables Formular-Feld. */
 		density?: 'compact' | 'comfortable';
 		/** Optionen deklarativ; alternativ rohe <option> via children. */
@@ -36,7 +36,7 @@
 	} & Omit<HTMLSelectAttributes, 'value' | 'class'>;
 
 	let {
-		value = $bindable(''),
+		value = $bindable('' as T),
 		density = 'comfortable',
 		options,
 		children,

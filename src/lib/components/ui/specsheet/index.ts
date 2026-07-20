@@ -12,6 +12,6 @@ export { default as RelatedComponents } from './RelatedComponents.svelte';
 export { default as DoDontList } from './DoDontList.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';
-export { default as CodeBlock } from './CodeBlock.svelte';
+// CodeBlock ist nach `$components/ui/code-block` umgezogen (eigener Barrel).
 export { default as SpecRow } from './SpecRow.svelte';
 export { default as Mark } from './Mark.svelte';

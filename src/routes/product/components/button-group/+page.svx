@@ -10,7 +10,8 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, StateList, RelatedComponents, CodeBlock, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
 	import content from './content.json';

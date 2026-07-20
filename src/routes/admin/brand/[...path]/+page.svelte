@@ -11,6 +11,7 @@
 	import ProseEditor from '../editor/ProseEditor.svelte';
 	import InsertMenu from '../editor/InsertMenu.svelte';
 	import { Button } from '$components/ui/button';
+	import { Field, Select } from '$components/ui/field';
 	import { Dialog } from '$components/ui/dialog';
 	import SlashMenu from '../editor/SlashMenu.svelte';
 	import { validateValues, countErrors } from '../core/validation';
@@ -522,14 +523,8 @@
 					minute: '2-digit'
 				})}&nbsp;Uhr gefunden.</span
 			>
-			<button type="button" class="draft-btn" onclick={() => history.applyDraft()}
-				>Wiederherstellen</button
-			>
-			<button
-				type="button"
-				class="draft-btn draft-btn--ghost"
-				onclick={() => history.dismissDraft()}>Verwerfen</button
-			>
+			<Button size="sm" variant="ghost" onclick={() => history.applyDraft()}>Wiederherstellen</Button>
+			<Button size="sm" variant="quiet" onclick={() => history.dismissDraft()}>Verwerfen</Button>
 		</div>
 	{/if}
 
@@ -542,7 +537,7 @@
 				{#each fieldState as field (field.key)}
 					<label class="field">
 						<span class="lbl">{field.key}</span>
-						<input bind:value={field.value} />
+						<Field density="compact" bind:value={field.value} />
 					</label>
 				{/each}
 			</section>
@@ -777,14 +772,17 @@
 											{/each}
 											{#if (it.childTypes ?? []).length}
 												<div class="add-child">
-													<select bind:value={it.childPick} aria-label="Element-Typ">
+													<Select
+														class="add-child__select"
+														density="compact"
+														bind:value={it.childPick}
+														aria-label="Element-Typ"
+													>
 														{#each it.childTypes ?? [] as ct (ct)}
 															<option value={ct}>{defByName(ct)?.label ?? ct}</option>
 														{/each}
-													</select>
-													<button type="button" class="ins-btn" onclick={() => addChild(it)}>
-														+ Element
-													</button>
+													</Select>
+													<Button dashed size="sm" onclick={() => addChild(it)}>+ Element</Button>
 												</div>
 											{/if}
 										</div>
@@ -805,8 +803,9 @@
 											</label>
 											<label class="block-card__image-field">
 												<span class="block-card__image-label">Alt-Text</span>
-												<input
+												<Field
 													class="block-card__image-alt"
+													density="compact"
 													value={imgAlt(it.content ?? '')}
 													placeholder="Bildbeschreibung eingeben …"
 													oninput={(e) => setImgAttr(it, 'alt', e.currentTarget.value)}
@@ -933,28 +932,6 @@
 		background: rgb(from var(--ds-accent) r g b / 0.1);
 		color: var(--ds-text);
 	}
-	.draft-btn {
-		border: 1px solid var(--ds-border);
-		background: var(--ds-surface);
-		font: inherit;
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text);
-		border-radius: 999px;
-		padding: 2px var(--z-ds-space-s);
-		cursor: pointer;
-	}
-	.draft-btn:hover {
-		border-color: var(--ds-accent);
-	}
-	.draft-btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.draft-btn--ghost {
-		border-color: transparent;
-		background: none;
-		color: var(--ds-text-muted);
-	}
 	.block {
 		margin-bottom: var(--z-ds-space-xl);
 	}
@@ -987,34 +964,6 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		margin: 0 0 var(--z-ds-space-l);
-	}
-	.ins-btn {
-		border: 1px dashed var(--ds-border);
-		background: none;
-		border-radius: var(--ds-radius-sm);
-		padding: 2px var(--z-ds-space-s);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-body);
-		cursor: pointer;
-	}
-	.ins-btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	input,
-	select {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-8);
-	}
-	input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 	/* Rohe <img>-Insel: gestapelte Editierfelder (Bild-Picker + Alt-Text), Optik wie
 	   die übrigen Block-Card-Felder (Label 12px muted oben, Control volle Breite). */
@@ -1379,7 +1328,8 @@
 		gap: var(--z-ds-space-s);
 		align-items: center;
 	}
-	.add-child select {
+	/* Der Typ-Select (Kind-Komponente) wächst, der dashed-Button bleibt schmal. */
+	.add-child :global(.add-child__select) {
 		flex: 1 1 auto;
 		min-width: 0;
 	}

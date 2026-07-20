@@ -11,6 +11,7 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 
 	type Props = {
 		/** A11y-Label (für icon-only verpflichtend). */
@@ -21,18 +22,30 @@
 		onclick?: (event: MouseEvent) => void;
 		/** Button-Inhalt (Icon oder Label). */
 		children: Snippet;
+		/** Zugriff aufs <button>-Element (z. B. für Popover-Anker). */
+		element?: HTMLButtonElement | null;
 		class?: string;
-	};
+	} & Omit<HTMLButtonAttributes, 'class' | 'onclick'>;
 
-	let { ariaLabel, iconButton = false, onclick, children, class: className = '' }: Props = $props();
+	let {
+		ariaLabel,
+		iconButton = false,
+		onclick,
+		children,
+		element = $bindable(null),
+		class: className = '',
+		...restProps
+	}: Props = $props();
 </script>
 
 <button
+	bind:this={element}
 	type="button"
 	class="icon-action {className}"
 	class:icon-button={iconButton}
 	aria-label={ariaLabel}
 	{onclick}
+	{...restProps}
 >
 	{@render children()}
 </button>

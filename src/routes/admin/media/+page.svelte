@@ -3,6 +3,7 @@
 	import { AdminPageHeader } from '../ui';
 	import { Alert } from '$components/ui/alert';
 	import { Button } from '$components/ui/button';
+	import { Field } from '$components/ui/field';
 	import { EmptyState } from '$components/ui/empty-state';
 
 	let { data, form }: import('./$types').PageProps = $props();
@@ -123,7 +124,7 @@
 	</form>
 
 	<div class="filter">
-		<input class="search" type="search" placeholder="Nach Name/Pfad suchen …" bind:value={query} />
+		<Field class="search" type="search" placeholder="Nach Name/Pfad suchen …" bind:value={query} />
 		<div class="chips" role="group" aria-label="Ordner">
 			{#each folders as fo (fo)}
 				<button
@@ -349,19 +350,9 @@
 		flex-wrap: wrap;
 		margin-bottom: var(--z-ds-space-m);
 	}
-	.search {
+	/* Suchfeld = ui/Field (Fläche/Kontur/Fokus trägt das Atom); hier nur die Flex-Breite. */
+	:global(.search) {
 		flex: 1 1 16rem;
-		font: inherit;
-		font-size: var(--ds-text-base);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius);
-		padding: 9px 12px;
-	}
-	.search:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 	.chips {
 		display: flex;

@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 	import {
 		hasHeadingTypo,
 		fixHeadings,
@@ -54,52 +55,45 @@
 
 <div class="pe">
 	<div class="pe-bar" role="toolbar" aria-label="Textformat">
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn"
 			title="Überschrift 2"
-			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '## '))}>H2</button
+			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '## '))}>H2</IconActionButton
 		>
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn"
 			title="Überschrift 3"
-			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '### '))}>H3</button
+			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '### '))}>H3</IconActionButton
 		>
 		<span class="pe-sep" aria-hidden="true"></span>
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn pe-btn--b"
 			title="Fett"
-			onclick={() => apply((t, s, e) => toggleInline(t, s, e, '**'))}>B</button
+			onclick={() => apply((t, s, e) => toggleInline(t, s, e, '**'))}>B</IconActionButton
 		>
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn pe-btn--i"
 			title="Kursiv"
-			onclick={() => apply((t, s, e) => toggleInline(t, s, e, '*'))}>I</button
+			onclick={() => apply((t, s, e) => toggleInline(t, s, e, '*'))}>I</IconActionButton
 		>
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn pe-btn--icon"
 			title="Link"
-			aria-label="Link"
-			onclick={() => apply(makeLink)}><Icon name="link" /></button
+			ariaLabel="Link"
+			onclick={() => apply(makeLink)}><Icon name="link" /></IconActionButton
 		>
-		<button
-			type="button"
+		<IconActionButton
 			class="pe-btn pe-btn--icon"
 			title="Liste"
-			aria-label="Liste"
+			ariaLabel="Liste"
 			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '- '))}
-			><Icon name="list" /></button
+			><Icon name="list" /></IconActionButton
 		>
-		<button
-			type="button"
-			class="pe-btn pe-btn--toggle"
-			class:pe-btn--on={preview}
+		<IconActionButton
+			class="pe-btn pe-btn--toggle{preview ? ' pe-btn--on' : ''}"
 			aria-pressed={preview}
-			onclick={() => (preview = !preview)}>{preview ? 'Bearbeiten' : 'Vorschau'}</button
+			onclick={() => (preview = !preview)}
+			>{preview ? 'Bearbeiten' : 'Vorschau'}</IconActionButton
 		>
 	</div>
 
@@ -140,48 +134,39 @@
 		gap: 2px;
 	}
 	/* Icon-Button-Standard (CMS): 24×24-Quadrat, radius 4 — Text-Buttons (H2/B/…)
-	   teilen Höhe, Radius und Hover, dürfen aber breiter sein. */
-	.pe-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border: none;
-		background: none;
-		font: inherit;
+	   teilen Höhe, Radius und Hover, dürfen aber breiter sein. Die Buttons sind jetzt
+	   ui/IconActionButton (Reset/Focus/Active/reduced-motion aus dem Atom) → die
+	   Toolbar-Optik landet auf dem Kind-<button> und braucht darum :global. */
+	:global(.pe-btn) {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		min-width: 1.5rem;
 		height: 1.5rem;
 		padding: 0 var(--z-ds-space-6);
 		border-radius: var(--ds-radius-sm);
-		cursor: pointer;
 		transition:
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.pe-btn--icon {
+	:global(.pe-btn--icon) {
 		width: 1.5rem;
 		flex: none;
 		padding: 0;
 	}
-	.pe-btn:hover {
+	:global(.pe-btn:hover) {
 		background: rgb(from var(--ds-text) r g b / 0.08);
 		color: var(--ds-text);
 	}
-	.pe-btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.pe-btn--b {
+	:global(.pe-btn--b) {
 		font-weight: 700;
 	}
-	.pe-btn--i {
+	:global(.pe-btn--i) {
 		font-style: italic;
 	}
-	.pe-btn--toggle {
+	:global(.pe-btn--toggle) {
 		margin-left: auto;
 	}
-	.pe-btn--on {
+	:global(.pe-btn--on) {
 		background: rgb(from var(--ds-accent) r g b / 0.12);
 		color: var(--ds-accent);
 	}
@@ -297,7 +282,7 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.pe-bar,
-		.pe-btn {
+		:global(.pe-btn) {
 			transition: none;
 		}
 	}

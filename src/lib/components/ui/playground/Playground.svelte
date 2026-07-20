@@ -86,7 +86,7 @@
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { CodeBlock } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { Switch } from '$components/ui/switch';
