@@ -48,6 +48,14 @@
 	align-items: stretch;
 }
 
+/* Mono-Variante: Code-Eingabe (Snippet-Editor) rendert das Bedienelement in der
+   Mono-Stack statt der UI-Schrift. */
+.field--mono .field__control {
+	font-family: var(--ds-font-mono);
+	font-size: var(--ds-text-sm);
+	line-height: 1.6;
+}
+
 @media (hover: hover) and (pointer: fine) {
 	.field:hover {
 		border-color: var(--ds-border-hover, var(--ds-border-strong, var(--ds-border)));

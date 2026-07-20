@@ -6,6 +6,7 @@
 	import { Icon } from '$lib/icons/cms';
 	import { AdminPageHeader } from '../ui';
 	import { Alert } from '$components/ui/alert';
+	import { Checkbox } from '$components/ui/checkbox';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -254,7 +255,11 @@
 			{#if hinweis}<p class="hint">{hinweis}</p>{/if}
 			{#each liste as _, i}
 				<div class="field-row field-row--pair">
-					<input class="field-row__key" bind:value={liste[i][keyProp]} placeholder={keyPlatzhalter} />
+					<input
+						class="field-row__key"
+						bind:value={liste[i][keyProp]}
+						placeholder={keyPlatzhalter}
+					/>
 					<input bind:value={liste[i][valProp]} placeholder={valPlatzhalter} />
 					<button
 						type="button"
@@ -320,10 +325,7 @@
 					<option value="center">Zentriert (Objekt auf Bühne)</option>
 					<option value="fill">Volle Breite (Ausschnitt aus Seite)</option>
 				</select>
-				<label class="checkbox-field">
-					<input type="checkbox" bind:checked={model.playground.resizable} />
-					<span>Resize-Handle anzeigen</span>
-				</label>
+				<Checkbox bind:checked={model.playground.resizable} label="Resize-Handle anzeigen" />
 			</div>
 		</section>
 
@@ -416,7 +418,9 @@
 		</section>
 
 		<section class="card">
-			<div class="card-head"><span class="card-title">Wording (Schlecht · Gut · Hinweis)</span></div>
+			<div class="card-head">
+				<span class="card-title">Wording (Schlecht · Gut · Hinweis)</span>
+			</div>
 			<div class="card-body">
 				{#each model.wording as _, i}
 					<div class="field-row">
@@ -476,8 +480,7 @@
 			<div class="savebar" role="status">
 				<span class="savebar-info">Ungespeicherte Änderungen</span>
 				<button type="button" class="savebar-discard" onclick={discard}>Verwerfen</button>
-				<button type="submit" class="save" disabled={!data.writable}
-					>Speichern <kbd>⌘S</kbd></button
+				<button type="submit" class="save" disabled={!data.writable}>Speichern <kbd>⌘S</kbd></button
 				>
 			</div>
 		{/if}
@@ -559,20 +562,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-8);
-	}
-	.checkbox-field {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
-		cursor: pointer;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-	}
-	.checkbox-field input[type='checkbox'] {
-		width: auto;
-		flex: none;
-		margin: 0;
-		accent-color: var(--ds-accent);
 	}
 	.field-row__key {
 		max-width: 12rem;

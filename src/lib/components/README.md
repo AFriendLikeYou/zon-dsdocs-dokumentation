@@ -97,7 +97,10 @@ Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann di
 Bevor eine neue Komponente oder ein neues Stück UI entsteht, **erst den Bestand
 prüfen** — in dieser Reihenfolge:
 
-1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`),
+1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`;
+   Field mit `multiline` + `font: text|mono` als vollwertige Textarea/Code-Eingabe),
+   `ui/checkbox/` (echtes „an/aus"-Häkchen mit optionalem klickbaren `label` —
+   NICHT der Toggle-Switch; für Boolean-Schalter, die als Häkchen gelesen werden),
    `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
    `ui/badge/` (EIN Label-/Status-/Herkunfts-Pill nach Figma 840:13943 — Achse
    `tone: default|machine|editorial|warn|ghost|accent`, optionales `icon`-Snippet;

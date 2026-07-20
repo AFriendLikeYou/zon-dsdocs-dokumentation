@@ -30,6 +30,9 @@
 		multiline?: boolean;
 		/** Zeilenzahl der Textarea (nur bei multiline). */
 		rows?: number;
+		/** Schrift des Bedienelements: `text` (Default, UI-Schrift) oder `mono`
+		 *  (Code-Eingabe, z. B. Snippet-Editor). */
+		font?: 'text' | 'mono';
 		/** Führendes Icon in der Feldfläche (z. B. SearchIcon). */
 		icon?: Snippet;
 		/** Rechtes Slot-Element (z. B. <Kbd>⌘K</Kbd> oder Esc-Hinweis). */
@@ -47,6 +50,7 @@
 		density = 'comfortable',
 		multiline = false,
 		rows = 3,
+		font = 'text',
 		icon,
 		shortcut,
 		error = false,
@@ -59,13 +63,15 @@
 <div
 	class="field field--{density} {className}"
 	class:field--multiline={multiline}
+	class:field--mono={font === 'mono'}
 	class:field--error={error}
 >
 	{#if icon}
 		<span class="field__icon">{@render icon()}</span>
 	{/if}
 	{#if multiline}
-		<textarea class="field__control" bind:this={element} bind:value {rows} {...restProps}></textarea>
+		<textarea class="field__control" bind:this={element} bind:value {rows} {...restProps}
+		></textarea>
 	{:else}
 		<input class="field__control" bind:this={element} bind:value {...restProps} />
 	{/if}
