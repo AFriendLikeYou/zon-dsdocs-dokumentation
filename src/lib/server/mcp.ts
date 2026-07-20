@@ -8,10 +8,14 @@
  * nicht sauber in adapter-vercel integrieren ließe. Die Route (+server.ts) bleibt dünn;
  * die Tool-Logik ist hier als pure Funktionen testbar.
  */
-import { AGENT_CATALOG, type AgentCatalogEntry } from '$data/agent-catalog';
+import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
+import { FOUNDATION_TOKENS, tokenName, tokenUsage } from '$data/foundation-tokens';
+import { COLOR_ROLE_GROUPS } from '$data/color-roles';
+import { ZDS_VALUES_LIGHT, ZDS_VALUES_DARK } from '$lib/server/zds-values';
+import { manifestComponent, manifestFoundations } from '$lib/server/manifest';
 
 const PROTOCOL_VERSION = '2025-06-18';
-const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.0.0' };
+const SERVER_INFO = { name: 'zeit-ds-doku', version: '1.1.0' };
 
 /** Kontext-Budget pro `get`-Antwort (Astryx-Muster): lange Ausgaben kappen. */
 export const GET_CHAR_BUDGET = 4000;
@@ -25,12 +29,26 @@ const SECTIONS: GetSection[] = ['overview', 'markup', 'tokens', 'a11y', 'usage']
 
 export type SearchHit = { slug: string; name: string; kategorie: string; zweck: string };
 
+/** Obergrenze für Treffer — hält Antworten im Kontext-Budget. */
+const MAX_LIMIT = 50;
+
+/**
+ * Robustes limit-Handling (Entscheidung zu Paket-Punkt 4: sauberes CLAMPING,
+ * kein Fehler): fehlend/nicht-numerisch → Default 8; <1 → 1; >MAX_LIMIT → MAX_LIMIT.
+ * Bewusst statt `Number(x) || 8` (das schluckt limit:0 und macht daraus 8) — und
+ * bewusst kein -32602, weil ein geklemmter Wert den Agenten weniger überrascht als
+ * ein harter Fehler mitten in einer sonst gültigen Suche. Dokumentiert im inputSchema.
+ */
+function clampLimit(limit: unknown): number {
+	const n = Number(limit);
+	if (!Number.isFinite(n)) return 8;
+	return Math.min(MAX_LIMIT, Math.max(1, Math.floor(n)));
+}
+
 /** Sammelt alle durchsuchbaren Textfragmente eines Eintrags, nach Gewicht gruppiert. */
 function haystack(entry: AgentCatalogEntry) {
 	const spec = entry.spec;
-	const variantLabels = (spec.varianten ?? []).flatMap((v) =>
-		(v.werte ?? []).map((w) => w.label)
-	);
+	const variantLabels = (spec.varianten ?? []).flatMap((v) => (v.werte ?? []).map((w) => w.label));
 	const tokenNames = (spec.tokens ?? []).flatMap((g) => (g.items ?? []).map((i) => i.name));
 	return {
 		name: [spec.name ?? '', entry.slug].join(' ').toLowerCase(),
@@ -39,15 +57,31 @@ function haystack(entry: AgentCatalogEntry) {
 	};
 }
 
-/** Case-insensitive Suche mit einfachem Scoring (Name > zweck > Rest). */
+/**
+ * Case-insensitive Suche mit einfachem Scoring. Reihenfolge des Gewichts:
+ * Exakt-Match auf Slug/Name (die ganze Query trifft genau) > Präfix-Match auf
+ * Slug/Name > Teilstring-Treffer je Term (Name > zweck > Rest). So landet bei
+ * `search "button"` die Komponente `button` VOR `button-group`/`icon-button`.
+ */
 export function searchComponents(query: string, limit = 8): SearchHit[] {
-	const q = String(query ?? '').trim().toLowerCase();
+	const q = String(query ?? '')
+		.trim()
+		.toLowerCase();
 	if (!q) return [];
 	const terms = q.split(/\s+/).filter(Boolean);
 
 	const scored = AGENT_CATALOG.map((entry) => {
 		const h = haystack(entry);
+		const slug = entry.slug.toLowerCase();
+		const name = (entry.spec.name ?? '').toLowerCase();
 		let score = 0;
+
+		// Stufe 1: Exakt-Match auf Slug oder Name → höchstes Gewicht.
+		if (q === slug || q === name) score += 1000;
+		// Stufe 2: Präfix-Match auf Slug oder Name.
+		else if (slug.startsWith(q) || (name && name.startsWith(q))) score += 100;
+
+		// Stufe 3: Teilstring-Treffer je Term (wie bisher).
 		for (const t of terms) {
 			if (h.name.includes(t)) score += 10;
 			if (h.zweck.includes(t)) score += 4;
@@ -57,7 +91,7 @@ export function searchComponents(query: string, limit = 8): SearchHit[] {
 	})
 		.filter((s) => s.score > 0)
 		.sort((a, b) => b.score - a.score || a.entry.slug.localeCompare(b.entry.slug))
-		.slice(0, Math.max(1, Number(limit) || 8));
+		.slice(0, clampLimit(limit));
 
 	return scored.map(({ entry }) => ({
 		slug: entry.slug,
@@ -73,6 +107,19 @@ export function searchComponents(query: string, limit = 8): SearchHit[] {
 
 const find = (slug: string) => AGENT_CATALOG.find((e) => e.slug === String(slug));
 
+/**
+ * Kompakte Light+Dark-Wertdarstellung eines --z-ds-Tokens für den Agenten-Text:
+ * '#ffffff · dark #121212', wenn sich der Dark-Wert unterscheidet; nur '#ffffff'
+ * bei theme-invarianten Tokens (identisch) oder wenn kein Dark-Wert existiert.
+ * Leerer String, wenn der Token gar keinen Wert hat.
+ */
+function zdsValueText(name: string): string {
+	const light = ZDS_VALUES_LIGHT[name];
+	const dark = ZDS_VALUES_DARK[name];
+	if (!light) return dark ?? '';
+	return dark && dark !== light ? `${light} · dark ${dark}` : light;
+}
+
 function line(label: string, value: unknown): string {
 	if (value == null || value === '') return '';
 	return `${label}: ${value}\n`;
@@ -83,8 +130,10 @@ function sectionOverview(e: AgentCatalogEntry): string {
 	let out = `# ${s.name ?? e.slug} (${e.slug})\n`;
 	out += line('Kategorie', s.kategorie);
 	out += line('Zweck', s.zweck);
-	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
-	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nutzen?.length)
+		out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length)
+		out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.varianten?.length) {
 		out += `Varianten:\n`;
 		for (const v of s.varianten) {
@@ -108,9 +157,6 @@ function sectionMarkup(e: AgentCatalogEntry): string {
 			out += `  - ${c.key} (${c.type})${c.cssClass ? ` → .${c.cssClass}` : ''}${c.attr ? ` → [${c.attr}]` : ''}\n`;
 		}
 	}
-	if (Array.isArray(r.presets) && r.presets.length) {
-		out += `Presets: ${r.presets.map((p) => p.label).join(', ')}\n`;
-	}
 	if (e.patternCss) out += `\npattern.css:\n${e.patternCss}\n`;
 	return out;
 }
@@ -120,7 +166,9 @@ function sectionTokens(e: AgentCatalogEntry): string {
 	let out = `# Tokens & Maße — ${s.name ?? e.slug}\n`;
 	for (const g of s.tokens ?? []) {
 		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
-		for (const i of g.items ?? []) out += `  - ${i.name}: ${i.wert}\n`;
+		// Wert aus der einen Quelle (Light + ggf. Dark) auflösen — nicht mehr im Modell.
+		for (const i of g.items ?? [])
+			out += `  - ${i.name}: ${zdsValueText(i.name) || '?'}${i.hinweis ? ' · ' + i.hinweis : ''}\n`;
 	}
 	if (s.masse) {
 		out += `\nMaße:\n`;
@@ -132,7 +180,8 @@ function sectionTokens(e: AgentCatalogEntry): string {
 	}
 	if (s.spacing?.length) {
 		out += `\nInnenabstände:\n`;
-		for (const sp of s.spacing) out += `  - ${sp.label}: ${sp.px}${sp.token ? ` (${sp.token})` : ''}\n`;
+		for (const sp of s.spacing)
+			out += `  - ${sp.label}: ${sp.px}${sp.token ? ` (${sp.token})` : ''}\n`;
 	}
 	return out;
 }
@@ -147,7 +196,8 @@ function sectionA11y(e: AgentCatalogEntry): string {
 	}
 	if (s.wording?.length) {
 		out += `\nWording:\n`;
-		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"${w.hinweis ? ` (${w.hinweis})` : ''}\n`;
+		for (const w of s.wording)
+			out += `  - statt "${w.schlecht}" → "${w.gut}"${w.hinweis ? ` (${w.hinweis})` : ''}\n`;
 	}
 	return out;
 }
@@ -155,10 +205,16 @@ function sectionA11y(e: AgentCatalogEntry): string {
 function sectionUsage(e: AgentCatalogEntry): string {
 	const s = e.spec;
 	let out = `# Verwendung — ${s.name ?? e.slug}\n`;
-	if (s.verwendung?.nutzen?.length) out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
-	if (s.verwendung?.nichtNutzen?.length) out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nutzen?.length)
+		out += `Verwenden für:\n${s.verwendung.nutzen.map((x) => `  - ${x}`).join('\n')}\n`;
+	if (s.verwendung?.nichtNutzen?.length)
+		out += `Nicht verwenden für:\n${s.verwendung.nichtNutzen.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.do?.length) out += `\nDo:\n${s.doDont.do.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.doDont?.dont?.length) out += `Don't:\n${s.doDont.dont.map((x) => `  - ${x}`).join('\n')}\n`;
+	// Kompositions-Hinweise: wie die Komponente mit anderen kombiniert wird — für
+	// Agenten beim Zusammensetzen von Formularen/Organismen besonders wertvoll.
+	if (s.komposition?.length)
+		out += `\nKomposition:\n${s.komposition.map((x) => `  - ${x}`).join('\n')}\n`;
 	if (s.wording?.length) {
 		out += `\nWording:\n`;
 		for (const w of s.wording) out += `  - statt "${w.schlecht}" → "${w.gut}"\n`;
@@ -210,28 +266,188 @@ export function getComponent(slug: string, section?: GetSection | string): strin
 	return budget(combined, false);
 }
 
+/** Ungekappter Volltext einer Komponente (alle Sektionen) — für llms-full.txt. */
+export function componentFullText(slug: string): string {
+	const e = find(slug);
+	if (!e) return '';
+	return SECTIONS.map((s) => RENDERERS[s](e)).join('\n\n');
+}
+
+/** Katalog-Slugs in Katalog-Reihenfolge — für llms.txt/llms-full.txt. */
+export const catalogSlugs = (): string[] => AGENT_CATALOG.map((e) => e.slug);
+
+/** Kurzinfo je Slug — für die llms.txt-Linkliste. */
+export const catalogSummaries = (): Array<{ slug: string; name: string; zweck: string }> =>
+	AGENT_CATALOG.map((e) => ({
+		slug: e.slug,
+		name: e.spec.name ?? e.slug,
+		zweck: e.spec.zweck ?? ''
+	}));
+
+// ---------------------------------------------------------------------------
+// foundations — Farb-Rollen, Tokens, Spacing, Typografie (Agenten-Text)
+// ---------------------------------------------------------------------------
+
+export type FoundationsSection = 'farben' | 'spacing' | 'typografie' | 'tokens';
+const F_SECTIONS: FoundationsSection[] = ['farben', 'spacing', 'typografie', 'tokens'];
+
+function foundationsFarben(): string {
+	let out = '# Farb-Rollen der Doku-UI (--ds-Rolle → --z-ds-Token = Wert · dark Dark-Wert)\n';
+	for (const g of COLOR_ROLE_GROUPS) {
+		out += `\n${g.titel}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
+		for (const r of g.rollen) {
+			const wert = zdsValueText(r.raw);
+			out += `  - ${r.token} → ${r.raw}${wert ? ` = ${wert}` : ''} · ${r.usage}\n`;
+		}
+	}
+	out += '\nRegel: In UI immer Rollen-Tokens verwenden, nie rohe Farbwerte.\n';
+	return out;
+}
+
+/** Foundation-Token-Gruppen (gefiltert) als Text — Name = Wert(e) · Einsatz. */
+function foundationsGroups(titel: string, match: (kategorie: string) => boolean): string {
+	let out = `# ${titel}\n`;
+	for (const g of FOUNDATION_TOKENS.filter((g) => match(g.kategorie.toLowerCase()))) {
+		out += `\n${g.kategorie}${g.beschreibung ? ` — ${g.beschreibung}` : ''}\n`;
+		for (const t of g.tokens) {
+			const name = tokenName(t);
+			const usage = tokenUsage(t);
+			const wert = zdsValueText(name);
+			out += `  - ${name}${wert ? ` = ${wert}` : ''}${usage && usage !== '—' ? ` · ${usage}` : ''}\n`;
+		}
+	}
+	return out;
+}
+
+/**
+ * Alle Foundation-Token KOMPAKT: nur `name = wert(e)` je Zeile, ohne Usage-Sätze
+ * und ohne Gruppen-Beschreibung — damit ALLE Gruppen (inkl. Radius/Schriftgröße)
+ * ins GET_CHAR_BUDGET passen. Die Usage-Sätze bleiben den spezifischen Sichten
+ * (farben/spacing/typografie) vorbehalten.
+ */
+function foundationsAllCompact(): string {
+	let out = '# Alle Foundation-Tokens (Name = Wert · dark abweichender Dark-Wert)\n';
+	for (const g of FOUNDATION_TOKENS) {
+		out += `\n${g.kategorie}\n`;
+		for (const t of g.tokens) {
+			const name = tokenName(t);
+			const wert = zdsValueText(name);
+			out += `  - ${name}${wert ? ` = ${wert}` : ''}\n`;
+		}
+	}
+	return out;
+}
+
+const F_RENDERERS: Record<FoundationsSection, () => string> = {
+	farben: foundationsFarben,
+	spacing: () => foundationsGroups('Spacing-Tokens', (k) => k.startsWith('abstand')),
+	typografie: () =>
+		foundationsGroups('Typografie-Tokens', (k) => k.includes('schrift') || k.includes('zeilen')),
+	tokens: foundationsAllCompact
+};
+
+/**
+ * Foundations als Agenten-Text: ohne `section` ein kompakter Einstieg
+ * (Farb-Rollen + Spacing), mit `section` gezielt eine der vier Sichten.
+ */
+export function getFoundations(section?: string): string {
+	if (section && F_SECTIONS.includes(section as FoundationsSection)) {
+		return budget(F_RENDERERS[section as FoundationsSection](), true);
+	}
+	const combined = [foundationsFarben(), F_RENDERERS.spacing()].join('\n---\n');
+	const capped =
+		combined.length <= GET_CHAR_BUDGET
+			? combined
+			: combined.slice(0, GET_CHAR_BUDGET - 60) +
+				`\n\n[…gekürzt. Gezielt abrufen mit section: ${F_SECTIONS.join(' | ')}]`;
+	return capped;
+}
+
+// ---------------------------------------------------------------------------
+// list — kompakte Katalog-Übersicht (Einstieg ohne Rate-Begriff)
+// ---------------------------------------------------------------------------
+
+/**
+ * Kompakte Gesamtübersicht aller dokumentierten Komponenten: eine Zeile je
+ * Eintrag (slug · name · kategorie), plus Einleitungszeile mit der Anzahl. Gibt
+ * Agenten den Einstieg, den `search` (braucht einen Begriff) nicht bietet.
+ */
+export function listComponents(): string {
+	const rows = AGENT_CATALOG.map(
+		(e) => `- ${e.slug} · ${e.spec.name ?? e.slug} · ${e.spec.kategorie ?? ''}`
+	);
+	return `${AGENT_CATALOG.length} dokumentierte Komponenten:\n${rows.join('\n')}`;
+}
+
 // ---------------------------------------------------------------------------
 // JSON-RPC 2.0 Dispatch (MCP Streamable HTTP, stateless)
 // ---------------------------------------------------------------------------
 
 const TOOLS = [
 	{
+		name: 'list',
+		description:
+			'Listet alle dokumentierten Komponenten des ZEIT-Designsystems kompakt (slug · name · kategorie je Zeile). Parameterlos — Einstiegspunkt, wenn kein Suchbegriff bekannt ist.',
+		inputSchema: { type: 'object', properties: {} },
+		outputSchema: {
+			type: 'object',
+			properties: {
+				components: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							slug: { type: 'string' },
+							name: { type: 'string' },
+							kategorie: { type: 'string' }
+						},
+						required: ['slug', 'name']
+					}
+				}
+			},
+			required: ['components']
+		}
+	},
+	{
 		name: 'search',
 		description:
-			'Sucht Komponenten des ZEIT-Designsystems (Name, Zweck, Kategorie, Varianten, Tokens). Liefert slug, name, kategorie, zweck.',
+			'Sucht Komponenten des ZEIT-Designsystems (Name, Zweck, Kategorie, Varianten, Tokens). Liefert slug, name, kategorie, zweck. Exakte und Präfix-Treffer auf slug/name werden bevorzugt.',
 		inputSchema: {
 			type: 'object',
 			properties: {
-				query: { type: 'string', description: 'Suchbegriff(e).' },
-				limit: { type: 'number', description: 'Max. Treffer (Default 8).' }
+				query: { type: 'string', description: 'Suchbegriff(e). Pflicht, nicht leer.' },
+				limit: {
+					type: 'number',
+					description:
+						'Max. Treffer. Default 8; wird auf 1..50 geklemmt (nicht-numerisch/fehlend → 8).'
+				}
 			},
 			required: ['query']
+		},
+		outputSchema: {
+			type: 'object',
+			properties: {
+				hits: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							slug: { type: 'string' },
+							name: { type: 'string' },
+							kategorie: { type: 'string' },
+							zweck: { type: 'string' }
+						},
+						required: ['slug', 'name']
+					}
+				}
+			},
+			required: ['hits']
 		}
 	},
 	{
 		name: 'get',
 		description:
-			'Liefert die Doku einer Komponente als Text. Ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage.',
+			'Liefert die Doku einer Komponente: als Text (ohne section eine kompakte Gesamtsicht; mit section gezielt overview | markup | tokens | a11y | usage) UND als structuredContent den vollen Manifest-Eintrag { slug, spec, patternCss } — unabhängig von section. Beispiel: { "slug": "button", "section": "markup" }.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -239,17 +455,62 @@ const TOOLS = [
 				section: {
 					type: 'string',
 					enum: SECTIONS,
-					description: 'Optionaler Ausschnitt.'
+					description: 'Optionaler Ausschnitt (nur für den Text-Teil).'
 				}
 			},
 			required: ['slug']
+		},
+		outputSchema: {
+			type: 'object',
+			description:
+				'Voller Manifest-Eintrag der Komponente — identisch zu GET /api/manifest.json?component=<slug>.',
+			properties: {
+				slug: { type: 'string' },
+				spec: { type: 'object', description: 'Gemergter Spec (model.json + content.json) inkl. render.' },
+				patternCss: { type: ['string', 'null'], description: 'Rohes, unscoped pattern.css.' }
+			},
+			required: ['slug', 'spec']
+		}
+	},
+	{
+		name: 'foundations',
+		description:
+			'Liefert die Design-Foundations: als Text (Farb-Rollen --ds-* → --z-ds-* mit Light- UND Dark-Werten, Spacing-, Typografie- und alle Foundation-Tokens; abweichende Dark-Werte als " · dark <wert>"; ohne section ein kompakter Einstieg) UND als structuredContent alle Rollen + Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark) — unabhängig von section. Beispiel: { "section": "farben" }.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				section: {
+					type: 'string',
+					enum: ['farben', 'spacing', 'typografie', 'tokens'],
+					description: 'Optionale Sicht (nur für den Text-Teil).'
+				}
+			}
+		},
+		outputSchema: {
+			type: 'object',
+			properties: {
+				farbRollen: {
+					type: 'array',
+					description: 'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + wert (Light) + wertDark (Dark) + Usage.'
+				},
+				tokens: {
+					type: 'array',
+					description: 'Foundation-Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark).'
+				}
+			},
+			required: ['farbRollen', 'tokens']
 		}
 	}
 ];
 
 type JsonRpcId = string | number | null;
 type JsonRpcRequest = { jsonrpc?: string; id?: JsonRpcId; method?: string; params?: unknown };
-export type JsonRpcResponse = { jsonrpc: '2.0'; id: JsonRpcId; result?: unknown; error?: { code: number; message: string } };
+export type JsonRpcResponse = {
+	jsonrpc: '2.0';
+	id: JsonRpcId;
+	result?: unknown;
+	error?: { code: number; message: string };
+};
 
 const ok = (id: JsonRpcId, result: unknown): JsonRpcResponse => ({ jsonrpc: '2.0', id, result });
 const err = (id: JsonRpcId, code: number, message: string): JsonRpcResponse => ({
@@ -257,7 +518,15 @@ const err = (id: JsonRpcId, code: number, message: string): JsonRpcResponse => (
 	id,
 	error: { code, message }
 });
-const textResult = (text: string) => ({ content: [{ type: 'text', text }] });
+/**
+ * Tool-Ergebnis: Text-Serialisierung (immer) + optional structuredContent
+ * (MCP-Spec: muss zum deklarierten outputSchema des Tools passen). Text bleibt
+ * budgetiert; structuredContent ist der volle, unkappte Vertrag.
+ */
+const textResult = (text: string, structuredContent?: unknown) => ({
+	content: [{ type: 'text', text }],
+	...(structuredContent !== undefined ? { structuredContent } : {})
+});
 
 /**
  * Verarbeitet EINE JSON-RPC-Nachricht. Notifications (ohne id) liefern `null`
@@ -267,12 +536,32 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 	const id = msg.id ?? null;
 	const method = msg.method;
 
+	// JSON-RPC-2.0-Envelope validieren, bevor wir dispatchen.
+	// Fehlendes/falsches jsonrpc ODER fehlendes/nicht-string method → -32600.
+	if (msg.jsonrpc !== '2.0' || typeof method !== 'string' || method === '') {
+		return err(
+			id,
+			-32600,
+			'Ungültige JSON-RPC-Anfrage (jsonrpc:"2.0" und method:string erforderlich).'
+		);
+	}
+
 	switch (method) {
 		case 'initialize':
 			return ok(id, {
 				protocolVersion: PROTOCOL_VERSION,
 				capabilities: { tools: {} },
-				serverInfo: SERVER_INFO
+				serverInfo: SERVER_INFO,
+				// Klassen-Grammatik als Server-Instructions (Astryx-Prinzip
+				// „vorhersagbare Muster"): Agenten können daraus das Markup
+				// unbekannter Komponenten ableiten, ohne jede einzeln zu laden.
+				instructions:
+					'ZEIT-Designsystem-Doku. Alle Patterns folgen derselben Klassen-Grammatik: ' +
+					'.z-<komponente> (Block) · .z-<komponente>__<teil> · .z-<komponente>--<variante> (Modifier, kombinierbar). ' +
+					'Zustände über native Attribute/Pseudoklassen (disabled, :hover, :focus-visible), keine State-Klassen. ' +
+					'Farben/Maße ausschließlich über --z-ds-*-Tokens. Markup ist Vanilla HTML/CSS mit eigenem pattern.css je Komponente. ' +
+					'Einstieg: list → get(slug) · Foundations: foundations(section). ' +
+					'Tool-Ergebnisse enthalten structuredContent (voller JSON-Vertrag); Gesamt-Manifest: GET /api/manifest.json.'
 			});
 
 		case 'notifications/initialized':
@@ -288,15 +577,37 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 		case 'tools/call': {
 			const params = (msg.params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
 			const args = params.arguments ?? {};
+			if (params.name === 'list') {
+				const components = AGENT_CATALOG.map((e) => ({
+					slug: e.slug,
+					name: e.spec.name ?? e.slug,
+					kategorie: e.spec.kategorie ?? ''
+				}));
+				return ok(id, textResult(listComponents(), { components }));
+			}
 			if (params.name === 'search') {
-				const hits = searchComponents(String(args.query ?? ''), Number(args.limit) || 8);
+				// Pflicht-Argument erzwingen: fehlend/leer/kein-String → -32602 statt Pseudo-Erfolg.
+				const query = typeof args.query === 'string' ? args.query.trim() : '';
+				if (!query) {
+					return err(id, -32602, 'Pflicht-Argument "query" fehlt oder ist leer.');
+				}
+				const hits = searchComponents(query, clampLimit(args.limit));
 				const text = hits.length
 					? hits.map((h) => `- ${h.slug} · ${h.name} (${h.kategorie}): ${h.zweck}`).join('\n')
-					: `Keine Treffer für "${args.query}".`;
-				return ok(id, textResult(text));
+					: `Keine Treffer für "${query}".`;
+				return ok(id, textResult(text, { hits }));
 			}
 			if (params.name === 'get') {
-				return ok(id, textResult(getComponent(String(args.slug ?? ''), args.section as string)));
+				const slug = typeof args.slug === 'string' ? args.slug.trim() : '';
+				if (!slug) {
+					return err(id, -32602, 'Pflicht-Argument "slug" fehlt oder ist leer.');
+				}
+				// structuredContent nur bei Treffer — der Nicht-gefunden-Fall bleibt reiner Text.
+				const entry = manifestComponent(slug);
+				return ok(id, textResult(getComponent(slug, args.section as string), entry ?? undefined));
+			}
+			if (params.name === 'foundations') {
+				return ok(id, textResult(getFoundations(args.section as string), manifestFoundations()));
 			}
 			return err(id, -32602, `Unbekanntes Tool: ${params.name}`);
 		}
@@ -311,6 +622,8 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 /** Verarbeitet einen JSON-RPC-Body (Einzelnachricht ODER Batch). */
 export function handleMcpBody(body: unknown): JsonRpcResponse | JsonRpcResponse[] | null {
 	if (Array.isArray(body)) {
+		// Leeres Batch ist laut JSON-RPC-2.0-Spec ungültig → einzelner -32600-Fehler.
+		if (body.length === 0) return err(null, -32600, 'Ungültige JSON-RPC-Anfrage (leeres Batch).');
 		const responses = body.map(handleRpc).filter((r): r is JsonRpcResponse => r !== null);
 		return responses.length ? responses : null;
 	}

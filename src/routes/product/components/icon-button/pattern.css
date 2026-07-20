@@ -1,0 +1,36 @@
+/* z-icon-button — Icon-Button (nur Icon, kein Label), originalgetreu aus Figma
+   ❖ ZDS portiert (node 3334:5440). Neutral, KEIN Akzent. Unscoped Pattern-CSS
+   auf den echten --z-ds-Tokens: Fläche background-10, Icon text-100 (default) /
+   text-70 (hover) / text-40 (disabled), Radius 4. Flache Regeln, keine At-Rules
+   (v1-Scoping). */
+.z-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 40px;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-10);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	transition: color 200ms ease-out;
+}
+.z-icon-button svg {
+	width: 20px;
+	height: 20px;
+}
+.z-icon-button:hover {
+	color: var(--z-ds-color-text-70);
+}
+.z-icon-button:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
+}
+.z-icon-button:disabled {
+	pointer-events: none;
+	color: var(--z-ds-color-text-40);
+}

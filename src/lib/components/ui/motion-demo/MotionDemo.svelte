@@ -4,9 +4,17 @@
   die Bewegung mit dem jeweiligen Token ab. Respektiert prefers-reduced-motion.
 -->
 <script lang="ts">
-	type MotionToken = { label: string; cssVar: string };
+	import { resolveCssVar } from '$lib/utils';
+
+	type MotionToken = {
+		/** Angezeigter Name des Tokens. */
+		label: string;
+		/** CSS-Variablenname, dessen Wert live gelesen wird. */
+		cssVar: string;
+	};
 
 	let {
+		/** Abspielbare Motion-Tokens (Label + CSS-Variable). */
 		tokens = [],
 		/** Welche Eigenschaft das Token steuert: Kurve (easing) oder Dauer (duration). */
 		type = 'easing'
@@ -17,9 +25,8 @@
 
 	// Token-Werte zur Laufzeit aus dem geladenen Stylesheet lesen.
 	$effect(() => {
-		const root = getComputedStyle(document.documentElement);
 		const next: Record<string, string> = {};
-		for (const t of tokens) next[t.cssVar] = root.getPropertyValue(t.cssVar).trim();
+		for (const t of tokens) next[t.cssVar] = resolveCssVar(t.cssVar);
 		values = next;
 	});
 

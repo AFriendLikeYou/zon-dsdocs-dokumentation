@@ -5,7 +5,10 @@
 <script lang="ts">
 	type ShadowToken = { label: string; cssVar: string; usage?: string };
 
-	let { tokens = [] }: { tokens?: ShadowToken[] } = $props();
+	let {
+		/** Shadow-Tokens: Label, cssVar und optionaler Einsatz-Hinweis. */
+		tokens = []
+	}: { tokens?: ShadowToken[] } = $props();
 </script>
 
 <div class="elevation-demo">

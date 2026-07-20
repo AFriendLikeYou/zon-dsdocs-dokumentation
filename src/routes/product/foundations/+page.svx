@@ -8,8 +8,8 @@ title: Foundations
 
 <script lang="ts">
 	import { CardGrid } from '$components/ui/card';
+	import type { BadgeVariant } from '$types/spec';
 
-	type BadgeVariant = 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
 	type CardMeta = {
 		title: string;
 		description: string;

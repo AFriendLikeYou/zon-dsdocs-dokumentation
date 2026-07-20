@@ -30,10 +30,17 @@ const ALLOW_EXACT = new Set([
 	'/admin', // interne Utility
 	'/login', // Auth
 	'/brand', // Bereichs-Landingpage (über den Navbar-Bereichswechsler erreichbar, nicht via Sidebar)
-	'/product' // dito
+	'/product', // dito
+	// Orientierungsseite der „Marke"-Sektion: die Sidebar zeigt die Unterseiten
+	// (identity/strategy, …) direkt unter dem Gruppen-Header „Marke" (ohne eigenen
+	// Header-Link — die Gruppe klappt nur auf). Der Index /brand/identity fasst die
+	// fünf Unterseiten als Kachel-Übersicht zusammen und ist bewusst nicht separat
+	// im Sidebar-Menü verlinkt (analog zu den Foundations-Übersichten).
+	'/brand/identity'
 ]);
 const ALLOW_PREFIX = [
-	'/product/foundations/' // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)
+	'/product/foundations/', // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)
+	'/admin/' // CMS-Editor-Seiten (interne Utility, bewusst nicht im Sidebar-Menü)
 ];
 
 const isAllowed = (route) =>
@@ -60,6 +67,16 @@ const routes = collectRoutes(routesDir).sort();
 const nav = fs.readFileSync(navFile, 'utf8');
 const navHrefs = new Set([...nav.matchAll(/href:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
 
+// Brand-Nav ist config-getrieben (ADR-028): Reihenfolge/Hierarchie stehen in
+// src/lib/data/brand-nav.json, nicht mehr als href-Literale in navigation.ts. Die
+// Hrefs von dort (Blatt-Links + Gruppen-Kinder) mit einlesen, sonst meldete der
+// Check alle Brand-Routen fälschlich als „nicht verlinkt".
+const brandNavFile = path.join(root, 'src/lib/data/brand-nav.json');
+for (const section of JSON.parse(fs.readFileSync(brandNavFile, 'utf8'))) {
+	if (section.href) navHrefs.add(section.href);
+	for (const child of section.items ?? []) if (child.href) navHrefs.add(child.href);
+}
+
 // Components-Sektion ist katalog-getrieben (ADR-025): die Einträge stehen nicht mehr als
 // href-Literale in navigation.ts, sondern werden aus CATALOG generiert. Eine Component-
 // Route /product/components/<slug> gilt daher als verlinkt, wenn sie per Konstruktion
@@ -68,9 +85,7 @@ const navHrefs = new Set([...nav.matchAll(/href:\s*['"]([^'"]+)['"]/g)].map((m) 
 // (Route ohne beides) schlägt weiterhin an; Routen ohne model.json fängt zusätzlich
 // check-component-drift.mjs ab.
 const COMPONENT_ROUTE = /^\/product\/components\/([^/]+)$/;
-const plannedSlugs = new Set(
-	[...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1])
-);
+const plannedSlugs = new Set([...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
 const hasModelJson = (slug) =>
 	fs.existsSync(path.join(routesDir, 'product/components', slug, 'model.json'));
 
@@ -90,11 +105,15 @@ if (missing.length === 0) {
 	process.exit(0);
 }
 
-console.warn(`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in src/lib/data/navigation.ts:`);
+console.warn(
+	`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in src/lib/data/navigation.ts:`
+);
 for (const route of missing) {
 	console.warn(`   • ${route}  → in MENU_ITEMS_BRAND/MENU_ITEMS_PRODUCT ergänzen`);
 }
 console.warn('   (Per direkter URL erreichbar, erscheint aber nicht im Sidebar-Menü.');
-console.warn('    Absicht? Dann in die Allowlist in tooling/check-nav.mjs. Siehe DECISIONS.md ADR-007.)\n');
+console.warn(
+	'    Absicht? Dann in die Allowlist in tooling/check-nav.mjs. Siehe DECISIONS.md ADR-007.)\n'
+);
 
 process.exit(strict ? 1 : 0);

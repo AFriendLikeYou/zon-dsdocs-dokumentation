@@ -4,10 +4,16 @@
   Nutzung: <Lightbox src="…" alt="…" caption="…" />
 -->
 <script lang="ts">
+	import { CloseIcon } from '$lib/icons';
+
 	let {
+		/** Bildquelle; wird für Trigger und Detailansicht genutzt. */
 		src,
+		/** Alt-Text; leer = dekorativ. */
 		alt = '',
+		/** Optionale Bildunterschrift in der Detailansicht. */
 		caption,
+		/** Zusätzliche CSS-Klasse für den Trigger. */
 		class: className = ''
 	}: { src: string; alt?: string; caption?: string; class?: string } = $props();
 
@@ -29,8 +35,20 @@
 >
 	<img {src} {alt} loading="lazy" />
 	<span class="lightbox-trigger__hint" aria-hidden="true">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.5" y2="16.5" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.5" y2="16.5" /><line
+				x1="11"
+				y1="8"
+				x2="11"
+				y2="14"
+			/><line x1="8" y1="11" x2="14" y2="11" />
 		</svg>
 	</span>
 </button>
@@ -44,9 +62,7 @@
 	}}
 >
 	<button type="button" class="lightbox__close" onclick={close} aria-label="Schließen">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-			<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-		</svg>
+		<CloseIcon />
 	</button>
 	<figure class="lightbox__figure">
 		<img {src} {alt} class="lightbox__img" />
@@ -157,7 +173,8 @@
 	.lightbox__close:active {
 		transform: scale(0.92);
 	}
-	.lightbox__close svg {
+	/* Icon liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.lightbox__close :global(svg) {
 		width: 18px;
 		height: 18px;
 	}

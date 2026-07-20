@@ -15,7 +15,7 @@
 		},
 		{
 			titel: 'Display-Schrift',
-			text: 'Die Headline steht in FranziskaWebPro — die Display-Serife für markante Aussagen.',
+			text: 'Die Headline steht in Tiemann Schmal — die Display-Serife für markante Aussagen.',
 			href: '/brand/typography',
 			hrefLabel: 'Typografie'
 		},
@@ -42,7 +42,7 @@
 		},
 		{
 			titel: 'Schrift-Mix',
-			text: 'Große Serifen-Headline (FranziskaWebPro) über ruhiger Grotesk-Subline (TabletGothic).',
+			text: 'Große Serifen-Headline (Tiemann Schmal) über ruhiger Grotesk-Subline (TabletGothic).',
 			href: '/brand/typography',
 			hrefLabel: 'Typografie'
 		},
@@ -62,9 +62,9 @@
 <h1>Anwendungsbeispiele</h1>
 
 <p>
-	So wirkt die Marke, wenn ihre Elemente zusammenkommen — Logo, Schrift und Farbe im
-	Zusammenspiel. Die folgenden Layouts sind <strong>illustrative Beispiele</strong>, keine
-	Vorlagen zum Download. Echte Templates folgen, sobald das Material dafür bereitsteht.
+	So wirkt die Marke, wenn ihre Elemente zusammenkommen — Logo, Schrift und Farbe im Zusammenspiel.
+	Die folgenden Layouts sind <strong>illustrative Beispiele</strong>, keine Vorlagen zum Download.
+	Echte Templates folgen, sobald das Material dafür bereitsteht.
 </p>
 
 <section class="ex">
@@ -117,8 +117,8 @@
 </section>
 
 <p class="ex-note">
-	Hinweis: Diese Beispiele dienen der Veranschaulichung. Die gezeigten Texte sind
-	Platzhalter, keine veröffentlichten Kampagnen.
+	Hinweis: Diese Beispiele dienen der Veranschaulichung. Die gezeigten Texte sind Platzhalter, keine
+	veröffentlichten Kampagnen.
 </p>
 
 <style>
@@ -168,7 +168,7 @@
 	}
 	.ex-headline {
 		margin: 0;
-		font-family: 'FranziskaWebPro', Georgia, 'Times New Roman', serif;
+		font-family: 'ZeitTiemannSchmal', Georgia, 'Times New Roman', serif;
 		font-size: clamp(1.5rem, 4vw, 2.25rem);
 		line-height: 1.1;
 		color: #1a1a1a;
@@ -191,7 +191,7 @@
 	}
 	.ex-poster-headline {
 		margin: 0 0 var(--z-ds-space-12);
-		font-family: 'FranziskaWebPro', Georgia, 'Times New Roman', serif;
+		font-family: 'ZeitTiemannSchmal', Georgia, 'Times New Roman', serif;
 		font-size: clamp(1.75rem, 5vw, 2.75rem);
 		line-height: 1.05;
 		color: #1a1a1a;

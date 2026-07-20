@@ -1,5 +1,9 @@
+<!-- ZeitBrandSite.svelte — ZEIT-Wortmarke als Inline-SVG; wird von Navbar und Footer eingehängt. -->
 <script lang="ts">
-	let { extraClasses }: { extraClasses?: string } = $props();
+	let {
+		/** Zusätzliche CSS-Klassen für das <svg>. */
+		extraClasses
+	}: { extraClasses?: string } = $props();
 </script>
 
 <svg

@@ -1,8 +1,8 @@
 ---
 title: Cell
 status: ready_for_dev
-figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=33137-39890&m=dev
-aktualisiert_am: 2026-07-03
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=1075-938
+aktualisiert_am: 2026-07-07
 kategorie: Inhalte
 ---
 
@@ -10,15 +10,16 @@ kategorie: Inhalte
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, VariantMatrix, VariantList, StateList, DoDontList, WordingList, CodeBlock, PropsTable, A11yList, MeasureTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { SectionNav } from '$components/ui/section-nav';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	import type { ComponentSpec } from '$types/spec';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
-	const calloutAnchors = [{"nr":1,"side":"left","y":50},{"nr":2,"side":"top","x":55},{"nr":3,"side":"right","y":45},{"nr":4,"side":"bottom","x":55}];
+	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-cell__media"},{"nr":2,"side":"top","x":55,"selector":".z-cell__kicker"},{"nr":3,"side":"right","y":45,"selector":".z-cell__title"},{"nr":4,"side":"bottom","x":55,"selector":".z-cell__byline"}];
 	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}];
 	const playgroundTemplate = `<article class="z-cell{classes}">
   <div class="z-cell__media" aria-hidden="true"></div>
@@ -29,11 +30,12 @@ kategorie: Inhalte
     <div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>
   </div>
 </article>`;
-	const playgroundPresets = [{"label":"Standard","state":{"type":"article","small":false}},{"label":"Schlagzeile","state":{"type":"headline","small":false}},{"label":"Mit Bild","state":{"type":"artikel","small":false}},{"label":"Kompakt","state":{"type":"artikel","small":true}}];
-	const htmlCode = `<!-- Cell-Styles global einbinden (z. B. cell.css) -->
-<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
+	const editorial = content as Partial<ComponentSpec>;
+	const htmlBody = `<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
 <article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
-	const svelteCode = `<script>
+	const codeNote = editorial.codeNote ?? `Cell-Styles global einbinden (z. B. cell.css)`;
+	const htmlCode = codeNote ? `<!-- ${codeNote} -->\n${htmlBody}` : htmlBody;
+	const svelteCode = editorial.codeSvelte ?? `<script>
   // 'article' | 'headline' | 'artikel' | 'author' | 'podcast-series' | 'anzeige' | 'pinned'
   export let type = 'article';
   export let size = 'wide';
@@ -49,242 +51,243 @@ kategorie: Inhalte
   </div>
 </article>`;
 	const patternCssCode = `/* z-cell — Teaser-Zelle (Cell), originalgetreu aus Figma ❖ ZDS portiert
-   (node 33137:39890). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+   (node 4388:32445). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
 
    Ein Markup, viele Typen: die gemeinsame Struktur (Media · Kicker · Titel ·
    Byline · Meta) wird pro Typ-Modifier ein-/ausgeblendet und umgelegt — so wie
    eine echte CSS-Komponente es täte. Media/Avatar sind hier neutrale Flächen
    (im Produkt: Bild bzw. Podcast-Cover). */
 .z-cell {
-  background-color: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-m);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
-  width: 343px;
-  max-width: 100%;
+	background-color: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-text-100);
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-m);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	width: 343px;
+	max-width: 100%;
 }
 
 /* Flächen (Bild / Cover / Avatar) — je Typ eingeblendet. */
 .z-cell__media {
-  display: none;
-  flex: 0 0 auto;
-  width: 84px;
-  height: 84px;
-  border-radius: var(--z-ds-border-radius-4);
-  /* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
+	display: none;
+	flex: 0 0 auto;
+	width: 84px;
+	height: 84px;
+	border-radius: var(--z-ds-border-radius-4);
+	/* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
      Getönte Fläche + feiner Rahmen markieren den Bild-Slot; Farbe = z-ds-Token,
      adaptiert also mit dem Light/Dark-Schalter. */
-  background-color: var(--z-ds-color-background-20);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
+	background-color: var(--z-ds-color-background-10);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 
 /* Bild-Typen: gekreuzte Diagonalen = universelles „hier steht ein Bild". */
 .z-cell--artikel .z-cell__media,
 .z-cell--pinned .z-cell__media,
 .z-cell--anzeige .z-cell__media {
-  --slash: color-mix(in srgb, var(--z-ds-color-text-100) 13%, transparent);
-  background-image:
-    linear-gradient(
-      45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    ),
-    linear-gradient(
-      -45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    );
+	--slash: color-mix(in srgb, var(--z-ds-color-text-100) 13%, transparent);
+	background-image:
+		linear-gradient(
+			45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		),
+		linear-gradient(
+			-45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
 }
 
 .z-cell__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-xs);
-  min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-xs);
+	min-width: 0;
 }
 
 .z-cell__kicker {
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.2;
-  color: var(--z-ds-color-accent-100);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.2;
+	color: var(--z-ds-color-accent-100);
 }
 
 .z-cell__title {
-  margin: 0;
-  font-size: var(--z-ds-fontsize-20);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--z-ds-color-text-100);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--z-ds-color-text-100);
 }
 
 .z-cell__byline {
-  display: none;
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	display: none;
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 
 .z-cell__meta {
-  display: none;
-  gap: var(--z-ds-space-s);
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	display: none;
+	gap: var(--z-ds-space-s);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 
 /* Typ: Article — Spitzmarke + Titel + Meta (Zeitstempel · Autor). */
 .z-cell--article {
-  gap: var(--z-ds-space-s);
+	gap: var(--z-ds-space-s);
 }
 .z-cell--article .z-cell__meta {
-  display: flex;
+	display: flex;
 }
 
 /* Typ: Headline — nur Titel, oben mit feiner Trennlinie. */
 .z-cell--headline {
-  border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-m);
 }
 .z-cell--headline .z-cell__kicker,
 .z-cell--headline .z-cell__byline,
 .z-cell--headline .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Typ: Artikel — Bild links, Spitzmarke + Titel + Byline rechts. */
 .z-cell--artikel {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: flex-start;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: flex-start;
 }
 .z-cell--artikel .z-cell__media {
-  display: block;
+	display: block;
 }
 .z-cell--artikel .z-cell__body {
-  flex: 1 1 0;
+	flex: 1 1 0;
 }
 .z-cell--artikel .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Author — runder Avatar, Name + Funktion, oben mit Trennlinie. */
 .z-cell--author {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-m);
 }
 .z-cell--author .z-cell__media {
-  display: block;
-  border-radius: 999px;
+	display: block;
+	border-radius: 999px;
 }
 .z-cell--author .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--author .z-cell__kicker,
 .z-cell--author .z-cell__meta {
-  display: none;
+	display: none;
 }
 .z-cell--author .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Podcast Series — farbiges Cover, Titel + Subline. */
 .z-cell--podcast-series {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 .z-cell--podcast-series .z-cell__media {
-  display: block;
-  background-color: #8e8cf7;
+	display: block;
+	background-color: #8e8cf7;
 }
 .z-cell--podcast-series .z-cell__body {
-  flex: 1 1 0;
+	flex: 1 1 0;
 }
 .z-cell--podcast-series .z-cell__kicker,
 .z-cell--podcast-series .z-cell__meta {
-  display: none;
+	display: none;
 }
 .z-cell--podcast-series .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Anzeige — getönte Fläche, Label in Versalien statt Spitzmarke. */
 .z-cell--anzeige {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  background-color: var(--z-ds-color-background-10);
-  padding: var(--z-ds-space-m);
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	background-color: var(--z-ds-color-background-10);
+	padding: var(--z-ds-space-m);
 }
 .z-cell--anzeige .z-cell__media {
-  display: block;
-  width: 108px;
-  height: 72px;
+	display: block;
+	width: 108px;
+	height: 72px;
 }
 .z-cell--anzeige .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--anzeige .z-cell__kicker {
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1;
-  letter-spacing: 0.24px;
-  text-transform: uppercase;
-  color: var(--z-ds-color-text-55);
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1;
+	letter-spacing: 0.24px;
+	text-transform: uppercase;
+	color: var(--z-ds-color-text-55);
 }
 .z-cell--anzeige .z-cell__title {
-  font-size: var(--z-ds-fontsize-16);
+	font-size: var(--z-ds-fontsize-16);
 }
 .z-cell--anzeige .z-cell__byline,
 .z-cell--anzeige .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Typ: Pinned — kleines Bild links, kompakter Titel. */
 .z-cell--pinned {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 .z-cell--pinned .z-cell__media {
-  display: block;
-  width: 108px;
-  height: 72px;
+	display: block;
+	width: 108px;
+	height: 72px;
 }
 .z-cell--pinned .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--pinned .z-cell__title {
-  font-size: var(--z-ds-fontsize-16);
+	font-size: var(--z-ds-fontsize-16);
 }
 .z-cell--pinned .z-cell__byline,
 .z-cell--pinned .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Größe: Small — kleinere Titel und Flächen. */
 .z-cell--small .z-cell__title {
-  font-size: var(--z-ds-fontsize-18);
+	font-size: var(--z-ds-fontsize-18);
 }
 .z-cell--small .z-cell__media {
-  width: 72px;
-  height: 72px;
+	width: 72px;
+	height: 72px;
 }
 `;
+	const variantItems = [{"label":"Pinned","html":"<article class=\"z-cell z-cell--pinned\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt."},{"label":"Article","html":"<article class=\"z-cell z-cell--article\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt."},{"label":"Headline","html":"<article class=\"z-cell z-cell--headline\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Reduziert auf den Titel, oben mit Trennlinie."},{"label":"Artikel","html":"<article class=\"z-cell z-cell--artikel\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Standard-Teaser mit Bild, Spitzmarke, Titel und Byline."},{"label":"Author","html":"<article class=\"z-cell z-cell--author\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Autor/Autorin mit rundem Avatar, Name und Funktion."},{"label":"Podcast Series","html":"<article class=\"z-cell z-cell--podcast-series\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Podcast-Serie mit farbigem Cover, Titel und Abo-Hinweis."},{"label":"Anzeige","html":"<article class=\"z-cell z-cell--anzeige\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Werblicher Teaser auf getönter Fläche mit Versal-Label."},{"label":"Wide","html":"<article class=\"z-cell\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Standardbreite (343)."},{"label":"Small","html":"<article class=\"z-cell z-cell--small\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Kompakt — kleinerer Titel und kleinere Fläche."}];
 	const propsData = [{"name":"type","typ":"\"Pinned\" | \"Article\" | \"Headline\" | \"Artikel\" | \"Author\" | \"Podcast Series\" | \"Anzeige\"","default":"\"Article\"","beschreibung":"Teaser-Typ — steuert Struktur (Fläche/Meta) und Layout."},{"name":"size","typ":"\"Wide\" | \"Small\"","default":"\"Wide\"","beschreibung":"Kompakte Variante mit kleinerem Titel und kleinerer Fläche."},{"name":"kicker","typ":"string","default":"—","beschreibung":"Spitzmarke / redaktionelle Kategorie (nicht bei Headline/Author)."},{"name":"title","typ":"string","default":"—","beschreibung":"Teaser-Titel; beim Author der Name."},{"name":"byline","typ":"string","default":"—","beschreibung":"Autor/Subline; beim Author die Funktion."},{"name":"showKicker","typ":"boolean","default":"true","beschreibung":"Spitzmarke ein-/ausblenden."}];
 </script>
 
@@ -296,23 +299,20 @@ kategorie: Inhalte
 
 <ComponentHero spec={spec} version={content.version} />
 
-<Tabs items={[
-		{ label: 'Design', component: designTab },
-		{ label: 'Develop', component: developTab },
-		{ label: 'Barrierefreiheit', component: a11yTab },
-		{ label: 'Specs', component: specsTab }
+<Tabs tabs={[
+		{ id: 'designTab', label: 'Design', component: designTab },
+		{ id: 'developTab', label: 'Develop', component: developTab },
+		{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab },
+		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
 {#snippet designTab()}
-	<SectionNav items={[{"label":"Playground","href":"#playground"},{"label":"Anatomie","href":"#anatomie"},{"label":"Verwendung","href":"#verwendung"},{"label":"Wording","href":"#wording"},{"label":"Varianten","href":"#varianten"},{"label":"Zustände","href":"#zustaende"},{"label":"Do & Don't","href":"#do-dont"}]} />
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} presets={playgroundPresets} />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>{/snippet}
-		{#snippet variant()}<article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>{/snippet}
 	</Anatomy>
 
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
@@ -322,19 +322,10 @@ kategorie: Inhalte
 	<WordingList items={spec.wording} />
 
 	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<VariantList varianten={spec.varianten} info={content.variantInfo ?? {}} />
-	<VariantMatrix>
-		<div class="cell"><span class="cell-label">Pinned · Wide</span><article class="z-cell z-cell--pinned"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3></div></article></div>
-		<div class="cell"><span class="cell-label">Article · Wide</span><article class="z-cell z-cell--article"><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><div class="z-cell__meta"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div></div></article></div>
-		<div class="cell"><span class="cell-label">Headline · Wide</span><article class="z-cell z-cell--headline"><div class="z-cell__body"><h3 class="z-cell__title">Artikel Überschrift</h3></div></article></div>
-		<div class="cell"><span class="cell-label">Artikel · Wide</span><article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article></div>
-		<div class="cell"><span class="cell-label">Author · Wide</span><article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article></div>
-		<div class="cell"><span class="cell-label">Podcast Series · Wide</span><article class="z-cell z-cell--podcast-series"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Podcast Titel</h3><p class="z-cell__byline">Abonnieren</p></div></article></div>
-		<div class="cell"><span class="cell-label">Anzeige · Wide</span><article class="z-cell z-cell--anzeige"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Verlagsangebot</p><h3 class="z-cell__title">Überschrift</h3></div></article></div>
-	</VariantMatrix>
+	<SpecimenGrid items={variantItems} />
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={spec.zustaende} />
+	<StateList states={[{"label":"default","vorhanden":true}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
@@ -348,6 +339,15 @@ kategorie: Inhalte
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
 {/snippet}
 
 {#snippet a11yTab()}
@@ -358,6 +358,9 @@ kategorie: Inhalte
 	<h2>Maße</h2>
 	<MeasureTable masse={spec.masse} />
 
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
+
 	<h2>Tokens</h2>
 	<TokenTable tokens={spec.tokens} />
 {/snippet}
@@ -366,24 +369,24 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell),
 :global(.pg-preview .z-cell) {
   background-color: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-m);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
-  width: 343px;
-  max-width: 100%;
+	color: var(--z-ds-color-text-100);
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-m);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	width: 343px;
+	max-width: 100%;
 }
 :global(.spec-canvas .z-cell__media),
 :global(.pg-preview .z-cell__media) {
   display: none;
-  flex: 0 0 auto;
-  width: 84px;
-  height: 84px;
-  border-radius: var(--z-ds-border-radius-4);
-  
-  background-color: var(--z-ds-color-background-20);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
+	flex: 0 0 auto;
+	width: 84px;
+	height: 84px;
+	border-radius: var(--z-ds-border-radius-4);
+	
+	background-color: var(--z-ds-color-background-10);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 :global(.spec-canvas .z-cell--artikel .z-cell__media),
 :global(.pg-preview .z-cell--artikel .z-cell__media),
@@ -392,60 +395,60 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--anzeige .z-cell__media),
 :global(.pg-preview .z-cell--anzeige .z-cell__media) {
   --slash: color-mix(in srgb, var(--z-ds-color-text-100) 13%, transparent);
-  background-image:
-    linear-gradient(
-      45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    ),
-    linear-gradient(
-      -45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    );
+	background-image:
+		linear-gradient(
+			45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		),
+		linear-gradient(
+			-45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
 }
 :global(.spec-canvas .z-cell__body),
 :global(.pg-preview .z-cell__body) {
   display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-xs);
-  min-width: 0;
+	flex-direction: column;
+	gap: var(--z-ds-space-xs);
+	min-width: 0;
 }
 :global(.spec-canvas .z-cell__kicker),
 :global(.pg-preview .z-cell__kicker) {
   margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.2;
-  color: var(--z-ds-color-accent-100);
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.2;
+	color: var(--z-ds-color-accent-100);
 }
 :global(.spec-canvas .z-cell__title),
 :global(.pg-preview .z-cell__title) {
   margin: 0;
-  font-size: var(--z-ds-fontsize-20);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--z-ds-color-text-100);
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--z-ds-color-text-100);
 }
 :global(.spec-canvas .z-cell__byline),
 :global(.pg-preview .z-cell__byline) {
   display: none;
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 :global(.spec-canvas .z-cell__meta),
 :global(.pg-preview .z-cell__meta) {
   display: none;
-  gap: var(--z-ds-space-s);
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	gap: var(--z-ds-space-s);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 :global(.spec-canvas .z-cell--article),
 :global(.pg-preview .z-cell--article) {
@@ -458,7 +461,7 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--headline),
 :global(.pg-preview .z-cell--headline) {
   border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	padding-top: var(--z-ds-space-m);
 }
 :global(.spec-canvas .z-cell--headline .z-cell__kicker),
 :global(.pg-preview .z-cell--headline .z-cell__kicker),
@@ -471,8 +474,8 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--artikel),
 :global(.pg-preview .z-cell--artikel) {
   flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: flex-start;
+	gap: var(--z-ds-space-m);
+	align-items: flex-start;
 }
 :global(.spec-canvas .z-cell--artikel .z-cell__media),
 :global(.pg-preview .z-cell--artikel .z-cell__media) {
@@ -489,20 +492,20 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--author),
 :global(.pg-preview .z-cell--author) {
   flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-m);
 }
 :global(.spec-canvas .z-cell--author .z-cell__media),
 :global(.pg-preview .z-cell--author .z-cell__media) {
   display: block;
-  border-radius: 999px;
+	border-radius: 999px;
 }
 :global(.spec-canvas .z-cell--author .z-cell__body),
 :global(.pg-preview .z-cell--author .z-cell__body) {
   flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	gap: var(--z-ds-space-xxxs);
 }
 :global(.spec-canvas .z-cell--author .z-cell__kicker),
 :global(.pg-preview .z-cell--author .z-cell__kicker),
@@ -517,13 +520,13 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--podcast-series),
 :global(.pg-preview .z-cell--podcast-series) {
   flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 :global(.spec-canvas .z-cell--podcast-series .z-cell__media),
 :global(.pg-preview .z-cell--podcast-series .z-cell__media) {
   display: block;
-  background-color: #8e8cf7;
+	background-color: #8e8cf7;
 }
 :global(.spec-canvas .z-cell--podcast-series .z-cell__body),
 :global(.pg-preview .z-cell--podcast-series .z-cell__body) {
@@ -542,29 +545,29 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--anzeige),
 :global(.pg-preview .z-cell--anzeige) {
   flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  background-color: var(--z-ds-color-background-10);
-  padding: var(--z-ds-space-m);
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	background-color: var(--z-ds-color-background-10);
+	padding: var(--z-ds-space-m);
 }
 :global(.spec-canvas .z-cell--anzeige .z-cell__media),
 :global(.pg-preview .z-cell--anzeige .z-cell__media) {
   display: block;
-  width: 108px;
-  height: 72px;
+	width: 108px;
+	height: 72px;
 }
 :global(.spec-canvas .z-cell--anzeige .z-cell__body),
 :global(.pg-preview .z-cell--anzeige .z-cell__body) {
   flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	gap: var(--z-ds-space-xxxs);
 }
 :global(.spec-canvas .z-cell--anzeige .z-cell__kicker),
 :global(.pg-preview .z-cell--anzeige .z-cell__kicker) {
   font-size: var(--z-ds-fontsize-14);
-  line-height: 1;
-  letter-spacing: 0.24px;
-  text-transform: uppercase;
-  color: var(--z-ds-color-text-55);
+	line-height: 1;
+	letter-spacing: 0.24px;
+	text-transform: uppercase;
+	color: var(--z-ds-color-text-55);
 }
 :global(.spec-canvas .z-cell--anzeige .z-cell__title),
 :global(.pg-preview .z-cell--anzeige .z-cell__title) {
@@ -579,19 +582,19 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--pinned),
 :global(.pg-preview .z-cell--pinned) {
   flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 :global(.spec-canvas .z-cell--pinned .z-cell__media),
 :global(.pg-preview .z-cell--pinned .z-cell__media) {
   display: block;
-  width: 108px;
-  height: 72px;
+	width: 108px;
+	height: 72px;
 }
 :global(.spec-canvas .z-cell--pinned .z-cell__body),
 :global(.pg-preview .z-cell--pinned .z-cell__body) {
   flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	gap: var(--z-ds-space-xxxs);
 }
 :global(.spec-canvas .z-cell--pinned .z-cell__title),
 :global(.pg-preview .z-cell--pinned .z-cell__title) {
@@ -610,6 +613,6 @@ kategorie: Inhalte
 :global(.spec-canvas .z-cell--small .z-cell__media),
 :global(.pg-preview .z-cell--small .z-cell__media) {
   width: 72px;
-  height: 72px;
+	height: 72px;
 }
 </style>

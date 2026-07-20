@@ -44,6 +44,8 @@ let brandAssetsCache: Awaited<ReturnType<typeof fetchBrandAssets>> | null = null
 
 export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 	const theme = cookies.get('theme') || ('system' as Theme);
+	// Persistierter Einklapp-Zustand der Desktop-Sidebar (no-flash: serverseitig gelesen).
+	const sidebarCollapsed = cookies.get('sidebar-collapsed') === 'true';
 
 	const icons = iconsCache ?? (await fetchIcons(fetch));
 	if (!iconsCache && icons.every((i) => i.svg !== null)) iconsCache = icons;
@@ -53,5 +55,5 @@ export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 
 	const isUserLoggedIn = cookies.get(LOGIN_COOKIE_NAME) !== undefined;
 
-	return { theme, icons, brandAssets, isUserLoggedIn };
+	return { theme, sidebarCollapsed, icons, brandAssets, isUserLoggedIn };
 };

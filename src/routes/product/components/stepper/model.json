@@ -5,27 +5,38 @@
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=4153-1351&m=dev",
 	"aktualisiertAm": "2026-07-03",
+	"dokumentiertAm": "2026-07-03",
 	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
 	"verwandt": [
 		"input"
 	],
 	"masse": {
-		"hoehe": "38",
-		"breite": "112",
+		"hoehe": {
+			"px": "38",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "112",
+			"herkunft": "abgeleitet"
+		},
 		"padding": {
 			"px": "6",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"herkunft": "gemessen"
 		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
 		{
 			"label": "Abstand −/Wert/+",
 			"px": "6 px",
-			"token": "--z-ds-space-xxs"
+			"token": "--z-ds-space-xxs",
+			"art": "gap",
+			"selector": ".z-stepper"
 		}
 	],
 	"callouts": [
@@ -48,27 +59,27 @@
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen",
+					"hinweis": "Rahmen",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Wert & Icons",
+					"hinweis": "Wert & Icons",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · Disabled",
+					"hinweis": "Disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Hover-Fläche",
+					"hinweis": "Hover-Fläche",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus",
+					"hinweis": "Fokus",
 					"swatch": "#005fcc"
 				}
 			]
@@ -78,11 +89,11 @@
 			"items": [
 				{
 					"name": "--z-ds-space-xxs",
-					"wert": "6px · Padding + Gap"
+					"hinweis": "6px · Padding + Gap"
 				},
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -91,34 +102,60 @@
 			"items": [
 				{
 					"name": "Label/Regular/14px",
-					"wert": "Tablet Gothic Regular 14/1"
+					"hinweis": "Tablet Gothic Regular 14/1"
 				}
 			]
 		}
 	],
-	"varianten": [
-		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Container · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"hover": "--z-ds-color-border-100",
+					"focus": "--z-ds-color-border-100",
+					"disabled": "--z-ds-color-border-100"
 				},
-				{
-					"label": "Hover",
-					"cssClass": "z-stepper--hover"
-				},
-				{
-					"label": "Focus",
-					"cssClass": "z-stepper--focus"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-stepper--disabled"
+				"hinweis": "Rahmenfarbe bleibt über die Zustände konstant."
+			},
+			{
+				"teil": "Wert & Icons",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-100",
+					"focus": "--z-ds-color-text-100",
+					"disabled": "--z-ds-color-text-40"
 				}
-			]
-		}
-	],
+			},
+			{
+				"teil": "Button-Fläche (− / +)",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "--z-ds-color-background-10",
+					"focus": "none",
+					"disabled": "none"
+				},
+				"hinweis": "Transparent bis zum Hover; Hover legt Background-10 unter den Button."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Inset-Ring am fokussierten Button."
+			}
+		]
+	},
 	"zustaende": [
 		{
 			"label": "default",
@@ -237,43 +274,26 @@
 		],
 		"template": "<div class=\"z-stepper{classes}\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>",
 		"cssFile": "./pattern.css",
-		"presets": [
-			{
-				"label": "Standard",
-				"state": {
-					"state": "default"
-				}
-			},
-			{
-				"label": "Fokus",
-				"state": {
-					"state": "focus"
-				}
-			},
-			{
-				"label": "Deaktiviert",
-				"state": {
-					"state": "disabled"
-				}
-			}
-		],
 		"preview": "<div class=\"z-stepper\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button></div>",
 		"variant": "<div class=\"z-stepper z-stepper--disabled\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\" disabled></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\" disabled></button></div>",
 		"calloutAnchors": [
 			{
 				"nr": 1,
 				"side": "bottom",
-				"x": 50
+				"x": 50,
+				"selector": ".z-stepper"
 			},
 			{
 				"nr": 2,
 				"side": "top",
-				"x": 50
+				"x": 50,
+				"selector": ".z-stepper__val"
 			},
 			{
 				"nr": 3,
 				"side": "right",
-				"y": 50
+				"y": 50,
+				"selector": ".z-stepper__plus"
 			}
 		],
 		"matrix": [

@@ -1,62 +1,70 @@
+<!--
+  DoDont.svelte — Brand-Erscheinung: illustrative Bild-Karte (Anatomie-Demo + Kante + Caption).
+  Dünne Spezialisierung über DoDontBase — beigesteuert wird nur die Füllung
+  (dotted Demo-Bühne / Bild-Strike / „Do"-„Don't"-Caption). Hülle, Radius und der
+  Farb-Kanal (--dd-accent) kommen aus der Basis. Wird von den Brand-.svx-Seiten
+  (Logo, Typografie …) und dem CMS-Editor über DoDontGroup gruppiert.
+
+  Erscheinungs-Achse heißt projektweit `variant` (do/dont).
+-->
 <script lang="ts">
+	import DoDontBase from './DoDontBase.svelte';
+
 	type DoDontProps = {
-		type?: 'do' | 'dont';
-		backgroundcolor: string;
+		/** Erscheinungs-Achse: „Do"-Karte (positiv) oder „Don't"-Karte (negativ). */
+		variant?: 'do' | 'dont';
+		/** Optionale Hintergrundfarbe der Demo-Bühne (CSS-Farbe). */
+		backgroundColor?: string;
+		/** Bildunterschrift unter der Kante. */
 		caption: string;
+		/** Roh-HTML-Inhalt der Bühne, falls kein `imgSrc` gesetzt ist. */
 		content?: string;
+		/** Bildquelle für die Demo-Bühne (schlägt `content`). */
 		imgSrc?: string;
+		/** Zeichnet die diagonale Streichung über das Bild (typischer „Don't"). */
 		strikeThrough?: boolean;
 	};
 
 	let {
-		type = 'do',
-		backgroundcolor = '',
+		variant = 'do',
+		backgroundColor = '',
 		caption = '',
 		content = '',
 		imgSrc = '',
 		strikeThrough = false
 	}: DoDontProps = $props();
-
-	// Do/Don't-Akzent über semantische, theme-adaptive z-ds-Tokens
-	// (statt hartem 'green'/'red') — passt sich Light/Dark automatisch an.
-	const ACCENT = {
-		do: 'var(--ds-positive)',
-		dont: 'var(--ds-negative)'
-	} as const;
-	const accent = $derived(ACCENT[type]);
 </script>
 
-<div class="dodont">
-	<div class="dodont-card__content">
-		<div class="dodont-card__demo" style:background-color={backgroundcolor}>
-			{#if imgSrc}
-				<div class="image-container" class:strike-through={strikeThrough}>
-					<img src={imgSrc || '/placeholder.svg'} alt={caption} />
-				</div>
-			{:else}
-				{@html content}
-			{/if}
+<!-- `class="dodont"` behält den Hook, über den DoDontGroup die Karten-Breite steuert. -->
+<DoDontBase tone={variant} class="dodont">
+	{#snippet body()}
+		<div class="dodont-card__content">
+			<div class="dodont-card__demo" style:background-color={backgroundColor}>
+				{#if imgSrc}
+					<div class="image-container" class:strike-through={strikeThrough}>
+						<img src={imgSrc || '/placeholder.svg'} alt={caption} />
+					</div>
+				{:else}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html content}
+				{/if}
+			</div>
 		</div>
-	</div>
-	<div class="dodont-card__bar" style="--bar-color: {accent}"></div>
+		<!-- Kante sitzt zwischen Demo und Caption; Farbe kommt aus --dd-accent (Basis). -->
+		<div class="dodont-card__bar"></div>
+	{/snippet}
 
-	<div class="dodont-card__caption dodont-card__caption--{type.toLowerCase()}">
-		<div class="dodont-card__title" style="color: {accent}">
-			{type === 'do' ? 'Do' : "Don't"}
+	{#snippet footer()}
+		<div class="dodont-card__caption dodont-card__caption--{variant.toLowerCase()}">
+			<div class="dodont-card__title">
+				{variant === 'do' ? 'Do' : "Don't"}
+			</div>
+			{caption}
 		</div>
-		{caption}
-	</div>
-</div>
+	{/snippet}
+</DoDontBase>
 
 <style>
-	.dodont {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		overflow: hidden;
-		border-radius: var(--ds-radius);
-	}
-
 	.dodont-card__content {
 		flex: 1;
 		aspect-ratio: 16/9;
@@ -81,7 +89,7 @@
 
 	.dodont-card__bar {
 		height: 4px;
-		background: var(--bar-color, #4ade80);
+		background: var(--dd-accent);
 	}
 
 	.dodont-card__caption {
@@ -92,7 +100,8 @@
 	.dodont-card__title {
 		font-weight: bold;
 		margin-bottom: 0.25rem;
-		/* Farbe kommt als Inline-Style aus `accent` (do = success, dont = error). */
+		/* Akzentfarbe erbt aus --dd-accent (Basis: do = positiv, dont = negativ). */
+		color: var(--dd-accent);
 	}
 
 	/* Markdown content styles */
@@ -127,7 +136,7 @@
 		background: linear-gradient(
 			to bottom right,
 			transparent calc(50% - 1.5px),
-			rgba(255, 0, 0, 0.8),
+			var(--ds-negative),
 			transparent calc(50% + 1.5px)
 		);
 		pointer-events: none;

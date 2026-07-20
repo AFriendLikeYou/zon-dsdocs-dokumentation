@@ -1,11 +1,158 @@
 ---
-title: Prike-Kommunikation
+title: Pride-Kommunikation
 ---
 
 <svelte:head>
 	<title>{title} - Die Zeit Design System</title>
 </svelte:head>
 
+<script lang="ts">
+	import { Banner } from '$components/ui/banner';
+	import { DoDont } from '$components/ui/dodont';
+	import { Color } from '$components/ui/colors';
+	import { TextColor } from '$components/ui/colors';
+	import { Lightbox } from '$components/ui/lightbox';
+	import { VideoPlayer } from '$components/ui/videoplayer';
+	import { DownloadSpecimen } from '$components/ui/downloadspecimen';
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
+	import { DoDontGroup } from '$components/ui/dodont';
+</script>
+
 # {title}
 
-...
+# Lorem ipsum
+## Headline H2
+### Headlien H3
+Das ist eine Paragraph
+Das ist **FETT**
+Das ist *Kursiv*
+Das ist ein [Link](www.zeit.de)
+Das ist eine Liste:
+- Eins
+- Zwei
+
+<img class="img-natural" src="/media/brand/icons/icon-anatomy-1.png" alt="Bild" />
+
+jo
+
+<Banner
+	variant="success"
+	title="Test"
+	description="Testtesttest"
+/>
+
+
+<DoDont
+	variant="dont"
+	caption="Lorem"
+	imgSrc="/media/brand/icons/icon-anatomy-2.png"
+	content="Lorem ipsum"
+	strikeThrough={true}
+/>
+
+
+<Color
+	title="Black"
+	description="Farbe"
+	fontColorCustomProperty="#000000"
+	borderColor="#cccccc"
+	showValue={true}
+/>
+
+
+<TextColor
+	title="Text Farbfeld"
+	description="Das ist ein Textfarbfeld"
+/>
+
+
+<Lightbox
+	src="/media/brand/icons/icon-anatomy-2.png"
+	alt="Text"
+	caption="Unterschrift"
+/>
+
+
+<VideoPlayer
+	src="/media/brand/animation/motion.mp4"
+	title="Video"
+/>
+
+
+<DownloadSpecimen
+	variant="figma"
+	title="Lorem"
+	subtitle="untertietel"
+	url="http://www.zeit.de"
+/>
+
+
+<Card
+	title="tet"
+	description="testest"
+	url="https://w"
+	badge="test"
+	badgeVariant="machine"
+/>
+
+
+<Grid columns={2} auto={true}>
+	<Color
+		title="eins"
+		description="text"
+		colorCustomProperty="--ds-accent"
+		fontColorCustomProperty="#ccc"
+		borderColor="--ds-accent-brand"
+		showValue={true}
+	/>
+	<Color
+		title="zwei"
+		description="text"
+		colorCustomProperty="--ds-border-soft"
+		fontColorCustomProperty="#333"
+		copyHex={false}
+	/>
+</Grid>
+
+
+<DoDontGroup columns={4}>
+	<DoDont
+		caption="do"
+		imgSrc="/media/brand/icons/icon-anatomy-1.png"
+	/>
+	<DoDont
+		variant="dont"
+		caption="dont"
+		imgSrc="/media/brand/icons/icon-anatomy-2.png"
+		strikeThrough={true}
+	/>
+</DoDontGroup>
+
+
+<Grid columns={4} auto={true}>
+	<Card
+		title="jo"
+		description="jo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojo"
+		description="jojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojojo"
+		description="jojojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+	<Card
+		title="jojojojo"
+		description="jojojojo"
+		url="https://www.zeit.de"
+		badge="Badge"
+	/>
+</Grid>

@@ -18,8 +18,7 @@
 			<p class="eyebrow">DIE ZEIT · Design System</p>
 			<h1>Marke und Produkt,<br />an einem Ort.</h1>
 			<p class="lead">
-				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und
-				agent-ready.
+				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und agent-ready.
 			</p>
 			<div class="hero__cta">
 				<a class="btn btn--primary" href="/product">Zum Design-System</a>
@@ -63,7 +62,11 @@
 							<i style="--c: var(--ds-surface-raised)"></i>
 						</div>
 						<div class="stage__lines"><span></span><span></span><span></span></div>
-						<div class="stage__cards"><div></div><div></div><div></div></div>
+						<div class="stage__cards">
+							<div></div>
+							<div></div>
+							<div></div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -103,7 +106,10 @@
 		   zurück, damit text-align:center die Zeilen tatsächlich zentriert. */
 		display: block;
 		text-align: center;
-		font-family: 'FranziskaWebPro', Georgia, serif;
+		/* Tiemann Schmal hat nur Normalschnitt → font-weight: normal (die globale
+		   h1-Regel setzt 700, was hier Faux-Bold erzeugen würde). */
+		font-family: 'ZeitTiemannSchmal', Georgia, 'Times New Roman', serif;
+		font-weight: normal;
 		font-size: clamp(2.4rem, 6vw, 4.2rem);
 		line-height: 1.05;
 		letter-spacing: -0.01em;
@@ -201,7 +207,7 @@
 		border: 1px solid var(--ds-border-soft);
 		border-radius: clamp(14px, 1.6vw, 22px);
 		background: var(--ds-surface);
-		box-shadow: var(--ds-shadow-lg, 0 30px 60px -20px rgba(0, 0, 0, 0.35));
+		box-shadow: var(--ds-shadow-lg);
 		overflow: hidden;
 		transform-origin: 50% 0%;
 	}

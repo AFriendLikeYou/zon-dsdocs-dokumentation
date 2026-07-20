@@ -4,9 +4,14 @@
   Nutzt die je Bühne gepinnten --z-ds-Token → adaptiert automatisch ans Bühnen-Theme.
 -->
 <script lang="ts">
+	import { SunIcon, MoonIcon } from '$lib/icons';
+
 	let {
+		/** Ob die Bühne aktuell dunkel ist (steuert aria-pressed). */
 		isDark = false,
+		/** Callback für „hellen Hintergrund". */
 		onlight,
+		/** Callback für „dunklen Hintergrund". */
 		ondark
 	}: { isDark?: boolean; onlight: () => void; ondark: () => void } = $props();
 </script>
@@ -19,22 +24,7 @@
 		aria-pressed={!isDark}
 		onclick={onlight}
 	>
-		<svg
-			aria-hidden="true"
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-		>
-			<circle cx="12" cy="12" r="4" />
-			<path
-				d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
-			/>
-		</svg>
+		<SunIcon width={14} height={14} />
 	</button>
 	<button
 		type="button"
@@ -43,19 +33,7 @@
 		aria-pressed={isDark}
 		onclick={ondark}
 	>
-		<svg
-			aria-hidden="true"
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-		>
-			<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-		</svg>
+		<MoonIcon width={14} height={14} />
 	</button>
 </div>
 
@@ -66,6 +44,7 @@
 		padding: 3px;
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+		backdrop-filter: blur(10px);
 	}
 	.stage-toggle__btn {
 		display: grid;

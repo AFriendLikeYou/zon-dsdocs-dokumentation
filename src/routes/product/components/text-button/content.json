@@ -1,0 +1,80 @@
+{
+	"zweck": "Dezenter, flächenloser Text-Button für sekundäre Aktionen — mit Größen- und Betonungs-Modifiern sowie einer On-Image-Variante für Flächen auf Bildern.",
+	"status": "ready_for_dev",
+	"verwandt": ["button", "icon-button"],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "Als natives <button> umsetzen (Figma: Component) — trägt Rolle & Fokusverhalten selbst.",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter / Leertaste lösen die Aktion nativ aus.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (in der Pattern-CSS vorhanden).",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Default",
+			"wert": "Label Text/70 #444444 auf heller Fläche ≈ 9.7:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Disabled",
+			"wert": "Label Text/55 #69696c auf Weiß ≈ 5.5:1 · AA — nur Disabled-State.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast On Image",
+			"wert": "General-White-60 hängt vom Bildhintergrund ab — nur auf ausreichend dunklen Flächen einsetzen.",
+			"status": "warn"
+		},
+		{
+			"label": "Touch-Target",
+			"wert": "Content 18px + Padding ≈ 34px < 44px — für Touch ggf. Trefferfläche vergrößern.",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Text-Button."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst die Aktion aus (nativ)."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Für nachrangige, dezente Aktionen neben einem primären Button einsetzen.",
+			"Label als konkrete Aktion formulieren: „Mehr anzeigen“ statt „Mehr“."
+		],
+		"dont": [
+			"Nicht als einzige oder wichtigste Aktion — dafür einen Button (Primary).",
+			"On-Image-Variante nicht auf hellen/unruhigen Bildern nutzen — der Kontrast bricht ein."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für flächenlose, dezente Aktionen in dichten Layouts (Listen, Toolbars, Teaser).",
+			"Auf Bildern die On-Image-Variante für lesbaren Kontrast."
+		],
+		"nichtNutzen": [
+			"Nicht für die Hauptaktion — dafür Button (Primary).",
+			"Nicht für reine Navigation / Seitenwechsel — dafür einen Link."
+		]
+	},
+	"variantInfo": {
+		"Default": "Flächenloser Text-Button in Tablet Gothic 14 — Standard für sekundäre Aktionen.",
+		"Slim": "Reduzierte vertikale Höhe (6px statt 8px) für dichte Layouts.",
+		"Large": "Größeres Label (Tablet Gothic 16) für prominentere Kontexte.",
+		"Bold": "Fettes Label zur stärkeren Betonung.",
+		"Active": "Persistenter Aktiv-Look (Background-10 + Text-100) — z. B. für den aktiven Eintrag.",
+		"On Image": "Helle Beschriftung (General-White-60) für Flächen auf Bildern; Hover mit dunkler Fläche."
+	}
+}

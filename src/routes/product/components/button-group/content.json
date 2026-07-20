@@ -1,0 +1,57 @@
+{
+	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
+	"status": "ready_for_dev",
+	"verwandt": ["button", "icon-button"],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "Segmentierte Single-Select-Auswahl — als Gruppe auszeichnen (role=\"group\", ggf. radiogroup-Muster mit aria-checked).",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Tab erreicht die Segmente, Enter / Leertaste aktiviert; für ein Radiogroup-Muster Pfeiltasten ergänzen.",
+			"status": "warn"
+		},
+		{
+			"label": "Aktiver Zustand",
+			"wert": "Aktives Segment programmatisch auszeichnen (aria-pressed=\"true\" / aria-current), nicht nur farblich.",
+			"status": "warn"
+		},
+		{
+			"label": "Kontrast aktiv",
+			"wert": "Text/100 #252525 auf Background/0 #ffffff ≈ 15:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast inaktiv",
+			"wert": "Text/55 #69696c auf Background/10 #eeeeee ≈ 4.7:1 · AA",
+			"status": "pass"
+		},
+		{
+			"label": "Touch-Target",
+			"wert": "Segment-Höhe 32px < 44px — für Touch ggf. vergrößern.",
+			"status": "warn"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Immer genau ein Segment aktiv halten.",
+			"Beschriftungen kurz und parallel formulieren (gleiche Wortart/Länge)."
+		],
+		"dont": [
+			"Nicht für Mehrfachauswahl — dafür Checkboxen.",
+			"Nicht mit zu vielen Segmenten überfrachten (Set reicht bis 6) — sonst Select/Dropdown."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für sich gegenseitig ausschließende Filter/Ansichten mit wenigen Optionen (Ressort, Zeitraum).",
+			"Wenn alle Optionen dauerhaft sichtbar bleiben sollen."
+		],
+		"nichtNutzen": [
+			"Nicht für Mehrfachauswahl oder viele Optionen — dafür Checkboxen bzw. Select.",
+			"Nicht für auslösende Aktionen (Speichern/Senden) — dafür Button."
+		]
+	}
+}

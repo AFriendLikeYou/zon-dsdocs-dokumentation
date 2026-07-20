@@ -1,28 +1,35 @@
 <!--
   ExampleStage.svelte — schlanker, gerahmter Beispiel-Bereich für Live-Demos.
-  Nutzung: <ExampleStage label="Primary" caption="…">{#snippet children()}<Button …/>{/snippet}</ExampleStage>
+  Nutzung: <ExampleStage title="Primary" caption="…">{#snippet children()}<Button …/>{/snippet}</ExampleStage>
+
+  Prop-Konvention: `title` = Überschrift der Bühne (Eyebrow oben),
+  `caption` = erläuternde Unterschrift zum Beispiel (unten).
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
 	let {
 		children,
-		label,
+		title,
 		caption,
 		/** Flächen-Ton: surface (neutral), muted (gedämpft), grid (Raster). */
 		background = 'surface',
 		padded = true
 	}: {
+		/** Demo-Inhalt der Bühne. */
 		children: Snippet;
-		label?: string;
+		/** Überschrift der Bühne (Eyebrow oben). */
+		title?: string;
+		/** Unterschrift zum Beispiel (unten). */
 		caption?: string;
 		background?: 'surface' | 'muted' | 'grid';
+		/** Innenabstand der Fläche (Default an). */
 		padded?: boolean;
 	} = $props();
 </script>
 
 <figure class="stage">
-	{#if label}<figcaption class="stage__label">{label}</figcaption>{/if}
+	{#if title}<figcaption class="stage__title">{title}</figcaption>{/if}
 	<div class="stage__area stage__area--{background}" class:stage__area--padded={padded}>
 		{#if background === 'grid'}<div class="stage__grid" aria-hidden="true"></div>{/if}
 		<div class="stage__content">{@render children()}</div>
@@ -34,7 +41,7 @@
 	.stage {
 		margin: 0 0 var(--z-ds-space-16);
 	}
-	.stage__label {
+	.stage__title {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		text-transform: uppercase;

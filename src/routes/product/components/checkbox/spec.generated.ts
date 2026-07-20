@@ -5,75 +5,67 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Checkbox",
-	"status": "ready_for_dev",
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=973-945&m=dev",
 	"aktualisiertAm": "2026-07-03",
-	"zweck": "Auswahlkästchen für eine An/Aus-Entscheidung oder Mehrfachauswahl. Zwei Achsen: ausgewählt (checked) und Interaktionszustand (Default, Hover, Focus, Disabled).",
-	"verwandt": [
-		"toggle",
-		"input"
-	],
+	"dokumentiertAm": "2026-07-03",
 	"masse": {
-		"hoehe": "16",
-		"breite": "16",
+		"hoehe": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
 		"radius": {
 			"px": "2",
-			"token": "--z-ds-border-radius-2"
+			"token": "--z-ds-border-radius-2",
+			"herkunft": "gemessen"
 		}
 	},
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Box — 16×16, Radius 2; Rahmen bzw. Füllung signalisieren den Zustand."
-		},
-		{
-			"nr": 2,
-			"text": "Haken — weiß, nur im checked-Zustand; Fokus als 2px-Rahmen in Focus-100."
-		}
-	],
 	"tokens": [
 		{
 			"kategorie": "Farbe",
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen unchecked",
+					"hinweis": "Rahmen unchecked",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-border-70",
-					"wert": "#e4e4e4 · Rahmen disabled",
+					"hinweis": "Rahmen disabled",
 					"swatch": "#e4e4e4"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"wert": "#eeeeee · Hover-Fläche",
+					"hinweis": "Hover-Fläche",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Füllung checked",
+					"hinweis": "Füllung checked",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"wert": "#444444 · checked Hover",
+					"hinweis": "checked Hover",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · disabled",
+					"hinweis": "disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus-Rahmen",
+					"hinweis": "Fokus-Rahmen",
 					"swatch": "#005fcc"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Haken",
+					"hinweis": "Haken",
 					"swatch": "#ffffff"
 				}
 			]
@@ -83,11 +75,62 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-2",
-					"wert": "2px"
+					"hinweis": "2px"
 				}
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"checked",
+			"checked+hover",
+			"disabled",
+			"checked+disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Box · Hintergrund",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0",
+					"hover": "--z-ds-color-background-10",
+					"focus": "--z-ds-color-background-0",
+					"checked": "--z-ds-color-text-100",
+					"checked+hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-background-0",
+					"checked+disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Box · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"hover": "--z-ds-color-border-100",
+					"focus": "--z-ds-color-focus-100",
+					"checked": "--z-ds-color-text-100",
+					"checked+hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-border-70",
+					"checked+disabled": "--z-ds-color-text-40"
+				},
+				"hinweis": "Focus zeichnet einen 2px-Rahmen in Focus-100 (unchecked wie checked)."
+			},
+			{
+				"teil": "Haken",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus": "none",
+					"checked": "--z-ds-color-general-white-100",
+					"checked+hover": "--z-ds-color-general-white-100",
+					"disabled": "none",
+					"checked+disabled": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Nur im checked-Zustand sichtbar (weißes CSS-Häkchen)."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Auswahl",
@@ -99,27 +142,6 @@ export const generated = {
 				{
 					"label": "Checked",
 					"cssClass": "z-checkbox--checked"
-				}
-			]
-		},
-		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
-				},
-				{
-					"label": "Hover",
-					"cssClass": "z-checkbox--hover"
-				},
-				{
-					"label": "Focus",
-					"cssClass": "z-checkbox--focus"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-checkbox--disabled"
 				}
 			]
 		}
@@ -144,70 +166,6 @@ export const generated = {
 		{
 			"label": "disabled",
 			"vorhanden": true
-		}
-	],
-	"a11y": [
-		{
-			"label": "Rolle",
-			"wert": "Als natives <input type=checkbox> mit verknüpftem <label> umsetzen.",
-			"status": "warn"
-		},
-		{
-			"label": "Tastatur",
-			"wert": "Leertaste schaltet um (nativ).",
-			"status": "pass"
-		},
-		{
-			"label": "Fokus",
-			"wert": "Sichtbarer 2px-Fokus in Focus-100.",
-			"status": "pass"
-		},
-		{
-			"label": "Zielgröße",
-			"wert": "16px Box — klickbare Fläche inkl. Label vergrößern (min. 24px).",
-			"status": "warn"
-		},
-		{
-			"label": "Kontrast",
-			"wert": "Rahmen #cccccf auf #ffffff ≈ 1.5:1 — nur Rahmen, Zustand zusätzlich über Haken.",
-			"status": "warn"
-		}
-	],
-	"tastatur": [
-		{
-			"taste": "Tab",
-			"aktion": "Setzt den Fokus auf die Checkbox."
-		},
-		{
-			"taste": "Leertaste",
-			"aktion": "Schaltet die Auswahl um (checked ↔ unchecked)."
-		}
-	],
-	"doDont": {
-		"do": [
-			"Immer mit klickbarem Label kombinieren.",
-			"Für unabhängige An/Aus-Optionen oder Mehrfachauswahl nutzen."
-		],
-		"dont": [
-			"Nicht für sich gegenseitig ausschließende Optionen — dafür Radio-Buttons.",
-			"Zustand nicht allein über Farbe kommunizieren."
-		]
-	},
-	"verwendung": {
-		"nutzen": [
-			"Mehrere unabhängige Optionen, die einzeln an/aus sein können.",
-			"Zustimmung/Bestätigung (AGB akzeptiert)."
-		],
-		"nichtNutzen": [
-			"Genau eine Option aus mehreren — dafür Radio.",
-			"Sofort wirksame Ein/Aus-Einstellung — dafür Toggle."
-		]
-	},
-	"wording": [
-		{
-			"schlecht": "Benachrichtigungen nicht deaktivieren",
-			"gut": "Benachrichtigungen erhalten",
-			"hinweis": "Checkbox-Labels positiv formulieren — angehakt = zutreffend."
 		}
 	]
 } satisfies Partial<ComponentSpec>;

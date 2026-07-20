@@ -1,5 +1,7 @@
+<!-- AnchorLinks.svelte — hängt per DOM an jede Content-h2/h3 einen Copy-Link-Button; global vom Root-Layout (+layout.svelte) eingehängt. -->
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
+	import { slugify } from '$lib/utils';
 
 	const COPY_LINK_SVG = `
         <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,63 +15,87 @@
         </svg>
     `;
 
-	// Function to create an anchor button
+	/**
+	 * Hängt einen Copy-Link-Button an den Header — IDEMPOTENT: der Guard verhindert
+	 * Doppel-Buttons bei SPA-Navigationen (afterNavigate feuert bei jeder Navigation,
+	 * die Header können weiterleben). Hover/Fokus laufen rein über CSS (unten) statt
+	 * über mouseenter/mouseleave-Listener, die sich vorher pro Navigation aufsummierten.
+	 */
 	function createAnchorButton(header: HTMLElement) {
-		const id =
-			header.id ||
-			header.textContent
-				?.toLowerCase()
-				.replace(/\s+/g, '-')
-				.replace(/[^\w-]/g, '');
+		if (header.querySelector('.anchor-copy')) return;
+		// Gemeinsames slugify() (identisch zu TableOfContents) statt Ad-hoc-Regex.
+		const id = header.id || slugify(header.textContent ?? '');
 		if (!id) return;
 
-		header.id = id; // Ensure the header has an ID
-		header.style.position = 'relative';
+		header.id = id;
+		header.classList.add('has-anchor');
 
-		// Create a button element
 		const button = document.createElement('button');
-
+		button.type = 'button';
+		button.className = 'anchor-copy';
 		button.innerHTML = COPY_LINK_SVG;
-		button.setAttribute('aria-label', 'Copy link');
-		button.style.border = 'none';
-		button.style.background = 'transparent';
-		button.style.color = 'var(--ds-text)';
-		button.style.cursor = 'pointer';
-		button.style.padding = '0.35rem';
-		button.style.marginLeft = '0.25rem';
-		button.style.opacity = '0'; // Initially hidden
-		button.style.transition = 'opacity var(--ds-dur) var(--ds-ease)'; // Hover-Fade → 160ms ease
-		button.style.minHeight = '1.75rem';
-		button.style.display = 'inline-flex';
-		button.style.alignItems = 'center';
-		button.style.justifyContent = 'center';
-		button.style.borderRadius = '50%';
-		button.style.width = '1.75rem';
-		button.style.height = '1.75rem';
+		button.setAttribute('aria-label', 'Link kopieren');
 
-		// Copy to clipboard on click
+		// Click-Listener lebt und stirbt mit dem Button (kein Teardown nötig).
 		button.addEventListener('click', async () => {
 			const url = `${window.location.origin}${window.location.pathname}#${id}`;
 			await navigator.clipboard.writeText(url);
 			button.innerHTML = TICK_SVG;
-
 			setTimeout(() => (button.innerHTML = COPY_LINK_SVG), 1200);
 		});
 
-		// Show button on hover
-		header.addEventListener('mouseenter', () => (button.style.opacity = '1'));
-		header.addEventListener('mouseleave', () => (button.style.opacity = '0'));
-
-		// Append button to header
 		header.appendChild(button);
 	}
 
 	afterNavigate(() => {
 		document.querySelectorAll<HTMLElement>('h2, h3').forEach((header) => {
-			// ✅ only process headers NOT inside `.accordion`
+			// nur Header außerhalb von Akkordeons/Dialogen
 			if (!header.closest('.accordion') && !header.closest('.dialog__content')) {
 				createAnchorButton(header);
 			}
 		});
 	});
 </script>
+
+<style>
+	/* Die Buttons entstehen per DOM-API → :global. Sichtbarkeit per CSS:
+	   Hover (nur echte Pointer) UND Tastatur-Fokus — vorher war der Button
+	   für Tastatur-Nutzer unsichtbar. */
+	:global(h2.has-anchor),
+	:global(h3.has-anchor) {
+		position: relative;
+	}
+	:global(.anchor-copy) {
+		border: none;
+		background: transparent;
+		color: var(--ds-text);
+		cursor: pointer;
+		padding: 0.35rem;
+		margin-left: 0.25rem;
+		opacity: 0;
+		transition: opacity var(--ds-dur) var(--ds-ease);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		width: 1.75rem;
+		height: 1.75rem;
+		min-height: 1.75rem;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		:global(h2.has-anchor:hover > .anchor-copy),
+		:global(h3.has-anchor:hover > .anchor-copy) {
+			opacity: 1;
+		}
+	}
+	:global(.anchor-copy:focus-visible) {
+		opacity: 1;
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		:global(.anchor-copy) {
+			transition: none;
+		}
+	}
+</style>

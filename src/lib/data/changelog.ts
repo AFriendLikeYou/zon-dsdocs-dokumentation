@@ -49,7 +49,7 @@ export const CHANGELOG: ChangelogVersion[] = [
 				date: '2026-06-28',
 				notes: [
 					'Globale Suche über <kbd>⌘</kbd>/<kbd>Strg</kbd> + <kbd>K</kbd>.',
-					'Neue wiederverwendbare UI-Bausteine (Copy-/Download-Button, Chip, Lightbox, Alert-Varianten, Empty-State).',
+					'Neue wiederverwendbare UI-Bausteine (Copy-/Download-Button, Chip, Lightbox, Banner-Varianten, Empty-State).',
 					'Komponenten-Doku um einen Abschnitt „Wann verwenden / Wann nicht" erweitert.'
 				]
 			}

@@ -50,7 +50,7 @@ Unsere Wort-/Bildmarke, in der das Bremer Wappen von »DIE« und »ZEIT« einger
 
 ### General-Version
 
-![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
+<img class="img-natural" src="/media/brand/logo/wordmark-1.webp" alt="DIE ZEIT Logo" />
 *ZEIT-Logo General — die Wortmarke für Printmedien.*
 
 Das ZEIT-Logo General ist ausschließlich für Printmedien vorgesehen.
@@ -60,7 +60,8 @@ Anwendung: Anzeigen, Plakate, Broschüren und andere gedruckte Medien, bei denen
 
 ### Small-Version
 
-![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
+<img class="img-natural" src="/media/brand/logo/wordmark-1.webp" alt="DIE ZEIT Logo" />
+*Hinweis: Für die Small-Version liegt noch kein eigenes Bildasset vor — hier ist vorläufig dieselbe Wortmarke wie oben zu sehen. Das dedizierte Small-Asset wird vom Brand-Team ergänzt.*
 
 Das ZEIT-Logo Small ist für digitale Medien sowie für Printmedien mit geringerem Platzbedarf bestimmt.
 
@@ -78,17 +79,17 @@ Die Wortmarke „DIE ZEIT" ist die primäre Form des Logos und wird überall dor
 eingesetzt, wo der volle Markenname stehen soll. Auf den Schutzraum um die Wortmarke
 (Safespace) ist immer zu achten.
 
-![DIE ZEIT Logo](/media/brand/logo/wordmark-1.webp)
+<img class="img-natural" src="/media/brand/logo/wordmark-1.webp" alt="DIE ZEIT Logo" />
 
-![DIE ZEIT Logo Safespace](/media/brand/logo/wordmark-2.webp)
+<img class="img-natural" src="/media/brand/logo/wordmark-2.webp" alt="DIE ZEIT Logo Safespace" />
 
 ### Pictogramm
 
 Das Pictogramm ist die kompakte Bildmarke für Kontexte mit wenig Platz oder dort, wo
 die Marke bereits etabliert ist — etwa als App-Icon oder Avatar.
 
-![DIE ZEIT Logo](/media/brand/logo/pictogram-1.png)
-![DIE ZEIT Logo](/media/brand/logo/pictogram-2.png)
+<img class="img-natural" src="/media/brand/logo/pictogram-1.png" alt="DIE ZEIT Logo" />
+<img class="img-natural" src="/media/brand/logo/pictogram-2.png" alt="DIE ZEIT Logo" />
 
 ## Varianten
 
@@ -99,21 +100,15 @@ die Marke bereits etabliert ist — etwa als App-Icon oder Avatar.
 
 ## Do and Don't
 <DoDontGroup columns={2}>
-  <DoDont 
-    type="dont"
+  <DoDont
+    variant="dont"
     caption="Das Logo darf nicht verzerrt werden."
     imgSrc="/media/brand/logo/dont-1.png"
     strikeThrough={true}
   />
 
-  <DoDont 
-    type="dont"
-    caption="Das Logo darf nicht gedreht werden."
-    imgSrc="/media/brand/logo/dont-2.png"
-  />
-
-    <DoDont 
-    type="do"
+  <DoDont
+    variant="dont"
     caption="Das Logo darf nicht gedreht werden."
     imgSrc="/media/brand/logo/dont-2.png"
   />
@@ -129,17 +124,18 @@ die Marke bereits etabliert ist — etwa als App-Icon oder Avatar.
 <BrandAssetsGrid {brandAssets} />
 
 
-## Todos
-Was brauchen wir?
-
-- Minimum und Max Size Print und Online
-- Logo in Farbe und Schwarz-Weiß
-- App Icon
-- Aufbau und Clearspace
-- Logo auf Backgrounds
-- Dos and Donts
-- Partnerships?
-Unser Logo und unser Claim stärken unsere internationale Markenpositionierung. 
+<!--
+  TODO Brand/Logo — offene redaktionelle Inhalte (nicht gerendert, Backlog fürs Brand-Team):
+  Was brauchen wir?
+  - Minimum und Max Size Print und Online
+  - Logo in Farbe und Schwarz-Weiß
+  - App Icon
+  - Aufbau und Clearspace
+  - Logo auf Backgrounds
+  - Dos and Donts
+  - Partnerships?
+  Unser Logo und unser Claim stärken unsere internationale Markenpositionierung.
+-->
 
 <!-- Zeigte vorher auf ein nicht existentes user-manual.pdf (404) — jetzt aufs echte PDF. -->
 <DownloadSpecimen

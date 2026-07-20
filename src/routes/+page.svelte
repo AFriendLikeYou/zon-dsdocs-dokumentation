@@ -35,8 +35,8 @@
 				<div class="world__text">
 					<h2>Brandhub</h2>
 					<p>
-						Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles,
-						was die Marke DIE ZEIT ausmacht.
+						Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles, was
+						die Marke DIE ZEIT ausmacht.
 					</p>
 					<span class="world__go">Zur Marke →</span>
 				</div>
@@ -45,13 +45,14 @@
 				<div class="world__demo" aria-hidden="true">
 					<button class="z-button z-button--primary" type="button">Primary</button>
 					<span class="z-switch z-switch--on"><span class="z-switch__thumb"></span></span>
-					<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span>
+					<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span
+					>
 				</div>
 				<div class="world__text">
 					<h2>Design-System</h2>
 					<p>
-						Design Principles, Foundations, Tokens und dokumentierte Komponenten mit
-						interaktivem Playground — für konsistente, barrierearme Interfaces.
+						Design Principles, Foundations, Tokens und dokumentierte Komponenten mit interaktivem
+						Playground — für konsistente, barrierearme Interfaces.
 					</p>
 					<span class="world__go">Zum System →</span>
 				</div>
@@ -78,11 +79,8 @@
 </div>
 
 <style>
-	.landing {
-		/* Volle Breite — der Hero (LandingHero) bricht bis an den Viewport-Rand aus. */
-	}
-
-	/* Zentrierte Inhaltsspalte für die Folgesektionen. */
+	/* .landing bleibt ungestylt: volle Breite — der Hero (LandingHero) bricht bis
+	   an den Viewport-Rand aus. Zentrierte Inhaltsspalte nur für die Folgesektionen: */
 	.container {
 		max-width: 76rem;
 		margin-inline: auto;
@@ -203,7 +201,7 @@
 	.whatsnew__date {
 		margin-top: 1rem;
 		font-size: var(--ds-text-sm);
-		color: var(--ds-text-faint);
+		color: var(--ds-text-muted);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

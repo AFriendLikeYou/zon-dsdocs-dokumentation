@@ -13,11 +13,19 @@ export type { BadgeVariant };
 // abgeleitet (ADR-025), statt sie hier von Hand zu pflegen.
 import { CATALOG } from '$data/catalog';
 
+// Brand-Navigation: Reihenfolge + Hierarchie liegen als JSON-Config vor (Single
+// Source of Truth, ADR-028). Sowohl die Sidebar (MENU_ITEMS_BRAND unten) als auch
+// die /admin/brand-Übersicht leiten daraus ab; die Übersicht kann die Config per
+// Drag&Drop umsortieren und persistieren (dev-Write → JSON, prod → GitHub-PR).
+// Hinweis für tooling/check-nav.mjs: die Brand-Hrefs stehen nun in dieser JSON
+// (nicht mehr als href-Literale hier) — der Drift-Check liest sie zusätzlich ein.
+import brandNav from './brand-nav.json';
+
 export interface MenuItem extends FooterVisible {
 	label: string;
 	href: string;
 	badge?: string;
-	/** Optik des Badges; ohne Angabe = 'ready' (z. B. „Neu"). 'neutral' für „Geplant". */
+	/** Tone des Badges; ohne Angabe = 'machine' (z. B. „Neu"). 'ghost' für „Geplant". */
 	badgeVariant?: BadgeVariant;
 	locked?: boolean; // Add locked field to indicate if the item is locked
 }
@@ -33,110 +41,10 @@ export interface MenuSection extends FooterVisible {
 	badgeVariant?: BadgeVariant;
 }
 
-export const MENU_ITEMS_BRAND: MenuSection[] = [
-	{
-		title: 'Getting started', // Kategorie im Menü
-		isCategory: true
-	},
-	{
-		title: 'Willkommen',
-		href: '/brand/getting-started',
-		isInFooter: false // Mark this item for the footer
-	},
-	{
-		title: 'Grundlagen', // Kategorie im Menü
-		isCategory: true
-	},
-	{
-		title: 'Marke',
-		items: [
-			{ label: 'Markenstrategie', href: '/brand/identity/strategy' },
-			{ label: 'Markenarchitektur', href: '/brand/identity/architecture', badge: 'Neu' },
-			{ label: 'Erscheinungsbild', href: '/brand/identity/appearance' },
-			{ label: 'Voice & Tone', href: '/brand/identity/voice-and-tone' },
-			{ label: 'Anwendungsbeispiele', href: '/brand/identity/examples', badge: 'Neu' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'Logo',
-		href: '/brand/logo',
-		isInFooter: true
-	},
-	{
-		title: 'Farbe',
-		href: '/brand/color',
-		badge: 'Neu',
-		isInFooter: true
-	},
-	{
-		title: 'Icons',
-		items: [
-			{ label: 'Aufbau', href: '/brand/icons/anatomy' },
-			{ label: 'Icon Library', href: '/brand/icons/library' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'Typografie',
-		href: '/brand/typography',
-		isInFooter: true
-	},
-	{
-		title: 'Primitives', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Bildsprache',
-		href: '/brand/imagery',
-		isInFooter: true
-	},
-	{
-		title: 'Sound',
-		href: '/brand/sound',
-		badge: 'Beta',
-		isInFooter: true
-	},
-	{
-		title: 'Animation',
-		href: '/brand/animation',
-		isInFooter: true
-	},
-	{
-		title: 'Accessibility',
-		items: [
-			{ label: 'Richtlinien', href: '/brand/accessibility' },
-			{ label: 'Issues & Solutions', href: '/brand/accessibility/issues' }
-		],
-		isInFooter: true
-	},
-	{
-		title: 'KI-Richtlinien',
-		href: '/brand/ai-guidelines',
-		isInFooter: true
-	},
-	{
-		title: 'Inklusion', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Pride Kommunikation',
-		href: '/brand/pride-communication',
-		isInFooter: true
-	},
-	{
-		title: 'Community', // Kategorie im Menü
-		isCategory: true,
-		isInFooter: true
-	},
-	{
-		title: 'Resources',
-		href: '/brand/resources',
-		isInFooter: true
-	}
-];
+// Aus der JSON-Config abgeleitet (SSOT, s. o.). Reihenfolge, Kategorien-Header,
+// Gruppen (mit items) und Blatt-Links stehen dort; hier nur der Typ-Cast, damit
+// Sidebar/Footer/Suche unverändert MenuSection[] konsumieren.
+export const MENU_ITEMS_BRAND: MenuSection[] = brandNav as MenuSection[];
 
 export const FLAT_MENU_ITEMS_BRAND: MenuItem[] = MENU_ITEMS_BRAND.reduce<MenuItem[]>(
 	(acc, item) => {
@@ -174,8 +82,9 @@ export const PLANNED_COMPONENTS: PlannedComponent[] = [
 ];
 
 // Components-Sektion aus dem Katalog ableiten (ADR-025): erst die dokumentierten
-// Einträge (sortiert kommt der Katalog schon), dann die geplanten Stubs. Badges sind
-// kuratiert (Override-Map im Katalog bzw. „Geplant" hier) — keine Automatik.
+// Einträge (sortiert kommt der Katalog schon), dann die geplanten Stubs. Badges
+// kommen aus der Zeit-Automatik im Katalog (badgeFor: „Neu"/„Update", je 14 Tage);
+// „Geplant" bleibt hier kuratiert. Ein Override in CATALOG_OVERRIDES pinnt.
 const COMPONENT_MENU_ITEMS: MenuSection[] = [
 	...CATALOG.map(
 		(e): MenuSection => ({
@@ -191,7 +100,7 @@ const COMPONENT_MENU_ITEMS: MenuSection[] = [
 			title: p.label,
 			href: `/product/components/${p.slug}`,
 			badge: 'Geplant',
-			badgeVariant: 'neutral',
+			badgeVariant: 'ghost',
 			isInFooter: true
 		})
 	)
@@ -204,7 +113,7 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	},
 	{
 		title: 'Willkommen',
-		href: '/product/getting-started',
+		href: '/product',
 		isInFooter: false
 	},
 	{
@@ -224,25 +133,41 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Tokens',
 		href: '/product/foundations/tokens',
-		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Farbe',
+		href: '/product/foundations/color',
+		isInFooter: true
+	},
+	{
+		title: 'Typografie',
+		href: '/product/foundations/typography',
 		isInFooter: true
 	},
 	{
 		title: 'Spacing',
 		href: '/product/foundations/spacing',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Shape',
 		href: '/product/foundations/shape',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
 		title: 'Motion & Elevation',
 		href: '/product/foundations/motion',
-		badge: 'Neu',
+		isInFooter: true
+	},
+	{
+		title: 'Icons',
+		href: '/product/foundations/icons',
+		isInFooter: true
+	},
+	{
+		title: 'Barrierefreiheit',
+		href: '/product/foundations/accessibility',
 		isInFooter: true
 	},
 	{
@@ -270,7 +195,6 @@ export const MENU_ITEMS_PRODUCT: MenuSection[] = [
 	{
 		title: 'Formular',
 		href: '/product/patterns/form',
-		badge: 'Neu',
 		isInFooter: true
 	},
 	{
@@ -297,7 +221,13 @@ const flattenMenu = (menu: MenuSection[]): MenuItem[] =>
 		if (item.items) {
 			item.items.forEach((subItem) => acc.push(subItem));
 		} else if (item.href) {
-			acc.push({ label: item.title, href: item.href, ...(item.badge && { badge: item.badge }) });
+			acc.push({
+				label: item.title,
+				href: item.href,
+				// badgeVariant MIT kopieren — sonst fällt „Geplant" (ghost) auf den
+				// machine-Fallback der SearchPalette zurück und färbt sich blau.
+				...(item.badge && { badge: item.badge, badgeVariant: item.badgeVariant })
+			});
 		}
 		return acc;
 	}, []);

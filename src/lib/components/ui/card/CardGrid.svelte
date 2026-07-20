@@ -1,16 +1,24 @@
+<!--
+  CardGrid.svelte — responsives Grid aus Card-Karten für Übersichtsseiten
+  (Product-/Foundations-/Patterns-Index, RelatedComponents im Specsheet).
+-->
 <script lang="ts">
 	import Card from './Card.svelte';
+	import type { BadgeVariant } from '$types/spec';
 
 	type CardItem = {
 		url: string;
 		title: string;
 		description: string;
 		badge?: string;
-		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+		badgeVariant?: BadgeVariant;
 	};
 
 	// Bewusst leerer Default — die alten Lorem-Platzhalter-Karten zeigten auf tote URLs.
-	let { cards = [] }: { cards?: CardItem[] } = $props();
+	let {
+		/** Karten-Daten (url/title/description + optionales Badge). */
+		cards = []
+	}: { cards?: CardItem[] } = $props();
 </script>
 
 <div class="grid">

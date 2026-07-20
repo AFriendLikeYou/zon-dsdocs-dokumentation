@@ -4,13 +4,18 @@
   Numerischer Wert live aus dem Stylesheet (kein Drift zum DS-Paket).
 -->
 <script lang="ts">
-	let { items = [] }: { items?: { token: string; usage?: string }[] } = $props();
+	import { Chip } from '$components/ui/chip';
+	import { resolveCssVar } from '$lib/utils';
+
+	let {
+		/** Radius-Tokens mit optionalem Einsatzzweck; jeder rendert einen eigenen Swatch. */
+		items = []
+	}: { items?: { token: string; usage?: string }[] } = $props();
 
 	let vals = $state<Record<string, string>>({});
 	$effect(() => {
-		const root = getComputedStyle(document.documentElement);
 		const m: Record<string, string> = {};
-		for (const it of items) m[it.token] = root.getPropertyValue(it.token).trim();
+		for (const it of items) m[it.token] = resolveCssVar(it.token);
 		vals = m;
 	});
 
@@ -27,8 +32,14 @@
 		<li class="card">
 			<div class="swatch" style="border-radius: var({it.token})"></div>
 			<div class="meta">
-				<code class="name">{it.token}</code>
-				<span class="val">{label(vals[it.token] ?? '')}</span>
+				<span class="name-line">
+					<Chip value={it.token} />
+				</span>
+				<span class="val-line">
+					{#if vals[it.token]}
+						<Chip value={vals[it.token]} label={label(vals[it.token])} />
+					{/if}
+				</span>
 				{#if it.usage}<span class="use">{it.usage}</span>{/if}
 			</div>
 		</li>
@@ -63,15 +74,11 @@
 		flex-direction: column;
 		gap: 2px;
 	}
-	.name {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text);
-	}
-	.val {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
+	.name-line,
+	.val-line {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-8);
 	}
 	.use {
 		font-size: var(--ds-text-sm);

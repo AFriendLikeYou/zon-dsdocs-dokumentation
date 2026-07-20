@@ -2,84 +2,84 @@
    (node 4153:1351). Zustands-Modifier für die Doku; im Produkt aus Interaktion.
    Icons als CSS-Balken (kein Asset). Echte --z-ds-Tokens. */
 .z-stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--z-ds-space-xxs);
-  box-sizing: border-box;
-  width: 112px;
-  padding: var(--z-ds-space-xxs);
-  border: 1px solid var(--z-ds-color-border-100);
-  border-radius: var(--z-ds-border-radius-4);
-  background-color: var(--z-ds-color-background-0);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--z-ds-space-xxs);
+	box-sizing: border-box;
+	width: 112px;
+	padding: var(--z-ds-space-xxs);
+	border: 1px solid var(--z-ds-color-border-100);
+	border-radius: var(--z-ds-border-radius-4);
+	background-color: var(--z-ds-color-background-0);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
 }
 
 .z-stepper__val {
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: center;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1;
-  color: var(--z-ds-color-text-100);
+	flex: 1 1 0;
+	min-width: 0;
+	text-align: center;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1;
+	color: var(--z-ds-color-text-100);
 }
 
 .z-stepper__minus,
 .z-stepper__plus {
-  position: relative;
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: var(--z-ds-border-radius-4);
-  background: transparent;
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
+	position: relative;
+	flex: 0 0 auto;
+	width: 26px;
+	height: 26px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--z-ds-border-radius-4);
+	background: transparent;
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
 }
 /* Minus + Plus teilen den horizontalen Balken; Plus bekommt zusätzlich den vertikalen. */
 .z-stepper__minus::before,
 .z-stepper__plus::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 12px;
-  height: 1.6px;
-  background-color: currentColor;
-  transform: translate(-50%, -50%);
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 12px;
+	height: 1.6px;
+	background-color: currentColor;
+	transform: translate(-50%, -50%);
 }
 .z-stepper__plus::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 1.6px;
-  height: 12px;
-  background-color: currentColor;
-  transform: translate(-50%, -50%);
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 1.6px;
+	height: 12px;
+	background-color: currentColor;
+	transform: translate(-50%, -50%);
 }
 
 .z-stepper__minus:hover,
 .z-stepper__plus:hover {
-  background-color: var(--z-ds-color-background-10);
+	background-color: var(--z-ds-color-background-10);
 }
 .z-stepper__minus:focus-visible,
 .z-stepper__plus:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+	outline: none;
+	box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
 }
 
 /* Zustands-Modifier (Doku/Matrix) — bilden Hover/Focus am Plus-Button ab. */
 .z-stepper--hover .z-stepper__plus {
-  background-color: var(--z-ds-color-background-10);
+	background-color: var(--z-ds-color-background-10);
 }
 .z-stepper--focus .z-stepper__plus {
-  box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
+	box-shadow: inset 0 0 0 2px var(--z-ds-color-focus-100);
 }
 .z-stepper--disabled .z-stepper__val,
 .z-stepper--disabled .z-stepper__minus,
 .z-stepper--disabled .z-stepper__plus {
-  color: var(--z-ds-color-text-40);
-  cursor: default;
+	color: var(--z-ds-color-text-40);
+	cursor: default;
 }

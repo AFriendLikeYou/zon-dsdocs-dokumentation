@@ -15,7 +15,7 @@ title: Formular
 	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus den
 	// Component-Ordnern (Single Source of Truth). Nur das Layout-Glue (Stack-Abstände,
 	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns.
-	import { CodeBlock } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { CardGrid } from '$components/ui/card';
 

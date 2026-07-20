@@ -4,10 +4,9 @@
 	import FooterNavigation from '$components/layout/FooterNavigation.svelte';
 	import SkipToMainContentLink from '$components/layout/SkipToMainContentLink.svelte';
 	import Toaster from '$components/layout/toast/toaster.svelte';
-	import { setToastState } from '$lib/toast-state.svelte';
+	import { setToastState } from '$stores/toast-state.svelte';
 	import Navbar from '$components/layout/Navbar.svelte';
 	import { page } from '$app/state';
-	import { afterNavigate } from '$app/navigation';
 	import {
 		FLAT_MENU_ITEMS_BRAND,
 		MENU_ITEMS_BRAND,
@@ -15,16 +14,15 @@
 		MENU_ITEMS_PRODUCT
 	} from '$data/navigation';
 	import Sidebar from '$components/layout/Sidebar.svelte';
+	import { initDesktopCollapsed } from '$stores/sidebar.svelte';
 
-	let url = $state(page.url.pathname);
-
-	afterNavigate(() => {
-		url = page.url.pathname;
-	});
+	// `page` (aus $app/state) ist fein-granular reaktiv — direkt ableiten
+	// (statt des früheren $state+afterNavigate-Spiegels, Review R2 Kür).
+	const url = $derived(page.url.pathname);
 
 	// Eine Quelle für die Bereichszuordnung — Menü, Footer-Navigation und TOC
 	// leiten sich daraus ab (statt drei verschiedener Routen-Checks).
-	const section = $derived(
+	const section: Section = $derived(
 		url?.startsWith('/product') ? 'product' : url?.startsWith('/brand') ? 'brand' : 'root'
 	);
 	const isProduct = $derived(section === 'product');
@@ -33,18 +31,25 @@
 	const menuItems = $derived(isProduct ? MENU_ITEMS_PRODUCT : MENU_ITEMS_BRAND);
 	const flatMenuItems = $derived(isProduct ? FLAT_MENU_ITEMS_PRODUCT : FLAT_MENU_ITEMS_BRAND);
 	const showFooterNav = $derived(section !== 'root');
-	const showTOC = $derived(section === 'brand');
+	// Rechte „Auf dieser Seite"-Spalte für Brand UND Product — auf den generierten
+	// Component-Seiten ersetzt sie die frühere SectionNav-Pill-Leiste (h2[id]-basiert;
+	// Tab-Wechsel werden über den MutationObserver der TOC erfasst).
+	const showTOC = $derived(section === 'brand' || section === 'product');
 
 	import TableOfContents from '$components/layout/TableOfContents.svelte';
 	import Footer from '$components/layout/Footer.svelte';
-	import type { Theme } from '$types/global';
+	import type { Theme, Section } from '$types/global';
 
 	type Props = {
-		data: { theme: Theme; isUserLoggedIn: boolean };
+		data: { theme: Theme; sidebarCollapsed: boolean; isUserLoggedIn: boolean };
 		children: () => ReturnType<import('svelte').Snippet>;
 	};
 
 	const { data, children }: Props = $props();
+
+	// Persistierten Einklapp-Zustand synchron (SSR + Client) in den Store spiegeln →
+	// kein Flash: der Server-Wert bestimmt bereits das erste Rendering.
+	initDesktopCollapsed(data.sidebarCollapsed);
 
 	const currentTheme = $state(data.theme);
 
@@ -53,7 +58,7 @@
 
 <SkipToMainContentLink />
 
-<Navbar isUserLoggedIn={data.isUserLoggedIn} />
+<Navbar isUserLoggedIn={data.isUserLoggedIn} {section} />
 
 <div class="flex" class:flex--root={isRoot}>
 	{#if !isRoot}
@@ -67,7 +72,6 @@
 				{/if}
 
 				{@render children()}
-
 			</main>
 			{#if showFooterNav}
 				<FooterNavigation items={flatMenuItems} />

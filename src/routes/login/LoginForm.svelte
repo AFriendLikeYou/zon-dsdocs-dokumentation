@@ -113,13 +113,17 @@
 		}
 	}
 
+	/* Fehlerbox auf inverser Fläche (dunkel im Light-, hell im Dark-Mode): der
+	   Vordergrund nutzt daher die Seiten-Fläche als Farbe → stets kontraststark.
+	   Der Fehler-Charakter kommt über den roten Rahmen (--ds-negative). */
 	.form__error {
 		display: flex;
 		gap: var(--z-ds-space-xs);
 		background-color: var(--ds-surface-inverse);
 		padding: var(--z-ds-space-xs);
 		border-radius: 4px;
-		color: var(--ds-negative);
+		border: 1px solid var(--ds-negative);
+		color: var(--ds-surface);
 
 		svg {
 			width: 18px;
@@ -129,7 +133,7 @@
 		}
 
 		p {
-			color: var(--ds-negative);
+			color: var(--ds-surface);
 			font-size: var(--ds-text-sm);
 		}
 	}

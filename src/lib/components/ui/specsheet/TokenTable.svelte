@@ -1,111 +1,126 @@
-<!-- TokenTable.svelte — Tokens als native, adaptive Tabelle (Specs-Tab). -->
+<!--
+  TokenTable.svelte — Tokens als native, adaptive Tabelle (Specs-Tab).
+
+  DÜNNER WRAPPER um `ui/table` (K8-Zwillings-Merge): Struktur/Gruppen/Counter kommen
+  aus dem geteilten Renderer, die öffentliche Optik (durchgezogene Trenner, Kategorie-
+  Eyebrow, Mono-Wert rechts) bringt die scoped Skin-Klasse hier ein. Name + API
+  bleiben unverändert — die generierten .svx importieren `TokenTable` weiter.
+
+  Werte stehen NICHT im Modell (keine zweite Wahrheit): jeder Wert wird live per
+  getComputedStyle aus dem geladenen styles-zds.css gelesen (dieselbe Auflösung wie
+  TokenReference/foundation-tokens.ts) — er folgt damit dem aktiven Light/Dark-Theme.
+  Bis zur Auflösung (SSR) steht ein Platzhalter.
+-->
 <script lang="ts">
-  import type { TokenGroup } from '$types/spec';
-  import { CopyButton } from '$components/ui/copy-button';
-  let { tokens = [] }: { tokens?: TokenGroup[] } = $props();
+	import type { TokenGroup } from '$types/spec';
+	import { Chip } from '$components/ui/chip';
+	import { Swatch } from '$components/ui/swatch';
+	import { Table } from '$components/ui/table';
+	import { resolveCssVar } from '$lib/utils';
+
+	let {
+		tokens = []
+	}: {
+		/** Token-Gruppen (Kategorie, optionale Beschreibung, Items mit Name/Swatch/Hinweis). */
+		tokens?: TokenGroup[];
+	} = $props();
+
+	type ResolvedItem = {
+		name: string;
+		hinweis?: string;
+		swatch?: string;
+		translucent?: boolean;
+		/** Live aus styles-zds.css aufgelöster Wert; '' vor der Auflösung (SSR). */
+		wert: string;
+	};
+	type ResolvedGroup = { kategorie: string; beschreibung?: string; items: ResolvedItem[] };
+
+	let resolved = $state<ResolvedGroup[]>([]);
+
+	// Läuft nur im Browser (nach Mount) — SSR liefert erstmal leere Werte.
+	$effect(() => {
+		resolved = tokens.map((group) => ({
+			kategorie: group.kategorie,
+			beschreibung: group.beschreibung,
+			items: (group.items ?? []).map((t) => ({ ...t, wert: resolveCssVar(t.name) }))
+		}));
+	});
+
+	// SSR/Pre-Mount-Basis (Werte noch leer → Platzhalter), danach vom Effect ersetzt.
+	let view = $derived<ResolvedGroup[]>(
+		resolved.length
+			? resolved
+			: tokens.map((group) => ({
+					kategorie: group.kategorie,
+					beschreibung: group.beschreibung,
+					items: (group.items ?? []).map((t) => ({ ...t, wert: '' }))
+				}))
+	);
+
+	// Gruppen für den generischen Renderer (Kategorie-Eyebrow + Beschreibung).
+	const groups = $derived(
+		view.map((g) => ({ label: g.kategorie, description: g.beschreibung, rows: g.items }))
+	);
+
+	const columns = [
+		{ key: 'swatch', width: '26px', render: swatchCell },
+		{ key: 'name', render: nameCell },
+		{ key: 'hinweis', render: hinweisCell },
+		{ key: 'wert', align: 'right' as const, render: wertCell }
+	];
 </script>
 
+{#snippet swatchCell(row: ResolvedItem)}
+	{#if row.translucent}
+		<Swatch checkerboard />
+	{:else if row.swatch}
+		<!-- Live-Farbe aus dem aufgelösten Token; Modell-Hex nur als SSR-Platzhalter. -->
+		<Swatch color={row.wert || row.swatch} />
+	{/if}
+{/snippet}
+{#snippet nameCell(row: ResolvedItem)}<Chip value={row.name} />{/snippet}
+{#snippet hinweisCell(row: ResolvedItem)}{row.hinweis ?? ''}{/snippet}
+{#snippet wertCell(row: ResolvedItem)}{row.wert || '…'}{/snippet}
+
 {#if tokens.length}
-  <div class="tok-wrap">
-  <table class="tok">
-    <tbody>
-      {#each tokens as group}
-        <tr class="cat"><th colspan="3">{group.kategorie}</th></tr>
-        {#if group.beschreibung}
-          <tr class="desc"><td colspan="3">{group.beschreibung}</td></tr>
-        {/if}
-        {#each group.items as t}
-          <tr>
-            <td class="sw-cell">
-              {#if t.translucent}
-                <span class="sw sw-t"></span>
-              {:else if t.swatch}
-                <span class="sw" style="background:{t.swatch}"></span>
-              {/if}
-            </td>
-            <td>
-              <span class="name-cell">
-                <code>{t.name}</code>
-                <CopyButton value={t.name} ariaLabel={`${t.name} kopieren`} class="tok-copy" />
-              </span>
-            </td>
-            <td class="val">{t.wert}</td>
-          </tr>
-        {/each}
-      {/each}
-    </tbody>
-  </table>
-  </div>
+	<div class="table-scroll token-table-skin">
+		<Table {columns} {groups} density="comfortable" label="Design-Tokens" />
+	</div>
 {/if}
 
 <style>
-  /* Schmale Viewports: lange Token-Namen scrollen im Container statt die Seite zu schieben. */
-  .tok-wrap {
-    overflow-x: auto;
-    max-width: 100%;
-    margin: 0 0 1em;
-  }
-  .tok {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .tok td {
-    padding: 9px 10px 9px 0;
-    border-bottom: 1px solid var(--ds-border);
-    vertical-align: middle;
-    font-size: var(--ds-text-sm);
-  }
-  .tok .cat th {
-    text-align: left;
-    padding: var(--z-ds-space-20) 0 var(--z-ds-space-8);
-    color: var(--ds-text-muted);
-    font-size: var(--ds-text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-  }
-  .tok .desc td {
-    padding: 0 0 var(--z-ds-space-8);
-    border-bottom: none;
-    color: var(--ds-text-body);
-    font-size: var(--ds-text-sm);
-    max-width: 60ch;
-  }
-  .tok code {
-    font-family: var(--ds-font-mono);
-  }
-  .name-cell {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--z-ds-space-8);
-  }
-  /* :global, weil die Klasse auf dem <button> der CopyButton-Komponente landet. */
-  :global(.tok-copy) {
-    --copy-icon-size: 14px;
-    color: var(--ds-text-faint);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    :global(.tok-copy:hover) {
-      color: var(--ds-text);
-    }
-  }
-  .val {
-    text-align: right;
-    color: var(--ds-text-body);
-    font-family: var(--ds-font-mono);
-    white-space: nowrap;
-  }
-  .sw-cell {
-    width: 26px;
-  }
-  .sw {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    border-radius: var(--ds-radius-sm);
-    border: 1px solid var(--ds-border-strong);
-  }
-  .sw-t {
-    background: repeating-conic-gradient(#bbb 0 25%, #fff 0 50%) 50% / 8px 8px;
-  }
+	/* ── Öffentliche Token-Optik (unverändert übernommen aus der Vor-Merge-Fassung) ──
+	   Skin über :global auf die vom geteilten Renderer erzeugten .ds-table-Hooks. */
+	.token-table-skin :global(.ds-table__cell) {
+		border-bottom: 1px solid var(--ds-border);
+	}
+	/* Kategorie-Eyebrow (Gruppen-Kopfzeile). */
+	.token-table-skin :global(.ds-table__group-cell) {
+		padding: var(--z-ds-space-20) 0 var(--z-ds-space-8);
+	}
+	.token-table-skin :global(.ds-table__group-label) {
+		color: var(--ds-text-muted);
+		font-size: var(--ds-text-xs);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		font-weight: 600;
+	}
+	/* Beschreibungszeile unter dem Eyebrow. */
+	.token-table-skin :global(.ds-table__group-desc) {
+		padding: 0 0 var(--z-ds-space-8);
+		color: var(--ds-text-body);
+		font-size: var(--ds-text-sm);
+		max-width: 60ch;
+	}
+	/* Hinweis-Spalte (3. Spalte). */
+	.token-table-skin :global(.ds-table__cell:nth-child(3)) {
+		color: var(--ds-text-body);
+		max-width: 40ch;
+	}
+	/* Wert-Spalte (4. Spalte): Mono, rechtsbündig. */
+	.token-table-skin :global(.ds-table__cell:nth-child(4)) {
+		color: var(--ds-text-body);
+		font-family: var(--ds-font-mono);
+		white-space: nowrap;
+	}
 </style>

@@ -1,15 +1,25 @@
+<!--
+  Card.svelte — verlinkte Übersichts-Karte (Platzhalter-Illustration + Titel + Badge +
+  Beschreibung). Wird ausschließlich vom CardGrid gerendert; Status-Pill kommt aus Badge.
+-->
 <script lang="ts">
 	import { Badge } from '$components/ui/badge';
+	import type { BadgeVariant } from '$types/spec';
 
 	type Props = {
+		/** Link-Ziel der gesamten Karte. */
 		url: string;
+		/** Karten-Überschrift. */
 		title: string;
+		/** Kurzbeschreibung unter dem Titel. */
 		description: string;
+		/** Optionaler Badge-Text neben dem Titel (leer = kein Badge). */
 		badge?: string;
-		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+		/** Farbrolle des Badges. */
+		badgeVariant?: BadgeVariant;
 	};
 
-	let { url, title, description, badge = '', badgeVariant = 'neutral' }: Props = $props();
+	let { url, title, description, badge = '', badgeVariant = 'default' }: Props = $props();
 </script>
 
 <a href={url} class="card">
@@ -38,7 +48,7 @@
 	</div>
 	<div class="card__head">
 		<h3 class="card__title">{title}</h3>
-		{#if badge}<Badge variant={badgeVariant}>{badge}</Badge>{/if}
+		{#if badge}<Badge tone={badgeVariant}>{badge}</Badge>{/if}
 	</div>
 	<p>{description}</p>
 </a>
@@ -113,6 +123,12 @@
 	@media (max-width: 600px) {
 		.card {
 			flex: 1 1 100%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card {
+			transition: none;
 		}
 	}
 </style>

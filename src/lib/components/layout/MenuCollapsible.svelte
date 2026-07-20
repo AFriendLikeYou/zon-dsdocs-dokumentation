@@ -1,16 +1,26 @@
+<!-- MenuCollapsible.svelte — aufklappbare Sidebar-Navigationsgruppe (Titel + optionale Sub-Links, Lock-Glyph für gesperrte Einträge); wird von der Sidebar eingehängt. -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { MenuItem, BadgeVariant } from '$data/navigation';
 	import { Badge } from '$components/ui/badge';
+	import { ChevronIcon, LockOpenIcon, LockClosedIcon } from '$lib/icons';
 
 	type Props = {
+		/** Titel der Gruppe (Header-Zeile). */
 		title: string;
+		/** Ziel-URL, wenn die Gruppe selbst ein Link ohne Kinder ist. */
 		href?: string;
+		/** Sub-Einträge; ab einem Eintrag wird die Gruppe ein Disclosure-Toggle. */
 		items?: MenuItem[];
+		/** Ob die Gruppe initial aufgeklappt startet. */
 		initiallyOpen?: boolean;
-		onClick?: () => void;
+		/** Callback bei Klick auf einen Link (z. B. Drawer auf Mobile schließen). */
+		onclick?: () => void;
+		/** Optionaler Badge-Text an der Header-Zeile. */
 		badge?: string;
+		/** Farbvariante des Badges. */
 		badgeVariant?: BadgeVariant;
+		/** Login-Status; steuert gesperrte Sub-Links und das Schloss-Glyph. */
 		isUserLoggedIn: boolean;
 	};
 
@@ -19,9 +29,9 @@
 		href,
 		items = [],
 		initiallyOpen = false,
-		onClick = () => {},
+		onclick = () => {},
 		badge,
-		badgeVariant = 'ready',
+		badgeVariant = 'machine',
 		isUserLoggedIn
 	}: Props = $props();
 
@@ -42,25 +52,11 @@
 	<span class="collapsible-title-content">
 		{title}
 		{#if badge}
-			<Badge variant={badgeVariant}>{badge}</Badge>
+			<Badge tone={badgeVariant}>{badge}</Badge>
 		{/if}
 	</span>
 	{#if items.length > 0}
-		<svg
-			class="chevron-icon {isOpen ? 'rotate' : ''}"
-			xmlns="http://www.w3.org/2000/svg"
-			width="16"
-			height="16"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<path d="m9 18 6-6-6-6" />
-		</svg>
+		<ChevronIcon direction="right" class="chevron-icon {isOpen ? 'rotate' : ''}" />
 	{/if}
 {/snippet}
 
@@ -68,62 +64,26 @@
 {#snippet lockIcon(unlocked: boolean)}
 	<span class="lock-icon">
 		{#if unlocked}
-			<svg
-				aria-hidden="true"
-				height="16"
-				stroke-linejoin="round"
-				viewBox="0 0 16 16"
-				width="16"
-				style="color: currentcolor;"
-				><path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M14 6V4.5C14 3.39543 13.1046 2.5 12 2.5C10.8954 2.5 10 3.39543 10 4.5V6H10.5H12V7.5V12.5C12 13.8807 10.8807 15 9.5 15H2.5C1.11929 15 0 13.8807 0 12.5V7.5V6H1.5H8.5V4.5C8.5 2.567 10.067 1 12 1C13.933 1 15.5 2.567 15.5 4.5V6H14ZM10.5 7.5H10H8.5H1.5V12.5C1.5 13.0523 1.94772 13.5 2.5 13.5H9.5C10.0523 13.5 10.5 13.0523 10.5 12.5V7.5Z"
-					fill="currentColor"
-				></path></svg
-			>
+			<LockOpenIcon style="color: currentcolor;" />
 		{:else}
-			<svg
-				aria-hidden="true"
-				height="16"
-				stroke-linejoin="round"
-				viewBox="0 0 16 16"
-				width="16"
-				style="color: var(--ds-text-muted);"
-				><path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M10 4.5V6H6V4.5C6 3.39543 6.89543 2.5 8 2.5C9.10457 2.5 10 3.39543 10 4.5ZM4.5 6V4.5C4.5 2.567 6.067 1 8 1C9.933 1 11.5 2.567 11.5 4.5V6H12.5H14V7.5V12.5C14 13.8807 12.8807 15 11.5 15H4.5C3.11929 15 2 13.8807 2 12.5V7.5V6H3.5H4.5ZM11.5 7.5H10H6H4.5H3.5V12.5C3.5 13.0523 3.94772 13.5 4.5 13.5H11.5C12.0523 13.5 12.5 13.0523 12.5 12.5V7.5H11.5Z"
-					fill="currentColor"
-				></path></svg
-			>
+			<LockClosedIcon style="color: var(--ds-text-muted);" />
 		{/if}
 	</span>
 {/snippet}
 
 <div class="collapsible-group">
 	<div class="collapsible-header">
-		{#if href}
-			<a
-				href={items.length ? '#' : href}
-				onclick={(e) => {
-					if (items.length) {
-						toggleMenu(e);
-					} else {
-						onClick?.();
-					}
-				}}
-				class="collapsible-link {isActive(href) ? 'active' : ''}"
-				aria-expanded={items.length ? isOpen : undefined}
-			>
+		{#if items.length > 0}
+			<!-- Hat Kinder → echter Disclosure-Button (statt <a href="#">) — korrekte Semantik. -->
+			<button class="collapsible-title" onclick={toggleMenu} aria-expanded={isOpen}>
+				{@render headerInner()}
+			</button>
+		{:else if href}
+			<a href={href} onclick={() => onclick?.()} class="collapsible-link {isActive(href) ? 'active' : ''}">
 				{@render headerInner()}
 			</a>
 		{:else}
-			<button
-				class="collapsible-title"
-				onclick={items.length ? toggleMenu : undefined}
-				aria-expanded={items.length ? isOpen : undefined}
-			>
+			<button class="collapsible-title">
 				{@render headerInner()}
 			</button>
 		{/if}
@@ -142,7 +102,7 @@
 										e.preventDefault();
 										return;
 									}
-									onClick();
+									onclick();
 								}}
 								class="submenu-link {isActive(item.href) ? 'active' : ''} {item.locked &&
 								!isUserLoggedIn
@@ -151,7 +111,7 @@
 							>
 								{item.label}
 								{#if item.badge}
-									<Badge variant={item.badgeVariant ?? 'ready'}>{item.badge}</Badge>
+									<Badge tone={item.badgeVariant ?? 'machine'}>{item.badge}</Badge>
 								{/if}
 								{#if item.locked}
 									{@render lockIcon(isUserLoggedIn)}
@@ -170,11 +130,6 @@
 		background: none;
 		cursor: pointer;
 	}
-
-	/* button .collapsible-title:active {
-		background: none;
-		cursor: pointer;
-	} */
 
 	.collapsible-group {
 		position: relative;
@@ -216,6 +171,12 @@
 		}
 	}
 
+	.collapsible-link:focus-visible,
+	.collapsible-title:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
 	/* Aktiv = Pill-Hintergrund + kräftige Schrift — ohne Indikator-Balken
 	   (Minimalismus-Pass: keine Linien als Abgrenzung). */
 	.collapsible-link.active {
@@ -230,7 +191,8 @@
 		gap: 8px;
 	}
 
-	.chevron-icon {
+	/* Chevron liegt in einer Kind-Komponente → :global, sonst greift das Scoping nicht. */
+	.collapsible-header :global(.chevron-icon) {
 		margin-left: 8px;
 		flex: none;
 		color: var(--ds-text-muted);
@@ -238,7 +200,7 @@
 		transform: rotate(0deg);
 	}
 
-	.chevron-icon.rotate {
+	.collapsible-header :global(.chevron-icon.rotate) {
 		transform: rotate(90deg);
 	}
 
@@ -295,6 +257,11 @@
 		}
 	}
 
+	.submenu-link:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
 	.submenu-link.active {
 		background-color: var(--ds-surface-raised);
 		color: var(--ds-text);
@@ -313,5 +280,11 @@
 		justify-content: center;
 		margin-left: 8px;
 		color: var(--ds-text-muted);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.collapsible-header :global(.chevron-icon) {
+			transition: none;
+		}
 	}
 </style>

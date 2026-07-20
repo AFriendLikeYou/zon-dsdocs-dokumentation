@@ -4,6 +4,7 @@ title: Spacing
 
 <script lang="ts">
 	import { SpacingScale } from '$components/ui/scale';
+	import { SpacingContext } from '$components/ui/spacing-context';
 	import { DoDontList } from '$components/ui/specsheet';
 
 	const semantisch = [
@@ -66,6 +67,21 @@ Die numerische Skala ist die **Ausnahme** für Feinabstimmung, wenn keine semant
 passt.
 
 <SpacingScale tokens={numerisch} />
+
+## Spacing im Kontext
+
+Die wichtigste Unterscheidung in der Praxis: **Innenabstand** (Padding — Luft
+*innerhalb* eines Elements) und **Außenabstand** (Gap/Margin — Luft *zwischen*
+Elementen). Die getönten Flächen unten sind die echten Token-Werte:
+
+<SpacingContext />
+
+Zwei Wegweiser für die Anwendung: Jede Komponenten-Seite zeigt ihre realen
+Innenabstände als **Redlines in der Anatomie** (z. B. beim
+[Button](/product/components/button), Ansicht „Measurements") — und die Abstände
+*zwischen* Inhaltsblöcken regelt auf den [Brand-Seiten](/brand) eine zentrale
+Fluss-Regel (`global.css`, „Vertikaler Rhythmus"), damit jedes Block-Paar denselben
+Abstand bekommt, egal in welcher Reihenfolge.
 
 ## Do &amp; Don't
 

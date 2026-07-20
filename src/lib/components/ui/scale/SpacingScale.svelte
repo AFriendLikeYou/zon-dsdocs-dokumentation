@@ -6,7 +6,12 @@
   auch bei Media-Query-abhängigen Stufen wie xxl.
 -->
 <script lang="ts">
-	let { tokens = [] }: { tokens?: string[] } = $props();
+	import { Chip } from '$components/ui/chip';
+
+	let {
+		/** Spacing-Tokens (--z-ds-space-*); jeder rendert einen maßstabsgetreuen Balken. */
+		tokens = []
+	}: { tokens?: string[] } = $props();
 
 	let listEl: HTMLUListElement;
 	let px = $state<Record<string, number>>({});
@@ -30,8 +35,10 @@
 			<span class="step">{short(t)}</span>
 			<span class="track"><span class="bar" style="width: var({t})"></span></span>
 			<span class="info">
-				<span class="val">{px[t] ?? ''} px</span>
-				<code class="name">{t}</code>
+				{#if px[t]}
+					<Chip value={`${px[t]}px`} label={`${px[t]} px`} />
+				{/if}
+				<Chip value={t} class="name-pill" />
 			</span>
 		</li>
 	{/each}
@@ -70,26 +77,13 @@
 	}
 	.info {
 		display: flex;
-		align-items: baseline;
-		gap: var(--z-ds-space-12);
+		align-items: center;
+		gap: var(--z-ds-space-8);
 		white-space: nowrap;
 	}
-	.val {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		min-width: 3.5rem;
-	}
-	/* Plainer Mono-Name — kein Code-Pill (Grid-Spalte soll nicht überlappen). */
-	.name {
-		background: none;
-		padding: 0;
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-	}
+	/* Token-Namen-Pille auf schmalen Viewports ausblenden (px-Wert genügt). */
 	@media (max-width: 560px) {
-		.name {
+		:global(.name-pill) {
 			display: none;
 		}
 	}

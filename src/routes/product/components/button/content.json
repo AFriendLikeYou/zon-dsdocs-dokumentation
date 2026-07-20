@@ -1,0 +1,82 @@
+{
+	"zweck": "Löst eine Aktion aus. Default für nachrangige Aktionen, Primary für die Hauptaktion, Z+ als Premium-Akzent (ZEIT+). Optional über volle Breite (Fullwidth) und mit optionalen Icon-Slots (Start/Ende).",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — natives <button>, Innenabstand 10px vertikal / 16px horizontal, Text zentriert."
+		},
+		{
+			"nr": 2,
+			"text": "Label — Tablet Gothic Bold 16, fett; optionale Icon-Slots links und rechts."
+		}
+	],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "als natives <button> umsetzen (Figma: Frame)",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter / Leertaste nativ",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": "kein Fokus-Stil im Design — :focus-visible ergänzen",
+			"status": "warn"
+		},
+		{
+			"label": "Kontrast",
+			"wert": "Primary #f5f5f5 auf #2c2c2c ≈ 13:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Disabled",
+			"wert": "#b3b3b3 auf #d9d9d9 ≈ 1.5:1 — nur Disabled-State",
+			"status": "warn"
+		},
+		{
+			"label": "Touch-Target",
+			"wert": "Medium 40px · Small 32px < 44px",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Button."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst die Aktion aus (nativ)."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Pro Aktionsgruppe nur eine Primary-Aktion.",
+			"Label als konkrete Verb-Aktion: „Speichern“ statt „OK“."
+		],
+		"dont": [
+			"Nicht mehrere Primary-Buttons nebeneinander.",
+			"Buttons nicht für reine Navigation verwenden — dafür Links."
+		]
+	},
+	"version": "Figma-Node 4185:3778",
+	"komposition": [
+		"In einer Aktionsgruppe (z. B. button-group) nur eine Primary-Aktion einsetzen, weitere Aktionen als Default.",
+		"Für reine Navigation statt Button einen Link bzw. text-button verwenden."
+	],
+	"verwandt": [
+		"text-button",
+		"icon-button",
+		"button-group"
+	],
+	"variantInfo": {
+		"Default": "Neutrale Aktion — helle Fläche, dunkles Label.",
+		"Primary": "Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal.",
+		"Z+": "Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext).",
+		"Fullwidth": "Streckt den Button auf 100 % Breite (z-button--fullwidth)."
+	}
+}

@@ -6,9 +6,13 @@
 -->
 <script lang="ts">
 	type Props = {
+		/** Große Überschrift (h1). */
 		title: string;
+		/** Unterzeile unter dem Titel. */
 		subtitle?: string;
+		/** Bildpfad (aus static/media/brand). */
 		image: string;
+		/** Alt-Text des Bildes. */
 		imageAlt?: string;
 	};
 	let { title, subtitle = '', image, imageAlt = '' }: Props = $props();
@@ -34,10 +38,11 @@
 	}
 	.brand-hero__title {
 		/* Display-Heading wie im Brand-Scope (global.css [data-area='brand'] h1),
-		   hier explizit gesetzt, damit der Hero auch außerhalb stimmig bleibt. */
-		font-family: 'FranziskaWebPro', Georgia, 'Times New Roman', serif;
+		   hier explizit gesetzt, damit der Hero auch außerhalb stimmig bleibt.
+		   Tiemann Schmal hat nur Normalschnitt → font-weight: normal (kein Faux-Bold). */
+		font-family: 'ZeitTiemannSchmal', Georgia, 'Times New Roman', serif;
 		font-size: var(--z-ds-fontsize-46);
-		font-weight: 700;
+		font-weight: normal;
 		line-height: 1.08;
 		letter-spacing: -0.022em;
 		margin: 0;

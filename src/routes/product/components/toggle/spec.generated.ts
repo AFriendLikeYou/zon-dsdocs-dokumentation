@@ -5,19 +5,23 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Toggle",
-	"status": "ready_for_dev",
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=2845-5966&m=dev",
 	"aktualisiertAm": "2026-07-03",
-	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
-	"verwandt": [
-		"checkbox",
-		"input"
-	],
+	"dokumentiertAm": "2026-07-03",
 	"masse": {
-		"hoehe": "16",
-		"breite": "26",
-		"radius": "999 (voll)"
+		"hoehe": {
+			"px": "16",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "26",
+			"herkunft": "abgeleitet"
+		},
+		"radius": {
+			"px": "999 (voll)",
+			"herkunft": "abgeleitet"
+		}
 	},
 	"spacing": [
 		{
@@ -29,43 +33,69 @@ export const generated = {
 			"px": "10 px"
 		}
 	],
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Track — 26×16, voll gerundet; Farbe signalisiert On (Text-100) bzw. Off (Background-20)."
-		},
-		{
-			"nr": 2,
-			"text": "Thumb — weißer 12px-Kreis, wandert im On-Zustand nach rechts."
-		}
-	],
 	"tokens": [
 		{
 			"kategorie": "Farbe",
 			"items": [
 				{
 					"name": "--z-ds-color-background-20",
-					"wert": "#dfdfe1 · Track Off",
+					"hinweis": "Track Off",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · Track On",
+					"hinweis": "Track On",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-general-white-100",
-					"wert": "#ffffff · Thumb",
+					"hinweis": "Thumb",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"wert": "#005fcc · Fokus-Ring",
+					"hinweis": "Fokus-Ring",
 					"swatch": "#005fcc"
 				}
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"off",
+			"on",
+			"focus"
+		],
+		"elemente": [
+			{
+				"teil": "Track · Hintergrund",
+				"tokensProZustand": {
+					"off": "--z-ds-color-background-20",
+					"on": "--z-ds-color-text-100",
+					"focus": "--z-ds-color-background-20"
+				},
+				"hinweis": "Track-Farbe signalisiert den Zustand; Focus zeigt zusätzlich einen 2px-Outline."
+			},
+			{
+				"teil": "Thumb",
+				"tokensProZustand": {
+					"off": "--z-ds-color-general-white-100",
+					"on": "--z-ds-color-general-white-100",
+					"focus": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Weißer Kreis; wandert im On-Zustand nach rechts (Farbe konstant)."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"off": "none",
+					"on": "none",
+					"focus": "--z-ds-color-focus-100"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Outline (kein Fill)."
+			}
+		]
+	},
 	"varianten": [
 		{
 			"prop": "Zustand",
@@ -96,70 +126,6 @@ export const generated = {
 		},
 		{
 			"label": "disabled"
-		}
-	],
-	"a11y": [
-		{
-			"label": "Rolle",
-			"wert": "Als <button role=switch> mit aria-checked umsetzen.",
-			"status": "warn"
-		},
-		{
-			"label": "Tastatur",
-			"wert": "Leertaste/Enter schaltet um.",
-			"status": "pass"
-		},
-		{
-			"label": "Fokus",
-			"wert": "Sichtbarer Fokus-Ring in Focus-100.",
-			"status": "pass"
-		},
-		{
-			"label": "Zustand",
-			"wert": "On/Off nicht allein über Farbe — aria-checked + ggf. Text.",
-			"status": "warn"
-		},
-		{
-			"label": "Plattform",
-			"wert": "iOS nutzt das native Switch-Control (nicht diese Web-Variante).",
-			"status": "todo"
-		}
-	],
-	"tastatur": [
-		{
-			"taste": "Tab",
-			"aktion": "Setzt den Fokus auf den Umschalter."
-		},
-		{
-			"taste": "Leertaste / Enter",
-			"aktion": "Schaltet zwischen On und Off um."
-		}
-	],
-	"doDont": {
-		"do": [
-			"Für Einstellungen, die sofort greifen (kein Speichern nötig).",
-			"Mit klarem Label, das den Ein-Zustand beschreibt."
-		],
-		"dont": [
-			"Nicht in Formularen, die erst per Absenden gespeichert werden — dafür Checkbox.",
-			"Nicht ohne Label allein stehen lassen."
-		]
-	},
-	"verwendung": {
-		"nutzen": [
-			"Sofort wirksame Ein/Aus-Einstellungen (Dark Mode, Benachrichtigungen).",
-			"Binäre Zustände mit unmittelbarer Wirkung."
-		],
-		"nichtNutzen": [
-			"Mehrfachauswahl oder Zustimmung im Formular — dafür Checkbox.",
-			"Mehr als zwei Zustände — dafür Segmented Control/Radio."
-		]
-	},
-	"wording": [
-		{
-			"schlecht": "Modus",
-			"gut": "Dunkles Design",
-			"hinweis": "Das Label beschreibt, was eingeschaltet wird — nicht nur die Kategorie."
 		}
 	]
 } satisfies Partial<ComponentSpec>;

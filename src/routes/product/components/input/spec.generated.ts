@@ -5,48 +5,44 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Input",
-	"status": "ready_for_dev",
 	"kategorie": "Formulare",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=477-3021&m=dev",
 	"aktualisiertAm": "2026-07-03",
-	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
-	"verwandt": [
-		"checkbox",
-		"stepper"
-	],
+	"dokumentiertAm": "2026-07-03",
 	"masse": {
-		"hoehe": "40",
-		"breite": "292",
-		"padding": "0 · 12 horizontal",
+		"hoehe": {
+			"px": "40",
+			"herkunft": "abgeleitet"
+		},
+		"breite": {
+			"px": "292",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "0 · 12 horizontal",
+			"token": "--z-ds-space-s",
+			"herkunft": "gemessen"
+		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
 		{
 			"label": "Icon ↔ Text ↔ Chevron",
 			"px": "8 px",
-			"token": "--z-ds-space-xs"
+			"token": "--z-ds-space-xs",
+			"art": "gap",
+			"selector": ".z-input"
 		},
 		{
 			"label": "Innenabstand links/rechts",
 			"px": "12 px",
-			"token": "--z-ds-space-s"
-		}
-	],
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Container — 40 hoch, Rahmen 1px, Radius 4; Rahmenfarbe signalisiert den Zustand."
-		},
-		{
-			"nr": 2,
-			"text": "Text/Platzhalter — Tablet Gothic Regular 16; Platzhalter Text-55, gefüllt Text-100."
-		},
-		{
-			"nr": 3,
-			"text": "Slots — optionales Icon links, Dropdown-Chevron oder Clear-Button rechts."
+			"token": "--z-ds-space-s",
+			"art": "padding",
+			"richtung": "horizontal"
 		}
 	],
 	"tokens": [
@@ -55,27 +51,27 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-border-100",
-					"wert": "#cccccf · Rahmen (Default/Filled/Disabled)",
+					"hinweis": "Rahmen (Default/Filled/Disabled)",
 					"swatch": "#cccccf"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"wert": "#69696c · Platzhalter, Rahmen aktiv",
+					"hinweis": "Platzhalter, Rahmen aktiv",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-text-100",
-					"wert": "#252525 · gefüllter Text",
+					"hinweis": "gefüllter Text",
 					"swatch": "#252525"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"wert": "#999999 · Disabled",
+					"hinweis": "Disabled",
 					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-error-70",
-					"wert": "#bf4040 · Rahmen Error",
+					"hinweis": "Rahmen Error",
 					"swatch": "#bf4040"
 				}
 			]
@@ -85,11 +81,11 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-space-s",
-					"wert": "12px · Innenabstand"
+					"hinweis": "12px · Innenabstand"
 				},
 				{
 					"name": "--z-ds-space-xs",
-					"wert": "8px · Gap zu Icon/Chevron"
+					"hinweis": "8px · Gap zu Icon/Chevron"
 				}
 			]
 		},
@@ -98,7 +94,7 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"wert": "4px"
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -107,37 +103,55 @@ export const generated = {
 			"items": [
 				{
 					"name": "Label/Regular/16px",
-					"wert": "Tablet Gothic Regular 16/1"
+					"hinweis": "Tablet Gothic Regular 16/1"
 				}
 			]
 		}
 	],
-	"varianten": [
-		{
-			"prop": "Zustand",
-			"werte": [
-				{
-					"label": "Default",
-					"default": true
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"active",
+			"filled",
+			"error",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Container · Rahmen",
+				"tokensProZustand": {
+					"default": "--z-ds-color-border-100",
+					"active": "--z-ds-color-text-55",
+					"filled": "--z-ds-color-border-100",
+					"error": "--z-ds-color-error-70",
+					"disabled": "--z-ds-color-border-100"
 				},
-				{
-					"label": "Active",
-					"cssClass": "z-input--active"
-				},
-				{
-					"label": "Filled",
-					"cssClass": "z-input--filled"
-				},
-				{
-					"label": "Error",
-					"cssClass": "z-input--error"
-				},
-				{
-					"label": "Disabled",
-					"cssClass": "z-input--disabled"
+				"hinweis": "Active greift auch über :focus-within (Rahmen in Text-55)."
+			},
+			{
+				"teil": "Text (Eingabe)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"active": "--z-ds-color-text-100",
+					"filled": "--z-ds-color-text-100",
+					"error": "--z-ds-color-text-100",
+					"disabled": "--z-ds-color-text-40"
 				}
-			]
-		},
+			},
+			{
+				"teil": "Platzhalter",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55",
+					"active": "--z-ds-color-text-55",
+					"filled": "--z-ds-color-text-100",
+					"error": "--z-ds-color-text-55",
+					"disabled": "--z-ds-color-text-40"
+				},
+				"hinweis": "Im Filled-Zustand rückt der Platzhalter-/Textwert auf Text-100."
+			}
+		]
+	},
+	"varianten": [
 		{
 			"prop": "Extras",
 			"werte": [
@@ -175,91 +189,6 @@ export const generated = {
 		},
 		{
 			"label": "hover"
-		}
-	],
-	"a11y": [
-		{
-			"label": "Label",
-			"wert": "Immer ein sichtbares <label> mit for/id — der Platzhalter ist KEIN Label.",
-			"status": "warn"
-		},
-		{
-			"label": "Fehler",
-			"wert": "Error-Text via aria-describedby verknüpfen; Farbe allein reicht nicht.",
-			"status": "warn"
-		},
-		{
-			"label": "Fokus",
-			"wert": "Sichtbarer Fokus-Rahmen (Active) — :focus-visible zusätzlich absichern.",
-			"status": "warn"
-		},
-		{
-			"label": "Disabled",
-			"wert": "Echtes disabled-Attribut setzen, nicht nur optisch dimmen.",
-			"status": "warn"
-		},
-		{
-			"label": "Kontrast Platzhalter",
-			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
-			"status": "pass"
-		}
-	],
-	"tastatur": [
-		{
-			"taste": "Tab",
-			"aktion": "Setzt den Fokus ins Feld bzw. zum nächsten Bedienelement."
-		},
-		{
-			"taste": "Text",
-			"aktion": "Zeichen werden direkt ins Feld eingegeben."
-		},
-		{
-			"taste": "Esc",
-			"aktion": "Leert das Feld — nur wenn es als clearable markiert ist."
-		}
-	],
-	"doDont": {
-		"do": [
-			"Immer ein sichtbares Label über dem Feld.",
-			"Fehler mit Text erklären, nicht nur mit rotem Rahmen."
-		],
-		"dont": [
-			"Den Platzhalter als Label missbrauchen (verschwindet beim Tippen).",
-			"Disabled-Felder ohne Erklärung, warum sie gesperrt sind."
-		]
-	},
-	"doDontBeispiele": [
-		{
-			"gut": {
-				"html": "<div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start\"><label for=\"ddv-mail-good\" style=\"font-size:14px;color:var(--z-ds-color-text-100)\">E-Mail</label><div class=\"z-input z-input--filled\"><input id=\"ddv-mail-good\" class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" /></div></div>",
-				"text": "Sichtbares Label über dem Feld — bleibt beim Tippen stehen und ist mit for/id verknüpft."
-			},
-			"schlecht": {
-				"html": "<div class=\"z-input\"><input class=\"z-input__field\" type=\"text\" placeholder=\"E-Mail\" aria-label=\"E-Mail\" /></div>",
-				"text": "Platzhalter als Label — verschwindet bei der Eingabe, das Feld verliert seine Beschriftung."
-			}
-		}
-	],
-	"verwendung": {
-		"nutzen": [
-			"Für kurze, einzeilige Freitext-Eingaben (Name, Suche, E-Mail).",
-			"Mit Dropdown-Chevron als Auswahl-/Combobox-Trigger."
-		],
-		"nichtNutzen": [
-			"Für mehrzeiligen Text — dafür ein Textarea.",
-			"Für eine feste Auswahl weniger Optionen — dafür Radio/Select."
-		]
-	},
-	"wording": [
-		{
-			"schlecht": "E-Mail (als Platzhalter)",
-			"gut": "Label »E-Mail« + Platzhalter »name@beispiel.de«",
-			"hinweis": "Der Platzhalter zeigt ein Beispiel, das Label benennt das Feld."
-		},
-		{
-			"schlecht": "Ungültig",
-			"gut": "Bitte eine gültige E-Mail-Adresse eingeben.",
-			"hinweis": "Fehlermeldungen sagen konkret, was zu tun ist."
 		}
 	]
 } satisfies Partial<ComponentSpec>;

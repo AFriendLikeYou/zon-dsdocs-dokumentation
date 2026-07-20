@@ -1,0 +1,94 @@
+{
+	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — 112 breit, Rahmen 1px, Radius 4, Innenabstand 6."
+		},
+		{
+			"nr": 2,
+			"text": "Wert — Tablet Gothic Regular 14, zentriert; Text-40 im Disabled-Zustand."
+		},
+		{
+			"nr": 3,
+			"text": "Buttons − / + — Hover legt Background-10 an, Focus einen 2px-Fokus in Focus-100."
+		}
+	],
+	"a11y": [
+		{
+			"label": "Buttons",
+			"wert": "− und + als echte <button> mit aria-label (Weniger/Mehr).",
+			"status": "warn"
+		},
+		{
+			"label": "Wert",
+			"wert": "Wert als Live-Region ausgeben (aria-live) oder role=spinbutton mit aria-valuenow.",
+			"status": "warn"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Buttons per Enter/Leertaste; optional Pfeiltasten hoch/runter.",
+			"status": "warn"
+		},
+		{
+			"label": "Fokus",
+			"wert": "Sichtbarer 2px-Fokus in Focus-100.",
+			"status": "pass"
+		},
+		{
+			"label": "Grenzen",
+			"wert": "Am Min/Max den jeweiligen Button deaktivieren (disabled).",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Wechselt den Fokus zwischen − und +."
+		},
+		{
+			"taste": "Enter / Leertaste",
+			"aktion": "Löst den fokussierten Button aus (erhöht bzw. verringert)."
+		},
+		{
+			"taste": "↑ / ↓",
+			"aktion": "Erhöht bzw. verringert den Wert (optional, bei role=spinbutton)."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Für kleine, schrittweise Anpassungen (Menge, Anzahl).",
+			"Am Minimum/Maximum den passenden Button deaktivieren."
+		],
+		"dont": [
+			"Nicht für große Wertebereiche — dafür Eingabefeld oder Slider.",
+			"Direkte Eingabe nicht verhindern, wenn große Sprünge nötig sind."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Mengen/Anzahl in kleinen Schritten ändern (Warenkorb, Portionen).",
+			"Werte mit klaren, kleinen Schrittweiten."
+		],
+		"nichtNutzen": [
+			"Große oder freie Zahlenbereiche — dafür ein Eingabefeld.",
+			"Kontinuierliche Bereiche — dafür ein Slider."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "+ / −",
+			"gut": "aria-label »Mehr« / »Weniger«",
+			"hinweis": "Die Icons brauchen für Screenreader ein sprechendes Label."
+		}
+	],
+	"version": "Figma-Node 4153:1351",
+	"verwandt": ["input"],
+	"variantInfo": {
+		"Default": "Ruhezustand.",
+		"Hover": "Mauszeiger über einem Button — Background-10.",
+		"Focus": "Tastaturfokus auf einem Button — 2px Focus-100.",
+		"Disabled": "Gesperrt — Wert und Icons in Text-40."
+	}
+}

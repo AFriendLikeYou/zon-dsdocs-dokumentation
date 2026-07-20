@@ -52,6 +52,12 @@ Seiten sind mdsvex-Routen (`+page.svx`) unter `src/routes/brand/…` oder `src/r
    `import.meta.glob`). Für Titel/Beschreibung/Badge/Reihenfolge einen Eintrag in der `META`-
    Map in `src/routes/product/foundations/+page.svx` ergänzen; ohne Eintrag greift ein
    Fallback (Title-Case des Slugs, ans Ende sortiert).
+4. **Bilder (16:9-Konvention)** — Content-Bilder in Prosa (`![alt](/media/…)`) werden per
+   Default im Verhältnis **16:9** gezeigt (`object-fit: cover`, Regel `main p > img` in
+   `static/global.css`) — passend für Fotos, Screenshots und Beispiel-Szenen. Soll ein Bild
+   im **natürlichen Verhältnis** ohne Beschnitt stehen (Logos/Wortmarken, Icon-Anatomie-
+   Diagramme, Hochformat-Poster), es als HTML-`<img class="img-natural" src="…" alt="…" />`
+   statt Markdown schreiben. Die Abweichung ist so im Markup sichtbar.
 
 ## 4. Eine dokumentierte Komponente hinzufügen (Exporter)
 
@@ -63,27 +69,52 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 2. **Exporter laufen lassen** —
    `node tooling/zeit-de-exporter/export.mjs <model.json>`. Erzeugt unter
    `src/routes/product/components/<kebab>/`: `+page.svx` + `spec.generated.ts` (beide **nie**
-   von Hand editieren) + `content.ts` (redaktioneller Stub, **hier** editieren) und legt
+   von Hand editieren) + `content.json` (redaktioneller Stub, **hier** editieren) und legt
    `model.json` co-locatet daneben ab. Re-Export später:
-   `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`.
-3. **Verlinken** — Menüeintrag in `src/lib/data/navigation.ts` ergänzen (`check-nav` warnt sonst).
+   `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`
+   (oder `npm run export:all` für alle Komponenten auf einmal).
+3. **Nav — kein Handeintrag.** Die Components-Sektion der Nav ist **katalog-getrieben**
+   (ADR-025): ein neues `model.json` erscheint automatisch. Nur optional Reihenfolge/Badge
+   in der Override-Map in `src/lib/data/catalog.ts`; geplante Stubs in `PLANNED_COMPONENTS`
+   (`src/lib/data/navigation.ts`).
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 
-- **Nur** `content.ts` im jeweiligen Component-Ordner editieren (`zweck`, `status`, `callouts`,
+- **Nur** `content.json` im jeweiligen Component-Ordner editieren (`zweck`, `status`, `callouts`,
   `a11y`, `doDont`, `verwendung`, …). Diese Datei überschreibt die generierten Defaults und
   wird beim Re-Export **nie** überschrieben.
 - **Nie** `spec.generated.ts` oder `+page.svx` von Hand ändern — die erzeugt der Exporter neu.
 
 ---
 
+## Prop-Namenskonvention: `title` / `label` / `caption`
+
+Bei Komponenten-Props für Beschriftungstexte gilt eine feste Rollen-Trennung:
+
+- **`title`** — Überschrift einer _Sache_ (Karte, Sektion, Hero, Beispiel-Bühne).
+  Beispiele: `Card`, `Banner`, `EmptyState`, `ExampleStage`, `ImageGallery`.
+- **`label`** — Beschriftung eines _Bedienelements_ (Button, Control, Tab, Feld).
+  Beispiele: `CopyButton`, `DownloadButton`, `SegmentedControl`, `Switch`,
+  `Tabs` (je Tab), `Playground`-Controls.
+- **`caption`** — erläuternde _Unterschrift_ zu Medien/Tabellen.
+  Beispiele: `Lightbox`, `ExampleStage` (unter dem Beispiel), `ContrastMatrix`
+  (sr-only Tabellen-`<caption>`).
+
+Sonderfall **`CodeBlock.title`**: der Kopfzeilen-Text bleibt bewusst `title` — er
+ist die Überschrift der Code-Box (konsistent mit `Card`/`Banner`), kein
+Control-Label. **Zeilen-/Item-Bezeichner in Spec-Tabellen** (`MeasureTable`,
+`StateList`, `SpecRow`, `A11yList`, `SpecimenGrid`, `TypeSpecimen`) heißen
+einheitlich `label` — es ist der Bezeichner einer Tabellen-/Listenzeile.
+
+---
+
 ## Vor dem Pushen
 
 ```bash
-npm run check   # svelte-check 0/0 + Drift-Checks (Nav, Tokens, Assets — nur Warnungen)
+npm run check   # svelte-check 0/0 + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync — nur Warnungen)
 npm run build   # muss mit Exit 0 durchlaufen
 ```
 
 Die Drift-Checks sind **Warnungen, keine Blocker** („Never Block, Always Suggest"). Für CI
 lassen sie sich scharf schalten: `node tooling/check-nav.mjs --strict` (analog `check-tokens`,
-`check-assets`) → Exit 1 bei Drift.
+`check-assets`, `check-component-drift`, `check-zds-sync`) → Exit 1 bei Drift.

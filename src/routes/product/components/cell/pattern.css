@@ -1,236 +1,236 @@
 /* z-cell — Teaser-Zelle (Cell), originalgetreu aus Figma ❖ ZDS portiert
-   (node 33137:39890). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+   (node 4388:32445). Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
 
    Ein Markup, viele Typen: die gemeinsame Struktur (Media · Kicker · Titel ·
    Byline · Meta) wird pro Typ-Modifier ein-/ausgeblendet und umgelegt — so wie
    eine echte CSS-Komponente es täte. Media/Avatar sind hier neutrale Flächen
    (im Produkt: Bild bzw. Podcast-Cover). */
 .z-cell {
-  background-color: var(--z-ds-color-background-0);
-  color: var(--z-ds-color-text-100);
-  display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-m);
-  font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
-  width: 343px;
-  max-width: 100%;
+	background-color: var(--z-ds-color-background-0);
+	color: var(--z-ds-color-text-100);
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-m);
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	width: 343px;
+	max-width: 100%;
 }
 
 /* Flächen (Bild / Cover / Avatar) — je Typ eingeblendet. */
 .z-cell__media {
-  display: none;
-  flex: 0 0 auto;
-  width: 84px;
-  height: 84px;
-  border-radius: var(--z-ds-border-radius-4);
-  /* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
+	display: none;
+	flex: 0 0 auto;
+	width: 84px;
+	height: 84px;
+	border-radius: var(--z-ds-border-radius-4);
+	/* Doku-Platzhalter: im Produkt steht hier ein <img> bzw. Podcast-Cover.
      Getönte Fläche + feiner Rahmen markieren den Bild-Slot; Farbe = z-ds-Token,
      adaptiert also mit dem Light/Dark-Schalter. */
-  background-color: var(--z-ds-color-background-20);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
+	background-color: var(--z-ds-color-background-10);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
 }
 
 /* Bild-Typen: gekreuzte Diagonalen = universelles „hier steht ein Bild". */
 .z-cell--artikel .z-cell__media,
 .z-cell--pinned .z-cell__media,
 .z-cell--anzeige .z-cell__media {
-  --slash: color-mix(in srgb, var(--z-ds-color-text-100) 13%, transparent);
-  background-image:
-    linear-gradient(
-      45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    ),
-    linear-gradient(
-      -45deg,
-      transparent calc(50% - 0.5px),
-      var(--slash) calc(50% - 0.5px),
-      var(--slash) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px)
-    );
+	--slash: color-mix(in srgb, var(--z-ds-color-text-100) 13%, transparent);
+	background-image:
+		linear-gradient(
+			45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		),
+		linear-gradient(
+			-45deg,
+			transparent calc(50% - 0.5px),
+			var(--slash) calc(50% - 0.5px),
+			var(--slash) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
 }
 
 .z-cell__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--z-ds-space-xs);
-  min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-xs);
+	min-width: 0;
 }
 
 .z-cell__kicker {
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.2;
-  color: var(--z-ds-color-accent-100);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.2;
+	color: var(--z-ds-color-accent-100);
 }
 
 .z-cell__title {
-  margin: 0;
-  font-size: var(--z-ds-fontsize-20);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--z-ds-color-text-100);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--z-ds-color-text-100);
 }
 
 .z-cell__byline {
-  display: none;
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	display: none;
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 
 .z-cell__meta {
-  display: none;
-  gap: var(--z-ds-space-s);
-  margin: 0;
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1.5;
-  color: var(--z-ds-color-text-55);
+	display: none;
+	gap: var(--z-ds-space-s);
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
 }
 
 /* Typ: Article — Spitzmarke + Titel + Meta (Zeitstempel · Autor). */
 .z-cell--article {
-  gap: var(--z-ds-space-s);
+	gap: var(--z-ds-space-s);
 }
 .z-cell--article .z-cell__meta {
-  display: flex;
+	display: flex;
 }
 
 /* Typ: Headline — nur Titel, oben mit feiner Trennlinie. */
 .z-cell--headline {
-  border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-m);
 }
 .z-cell--headline .z-cell__kicker,
 .z-cell--headline .z-cell__byline,
 .z-cell--headline .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Typ: Artikel — Bild links, Spitzmarke + Titel + Byline rechts. */
 .z-cell--artikel {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: flex-start;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: flex-start;
 }
 .z-cell--artikel .z-cell__media {
-  display: block;
+	display: block;
 }
 .z-cell--artikel .z-cell__body {
-  flex: 1 1 0;
+	flex: 1 1 0;
 }
 .z-cell--artikel .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Author — runder Avatar, Name + Funktion, oben mit Trennlinie. */
 .z-cell--author {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  border-top: 1px solid var(--z-ds-color-border-70);
-  padding-top: var(--z-ds-space-m);
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-m);
 }
 .z-cell--author .z-cell__media {
-  display: block;
-  border-radius: 999px;
+	display: block;
+	border-radius: 999px;
 }
 .z-cell--author .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--author .z-cell__kicker,
 .z-cell--author .z-cell__meta {
-  display: none;
+	display: none;
 }
 .z-cell--author .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Podcast Series — farbiges Cover, Titel + Subline. */
 .z-cell--podcast-series {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 .z-cell--podcast-series .z-cell__media {
-  display: block;
-  background-color: #8e8cf7;
+	display: block;
+	background-color: #8e8cf7;
 }
 .z-cell--podcast-series .z-cell__body {
-  flex: 1 1 0;
+	flex: 1 1 0;
 }
 .z-cell--podcast-series .z-cell__kicker,
 .z-cell--podcast-series .z-cell__meta {
-  display: none;
+	display: none;
 }
 .z-cell--podcast-series .z-cell__byline {
-  display: block;
+	display: block;
 }
 
 /* Typ: Anzeige — getönte Fläche, Label in Versalien statt Spitzmarke. */
 .z-cell--anzeige {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
-  background-color: var(--z-ds-color-background-10);
-  padding: var(--z-ds-space-m);
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
+	background-color: var(--z-ds-color-background-10);
+	padding: var(--z-ds-space-m);
 }
 .z-cell--anzeige .z-cell__media {
-  display: block;
-  width: 108px;
-  height: 72px;
+	display: block;
+	width: 108px;
+	height: 72px;
 }
 .z-cell--anzeige .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--anzeige .z-cell__kicker {
-  font-size: var(--z-ds-fontsize-14);
-  line-height: 1;
-  letter-spacing: 0.24px;
-  text-transform: uppercase;
-  color: var(--z-ds-color-text-55);
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1;
+	letter-spacing: 0.24px;
+	text-transform: uppercase;
+	color: var(--z-ds-color-text-55);
 }
 .z-cell--anzeige .z-cell__title {
-  font-size: var(--z-ds-fontsize-16);
+	font-size: var(--z-ds-fontsize-16);
 }
 .z-cell--anzeige .z-cell__byline,
 .z-cell--anzeige .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Typ: Pinned — kleines Bild links, kompakter Titel. */
 .z-cell--pinned {
-  flex-direction: row;
-  gap: var(--z-ds-space-m);
-  align-items: center;
+	flex-direction: row;
+	gap: var(--z-ds-space-m);
+	align-items: center;
 }
 .z-cell--pinned .z-cell__media {
-  display: block;
-  width: 108px;
-  height: 72px;
+	display: block;
+	width: 108px;
+	height: 72px;
 }
 .z-cell--pinned .z-cell__body {
-  flex: 1 1 0;
-  gap: var(--z-ds-space-xxxs);
+	flex: 1 1 0;
+	gap: var(--z-ds-space-xxxs);
 }
 .z-cell--pinned .z-cell__title {
-  font-size: var(--z-ds-fontsize-16);
+	font-size: var(--z-ds-fontsize-16);
 }
 .z-cell--pinned .z-cell__byline,
 .z-cell--pinned .z-cell__meta {
-  display: none;
+	display: none;
 }
 
 /* Größe: Small — kleinere Titel und Flächen. */
 .z-cell--small .z-cell__title {
-  font-size: var(--z-ds-fontsize-18);
+	font-size: var(--z-ds-fontsize-18);
 }
 .z-cell--small .z-cell__media {
-  width: 72px;
-  height: 72px;
+	width: 72px;
+	height: 72px;
 }

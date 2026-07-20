@@ -1,0 +1,39 @@
+---
+title: Farbe
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { ColorRoles } from '$components/ui/color-roles';
+	import { DoDontList } from '$components/ui/specsheet';
+	// EINE Quelle für Seite und MCP-Endpoint (foundations-Tool): $data/color-roles.
+	import { COLOR_ROLE_GROUPS as groups, COLOR_CONTRAST_PAIRS as pairs } from '$data/color-roles';
+
+	const doDont = {
+		do: [
+			'Immer über Rollen arbeiten (<code>--ds-text-muted</code>) — nie über rohe Farbwerte.',
+			'Neue UI zuerst gegen die Kontrast-Paare unten prüfen (AA ist Pflicht).'
+		],
+		dont: [
+			'Keine rohen <code>--z-ds-color-*</code> in Doku-UI-Komponenten (Ausnahme: originalgetreue Pattern-CSS und Specimen-Bühnen).',
+			'Fokus-Ringe nie entfernen oder umfärben — <code>--ds-focus-ring</code> ist systemweit.'
+		]
+	};
+</script>
+
+# Farbe
+
+Farben der Doku-UI sind **Rollen, keine Paletten**: Jede Rolle (`--ds-*`) beschreibt einen
+Einsatzzweck und ist auf ein Foundation-Token (`--z-ds-color-*`) gemappt — die Werte kommen
+zur Laufzeit aus dem Upstream-Paket und wechseln mit dem Theme-Schalter. Die Marken-Palette
+selbst lebt im [Brandhub](/brand/color), die rohen Foundation-Tokens in der
+[Token-Referenz](/product/foundations/tokens).
+
+<ColorRoles {groups} {pairs} />
+
+## Do & Don’t
+
+<DoDontList {doDont} />

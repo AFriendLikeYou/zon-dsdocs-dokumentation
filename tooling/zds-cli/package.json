@@ -1,0 +1,17 @@
+{
+	"name": "@zeit/zds-cli",
+	"version": "0.1.0",
+	"private": true,
+	"description": "CLI, um dokumentierte ZEIT-Designsystem-Komponenten per Copy-in (shadcn-Modell) ins eigene Projekt zu ziehen.",
+	"type": "module",
+	"bin": {
+		"zds": "./zds.mjs"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"files": [
+		"zds.mjs",
+		"README.md"
+	]
+}

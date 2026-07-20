@@ -1,25 +1,33 @@
 <!--
   DownloadButton.svelte — lädt eine Datei herunter, mit optionaler Toast-Rückmeldung.
   Twin zu CopyButton; konsolidiert das doppelte Inline-Download-Markup (IconComponent,
-  BrandAssetsGrid). Entweder href/filename ODER eigene onDownload-Logik (z. B. Blob).
+  BrandAssetsGrid). Entweder href/filename ODER eigene ondownload-Logik (z. B. Blob).
+  Der Button-Look kommt aus der gemeinsamen Basis IconActionButton.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { getToastState } from '$lib/toast-state.svelte';
+	import { getToastState } from '$stores/toast-state.svelte';
+	import { IconActionButton } from '$components/ui/icon-action-button';
+	import { DownloadIcon } from '$lib/icons';
 
 	type Props = {
 		/** Direkter Download-Link. */
 		href?: string;
+		/** Dateiname für den Download (bei href). */
 		filename?: string;
 		/** Eigene Download-Logik statt href (z. B. downloadIcon(icon)). */
-		onDownload?: () => void | Promise<void>;
+		ondownload?: () => void | Promise<void>;
+		/** Sichtbares Label; ohne Angabe = nur Download-Icon. */
 		label?: string;
+		/** A11y-Label (für icon-only verpflichtend). */
 		ariaLabel?: string;
+		/** Rückmeldung: 'none' oder 'toast'. */
 		feedback?: 'none' | 'toast';
 		toastTitle?: string;
 		toastMessage?: string;
 		/** Gerahmter Icon-Button-Look (wie Icon-/Asset-Grid). */
 		iconButton?: boolean;
+		/** Eigenes Trigger-Markup statt Standard-Icon/-Label. */
 		children?: Snippet;
 		class?: string;
 	};
@@ -27,7 +35,7 @@
 	let {
 		href,
 		filename,
-		onDownload,
+		ondownload,
 		label,
 		ariaLabel,
 		feedback = 'none',
@@ -41,8 +49,8 @@
 	const toast = feedback === 'toast' ? getToastState() : null;
 
 	async function handleDownload() {
-		if (onDownload) {
-			await onDownload();
+		if (ondownload) {
+			await ondownload();
 		} else if (href) {
 			const a = document.createElement('a');
 			a.href = href;
@@ -55,79 +63,27 @@
 	}
 </script>
 
-<button
-	type="button"
-	class="download-button {className}"
-	class:icon-button={iconButton}
-	aria-label={ariaLabel ?? label ?? 'Herunterladen'}
+<IconActionButton
+	{iconButton}
+	ariaLabel={ariaLabel ?? label ?? 'Herunterladen'}
 	onclick={handleDownload}
+	class="download-button {className}"
 >
 	{#if children}
 		{@render children()}
 	{:else if label}
 		<span>{label}</span>
 	{:else}
-		<svg
-			class="download-button__icon"
-			viewBox="0 0 18 18"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="1.5"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<path d="M9 2V12" /><path d="M5.5 8.5 9 12l3.5-3.5" /><path d="M2.75 9v6h12.5V9" />
-		</svg>
+		<DownloadIcon class="download-button__icon" />
 	{/if}
-</button>
+</IconActionButton>
 
 <style>
-	:where(.download-button) {
-		--download-icon-size: 16px;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--z-ds-space-xs);
-		font: inherit;
-		color: inherit;
-		background: none;
-		border: none;
-		padding: 0;
-		cursor: pointer;
-		transition: color var(--ds-dur) var(--ds-ease);
-	}
-	.download-button:active:not(:disabled) {
-		transform: scale(0.97);
-	}
-	.download-button:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-		border-radius: var(--ds-radius-sm);
-	}
-	.download-button__icon {
-		width: var(--download-icon-size);
-		height: var(--download-icon-size);
+	/* Icon liegt in einer Kind-Komponente unter dem (in IconActionButton gerenderten)
+	   Button → vollständig :global, sonst greift das Scoping nicht. */
+	:global(.download-button .download-button__icon) {
+		width: 16px;
+		height: 16px;
 		flex: none;
-	}
-	.download-button.icon-button {
-		padding: var(--z-ds-space-8);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		background: var(--ds-surface);
-		color: var(--ds-text);
-		transition:
-			background-color var(--ds-dur) var(--ds-ease),
-			transform var(--ds-dur) var(--ds-ease-out);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.download-button.icon-button:hover {
-			background: var(--ds-surface-raised);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.download-button {
-			transition: none;
-		}
 	}
 </style>

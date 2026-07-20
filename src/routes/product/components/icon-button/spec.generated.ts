@@ -5,149 +5,115 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Icon Button",
-	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
-	"zweck": "Löst eine Aktion ohne sichtbares Label aus — kompakt und ikonografisch. Da kein Text sichtbar ist, braucht jeder Icon Button ein aria-label, das die Aktion beschreibt.",
-	"verwandt": [
-		"button",
-		"text-button",
-		"button-group"
-	],
-	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=11-11508&m=dev",
-	"aktualisiertAm": "2026-06-28",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=3334-5440",
+	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-02",
 	"masse": {
-		"hoehe": "40",
-		"breite": "40",
-		"padding": "12",
-		"radius": "32"
-	},
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Container — quadratisch, voll abgerundet (border-radius 32 = Kreis), Icon zentriert"
+		"hoehe": {
+			"px": "40",
+			"herkunft": "abgeleitet"
 		},
-		{
-			"nr": 2,
-			"text": "Icon — 20×20, zentriert; KEIN sichtbares Label → aria-label Pflicht"
+		"breite": {
+			"px": "40",
+			"herkunft": "abgeleitet"
+		},
+		"radius": {
+			"px": "4",
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
-	],
+	},
 	"tokens": [
 		{
-			"kategorie": "Farbe · Primary",
+			"kategorie": "Farbe",
 			"items": [
 				{
-					"name": "--sds-color-background-brand-default",
-					"wert": "#2c2c2c",
-					"swatch": "#2c2c2c"
+					"name": "--z-ds-color-background-10",
+					"hinweis": "Fläche",
+					"swatch": "#eeeeee"
 				},
 				{
-					"name": "--sds-color-icon-brand-on-brand",
-					"wert": "#f5f5f5",
-					"swatch": "#f5f5f5"
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Icon (default)",
+					"swatch": "#252525"
 				},
 				{
-					"name": "--sds-color-background-brand-hover",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
+					"name": "--z-ds-color-text-70",
+					"hinweis": "Icon (hover)",
+					"swatch": "#444444"
+				},
+				{
+					"name": "--z-ds-color-text-40",
+					"hinweis": "Icon (disabled)",
+					"swatch": "#999999"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Neutral / Subtle",
+			"kategorie": "Radius",
 			"items": [
 				{
-					"name": "--sds-color-background-default-secondary",
-					"wert": "#f5f5f5",
-					"swatch": "#f5f5f5"
-				},
-				{
-					"name": "--sds-color-background-default-secondary-hover",
-					"wert": "#e6e6e6",
-					"swatch": "#e6e6e6"
-				},
-				{
-					"name": "--sds-color-border-default-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
-				},
-				{
-					"name": "--sds-color-icon-default-default",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
+					"name": "--z-ds-border-radius-4",
+					"hinweis": "4px"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Disabled",
+			"kategorie": "Farbe · Fokus",
 			"items": [
 				{
-					"name": "--sds-color-background-disabled-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
-				},
-				{
-					"name": "--sds-color-icon-disabled-on-disabled",
-					"wert": "#b3b3b3",
-					"swatch": "#b3b3b3"
-				}
-			]
-		},
-		{
-			"kategorie": "Größe & Form",
-			"items": [
-				{
-					"name": "--sds-typography-scale-07",
-					"wert": "40px · Box Medium"
-				},
-				{
-					"name": "--sds-typography-scale-06",
-					"wert": "32px · Radius (rund)"
-				},
-				{
-					"name": "--sds-size-space-300",
-					"wert": "12px · Padding Medium"
-				},
-				{
-					"name": "--sds-size-space-200",
-					"wert": "8px · Padding Small"
-				}
-			]
-		},
-		{
-			"kategorie": "Border",
-			"items": [
-				{
-					"name": "--sds-size-stroke-border",
-					"wert": "1px"
+					"name": "--z-ds-color-focus-100",
+					"hinweis": ":focus-visible-Outline (2px)",
+					"swatch": "#005fcc"
 				}
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus-visible",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche (Container)",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-10",
+					"hover": "--z-ds-color-background-10",
+					"disabled": "--z-ds-color-background-10"
+				},
+				"hinweis": "Die Fläche bleibt in allen Zuständen --z-ds-color-background-10; die Rückmeldung erfolgt über die Icon-Farbe."
+			},
+			{
+				"teil": "Icon",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-70",
+					"disabled": "--z-ds-color-text-40"
+				}
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus-visible": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (kein Fill)."
+			}
+		]
+	},
 	"varianten": [
 		{
-			"prop": "Variant",
+			"prop": "Variante",
 			"werte": [
 				{
-					"label": "Primary",
+					"label": "Default",
 					"default": true
-				},
-				{
-					"label": "Neutral"
-				},
-				{
-					"label": "Subtle"
-				}
-			]
-		},
-		{
-			"prop": "Größe",
-			"werte": [
-				{
-					"label": "Medium",
-					"default": true
-				},
-				{
-					"label": "Small"
 				}
 			]
 		}
@@ -174,47 +140,5 @@ export const generated = {
 		{
 			"label": "loading"
 		}
-	],
-	"a11y": [
-		{
-			"label": "Label",
-			"wert": "aria-label PFLICHT — kein sichtbarer Text",
-			"status": "warn"
-		},
-		{
-			"label": "Rolle",
-			"wert": "als natives <button> umsetzen (Figma: Frame)",
-			"status": "warn"
-		},
-		{
-			"label": "Tastatur",
-			"wert": "Enter / Leertaste nativ",
-			"status": "pass"
-		},
-		{
-			"label": "Fokus",
-			"wert": "kein Fokus-Stil im Design — :focus-visible ergänzen",
-			"status": "warn"
-		},
-		{
-			"label": "Kontrast",
-			"wert": "Icon #f5f5f5 auf #2c2c2c ≈ 13:1 · AAA",
-			"status": "pass"
-		},
-		{
-			"label": "Touch-Target",
-			"wert": "Medium 40px · Small 36px < 44px",
-			"status": "warn"
-		}
-	],
-	"doDont": {
-		"do": [
-			"Immer ein aria-label setzen, das die Aktion beschreibt (z. B. „Favorit hinzufügen“).",
-			"Nur für allgemein verständliche Icons verwenden."
-		],
-		"dont": [
-			"Icon Button nie ohne aria-label ausliefern.",
-			"Keine mehrdeutigen Icons ohne zusätzlichen Tooltip nutzen."
-		]
-	}
+	]
 } satisfies Partial<ComponentSpec>;

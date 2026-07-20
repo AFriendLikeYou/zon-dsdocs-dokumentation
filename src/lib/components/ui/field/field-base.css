@@ -1,0 +1,126 @@
+/*
+ * field-base.css — die EINE Feld-Optik-Quelle für Field.svelte und Select.svelte.
+ *
+ * Bewusst als geteilte (globale) Klasse statt im Component-Scope, weil sich zwei
+ * eigenständige Atome (Field + Select) exakt dieselbe Fläche/Kontur/Fokus-Optik
+ * teilen — Duplizieren würde Drift erzeugen (vgl. ADR-011: geteilte Basis global,
+ * dokumentiert). Konsolidiert die zuvor ≥8× je Datei gepflegte Feld-CSS aus zwei
+ * Systemen zu zwei Dichten:
+ *   · compact      → --ds-surface-inset · --ds-border-strong · radius-sm · 6px · font-sm
+ *   · comfortable  → --ds-surface       · --ds-border        · radius(8)  · 9/12px · font-base
+ *
+ * Die Kontur/Fläche trägt der WRAPPER (.field); das eigentliche Bedienelement
+ * (.field__control) ist randlos/transparent und erbt Font/Farbe. Der Fokus-Ring
+ * liegt am Wrapper (:focus-within), damit führende Icons/Kürzel innerhalb der
+ * Feldfläche mit umrandet werden.
+ */
+.field {
+	display: inline-flex;
+	align-items: center;
+	width: 100%;
+	box-sizing: border-box;
+	color: var(--ds-text);
+	background: var(--ds-surface);
+	border: 1px solid var(--ds-border);
+	border-radius: var(--ds-radius, 8px);
+	transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+}
+
+/* comfortable = Default (Brand-PropField-Optik, Figma 689:11510). */
+.field--comfortable {
+	gap: var(--z-ds-space-8);
+	padding: var(--z-ds-space-8) var(--z-ds-space-12);
+	font-size: var(--ds-text-base);
+}
+
+/* compact = dichte Editor-/Header-Felder. */
+.field--compact {
+	gap: var(--z-ds-space-6);
+	background: var(--ds-surface-inset);
+	border-color: var(--ds-border-strong);
+	border-radius: var(--ds-radius);
+	padding: var(--z-ds-space-6) var(--z-ds-space-12);
+	font-size: var(--ds-text-sm);
+}
+
+/* Mehrzeilig (textarea): oben ausrichten, nicht mittig. */
+.field--multiline {
+	align-items: stretch;
+}
+
+/* Mono-Variante: Code-Eingabe (Snippet-Editor) rendert das Bedienelement in der
+   Mono-Stack statt der UI-Schrift. */
+.field--mono .field__control {
+	font-family: var(--ds-font-mono);
+	font-size: var(--ds-text-sm);
+	line-height: 1.6;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.field:hover {
+		border-color: var(--ds-border-hover, var(--ds-border-strong, var(--ds-border)));
+	}
+}
+
+.field:focus-within {
+	outline: 2px solid var(--ds-focus-ring);
+	outline-offset: 1px;
+}
+
+.field--error {
+	border-color: var(--ds-negative, #b91109);
+}
+
+/* Das eigentliche Bedienelement: erbt alles, trägt keine eigene Optik. */
+.field__control {
+	flex: 1;
+	min-width: 0;
+	width: 100%;
+	font: inherit;
+	font-size: inherit;
+	color: inherit;
+	background: none;
+	border: none;
+	outline: none;
+	padding: 0;
+	margin: 0;
+}
+.field__control::placeholder {
+	color: var(--ds-text-faint, var(--ds-text-muted));
+}
+.field__control:is(textarea) {
+	resize: vertical;
+	line-height: 1.5;
+	/* Wächst mit dem Inhalt (aus PropField übernommen); rows/min-height als Startwert. */
+	field-sizing: content;
+}
+
+/* Führendes Icon (z. B. Suche) und rechtes Kürzel/Slot (z. B. ⌘K, Esc). */
+.field__icon,
+.field__shortcut {
+	display: inline-flex;
+	align-items: center;
+	flex: none;
+	color: var(--ds-text-muted);
+}
+
+/* Select: eigener Pfeil (Muster aus PropField), Bedienelement ohne System-UI. */
+.field--select .field__control:is(select) {
+	appearance: none;
+	cursor: pointer;
+}
+.field__arrow {
+	flex: none;
+	width: 0;
+	height: 0;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 5px solid var(--ds-text-muted);
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.field {
+		transition: none;
+	}
+}

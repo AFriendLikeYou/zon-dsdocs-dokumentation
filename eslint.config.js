@@ -31,6 +31,19 @@ export default ts.config(
 		}
 	},
 	{
+		// Figma-Plugin-Sandbox-Skripte: laufen NICHT in Node/Browser, sondern via
+		// use_figma in Figmas Sandbox (`figma` ist dort ein Global). Kein Runtime-Code
+		// dieser App — Globals bereitstellen statt 136 false-positive Fehler.
+		files: ['.agents/skills/**/scripts/**/*.js', 'tooling/zeit-de-exporter/figma-measure.js'],
+		languageOptions: {
+			globals: { figma: 'readonly', __html__: 'readonly' }
+		},
+		rules: {
+			'no-empty': 'off',
+			'@typescript-eslint/no-unused-vars': 'off'
+		}
+	},
+	{
 		files: ['**/*.svelte'],
 
 		languageOptions: {

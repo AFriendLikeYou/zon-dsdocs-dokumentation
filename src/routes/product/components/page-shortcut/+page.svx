@@ -1,7 +1,8 @@
 ---
 title: "Page Shortcut"
 status: ready_for_dev
-aktualisiert_am: 2026-07-02
+figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=16572-9182
+aktualisiert_am: 2026-07-11
 kategorie: Aktionen
 ---
 
@@ -9,39 +10,45 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, CodeBlock } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { content } from './content';
-	// Maschine (Figma-Export) + Mensch (content.ts) zusammenführen — content gewinnt.
+	import content from './content.json';
+	import type { ComponentSpec } from '$types/spec';
+	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-page-shortcut"},{"nr":2,"side":"bottom","x":50}];
 	const playgroundControls = [];
 	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>
   <span>Zur Startseite</span>
 </button>`;
+	const editorial = content as Partial<ComponentSpec>;
 	const patternCssCode = `/* z-page-shortcut — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .z-page-shortcut {
-  align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--z-ds-color-border-70);
-  border-radius: var(--z-ds-border-radius-4);
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: var(--z-ds-fontsize-16);
-  gap: var(--z-ds-space-xs);
-  line-height: 1rem;
-  margin: 0;
-  padding: var(--z-ds-space-xs);
-  transition: background-color 200ms ease-out, border-color 200ms ease-out;
-  white-space: nowrap;
+	align-items: center;
+	background-color: transparent;
+	border: 1px solid var(--z-ds-color-border-70);
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	display: inline-flex;
+	font-size: var(--z-ds-fontsize-16);
+	gap: var(--z-ds-space-xs);
+	line-height: 1rem;
+	margin: 0;
+	padding: var(--z-ds-space-xs);
+	transition:
+		background-color 200ms ease-out,
+		border-color 200ms ease-out;
+	white-space: nowrap;
 }
 .z-page-shortcut:hover,
 .z-page-shortcut:focus {
-  border-color: var(--z-ds-color-border-100);
+	border-color: var(--z-ds-color-border-100);
 }
 .z-page-shortcut:focus-visible {
-  outline: 2px solid var(--z-ds-color-focus-100);
+	outline: 2px solid var(--z-ds-color-focus-100);
 }
 `;
 </script>
@@ -54,40 +61,75 @@ kategorie: Aktionen
 
 <ComponentHero spec={spec} />
 
-<Tabs items={[
-		{ label: 'Design', component: designTab },
-		{ label: 'Develop', component: developTab }
+<Tabs tabs={[
+		{ id: 'designTab', label: 'Design', component: designTab },
+		{ id: 'developTab', label: 'Develop', component: developTab },
+		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
 {#snippet designTab()}
-	<div id="playground" class="section-anchor">
-		<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." />
-	</div>
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." align={spec.playground?.align} resizable={spec.playground?.resizable} />
+
+	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<button type="button" class="z-page-shortcut">
+  <span>Zur Startseite</span>
+</button>{/snippet}
+	</Anatomy>
+
+	<h2 id="zustaende" class="section-anchor">Zustände</h2>
+	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover","vorhanden":true},{"label":"focus","vorhanden":true},{"label":"aktiv"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
+
+	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+	<RelatedComponents slugs={spec.verwandt} />
 {/snippet}
 
 {#snippet developTab()}
 
 	<h2>Code</h2>
 	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
 {/snippet}
 
 <style>
 :global(.spec-canvas .z-page-shortcut),
 :global(.pg-preview .z-page-shortcut) {
   align-items: center;
-  background-color: transparent;
-  border: 1px solid var(--z-ds-color-border-70);
-  border-radius: var(--z-ds-border-radius-4);
-  color: var(--z-ds-color-text-100);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: var(--z-ds-fontsize-16);
-  gap: var(--z-ds-space-xs);
-  line-height: 1rem;
-  margin: 0;
-  padding: var(--z-ds-space-xs);
-  transition: background-color 200ms ease-out, border-color 200ms ease-out;
-  white-space: nowrap;
+	background-color: transparent;
+	border: 1px solid var(--z-ds-color-border-70);
+	border-radius: var(--z-ds-border-radius-4);
+	color: var(--z-ds-color-text-100);
+	cursor: pointer;
+	display: inline-flex;
+	font-size: var(--z-ds-fontsize-16);
+	gap: var(--z-ds-space-xs);
+	line-height: 1rem;
+	margin: 0;
+	padding: var(--z-ds-space-xs);
+	transition:
+		background-color 200ms ease-out,
+		border-color 200ms ease-out;
+	white-space: nowrap;
 }
 :global(.spec-canvas .z-page-shortcut:hover),
 :global(.pg-preview .z-page-shortcut:hover),

@@ -20,6 +20,7 @@ title: Farbe
 
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-100"
 		borderColor="--z-ds-color-border-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
@@ -27,6 +28,7 @@ title: Farbe
 		description="Pure Black"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-80"
 		borderColor="--z-ds-color-border-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
@@ -34,6 +36,7 @@ title: Farbe
 		description="80% Black"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-60"
 		borderColor="--z-ds-color-border-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
@@ -41,6 +44,7 @@ title: Farbe
 		description="60% Black"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-40"
 		borderColor="--z-ds-color-border-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
@@ -53,24 +57,28 @@ title: Farbe
 
 <Grid auto columns={4} justify="start"  rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-white-100"
 		borderColor="--z-ds-color-border-100"
 		description="Pure White"
 		title="100"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-white-80"
 		borderColor="--z-ds-color-border-100"
 		description="80% White"
 		title="80"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-white-60"
 		borderColor="--z-ds-color-border-100"
 		description="60% White"
 		title="60"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-general-white-40"
 		borderColor="--z-ds-color-border-100"
 		description="60% White"
@@ -82,18 +90,21 @@ title: Farbe
 <h2>Hintergrundfarben</h2>
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-background-0"
 		borderColor="--z-ds-color-border-100"
 		title="Background / 0"
 		description="Primary"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-background-10"
 		borderColor="--z-ds-color-border-100"
 		title="Background / 10"
 		description="Secondary, Active States"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-background-20"
 		borderColor="--z-ds-color-border-100"
 		title="Background / 20"
@@ -105,11 +116,13 @@ title: Farbe
 <h2>Border</h2>
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-border-100"
 		title="Border / 100"
 		description="Primary Dividers"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-border-70"
 		title="Border / 70"
 		description="Secondary Dividers"
@@ -145,12 +158,14 @@ title: Farbe
 <h2>Akzentfarben</h2>
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-accent-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
 		title="Accent / 100"
 		description="Z+ Highlight"
 	/>
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-accent-70"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
 		title="Accent / 70"
@@ -163,6 +178,7 @@ title: Farbe
 <h2>Andere (Error, Warning, Focus, Success)</h2>
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-error-70"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
 		title="Error / 70"
@@ -170,6 +186,7 @@ title: Farbe
 	/>
 
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-background-warning"
 		fontColorCustomProperty="--z-ds-color-general-black-0"
 		title="Warning / 0"
@@ -177,6 +194,7 @@ title: Farbe
 	/>
 
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-focus-100"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
 		title="Focus / 100"
@@ -184,6 +202,7 @@ title: Farbe
 	/>
 
 	<Color
+		showValue={true}
 		colorCustomProperty="--z-ds-color-background-success"
 		fontColorCustomProperty="--z-ds-color-general-white-0"
 		title="Success / 100"

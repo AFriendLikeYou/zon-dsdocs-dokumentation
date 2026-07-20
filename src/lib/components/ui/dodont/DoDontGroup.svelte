@@ -1,6 +1,13 @@
+<!--
+  DoDontGroup.svelte — flexbox-Gruppierung für DoDont-Karten (steuert die Karten-
+  Breite über den .dodont-Hook). Verwendet auf den Brand-/Foundations-Seiten und
+  als CMS-Container (cms-components.ts).
+-->
 <script lang="ts">
 	interface Props {
-		columns?: number; // Default to 2 columns
+		/** Karten pro Zeile (Default 2). */
+		columns?: number;
+		/** DoDont-Karten als Kinder. */
 		children?: import('svelte').Snippet;
 	}
 

@@ -5,89 +5,93 @@ import type { ComponentSpec } from '$types/spec';
 
 export const generated = {
 	"name": "Button",
-	"status": "ready_for_dev",
 	"kategorie": "Aktionen",
-	"zweck": "Löst eine Aktion aus. Primary für die Hauptaktion, Neutral und Subtle für nachrangige Aktionen. Verfügbar in den Größen Medium und Small, mit optionalen Icon-Slots (Start/Ende).",
-	"verwandt": [
-		"text-button",
-		"icon-button",
-		"button-group"
-	],
-	"figma": "https://www.figma.com/design/zBxcZHwdQCkPGRHHYchsQZ/Simple-Design-System?node-id=4185-3778&m=dev",
-	"aktualisiertAm": "2026-06-27",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=215-16&focus-id=298-106",
+	"aktualisiertAm": "2026-07-07",
+	"dokumentiertAm": "2026-07-02",
 	"masse": {
-		"hoehe": "40",
-		"padding": "12",
-		"radius": "8"
-	},
-	"callouts": [
-		{
-			"nr": 1,
-			"text": "Container — Auto-Layout, gap --sds-size-space-200 (8px), Inhalt zentriert"
+		"hoehe": {
+			"px": "40",
+			"herkunft": "abgeleitet"
 		},
-		{
-			"nr": 2,
-			"text": "Label — Inter Regular 16, optionale Icon-Slots (Star/X) links und rechts"
+		"padding": {
+			"px": "10 · 16",
+			"herkunft": "gemessen"
+		},
+		"radius": {
+			"px": "4",
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "gemessen"
 		}
-	],
+	},
 	"tokens": [
+		{
+			"kategorie": "Farbe · Default",
+			"items": [
+				{
+					"name": "--z-ds-color-background-10",
+					"hinweis": "Fläche Default",
+					"swatch": "#eeeeee"
+				},
+				{
+					"name": "--z-ds-color-background-20",
+					"hinweis": "Fläche Hover/Focus",
+					"swatch": "#dfdfe1"
+				},
+				{
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Label",
+					"swatch": "#252525"
+				}
+			]
+		},
 		{
 			"kategorie": "Farbe · Primary",
 			"items": [
 				{
-					"name": "--sds-color-background-brand-default",
-					"wert": "#2c2c2c",
-					"swatch": "#2c2c2c"
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Fläche Default",
+					"swatch": "#252525"
 				},
 				{
-					"name": "--sds-color-background-brand-hover",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
+					"name": "--z-ds-color-text-70",
+					"hinweis": "Fläche Hover/Focus",
+					"swatch": "#444444"
 				},
 				{
-					"name": "--sds-color-text-brand-on-brand",
-					"wert": "#f5f5f5",
-					"swatch": "#f5f5f5"
+					"name": "--z-ds-color-background-0",
+					"hinweis": "Label",
+					"swatch": "#ffffff"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Neutral / Subtle",
+			"kategorie": "Farbe · Z+",
 			"items": [
 				{
-					"name": "--sds-color-background-neutral-tertiary",
-					"wert": "#e3e3e3",
-					"swatch": "#e3e3e3"
+					"name": "--z-ds-color-accent-100",
+					"hinweis": "Fläche Default (ZEIT-Rot)",
+					"swatch": "#b91109"
 				},
 				{
-					"name": "--sds-color-border-neutral-secondary",
-					"wert": "#767676",
-					"swatch": "#767676"
+					"name": "--z-ds-color-accent-70",
+					"hinweis": "Fläche Hover/Focus",
+					"swatch": "#880d07"
 				},
 				{
-					"name": "--sds-color-text-default-default",
-					"wert": "#1e1e1e",
-					"swatch": "#1e1e1e"
-				},
-				{
-					"name": "--sds-color-border-default-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
+					"name": "--z-ds-color-general-white-100",
+					"hinweis": "Label",
+					"swatch": "#ffffff"
 				}
 			]
 		},
 		{
-			"kategorie": "Farbe · Disabled",
+			"kategorie": "Farbe · Fokus",
 			"items": [
 				{
-					"name": "--sds-color-background-disabled-default",
-					"wert": "#d9d9d9",
-					"swatch": "#d9d9d9"
-				},
-				{
-					"name": "--sds-color-text-disabled-on-disabled",
-					"wert": "#b3b3b3",
-					"swatch": "#b3b3b3"
+					"name": "--z-ds-color-focus-100",
+					"hinweis": ":focus-visible-Outline (2px)",
+					"swatch": "#005fcc"
 				}
 			]
 		},
@@ -95,12 +99,12 @@ export const generated = {
 			"kategorie": "Spacing",
 			"items": [
 				{
-					"name": "--sds-size-space-300",
-					"wert": "12px · Padding Medium"
+					"name": "--z-ds-space-10",
+					"hinweis": "10px · Innenabstand vertikal"
 				},
 				{
-					"name": "--sds-size-space-200",
-					"wert": "8px · Padding Small + Gap"
+					"name": "--z-ds-space-16",
+					"hinweis": "16px · Innenabstand horizontal"
 				}
 			]
 		},
@@ -108,17 +112,8 @@ export const generated = {
 			"kategorie": "Radius",
 			"items": [
 				{
-					"name": "--sds-size-radius-200",
-					"wert": "8px"
-				}
-			]
-		},
-		{
-			"kategorie": "Border",
-			"items": [
-				{
-					"name": "--sds-size-stroke-border",
-					"wert": "1px"
+					"name": "--z-ds-border-radius-4",
+					"hinweis": "4px"
 				}
 			]
 		},
@@ -126,42 +121,81 @@ export const generated = {
 			"kategorie": "Typografie",
 			"items": [
 				{
-					"name": "Single Line/Body Base",
-					"wert": "Inter 16/16 · 400"
+					"name": "--z-ds-fontsize-16",
+					"hinweis": "Tablet Gothic Bold 16 · fett"
 				}
 			]
 		}
 	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"focus-visible",
+			"disabled"
+		],
+		"elemente": [
+			{
+				"teil": "Default · Hintergrund",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-10",
+					"hover": "--z-ds-color-background-20"
+				},
+				"hinweis": "Disabled hat kein eigenes Farb-Token — die Basis-Fläche wird per opacity: 0.5 abgedunkelt."
+			},
+			{
+				"teil": "Default · Text",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-100"
+				},
+				"hinweis": "Textfarbe bleibt über die Zustände gleich; Disabled nur via opacity."
+			},
+			{
+				"teil": "Primary · Hintergrund",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-70"
+				},
+				"hinweis": "Disabled: keine eigene Regel, opacity: 0.5 auf der Basis."
+			},
+			{
+				"teil": "Primary · Text",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0",
+					"hover": "--z-ds-color-background-0"
+				}
+			},
+			{
+				"teil": "Z+ · Hintergrund",
+				"tokensProZustand": {
+					"default": "--z-ds-color-accent-100",
+					"hover": "--z-ds-color-accent-70"
+				},
+				"hinweis": "Disabled: keine eigene Regel, opacity: 0.5 auf der Basis."
+			},
+			{
+				"teil": "Z+ · Text",
+				"tokensProZustand": {
+					"default": "--z-ds-color-general-white-100",
+					"hover": "--z-ds-color-general-white-100"
+				}
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"focus-visible": "--z-ds-color-focus-100",
+					"disabled": "none"
+				},
+				"hinweis": ":focus-visible zeichnet einen 2px-Outline in --z-ds-color-focus-100 (kein Fill)."
+			}
+		]
+	},
 	"varianten": [
 		{
-			"prop": "Variant",
-			"werte": [
-				{
-					"label": "Primary",
-					"default": true
-				},
-				{
-					"label": "Neutral"
-				},
-				{
-					"label": "Subtle"
-				}
-			]
-		},
-		{
-			"prop": "Größe",
-			"werte": [
-				{
-					"label": "Medium",
-					"default": true
-				},
-				{
-					"label": "Small"
-				}
-			]
-		},
-		{
-			"prop": "z-button Variante",
+			"prop": "Variante",
 			"werte": [
 				{
 					"label": "Default",
@@ -178,7 +212,7 @@ export const generated = {
 			]
 		},
 		{
-			"prop": "z-button Layout",
+			"prop": "Layout",
 			"werte": [
 				{
 					"label": "Fullwidth",
@@ -209,79 +243,5 @@ export const generated = {
 		{
 			"label": "loading"
 		}
-	],
-	"a11y": [
-		{
-			"label": "Rolle",
-			"wert": "als natives <button> umsetzen (Figma: Frame)",
-			"status": "warn"
-		},
-		{
-			"label": "Tastatur",
-			"wert": "Enter / Leertaste nativ",
-			"status": "pass"
-		},
-		{
-			"label": "Fokus",
-			"wert": "kein Fokus-Stil im Design — :focus-visible ergänzen",
-			"status": "warn"
-		},
-		{
-			"label": "Kontrast",
-			"wert": "Primary #f5f5f5 auf #2c2c2c ≈ 13:1 · AAA",
-			"status": "pass"
-		},
-		{
-			"label": "Disabled",
-			"wert": "#b3b3b3 auf #d9d9d9 ≈ 1.5:1 — nur Disabled-State",
-			"status": "warn"
-		},
-		{
-			"label": "Touch-Target",
-			"wert": "Medium 40px · Small 32px < 44px",
-			"status": "warn"
-		}
-	],
-	"tastatur": [
-		{
-			"taste": "Tab",
-			"aktion": "Setzt den Fokus auf den Button."
-		},
-		{
-			"taste": "Enter / Leertaste",
-			"aktion": "Löst die Aktion aus (nativ)."
-		}
-	],
-	"doDont": {
-		"do": [
-			"Pro Aktionsgruppe nur eine Primary-Aktion.",
-			"Label als konkrete Verb-Aktion: „Speichern“ statt „OK“."
-		],
-		"dont": [
-			"Nicht mehrere Primary-Buttons nebeneinander.",
-			"Buttons nicht für reine Navigation verwenden — dafür Links."
-		]
-	},
-	"doDontBeispiele": [
-		{
-			"gut": {
-				"html": "<button type=\"button\" class=\"z-button z-button--primary\">Speichern</button>",
-				"text": "Label als konkrete Verb-Aktion — sagt, was der Klick auslöst."
-			},
-			"schlecht": {
-				"html": "<button type=\"button\" class=\"z-button z-button--primary\">OK</button>",
-				"text": "Generische Bestätigung — der Nutzer muss raten, was passiert."
-			}
-		}
-	],
-	"verwendung": {
-		"nutzen": [
-			"Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).",
-			"Für klar auslösende Aktionen: Speichern, Senden, Bestätigen."
-		],
-		"nichtNutzen": [
-			"Für reine Navigation / Seitenwechsel — dafür einen Link (Link-Button).",
-			"Mehrere gleichwertige Primary-Buttons nebeneinander."
-		]
-	}
+	]
 } satisfies Partial<ComponentSpec>;

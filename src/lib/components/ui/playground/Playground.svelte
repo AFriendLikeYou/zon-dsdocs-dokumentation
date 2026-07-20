@@ -22,6 +22,18 @@
   2) SNIPPET-MODUS (Escape-Hatch für Loops/Interaktion, z. B. Button-Group):
      `preview`-Snippet rendert das Specimen aus dem State, `code`-Funktion liefert
      den Code-String. Lebt co-located als Specimen.svelte neben der Route.
+
+  Bühnen-Modi (CMS-schaltbar über content.json → spec.playground):
+  - align 'center' (Default): Objekt auf Bühne — zentriert, Punktraster.
+  - align 'fill': Ausschnitt aus Seite — volle Breite, ruhige Fläche ohne Raster
+    (für Patterns wie Cell/Input, die im Einsatz nie frei schweben).
+  - resizable: Drag-Handle am rechten Rand + px-Anzeige für breitenabhängige
+    Patterns (impliziert die fill-Optik).
+
+  Details: Selects rendern als SegmentedControl, Booleans als Switch; der
+  Code-Block lässt geänderte Zeilen kurz aufleuchten (flash) und kappt lange
+  Snippets (collapsible). Text-Zoom (Aa, 100→200 %) sitzt dezent unten rechts
+  auf der Bühne — WCAG-2.2-Reflow-Check direkt am Specimen.
 -->
 <script lang="ts" module>
 	export type PlaygroundOption = { value: string; label: string; cssClass?: string };
@@ -36,8 +48,6 @@
 		| { key: string; label: string; type: 'toggle'; cssClass?: string; default?: boolean }
 		| { key: string; label: string; type: 'attr'; attr: string; default?: boolean };
 	export type PlaygroundState = Record<string, string | number | boolean>;
-	/** Benanntes Beispiel: ein Klick setzt (teilweise) den Control-State — „Rezept". */
-	export type PlaygroundPreset = { label: string; state: PlaygroundState };
 
 	/** Template + Controls + State → fertiges Markup (Preview UND Code — eine Quelle). */
 	export function instantiate(
@@ -61,13 +71,27 @@
 			.replaceAll('{classes}', classes.length ? ` ${classes.join(' ')}` : '')
 			.replaceAll('{attrs}', attrs);
 	}
+
+	/** Zeilen, in denen sich zwei Code-Stände unterscheiden (für den Code-Flash). */
+	export function changedLines(prev: string, next: string): number[] {
+		const a = prev.split('\n');
+		const b = next.split('\n');
+		const out: number[] = [];
+		for (let i = 0; i < Math.max(a.length, b.length); i++) {
+			if (a[i] !== b[i]) out.push(i);
+		}
+		return out;
+	}
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Chip } from '$components/ui/chip';
-	import { CodeBlock } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
 	import { StageToggle } from '$components/ui/stage-toggle';
+	import { SegmentedControl } from '$components/ui/segmented-control';
+	import { Switch } from '$components/ui/switch';
+	import { ResizeHandle } from '$components/ui/resize-handle';
+	import { ResetIcon } from '$lib/icons';
 
 	type Props = {
 		controls?: PlaygroundControl[];
@@ -82,8 +106,10 @@
 		preview?: Snippet<[PlaygroundState]>;
 		/** SNIPPET-MODUS: erzeugt den Code-String aus dem State. */
 		code?: (state: PlaygroundState) => string;
-		/** Benannte Beispiele/„Rezepte": ein Klick setzt den Control-State (Astryx-Idee). */
-		presets?: PlaygroundPreset[];
+		/** Bühnen-Modus: 'center' = Objekt auf Bühne · 'fill' = Ausschnitt aus Seite. */
+		align?: 'center' | 'fill';
+		/** Drag-Handle + px-Anzeige für breitenabhängige Patterns (impliziert fill-Optik). */
+		resizable?: boolean;
 		class?: string;
 	};
 	let {
@@ -94,14 +120,16 @@
 		template,
 		preview,
 		code,
-		presets = [],
+		align = 'center',
+		resizable = false,
 		class: className = ''
 	}: Props = $props();
 
 	function initialState(): PlaygroundState {
 		const s: PlaygroundState = {};
 		for (const c of controls) {
-			s[c.key] = c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
+			s[c.key] =
+				c.type === 'select' ? (c.default ?? c.options[0]?.value ?? '') : (c.default ?? false);
 		}
 		return s;
 	}
@@ -109,6 +137,20 @@
 	let values = $state<PlaygroundState>(initialState());
 	const html = $derived(template ? instantiate(template, controls, values) : '');
 	const codeStr = $derived(template ? html : (code?.(values) ?? ''));
+
+	// Code-Flash: bei jeder Code-Änderung die geänderten Zeilen an den CodeBlock
+	// melden. prev lebt als plain Closure-Variable — der Initialwert flasht nicht.
+	let flashKey = $state(0);
+	let flashLines = $state<number[]>([]);
+	let prevCode: string | undefined;
+	$effect(() => {
+		const next = codeStr;
+		if (prevCode !== undefined && prevCode !== next) {
+			flashLines = changedLines(prevCode, next);
+			flashKey++;
+		}
+		prevCode = next;
+	});
 
 	// Vorschau-Hintergrund: 'auto' folgt dem darkKey-Control (z. B. on-image),
 	// 'light'/'dark' überschreiben es manuell (Schalter auf der Bühne). Die Bühne
@@ -118,10 +160,45 @@
 	const autoDark = $derived(!!(darkKey && values[darkKey]));
 	const isDark = $derived(themeMode === 'dark' || (themeMode === 'auto' && autoDark));
 
+	// Text-Zoom (Aa): zyklisch 100 → 130 → 150 → 200 % — CSS zoom skaliert das
+	// Specimen inkl. Layout (Reflow), wie es der WCAG-200 %-Test verlangt.
+	const ZOOM_STEPS = [1, 1.3, 1.5, 2];
+	let zoom = $state(1);
+	function cycleZoom() {
+		const i = ZOOM_STEPS.indexOf(zoom);
+		zoom = ZOOM_STEPS[(i + 1) % ZOOM_STEPS.length];
+	}
+
+	// Resize: Breite des Vorschau-Rahmens (null = volle Breite); px-Anzeige läuft
+	// über ResizeObserver mit, damit auch Fenster-Resizes stimmen.
+	const isFill = $derived(align === 'fill' || resizable);
+	let frameWidth = $state<number | null>(null);
+	let frameEl = $state<HTMLDivElement>();
+	let measuredWidth = $state(0);
+	$effect(() => {
+		if (!frameEl) return;
+		const ro = new ResizeObserver(() => {
+			if (frameEl) measuredWidth = Math.round(frameEl.getBoundingClientRect().width);
+		});
+		ro.observe(frameEl);
+		return () => ro.disconnect();
+	});
+	// Das ResizeHandle-Atom meldet nur das Delta; die min-Grenze (200px) und die
+	// aktuelle Breite bleiben hier im Consumer. Basis ist die zuletzt gesetzte Breite,
+	// sonst die LIVE gemessene Rahmenbreite (erstes Ziehen aus der 100%-Ausgangslage —
+	// nicht der ggf. noch nicht befüllte measuredWidth-State).
+	function handleResize(delta: number) {
+		const base = frameWidth ?? frameEl?.getBoundingClientRect().width ?? measuredWidth;
+		frameWidth = Math.max(200, Math.round(base + delta));
+	}
+
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
 	const defaults = initialState();
 	const isDirty = $derived(
-		themeMode !== 'auto' || controls.some((c) => values[c.key] !== defaults[c.key])
+		themeMode !== 'auto' ||
+			zoom !== 1 ||
+			frameWidth !== null ||
+			controls.some((c) => values[c.key] !== defaults[c.key])
 	);
 	function setTheme(theme: 'light' | 'dark') {
 		themeMode = theme;
@@ -129,24 +206,20 @@
 	function reset() {
 		for (const c of controls) values[c.key] = defaults[c.key];
 		themeMode = 'auto';
+		zoom = 1;
+		frameWidth = null;
 	}
 
-	// Beispiel/„Rezept" anwenden: setzt (nur) die im Preset genannten Keys.
-	function applyPreset(p: PlaygroundPreset) {
-		for (const k in p.state) values[k] = p.state[k];
-	}
-	// Aktiv, wenn alle Preset-Keys dem aktuellen State entsprechen.
-	const activePreset = $derived(
-		presets.findIndex((p) => Object.keys(p.state).every((k) => values[k] === p.state[k]))
-	);
 </script>
 
-<div class="pg {className}">
-	<div class="pg-stage ds-stage" class:is-dark={isDark}>
-		<div class="pg-toolbar">
+<div class="playground {className}">
+	<div class="playground__stage ds-stage" class:is-dark={isDark} class:is-fill={isFill}>
+		<div class="playground__toolbar">
 			<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 		</div>
-		<div class="pg-preview">
+
+		<!-- Vorschau-Inhalt einmal definiert — resizable- und Normalzweig teilen ihn. -->
+		{#snippet previewBody()}
 			{#if template}
 				<!-- Template-Modus: Markup kommt aus der Registry (vertrauenswürdige Repo-Daten). -->
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -154,106 +227,201 @@
 			{:else}
 				{@render preview?.(values)}
 			{/if}
-		</div>
+		{/snippet}
+
+		{#if resizable}
+			<div
+				class="playground__frame"
+				bind:this={frameEl}
+				style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
+			>
+				<div class="pg-preview" style:zoom>
+					{@render previewBody()}
+				</div>
+				<ResizeHandle
+					direction="horizontal"
+					onresize={handleResize}
+					label="Vorschau-Breite ändern (ziehen oder Pfeiltasten)"
+				/>
+			</div>
+			<span class="playground__width" aria-hidden="true">{measuredWidth} px</span>
+		{:else}
+			<div class="pg-preview" style:zoom>
+				{@render previewBody()}
+			</div>
+		{/if}
+
+		<button
+			type="button"
+			class="playground__zoom"
+			onclick={cycleZoom}
+			title="Text-Zoom durchschalten (WCAG-Reflow-Check)"
+			aria-label="Text-Zoom, aktuell {Math.round(zoom * 100)} Prozent"
+		>
+			<span class="playground__zoom-label" aria-hidden="true">Aa</span>
+			{Math.round(zoom * 100)}&hairsp;%
+		</button>
 	</div>
 
-	{#if presets.length}
-		<div class="pg-presets">
-			<span class="pg-label">Beispiele</span>
-			{#each presets as p, i (p.label)}
-				<Chip
-					variant={activePreset === i ? 'accent' : 'neutral'}
-					emphasis={activePreset === i}
-					onclick={() => applyPreset(p)}>{p.label}</Chip
-				>
-			{/each}
-		</div>
-	{/if}
-
 	{#if hint}
-		<div class="pg-controls"><span class="pg-hint">{hint}</span></div>
+		<div class="playground__controls"><span class="playground__hint">{hint}</span></div>
 	{:else if controls.length}
-		<div class="pg-controls">
+		<div class="playground__controls">
 			{#each controls as c (c.key)}
-				{#if c.type === 'select'}
-					<span class="pg-label">{c.label}</span>
-					{#each c.options as o (o.value)}
-						<Chip
-							variant={values[c.key] === o.value ? 'accent' : 'neutral'}
-							emphasis={values[c.key] === o.value}
-							onclick={() => (values[c.key] = o.value)}>{o.label}</Chip
-						>
-					{/each}
-				{:else}
-					<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
-					<Chip
-						variant={values[c.key] ? 'accent' : 'neutral'}
-						onclick={() => (values[c.key] = !values[c.key])}>{c.label}</Chip
-					>
-				{/if}
+				<!-- Auswahl (SegmentedControl) und An/Aus (Switch) lesen sich jetzt als
+				     unterschiedliche Control-Typen — Trennlinie bündelt die Gruppen. -->
+				<span class="playground__group">
+					{#if c.type === 'select'}
+						<span class="playground__label">{c.label}</span>
+						<SegmentedControl
+							label={c.label}
+							options={c.options.map((o) => ({ value: o.value, label: o.label }))}
+							value={String(values[c.key])}
+							onchange={(v) => (values[c.key] = v)}
+						/>
+					{:else}
+						<!-- toggle (Klasse) und attr (HTML-Attribut) bedienen sich gleich -->
+						<Switch
+							label={c.label}
+							checked={!!values[c.key]}
+							onchange={(v) => (values[c.key] = v)}
+						/>
+					{/if}
+				</span>
 			{/each}
 
 			{#if isDirty}
-				<button type="button" class="pg-reset" onclick={reset}>
-					<svg
-						aria-hidden="true"
-						width="12"
-						height="12"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-						<path d="M3 3v5h5" />
-					</svg>
+				<button type="button" class="playground__reset" onclick={reset}>
+					<ResetIcon width={12} height={12} />
 					Zurücksetzen
 				</button>
 			{/if}
 		</div>
 	{/if}
 
-	<CodeBlock code={codeStr} {lang} />
+	<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
 </div>
 
 <style>
-	.pg {
+	.playground {
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
 		overflow: hidden;
 		margin-block: var(--z-ds-space-16);
 		background: var(--ds-surface);
 	}
-	.pg-stage {
+	.playground__stage {
 		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: var(--z-ds-space-32) var(--z-ds-space-16);
-		min-height: 96px;
-		/* RAW-Token, damit die Fläche mit den je Bühne gepinnten Werten flippt —
-		   ein abgeleitetes --ds-*-Token wäre schon auf :root-Ebene aufgelöst. */
-		background: var(--z-ds-color-background-10);
+		/* Bühne wächst MIT dem Specimen (Boden 240px): kleine Komponenten schwimmen
+		   nicht mehr in einer fixen 16:9-Fläche, große (Carousel, Cell) bekommen
+		   ihren Platz ohne Clipping. */
+		min-height: 240px;
+		overflow: hidden;
+		/* RAW-Token, damit Fläche UND Punktraster mit den je Bühne gepinnten Werten
+		   flippen (.ds-stage.is-dark pinnt background-10 + border-70) — kein separater
+		   is-dark-Block nötig. Abgeleitete --ds-*-Token wären auf :root aufgelöst. */
+		background-color: var(--z-ds-color-background-0);
+		background-image: radial-gradient(circle, var(--z-ds-color-border-70) 1px, transparent 1px);
+		background-size: 12px 12px;
 		transition: background-color var(--ds-dur) var(--ds-ease);
+	}
+	/* fill: „Ausschnitt aus Seite" statt „Objekt auf Bühne" — ruhige Fläche ohne
+	   Punktraster, Specimen über die volle Breite (Cell, Input, …). */
+	.playground__stage.is-fill {
+		background-image: none;
+		align-items: stretch;
+		justify-content: flex-start;
+		padding: var(--z-ds-space-32) var(--z-ds-space-24);
+	}
+	.playground__stage.is-fill .pg-preview {
+		justify-content: flex-start;
+		flex: 1;
+		min-width: 0;
 	}
 
 	/* Light/Dark-Schalter (StageToggle) — dezent oben rechts auf der Bühne. */
-	.pg-toolbar {
+	.playground__toolbar {
 		position: absolute;
 		top: var(--z-ds-space-8);
 		right: var(--z-ds-space-8);
 		z-index: 1;
 	}
+	/* .pg-preview bleibt bewusst kryptisch: Es ist — wie sein Zwilling .spec-canvas —
+	   ein GLOBALER Scoping-Anker, den der Exporter (tooling/zeit-de-exporter/export.mjs,
+	   scopeCss) in jede generierte +page.svx präfixt (:global(.pg-preview .z-…)). Ein
+	   Rename hier müsste den Exporter + alle generierten Seiten mitziehen → Contract,
+	   kein dateilokaler Name. Darum wie .ds-stage/.spec-canvas von der Umbenennung ausgenommen. */
 	.pg-preview {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		max-width: 100%;
 	}
-	.pg-controls,
-	.pg-presets {
+
+	/* Resize-Rahmen: gestrichelte Kante + Griff rechts, px-Anzeige unten links. */
+	.playground__frame {
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-width: 200px;
+		max-width: 100%;
+		border-right: 1px dashed var(--z-ds-color-border-70);
+		padding-right: var(--z-ds-space-16);
+	}
+	.playground__width {
+		position: absolute;
+		bottom: var(--z-ds-space-8);
+		left: var(--z-ds-space-8);
+		font-size: var(--ds-text-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--z-ds-color-text-55);
+		pointer-events: none;
+	}
+
+	/* Text-Zoom — leiser Zykler unten rechts; RAW-Token, flippt mit der Bühne. */
+	.playground__zoom {
+		position: absolute;
+		bottom: var(--z-ds-space-8);
+		right: var(--z-ds-space-8);
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		border: none;
+		background: none;
+		padding: 3px 8px;
+		border-radius: 999px;
+		font-size: var(--ds-text-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--z-ds-color-text-55);
+		cursor: pointer;
+		transition:
+			color var(--ds-dur) var(--ds-ease),
+			background-color var(--ds-dur) var(--ds-ease);
+	}
+	.playground__zoom-label {
+		font-weight: 700;
+		font-size: 11px;
+		letter-spacing: 0.02em;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.playground__zoom:hover {
+			color: var(--z-ds-color-text-100);
+			background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
+		}
+	}
+	.playground__zoom:active {
+		transform: scale(0.96);
+	}
+	.playground__zoom:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+
+	.playground__controls {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -261,23 +429,30 @@
 		padding: var(--z-ds-space-12) var(--z-ds-space-16);
 		border-bottom: 1px solid var(--ds-border-soft);
 	}
-	/* Beispiele/Rezepte sitzen zwischen Bühne und Controls — dezent abgesetzt. */
-	.pg-presets {
-		background: color-mix(in srgb, var(--ds-surface-raised) 45%, transparent);
+	/* Control-Gruppe (ein select mit Label bzw. ein Switch) — Trennlinie zwischen
+	   den Gruppen, damit Booleans nicht wie weitere Variant-Werte lesen. */
+	.playground__group {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-8);
 	}
-	.pg-label {
+	.playground__group + .playground__group {
+		border-left: 1px solid var(--ds-border-soft);
+		padding-left: var(--z-ds-space-12);
+	}
+	.playground__label {
 		font-size: var(--ds-label-size);
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 600;
 		color: var(--ds-text-muted);
 	}
-	.pg-hint {
+	.playground__hint {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
 	/* Reset — dezenter Ghost-Button, rechtsbündig, nur bei Abweichung vom Default */
-	.pg-reset {
+	.playground__reset {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
@@ -295,20 +470,21 @@
 			transform var(--ds-dur) var(--ds-ease-out);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		.pg-reset:hover {
+		.playground__reset:hover {
 			color: var(--ds-text);
 			background: var(--ds-surface-raised);
 		}
 	}
-	.pg-reset:active {
+	.playground__reset:active {
 		transform: scale(0.96);
 	}
-	.pg-reset:focus-visible {
+	.playground__reset:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.pg-stage {
+		.playground__stage,
+		.playground__zoom {
 			transition: none;
 		}
 	}

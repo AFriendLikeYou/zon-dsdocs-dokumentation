@@ -30,7 +30,7 @@ describe('Playground (generischer Harness)', () => {
 		render(Playground, { props: { controls, code, preview } });
 
 		expect(screen.getByText('Variant')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Primary' })).toBeInTheDocument();
+		expect(screen.getByRole('radio', { name: 'Primary' })).toBeInTheDocument();
 		expect(screen.getByText('code:primary:false')).toBeInTheDocument();
 		// Default-State → kein Reset sichtbar
 		expect(screen.queryByRole('button', { name: /Zurücksetzen/ })).toBeNull();
@@ -39,7 +39,7 @@ describe('Playground (generischer Harness)', () => {
 	it('Select-Chip ändert State + Live-Code; Reset erscheint und stellt Default her', async () => {
 		render(Playground, { props: { controls, code, preview } });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Subtle' }));
+		await fireEvent.click(screen.getByRole('radio', { name: 'Subtle' }));
 		expect(screen.getByText('code:subtle:false')).toBeInTheDocument();
 
 		const reset = screen.getByRole('button', { name: /Zurücksetzen/ });
@@ -51,7 +51,7 @@ describe('Playground (generischer Harness)', () => {
 	it('Toggle-Chip schaltet Boolean-State um', async () => {
 		render(Playground, { props: { controls, code, preview } });
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
+		await fireEvent.click(screen.getByRole('switch', { name: 'Disabled' }));
 		expect(screen.getByText('code:primary:true')).toBeInTheDocument();
 	});
 });
@@ -76,10 +76,12 @@ const tpl = '<button type="submit" class="z-button{classes}"{attrs}>Click me</bu
 
 describe('Playground — Template-Modus (Registry)', () => {
 	it('instantiate(): Klassen + Attribute aus Controls-State, eine Quelle für Preview & Code', () => {
-		expect(instantiate(tpl, tplControls, { variant: 'default', fullwidth: false, disabled: false })).toBe(
-			'<button type="submit" class="z-button">Click me</button>'
-		);
-		expect(instantiate(tpl, tplControls, { variant: 'zplus', fullwidth: true, disabled: true })).toBe(
+		expect(
+			instantiate(tpl, tplControls, { variant: 'default', fullwidth: false, disabled: false })
+		).toBe('<button type="submit" class="z-button">Click me</button>');
+		expect(
+			instantiate(tpl, tplControls, { variant: 'zplus', fullwidth: true, disabled: true })
+		).toBe(
 			'<button type="submit" class="z-button z-button--zplus z-button--fullwidth" disabled>Click me</button>'
 		);
 	});
@@ -93,28 +95,13 @@ describe('Playground — Template-Modus (Registry)', () => {
 		expect(btn!.className).toContain('z-button--primary');
 
 		// Chip-Klick → Klasse wandert in Preview UND Code
-		await fireEvent.click(screen.getByRole('button', { name: 'Z+' }));
+		await fireEvent.click(screen.getByRole('radio', { name: 'Z+' }));
 		expect(container.querySelector('.pg-preview button')!.className).toContain('z-button--zplus');
 		expect(container.textContent).toContain('z-button--zplus');
 
 		// attr-Control → HTML-Attribut in Preview und Code-String
-		await fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
+		await fireEvent.click(screen.getByRole('switch', { name: 'Disabled' }));
 		expect(container.querySelector('.pg-preview button')!.hasAttribute('disabled')).toBe(true);
 	});
 
-	it('Preset-Chip setzt mehrere Control-Werte auf einmal (Astryx-Rezept)', async () => {
-		const presets = [{ label: 'Z+ Voll', state: { variant: 'zplus', fullwidth: true, disabled: false } }];
-		const { container } = render(Playground, {
-			props: { controls: tplControls, template: tpl, presets }
-		});
-
-		// Default: primary, kein fullwidth
-		expect(container.querySelector('.pg-preview button')!.className).toContain('z-button--primary');
-
-		await fireEvent.click(screen.getByRole('button', { name: 'Z+ Voll' }));
-		const btn = container.querySelector('.pg-preview button')!;
-		expect(btn.className).toContain('z-button--zplus');
-		expect(btn.className).toContain('z-button--fullwidth');
-		expect(container.textContent).toContain('z-button--fullwidth');
-	});
 });
