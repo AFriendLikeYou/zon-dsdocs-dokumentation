@@ -174,6 +174,9 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
 Fokus-Ringe für Neubauten über die Utility `.focus-ring` (`global.css`, 2px/2px);
 abweichende Offsets nur mit Kommentar-Begründung.
 
+Seiten einfassen über `max-width: var(--ds-container-max)` + `padding-inline:
+var(--ds-gutter)` (beide in `global.css`) — keine eigenen `max-width`/`clamp`-Paare.
+
 **Tabellen (ehem. v2-Notiz M3, eingelöst in K8, vollendet in K9, vereinheitlicht in
 K11):** `ui/table/` ist der gemeinsame daten-getriebene Renderer ALLER tabellarischen
 Oberflächen. Wrapper sind dünn: Struktur, Semantik UND das Erscheinungsbild

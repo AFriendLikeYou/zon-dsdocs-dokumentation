@@ -83,9 +83,9 @@
 	/* .landing bleibt ungestylt: volle Breite — der Hero (LandingHero) bricht bis
 	   an den Viewport-Rand aus. Zentrierte Inhaltsspalte nur für die Folgesektionen: */
 	.container {
-		max-width: 76rem;
+		max-width: var(--ds-container-max);
 		margin-inline: auto;
-		padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 4vw, 2.5rem) 4rem;
+		padding: clamp(3rem, 8vw, 5rem) var(--ds-gutter) 4rem;
 	}
 
 	/* ── Zwei Welten ── */

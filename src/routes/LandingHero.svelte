@@ -87,9 +87,9 @@
 		overflow: hidden; /* Glow + gekippte Bühne dürfen nicht ausbrechen */
 	}
 	.hero__inner {
-		max-width: 76rem;
+		max-width: var(--ds-container-max);
 		margin-inline: auto;
-		padding-inline: clamp(1rem, 4vw, 2.5rem);
+		padding-inline: var(--ds-gutter);
 		text-align: center;
 	}
 	.hero__copy {
