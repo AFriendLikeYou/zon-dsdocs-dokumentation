@@ -335,6 +335,10 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
   `prefers-reduced-motion`.
 - Neueste **Svelte-5-Syntax** (Runes/Snippets; kein `export let`/`$:`/`slot`/`on:`).
 - Wiederverwendbares immer als eigene `ui/`-Komponente bauen, nicht inline duplizieren.
+- **Atom-first:** Vor jedem UI-Neubau erst den Bestand prüfen (Reihenfolge + Liste in
+  `src/lib/components/README.md`, Abschnitt „Atom-first"): Felder nur über `ui/field/`
+  (einzige Feld-Optik), Buttons über `ui/button/` (`size`-Prop), Banner/Flash über
+  `ui/alert/`, Leere-Zustände über `ui/empty-state/`, Fokus-Ringe via `.focus-ring`.
 - Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 

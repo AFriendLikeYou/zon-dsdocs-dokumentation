@@ -90,3 +90,25 @@ Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann di
 1. Seitengerüst / einmal pro Seite? → `layout/` (Direktimport).
 2. Genau ein Route-Consumer? → neben die Route (`src/routes/…`).
 3. Alles andere → `ui/<kebab>/` **mit** Barrel.
+
+## Atom-first (Pflicht vor jedem Neubau)
+
+Bevor eine neue Komponente oder ein neues Stück UI entsteht, **erst den Bestand
+prüfen** — in dieser Reihenfolge:
+
+1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`),
+   `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
+   `ui/badge/`, Icons aus `$lib/icons`.
+2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
+   `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
+   `admin/ui/PopoverSheet` (Popover mit Esc/Fokus/Outside-Click).
+3. Erst wenn nichts passt: neues Atom in `ui/` anlegen (nie inline duplizieren)
+   und hier eintragen.
+
+Fokus-Ringe für Neubauten über die Utility `.focus-ring` (`global.css`, 2px/2px);
+abweichende Offsets nur mit Kommentar-Begründung.
+
+**v2-Notiz (M3):** `SpecTable` im Spec-Editor und `TokenTable`/`MeasureTable` im
+öffentlichen Specsheet sind fachliche Zwillinge (gleiche Datenform, andere Bühne).
+Ein Merge lohnt erst, wenn eine dritte Tabellen-Oberfläche dazukommt — dann als
+gemeinsamer daten-getriebener Renderer mit `variant`-Achse.
