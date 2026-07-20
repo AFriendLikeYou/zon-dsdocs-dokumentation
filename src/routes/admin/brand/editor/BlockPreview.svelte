@@ -1,7 +1,7 @@
 <!--
   BlockPreview — typ-bewusste Live-Vorschau eines CMS-Blocks (Richtung A).
   Statt nackter Felder zeigt der Block-Body, was er ergibt: Media → Thumbnail,
-  Color → Swatch (via var(token)), Alert → getönte Zeile, Container → Anzahl
+  Color → Swatch (via var(token)), Banner → getönte Zeile, Container → Anzahl
   Elemente, sonst Titel + Prop-Chips. Rein präsentational, aus Werten abgeleitet.
 -->
 <script lang="ts">
@@ -107,7 +107,7 @@
 				>{/if}
 		</div>
 	</div>
-{:else if name === 'Alert'}
+{:else if name === 'Banner'}
 	<div class="block-preview block-preview--alert" data-role={alertRole}>
 		<span class="block-preview__title">{title || 'Hinweis'}</span>
 		{#if desc}<span class="block-preview__desc">{desc}</span>{/if}

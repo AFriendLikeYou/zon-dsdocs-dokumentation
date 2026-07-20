@@ -7,7 +7,7 @@ title: KI-Richtlinien
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 </script>
 
 # {title}
@@ -17,7 +17,7 @@ klare Leitplanken, damit Markenidentität, Glaubwürdigkeit und rechtliche Vorga
 gewahrt bleiben. Diese Seite hält fest, wie wir KI im Sinne der Marke DIE ZEIT
 einsetzen.
 
-<Alert
+<Banner
 	variant="default"
 	title="Diese Seite ist im Aufbau"
 	description="Die verbindlichen KI-Richtlinien werden vom Brand-/Rechts-Team gepflegt. Unten steht die Struktur, die hier mit ZEIT-spezifischem Inhalt gefüllt wird."

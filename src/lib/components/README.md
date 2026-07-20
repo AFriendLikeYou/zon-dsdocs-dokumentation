@@ -69,7 +69,7 @@ Motion nach dem emil-design-eng-Skill (`.agents/skills/`): Tokens
 Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann die
 übrigen erraten — Mensch wie Agent.
 
-1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Alert`, `DoDont`, …)
+1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Banner`, `DoDont`, …)
    — nie `type`/`kind`/`appearance`. `type` bleibt nativen HTML-Attributen
    vorbehalten (`<button type>`, `<input type>`). Ausnahme: farb-getönte Pillen
    (`Badge`, `Chip`) nutzen `tone` als Farbrollen-Achse.
@@ -140,7 +140,7 @@ prüfen** — in dieser Reihenfolge:
    SpecTable (Editor, mz-Optik) und TokenTable/MeasureTable (öffentliches Specsheet)
    sind dünne Wrapper darüber — löst die frühere v2-Notiz M3 ein),
    Icons aus `$lib/icons`.
-2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
+2. **Moleküle:** `ui/banner/` (Hinweis-/Status-Banner — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
    `ui/dialog/` (schwebende Bestätigungs-/Aktionsleiste `variant="bar"` — Save-Flows
    mit Verwerfen/Speichern + `shortcut="cmd+s"`; 'modal' als geplante Erweiterung),

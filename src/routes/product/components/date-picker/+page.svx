@@ -7,7 +7,7 @@ title: Date Picker
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 </script>
 
 # {title}
@@ -15,7 +15,7 @@ title: Date Picker
 Der Date Picker lässt Nutzer:innen ein Datum (oder einen Zeitraum) auswählen. Die
 Komponente ist im ZEIT-Designsystem vorgesehen, aber noch nicht dokumentiert.
 
-<Alert
+<Banner
 	variant="default"
 	title="Diese Komponente ist geplant"
 	description="Die Doku entsteht, sobald der Figma-Node vermessen und das model.json angelegt ist. Bis dahin steht hier nur dieser Platzhalter — es gibt noch keinen verbindlichen Playground, keine Tokens und keine Specs."

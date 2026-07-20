@@ -6,12 +6,12 @@
 // Editor geschützte Blöcke — änderbar „nur bei Bedarf" über den Code.
 //
 // Insert-Palette bewusst kuratiert: Product-Seiten sind redaktionell schlanker
-// als Brand — vorerst nur Hinweis-Boxen (Alert) + das eingebaute Bild.
+// als Brand — vorerst nur Hinweis-Boxen (Banner) + das eingebaute Bild.
 import { CMS_COMPONENTS } from '../../brand/core/cms-components';
 import { makeEditorLoad, makeEditorActions } from '../../brand/core/editor-server';
 import type { PageServerLoad, Actions } from './$types';
 
-const PRODUCT_PALETTE = CMS_COMPONENTS.filter((c) => c.name === 'Alert');
+const PRODUCT_PALETTE = CMS_COMPONENTS.filter((c) => c.name === 'Banner');
 
 export const load: PageServerLoad = makeEditorLoad('product', {
 	components: PRODUCT_PALETTE,

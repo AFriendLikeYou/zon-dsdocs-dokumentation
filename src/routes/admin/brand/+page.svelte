@@ -5,7 +5,7 @@
 	import { Icon } from '$lib/icons/cms';
 	import { AdminPageHeader, AdminRow } from '../ui';
 	import { Badge } from '$components/ui/badge';
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { Button } from '$components/ui/button';
 	import { ButtonGroup } from '$components/ui/button-group';
 	import { Field } from '$components/ui/field';
@@ -240,9 +240,9 @@
 	{/if}
 
 	{#if !data.writable}
-		<Alert compact variant="warning">
+		<Banner compact variant="warning">
 			Nur-Lese-Vorschau: Umsortieren ist im Prod-Modus deaktiviert (Phase 2b: GitHub-PR).
-		</Alert>
+		</Banner>
 	{/if}
 
 	<ul class="tree" class:is-saving={saving}>

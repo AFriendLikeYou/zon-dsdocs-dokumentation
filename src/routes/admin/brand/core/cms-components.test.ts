@@ -12,11 +12,11 @@ import {
 } from './cms-components';
 
 describe('parseComponentTag', () => {
-	it('parst ein mehrzeiliges Alert-Tag', () => {
+	it('parst ein mehrzeiliges Banner-Tag', () => {
 		const p = parseComponentTag(
-			`<Alert\n\tvariant="tip"\n\ttitle="Hallo"\n\tdescription="Welt"\n/>`
+			`<Banner\n\tvariant="tip"\n\ttitle="Hallo"\n\tdescription="Welt"\n/>`
 		);
-		expect(p?.name).toBe('Alert');
+		expect(p?.name).toBe('Banner');
 		expect(p?.attrs).toEqual([
 			{ key: 'variant', kind: 'string', value: 'tip' },
 			{ key: 'title', kind: 'string', value: 'Hallo' },
@@ -35,18 +35,18 @@ describe('parseComponentTag', () => {
 	});
 
 	it('lehnt Nicht-selbstschließende / verschachtelte Tags ab', () => {
-		expect(parseComponentTag('<Alert>Hi</Alert>')).toBeNull();
-		expect(parseComponentTag('<Alert title="x"><b>y</b></Alert>')).toBeNull();
+		expect(parseComponentTag('<Banner>Hi</Banner>')).toBeNull();
+		expect(parseComponentTag('<Banner title="x"><b>y</b></Banner>')).toBeNull();
 	});
 
 	it('dekodiert Entities im String-Wert', () => {
-		const p = parseComponentTag('<Alert title="Er sagte &quot;hi&quot; &amp; ging" />');
+		const p = parseComponentTag('<Banner title="Er sagte &quot;hi&quot; &amp; ging" />');
 		expect(p?.attrs[0].value).toBe('Er sagte "hi" & ging');
 	});
 });
 
 describe('serializeComponentTag', () => {
-	const alert = CMS_MAP.Alert;
+	const alert = CMS_MAP.Banner;
 
 	it('emittiert nur Nicht-Default-Props, mehrzeilig', () => {
 		const out = serializeComponentTag(alert, {
@@ -54,12 +54,12 @@ describe('serializeComponentTag', () => {
 			title: 'Hallo',
 			description: ''
 		});
-		expect(out).toBe(`<Alert\n\tvariant="tip"\n\ttitle="Hallo"\n/>`);
+		expect(out).toBe(`<Banner\n\tvariant="tip"\n\ttitle="Hallo"\n/>`);
 	});
 
 	it('lässt Default-Variante weg', () => {
 		const out = serializeComponentTag(alert, { variant: 'default', title: 'X', description: '' });
-		expect(out).toBe(`<Alert\n\ttitle="X"\n/>`);
+		expect(out).toBe(`<Banner\n\ttitle="X"\n/>`);
 	});
 
 	it('kodiert gefährliche Zeichen (kein Tag-Ausbruch)', () => {
@@ -114,13 +114,13 @@ describe('serializeComponentTag', () => {
 
 describe('componentIslandInfo / Mutabilität', () => {
 	it('all-literal registrierte Komponente ist mutable', () => {
-		expect(isMutableComponentIsland('<Alert variant="tip" title="x" description="y" />')).toBe(
+		expect(isMutableComponentIsland('<Banner variant="tip" title="x" description="y" />')).toBe(
 			true
 		);
 	});
 
 	it('füllt fehlende Props mit Defaults', () => {
-		const info = componentIslandInfo('<Alert title="x" />');
+		const info = componentIslandInfo('<Banner title="x" />');
 		expect(info?.values.variant).toBe('default');
 		expect(info?.values.description).toBe('');
 	});
@@ -132,11 +132,11 @@ describe('componentIslandInfo / Mutabilität', () => {
 	});
 
 	it('Fremd-Attribut → geschützt (null)', () => {
-		expect(componentIslandInfo('<Alert title="x" onclick="evil()" />')).toBeNull();
+		expect(componentIslandInfo('<Banner title="x" onclick="evil()" />')).toBeNull();
 	});
 
 	it('ungültiger Enum-Wert → geschützt (null)', () => {
-		expect(componentIslandInfo('<Alert variant="explode" title="x" />')).toBeNull();
+		expect(componentIslandInfo('<Banner variant="explode" title="x" />')).toBeNull();
 	});
 
 	it('nicht registrierte Komponente → null', () => {
@@ -153,10 +153,10 @@ describe('componentIslandInfo / Mutabilität', () => {
 describe('usedRegisteredComponents', () => {
 	it('findet registrierte (inkl. Container), ignoriert unregistrierte', () => {
 		const body =
-			'<Alert title="x" />\n<Grid columns={2}><Color title="a" /></Grid>\n<SectionTiles tiles={y} />';
+			'<Banner title="x" />\n<Grid columns={2}><Color title="a" /></Grid>\n<SectionTiles tiles={y} />';
 		const used = usedRegisteredComponents(body).sort();
 		// Grid ist jetzt als Container registriert; SectionTiles nicht.
-		expect(used).toEqual(['Alert', 'Color', 'Grid']);
+		expect(used).toEqual(['Banner', 'Color', 'Grid']);
 	});
 });
 
@@ -186,7 +186,7 @@ describe('Container: parse / serialize / info', () => {
 	});
 
 	it('lehnt Container mit nicht-erlaubtem Kind ab (Grid → nur Color/TextColor)', () => {
-		const bad = `<Grid columns={2}>\n\t<Alert title="x" />\n</Grid>`;
+		const bad = `<Grid columns={2}>\n\t<Banner title="x" />\n</Grid>`;
 		expect(containerIslandInfo(bad)).toBeNull();
 	});
 

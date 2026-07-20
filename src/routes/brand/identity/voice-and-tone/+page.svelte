@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { WordingList } from '$components/ui/specsheet';
 	import type { WordingRule } from '$types/spec';
 
@@ -75,7 +75,7 @@
 	als ein Onboarding.
 </p>
 
-<Alert
+<Banner
 	variant="default"
 	title="Diese Seite ist im Aufbau"
 	description="Die finalen Voice-&-Tone-Inhalte werden vom Brand-Team gepflegt. Unten steht die Struktur, die hier mit Inhalt gefüllt wird."

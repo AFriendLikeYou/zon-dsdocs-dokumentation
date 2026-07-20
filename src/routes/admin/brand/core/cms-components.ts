@@ -48,9 +48,9 @@ export interface CmsComponentDef {
 
 export const CMS_COMPONENTS: CmsComponentDef[] = [
 	{
-		name: 'Alert',
-		label: 'Alert / Hinweis',
-		importStatement: "import { Alert } from '$components/ui/alert';",
+		name: 'Banner',
+		label: 'Banner / Hinweis',
+		importStatement: "import { Banner } from '$components/ui/banner';",
 		props: [
 			{
 				key: 'variant',
@@ -317,7 +317,7 @@ const ICON_KEY: Record<string, string> = {
 	Image: 'image',
 	Lightbox: 'image',
 	ImageGallery: 'gallery',
-	Alert: 'alert',
+	Banner: 'alert',
 	DoDont: 'dodont',
 	DoDontGroup: 'dodont',
 	Color: 'color',

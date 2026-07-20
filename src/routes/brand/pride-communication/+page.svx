@@ -7,7 +7,7 @@ title: Pride-Kommunikation
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { DoDont } from '$components/ui/dodont';
 	import { Color } from '$components/ui/colors';
 	import { TextColor } from '$components/ui/colors';
@@ -36,7 +36,7 @@ Das ist eine Liste:
 
 jo
 
-<Alert
+<Banner
 	variant="success"
 	title="Test"
 	description="Testtesttest"

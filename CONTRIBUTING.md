@@ -92,7 +92,7 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 Bei Komponenten-Props für Beschriftungstexte gilt eine feste Rollen-Trennung:
 
 - **`title`** — Überschrift einer _Sache_ (Karte, Sektion, Hero, Beispiel-Bühne).
-  Beispiele: `Card`, `Alert`, `EmptyState`, `ExampleStage`, `ImageGallery`.
+  Beispiele: `Card`, `Banner`, `EmptyState`, `ExampleStage`, `ImageGallery`.
 - **`label`** — Beschriftung eines _Bedienelements_ (Button, Control, Tab, Feld).
   Beispiele: `CopyButton`, `DownloadButton`, `SegmentedControl`, `Switch`,
   `Tabs` (je Tab), `Playground`-Controls.
@@ -101,7 +101,7 @@ Bei Komponenten-Props für Beschriftungstexte gilt eine feste Rollen-Trennung:
   (sr-only Tabellen-`<caption>`).
 
 Sonderfall **`CodeBlock.title`**: der Kopfzeilen-Text bleibt bewusst `title` — er
-ist die Überschrift der Code-Box (konsistent mit `Card`/`Alert`), kein
+ist die Überschrift der Code-Box (konsistent mit `Card`/`Banner`), kein
 Control-Label. **Zeilen-/Item-Bezeichner in Spec-Tabellen** (`MeasureTable`,
 `StateList`, `SpecRow`, `A11yList`, `SpecimenGrid`, `TypeSpecimen`) heißen
 einheitlich `label` — es ist der Bezeichner einer Tabellen-/Listenzeile.

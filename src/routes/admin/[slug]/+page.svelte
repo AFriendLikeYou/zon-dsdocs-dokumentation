@@ -5,7 +5,7 @@
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
 	import { AdminPageHeader } from '../ui';
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { Checkbox } from '$components/ui/checkbox';
 	import { Field, Select } from '$components/ui/field';
 	import { Button } from '$components/ui/button';
@@ -292,9 +292,9 @@
 	</AdminPageHeader>
 
 	{#if !data.writable}
-		<Alert compact variant="warning">
+		<Banner compact variant="warning">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).
-		</Alert>
+		</Banner>
 	{/if}
 
 	<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>

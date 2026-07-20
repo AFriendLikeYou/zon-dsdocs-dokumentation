@@ -127,7 +127,7 @@ title: Pride
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { DoDont, DoDontGroup } from '$components/ui/dodont';
 	import { Color, TextColor } from '$components/ui/colors';
 	import { Grid } from '$components/ui/grid';
@@ -145,7 +145,7 @@ title: Pride
 
 Intro-Prosa.
 
-<Alert
+<Banner
 	variant="info"
 	title="Hinweis"
 	description="Text"
@@ -194,7 +194,7 @@ describe('Pride-Fixture: Showcase', () => {
 		expect(p.safe).toBe(true);
 		// Die eingebauten Komponenten liegen als geschützte Inseln vor.
 		const islands = p.segments.filter((s) => s.type === 'insel').map((s) => s.text);
-		expect(islands.some((t) => t.includes('<Alert'))).toBe(true);
+		expect(islands.some((t) => t.includes('<Banner'))).toBe(true);
 		expect(islands.some((t) => t.includes('<DoDontGroup'))).toBe(true);
 	});
 });
@@ -236,13 +236,13 @@ describe('Segmenter: ≥2-Leerzeilen-Regel', () => {
 		parseSvx(doc).segments.filter((s) => s.type === 'insel' && s.text.includes(needle)).length;
 
 	it('zwei Inseln mit EINER Leerzeile bleiben ein Segment (unverändert)', () => {
-		const doc = `---\nt: x\n---\n\n<Alert title="a" />\n\n<Alert title="b" />\n`;
+		const doc = `---\nt: x\n---\n\n<Banner title="a" />\n\n<Banner title="b" />\n`;
 		expect(parseSvx(doc).segments.filter((s) => s.type === 'insel').length).toBe(1);
-		expect(islandCount(doc, '<Alert')).toBe(1);
+		expect(islandCount(doc, '<Banner')).toBe(1);
 	});
 
 	it('zwei Inseln mit ZWEI Leerzeilen werden getrennt', () => {
-		const doc = `---\nt: x\n---\n\n<Alert title="a" />\n\n\n<Alert title="b" />\n`;
+		const doc = `---\nt: x\n---\n\n<Banner title="a" />\n\n\n<Banner title="b" />\n`;
 		expect(parseSvx(doc).segments.filter((s) => s.type === 'insel').length).toBe(2);
 	});
 
@@ -254,7 +254,7 @@ describe('Segmenter: ≥2-Leerzeilen-Regel', () => {
 	});
 
 	it('Round-Trip bleibt byte-identisch (serializeOk)', () => {
-		const doc = `---\nt: x\n---\n\n<Alert title="a" />\n\n\n<Alert title="b" />\n`;
+		const doc = `---\nt: x\n---\n\n<Banner title="a" />\n\n\n<Banner title="b" />\n`;
 		expect(parseSvx(doc).serializeOk).toBe(true);
 	});
 });
@@ -290,8 +290,8 @@ describe('Pride-Fixture: End-to-End', () => {
 	const findIsland = (needle: string) =>
 		before.segments.findIndex((s) => s.type === 'insel' && s.text.includes(needle));
 
-	it('bearbeitet den Alert (Titel) end-to-end, Guard ok, bleibt safe', () => {
-		const idx = findIsland('<Alert');
+	it('bearbeitet den Banner (Titel) end-to-end, Guard ok, bleibt safe', () => {
+		const idx = findIsland('<Banner');
 		const next = rebuild(raw, {
 			componentEdits: {
 				[idx]: { variant: 'info', title: 'Pride 2026', description: 'Aktualisiert' }
@@ -303,12 +303,12 @@ describe('Pride-Fixture: End-to-End', () => {
 		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
 	});
 
-	it('fügt einen Alert ein — Import bereits vorhanden, kein Duplikat, Guard ok', () => {
+	it('fügt einen Banner ein — Import bereits vorhanden, kein Duplikat, Guard ok', () => {
 		const lastIdx = before.segments.length - 1;
 		const next = rebuild(raw, {
-			inserts: [{ after: lastIdx, name: 'Alert', values: { variant: 'success', title: 'Neu' } }]
+			inserts: [{ after: lastIdx, name: 'Banner', values: { variant: 'success', title: 'Neu' } }]
 		});
-		const importCount = next.split("import { Alert } from '$components/ui/alert';").length - 1;
+		const importCount = next.split("import { Banner } from '$components/ui/banner';").length - 1;
 		expect(importCount).toBe(1);
 		expect(next).toContain('title="Neu"');
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
@@ -341,7 +341,7 @@ describe('Pride-Fixture: End-to-End', () => {
 	});
 
 	it('kombiniert editieren + einfügen + löschen in einem Save, Guard ok', () => {
-		const alertI = findIsland('<Alert');
+		const alertI = findIsland('<Banner');
 		const doDontI = findIsland('<DoDont\n');
 		const lastIdx = before.segments.length - 1;
 		const next = rebuild(raw, {
@@ -388,8 +388,8 @@ describe('Pride-Fixture: End-to-End', () => {
 		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
 	});
 
-	it('Block-Insert an Position (Lightbox nach Alert) landet als eigenes Segment', () => {
-		const alertI = findIsland('<Alert');
+	it('Block-Insert an Position (Lightbox nach Banner) landet als eigenes Segment', () => {
+		const alertI = findIsland('<Banner');
 		const blocks: Array<{ keep: number } | { insert: string; values: Record<string, string> }> = [];
 		for (const b of keepAll) {
 			blocks.push(b);
@@ -400,7 +400,7 @@ describe('Pride-Fixture: End-to-End', () => {
 				});
 		}
 		const next = rebuild(raw, { blocks });
-		expect(next.indexOf('<Lightbox')).toBeGreaterThan(next.indexOf('<Alert'));
+		expect(next.indexOf('<Lightbox')).toBeGreaterThan(next.indexOf('<Banner'));
 		expect(next).toContain("import { Lightbox } from '$components/ui/lightbox';");
 		const after = parseSvx(next);
 		expect(after.safe).toBe(true);
@@ -488,18 +488,18 @@ Text nach dem Bild.
 	});
 });
 
-// Doku mit einer bestehenden, editierbaren Alert-Komponente.
+// Doku mit einer bestehenden, editierbaren Banner-Komponente.
 const DOC2 = `---
 title: Test
 ---
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 </script>
 
 Einleitung.
 
-<Alert
+<Banner
 	variant="tip"
 	title="Alt"
 	description="Text"
@@ -509,7 +509,7 @@ Schluss.
 `;
 
 const alertIdx = (raw: string) =>
-	parseSvx(raw).segments.findIndex((s) => s.type === 'insel' && s.text.includes('<Alert'));
+	parseSvx(raw).segments.findIndex((s) => s.type === 'insel' && s.text.includes('<Banner'));
 
 describe('rebuild: Komponente bearbeiten (componentEdits)', () => {
 	const before = parseSvx(DOC2);
@@ -541,7 +541,7 @@ describe('rebuild: Komponente bearbeiten (componentEdits)', () => {
 		});
 		expect(next).toContain('Einleitung.');
 		expect(next).toContain('Schluss.');
-		expect(next).toContain('import { Alert }');
+		expect(next).toContain('import { Banner }');
 	});
 });
 
@@ -557,8 +557,8 @@ describe('rebuild: Komponente einfügen (inserts) + Import-Management', () => {
 		expect(next).toContain('title="Rot"');
 		// Import wurde ergänzt.
 		expect(next).toContain("import { Color } from '$components/ui/colors';");
-		// Bestehender Alert-Import bleibt.
-		expect(next).toContain("import { Alert } from '$components/ui/alert';");
+		// Bestehender Banner-Import bleibt.
+		expect(next).toContain("import { Banner } from '$components/ui/banner';");
 		const after = parseSvx(next);
 		expect(after.serializeOk).toBe(true);
 		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
@@ -566,9 +566,9 @@ describe('rebuild: Komponente einfügen (inserts) + Import-Management', () => {
 
 	it('dupliziert keinen bereits vorhandenen Import', () => {
 		const next = rebuild(DOC2, {
-			inserts: [{ after: lastIdx, name: 'Alert', values: { title: 'Zweiter' } }]
+			inserts: [{ after: lastIdx, name: 'Banner', values: { title: 'Zweiter' } }]
 		});
-		const importCount = next.split("import { Alert } from '$components/ui/alert';").length - 1;
+		const importCount = next.split("import { Banner } from '$components/ui/banner';").length - 1;
 		expect(importCount).toBe(1);
 	});
 });
@@ -577,9 +577,9 @@ describe('rebuild: Komponente löschen (dropSegments)', () => {
 	const before = parseSvx(DOC2);
 	const idx = alertIdx(DOC2);
 
-	it('entfernt die Alert-Insel, Guard ok, Rest bleibt', () => {
+	it('entfernt die Banner-Insel, Guard ok, Rest bleibt', () => {
 		const next = rebuild(DOC2, { dropSegments: [idx] });
-		expect(next).not.toContain('<Alert');
+		expect(next).not.toContain('<Banner');
 		expect(next).toContain('Einleitung.');
 		expect(next).toContain('Schluss.');
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
@@ -594,7 +594,7 @@ describe('checkIslandGuard v2: Grenzfälle', () => {
 			'\tdescription="Text"\n/>',
 			'\tdescription="Text"\n\tonclick="evil()"\n/>'
 		);
-		// Der manipulierte Alert ist nicht mehr „mutable" → als neue Fremd-Insel gewertet.
+		// Der manipulierte Banner ist nicht mehr „mutable" → als neue Fremd-Insel gewertet.
 		expect(checkIslandGuard(before, parseSvx(tampered))).toEqual({
 			ok: false,
 			reason: 'foreign-add'
@@ -603,16 +603,16 @@ describe('checkIslandGuard v2: Grenzfälle', () => {
 
 	it('lehnt eine Script-Manipulation jenseits registrierter Imports ab', () => {
 		const tampered = DOC2.replace(
-			"import { Alert } from '$components/ui/alert';",
-			"import { Alert } from '$components/ui/alert';\n\tfetch('https://evil.example');"
+			"import { Banner } from '$components/ui/banner';",
+			"import { Banner } from '$components/ui/banner';\n\tfetch('https://evil.example');"
 		);
 		expect(checkIslandGuard(before, parseSvx(tampered))).toEqual({ ok: false, reason: 'changed' });
 	});
 
 	it('erlaubt eine hinzugefügte registrierte Import-Zeile im Script', () => {
 		const withImport = DOC2.replace(
-			"import { Alert } from '$components/ui/alert';",
-			"import { Alert } from '$components/ui/alert';\n\timport { Color } from '$components/ui/colors';"
+			"import { Banner } from '$components/ui/banner';",
+			"import { Banner } from '$components/ui/banner';\n\timport { Color } from '$components/ui/colors';"
 		);
 		expect(checkIslandGuard(before, parseSvx(withImport))).toEqual({ ok: true });
 	});
@@ -620,7 +620,7 @@ describe('checkIslandGuard v2: Grenzfälle', () => {
 
 describe('hasScriptBlock (Insert-Gate)', () => {
 	it('erkennt Script auch wenn svelte:head im selben Segment vorangeht', () => {
-		const body = `<svelte:head>\n\t<title>x</title>\n</svelte:head>\n\n<script lang="ts">\n\timport { Alert } from '$components/ui/alert';\n</script>\n\n# Titel\n`;
+		const body = `<svelte:head>\n\t<title>x</title>\n</svelte:head>\n\n<script lang="ts">\n\timport { Banner } from '$components/ui/banner';\n</script>\n\n# Titel\n`;
 		expect(hasScriptBlock(body)).toBe(true);
 		// Genau der Bug: Segment beginnt mit <svelte:head, nicht mit <script.
 		expect(/^<script/.test(body.trim())).toBe(false);
@@ -652,7 +652,7 @@ title: T
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 </script>
 
 # {title}
@@ -681,8 +681,8 @@ Intro.
 
 	it('echte Script-Manipulation (fetch) bleibt abgelehnt', () => {
 		const tampered = MERGED.replace(
-			"import { Alert } from '$components/ui/alert';",
-			"import { Alert } from '$components/ui/alert';\n\tfetch('https://evil.example');"
+			"import { Banner } from '$components/ui/banner';",
+			"import { Banner } from '$components/ui/banner';\n\tfetch('https://evil.example');"
 		);
 		expect(checkIslandGuard(before, parseSvx(tampered))).toEqual({ ok: false, reason: 'changed' });
 	});
@@ -690,7 +690,7 @@ Intro.
 
 describe('syncComponentImports', () => {
 	it('ergänzt fehlende Imports idempotent', () => {
-		const body = `<script lang="ts">\n\timport { Alert } from '$components/ui/alert';\n</script>\n\n<Alert title="x" />\n\n\n<Color title="y" />\n`;
+		const body = `<script lang="ts">\n\timport { Banner } from '$components/ui/banner';\n</script>\n\n<Banner title="x" />\n\n\n<Color title="y" />\n`;
 		const out = syncComponentImports(body);
 		expect(out).toContain("import { Color } from '$components/ui/colors';");
 		expect(syncComponentImports(out)).toBe(out); // idempotent
@@ -703,9 +703,9 @@ describe('syncComponentImports', () => {
 	});
 
 	it('entfernt eine ungenutzte KANONISCHE Import-Zeile (prune)', () => {
-		const body = `<script lang="ts">\n\timport { Alert } from '$components/ui/alert';\n\timport { Color } from '$components/ui/colors';\n</script>\n\n<Color title="y" />\n`;
+		const body = `<script lang="ts">\n\timport { Banner } from '$components/ui/banner';\n\timport { Color } from '$components/ui/colors';\n</script>\n\n<Color title="y" />\n`;
 		const out = syncComponentImports(body);
-		expect(out).not.toContain('import { Alert }'); // Alert ungenutzt → entfernt
+		expect(out).not.toContain('import { Banner }'); // Banner ungenutzt → entfernt
 		expect(out).toContain('import { Color }'); // Color genutzt → bleibt
 	});
 
@@ -718,7 +718,7 @@ describe('syncComponentImports', () => {
 	});
 
 	it('ohne Script-Block: unverändert', () => {
-		const body = `Nur Prosa\n\n<Alert title="x" />\n`;
+		const body = `Nur Prosa\n\n<Banner title="x" />\n`;
 		expect(syncComponentImports(body)).toBe(body);
 	});
 });
@@ -834,11 +834,11 @@ describe('rebuild: Container-Block editieren/einfügen', () => {
 });
 
 describe('rebuild: Block-Modell (blocks)', () => {
-	// DOC2: [svelte-head?] script · prosa(Einleitung) · Alert · prosa(Schluss)
+	// DOC2: [svelte-head?] script · prosa(Einleitung) · Banner · prosa(Schluss)
 	const parsed = parseSvx(DOC2);
 	const before = parsed;
 	const scriptI = parsed.segments.findIndex((s) => s.text.trim().startsWith('<script'));
-	const alertI = parsed.segments.findIndex((s) => s.text.includes('<Alert'));
+	const alertI = parsed.segments.findIndex((s) => s.text.includes('<Banner'));
 	const introI = parsed.segments.findIndex(
 		(s) => s.type === 'prosa' && s.text.includes('Einleitung')
 	);
@@ -854,7 +854,7 @@ describe('rebuild: Block-Modell (blocks)', () => {
 		expect(after.safe).toBe(true);
 		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
 		expect(next).toContain('Einleitung.');
-		expect(next).toContain('<Alert');
+		expect(next).toContain('<Banner');
 		expect(next).toContain('Schluss.');
 	});
 
@@ -884,14 +884,14 @@ describe('rebuild: Block-Modell (blocks)', () => {
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
 	});
 
-	it('Reihenfolge ändern (Alert vor Einleitung) — Guard ok (multiset-invariant)', () => {
+	it('Reihenfolge ändern (Banner vor Einleitung) — Guard ok (multiset-invariant)', () => {
 		const blocks = [{ keep: scriptI }, { keep: alertI }, { keep: introI }, { keep: schlussI }];
 		const next = rebuild(DOC2, { blocks });
-		expect(next.indexOf('<Alert')).toBeLessThan(next.indexOf('Einleitung.'));
+		expect(next.indexOf('<Banner')).toBeLessThan(next.indexOf('Einleitung.'));
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
 	});
 
-	it('an beliebiger Stelle einfügen (Color zwischen Intro und Alert)', () => {
+	it('an beliebiger Stelle einfügen (Color zwischen Intro und Banner)', () => {
 		const blocks = [
 			{ keep: scriptI },
 			{ keep: introI },
@@ -901,16 +901,16 @@ describe('rebuild: Block-Modell (blocks)', () => {
 		];
 		const next = rebuild(DOC2, { blocks });
 		expect(next.indexOf('Einleitung.')).toBeLessThan(next.indexOf('<Color'));
-		expect(next.indexOf('<Color')).toBeLessThan(next.indexOf('<Alert'));
+		expect(next.indexOf('<Color')).toBeLessThan(next.indexOf('<Banner'));
 		expect(next).toContain("import { Color } from '$components/ui/colors';");
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
 	});
 
-	it('löschen (Alert weglassen) entfernt auch den ungenutzten Import', () => {
+	it('löschen (Banner weglassen) entfernt auch den ungenutzten Import', () => {
 		const blocks = [{ keep: scriptI }, { keep: introI }, { keep: schlussI }];
 		const next = rebuild(DOC2, { blocks });
-		expect(next).not.toContain('<Alert');
-		expect(next).not.toContain('import { Alert }'); // dynamisch entfernt
+		expect(next).not.toContain('<Banner');
+		expect(next).not.toContain('import { Banner }'); // dynamisch entfernt
 		expect(checkIslandGuard(before, parseSvx(next))).toEqual({ ok: true });
 	});
 
@@ -925,11 +925,11 @@ describe('rebuild: Block-Modell (blocks)', () => {
 	});
 
 	it('bewahrt getrennte Inseln nach Reorder (≥2-Leerzeilen zwischen Inseln)', () => {
-		// script + Alert direkt nebeneinander (beide Inseln) → müssen 2 Segmente bleiben.
+		// script + Banner direkt nebeneinander (beide Inseln) → müssen 2 Segmente bleiben.
 		const blocks = [{ keep: scriptI }, { keep: alertI }, { keep: introI }, { keep: schlussI }];
 		const next = rebuild(DOC2, { blocks });
 		const isl = parseSvx(next).segments.filter((s) => s.type === 'insel');
 		expect(isl.some((s) => s.text.includes('<script'))).toBe(true);
-		expect(isl.some((s) => s.text.trim().startsWith('<Alert'))).toBe(true);
+		expect(isl.some((s) => s.text.trim().startsWith('<Banner'))).toBe(true);
 	});
 });

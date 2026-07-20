@@ -21,7 +21,7 @@
 	import SpecTable from './SpecTable.svelte';
 	import StatusSegmentedControl from './StatusSegmentedControl.svelte';
 	import AnchorBar from './AnchorBar.svelte';
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 
 	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();
@@ -710,10 +710,10 @@
 	<nav class="crumb"><a href="/admin">← Alle Komponenten</a></nav>
 
 	{#if !data.writable}
-		<Alert compact variant="warning">
+		<Banner compact variant="warning">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Prod öffnet später einen
 			GitHub-PR).
-		</Alert>
+		</Banner>
 	{/if}
 
 	<!-- EIN äußerer Karten-Container um den gesamten Editor (Delta 1). -->
@@ -758,14 +758,14 @@
 		<div class="editor-card__body">
 			<!-- Drift-Banner (nur wenn figma-raw.json neuer als model.json) — Delta 7. -->
 			{#if data.figmaRawNeuerAlsModel}
-				<Alert
+				<Banner
 					variant="warning"
 					role="status"
 					title="Design hat sich seit dem letzten Import geändert"
 					actions={driftActions}
 				>
 					{@render driftText()}
-				</Alert>
+				</Banner>
 			{/if}
 
 			<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>

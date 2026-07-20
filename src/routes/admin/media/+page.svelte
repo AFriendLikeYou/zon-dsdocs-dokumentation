@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { AdminPageHeader } from '../ui';
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { Button } from '$components/ui/button';
 	import { Field } from '$components/ui/field';
 	import { EmptyState } from '$components/ui/empty-state';
@@ -71,22 +71,22 @@
 	</AdminPageHeader>
 
 	{#if form?.uploaded}
-		<Alert compact variant="success" role="status">
+		<Banner compact variant="success" role="status">
 			Hochgeladen: <code>{form.path}</code>
 			<button type="button" class="link" onclick={() => copyPath(String(form?.path))}>
 				{copied === form.path ? 'Kopiert!' : 'Pfad kopieren'}
 			</button>
-		</Alert>
+		</Banner>
 	{:else if form?.deleted}
-		<Alert compact variant="success" role="status">Gelöscht: <code>{form.path}</code></Alert>
+		<Banner compact variant="success" role="status">Gelöscht: <code>{form.path}</code></Banner>
 	{:else if form?.message}
-		<Alert compact variant="danger" role="alert">{form.message}</Alert>
+		<Banner compact variant="danger" role="alert">{form.message}</Banner>
 	{/if}
 	{#if !data.writable}
-		<Alert compact variant="warning">
+		<Banner compact variant="warning">
 			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht persistent
 			→ Blob-Store/GitHub, Phase 3).
-		</Alert>
+		</Banner>
 	{/if}
 
 	<form

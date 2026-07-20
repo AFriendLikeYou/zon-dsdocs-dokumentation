@@ -7,7 +7,7 @@ title: Resources
 </svelte:head>
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 
 	import { blur } from "svelte/transition";
 
@@ -29,7 +29,7 @@ title: Resources
 
 # {title}
 
-<Alert
+<Banner
 	variant="default"
 	title="Diese Seite ist im Aufbau"
 	description="Die hier verlinkten Pakete sind eine erste Auswahl. Die vollständige Ressourcen-Übersicht wird noch ausgebaut."

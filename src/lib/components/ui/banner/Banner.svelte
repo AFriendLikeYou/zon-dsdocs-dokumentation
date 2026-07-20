@@ -1,5 +1,5 @@
 <!--
-  Alert.svelte — Callout/Hinweis-Box. Adaptiv über z-ds-Tokens.
+  Banner.svelte — Hinweis-/Status-Banner. Adaptiv über z-ds-Tokens.
   Inhalt entweder über title/description (einfach) ODER als children (rich content).
   Varianten: default · info · success · warning · danger · tip.
 
@@ -44,8 +44,8 @@
 	} = $props();
 </script>
 
-<div class="alert alert--{variant} {className}" class:alert--compact={compact} {role}>
-	<span class="alert__icon" aria-hidden="true">
+<div class="banner banner--{variant} {className}" class:banner--compact={compact} {role}>
+	<span class="banner__icon" aria-hidden="true">
 		{#if variant === 'success'}
 			<svg
 				viewBox="0 0 18 18"
@@ -106,21 +106,21 @@
 		{/if}
 	</span>
 
-	<div class="alert__body">
-		{#if title}<p class="alert__title">{title}</p>{/if}
+	<div class="banner__body">
+		{#if title}<p class="banner__title">{title}</p>{/if}
 		{#if children}
-			<div class="alert__content">{@render children()}</div>
+			<div class="banner__content">{@render children()}</div>
 		{:else if description}
-			<p class="alert__desc">{description}</p>
+			<p class="banner__desc">{description}</p>
 		{/if}
 		{#if actions}
-			<div class="alert__actions">{@render actions()}</div>
+			<div class="banner__actions">{@render actions()}</div>
 		{/if}
 	</div>
 </div>
 
 <style>
-	.alert {
+	.banner {
 		display: flex;
 		align-items: flex-start;
 		gap: var(--z-ds-space-8);
@@ -129,31 +129,31 @@
 		margin-block: var(--z-ds-space-24);
 		font-size: var(--ds-text-base);
 	}
-	.alert__icon {
+	.banner__icon {
 		flex: none;
 		display: inline-flex;
 		margin-top: 1px;
 	}
-	.alert__icon svg {
+	.banner__icon svg {
 		width: 18px;
 		height: 18px;
 	}
-	.alert__body {
+	.banner__body {
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-4);
 		min-width: 0;
 	}
-	.alert__title {
+	.banner__title {
 		margin: 0;
 		font-weight: 700;
 	}
-	.alert__desc {
+	.banner__desc {
 		margin: 0;
 		font-size: var(--ds-text-sm);
 	}
 	/* Aktions-Zeile (Buttons/Links) unter dem Text — Muster vom früheren DriftBanner. */
-	.alert__actions {
+	.banner__actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--z-ds-space-6);
@@ -161,7 +161,7 @@
 	}
 	/* Schmales Statusband (compact): weniger Padding, kleinerer Radius, kein
 	   Block-Abstand — ersetzt das frühere AdminFlash. Icon oben-zentriert. */
-	.alert--compact {
+	.banner--compact {
 		align-items: center;
 		gap: var(--z-ds-space-8);
 		padding: var(--z-ds-space-8) var(--z-ds-space-16);
@@ -169,35 +169,35 @@
 		margin-block: 0 var(--z-ds-space-24);
 		font-size: var(--ds-text-sm);
 	}
-	.alert--compact .alert__icon {
+	.banner--compact .banner__icon {
 		margin-top: 0;
 	}
 	/* Rich-Content: erste/letzte Ränder zähmen, damit der Block bündig sitzt. */
-	.alert__content :global(> :first-child) {
+	.banner__content :global(> :first-child) {
 		margin-top: 0;
 	}
-	.alert__content :global(> :last-child) {
+	.banner__content :global(> :last-child) {
 		margin-bottom: 0;
 	}
 
-	.alert--default,
-	.alert--info {
+	.banner--default,
+	.banner--info {
 		background-color: rgb(from var(--ds-accent) r g b / 0.1);
 		color: color-mix(in lab, var(--ds-accent) 60%, var(--ds-text) 40%);
 	}
-	.alert--success {
+	.banner--success {
 		background-color: rgb(from var(--ds-positive) r g b / 0.1);
 		color: color-mix(in lab, var(--ds-positive) 60%, var(--ds-text) 80%);
 	}
-	.alert--danger {
+	.banner--danger {
 		background-color: rgb(from var(--ds-negative) r g b / 0.1);
 		color: color-mix(in lab, var(--ds-negative) 60%, var(--ds-text) 80%);
 	}
-	.alert--warning {
+	.banner--warning {
 		background-color: rgb(from var(--ds-warning) r g b / 0.1);
 		color: color-mix(in lab, var(--ds-warning) 60%, var(--ds-text) 80%);
 	}
-	.alert--tip {
+	.banner--tip {
 		background-color: rgb(from var(--ds-accent-brand) r g b / 0.1);
 		color: color-mix(in lab, var(--ds-accent-brand) 60%, var(--ds-text) 50%);
 	}

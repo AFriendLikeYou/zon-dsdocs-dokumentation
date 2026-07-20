@@ -227,7 +227,7 @@ geschützter Inseln übers CMS). Regeln:
 
 ### Editierbare Komponenten — `admin/brand/core/cms-components.ts` (Registry)
 
-**Leaves (self-closing, feld-editierbar):** Alert, DoDont, Color, TextColor, Lightbox,
+**Leaves (self-closing, feld-editierbar):** Banner, DoDont, Color, TextColor, Lightbox,
 VideoPlayer, DownloadSpecimen, BrandHero, **Card**. Prop-Typen: `text|textarea|select|
 boolean|number|media`. **Container (Attribute + editierbare Kinder):** **Grid** (→
 Color/TextColor), **DoDontGroup** (→ DoDont), **ImageGallery** (→ Lightbox); je mit
@@ -283,7 +283,7 @@ prüfen die E2E-Tests **Invarianten** (safe, guard-ok, Insel-Erhalt, Idempotenz)
 **Newline-Kodierung (kritisch):** `serializeComponentTag` kodiert `\n` als `&#10;`, damit
 ein Attribut-Wert IMMER eine physische Zeile bleibt. Ein echter Zeilenumbruch (v. a. eine
 Leerzeile) in einem Tag-Attribut würde die mdsvex-`.svx` beim Kompilieren zerreißen
-(„Expected token ="). Mehrzeilige Redaktions-Texte (z. B. `Alert description`) sind so
+(„Expected token ="). Mehrzeilige Redaktions-Texte (z. B. `Banner description`) sind so
 sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 
 > Offen (spätere Politur): Drag & Drop für Container-KINDER (top-level ist da) ·
@@ -338,7 +338,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 - **Atom-first:** Vor jedem UI-Neubau erst den Bestand prüfen (Reihenfolge + Liste in
   `src/lib/components/README.md`, Abschnitt „Atom-first"): Felder nur über `ui/field/`
   (einzige Feld-Optik), Buttons über `ui/button/` (`size`-Prop), Banner/Flash über
-  `ui/alert/`, Leere-Zustände über `ui/empty-state/`, Fokus-Ringe via `.focus-ring`.
+  `ui/banner/`, Leere-Zustände über `ui/empty-state/`, Fokus-Ringe via `.focus-ring`.
 - Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 

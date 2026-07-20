@@ -1,7 +1,7 @@
 // Brand-Prosa-Editor — Segmentierung & Round-Trip-sichere (De-)Serialisierung.
 //
 // Zweck: eine mdsvex-`.svx`-Brand-Seite in editierbare Zonen zerlegen, OHNE die
-// Svelte-Inseln (`<script>`, Komponenten-Tags `<Alert …>`, `{#each …}`-Blöcke,
+// Svelte-Inseln (`<script>`, Komponenten-Tags `<Banner …>`, `{#each …}`-Blöcke,
 // `<style>`, `<svelte:head>`) zu gefährden. Editierbar sind nur (1) skalare
 // Frontmatter-Felder (v. a. `title`) und (2) reine Markdown-Prosa (Zeilen ganz
 // ohne `<`, `{`, `}`). Alles andere bleibt VERBATIM erhalten.

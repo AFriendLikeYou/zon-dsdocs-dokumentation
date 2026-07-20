@@ -5,7 +5,7 @@ category: brand
 ---
 
 <script lang="ts">
-	import { Alert } from '$components/ui/alert';
+	import { Banner } from '$components/ui/banner';
 	import { DoDont, DoDontGroup } from '$components/ui/dodont';
 	import { ExampleStage } from '$components/ui/example-stage';
 </script>
@@ -15,10 +15,12 @@ category: brand
 Typografie ist ein zentrales Markenelement der ZEIT — sie trägt Haltung, Hierarchie
 und Lesbarkeit. Auf dieser Seite stehen die Grundlagen der Marken-Typografie.
 
-<Alert variant="info" title="Diese Seite ist im Aufbau">
-	Die ausführlichen Marken-Typografie-Regeln werden vom Brand-Team gepflegt. Die
-	technische Schrift-Skala der Produkte steht unter [Foundations → Typography](/product/foundations/typography).
-</Alert>
+<Banner variant="info" title="Diese Seite ist im Aufbau">
+
+Die ausführlichen Marken-Typografie-Regeln werden vom Brand-Team gepflegt. Die
+technische Schrift-Skala der Produkte steht unter [Foundations → Typography](/product/foundations/typography).
+
+</Banner>
 
 <img class="img-natural" src="/media/brand/typography/typografie-image-0.png" alt="Typografie der Marke DIE ZEIT" />
 
@@ -32,10 +34,12 @@ Texte. Welche Schrift in welchem Kontext zum Einsatz kommt, ist Teil der Markenf
 	<img src="/media/brand/typography/typografie-image-2.png" alt="Schrift-Beispiele der Marke DIE ZEIT" />
 </ExampleStage>
 
-<Alert variant="tip" title="Hierarchie zuerst">
+<Banner variant="tip" title="Hierarchie zuerst">
+
 	Baue Hierarchie über Größe und Gewicht auf, nicht über Farbe — das hält Texte ruhig
 	und gut lesbar.
-</Alert>
+
+</Banner>
 
 ## Do & Don't
 
