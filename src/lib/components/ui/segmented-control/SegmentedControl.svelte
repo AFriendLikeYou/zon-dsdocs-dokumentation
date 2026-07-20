@@ -81,7 +81,10 @@
 	const showThumb = $derived(variant === 'pill' && !tonal);
 
 	let groupEl: HTMLDivElement | undefined = $state();
-	let thumb = $state({ left: 0, width: 0 });
+	// Der Thumb wird VOLLSTÄNDIG am aktiven Segment gemessen (auch top/height) —
+	// eine feste Höhe im CSS würde bei abweichenden Segment-Metriken (size="sm",
+	// icon-only) 2–4px überstehen.
+	let thumb = $state({ left: 0, top: 0, width: 0, height: 0 });
 	// Erst nach der ersten Messung animieren — sonst gleitet der Indikator beim
 	// Mount sichtbar von 0 herein.
 	let ready = $state(false);
@@ -95,7 +98,12 @@
 		if (!showThumb) return;
 		const active = groupEl?.querySelector<HTMLButtonElement>('[aria-checked="true"]');
 		if (!active) return;
-		thumb = { left: active.offsetLeft, width: active.offsetWidth };
+		thumb = {
+			left: active.offsetLeft,
+			top: active.offsetTop,
+			width: active.offsetWidth,
+			height: active.offsetHeight
+		};
 	}
 
 	$effect(() => {
@@ -143,7 +151,9 @@
 			class="segmented-control__thumb"
 			class:segmented-control__thumb--ready={ready}
 			style:left="{thumb.left}px"
+			style:top="{thumb.top}px"
 			style:width="{thumb.width}px"
+			style:height="{thumb.height}px"
 			aria-hidden="true"
 		></span>
 	{/if}
@@ -189,10 +199,10 @@
 	.segmented-control--pill {
 		backdrop-filter: blur(var(--seg-blur));
 	}
+	/* top/left/width/height kommen gemessen aus dem Script (style:*) — der Thumb
+	   deckt das aktive Segment exakt, unabhängig von Größe und Icon-/Text-Metrik. */
 	.segmented-control__thumb {
 		position: absolute;
-		top: 3px;
-		height: 26px;
 		border-radius: 999px;
 		background: var(--seg-thumb-bg);
 		box-shadow: var(--ds-shadow-sm);
@@ -227,6 +237,10 @@
 		cursor: pointer;
 		white-space: nowrap;
 	}
+	/* Press-Feedback (Emil-Skill): jedes drückbare Element reagiert auf den Druck. */
+	.segmented-control__option:active {
+		transform: scale(0.94);
+	}
 	.segmented-control__option:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
@@ -238,7 +252,9 @@
 		height: 26px;
 		font-size: var(--ds-text-xs);
 		font-weight: 500;
-		transition: color var(--ds-dur) var(--ds-ease);
+		transition:
+			color var(--ds-dur) var(--ds-ease),
+			transform var(--ds-dur) var(--ds-ease-out);
 	}
 	.segmented-control--pill.segmented-control--sm .segmented-control__option {
 		height: 22px;
@@ -271,9 +287,17 @@
 	}
 
 	/* Icon-Segmente (kein sichtbares Label) — quadratisch, zentriertes Icon.
-	   Kompound mit --pill, damit die Pill-Optionsmetrik (height/padding) nicht
-	   per höherer Spezifität gewinnt. */
-	.segmented-control--pill .segmented-control__option--icon,
+	   Kompound mit --pill/--flat, damit die Optionsmetrik (height/padding) nicht
+	   per höherer Spezifität gewinnt. In der Pill bleibt die Höhe der Variante
+	   erhalten (26px bzw. 22px bei sm) und die Breite zieht quadratisch nach —
+	   sonst säße das Icon-Segment niedriger als der Track dafür ausgelegt ist. */
+	.segmented-control--pill .segmented-control__option--icon {
+		width: 26px;
+		padding: 0;
+	}
+	.segmented-control--pill.segmented-control--sm .segmented-control__option--icon {
+		width: 22px;
+	}
 	.segmented-control--flat .segmented-control__option--icon {
 		width: 1.5rem;
 		height: 1.5rem;

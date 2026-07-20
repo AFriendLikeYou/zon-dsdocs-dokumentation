@@ -117,9 +117,10 @@
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		gap: var(--z-ds-space-6);
-		/* Figma-Chip 845:14187: padding 4/8. */
-		padding: var(--z-ds-space-4) var(--z-ds-space-8);
+		/* 2px: die Space-Skala beginnt erst bei 4px — für die enge Chip-Zeile bewusst
+		   ein Literal (ein fehlendes --z-ds-space-2 fällt sonst still auf 0 zurück). */
+		gap: 2px;
+		padding: 2px var(--z-ds-space-8);
 		border-radius: var(--ds-radius-sm);
 		vertical-align: middle;
 		max-width: 100%;

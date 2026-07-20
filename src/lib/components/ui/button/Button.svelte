@@ -17,6 +17,7 @@
     · size      — sm (Default) | md | lg (reale Padding-Cluster)
     · href      — wenn gesetzt, rendert <a> statt <button>
     · type      — Button-Typ (nur ohne href relevant), Default `button`
+    · title     — Kurzinfo als barrierefreier ui/tooltip (nicht als natives title)
     · disabled  — deaktiviert (bei <a> via aria-disabled + Klassen-Look)
     · iconLeft  — Snippet vor dem Label
     · iconRight — Snippet nach dem Label
@@ -30,6 +31,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
+	import { tooltip } from '$components/ui/tooltip';
 
 	type Variant = 'default' | 'accent' | 'ghost' | 'quiet' | 'danger';
 	type Size = 'sm' | 'md' | 'lg';
@@ -45,6 +47,11 @@
 		href?: string;
 		/** Deaktiviert-Zustand (bei <a> via aria-disabled). */
 		disabled?: boolean;
+		/** Kurzinfo — als barrierefreier ui/tooltip statt nativem title (K8);
+		 *  erscheint bei Hover UND Tastatur-Fokus. Ersetzt das native Attribut nicht
+		 *  den `aria-label`: bleibt der sichtbare Text unvollständig (dynamische
+		 *  Werte), gehört der Zustand weiterhin ins aria-label. */
+		title?: string;
 		/** Icon vor dem Label. */
 		iconLeft?: Snippet;
 		/** Icon nach dem Label. */
@@ -56,8 +63,8 @@
 	};
 
 	type Props = BaseProps &
-		Omit<HTMLButtonAttributes, 'class' | 'disabled'> &
-		Omit<HTMLAnchorAttributes, 'class' | 'href'>;
+		Omit<HTMLButtonAttributes, 'class' | 'disabled' | 'title'> &
+		Omit<HTMLAnchorAttributes, 'class' | 'href' | 'title'>;
 
 	let {
 		variant = 'default',
@@ -65,6 +72,7 @@
 		dashed = false,
 		href,
 		disabled = false,
+		title,
 		iconLeft,
 		iconRight,
 		class: className = '',
@@ -91,12 +99,15 @@
 	);
 </script>
 
+<!-- `title` läuft NICHT als natives Attribut durch (doppelter Tooltip wäre störend),
+     sondern über die ui/tooltip-Action: Hover + Tastatur-Fokus, Esc schließt. -->
 {#if href}
 	<a
 		{href}
 		class={classes}
 		aria-disabled={disabled || undefined}
 		tabindex={disabled ? -1 : undefined}
+		use:tooltip={title ?? ''}
 		{...restProps}
 	>
 		{#if iconLeft}{@render iconLeft()}{/if}
@@ -108,6 +119,7 @@
 		type={(restProps as HTMLButtonAttributes).type ?? 'button'}
 		class={classes}
 		{disabled}
+		use:tooltip={title ?? ''}
 		{...restProps}
 	>
 		{#if iconLeft}{@render iconLeft()}{/if}

@@ -86,6 +86,7 @@
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { Button } from '$components/ui/button';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
@@ -251,8 +252,11 @@
 			</div>
 		{/if}
 
-		<button
-			type="button"
+		<!-- Zoom-Zykler: Button-Atom (quiet) + ui/tooltip. Das aria-label trägt den
+		     DYNAMISCHEN Prozentwert (Screenreader müssen den Zustand hören), der
+		     Tooltip die statische Erklärung. -->
+		<Button
+			variant="quiet"
 			class="playground__zoom"
 			onclick={cycleZoom}
 			title="Text-Zoom durchschalten (WCAG-Reflow-Check)"
@@ -260,7 +264,7 @@
 		>
 			<span class="playground__zoom-label" aria-hidden="true">Aa</span>
 			{Math.round(zoom * 100)}&hairsp;%
-		</button>
+		</Button>
 	</div>
 
 	{#if hint}
@@ -382,43 +386,28 @@
 		pointer-events: none;
 	}
 
-	/* Text-Zoom — leiser Zykler unten rechts; RAW-Token, flippt mit der Bühne. */
-	.playground__zoom {
+	/* Text-Zoom — leiser Zykler unten rechts. Optik (Fläche, Hover, Press, Fokus)
+	   kommt vollständig aus dem Button-Atom (variant="quiet"); lokal bleiben nur
+	   Position, Ziffern-Laufweite und der BÜHNEN-KONTEXT: das Atom rendert quiet
+	   über --ds-text-muted/--ds-text; hier werden diese Rollen auf die je Bühne
+	   gepinnten ROHEN --z-ds-*-Token umgelenkt, damit der Zykler mit der BÜHNE
+	   flippt statt mit dem Seiten-Theme (ds-stage-raw-token-rule — dasselbe Rezept
+	   wie das --seg-*-Remapping für die Pill in global.css).
+	   :global, weil die Klasse per class-Prop auf dem <button> des Atoms landet. */
+	:global(.playground__zoom) {
 		position: absolute;
 		bottom: var(--z-ds-space-8);
 		right: var(--z-ds-space-8);
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		border: none;
-		background: none;
-		padding: 3px 8px;
-		border-radius: 999px;
-		font-size: var(--ds-text-xs);
 		font-variant-numeric: tabular-nums;
-		color: var(--z-ds-color-text-55);
-		cursor: pointer;
-		transition:
-			color var(--ds-dur) var(--ds-ease),
-			background-color var(--ds-dur) var(--ds-ease);
+		--ds-text-muted: var(--z-ds-color-text-55);
+		--ds-text: var(--z-ds-color-text-100);
+		--ds-text-body: var(--z-ds-color-text-70);
+		--ds-surface: var(--z-ds-color-background-0);
 	}
 	.playground__zoom-label {
 		font-weight: 700;
 		font-size: 11px;
 		letter-spacing: 0.02em;
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.playground__zoom:hover {
-			color: var(--z-ds-color-text-100);
-			background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
-		}
-	}
-	.playground__zoom:active {
-		transform: scale(0.96);
-	}
-	.playground__zoom:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
 	}
 
 	.playground__controls {
@@ -483,8 +472,7 @@
 		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.playground__stage,
-		.playground__zoom {
+		.playground__stage {
 			transition: none;
 		}
 	}

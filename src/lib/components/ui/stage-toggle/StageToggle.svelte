@@ -1,86 +1,46 @@
 <!--
   StageToggle.svelte — Light/Dark-Umschalter für Specimen-Bühnen (Playground, Anatomy).
   Rein visuell + a11y; der Parent hält den State und reicht `isDark` + Handler herein.
-  Nutzt die je Bühne gepinnten --z-ds-Token → adaptiert automatisch ans Bühnen-Theme.
+
+  Dünner semantischer Wrapper um ui/SegmentedControl (Muster StatusSegmentedControl,
+  ProvenanceChip→Badge): fixiert die Bühnen-Fachsprache ('light' | 'dark'), die
+  Sonne/Mond-Icons und das A11y-Label. Radiogroup-Semantik (role=radio/aria-checked),
+  roving tabindex, Pfeiltasten und der gleitende Aktiv-Indikator kommen komplett aus
+  dem Atom.
+
+  Bühnen-Theming: der Wrapper pinnt NICHTS. Die Pill rendert über die
+  --seg-*-Kontextvariablen, die `static/global.css` unter `.ds-stage` auf die je
+  Bühne gepinnten ROHEN --z-ds-*-Token umlenkt — dadurch folgt der Umschalter der
+  BÜHNE statt dem Seiten-Theme (ds-stage-raw-token-rule), ohne dass hier oder im
+  Atom ein RAW-Token steht.
 -->
 <script lang="ts">
+	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { SunIcon, MoonIcon } from '$lib/icons';
 
 	let {
-		/** Ob die Bühne aktuell dunkel ist (steuert aria-pressed). */
+		/** Ob die Bühne aktuell dunkel ist (bestimmt das gewählte Segment). */
 		isDark = false,
 		/** Callback für „hellen Hintergrund". */
 		onlight,
 		/** Callback für „dunklen Hintergrund". */
 		ondark
 	}: { isDark?: boolean; onlight: () => void; ondark: () => void } = $props();
+
+	// `title` statt sichtbarem Label: Icon-Segmente holen daraus ihr aria-label UND
+	// ihren Tooltip (Hover + Tastatur-Fokus).
+	const options = [
+		{ value: 'light', title: 'Heller Hintergrund', icon: sunIcon },
+		{ value: 'dark', title: 'Dunkler Hintergrund', icon: moonIcon }
+	];
 </script>
 
-<div class="stage-toggle" role="group" aria-label="Vorschau-Hintergrund">
-	<button
-		type="button"
-		class="stage-toggle__btn"
-		aria-label="Heller Hintergrund"
-		aria-pressed={!isDark}
-		onclick={onlight}
-	>
-		<SunIcon width={14} height={14} />
-	</button>
-	<button
-		type="button"
-		class="stage-toggle__btn"
-		aria-label="Dunkler Hintergrund"
-		aria-pressed={isDark}
-		onclick={ondark}
-	>
-		<MoonIcon width={14} height={14} />
-	</button>
-</div>
+{#snippet sunIcon()}<SunIcon width={14} height={14} />{/snippet}
+{#snippet moonIcon()}<MoonIcon width={14} height={14} />{/snippet}
 
-<style>
-	.stage-toggle {
-		display: inline-flex;
-		gap: 2px;
-		padding: 3px;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
-		backdrop-filter: blur(10px);
-	}
-	.stage-toggle__btn {
-		display: grid;
-		place-items: center;
-		width: 26px;
-		height: 26px;
-		border: none;
-		background: none;
-		border-radius: 999px;
-		color: var(--z-ds-color-text-55);
-		cursor: pointer;
-		transition:
-			color var(--ds-dur) var(--ds-ease),
-			background-color var(--ds-dur) var(--ds-ease),
-			transform var(--ds-dur) var(--ds-ease-out);
-	}
-	.stage-toggle__btn[aria-pressed='true'] {
-		background: var(--z-ds-color-background-0);
-		color: var(--z-ds-color-text-100);
-		box-shadow: var(--ds-shadow-sm);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.stage-toggle__btn:hover {
-			color: var(--z-ds-color-text-100);
-		}
-	}
-	.stage-toggle__btn:active {
-		transform: scale(0.94);
-	}
-	.stage-toggle__btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.stage-toggle__btn {
-			transition: none;
-		}
-	}
-</style>
+<SegmentedControl
+	label="Vorschau-Hintergrund"
+	{options}
+	value={isDark ? 'dark' : 'light'}
+	onchange={(v) => (v === 'dark' ? ondark() : onlight())}
+/>

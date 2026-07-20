@@ -3,7 +3,7 @@ title: Components
 ---
 
 <script lang="ts">
-	import { Badge } from '$components/ui/badge';
+	import { Card } from '$components/ui/card';
 	import type { BadgeVariant } from '$types/spec';
 	// Zentraler, generierter Katalog-Index (Stufe 5, ADR-023/024) — Discovery über
 	// die co-locateten model.json, redaktionelle Overrides bereits eingemerged.
@@ -86,23 +86,25 @@ Design-System-Styles.
 
 <div class="cat-grid">
 	{#each cards as card (card.url)}
-		<a href={card.url} class="cat-card">
-			{#if card.preview}
-				<div class="cat-preview catalog-preview spec-canvas ds-stage" aria-hidden="true" inert>
+		<Card
+			url={card.url}
+			title={card.title}
+			description={card.description}
+			badge={card.badge}
+			badgeVariant={card.badgeVariant}
+			mediaClass={card.preview
+				? 'catalog-preview spec-canvas ds-stage'
+				: 'catalog-preview catalog-preview--empty'}
+		>
+			{#snippet media()}
+				{#if card.preview}
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html card.preview.html}
-				</div>
-			{:else}
-				<div class="cat-preview catalog-preview cat-preview--empty" aria-hidden="true">
-					<span>{card.title}</span>
-				</div>
-			{/if}
-			<div class="cat-card__head">
-				<h3 class="cat-card__title">{card.title}</h3>
-				{#if card.badge}<Badge tone={card.badgeVariant}>{card.badge}</Badge>{/if}
-			</div>
-			<p class="cat-card__desc">{card.description}</p>
-		</a>
+				{:else}
+					<span class="cat-preview__label">{card.title}</span>
+				{/if}
+			{/snippet}
+		</Card>
 	{/each}
 </div>
 
@@ -115,63 +117,10 @@ Design-System-Styles.
 		width: 100%;
 		max-width: 100%;
 	}
-	.cat-card {
-		display: block;
-		text-decoration: none;
-		transition: transform var(--ds-dur) var(--ds-ease-out);
-	}
-	.cat-card:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 3px;
-		border-radius: var(--ds-radius);
-		transform: translateY(-3px);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.cat-card:hover {
-			transform: translateY(-3px);
-		}
-		.cat-card:hover .cat-preview {
-			box-shadow: var(--ds-shadow-md);
-		}
-	}
-	.cat-card:active {
-		transform: translateY(-1px) scale(0.99);
-	}
-
-	/* Basis-Fläche (16:9, Rahmen, Bühnen-Bg) kommt aus `.catalog-preview` (global.css).
-	   Specimen mittig, damit breite Inhalte (Cell) links/rechts gleichmäßig abgeschnitten
-	   werden statt links anzukleben; leichte Skalierung hält typische Specimens im Rahmen. */
-	.cat-preview :global(> *) {
-		transform: scale(0.9);
-		max-width: 100%;
-	}
-	.cat-preview--empty {
-		background: color-mix(in srgb, var(--ds-accent) 8%, var(--ds-surface-raised));
-	}
-	.cat-preview--empty span {
+	/* Karte, Medienrahmen, Hover/Fokus-Motion kommen aus `ui/card` (K12). Hier bleibt
+	   nur das Katalog-Eigene: das Raster und der Text der leeren Vorschau. */
+	.cat-preview__label {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
-	}
-	.cat-card__head {
-		display: flex;
-		align-items: baseline;
-		gap: var(--z-ds-space-8);
-		padding-top: var(--z-ds-space-16);
-		flex-wrap: wrap;
-	}
-	.cat-card__title {
-		margin: 0 0 var(--z-ds-space-4);
-	}
-	.cat-card__desc {
-		font-size: var(--ds-text-base);
-		color: var(--ds-text-body);
-		max-width: none;
-		margin: 0;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.cat-card,
-		.cat-preview {
-			transition: none;
-		}
 	}
 </style>

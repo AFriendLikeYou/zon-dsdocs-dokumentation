@@ -5,6 +5,7 @@
 	// Die kleine Produkt-Vorschau in der Welten-Karte nutzt echte z-Klassen;
 	// deren Pattern-CSS kommt via ?raw aus den Component-Ordnern.
 	import { CHANGELOG } from '$data/changelog';
+	import { Card } from '$components/ui/card';
 	import LandingHero from './LandingHero.svelte';
 	import buttonCss from './product/components/button/pattern.css?raw';
 	import toggleCss from './product/components/toggle/pattern.css?raw';
@@ -30,33 +31,33 @@
 	<div class="container">
 		<!-- ── Zwei Welten ──────────────────────────────────────────────────────── -->
 		<section class="worlds">
-			<a class="world world--brand" href="/brand">
-				<img src="/media/brand/logo/wordmark-1.webp" alt="" class="world__img" loading="lazy" />
-				<div class="world__text">
-					<h2>Brandhub</h2>
-					<p>
-						Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles, was
-						die Marke DIE ZEIT ausmacht.
-					</p>
-					<span class="world__go">Zur Marke →</span>
-				</div>
-			</a>
-			<a class="world world--product" href="/product">
-				<div class="world__demo" aria-hidden="true">
-					<button class="z-button z-button--primary" type="button">Primary</button>
-					<span class="z-switch z-switch--on"><span class="z-switch__thumb"></span></span>
-					<span class="z-checkbox z-checkbox--checked"><span class="z-checkbox__check"></span></span
-					>
-				</div>
-				<div class="world__text">
-					<h2>Design-System</h2>
-					<p>
-						Design Principles, Foundations, Tokens und dokumentierte Komponenten mit interaktivem
-						Playground — für konsistente, barrierearme Interfaces.
-					</p>
-					<span class="world__go">Zum System →</span>
-				</div>
-			</a>
+			<Card
+				url="/brand"
+				variant="framed"
+				headingLevel={2}
+				title="Brandhub"
+				description="Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles, was die Marke DIE ZEIT ausmacht."
+				image="/media/brand/logo/wordmark-1.webp"
+				cta="Zur Marke →"
+			/>
+			<Card
+				url="/product"
+				variant="framed"
+				headingLevel={2}
+				title="Design-System"
+				description="Design Principles, Foundations, Tokens und dokumentierte Komponenten mit interaktivem Playground — für konsistente, barrierearme Interfaces."
+				cta="Zum System →"
+			>
+				{#snippet media()}
+					<div class="world-demo">
+						<button class="z-button z-button--primary" type="button">Primary</button>
+						<span class="z-switch z-switch--on"><span class="z-switch__thumb"></span></span>
+						<span class="z-checkbox z-checkbox--checked"
+							><span class="z-checkbox__check"></span></span
+						>
+					</div>
+				{/snippet}
+			</Card>
 		</section>
 
 		<!-- ── Was ist neu ──────────────────────────────────────────────────────── -->
@@ -98,56 +99,14 @@
 			grid-template-columns: 1fr 1fr;
 		}
 	}
-	.world {
-		display: flex;
-		flex-direction: column;
-		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		overflow: hidden;
-		background: var(--ds-surface);
-		text-decoration: none;
-		color: inherit;
-		transition:
-			transform var(--ds-dur) var(--ds-ease-out),
-			border-color var(--ds-dur) var(--ds-ease);
-	}
-	@media (hover: hover) {
-		.world:hover {
-			transform: translateY(-3px);
-			border-color: var(--ds-border-hover);
-		}
-	}
-	.world__img {
-		width: 100%;
-		height: 180px;
-		object-fit: cover;
-		background: var(--ds-surface-raised);
-	}
-	.world__demo {
+	/* Die Karten selbst kommen aus `ui/card` (variant="framed", K12). Hier bleibt nur
+	   die Anordnung der Live-Komponenten in der Medienfläche der Produkt-Karte. */
+	.world-demo {
 		display: flex;
 		align-items: center;
 		gap: 1.25rem;
-		height: 180px;
+		width: 100%;
 		padding: 0 1.5rem;
-		background: var(--ds-surface-raised);
-	}
-	.world__text {
-		padding: 1.5rem;
-	}
-	.world__text h2 {
-		font-size: var(--ds-heading-2);
-		margin: 0 0 0.5rem;
-		color: var(--ds-text);
-	}
-	.world__text p {
-		font-size: var(--ds-text-base);
-		line-height: 1.5;
-		color: var(--ds-text-body);
-		margin: 0 0 1rem;
-	}
-	.world__go {
-		font-weight: 500;
-		color: var(--ds-accent);
 	}
 
 	/* ── Was ist neu ── */
@@ -202,11 +161,5 @@
 		margin-top: 1rem;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.world {
-			transition: none;
-		}
 	}
 </style>

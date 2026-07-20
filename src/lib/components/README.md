@@ -133,6 +133,16 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    `variant: solid|dashed` (dashed = Maschinen-Sprache), optionales `label` in der
    Linie, `spacing: sm|md|lg`; NICHT für Karten-/Tabellen-/Kopfzeilen-Borders,
    die zur Komponente gehören),
+   `ui/card/` (DIE verlinkte Übersichtskarte — Medienfläche + Titel + Beschreibung,
+   `<a>` ohne interaktive Kinder. Achsen: `variant: plain|framed` (plain = Rahmen auf
+   der Medienfläche, Text frei darunter; framed = Gehäuse mit Rahmen/Fläche/Padding,
+   Landing-„Welten"), `headingLevel: 2|3` (Dokument-Gliederung, kein CSS-Trick),
+   Medien in Reihenfolge `media`-Snippet › `image`+`imageAlt` › Platzhalter-
+   Illustration — die Fläche ist IMMER `aria-hidden` + `inert`, damit Live-Specimens
+   nicht fokussierbar werden. Dazu `badge`/`badgeVariant`, `cta`, `mediaClass`
+   (z. B. `catalog-preview ds-stage`), Hintergrund-Hook `--ds-card-media-bg`,
+   `class`-Passthrough. Raster über `ui/card/CardGrid`; seit K12 laufen Katalog-
+   Karten und Landing-„Welten" hierüber — keine handgebauten Karten mehr),
    `ui/tooltip/` (Action `use:tooltip={'Text'}` bzw. `{ text, position }` — ersetzt
    native `title=`: ~400ms Hover-Delay, auch bei Tastatur-Fokus, Esc schließt,
    aria-describedby, kein Tooltip auf Touch; Badge/IconActionButton/SegmentedControl

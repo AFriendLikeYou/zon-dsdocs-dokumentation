@@ -9,11 +9,14 @@
 	   in Gruppe 3 (Mapping), in den originalgetreuen DS-Kopien (Playground-Specimens)
 	   und bei Abständen/Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind
 	   bereits semantisch).
-	   AUSNAHME (bewusst): ui/StageToggle greift direkt auf rohe --z-ds-*, damit es
-	   sich der jeweiligen Bühne anpasst (Bühnen-Adaptivität) statt dem Seiten-Theme
-	   zu folgen. ui/SegmentedControl selbst referenziert KEINE RAW-Token mehr,
-	   sondern eigene --seg-*-Variablen; deren Bühnen-Remapping steht unten im
-	   `.ds-stage`-Block. ═════════════════════════════════════════════════════════ */
+	   BÜHNEN-ADAPTIVITÄT (Controls auf .ds-stage müssen der BÜHNE folgen, nicht dem
+	   Seiten-Theme): dafür gibt es KEINE RAW-Ausnahme mehr in den Atomen. Seit K13
+	   ist auch ui/StageToggle nur noch ein dünner Wrapper um ui/SegmentedControl;
+	   beide referenzieren ausschließlich eigene --seg-*-Kontextvariablen, deren
+	   Bühnen-Remapping unten im `.ds-stage`-Block steht. Nach demselben Rezept lenkt
+	   der Playground die --ds-*-Rollen des Zoom-Buttons lokal auf RAW um
+	   (`:global(.playground__zoom)` in Playground.svelte) — die Umlenkung sitzt im
+	   Consumer, das Atom bleibt RAW-frei. ══════════════════════════════════════ */
 
 	/* ── (1) SITE-LOKAL ───────────────────────────────────────────────────────
 	   Eigene Werte der Doku-App ohne z-ds-Herkunft. */
@@ -196,9 +199,10 @@ html.color-scheme-dark {
    zwischen den Modi unterscheiden. Bei DS-Palette-Update hier re-syncen. */
 /* ── Katalog-Vorschau-Bühne (Komponenten-Mini-Previews) ───────────────────────
    Geteilte Fläche für die Katalog-Previews auf /product und /product/components.
-   Die Basis-Fläche steht EINMAL hier statt dupliziert in beiden Seiten-<style>
-   (beide Karten ergänzen nur ihre Karten-/Hover-Regeln). Specimen zentriert,
-   Überlauf abgeschnitten. Verhältnis 16:9 (Bild-Konvention) statt fester Höhe.
+   Die Basis-Fläche (16:9, Rahmen, Radius, Schatten, Zentrierung) kommt seit K12
+   aus der Medienfläche von `ui/card` — `.catalog-preview` wird als `mediaClass`
+   dazugegeben und trägt nur noch das Bühnen-Eigene: den RAW-Bühnenhintergrund
+   (über den Karten-Hook `--ds-card-media-bg`) und die Specimen-Skalierung.
    Hinweis: NICHT `.spec-canvas` überladen — die Klasse markiert generisch jede
    Specimen-Bühne (Playground, VariantMatrix, Anatomie) und darf kein festes
    Seitenverhältnis erzwingen. */
@@ -213,7 +217,18 @@ html.color-scheme-dark {
 	box-shadow: var(--ds-shadow-sm);
 	/* RAW-Token wie die anderen Bühnen → Fläche bleibt eigenständig hell. */
 	background: var(--z-ds-color-background-10);
+	--ds-card-media-bg: var(--z-ds-color-background-10);
 	transition: box-shadow var(--ds-dur) var(--ds-ease);
+}
+/* Specimen mittig, damit breite Inhalte (Cell) links/rechts gleichmäßig abgeschnitten
+   werden statt links anzukleben; leichte Skalierung hält typische Specimens im Rahmen. */
+.catalog-preview > * {
+	transform: scale(0.9);
+	max-width: 100%;
+}
+/* Vorschau ohne Specimen: dezente Tint-Fläche statt Bühne. */
+.catalog-preview--empty {
+	--ds-card-media-bg: color-mix(in srgb, var(--ds-accent) 8%, var(--ds-surface-raised));
 }
 
 .ds-stage {
@@ -233,9 +248,10 @@ html.color-scheme-dark {
 	--z-ds-color-error-70: #bf4040;
 	--z-ds-color-background-warning: #ffe246;
 
-	/* ui/SegmentedControl (Pill) auf der Bühne: die --seg-*-Kontextvariablen auf die
-	   hier gepinnten ROHEN --z-ds-* umlenken → die Pill flippt mit der Bühne, nicht
-	   mit dem Seiten-Theme (ds-stage-raw-token-rule). Die Komponente selbst bleibt
+	/* ui/SegmentedControl (Pill) auf der Bühne — inkl. ui/StageToggle, das seit K13
+	   nur noch ein Wrapper darum ist: die --seg-*-Kontextvariablen auf die hier
+	   gepinnten ROHEN --z-ds-* umlenken → die Pill flippt mit der Bühne, nicht mit
+	   dem Seiten-Theme (ds-stage-raw-token-rule). Die Komponente selbst bleibt
 	   RAW-frei und nutzt off-stage denselben Satz über --ds-*-Rollen. */
 	--seg-track-bg: color-mix(in srgb, var(--z-ds-color-text-100) 7%, transparent);
 	--seg-text: var(--z-ds-color-text-55);
