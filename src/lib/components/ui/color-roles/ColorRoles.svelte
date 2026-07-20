@@ -8,7 +8,7 @@
   Text-auf-Fläche-Paare, live berechnet, mit AA/AAA-Badge.
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 
 	export type RoleItem = { token: string; raw: string; usage: string };
 	export type RoleGroup = { titel: string; beschreibung?: string; rollen: RoleItem[] };
@@ -85,7 +85,7 @@
 							<span class="sw" style="background:{r.wert}"></span>
 							<div class="ident">
 								<span class="name-line">
-									<TokenPill value={r.token} />
+									<Chip value={r.token} />
 								</span>
 								<span class="usage">{r.usage}</span>
 							</div>

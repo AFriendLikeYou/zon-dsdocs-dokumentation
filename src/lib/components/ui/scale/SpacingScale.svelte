@@ -6,7 +6,7 @@
   auch bei Media-Query-abhängigen Stufen wie xxl.
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 
 	let {
 		/** Spacing-Tokens (--z-ds-space-*); jeder rendert einen maßstabsgetreuen Balken. */
@@ -36,9 +36,9 @@
 			<span class="track"><span class="bar" style="width: var({t})"></span></span>
 			<span class="info">
 				{#if px[t]}
-					<TokenPill value={`${px[t]}px`} label={`${px[t]} px`} />
+					<Chip value={`${px[t]}px`} label={`${px[t]} px`} />
 				{/if}
-				<TokenPill value={t} class="name-pill" />
+				<Chip value={t} class="name-pill" />
 			</span>
 		</li>
 	{/each}

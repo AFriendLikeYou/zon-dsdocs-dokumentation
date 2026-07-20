@@ -1,9 +1,9 @@
 <!--
-  TokenPill.svelte — einheitliche Inline-Pille für Token-Namen, Spec-Werte und
+  Chip.svelte — einheitliche Inline-Pille für Token-Namen, Spec-Werte und
   Label-Chips. Ersetzt das zuvor je Komponente unterschiedlich gestylte `<code>` +
   separater CopyButton-Flickenteppich (TokenTable, ColorRoleTable, MeasureTable,
   TokenReference, ColorRoles, ContrastMatrix, RadiusScale, SpacingScale, TypeSpecimen)
-  durch EINE Pille mit integriertem Copy-Icon.
+  durch EINE Pille mit integriertem Copy-Icon. (Früher `ui/token-pill/TokenPill`.)
 
   Zwei Achsen (Figma-Chip-Set, node 845:14173 / 845:14186 — Optik folgt der Vorlage:
   padding 4/8, gap 6, radius-sm, 12px/lh 1, 12px-Icon):
@@ -19,17 +19,26 @@
   - `font` — Schrift. Default `mono` rendert `<code>` in der Mono-Stack (Code/Tokens);
     `text` rendert ein `<span>` in der normalen UI-Schrift (Label-Chips, KEIN `<code>`).
 
-  Optik/Verhalten sonst identisch: die ganze Pille IST der Button (cursor: copy);
-  rechts ein 12px Copy-Icon, das bei Hover leicht ansteigt. Klick kopiert `value` und
-  feuert den globalen Toast; kurz danach zeigt die Pille ein CheckIcon. :active/focus/
-  reduced-motion kommt aus der gemeinsamen Basis IconActionButton (wie bei CopyButton).
+  Interaktion (User-Entscheid 2026-07-20): Die Pille selbst ist ein statisches
+  `<span>` — der Text bleibt frei selektierbar. Kopiert wird AUSSCHLIESSLICH über den
+  kleinen Copy-Icon-Button rechts (IconActionButton, aria-label „<value> kopieren"):
+  nur dort liegen cursor: copy, :active-Feedback und der Fokusring (.focus-ring). Der
+  12px-Icon-Button trägt eine ≥24px große Hit-Area (Padding, per negativem Margin aus
+  dem Layout gerechnet — Touch-Target ohne die Pillenhöhe zu sprengen). Klick kopiert
+  `value` und feuert den globalen Toast; kurz danach zeigt der Button ein CheckIcon.
+  `copy={false}` rendert die reine Anzeige-Pille ganz ohne Icon.
+
+  Abgrenzung (Komposition): runde Status-/Label-Pillen → `ui/badge/` (Badge, ohne
+  Copy, voll rund, Figma 840:13943); Herkunfts-Marker im Spec-Editor →
+  `routes/admin/product/components/[slug]/ProvenanceChip`. Dieser Chip ist die
+  eckige Inline-Copy-Pille für Code-/Token-Werte.
 
   Nutzung:
-    <TokenPill value="--z-ds-space-16" />                       // Name = kopierter Text
-    <TokenPill value="16px" label="16 px" />                    // eigene Anzeige
-    <TokenPill value="none" copy={false} />                     // reine Anzeige, kein Copy
-    <TokenPill value="--z-ds-color-x" tone="machine" />         // Maschinen-Zone (Import)
-    <TokenPill value="Primär" font="text" tone="editorial" />   // Label-Chip, UI-Schrift
+    <Chip value="--z-ds-space-16" />                       // Name = kopierter Text
+    <Chip value="16px" label="16 px" />                    // eigene Anzeige
+    <Chip value="none" copy={false} />                     // reine Anzeige, kein Copy
+    <Chip value="--z-ds-color-x" tone="machine" />         // Maschinen-Zone (Import)
+    <Chip value="Primär" font="text" tone="editorial" />   // Label-Chip, UI-Schrift
 -->
 <script lang="ts">
 	import { getToastState } from '$stores/toast-state.svelte';
@@ -41,7 +50,7 @@
 		value: string;
 		/** Sichtbares Label; Default = value. */
 		label?: string;
-		/** Copy-Verhalten (Icon + Klick + Toast). false = reine Anzeige-Pille. */
+		/** Copy-Verhalten (Icon-Button + Klick + Toast). false = reine Anzeige-Pille. */
 		copy?: boolean;
 		/** Farbfamilie. Default `default` = neutraler Figma-Chip (845:14187). */
 		tone?: 'accent' | 'default' | 'machine' | 'editorial' | 'warn' | 'ghost';
@@ -61,8 +70,8 @@
 
 	const anzeige = $derived(label ?? value);
 	// Tone- und Font-Modifier additiv an die Basis-Klasse hängen.
-	const pillClass = $derived(
-		`token-pill token-pill--${tone}${font === 'text' ? ' token-pill--text' : ''} ${className}`
+	const chipClass = $derived(
+		`chip chip--${tone}${font === 'text' ? ' chip--text' : ''} ${className}`
 	);
 	const toast = copy ? getToastState() : null;
 	let copied = $state(false);
@@ -82,38 +91,30 @@
 	}
 </script>
 
-<!-- Text-Element: `<code>` (mono) oder `<span>` (text) — Copy-Verhalten identisch. -->
-{#snippet textEl()}
+<!-- Die Pille ist ein statisches <span>; der Text bleibt selektierbar. -->
+<span class={chipClass}>
 	{#if font === 'text'}
-		<span class="token-pill__text">{anzeige}</span>
+		<span class="chip__text">{anzeige}</span>
 	{:else}
-		<code class="token-pill__text">{anzeige}</code>
+		<code class="chip__text">{anzeige}</code>
 	{/if}
-{/snippet}
-
-{#if copy}
-	<IconActionButton
-		ariaLabel={`${value} kopieren`}
-		onclick={handleCopy}
-		class="{pillClass}{copied ? ' is-copied' : ''}"
-	>
-		{@render textEl()}
-		{#if copied}
-			<CheckIcon class="token-pill__icon" width={12} height={12} />
-		{:else}
-			<CopyIcon class="token-pill__icon" width={12} height={12} />
-		{/if}
-	</IconActionButton>
-{:else}
-	<span class="{pillClass} token-pill--static">
-		{@render textEl()}
-	</span>
-{/if}
+	{#if copy}
+		<IconActionButton
+			ariaLabel={`${value} kopieren`}
+			onclick={handleCopy}
+			class="chip__copy focus-ring{copied ? ' is-copied' : ''}"
+		>
+			{#if copied}
+				<CheckIcon class="chip__icon" width={12} height={12} />
+			{:else}
+				<CopyIcon class="chip__icon" width={12} height={12} />
+			{/if}
+		</IconActionButton>
+	{/if}
+</span>
 
 <style>
-	/* Die Pille landet auf dem <button> (IconActionButton) bzw. dem <span> → :global,
-	   damit das Scoping über die Kind-Komponente hinweg greift. */
-	:global(.token-pill) {
+	.chip {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
@@ -122,39 +123,38 @@
 		border-radius: var(--ds-radius-sm);
 		vertical-align: middle;
 		max-width: 100%;
-		cursor: copy;
 		border: 1px solid transparent;
 	}
 	/* ── Tone: default — der neutrale Figma-Chip (845:14187), Standard für alle
 	   Code-/Token-Pills inkl. der öffentlichen Tabellen. ── */
-	:global(.token-pill--default) {
+	.chip--default {
 		background: var(--ds-surface-raised);
 		color: var(--ds-text-muted);
 	}
 	/* ── Zusatz-Tones über die semantischen Rollen-Tokens (global.css). ── */
-	:global(.token-pill--accent) {
+	.chip--accent {
 		background: color-mix(in srgb, var(--ds-accent) 10%, transparent);
 		color: var(--ds-accent);
 	}
-	:global(.token-pill--machine) {
+	.chip--machine {
 		background: var(--ds-tint-info-surface);
 		color: var(--ds-tint-info-text);
 	}
-	:global(.token-pill--editorial) {
+	.chip--editorial {
 		background: var(--ds-tint-positive-surface);
 		color: var(--ds-tint-positive-text);
 	}
-	:global(.token-pill--warn) {
+	.chip--warn {
 		background: var(--ds-tint-warning-surface);
 		color: var(--ds-tint-warning-text);
 	}
-	:global(.token-pill--ghost) {
+	.chip--ghost {
 		background: transparent;
 		border-color: var(--ds-border-strong);
 		color: var(--ds-text-muted);
 	}
 
-	:global(.token-pill .token-pill__text) {
+	.chip__text {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		/* Figma: leading-none; das 4px-Padding trägt die Höhe. Umbrochene Langtoken
@@ -164,10 +164,25 @@
 		overflow-wrap: anywhere;
 	}
 	/* Text-Variante: normale UI-Schrift (Tablet Gothic) statt Mono. */
-	:global(.token-pill--text .token-pill__text) {
+	.chip--text .chip__text {
 		font-family: inherit;
 	}
-	:global(.token-pill .token-pill__icon) {
+
+	/* Copy-Icon-Button — das EINZIGE interaktive Element der Pille. Das Icon bleibt
+	   12px; padding + negativer Margin heben die Hit-Area auf ≥24px, ohne die
+	   Pillenhöhe (Tabellen-Zeilen!) zu sprengen. Der Button landet auf dem
+	   IconActionButton-<button> → :global, damit das Scoping über die
+	   Kind-Komponente hinweg greift. */
+	:global(.chip .chip__copy) {
+		/* 12px Icon + 2×6px = 24px Touch-Target. */
+		padding: var(--z-ds-space-6);
+		/* Wachstum aus dem Fluss rechnen: vertikal neutralisieren, rechts bündig. */
+		margin-block: calc(-1 * var(--z-ds-space-6));
+		margin-inline-end: calc(-1 * var(--z-ds-space-4));
+		border-radius: var(--ds-radius-sm);
+		cursor: copy;
+	}
+	:global(.chip .chip__copy .chip__icon) {
 		flex: none;
 		opacity: 0.7;
 		transform: translateY(0);
@@ -176,33 +191,20 @@
 			opacity var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		/* Fläche verstärkt sich bei Hover nur bei accent (Akzent-Mix) und default
-		   (Stufe höher); die getönten Tones behalten ihre Rollen-Fläche. */
-		:global(.token-pill--accent:hover) {
-			background: color-mix(in srgb, var(--ds-accent) 16%, transparent);
-		}
-		:global(.token-pill--default:hover) {
-			background: color-mix(in srgb, var(--ds-surface-raised) 82%, var(--ds-text));
-		}
-		/* Icon steigt bei Hover leicht an (Emil: gated, ease-out) — für alle Tones. */
-		:global(.token-pill:hover .token-pill__icon) {
+		/* Icon steigt bei Hover leicht an (Emil: gated, ease-out) und wird voll sichtbar. */
+		:global(.chip .chip__copy:hover .chip__icon) {
 			opacity: 1;
 			transform: translateY(-1px);
 		}
 	}
 	/* Erfolgs-Icon (Check) kurz nach Copy — voll sichtbar, ohne Anstieg. */
-	:global(.token-pill.is-copied .token-pill__icon) {
+	:global(.chip .chip__copy.is-copied .chip__icon) {
 		opacity: 1;
 		transform: translateY(0);
 	}
 
-	/* Reine Anzeige-Pille: kein Copy → neutraler Cursor, kein Icon. */
-	:global(.token-pill--static) {
-		cursor: default;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
-		:global(.token-pill .token-pill__icon) {
+		:global(.chip .chip__copy .chip__icon) {
 			transition: none;
 		}
 	}

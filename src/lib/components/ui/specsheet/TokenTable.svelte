@@ -8,7 +8,7 @@
 -->
 <script lang="ts">
 	import type { TokenGroup } from '$types/spec';
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { Swatch } from '$components/ui/swatch';
 	import { resolveCssVar } from '$lib/utils';
 
@@ -72,7 +72,7 @@
 								{/if}
 							</td>
 							<td>
-								<TokenPill value={t.name} />
+								<Chip value={t.name} />
 							</td>
 							<td class="token-table__hinweis">{t.hinweis ?? ''}</td>
 							<td class="token-table__value">{t.wert || '…'}</td>

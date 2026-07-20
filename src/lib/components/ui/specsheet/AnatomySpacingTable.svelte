@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
 	import type { SpacingSpec } from '$types/spec';
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { HERKUNFT_LABEL, RICHTUNG_LABEL, type Drift } from './anatomy-measure';
 
 	let {
@@ -81,7 +81,7 @@
 					<!-- copy={false}: Sync-Zeilen sind selbst Buttons — ein kopierbarer
 					     Pill-Button darin wäre verschachtelt (invalide). Kopieren geht
 					     über die Token-Referenz bzw. den Specs-Tab. -->
-					{#if s.token}<TokenPill value={s.token} copy={false} />{/if}
+					{#if s.token}<Chip value={s.token} copy={false} />{/if}
 				</span>
 			</svelte:element>
 		{/each}

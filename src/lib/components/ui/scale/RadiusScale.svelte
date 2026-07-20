@@ -4,7 +4,7 @@
   Numerischer Wert live aus dem Stylesheet (kein Drift zum DS-Paket).
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { resolveCssVar } from '$lib/utils';
 
 	let {
@@ -33,11 +33,11 @@
 			<div class="swatch" style="border-radius: var({it.token})"></div>
 			<div class="meta">
 				<span class="name-line">
-					<TokenPill value={it.token} />
+					<Chip value={it.token} />
 				</span>
 				<span class="val-line">
 					{#if vals[it.token]}
-						<TokenPill value={vals[it.token]} label={label(vals[it.token])} />
+						<Chip value={vals[it.token]} label={label(vals[it.token])} />
 					{/if}
 				</span>
 				{#if it.usage}<span class="use">{it.usage}</span>{/if}

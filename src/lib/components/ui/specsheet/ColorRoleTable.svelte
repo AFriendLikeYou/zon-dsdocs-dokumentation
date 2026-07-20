@@ -8,7 +8,7 @@
 -->
 <script lang="ts">
 	import type { ColorRoles } from '$types/spec';
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { Swatch } from '$components/ui/swatch';
 	import { resolveCssVar } from '$lib/utils';
 
@@ -59,12 +59,12 @@
 								{#if token === 'none'}
 									<span class="color-role-table__cell">
 										<Swatch checkerboard title="Kein Fill" />
-										<TokenPill value="none" copy={false} class="color-role-table__none" />
+										<Chip value="none" copy={false} class="color-role-table__none" />
 									</span>
 								{:else if token}
 									<span class="color-role-table__cell">
 										<Swatch color={resolved[token]} />
-										<TokenPill value={token} />
+										<Chip value={token} />
 									</span>
 								{:else}
 									<span class="color-role-table__dash">—</span>

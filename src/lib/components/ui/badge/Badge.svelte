@@ -21,6 +21,9 @@
               der Karten/Foundations + admin „Thema"), farblich von machine/info
               abgegrenzt → bewusst als eigener Tone geführt.
 
+  Abgrenzung: Badge ist die voll runde Status-/Label-Pille OHNE Copy. Die eckige
+  Inline-Copy-Pille für Code-/Token-Werte (mit Copy-Icon-Button) ist `ui/chip/` (Chip).
+
   Nutzung: <Badge tone="machine">Ready for dev</Badge>
 -->
 <script lang="ts">

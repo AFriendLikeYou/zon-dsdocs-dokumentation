@@ -9,7 +9,7 @@
   (kein Drift zum Upstream-Paket) — dieselbe Auflösung wie foundation-tokens.ts.
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { resolveCssVar } from '$lib/utils';
 	import { TOKEN_USAGE } from '$data/catalog';
 	import {
@@ -65,7 +65,7 @@
 							{/if}
 							<div class="ident">
 								<span class="name-line">
-									<TokenPill value={t.name} />
+									<Chip value={t.name} />
 								</span>
 								{#if t.usage}<span class="usage">{t.usage}</span>{/if}
 								{#if t.usedBy.length}
@@ -79,7 +79,7 @@
 							</div>
 							<span class="val-line">
 								{#if t.wert}
-									<TokenPill value={t.wert} />
+									<Chip value={t.wert} />
 								{:else}
 									<code class="val">{t.wert}</code>
 								{/if}

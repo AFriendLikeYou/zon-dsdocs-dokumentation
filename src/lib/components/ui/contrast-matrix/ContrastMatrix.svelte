@@ -1,11 +1,11 @@
 <!--
   ContrastMatrix.svelte — live berechnete Kontrast-Matrix (Text-Tokens × Hintergrund-
   Tokens) mit WCAG-Einstufung, reagiert auf den Light/Dark-Schalter. Token-Namen
-  werden als TokenPill gerendert. Genau ein Consumer: /product/foundations/accessibility.
+  werden als Chip gerendert. Genau ein Consumer: /product/foundations/accessibility.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	import { resolveCssVar } from '$lib/utils';
 	import { contrastForPair, classifyContrast, formatRatio } from './contrast';
 	import type { ContrastLevel } from './contrast';
@@ -99,7 +99,7 @@
 					{#each backgrounds as bg (bg.token)}
 						<th scope="col">
 							<span class="head-label">{bg.label ?? short(bg.token)}</span>
-							<TokenPill value={bg.token} copy={false} class="head-pill" />
+							<Chip value={bg.token} copy={false} class="head-pill" />
 						</th>
 					{/each}
 				</tr>
@@ -109,7 +109,7 @@
 					<tr>
 						<th scope="row">
 							<span class="head-label">{row.text.label ?? short(row.text.token)}</span>
-							<TokenPill value={row.text.token} copy={false} class="head-pill" />
+							<Chip value={row.text.token} copy={false} class="head-pill" />
 						</th>
 						{#each row.cells as cell (cell.bg.token)}
 							<td>

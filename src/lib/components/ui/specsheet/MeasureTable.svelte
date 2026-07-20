@@ -1,7 +1,7 @@
 <!-- MeasureTable.svelte — Maße als native, adaptive Tabelle (Specs-Tab). -->
 <script lang="ts">
 	import type { Masse, MasseValue } from '$types/spec';
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 	let { masse = null }: {
 		/** Maße (Höhe/Breite/Padding/Radius) als Spec-Zeilen; null blendet die Tabelle aus. */
 		masse?: Masse | null;
@@ -44,7 +44,7 @@
 							>{px(row.value)}{row.unit}{#if herk(row.value)}<span class="measure-table__provenance"
 									>{herk(row.value)}</span
 								>{/if}{#if tok(row.value)}<span class="measure-table__token"
-									><TokenPill value={tok(row.value)!} /></span
+									><Chip value={tok(row.value)!} /></span
 								>{/if}</td
 						>
 					</tr>

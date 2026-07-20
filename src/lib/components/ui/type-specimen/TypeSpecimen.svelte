@@ -10,7 +10,7 @@
   optional: lineHeightToken (--z-ds-lineheight-*) setzt die Zeilenhöhe der Rolle.
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 
 	export type TypeRole = {
 		/** fontsize-Token, z. B. '--z-ds-fontsize-34'. */
@@ -73,12 +73,12 @@
 				<span class="usage">{role.usage}</span>
 				<div class="tokens">
 					<span class="chip">
-						<TokenPill value={role.token} />
+						<Chip value={role.token} />
 						{#if px[role.token]}<span class="px">{px[role.token]}</span>{/if}
 					</span>
 					{#if role.lineHeightToken}
 						<span class="chip">
-							<TokenPill value={role.lineHeightToken} />
+							<Chip value={role.lineHeightToken} />
 						</span>
 					{/if}
 				</div>

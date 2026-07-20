@@ -72,7 +72,7 @@ Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann di
 1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Alert`, `DoDont`, …)
    — nie `type`/`kind`/`appearance`. `type` bleibt nativen HTML-Attributen
    vorbehalten (`<button type>`, `<input type>`). Ausnahme: farb-getönte Pillen
-   (`Badge`, `TokenPill`) nutzen `tone` als Farbrollen-Achse.
+   (`Badge`, `Chip`) nutzen `tone` als Farbrollen-Achse.
 2. **Text-Slots nach fester Bedeutung:** `title` = Überschrift eines Inhalts ·
    `label` = Beschriftung eines Bedienelements · `caption` = Unterschrift zu
    Medien/Beispielen · `description` = ergänzender Fließtext.
@@ -84,7 +84,7 @@ Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann di
    `...restProps`, dokumentiert im JSDoc.
 5. **JSDoc ist Pflicht:** Header-Kommentar mit Zweck + Kompositions-Hinweis
    („Wird von X verwendet; für icon-only nimm `IconActionButton`") und `/** */`
-   je Prop — Muster: `ui/token-pill/TokenPill.svelte`, `ui/copy-button/CopyButton.svelte`.
+   je Prop — Muster: `ui/chip/Chip.svelte`, `ui/copy-button/CopyButton.svelte`.
 
 ## Faustregel beim Anlegen
 
@@ -102,10 +102,11 @@ prüfen** — in dieser Reihenfolge:
    `ui/badge/` (EIN Label-/Status-/Herkunfts-Pill nach Figma 840:13943 — Achse
    `tone: default|machine|editorial|warn|ghost|accent`, optionales `icon`-Snippet;
    ersetzt die früheren admin/AdminBadge + admin/Pill),
-   `ui/token-pill/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
+   `ui/chip/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
    Label-Chips — Achsen `tone: default|accent|machine|editorial|warn|ghost` und
    `font: mono|text`; Default = neutraler Figma-Chip 845:14187, Optik folgt der
-   Figma-Vorlage 845:14173/14186),
+   Figma-Vorlage 845:14173/14186. Statisches `<span>`, Text selektierbar; kopiert
+   wird NUR über den Copy-Icon-Button rechts. Runde Status-Pille ohne Copy → `ui/badge/`),
    `ui/segmented-control/` (EIN „einer von N"-Umschalter — Achsen
    `variant: pill|flat` (pill = Bühnen-Optik mit gleitendem Thumb/Blur,
    flat = Editor-Rechteck Figma 689:11510) und optionales `tone` je Option für

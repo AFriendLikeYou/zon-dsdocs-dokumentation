@@ -9,7 +9,7 @@
   echte --z-ds-space-*-Token, per Prop überschreibbar → wiederverwendbar.
 -->
 <script lang="ts">
-	import { TokenPill } from '$components/ui/token-pill';
+	import { Chip } from '$components/ui/chip';
 
 	let {
 		paddingBlock = '--z-ds-space-10',
@@ -37,11 +37,11 @@
 		</div>
 		<ul class="spacing-context__legend">
 			<li>
-				<span class="spacing-context__swatch"></span><TokenPill value={paddingBlock} label={short(paddingBlock)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip value={paddingBlock} label={short(paddingBlock)} copy={false} />
 				<span class="spacing-context__dim">vertikal</span>
 			</li>
 			<li>
-				<span class="spacing-context__swatch"></span><TokenPill value={paddingInline} label={short(paddingInline)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip value={paddingInline} label={short(paddingInline)} copy={false} />
 				<span class="spacing-context__dim">horizontal</span>
 			</li>
 		</ul>
@@ -58,7 +58,7 @@
 		</div>
 		<ul class="spacing-context__legend">
 			<li>
-				<span class="spacing-context__swatch"></span><TokenPill value={gap} label={short(gap)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip value={gap} label={short(gap)} copy={false} />
 				<span class="spacing-context__dim">gap</span>
 			</li>
 		</ul>
