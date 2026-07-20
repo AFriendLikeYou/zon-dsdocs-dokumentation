@@ -105,6 +105,8 @@ prüfen** — in dieser Reihenfolge:
    Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
+   `ui/dialog/` (schwebende Bestätigungs-/Aktionsleiste `variant="bar"` — Save-Flows
+   mit Verwerfen/Speichern + `shortcut="cmd+s"`; 'modal' als geplante Erweiterung),
    `admin/ui/PopoverSheet` (Popover mit Esc/Fokus/Outside-Click).
 3. Erst wenn nichts passt: neues Atom in `ui/` anlegen (nie inline duplizieren)
    und hier eintragen.

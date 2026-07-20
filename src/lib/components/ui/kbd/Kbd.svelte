@@ -1,11 +1,11 @@
 <!--
-  Kbd.svelte — der Tastenkürzel-Chip der Doku-UI (⌘K der Suche, ⌘S der SaveBar).
+  Kbd.svelte — der Tastenkürzel-Chip der Doku-UI (⌘K der Suche, ⌘S der Dialog-Leiste).
   Konsolidiert die zuvor je Stelle wiederholte <kbd>-Optik (Mono, klein, gerundete
   Fläche, theme-adaptiv) in EIN Atom. Rein darstellend.
 
   Nutzung:
     <Kbd>⌘K</Kbd>
-    <Kbd variant="on-accent">⌘S</Kbd>   // auf gefüllter Accent-Fläche (SaveBar)
+    <Kbd variant="on-accent">⌘S</Kbd>   // auf gefüllter Accent-Fläche (Dialog-Leiste)
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -37,7 +37,7 @@
 		padding: 0 var(--z-ds-space-4);
 	}
 
-	/* Auf gefüllter Accent-Fläche (SaveBar-Speichern-Button): heller, randlos. */
+	/* Auf gefüllter Accent-Fläche (Dialog-Speichern-Button): heller, randlos. */
 	.kbd--on-accent {
 		color: inherit;
 		background: rgb(from var(--ds-static-white) r g b / 0.18);

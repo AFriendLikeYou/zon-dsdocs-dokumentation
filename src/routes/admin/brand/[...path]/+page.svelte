@@ -11,6 +11,7 @@
 	import ProseEditor from '../editor/ProseEditor.svelte';
 	import InsertMenu from '../editor/InsertMenu.svelte';
 	import { Button } from '$components/ui/button';
+	import { Dialog } from '$components/ui/dialog';
 	import SlashMenu from '../editor/SlashMenu.svelte';
 	import { validateValues, countErrors } from '../core/validation';
 	import { readSlash } from '../core/slash';
@@ -402,11 +403,8 @@
 		const inField = (e.target as HTMLElement | null)?.matches?.(
 			'input, textarea, select, [contenteditable]'
 		);
-		if ((e.metaKey || e.ctrlKey) && key === 's') {
-			e.preventDefault();
-			if (dirty && data.writable) formEl?.requestSubmit();
-			return;
-		}
+		// ⌘S liegt jetzt im <Dialog shortcut="cmd+s"> (ein window-Listener dort) —
+		// hier bleiben nur die block-spezifischen Shortcuts.
 		// ⌘Z/⇧⌘Z: Block-History — in Textfeldern gilt weiter das native Text-Undo.
 		if ((e.metaKey || e.ctrlKey) && key === 'z' && !inField) {
 			e.preventDefault();
@@ -488,6 +486,10 @@
 
 <svelte:head><title>{data.title} bearbeiten – Admin</title></svelte:head>
 <svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
+
+{#snippet errorChip()}
+	<span class="savebar-err">{errorCount} {errorCount === 1 ? 'Feld' : 'Felder'} prüfen</span>
+{/snippet}
 
 <div class="edit">
 	<nav class="crumb"><a href={data.backHref}>← {data.backLabel}</a></nav>
@@ -866,27 +868,18 @@
 			{/if}
 		</section>
 
-		{#if dirty}
-			<div class="savebar" role="status">
-				<span class="savebar-info"
-					>{dirtyCount > 0
-						? `${dirtyCount} ungespeicherte Änderung${dirtyCount === 1 ? '' : 'en'}`
-						: 'Reihenfolge geändert'}</span
-				>
-				{#if errorCount > 0}
-					<span class="savebar-err">{errorCount} {errorCount === 1 ? 'Feld' : 'Felder'} prüfen</span
-					>
-				{/if}
-				<button type="button" class="savebar-discard" onclick={discard}>Verwerfen</button>
-				<button
-					type="submit"
-					class="save"
-					disabled={!data.writable || errorCount > 0}
-					title={errorCount > 0 ? 'Bitte zuerst die rot markierten Felder korrigieren' : undefined}
-					>Speichern <kbd>⌘S</kbd></button
-				>
-			</div>
-		{/if}
+		<Dialog
+			open={dirty}
+			message={dirtyCount > 0
+				? `${dirtyCount} ungespeicherte Änderung${dirtyCount === 1 ? '' : 'en'}`
+				: 'Reihenfolge geändert'}
+			extra={errorCount > 0 ? errorChip : undefined}
+			primaryDisabled={!data.writable || errorCount > 0}
+			primaryTitle="Bitte zuerst die rot markierten Felder korrigieren"
+			onprimary={() => formEl?.requestSubmit()}
+			onsecondary={discard}
+			shortcut="cmd+s"
+		/>
 	</form>
 
 	{#if slashOpen}
@@ -1053,70 +1046,9 @@
 		height: 1.25rem;
 		font-size: 0.8rem;
 	}
-	/* P4: schwebende Save-Bar bei offenen Änderungen (+ Platz, damit sie nichts verdeckt) */
-	.savebar {
-		position: fixed;
-		left: 50%;
-		bottom: 1.25rem;
-		transform: translateX(-50%);
-		z-index: 40;
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-s);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: 999px;
-		padding: var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-l);
-		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
-		animation: savebar-in 0.2s var(--ds-ease-out, ease-out);
-	}
-	@keyframes savebar-in {
-		from {
-			opacity: 0;
-			transform: translate(-50%, 8px);
-		}
-		to {
-			opacity: 1;
-			transform: translate(-50%, 0);
-		}
-	}
-	.savebar-info {
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-body);
-		white-space: nowrap;
-	}
-	.savebar-discard {
-		border: none;
-		background: none;
-		color: var(--ds-text-muted);
-		font-size: var(--ds-text-sm);
-		cursor: pointer;
-		padding: var(--z-ds-space-6) var(--z-ds-space-s);
-		border-radius: 999px;
-		transition:
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.savebar-discard:hover {
-		background: rgb(from var(--ds-text) r g b / 0.08);
-		color: var(--ds-text);
-	}
-	.savebar-discard:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.savebar .save {
-		padding: var(--z-ds-space-8) var(--z-ds-space-l);
-	}
-	.savebar kbd {
-		font-family: var(--ds-font-mono);
-		font-size: 0.72em;
-		opacity: 0.75;
-		margin-left: 0.3em;
-		background: rgb(from var(--ds-static-white) r g b / 0.18);
-		padding: 1px 5px;
-		border-radius: 4px;
-	}
+	/* P4: schwebende Save-Bar → ui/dialog (Dialog variant="bar"); Optik lebt dort.
+	   Der Fehler-Chip (.savebar-err) wird als `extra`-Snippet in den Dialog gereicht
+	   und bleibt darum hier gestylt (Snippet-Markup = Eltern-Scope). */
 	.ro-chip {
 		display: inline-block;
 		vertical-align: middle;
@@ -1130,29 +1062,6 @@
 		border: 1px solid var(--ds-border-soft);
 		border-radius: 999px;
 		padding: 2px var(--z-ds-space-s);
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.savebar {
-			animation: none;
-		}
-	}
-	.save {
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		border: none;
-		border-radius: 999px;
-		padding: var(--z-ds-space-10) var(--z-ds-space-xl);
-		font-weight: 600;
-		cursor: pointer;
-		transition: opacity var(--ds-dur) var(--ds-ease-out);
-	}
-	.save:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-	.save:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
 	}
 
 	/* Block-Liste (WYSIWYG) */

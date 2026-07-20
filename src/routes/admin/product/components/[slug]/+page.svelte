@@ -13,7 +13,7 @@
 	import RowListField from './RowListField.svelte';
 	import RelatedField from './RelatedField.svelte';
 	import SnippetOverridesField from './SnippetOverridesField.svelte';
-	import SaveBar from './SaveBar.svelte';
+	import { Dialog } from '$components/ui/dialog';
 	import CodeExamplesField from './CodeExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
 	import EditorialCard from './EditorialCard.svelte';
@@ -565,19 +565,15 @@
 		};
 	};
 
-	function onGlobalKeydown(e: KeyboardEvent) {
-		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-			e.preventDefault();
-			if (dirty && data.writable) formEl?.requestSubmit();
-		}
-	}
+	// ⌘S wandert in <Dialog shortcut="cmd+s"> (ein window-Listener dort); hier bleibt
+	// nur der Beforeunload-Schutz gegen versehentliches Verlassen mit offenen Änderungen.
 	function onBeforeUnload(e: BeforeUnloadEvent) {
 		if (dirty) e.preventDefault();
 	}
 </script>
 
 <svelte:head><title>{data.name} — Spec-Editor</title></svelte:head>
-<svelte:window onkeydown={onGlobalKeydown} onbeforeunload={onBeforeUnload} />
+<svelte:window onbeforeunload={onBeforeUnload} />
 
 {#snippet miniPill(variant: 'machine' | 'editorial')}
 	<span class="mini-pill mini-pill--{variant}" aria-hidden="true">
@@ -1153,9 +1149,14 @@
 					<SnippetOverridesField {model} machine={data.machineSnippets} />
 				</EditorialCard>
 
-				{#if dirty}
-					<SaveBar writable={data.writable} ondiscard={discard} />
-				{/if}
+				<Dialog
+					open={dirty}
+					message="Ungespeicherte Änderungen"
+					primaryDisabled={!data.writable}
+					onprimary={() => formEl?.requestSubmit()}
+					onsecondary={discard}
+					shortcut="cmd+s"
+				/>
 			</form>
 		</div>
 	</article>
