@@ -44,7 +44,16 @@
 			setTimeout(() => (button.innerHTML = COPY_LINK_SVG), 1200);
 		});
 
-		header.appendChild(button);
+		// Steht die Überschrift in einer Kopfzeile mit weiteren Elementen (z. B. Titel +
+		// Badge), hängt der Button ans ENDE dieser Zeile statt in die Überschrift —
+		// sonst schöbe er sich zwischen Titel und Badge. Markierung: [data-anchor-row].
+		const row = header.parentElement?.closest<HTMLElement>('[data-anchor-row]');
+		if (row) {
+			row.classList.add('has-anchor-row');
+			row.appendChild(button);
+		} else {
+			header.appendChild(button);
+		}
 	}
 
 	afterNavigate(() => {
@@ -84,7 +93,8 @@
 	}
 	@media (hover: hover) and (pointer: fine) {
 		:global(h2.has-anchor:hover > .anchor-copy),
-		:global(h3.has-anchor:hover > .anchor-copy) {
+		:global(h3.has-anchor:hover > .anchor-copy),
+		:global(.has-anchor-row:hover > .anchor-copy) {
 			opacity: 1;
 		}
 	}
