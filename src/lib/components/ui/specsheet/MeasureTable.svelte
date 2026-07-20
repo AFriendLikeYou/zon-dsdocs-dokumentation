@@ -1,7 +1,15 @@
-<!-- MeasureTable.svelte — Maße als native, adaptive Tabelle (Specs-Tab). -->
+<!--
+  MeasureTable.svelte — Maße als native, adaptive Tabelle (Specs-Tab).
+
+  DÜNNER WRAPPER um `ui/table` (K8-Zwillings-Merge): der geteilte Renderer trägt
+  Struktur + Semantik, die öffentliche Maß-Optik (durchgezogene Trenner, Label links
+  gedämpft, Mono-Wert rechts mit Token-/Herkunfts-Zeile) bringt die Skin-Klasse hier
+  ein. Name + API unverändert — die generierten .svx importieren `MeasureTable` weiter.
+-->
 <script lang="ts">
 	import type { Masse, MasseValue } from '$types/spec';
 	import { Chip } from '$components/ui/chip';
+	import { Table } from '$components/ui/table';
 	let { masse = null }: {
 		/** Maße (Höhe/Breite/Padding/Radius) als Spec-Zeilen; null blendet die Tabelle aus. */
 		masse?: Masse | null;
@@ -31,56 +39,54 @@
 				).filter((r) => r.value)
 			: []
 	);
+
+	type MeasureRow = (typeof rows)[number];
+
+	const columns = [
+		{ key: 'label', render: labelCell },
+		{ key: 'value', align: 'right' as const, render: valueCell }
+	];
 </script>
 
+{#snippet labelCell(row: MeasureRow)}{row.label}{/snippet}
+{#snippet valueCell(row: MeasureRow)}{px(row.value)}{row.unit}{#if herk(row.value)}<span
+			class="measure-table__provenance">{herk(row.value)}</span
+		>{/if}{#if tok(row.value)}<span class="measure-table__token"><Chip value={tok(row.value)!} /></span
+		>{/if}{/snippet}
+
 {#if masse}
-	<div class="table-scroll">
-		<table class="measure-table">
-			<tbody>
-				{#each rows as row (row.label)}
-					<tr>
-						<th>{row.label}</th>
-						<td
-							>{px(row.value)}{row.unit}{#if herk(row.value)}<span class="measure-table__provenance"
-									>{herk(row.value)}</span
-								>{/if}{#if tok(row.value)}<span class="measure-table__token"
-									><Chip value={tok(row.value)!} /></span
-								>{/if}</td
-						>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
+	<div class="table-scroll measure-table-skin">
+		<Table {columns} rows={[...rows]} label="Maße" />
 	</div>
 {/if}
 
 <style>
-	.measure-table {
-		border-collapse: collapse;
+	/* ── Öffentliche Maß-Optik (unverändert übernommen; Skin über :global). ── */
+	.measure-table-skin :global(.ds-table) {
+		/* Vor-Merge-Optik: kompakte Tabelle in Inhaltsbreite, nicht full-width. */
+		width: auto;
 		min-width: 260px;
 	}
-	.measure-table th {
-		text-align: left;
-		font-weight: 400;
+	/* Label-Spalte (1.): links, gedämpft, breiter Abstand nach rechts. */
+	.measure-table-skin :global(.ds-table__cell:first-child) {
 		color: var(--ds-text-muted);
 		padding: 9px 40px 9px 0;
 		border-bottom: 1px solid var(--ds-border);
-		font-size: var(--ds-text-sm);
+		font-weight: 400;
 	}
-	.measure-table td {
-		text-align: right;
+	/* Wert-Spalte (2.): Mono, rechtsbündig. */
+	.measure-table-skin :global(.ds-table__cell:last-child) {
 		font-family: var(--ds-font-mono);
-		padding: 9px 0; /* bewusstes Zell-Padding ohne passendes z-ds-Token */
+		padding: 9px 0;
 		border-bottom: 1px solid var(--ds-border);
-		font-size: var(--ds-text-sm);
 	}
-	.measure-table__token {
+	.measure-table-skin :global(.measure-table__token) {
 		display: block;
 		color: var(--ds-text-muted);
 		font-size: var(--ds-text-xs);
 	}
 	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
-	.measure-table__provenance {
+	.measure-table-skin :global(.measure-table__provenance) {
 		display: block;
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-xs);

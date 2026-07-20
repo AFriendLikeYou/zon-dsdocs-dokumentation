@@ -12,10 +12,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { tooltip } from '$components/ui/tooltip';
 
 	type Props = {
 		/** A11y-Label (für icon-only verpflichtend). */
 		ariaLabel?: string;
+		/** Kurzinfo — als barrierefreier ui/tooltip statt nativem title (K8);
+		 *  erscheint bei Hover UND Tastatur-Fokus. */
+		title?: string;
 		/** Gerahmter Icon-Button-Look (Border + Hover) — wie Icon-/Asset-Grid. */
 		iconButton?: boolean;
 		/** Klick-Handler des Buttons. */
@@ -25,10 +29,11 @@
 		/** Zugriff aufs <button>-Element (z. B. für Popover-Anker). */
 		element?: HTMLButtonElement | null;
 		class?: string;
-	} & Omit<HTMLButtonAttributes, 'class' | 'onclick'>;
+	} & Omit<HTMLButtonAttributes, 'class' | 'onclick' | 'title'>;
 
 	let {
 		ariaLabel,
+		title,
 		iconButton = false,
 		onclick,
 		children,
@@ -38,12 +43,15 @@
 	}: Props = $props();
 </script>
 
+<!-- title läuft NICHT mehr als natives Attribut durch (doppelter Tooltip wäre
+     störend), sondern über die ui/tooltip-Action: Hover + Tastatur-Fokus, Esc. -->
 <button
 	bind:this={element}
 	type="button"
 	class="icon-action {className}"
 	class:icon-button={iconButton}
 	aria-label={ariaLabel}
+	use:tooltip={title ?? ''}
 	{onclick}
 	{...restProps}
 >

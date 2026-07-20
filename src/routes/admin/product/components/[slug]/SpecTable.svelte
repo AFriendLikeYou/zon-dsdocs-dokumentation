@@ -4,6 +4,12 @@
   Auflösung (resolveCssVar o. Ä.) bleibt in der Seite — hier werden nur bereits
   aufgelöste Werte gerendert.
 
+  DÜNNER WRAPPER um `ui/table` (K8-Zwillings-Merge): Struktur, Gruppen und Counter
+  kommen aus dem geteilten Renderer; die Maschinen-Zonen-Optik (GESTRICHELTE Trenner,
+  machine-Chips, ≈-Warn-Pill) bringt die scoped Skin-Klasse hier ein. So teilt der
+  Editor jetzt EINEN Renderer mit den öffentlichen TokenTable/MeasureTable, behält aber
+  seine eigene „nicht editierbar"-Sprache.
+
   - variant „measure": Maße/Abstände. Je Zeile Label · Wert (+ inline-Token) ·
     Herkunft rechts. Der Wert wird fürs Auge formatiert (`anzeigeWert`); Herkunft
     „gemessen"/„abgeleitet" steht als leiser Klartext, „geschätzt" als ≈-Warn-Pill.
@@ -21,6 +27,7 @@
 	import { Swatch } from '$components/ui/swatch';
 	import { Chip } from '$components/ui/chip';
 	import { Badge } from '$components/ui/badge';
+	import { Table } from '$components/ui/table';
 
 	type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
 	type MeasureRow = { label: string; px: string; token?: string; herkunft: Herkunft };
@@ -50,148 +57,145 @@
 		const s = px.replace(/\s*·\s*/g, ' / ').trim();
 		return /[a-z%]/i.test(s) ? s : `${s} px`;
 	};
+
+	const measureColumns = [
+		{ key: 'label', render: mLabel },
+		{ key: 'value', render: mValue },
+		{ key: 'herkunft', align: 'right' as const, render: mHerkunft }
+	];
+
+	const tokenColumns = [
+		{ key: 'swatch', width: '24px', render: tSwatch },
+		{ key: 'name', render: tToken },
+		{ key: 'wert', align: 'right' as const, render: tWert },
+		{ key: 'hinweis', align: 'right' as const, render: tHinweis }
+	];
+
+	// Gruppen für den Renderer (Eyebrow + Counter wie zuvor).
+	const tokenGroups = $derived(
+		groups.map((g) => ({
+			label: g.kategorie,
+			count: `${g.items.length} ${g.items.length === 1 ? 'Token' : 'Tokens'}`,
+			rows: g.items
+		}))
+	);
 </script>
 
-{#snippet herkunftBadge(h: Herkunft)}
-	{#if h === 'geschätzt'}
+{#snippet mLabel(r: MeasureRow)}{r.label}{/snippet}
+{#snippet mValue(r: MeasureRow)}{anzeigeWert(r.px)}{#if r.token} <Chip value={r.token} tone="machine" />{/if}{/snippet}
+{#snippet mHerkunft(r: MeasureRow)}
+	{#if r.herkunft === 'geschätzt'}
 		<Badge tone="warn">≈ geschätzt</Badge>
 	{:else}
 		<!-- gemessen/abgeleitet: ruhiger Klartext rechts (kein Pill) — wie im Mockup. -->
-		<span class="herkunft-text">{h}</span>
+		<span class="herkunft-text">{r.herkunft}</span>
 	{/if}
 {/snippet}
 
+{#snippet tSwatch(t: TokenItem)}
+	{#if t.translucent}
+		<Swatch checkerboard />
+	{:else if t.swatch}
+		<Swatch color={t.wert || t.swatch} />
+	{/if}
+{/snippet}
+{#snippet tToken(t: TokenItem)}<Chip value={t.name} tone="machine" />{/snippet}
+{#snippet tWert(t: TokenItem)}{t.wert || '…'}{/snippet}
+{#snippet tHinweis(t: TokenItem)}{t.hinweis ?? ''}{/snippet}
+
 {#if variant === 'measure'}
 	{#if subhead}<div class="mz-subhead">{subhead}</div>{/if}
-	<table class="mz-table">
-		<tbody>
-			{#each rows as r, i (i)}
-				<tr>
-					<td class="mz-table__label">{r.label}</td>
-					<td class="mz-table__value"
-						>{anzeigeWert(r.px)}{#if r.token} <Chip
-								value={r.token}
-								tone="machine"
-							/>{/if}</td
-					>
-					<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+	<div class="mz-skin mz-skin--measure">
+		<Table columns={measureColumns} {rows} label="Maße (aus Figma)" />
+	</div>
 {:else}
-	<table class="mz-table mz-table--tokens">
-		<!-- Jede Gruppe als eigener <tbody> — semantisch sauberer als Eyebrow-Zeilen im
-		     gemeinsamen Fluss und trägt den Luft-/Trennlinien-Rhythmus zwischen den Gruppen. -->
-		{#each groups as group (group.kategorie)}
-			<tbody class="mz-group">
-				<tr class="mz-grouprow">
-					<td class="mz-grouprow__cell" colspan="4">
-						<div class="mz-grouprow__inner">
-							<span class="mz-grouprow__eyebrow">{group.kategorie}</span>
-							<span class="mz-grouprow__count"
-								>{group.items.length}
-								{group.items.length === 1 ? 'Token' : 'Tokens'}</span
-							>
-						</div>
-					</td>
-				</tr>
-				{#each group.items as t (t.name)}
-					<tr>
-						<td class="mz-table__swatch">
-							{#if t.translucent}
-								<Swatch checkerboard />
-							{:else if t.swatch}
-								<Swatch color={t.wert || t.swatch} />
-							{/if}
-						</td>
-						<td class="mz-table__token"><Chip value={t.name} tone="machine" /></td>
-						<td class="mz-table__value mz-table__value--mono">{t.wert || '…'}</td>
-						<td class="mz-table__hinweis">{t.hinweis ?? ''}</td>
-					</tr>
-				{/each}
-			</tbody>
-		{/each}
-	</table>
+	<div class="mz-skin mz-skin--tokens">
+		<Table columns={tokenColumns} groups={tokenGroups} label="Tokens (aus Figma)" />
+	</div>
 {/if}
 
 <style>
-	/* ── Maschinen-Tabellen ── */
-	.mz-table {
-		width: 100%;
-		border-collapse: collapse;
-	}
-	/* Maschinen-Zone → Trenner GESTRICHELT (dieselbe „nicht editierbar"-Sprache).
-	   Zeilen-Rhythmus: kompakt, aber mit Luft. */
-	.mz-table td {
+	/* ── Maschinen-Tabellen (GESTRICHELTE Trenner = „nicht editierbar"-Sprache) ──
+	   Optik unverändert aus der Vor-Merge-Fassung; Skin über :global auf die
+	   .ds-table-Hooks des geteilten Renderers. */
+	.mz-skin :global(.ds-table__cell) {
 		padding: var(--z-ds-space-10) var(--z-ds-space-8) var(--z-ds-space-10) 0;
 		border-bottom: 1px dashed var(--ds-border);
-		vertical-align: middle;
-		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
-	.mz-table tr:last-child td {
+	.mz-skin :global(.ds-table__row:last-child .ds-table__cell) {
 		border-bottom: none;
 	}
-	/* Token-Gruppen als eigene <tbody>: die letzte Zeile je Gruppe trägt keinen
-	   Zeilen-Trenner mehr — die Gruppen trennt stattdessen Luft + eine durchgehende
-	   Linie am nächsten Eyebrow (s. u.). */
-	.mz-group tr:last-child td {
+	/* Token-Gruppen als eigene <tbody>: letzte Zeile je Gruppe ohne Trenner. */
+	.mz-skin :global(.ds-table__group .ds-table__row:last-child .ds-table__cell) {
 		border-bottom: none;
 	}
-	.mz-table__label {
-		/* Eine Stufe leiser als muted — die Werte tragen die Zeile, das Label ordnet nur ein. */
+
+	/* ── measure-Variante ── */
+	.mz-skin--measure :global(.ds-table__cell:first-child) {
+		/* Label eine Stufe leiser als muted — die Werte tragen die Zeile. */
 		color: var(--ds-text-faint);
 		white-space: nowrap;
 		width: 1%;
 		min-width: 148px;
 		padding-right: var(--z-ds-space-m);
 	}
-	/* Wert-Spalte trägt die Zeile (Zahl + inline-Token) → nimmt den Restplatz;
-	   der Messwert selbst in voller Textfarbe (Mockup: Wert klar, Label gedämpft). */
-	.mz-table__value {
+	.mz-skin--measure :global(.ds-table__cell:nth-child(2)) {
+		/* Wert-Spalte trägt die Zeile → Restplatz, volle Textfarbe. */
 		width: 100%;
 		color: var(--ds-text);
 	}
-	/* Mono-Wert-Spalte (tokens-Variante). Token-Name/inline-Maß tragen jetzt die
-	   <Chip> (tone="machine") mit eigenem Mono-Styling — kein <code> mehr hier. */
-	.mz-table__value--mono {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-	}
-	.mz-table__herkunft {
-		text-align: right;
+	.mz-skin--measure :global(.ds-table__cell:last-child) {
 		white-space: nowrap;
 	}
-	/* gemessen/abgeleitet als ruhiger Klartext rechts (kein Pill). */
 	.herkunft-text {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.mz-table__swatch {
-		width: 24px;
-	}
-	/* Token-Zeilen: Token-Name nimmt die Breite, Wert + Hinweis rechts. Bewusst
-	   KOMPAKTER als die Maße-Zeilen — viele Zeilen, reine Referenzliste. */
-	.mz-table--tokens td {
+
+	/* ── tokens-Variante (kompakter Rhythmus) ── */
+	.mz-skin--tokens :global(.ds-table__cell) {
 		padding-top: var(--z-ds-space-8);
 		padding-bottom: var(--z-ds-space-8);
 	}
-	.mz-table--tokens .mz-table__token {
+	.mz-skin--tokens :global(.ds-table__cell:nth-child(2)) {
 		width: 100%;
 	}
-	.mz-table--tokens .mz-table__value {
-		width: auto;
+	.mz-skin--tokens :global(.ds-table__cell:nth-child(3)) {
 		white-space: nowrap;
-		text-align: right;
 		color: var(--ds-text-body);
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
 	}
-	.mz-table__hinweis {
+	.mz-skin--tokens :global(.ds-table__cell:last-child) {
 		color: var(--ds-text-muted);
 		white-space: nowrap;
-		text-align: right;
 		padding-left: var(--z-ds-space-m);
 	}
+	/* Gruppen-Eyebrow-Zeile. */
+	.mz-skin--tokens :global(.ds-table__group-cell) {
+		padding: 0 0 var(--z-ds-space-6);
+		border-bottom: none;
+	}
+	.mz-skin--tokens :global(.ds-table__group-label) {
+		font-size: var(--ds-text-xs);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ds-text-muted);
+		font-weight: 600;
+	}
+	.mz-skin--tokens :global(.ds-table__group-count) {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		font-variant-numeric: tabular-nums;
+	}
+	/* Ab der zweiten Gruppe: 16px Luft + feine durchgehende Trennlinie darüber. */
+	.mz-skin--tokens :global(.ds-table__group + .ds-table__group .ds-table__group-inner) {
+		margin-top: var(--z-ds-space-m);
+		padding-top: var(--z-ds-space-m);
+		border-top: 1px solid var(--ds-border);
+	}
+
 	.mz-subhead {
 		margin: var(--z-ds-space-m) 0 var(--z-ds-space-6);
 		font-size: var(--ds-text-xs);
@@ -199,38 +203,5 @@
 		letter-spacing: 0.06em;
 		color: var(--ds-text-muted);
 		font-weight: 600;
-	}
-	/* Gruppen-Eyebrow-Zeile IN der Token-Tabelle (eine Tabelle statt vier Boxen).
-	   Eyebrow links, Token-Zähler rechts, baseline-aligned. Kein dashed Bottom —
-	   die gestrichelten Trenner bleiben den Zeilen vorbehalten. */
-	.mz-grouprow__cell {
-		padding: 0 0 var(--z-ds-space-6);
-		border-bottom: none;
-	}
-	/* Eyebrow links, Token-Zähler rechts, baseline-aligned. */
-	.mz-grouprow__inner {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--z-ds-space-8);
-	}
-	.mz-grouprow__eyebrow {
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--ds-text-muted);
-		font-weight: 600;
-	}
-	.mz-grouprow__count {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-		font-variant-numeric: tabular-nums;
-	}
-	/* Ab der zweiten Gruppe: 16px Luft + feine, durchgehende Trennlinie darüber
-	   (Margin/Border sitzen am Block-Wrapper, nicht an der <td> — dort zuverlässig). */
-	.mz-group + .mz-group .mz-grouprow__inner {
-		margin-top: var(--z-ds-space-m);
-		padding-top: var(--z-ds-space-m);
-		border-top: 1px solid var(--ds-border);
 	}
 </style>

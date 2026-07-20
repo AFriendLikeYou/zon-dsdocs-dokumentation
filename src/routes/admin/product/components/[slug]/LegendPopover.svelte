@@ -11,6 +11,7 @@
 	import { InfoIcon } from '$lib/icons';
 	import { PopoverSheet } from '../../../ui';
 	import { Badge } from '$components/ui/badge';
+	import { Divider } from '$components/ui/divider';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 
 	let open = $state(false);
@@ -54,7 +55,8 @@
 		<p class="legend-pop__row">
 			<ProvenanceChip variant="editorial" /> redaktionell editierbar
 		</p>
-		<hr class="legend-pop__sep" />
+		<!-- Trenner zwischen Herkunfts- und Genauigkeits-Block (K8: Divider-Atom). -->
+		<Divider class="legend-pop__sep" />
 		<p class="legend-pop__row">
 			<Badge tone="default">abgeleitet</Badge>
 			aus anderen Werten berechnet
@@ -115,12 +117,10 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	.legend-pop__sep {
-		width: 100%;
-		height: 0;
-		margin: var(--z-ds-space-6) 0;
-		border: none;
-		border-top: 1px solid var(--ds-border);
+	/* Linie/Semantik kommt aus dem Divider-Atom; hier nur der engere Popover-Rhythmus
+	   (6px statt spacing-md) — :global, weil die Klasse am Kind-Element hängt. */
+	.legend-pop :global(.legend-pop__sep) {
+		margin-block: var(--z-ds-space-6);
 	}
 	.legend-pop__note {
 		margin: 0;

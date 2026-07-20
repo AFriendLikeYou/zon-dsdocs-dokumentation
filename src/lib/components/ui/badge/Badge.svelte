@@ -29,13 +29,15 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { BadgeVariant } from '$types/spec';
+	import { tooltip } from '$components/ui/tooltip';
 
 	let {
 		/** Farbrolle des Badges (default/machine/editorial/warn/ghost/accent). */
 		tone = 'default',
 		/** Optionales Herkunfts-Icon (Snippet) VOR dem Label, an die Textgröße gekoppelt. */
 		icon,
-		/** Nativer Tooltip (z. B. Erklärung der Maschinen-Zone). */
+		/** Kurzinfo (z. B. Erklärung der Maschinen-Zone) — als barrierefreier
+		 *  ui/tooltip statt nativem title; die Pille wird dann tab-fokussierbar. */
 		title,
 		/** Class-Passthrough für Positionierung durch den Aufrufer. */
 		class: className = '',
@@ -50,7 +52,17 @@
 	} = $props();
 </script>
 
-<span class="badge badge--{tone} {className}" {title}>
+<!-- Kein natives title mehr (doppelter Tooltip wäre störend): die Kurzinfo trägt
+     die ui/tooltip-Action; mit Kurzinfo wird die Pille tab-fokussierbar, damit der
+     Tooltip auch per Tastatur erscheint (aria-describedby-Verknüpfung).
+     svelte-ignore: der tabindex ist hier gewollt — nur gesetzt, wenn eine Kurzinfo
+     existiert, die sonst für Tastatur-Nutzer unerreichbar wäre (WAI-Tooltip-Muster). -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<span
+	class="badge badge--{tone} {className}"
+	use:tooltip={title ?? ''}
+	tabindex={title ? 0 : undefined}
+>
 	{#if icon}<span class="badge__icon" aria-hidden="true">{@render icon()}</span>{/if}
 	{@render children?.()}
 </span>
@@ -72,6 +84,12 @@
 		padding: 4px 8px;
 		border-radius: 999px;
 		border: 1px solid transparent;
+	}
+	/* Nur fokussierbar, wenn eine Kurzinfo dranhängt → sichtbarer Ring (2px/2px
+	   wie die .focus-ring-Utility). */
+	.badge:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
 	}
 	.badge__icon {
 		display: inline-flex;

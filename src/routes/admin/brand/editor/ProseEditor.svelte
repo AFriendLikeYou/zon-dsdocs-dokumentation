@@ -7,6 +7,7 @@
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
 	import { IconActionButton } from '$components/ui/icon-action-button';
+	import { Divider } from '$components/ui/divider';
 	import {
 		hasHeadingTypo,
 		fixHeadings,
@@ -65,7 +66,8 @@
 			title="Überschrift 3"
 			onclick={() => apply((t, s, e) => toggleLinePrefix(t, s, e, '### '))}>H3</IconActionButton
 		>
-		<span class="pe-sep" aria-hidden="true"></span>
+		<!-- Werkzeuggruppen-Trenner (K8: Divider-Atom, vertikal). -->
+		<Divider orientation="vertical" class="pe-sep" />
 		<IconActionButton
 			class="pe-btn pe-btn--b"
 			title="Fett"
@@ -170,11 +172,13 @@
 		background: rgb(from var(--ds-accent) r g b / 0.12);
 		color: var(--ds-accent);
 	}
-	.pe-sep {
-		width: 1px;
+	/* Linie kommt aus dem Divider-Atom; hier nur Toolbar-Maß (1rem hoch, xs-Abstand,
+	   softere Border-Rolle) — :global, weil die Klasse am Kind-Element hängt. */
+	:global(.pe-sep.pe-sep) {
+		align-self: center;
 		height: 1rem;
-		background: var(--ds-border-soft);
-		margin: 0 var(--z-ds-space-xs);
+		border-left-color: var(--ds-border-soft);
+		margin-inline: var(--z-ds-space-xs);
 	}
 
 	/* Nackte Textzeile im Fluss (Figma „Slot"): keine Fläche, kein Rand. */

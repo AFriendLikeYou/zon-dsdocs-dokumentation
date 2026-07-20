@@ -7,6 +7,7 @@
 	import { Badge } from '$components/ui/badge';
 	import { Alert } from '$components/ui/alert';
 	import { Button } from '$components/ui/button';
+	import { ButtonGroup } from '$components/ui/button-group';
 	import { Field } from '$components/ui/field';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
@@ -382,14 +383,14 @@
 <!-- ↑/↓-Buttons (präzise, barrierefreie Umsortierung; CMS-Pfeil-Icons). -->
 {#snippet nudges(up: () => void, down: () => void, atTop: boolean, atBottom: boolean)}
 	{#if data.writable}
-		<span class="nudge">
+		<ButtonGroup attached label="Position ändern" class="nudge">
 			<button type="button" onclick={up} disabled={atTop} aria-label="Nach oben"
 				><Icon name="arrow-up" /></button
 			>
 			<button type="button" onclick={down} disabled={atBottom} aria-label="Nach unten"
 				><Icon name="arrow-down" /></button
 			>
-		</span>
+		</ButtonGroup>
 	{/if}
 {/snippet}
 
@@ -487,18 +488,20 @@
 		color: var(--ds-text-muted);
 	}
 
-	.nudge {
-		display: inline-flex;
-		gap: 2px;
+	/* Layout (inline-flex, Segment-Merge) trägt jetzt ButtonGroup(attached); hier
+	   bleibt nur das Hover-Reveal-Verhalten der Zeile. `.nudge` hängt am
+	   ButtonGroup-Element (class-Passthrough) → :global, die Buttons darin sind
+	   weiter in diesem Scope. */
+	.tree :global(.nudge) {
 		margin-left: var(--z-ds-space-s);
 		opacity: 0.35;
 		transition: opacity var(--ds-dur) var(--ds-ease-out);
 	}
-	:global(.admin-row:hover) .nudge,
-	:global(.admin-row:focus-within) .nudge {
+	.tree :global(.admin-row:hover .nudge),
+	.tree :global(.admin-row:focus-within .nudge) {
 		opacity: 1;
 	}
-	.nudge button {
+	:global(.nudge > button) {
 		width: 1.4rem;
 		height: 1.4rem;
 		display: inline-flex;
@@ -512,14 +515,14 @@
 		font-size: var(--ds-text-xs);
 		line-height: 1;
 	}
-	.nudge button:hover:not(:disabled) {
+	:global(.nudge > button):hover:not(:disabled) {
 		background: var(--ds-surface-raised);
 	}
-	.nudge button:disabled {
+	:global(.nudge > button):disabled {
 		opacity: 0.3;
 		cursor: not-allowed;
 	}
-	.nudge button:focus-visible {
+	:global(.nudge > button):focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}

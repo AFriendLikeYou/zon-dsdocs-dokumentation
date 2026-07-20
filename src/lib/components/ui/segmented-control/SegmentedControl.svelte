@@ -38,6 +38,7 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { tooltip } from '$components/ui/tooltip';
 
 	type Tone = 'positive' | 'warning' | 'neutral';
 	type Option = {
@@ -156,7 +157,7 @@
 			role="radio"
 			aria-checked={value === o.value}
 			aria-label={o.label ? undefined : o.title}
-			title={o.title}
+			use:tooltip={o.title ?? ''}
 			tabindex={value === o.value ? 0 : -1}
 			onclick={() => select(o.value)}
 			onkeydown={onKeydown}

@@ -122,7 +122,24 @@ prüfen** — in dieser Reihenfolge:
    `direction`, `onresize(delta)`, `label`, Tastatur-Schritte; Consumer hält min/max.
    NICHT der DnD-Reorder-Griff IconGrip), `ui/round-button/` (kreisrunder, geblurter
    Overlay-Icon-Button — `label`, `icon`, `size`; für schwebende Medien-Aktionen.
-   Eckig-inline → `ui/icon-action-button/`), Icons aus `$lib/icons`.
+   Eckig-inline → `ui/icon-action-button/`),
+   `ui/button-group/` (bündelt ECHTE Button-Cluster als `role=group` — `attached`
+   für zusammengewachsene Segmente wie die ↑/↓-Nudge-Paare, sonst `gap: sm|md`,
+   `align`, `label`; nicht jede zufällige Button-Nachbarschaft),
+   `ui/divider/` (eigenständige Trennlinie — `orientation: horizontal|vertical`,
+   `variant: solid|dashed` (dashed = Maschinen-Sprache), optionales `label` in der
+   Linie, `spacing: sm|md|lg`; NICHT für Karten-/Tabellen-/Kopfzeilen-Borders,
+   die zur Komponente gehören),
+   `ui/tooltip/` (Action `use:tooltip={'Text'}` bzw. `{ text, position }` — ersetzt
+   native `title=`: ~400ms Hover-Delay, auch bei Tastatur-Fokus, Esc schließt,
+   aria-describedby, kein Tooltip auf Touch; Badge/IconActionButton/SegmentedControl
+   heben ihr `title`-Prop intern darauf),
+   `ui/table/` (DER daten-getriebene Tabellen-Renderer — `columns` mit
+   `render`-Snippets je Zelle, `rows` ODER `groups` mit Eyebrow+Counter,
+   `density`, sr-only `caption`/`label`; Optik bringt der Wrapper als Skin-Klasse.
+   SpecTable (Editor, mz-Optik) und TokenTable/MeasureTable (öffentliches Specsheet)
+   sind dünne Wrapper darüber — löst die frühere v2-Notiz M3 ein),
+   Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
    `ui/dialog/` (schwebende Bestätigungs-/Aktionsleiste `variant="bar"` — Save-Flows
@@ -134,7 +151,10 @@ prüfen** — in dieser Reihenfolge:
 Fokus-Ringe für Neubauten über die Utility `.focus-ring` (`global.css`, 2px/2px);
 abweichende Offsets nur mit Kommentar-Begründung.
 
-**v2-Notiz (M3):** `SpecTable` im Spec-Editor und `TokenTable`/`MeasureTable` im
-öffentlichen Specsheet sind fachliche Zwillinge (gleiche Datenform, andere Bühne).
-Ein Merge lohnt erst, wenn eine dritte Tabellen-Oberfläche dazukommt — dann als
-gemeinsamer daten-getriebener Renderer mit `variant`-Achse.
+**Tabellen (ehem. v2-Notiz M3, eingelöst in K8):** `ui/table/` ist der gemeinsame
+daten-getriebene Renderer der Tabellen-Zwillinge. `SpecTable` (Spec-Editor,
+Maschinen-Optik: gestrichelte Trenner, machine-Chips, Gruppen+Counter) und
+`TokenTable`/`MeasureTable` (öffentliches Specsheet) sind dünne Wrapper darüber —
+Name + API unverändert, die generierten `.svx` importieren weiter aus
+`ui/specsheet/`. Neue Tabellen-Oberflächen bauen direkt auf `ui/table` auf
+(Skin-Klasse per `class`-Prop, Zellinhalte per `render`-Snippet).

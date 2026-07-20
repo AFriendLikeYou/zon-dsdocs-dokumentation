@@ -32,6 +32,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { Button } from '$components/ui/button';
+	import { ButtonGroup } from '$components/ui/button-group';
 	import { Kbd } from '$components/ui/kbd';
 
 	type Props = {
@@ -92,18 +93,21 @@
 	<div class="dialog-bar" data-variant={variant} role="status" aria-live="polite">
 		{#if message}<span class="dialog-bar__message">{message}</span>{/if}
 		{#if extra}{@render extra()}{/if}
-		{#if onsecondary}
-			<Button variant="quiet" onclick={onsecondary}>{secondaryLabel}</Button>
-		{/if}
-		<Button
-			variant="accent"
-			disabled={primaryDisabled}
-			title={primaryDisabled ? primaryTitle : undefined}
-			onclick={onprimary}
-		>
-			{primaryLabel}{#if shortcut === 'cmd+s'}
-				<Kbd variant="on-accent">⌘S</Kbd>{/if}
-		</Button>
+		<!-- Aktions-Cluster als ButtonGroup (K8) statt eigenem Flex-Nachbarschaftslayout. -->
+		<ButtonGroup label="Dialog-Aktionen" gap="md">
+			{#if onsecondary}
+				<Button variant="quiet" onclick={onsecondary}>{secondaryLabel}</Button>
+			{/if}
+			<Button
+				variant="accent"
+				disabled={primaryDisabled}
+				title={primaryDisabled ? primaryTitle : undefined}
+				onclick={onprimary}
+			>
+				{primaryLabel}{#if shortcut === 'cmd+s'}
+					<Kbd variant="on-accent">⌘S</Kbd>{/if}
+			</Button>
+		</ButtonGroup>
 	</div>
 {/if}
 

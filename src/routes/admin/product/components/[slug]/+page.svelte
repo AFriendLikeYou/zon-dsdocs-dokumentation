@@ -8,6 +8,7 @@
 	import { Badge } from '$components/ui/badge';
 	import { Field, Select } from '$components/ui/field';
 	import { Button } from '$components/ui/button';
+	import { ButtonGroup } from '$components/ui/button-group';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
 	import RowListField from './RowListField.svelte';
@@ -686,13 +687,16 @@
 	bewusst ein manueller CLI-Schritt — die Doku rät nie.
 {/snippet}
 {#snippet driftActions()}
-	<Button variant="ghost" onclick={copyReImport}>
-		{#snippet iconLeft()}<ImportIcon width={13} height={13} />{/snippet}
-		Re-Import-Befehl kopieren
-	</Button>
-	<Button variant="ghost" href={data.importGuideHref} target="_blank" rel="noreferrer"
-		>Zur Anleitung ↗</Button
-	>
+	<!-- Echte Aktions-Gruppe (K8): beide Drift-Aktionen als EIN role=group-Cluster. -->
+	<ButtonGroup label="Drift-Aktionen" gap="md">
+		<Button variant="ghost" onclick={copyReImport}>
+			{#snippet iconLeft()}<ImportIcon width={13} height={13} />{/snippet}
+			Re-Import-Befehl kopieren
+		</Button>
+		<Button variant="ghost" href={data.importGuideHref} target="_blank" rel="noreferrer"
+			>Zur Anleitung ↗</Button
+		>
+	</ButtonGroup>
 {/snippet}
 
 <!-- „gemischt"-Meta der Barrierefreiheit-Karte (nur wenn Maschinen-Zeilen dabei sind). -->
