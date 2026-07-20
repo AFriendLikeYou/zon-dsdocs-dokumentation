@@ -78,10 +78,10 @@ button.buttongroup-button {
 
 <ComponentHero spec={spec} />
 
-<Tabs items={[
-		{ label: 'Design', component: designTab },
-		{ label: 'Develop', component: developTab },
-		{ label: 'Specs', component: specsTab }
+<Tabs tabs={[
+		{ id: 'designTab', label: 'Design', component: designTab },
+		{ id: 'developTab', label: 'Develop', component: developTab },
+		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
 {#snippet designTab()}

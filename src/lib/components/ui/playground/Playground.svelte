@@ -90,6 +90,7 @@
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { Switch } from '$components/ui/switch';
+	import { ResizeHandle } from '$components/ui/resize-handle';
 	import { ResetIcon } from '$lib/icons';
 
 	type Props = {
@@ -182,21 +183,13 @@
 		ro.observe(frameEl);
 		return () => ro.disconnect();
 	});
-	function startDrag(e: PointerEvent) {
-		if (!frameEl) return;
-		e.preventDefault();
-		const target = e.currentTarget as HTMLElement;
-		target.setPointerCapture(e.pointerId);
-		const left = frameEl.getBoundingClientRect().left;
-		const onMove = (ev: PointerEvent) => {
-			frameWidth = Math.max(200, Math.round(ev.clientX - left));
-		};
-		const onUp = () => {
-			target.removeEventListener('pointermove', onMove);
-			target.removeEventListener('pointerup', onUp);
-		};
-		target.addEventListener('pointermove', onMove);
-		target.addEventListener('pointerup', onUp);
+	// Das ResizeHandle-Atom meldet nur das Delta; die min-Grenze (200px) und die
+	// aktuelle Breite bleiben hier im Consumer. Basis ist die zuletzt gesetzte Breite,
+	// sonst die LIVE gemessene Rahmenbreite (erstes Ziehen aus der 100%-Ausgangslage —
+	// nicht der ggf. noch nicht befüllte measuredWidth-State).
+	function handleResize(delta: number) {
+		const base = frameWidth ?? frameEl?.getBoundingClientRect().width ?? measuredWidth;
+		frameWidth = Math.max(200, Math.round(base + delta));
 	}
 
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
@@ -245,12 +238,11 @@
 				<div class="pg-preview" style:zoom>
 					{@render previewBody()}
 				</div>
-				<button
-					type="button"
-					class="playground__handle"
-					aria-label="Vorschau-Breite ändern (ziehen)"
-					onpointerdown={startDrag}
-				></button>
+				<ResizeHandle
+					direction="horizontal"
+					onresize={handleResize}
+					label="Vorschau-Breite ändern (ziehen oder Pfeiltasten)"
+				/>
 			</div>
 			<span class="playground__width" aria-hidden="true">{measuredWidth} px</span>
 		{:else}
@@ -380,38 +372,6 @@
 		border-right: 1px dashed var(--z-ds-color-border-70);
 		padding-right: var(--z-ds-space-16);
 	}
-	.playground__handle {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: -10px;
-		width: 20px;
-		border: none;
-		background: none;
-		cursor: col-resize;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0;
-		touch-action: none;
-	}
-	.playground__handle::after {
-		content: '';
-		width: 4px;
-		height: 36px;
-		border-radius: 999px;
-		background: var(--z-ds-color-border-70);
-		transition: background-color var(--ds-dur) var(--ds-ease);
-	}
-	@media (hover: hover) and (pointer: fine) {
-		.playground__handle:hover::after {
-			background: var(--ds-measure, var(--ds-accent));
-		}
-	}
-	.playground__handle:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: -2px;
-	}
 	.playground__width {
 		position: absolute;
 		bottom: var(--z-ds-space-8);
@@ -524,8 +484,7 @@
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.playground__stage,
-		.playground__zoom,
-		.playground__handle::after {
+		.playground__zoom {
 			transition: none;
 		}
 	}

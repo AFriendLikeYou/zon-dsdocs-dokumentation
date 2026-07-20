@@ -115,7 +115,14 @@ prüfen** — in dieser Reihenfolge:
    flat = Editor-Rechteck Figma 689:11510) und optionales `tone` je Option für
    Status-Flächen; Radiogroup + roving tabindex + Pfeiltasten. StatusSegmentedControl
    (✓/⚠/○) ist ein dünner Wrapper darüber, PropField nutzt `variant="flat"`),
-   Icons aus `$lib/icons`.
+   `ui/tab/` (Tabs — barrierefreies Panel-Umschalter-Atom: `tabs: {id?,label,icon?,
+   component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
+   roving tabindex + Pfeiltasten/Home/End. NICHT die AnchorBar-Sprungnavigation,
+   die bleibt Scrollspy-`<nav>`), `ui/resize-handle/` (Zieh-Griff für Breite/Höhe —
+   `direction`, `onresize(delta)`, `label`, Tastatur-Schritte; Consumer hält min/max.
+   NICHT der DnD-Reorder-Griff IconGrip), `ui/round-button/` (kreisrunder, geblurter
+   Overlay-Icon-Button — `label`, `icon`, `size`; für schwebende Medien-Aktionen.
+   Eckig-inline → `ui/icon-action-button/`), Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
    `ui/dialog/` (schwebende Bestätigungs-/Aktionsleiste `variant="bar"` — Save-Flows

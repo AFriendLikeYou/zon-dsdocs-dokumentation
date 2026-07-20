@@ -78,11 +78,11 @@ kategorie: Formulare
 
 <ComponentHero spec={spec} version={content.version} />
 
-<Tabs items={[
-		{ label: 'Design', component: designTab },
-		{ label: 'Develop', component: developTab },
-		{ label: 'Barrierefreiheit', component: a11yTab },
-		{ label: 'Specs', component: specsTab }
+<Tabs tabs={[
+		{ id: 'designTab', label: 'Design', component: designTab },
+		{ id: 'developTab', label: 'Develop', component: developTab },
+		{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab },
+		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
 {#snippet designTab()}

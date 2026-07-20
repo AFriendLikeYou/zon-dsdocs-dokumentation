@@ -702,7 +702,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		.map((t) => `{#snippet ${t.name}()}\n${bodies[t.name]}{/snippet}`)
 		.join('\n\n');
 	const tabsItems = tabs
-		.map((t) => `\t\t{ label: '${t.label}', component: ${t.name} }`)
+		.map((t) => `\t\t{ id: '${t.name}', label: '${t.label}', component: ${t.name} }`)
 		.join(',\n');
 
 	return (
@@ -723,7 +723,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\n` +
 		`<ComponentHero spec={${S}}${versionProp} />\n` +
 		`\n` +
-		`<Tabs items={[\n${tabsItems}\n]} sticky />\n` +
+		`<Tabs tabs={[\n${tabsItems}\n]} sticky />\n` +
 		`\n` +
 		snippets +
 		`\n` +
