@@ -11,6 +11,8 @@
 	import ProseEditor from '../editor/ProseEditor.svelte';
 	import InsertMenu from '../editor/InsertMenu.svelte';
 	import { Button } from '$components/ui/button';
+	import { ButtonGroup } from '$components/ui/button-group';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 	import { Field, Select } from '$components/ui/field';
 	import { Dialog } from '$components/ui/dialog';
 	import SlashMenu from '../editor/SlashMenu.svelte';
@@ -481,7 +483,10 @@
 
 	// Einmalig beim Laden: passenden Entwurf anbieten (nur wenn Datei unverändert).
 	$effect(() => {
-		history.offerDraft(untrack(() => savedPayload), untrack(snap));
+		history.offerDraft(
+			untrack(() => savedPayload),
+			untrack(snap)
+		);
 	});
 </script>
 
@@ -523,7 +528,9 @@
 					minute: '2-digit'
 				})}&nbsp;Uhr gefunden.</span
 			>
-			<Button size="sm" variant="ghost" onclick={() => history.applyDraft()}>Wiederherstellen</Button>
+			<Button size="sm" variant="ghost" onclick={() => history.applyDraft()}
+				>Wiederherstellen</Button
+			>
 			<Button size="sm" variant="quiet" onclick={() => history.dismissDraft()}>Verwerfen</Button>
 		</div>
 	{/if}
@@ -535,8 +542,8 @@
 			<section class="block">
 				<h2 class="block-title">Frontmatter</h2>
 				{#each fieldState as field (field.key)}
-					<label class="field">
-						<span class="lbl">{field.key}</span>
+					<label class="frontmatter-field">
+						<span class="frontmatter-field__label">{field.key}</span>
 						<Field density="compact" bind:value={field.value} />
 					</label>
 				{/each}
@@ -560,38 +567,37 @@
 
 				{#snippet blockTools(i: number, it: Item)}
 					<div class="block-card__tools">
-						<button
-							type="button"
-							class="block-card__btn"
-							disabled={!canMoveUp(i)}
-							onclick={() => move(i, -1)}
-							aria-label="nach oben"
-							title="nach oben"><Icon name="arrow-up" /></button
-						>
-						<button
-							type="button"
-							class="block-card__btn"
-							disabled={!canMoveDown(i)}
-							onclick={() => move(i, 1)}
-							aria-label="nach unten"
-							title="nach unten"><Icon name="arrow-down" /></button
-						>
+						<ButtonGroup attached label="Reihenfolge">
+							<IconActionButton
+								subtle
+								disabled={!canMoveUp(i)}
+								onclick={() => move(i, -1)}
+								ariaLabel="nach oben"
+								title="nach oben"><Icon name="arrow-up" /></IconActionButton
+							>
+							<IconActionButton
+								subtle
+								disabled={!canMoveDown(i)}
+								onclick={() => move(i, 1)}
+								ariaLabel="nach unten"
+								title="nach unten"><Icon name="arrow-down" /></IconActionButton
+							>
+						</ButtonGroup>
 						{#if canDuplicate(it)}
-							<button
-								type="button"
-								class="block-card__btn"
+							<IconActionButton
+								subtle
 								onclick={() => duplicate(it.uid)}
-								aria-label="Duplizieren"
-								title="Duplizieren"><Icon name="duplicate" /></button
+								ariaLabel="Duplizieren"
+								title="Duplizieren"><Icon name="duplicate" /></IconActionButton
 							>
 						{/if}
 						{#if it.deletable}
-							<button
-								type="button"
-								class="block-card__btn block-card__btn--del"
+							<IconActionButton
+								subtle
+								tone="danger"
 								onclick={() => remove(it.uid)}
-								aria-label="Löschen"
-								title="Löschen"><Icon name="trash" /></button
+								ariaLabel="Löschen"
+								title="Löschen"><Icon name="trash" /></IconActionButton
 							>
 						{/if}
 					</div>
@@ -642,19 +648,29 @@
 									/>
 								{/if}
 								{#if it.movable}
-									<span
+									<!-- Griff als IconActionButton (subtle). Bewusst `aria-hidden` +
+									     `tabindex={-1}`: der barrierefreie Reorder-Weg sind die ↑/↓-Buttons
+									     im Kopf — ein fokussierbarer Griff wäre ein toter Fokus-Stop, da
+									     HTML5-Drag per Tastatur nicht bedienbar ist. `title` läuft trotzdem
+									     über das Tooltip-Prop: der Hover-Tooltip bleibt sichtbar, der
+									     Fokus-Pfad entfällt mangels Fokussierbarkeit. -->
+									<IconActionButton
+										subtle
 										class="drag-handle"
 										draggable="true"
 										data-drag-handle
 										title="Ziehen zum Sortieren"
-										aria-hidden="true"><Icon name="grip" /></span
+										tabindex={-1}
+										aria-hidden="true"><Icon name="grip" /></IconActionButton
 									>
 								{/if}
 							</div>
 
 							<div class="block-card__main">
 								<div class="block-card__head">
-									<span class="block-card__label">{it.label}{it.source === 'new' ? ' · neu' : ''}</span>
+									<span class="block-card__label"
+										>{it.label}{it.source === 'new' ? ' · neu' : ''}</span
+									>
 									{#if it.blockKind === 'structural'}
 										<span class="tech-chip">automatisch verwaltet</span>
 									{/if}
@@ -725,28 +741,28 @@
 														>
 														<span class="child-label">{child.label}</span>
 														<div class="block-card__tools">
-															<button
-																type="button"
-																class="block-card__btn"
-																disabled={ci === 0}
-																onclick={() => moveChild(it, ci, -1)}
-																aria-label="nach oben"
-																title="nach oben"><Icon name="arrow-up" /></button
-															>
-															<button
-																type="button"
-																class="block-card__btn"
-																disabled={ci === (it.children?.length ?? 0) - 1}
-																onclick={() => moveChild(it, ci, 1)}
-																aria-label="nach unten"
-																title="nach unten"><Icon name="arrow-down" /></button
-															>
-															<button
-																type="button"
-																class="block-card__btn block-card__btn--del"
+															<ButtonGroup attached label="Reihenfolge">
+																<IconActionButton
+																	subtle
+																	disabled={ci === 0}
+																	onclick={() => moveChild(it, ci, -1)}
+																	ariaLabel="nach oben"
+																	title="nach oben"><Icon name="arrow-up" /></IconActionButton
+																>
+																<IconActionButton
+																	subtle
+																	disabled={ci === (it.children?.length ?? 0) - 1}
+																	onclick={() => moveChild(it, ci, 1)}
+																	ariaLabel="nach unten"
+																	title="nach unten"><Icon name="arrow-down" /></IconActionButton
+																>
+															</ButtonGroup>
+															<IconActionButton
+																subtle
+																tone="danger"
 																onclick={() => removeChild(it, child.uid)}
-																aria-label="Löschen"
-																title="Löschen"><Icon name="trash" /></button
+																ariaLabel="Löschen"
+																title="Löschen"><Icon name="trash" /></IconActionButton
 															>
 														</div>
 													</div>
@@ -816,13 +832,15 @@
 										{#if it.blockKind === 'structural'}
 											<p class="tech-hint">
 												Technischer Seitenkopf — wird vom System gepflegt.{#if TITLE_HEADING.test(it.content ?? '')}{' '}Die
-													sichtbare Seiten-Überschrift kommt aus dem <strong>Titel</strong>-Feld oben im
-													<strong>Frontmatter</strong>.{:else}{' '}Erscheint nicht als Inhalt auf der Seite.{/if}
+													sichtbare Seiten-Überschrift kommt aus dem <strong>Titel</strong>-Feld
+													oben im
+													<strong>Frontmatter</strong>.{:else}{' '}Erscheint nicht als Inhalt auf
+													der Seite.{/if}
 											</p>
 										{:else if TITLE_HEADING.test(it.content ?? '')}
 											<p class="tech-hint">
-												Überschrift der Seite — wird oben im Abschnitt <strong>Frontmatter</strong> über
-												das <strong>Titel</strong>-Feld bearbeitet.
+												Überschrift der Seite — wird oben im Abschnitt <strong>Frontmatter</strong>
+												über das <strong>Titel</strong>-Feld bearbeitet.
 											</p>
 										{/if}
 										<details class="block-card__details">
@@ -857,8 +875,7 @@
 							Komponente.
 						</p>
 						<div class="empty-actions">
-							<Button variant="ghost" onclick={() => insertType('Prose')}
-								>Textblock beginnen</Button
+							<Button variant="ghost" onclick={() => insertType('Prose')}>Textblock beginnen</Button
 							>
 							<InsertMenu items={paletteItems} onpick={insertType} label="Element einfügen" />
 						</div>
@@ -944,11 +961,14 @@
 		padding-bottom: var(--z-ds-space-xs);
 		margin-bottom: var(--z-ds-space-m);
 	}
-	.field {
+	/* Frontmatter-Zeile: Label über dem Field-Atom. Die Klasse darf NICHT `.field`
+	   heißen — `field-base.css` definiert `.field` global (Rahmen/Fläche/Fokus-Ring),
+	   das Label bekäme sonst eine zweite Feld-Box um die eigentliche. */
+	.frontmatter-field {
 		display: block;
 		margin: 0 0 var(--z-ds-space-l);
 	}
-	.lbl {
+	.frontmatter-field__label {
 		display: block;
 		font-size: var(--ds-label-size);
 		text-transform: uppercase;
@@ -1116,7 +1136,7 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
-/* Prosa: gleiche Karten-Behandlung wie die Komponenten (Wunsch 2026-07-10). */
+	/* Prosa: gleiche Karten-Behandlung wie die Komponenten (Wunsch 2026-07-10). */
 
 	/* Gutter-Controls (Figma: 24px-Icon-Buttons, radius 4, auf Kopfhöhe der Karte):
 	   absolut links AUSSERHALB des Containers, bei Hover/Fokus eingeblendet. */
@@ -1143,25 +1163,18 @@
 	.block-card:focus-within .block-card__gutter {
 		opacity: 1;
 	}
-	.drag-handle {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		flex: none;
-		color: var(--ds-text-muted);
+	/* Griff = IconActionButton(subtle); Maß/Hover-Tint kommen aus dem Atom. Hier
+	   bleibt nur die Greif-Affordanz — die Klasse hängt am Kind-<button>, darum
+	   :global (Muster aus Paket 3/K5). */
+	:global(.drag-handle) {
 		cursor: grab;
 		user-select: none;
-		border-radius: var(--ds-radius-sm);
-		transition: background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.drag-handle:hover {
-		background: rgb(from var(--ds-text) r g b / 0.08);
-		color: var(--ds-text);
-	}
-	.drag-handle:active {
+	/* Kein :active-Scale am Griff: der Druck-Impuls des Atoms würde in das
+	   Drag-Ghost-Bild einfrieren (Snapshot entsteht nach dem mousedown). */
+	:global(.drag-handle.drag-handle:active:not(:disabled)) {
 		cursor: grabbing;
+		transform: none;
 	}
 
 	/* Kopfzeile: Typ-Label links, Move/Delete-Tools rechts (bei Hover eingeblendet). */
@@ -1192,43 +1205,9 @@
 	.block-card:focus-within .block-card__tools {
 		opacity: 1;
 	}
-	/* Icon-Button-Standard (CMS): 16×16-Icon in 24×24-Quadrat, radius 4,
-	   Hover = dezente Text-Tönung. Gleiches Muster in ProseEditor/MediaPicker. */
-	.block-card__btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		flex: none;
-		border: none;
-		background: none;
-		border-radius: var(--ds-radius-sm);
-		padding: 0;
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-		cursor: pointer;
-		line-height: 1;
-		transition:
-			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
-			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.block-card__btn:hover:not(:disabled) {
-		background: rgb(from var(--ds-text) r g b / 0.08);
-		color: var(--ds-text);
-	}
-	.block-card__btn:disabled {
-		opacity: 0.35;
-		cursor: not-allowed;
-	}
-	.block-card__btn--del:hover:not(:disabled) {
-		color: var(--ds-negative, var(--ds-text));
-		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
-	}
-	.block-card__btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
+	/* Die Werkzeuge sind jetzt ui/IconActionButton (subtle + tone="danger"): Maß,
+	   Hover-Tint, disabled-Opacity und Fokus-Ring kommen aus dem Atom, das ↑/↓-Paar
+	   fasst ui/ButtonGroup(attached). Hier bleibt nur das Reveal-Layout oben. */
 	.block-card__body {
 		padding: 2px 0 var(--z-ds-space-s);
 	}

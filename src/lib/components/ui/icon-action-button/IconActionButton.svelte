@@ -8,6 +8,13 @@
     <IconActionButton {ariaLabel} {onclick} class="copy-button" iconButton>
       …Icon oder Label…
     </IconActionButton>
+    <IconActionButton subtle tone="danger" ariaLabel="Löschen" title="Löschen" …/>
+
+  Achse `subtle` = dezenter Werkzeug-Look (CMS), `tone` = Bedeutung des Hover-
+  Feedbacks. `ariaLabel` ist für icon-only Pflicht — Ausnahme: rein dekorative
+  Griffe, die per `aria-hidden="true" tabindex={-1}` bewusst aus Fokus- und
+  a11y-Baum genommen sind (z. B. der Drag-Griff, dessen barrierefreies Pendant
+  die ↑/↓-Buttons sind). Beides läuft über `...restProps`.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -22,6 +29,14 @@
 		title?: string;
 		/** Gerahmter Icon-Button-Look (Border + Hover) — wie Icon-/Asset-Grid. */
 		iconButton?: boolean;
+		/** Dezenter Werkzeug-Look (CMS-Standard): 1.5rem-Quadrat, `--ds-text-muted`,
+		 *  Hover-Tint `--ds-text`/8 %, disabled-Opacity 0.35. Löst die zuvor je Datei
+		 *  gepflegten Kopien (Block-Karten-Werkzeuge, Drag-Griff) ab. */
+		subtle?: boolean;
+		/** Bedeutungs-Achse des Hover-Feedbacks: `default` (neutral) oder `danger`
+		 *  (destruktiv — roter Hover aus `--ds-negative`, z. B. „Löschen"). Der
+		 *  Ruhezustand bleibt in beiden Fällen neutral; nur Hover/Fokus färbt. */
+		tone?: 'default' | 'danger';
 		/** Klick-Handler des Buttons. */
 		onclick?: (event: MouseEvent) => void;
 		/** Button-Inhalt (Icon oder Label). */
@@ -35,6 +50,8 @@
 		ariaLabel,
 		title,
 		iconButton = false,
+		subtle = false,
+		tone = 'default',
 		onclick,
 		children,
 		element = $bindable(null),
@@ -50,6 +67,8 @@
 	type="button"
 	class="icon-action {className}"
 	class:icon-button={iconButton}
+	class:icon-action--subtle={subtle}
+	class:icon-action--danger={tone === 'danger'}
 	aria-label={ariaLabel}
 	use:tooltip={title ?? ''}
 	{onclick}
@@ -97,6 +116,45 @@
 	@media (hover: hover) and (pointer: fine) {
 		.icon-action.icon-button:hover {
 			background: var(--ds-surface-raised);
+		}
+	}
+
+	/* Dezenter Werkzeug-Look (CMS-Standard): 16×16-Icon im 24×24-Quadrat, radius 4,
+	   Hover = dezente Text-Tönung. War zuvor je Datei kopiert (Block-Karten-Werkzeuge,
+	   Drag-Griff, Media-Werkzeuge) — hier ist die eine Quelle. */
+	.icon-action.icon-action--subtle {
+		width: 1.5rem;
+		height: 1.5rem;
+		flex: none;
+		padding: 0;
+		border-radius: var(--ds-radius-sm);
+		font-size: var(--ds-text-xs);
+		line-height: 1;
+		color: var(--ds-text-muted);
+		transition:
+			background var(--ds-dur) var(--ds-ease-out),
+			color var(--ds-dur) var(--ds-ease-out);
+	}
+	.icon-action--subtle:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.icon-action--subtle:hover:not(:disabled) {
+			background: rgb(from var(--ds-text) r g b / 0.08);
+			color: var(--ds-text);
+		}
+		/* Destruktive Aktion: erst beim Hover rot — der Ruhezustand bleibt neutral,
+		   damit „Löschen" die Werkzeugleiste nicht dauerhaft alarmiert. */
+		.icon-action--subtle.icon-action--danger:hover:not(:disabled) {
+			color: var(--ds-negative);
+			background: rgb(from var(--ds-negative) r g b / 0.1);
+		}
+	}
+	/* Ohne `subtle` (nackter Look) trägt danger nur die Farbe. */
+	@media (hover: hover) and (pointer: fine) {
+		.icon-action--danger:not(.icon-action--subtle):hover:not(:disabled) {
+			color: var(--ds-negative);
 		}
 	}
 

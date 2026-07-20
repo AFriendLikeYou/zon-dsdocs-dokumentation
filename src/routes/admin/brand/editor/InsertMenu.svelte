@@ -8,6 +8,7 @@
 	import BlockMenuList from './BlockMenuList.svelte';
 	import { PopoverSheet } from '../../ui';
 	import { Field } from '$components/ui/field';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 	import { Icon } from '$lib/icons/cms';
 	import { cycleIndex } from '../core/cycle';
 
@@ -28,7 +29,7 @@
 	let query = $state('');
 	let activeIdx = $state(0);
 	let input = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
-	let triggerEl = $state<HTMLElement | null>(null);
+	let triggerEl = $state<HTMLButtonElement | null>(null);
 
 	const filtered = $derived(
 		items.filter((i) => i.label.toLowerCase().includes(query.trim().toLowerCase()))
@@ -70,18 +71,19 @@
 </script>
 
 <div class="insert-menu">
-	<button
-		type="button"
-		class="insert-menu__trigger"
-		class:insert-menu__trigger--compact={compact}
-		bind:this={triggerEl}
+	<!-- Popover-Trigger auf dem Atom: `bind:element` liefert den Anker für
+	     PopoverSheet, aria-haspopup/-expanded laufen über restProps. -->
+	<IconActionButton
+		class="insert-menu__trigger{compact ? ' insert-menu__trigger--compact' : ''}"
+		bind:element={triggerEl}
+		ariaLabel={compact ? label : undefined}
 		aria-haspopup="listbox"
 		aria-expanded={open}
 		onclick={toggle}
 	>
 		<span class="insert-menu__plus" aria-hidden="true"><Icon name="plus" /></span>
 		{#if !compact}<span>{label}</span>{/if}
-	</button>
+	</IconActionButton>
 
 	<PopoverSheet
 		{open}
@@ -115,9 +117,10 @@
 		position: relative;
 		display: inline-block;
 	}
-	.insert-menu__trigger {
-		display: inline-flex;
-		align-items: center;
+	/* Trigger ist jetzt ui/IconActionButton (Reset/Fokus-Ring/:active/reduced-motion
+	   aus dem Atom); die gerahmte Trigger-Optik landet auf dem Kind-<button> und
+	   braucht darum :global (Muster aus Paket 3/K5). */
+	:global(.insert-menu__trigger) {
 		gap: var(--z-ds-space-6);
 		border: 1px solid var(--ds-border);
 		background: var(--ds-surface-raised, var(--ds-surface));
@@ -125,17 +128,17 @@
 		padding: 3px var(--z-ds-space-s);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-body);
-		cursor: pointer;
 		white-space: nowrap;
+		transition:
+			border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
+			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.insert-menu__trigger:hover {
-		border-color: var(--ds-accent);
+	@media (hover: hover) and (pointer: fine) {
+		:global(.insert-menu__trigger:hover) {
+			border-color: var(--ds-accent);
+		}
 	}
-	.insert-menu__trigger:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.insert-menu__trigger--compact {
+	:global(.insert-menu__trigger--compact) {
 		padding: 2px var(--z-ds-space-6);
 		border-style: dashed;
 		background: var(--ds-surface);

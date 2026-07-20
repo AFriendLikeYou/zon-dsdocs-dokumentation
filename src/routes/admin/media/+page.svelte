@@ -106,8 +106,8 @@
 		ondragleave={() => (dragging = false)}
 		ondrop={onDrop}
 	>
-		<label class="field">
-			<span class="lbl">Bild hochladen</span>
+		<label class="upload-field">
+			<span class="upload-field__label">Bild hochladen</span>
 			<input
 				bind:this={fileEl}
 				type="file"
@@ -215,10 +215,12 @@
 			border-color var(--ds-dur) var(--ds-ease-out),
 			background var(--ds-dur) var(--ds-ease-out);
 	}
-	.field {
+	/* Nicht `.field` nennen — `field-base.css` definiert `.field` global
+	   (Rahmen/Fläche/Fokus-Ring) und legte sonst eine zweite Box um das Label. */
+	.upload-field {
 		display: block;
 	}
-	.lbl {
+	.upload-field__label {
 		display: block;
 		font-size: var(--ds-label-size);
 		text-transform: uppercase;

@@ -7,6 +7,8 @@
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
 	import { IconActionButton } from '$components/ui/icon-action-button';
+	import { Button } from '$components/ui/button';
+	import { Field } from '$components/ui/field';
 	import { Divider } from '$components/ui/divider';
 	import {
 		hasHeadingTypo,
@@ -30,27 +32,37 @@
 		onblur?: () => void;
 	} = $props();
 
-	let el = $state<HTMLTextAreaElement | null>(null);
+	/* Field bindet sein Bedienelement als Union (input|textarea); dank `multiline`
+	   ist es hier immer die Textarea. */
+	let el = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
 	let preview = $state(false);
 
 	const typo = $derived(hasHeadingTypo(value));
 	const previewHtml = $derived(preview ? renderPreview(value) : '');
 
+	/* Toolbar-Edits schreiben direkt ins DOM (die Selektion muss erhalten bleiben).
+	   Seit die Fläche ui/Field ist, hält Field den Wert in eigenem State — ein
+	   stiller DOM-Write liefe daran vorbei. Darum feuern wir ein echtes input-Event:
+	   das aktualisiert Fields `bind:value` UND ruft unseren oninput-Durchreicher;
+	   danach stellen wir die Selektion wieder her. */
+	function commit(t: HTMLTextAreaElement, text: string, selStart: number, selEnd: number) {
+		t.value = text;
+		t.dispatchEvent(new Event('input', { bubbles: true }));
+		t.setSelectionRange(selStart, selEnd);
+		t.focus();
+	}
+
 	function apply(fn: (text: string, s: number, e: number) => Edit) {
-		const t = el;
+		const t = el as HTMLTextAreaElement | null;
 		if (!t) return;
 		const r = fn(t.value, t.selectionStart ?? 0, t.selectionEnd ?? 0);
-		t.value = r.text;
-		t.setSelectionRange(r.selStart, r.selEnd);
-		t.focus();
-		oninput(r.text, t);
+		commit(t, r.text, r.selStart, r.selEnd);
 	}
 	function fixTypo() {
-		const t = el;
+		const t = el as HTMLTextAreaElement | null;
 		if (!t) return;
-		t.value = fixHeadings(t.value);
-		oninput(t.value, t);
-		t.focus();
+		const pos = t.selectionStart ?? 0;
+		commit(t, fixHeadings(t.value), pos, pos);
 	}
 </script>
 
@@ -94,8 +106,7 @@
 		<IconActionButton
 			class="pe-btn pe-btn--toggle{preview ? ' pe-btn--on' : ''}"
 			aria-pressed={preview}
-			onclick={() => (preview = !preview)}
-			>{preview ? 'Bearbeiten' : 'Vorschau'}</IconActionButton
+			onclick={() => (preview = !preview)}>{preview ? 'Bearbeiten' : 'Vorschau'}</IconActionButton
 		>
 	</div>
 
@@ -105,21 +116,27 @@
 			{@html previewHtml}
 		</div>
 	{:else}
-		<textarea
-			bind:this={el}
-			class="prosa"
+		<!-- Fläche = ui/Field (multiline). Bewusste Angleichung an die Doku-Feld-Optik:
+		     Rahmen + Fläche + Fokus-Ring statt der früheren randlosen Zeile. -->
+		<Field
+			multiline
+			class="prose-editor__field"
+			bind:element={el}
 			{value}
 			placeholder="/Text eingeben oder auf „+“ eine Komponente einfügen"
-			oninput={(e) => oninput(e.currentTarget.value, e.currentTarget)}
+			oninput={(e: Event) => {
+				const t = e.currentTarget as HTMLTextAreaElement;
+				oninput(t.value, t);
+			}}
 			{onkeydown}
 			{onblur}
-		></textarea>
+		/>
 	{/if}
 
 	{#if typo && !preview}
 		<p class="pe-hint">
 			Für Überschriften braucht es ein Leerzeichen nach „#" — z. B. <code>## Titel</code>.
-			<button type="button" class="pe-fix" onclick={fixTypo}>Korrigieren</button>
+			<Button variant="ghost" size="sm" class="pe-fix" onclick={fixTypo}>Korrigieren</Button>
 		</p>
 	{/if}
 </div>
@@ -181,27 +198,14 @@
 		margin-inline: var(--z-ds-space-xs);
 	}
 
-	/* Nackte Textzeile im Fluss (Figma „Slot"): keine Fläche, kein Rand. */
-	textarea.prosa {
-		width: 100%;
-		font: inherit;
+	/* Fläche/Kontur/Fokus/Auto-Grow trägt jetzt ui/Field (field-base.css); hier
+	   bleibt nur Schriftgröße + Mindesthöhe des Prosa-Blocks. `.prose-editor__field`
+	   hängt am Field-Wrapper (class-Passthrough) → :global. */
+	:global(.prose-editor__field) {
 		font-size: var(--ds-text-base);
-		color: var(--ds-text);
-		background: transparent;
-		border: none;
-		border-radius: var(--ds-radius-sm);
-		padding: 6px 0;
-		resize: vertical;
-		line-height: 1.5;
-		field-sizing: content;
+	}
+	:global(.prose-editor__field .field__control) {
 		min-height: 2.25rem;
-	}
-	textarea.prosa::placeholder {
-		color: var(--ds-text-faint, var(--ds-text-muted));
-	}
-	textarea.prosa:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 
 	.pe-preview {
@@ -266,22 +270,12 @@
 	.pe-hint code {
 		font-family: var(--ds-font-mono);
 	}
-	.pe-fix {
-		border: 1px solid var(--ds-border);
-		background: var(--ds-surface);
-		font: inherit;
-		font-size: var(--ds-text-xs);
+	/* „Korrigieren" ist jetzt ui/Button (ghost, sm) — Rahmen/Hover/Fokus kommen aus
+	   der app-button-Schicht; hier bleibt nur die Pillen-Kontur des Hinweises.
+	   Klasse hängt am Kind-<button> → :global. */
+	:global(.pe-fix) {
 		border-radius: 999px;
-		padding: 1px var(--z-ds-space-s);
-		cursor: pointer;
-	}
-	.pe-fix:hover {
-		border-color: var(--ds-accent);
-		color: var(--ds-accent);
-	}
-	.pe-fix:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
+		font-size: var(--ds-text-xs);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
