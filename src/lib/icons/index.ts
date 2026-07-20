@@ -28,6 +28,7 @@ export { default as ThemeSystemIcon } from './ThemeSystemIcon.svelte';
 export { default as ImportIcon } from './ImportIcon.svelte';
 export { default as PencilIcon } from './PencilIcon.svelte';
 export { default as AlertTriangleIcon } from './AlertTriangleIcon.svelte';
+export { default as CircleIcon } from './CircleIcon.svelte';
 export { default as InfoIcon } from './InfoIcon.svelte';
 
 // cms/ — Editor-Icons via Namens-Dispatcher (eigenes Barrel, s. ./cms).

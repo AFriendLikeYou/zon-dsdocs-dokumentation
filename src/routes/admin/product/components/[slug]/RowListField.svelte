@@ -117,15 +117,15 @@
 	.rlf {
 		display: flex;
 		flex-direction: column;
+		/* Feld-Optik trägt die Kontur je Input → Zeilen bekommen Luft statt Hairlines. */
+		gap: var(--z-ds-space-6);
 	}
 	.rlf__row {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
-		border-bottom: 1px solid var(--ds-border-soft);
 	}
 	.rlf__row--ghost {
-		border-bottom: none;
 		opacity: 0.85;
 	}
 	.rlf__row--ghost:focus-within {

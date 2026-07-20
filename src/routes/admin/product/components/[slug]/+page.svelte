@@ -16,6 +16,7 @@
 	import LegendPopover from './LegendPopover.svelte';
 	import EditorialCard from './EditorialCard.svelte';
 	import SpecTable from './SpecTable.svelte';
+	import StatusSegmentedControl from './StatusSegmentedControl.svelte';
 	import AnchorBar from './AnchorBar.svelte';
 	import DriftBanner from './DriftBanner.svelte';
 
@@ -529,15 +530,11 @@
 		aria-label="Label"
 	/>
 	<input class="row__input" bind:value={entry.wert} placeholder="Wert" aria-label="Wert" />
-	<select
-		class="status-select status-select--{entry.status}"
-		bind:value={entry.status}
-		aria-label="Status"
-	>
-		{#each A11Y_STATUS_OPTIONS as o (o.value)}
-			<option value={o.value}>{o.label}</option>
-		{/each}
-	</select>
+	<StatusSegmentedControl
+		value={entry.status}
+		onchange={(v) => (entry.status = v)}
+		ariaLabel="Status"
+	/>
 {/snippet}
 
 <!-- Drift-Banner-Inhalte: Text + Aktionen kennen den Re-Import-Befehl (Seiten-Scope). -->
@@ -776,11 +773,11 @@
 					onremove={() => removeSection('doDont', "Do & Don't geleert")}
 				>
 					<div class="sublist">
-						<span class="sublist__label">Do</span>
+						<span class="sublist__label sublist__label--do">Do</span>
 						<StringListField list={model.doDont.do} />
 					</div>
 					<div class="sublist">
-						<span class="sublist__label">Don't</span>
+						<span class="sublist__label sublist__label--dont">Don't</span>
 						<StringListField list={model.doDont.dont} />
 					</div>
 				</EditorialCard>
@@ -1201,6 +1198,29 @@
 		color: var(--ds-text-muted);
 		font-weight: 600;
 	}
+	/* Do/Don't-Marker: kleiner vertikaler Balken + Label in der Status-Rollenfarbe —
+	   dieselbe Semantik wie die öffentliche DoDont-Komponente (do = positiv,
+	   dont = negativ). Nur in der Do-&-Don't-Karte, nicht bei „Verwendung". */
+	.sublist__label--do,
+	.sublist__label--dont {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-6);
+	}
+	.sublist__label--do::before,
+	.sublist__label--dont::before {
+		content: '';
+		width: 3px;
+		height: 0.9em;
+		border-radius: 2px;
+		background: currentcolor;
+	}
+	.sublist__label--do {
+		color: var(--ds-positive);
+	}
+	.sublist__label--dont {
+		color: var(--ds-negative);
+	}
 
 	/* ── Dichte Zeilen (A11y, Wording, Verwandt) ── */
 	.row {
@@ -1209,16 +1229,20 @@
 		gap: var(--z-ds-space-6);
 		border-bottom: 1px solid var(--ds-border-soft);
 	}
+	/* Echte Feld-Optik (wie StringListField): Inset-Fläche, deutliche Kontur, Radius. */
 	.row__input {
 		flex: 1;
 		min-width: 0;
-		background: transparent;
-		border: none;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text);
+		background: var(--ds-surface-inset);
+		border: 1px solid var(--ds-border-strong);
+		border-radius: var(--ds-radius-sm);
 		padding: var(--z-ds-space-6) var(--z-ds-space-6);
 	}
 	.row__input:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: -2px;
+		outline-offset: 1px;
 	}
 	.row__input--key {
 		flex: 0 1 11rem;
@@ -1266,7 +1290,8 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
-	/* Status als kompaktes Select im Pill-Look (Mockup „pass ▾"). */
+	/* Übersichts-Status als kompaktes Select im Pill-Look (die A11y-Zeilen nutzen
+	   stattdessen die StatusSegmentedControl). */
 	.status-select {
 		flex: none;
 		width: auto;
@@ -1278,14 +1303,6 @@
 		background: var(--ds-surface-sunken);
 		color: var(--ds-text-body);
 		cursor: pointer;
-	}
-	.status-select--pass {
-		color: var(--ds-tint-positive-text);
-		background: var(--ds-tint-positive-surface);
-	}
-	.status-select--warn {
-		color: var(--ds-tint-warning-text);
-		background: var(--ds-tint-warning-surface);
 	}
 	.status-select:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);

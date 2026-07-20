@@ -84,30 +84,37 @@
 	.string-list {
 		display: flex;
 		flex-direction: column;
+		/* Feld-Optik trägt die Kontur je Zeile → Zeilen bekommen Luft statt Hairlines. */
+		gap: var(--z-ds-space-6);
 	}
 	.string-list__row {
 		display: flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
-		border-bottom: 1px solid var(--ds-border-soft);
 	}
-	.string-list__row--ghost {
-		border-bottom: none;
-	}
+	/* Echte Feld-Optik: Inset-Fläche, deutliche Kontur, kleiner Radius. */
 	.string-list__input {
 		flex: 1;
 		min-width: 0;
 		font: inherit;
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text);
-		background: transparent;
-		border: none;
-		border-radius: var(--ds-radius-xs);
+		background: var(--ds-surface-inset);
+		border: 1px solid var(--ds-border-strong);
+		border-radius: var(--ds-radius-sm);
 		padding: var(--z-ds-space-6) var(--z-ds-space-6);
 	}
 	.string-list__input:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: -2px;
+		outline-offset: 1px;
+	}
+	/* Ghost-Zeile bleibt klar unterscheidbar: gestrichelte Kontur, gedämpfter Text,
+	   leise/transparente Fläche — noch kein „echtes" Feld. */
+	.string-list__ghost {
+		background: transparent;
+		border-style: dashed;
+		border-color: var(--ds-border);
+		color: var(--ds-text-muted);
 	}
 	.string-list__ghost::placeholder {
 		color: var(--ds-text-faint);

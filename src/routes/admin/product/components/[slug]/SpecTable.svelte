@@ -77,10 +77,20 @@
 	</table>
 {:else}
 	<table class="mz-table mz-table--tokens">
-		<tbody>
-			{#each groups as group (group.kategorie)}
+		<!-- Jede Gruppe als eigener <tbody> — semantisch sauberer als Eyebrow-Zeilen im
+		     gemeinsamen Fluss und trägt den Luft-/Trennlinien-Rhythmus zwischen den Gruppen. -->
+		{#each groups as group (group.kategorie)}
+			<tbody class="mz-group">
 				<tr class="mz-grouprow">
-					<td class="mz-grouprow__cell" colspan="4">{group.kategorie}</td>
+					<td class="mz-grouprow__cell" colspan="4">
+						<div class="mz-grouprow__inner">
+							<span class="mz-grouprow__eyebrow">{group.kategorie}</span>
+							<span class="mz-grouprow__count"
+								>{group.items.length}
+								{group.items.length === 1 ? 'Token' : 'Tokens'}</span
+							>
+						</div>
+					</td>
 				</tr>
 				{#each group.items as t (t.name)}
 					<tr>
@@ -96,8 +106,8 @@
 						<td class="mz-table__hinweis">{t.hinweis ?? ''}</td>
 					</tr>
 				{/each}
-			{/each}
-		</tbody>
+			</tbody>
+		{/each}
 	</table>
 {/if}
 
@@ -117,6 +127,12 @@
 		color: var(--ds-text-body);
 	}
 	.mz-table tr:last-child td {
+		border-bottom: none;
+	}
+	/* Token-Gruppen als eigene <tbody>: die letzte Zeile je Gruppe trägt keinen
+	   Zeilen-Trenner mehr — die Gruppen trennt stattdessen Luft + eine durchgehende
+	   Linie am nächsten Eyebrow (s. u.). */
+	.mz-group tr:last-child td {
 		border-bottom: none;
 	}
 	.mz-table__label {
@@ -184,17 +200,37 @@
 		color: var(--ds-text-muted);
 		font-weight: 600;
 	}
-	/* Gruppen-Eyebrow-Zeile IN der Token-Tabelle (eine Tabelle statt vier Boxen). */
+	/* Gruppen-Eyebrow-Zeile IN der Token-Tabelle (eine Tabelle statt vier Boxen).
+	   Eyebrow links, Token-Zähler rechts, baseline-aligned. Kein dashed Bottom —
+	   die gestrichelten Trenner bleiben den Zeilen vorbehalten. */
 	.mz-grouprow__cell {
-		padding: var(--z-ds-space-m) 0 var(--z-ds-space-6);
-		border-bottom: 1px dashed var(--ds-border);
+		padding: 0 0 var(--z-ds-space-6);
+		border-bottom: none;
+	}
+	/* Eyebrow links, Token-Zähler rechts, baseline-aligned. */
+	.mz-grouprow__inner {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--z-ds-space-8);
+	}
+	.mz-grouprow__eyebrow {
 		font-size: var(--ds-text-xs);
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		color: var(--ds-text-muted);
 		font-weight: 600;
 	}
-	.mz-grouprow:first-child .mz-grouprow__cell {
-		padding-top: 0;
+	.mz-grouprow__count {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		font-variant-numeric: tabular-nums;
+	}
+	/* Ab der zweiten Gruppe: 16px Luft + feine, durchgehende Trennlinie darüber
+	   (Margin/Border sitzen am Block-Wrapper, nicht an der <td> — dort zuverlässig). */
+	.mz-group + .mz-group .mz-grouprow__inner {
+		margin-top: var(--z-ds-space-m);
+		padding-top: var(--z-ds-space-m);
+		border-top: 1px solid var(--ds-border);
 	}
 </style>
