@@ -1,7 +1,7 @@
 <!--
   Dialog.svelte — die schwebende Bestätigungs-/Aktionsleiste der Doku-Admin-UI.
   Konsolidiert das zuvor DOPPELT gepflegte „Save-Bar"-Muster (Spec-Editor +
-  Brand-Editor): eine am unteren Rand schwebende Pillen-Leiste mit Status-Text,
+  Brand-Editor): eine am unteren Rand schwebende Leiste mit Status-Text,
   Verwerfen- und Speichern-Aktion (⌘S). Rein darstellend — der Zustand (dirty,
   Fehlerzahl, Speichern/Verwerfen) bleibt in der aufrufenden Seite; hier kommen
   Props rein, Callbacks raus.
@@ -10,7 +10,7 @@
   Tastenkürzel-Hinweis aus dem Kbd-Atom.
 
   Modi (variant):
-    · 'bar' (Default, gebaut) — schwebende Pillen-Leiste unten, wie die Save-Bar.
+    · 'bar' (Default, gebaut) — schwebende Leiste unten, wie die Save-Bar.
   Als vorgesehene Erweiterung ist ein 'modal'-Modus (zentrierter <dialog> mit
   Fokus-Trap für echte Verwerfen-/Löschen-Bestätigungen) angelegt, aber bewusst
   NOCH NICHT implementiert: im Bestand gibt es aktuell keinen modalen
@@ -123,7 +123,7 @@
 		gap: var(--z-ds-space-s);
 		background: var(--ds-surface);
 		border: 1px solid var(--ds-border);
-		border-radius: 999px;
+		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-l);
 		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
 		animation: dialog-bar-in 0.2s var(--ds-ease-out, ease-out);
