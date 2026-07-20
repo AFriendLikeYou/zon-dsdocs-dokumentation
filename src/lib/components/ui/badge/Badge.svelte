@@ -31,7 +31,7 @@
 		font-size: var(--ds-text-xs);
 		font-weight: 500;
 		letter-spacing: 0;
-		padding: 4px 10px;
+		padding: 4px 8px;
 		border-radius: 999px;
 		color: var(--ds-text);
 	}
@@ -45,7 +45,7 @@
 	}
 	.badge--ready {
 		background: color-mix(in srgb, var(--ds-accent) 14%, transparent);
-		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ds-accent) 32%, transparent);
+		color: var(--ds-tint-info-text);
 	}
 	.badge--ready::before {
 		background: var(--ds-accent);

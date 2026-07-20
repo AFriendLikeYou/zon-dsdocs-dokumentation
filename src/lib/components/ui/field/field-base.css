@@ -29,8 +29,7 @@
 /* comfortable = Default (Brand-PropField-Optik, Figma 689:11510). */
 .field--comfortable {
 	gap: var(--z-ds-space-8);
-	/* 9/12px sind bewusste, originalgetreue Figma-Maße (kein Space-Token deckt 9px). */
-	padding: 9px 12px;
+	padding: var(--z-ds-space-8) var(--z-ds-space-12);
 	font-size: var(--ds-text-base);
 }
 
@@ -39,8 +38,8 @@
 	gap: var(--z-ds-space-6);
 	background: var(--ds-surface-inset);
 	border-color: var(--ds-border-strong);
-	border-radius: var(--ds-radius-sm);
-	padding: var(--z-ds-space-6);
+	border-radius: var(--ds-radius);
+	padding: var(--z-ds-space-6) var(--z-ds-space-12);
 	font-size: var(--ds-text-sm);
 }
 

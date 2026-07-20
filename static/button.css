@@ -23,7 +23,7 @@
 	border-radius: var(--ds-radius-sm);
 	color: var(--ds-surface);
 	padding-inline: var(--z-ds-space-12);
-	padding-block: var(--z-ds-space-6);
+	padding-block: var(--z-ds-space-8);
 	background-color: var(--ds-text);
 	font-size: var(--ds-text-sm);
 	gap: var(--z-ds-space-xs);

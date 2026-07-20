@@ -37,6 +37,7 @@ Das ist eine Liste:
 jo
 
 <Alert
+	variant="success"
 	title="Test"
 	description="Testtesttest"
 />
