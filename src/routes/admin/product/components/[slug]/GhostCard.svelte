@@ -9,8 +9,8 @@
   - label:    vollständiger Aufforderungstext (z. B. „Verwendung ergänzen").
   - onexpand: Klick-Handler — expandiert den zugehörigen Abschnitt.
   - id?:      DOM-id des Buttons (Fokus-Ziel, nachdem ein Abschnitt entfernt wurde).
-  - attached?: eingerückte „aufgesetzte" Variante — gehört zur Zone darüber (z. B.
-              „Hinweis je Token" direkt unter den Tokens).
+  - attached?: „aufgesetzte" Variante — rückt bündig an die Zone darüber heran
+              (z. B. „Hinweis je Token" direkt unter den Tokens).
 -->
 <script lang="ts">
 	let {
@@ -86,9 +86,8 @@
 	.ghost-card__label {
 		font-size: var(--ds-text-sm);
 	}
-	/* „Hinweis je Token" gehört zur Tokens-Zone → leicht eingerückt & aufgesetzt. */
+	/* Gehört zur Zone darüber → rückt bündig heran (Nähe statt Einzugsstufe). */
 	.ghost-attached {
-		margin-left: var(--z-ds-space-m);
 		margin-top: calc(-1 * var(--z-ds-space-6));
 	}
 	@media (prefers-reduced-motion: reduce) {

@@ -17,7 +17,7 @@
   - title:       Karten-Überschrift.
   - subline?:    gedämpfte Subzeile unter dem Titel.
   - id?:         DOM-id der Section (Anker-/Scroll-Ziel, z. B. „cluster-overview").
-  - attached?:   eingerückte „aufgesetzte" Variante — gehört zur Zone darüber.
+  - attached?:   „aufgesetzte" Variante — rückt bündig an die Zone darüber heran.
   - expanded?:   ist der Abschnitt aufgeklappt? (nur mit `onexpand` relevant; Default true).
   - ghostLabel?: Aufforderungstext der GhostCard (Fallback: `title`).
   - ghostId?:    DOM-id der GhostCard (Fokus-Ziel nach dem Entfernen).
@@ -130,9 +130,8 @@
 		   Chips (#sec-a11y / #sec-doDont): unter der Sticky-Navbar landen. */
 		scroll-margin-top: calc(var(--header-height, 4rem) + var(--z-ds-space-m));
 	}
-	/* „Hinweis je Token" gehört zur Tokens-Zone → leicht eingerückt & aufgesetzt. */
+	/* Gehört zur Zone darüber → rückt bündig heran (Nähe statt Einzugsstufe). */
 	.card--attached {
-		margin-left: var(--z-ds-space-m);
 		margin-top: calc(-1 * var(--z-ds-space-6));
 	}
 	.card-head {
