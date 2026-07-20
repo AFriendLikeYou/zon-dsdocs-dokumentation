@@ -4,6 +4,7 @@ title: Components
 
 <script lang="ts">
 	import { Badge } from '$components/ui/badge';
+	import type { BadgeVariant } from '$types/spec';
 	// Zentraler, generierter Katalog-Index (Stufe 5, ADR-023/024) — Discovery über
 	// die co-locateten model.json, redaktionelle Overrides bereits eingemerged.
 	import { CATALOG } from '$data/catalog';
@@ -15,9 +16,9 @@ title: Components
 		completed: 'Completed',
 		changed: 'Geändert'
 	};
-	const STATUS_VARIANT: Record<string, 'ready' | 'done' | 'warn' | 'neutral'> = {
-		ready_for_dev: 'ready',
-		completed: 'done',
+	const STATUS_VARIANT: Record<string, BadgeVariant> = {
+		ready_for_dev: 'machine',
+		completed: 'editorial',
 		changed: 'warn'
 	};
 
@@ -33,7 +34,7 @@ title: Components
 		title: e.spec.name ?? titleCase(e.slug),
 		description: e.spec.zweck ?? '',
 		badge: STATUS_LABEL[e.spec.status ?? ''] ?? e.spec.status ?? '',
-		badgeVariant: STATUS_VARIANT[e.spec.status ?? ''] ?? ('neutral' as const),
+		badgeVariant: STATUS_VARIANT[e.spec.status ?? ''] ?? ('default' as const),
 		preview: CATALOG_PREVIEWS[e.slug] ?? null
 	}));
 
@@ -49,7 +50,7 @@ title: Components
 			title: titleCase(slug),
 			description: 'Noch nicht dokumentiert.',
 			badge: 'In Arbeit',
-			badgeVariant: 'neutral' as const,
+			badgeVariant: 'default' as const,
 			preview: null
 		}));
 
@@ -98,7 +99,7 @@ Design-System-Styles.
 			{/if}
 			<div class="cat-card__head">
 				<h3 class="cat-card__title">{card.title}</h3>
-				{#if card.badge}<Badge variant={card.badgeVariant}>{card.badge}</Badge>{/if}
+				{#if card.badge}<Badge tone={card.badgeVariant}>{card.badge}</Badge>{/if}
 			</div>
 			<p class="cat-card__desc">{card.description}</p>
 		</a>

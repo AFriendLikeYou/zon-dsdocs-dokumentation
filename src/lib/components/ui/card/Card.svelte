@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { Badge } from '$components/ui/badge';
+	import type { BadgeVariant } from '$types/spec';
 
 	type Props = {
 		/** Link-Ziel der gesamten Karte. */
@@ -15,10 +16,10 @@
 		/** Optionaler Badge-Text neben dem Titel (leer = kein Badge). */
 		badge?: string;
 		/** Farbrolle des Badges. */
-		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+		badgeVariant?: BadgeVariant;
 	};
 
-	let { url, title, description, badge = '', badgeVariant = 'neutral' }: Props = $props();
+	let { url, title, description, badge = '', badgeVariant = 'default' }: Props = $props();
 </script>
 
 <a href={url} class="card">
@@ -47,7 +48,7 @@
 	</div>
 	<div class="card__head">
 		<h3 class="card__title">{title}</h3>
-		{#if badge}<Badge variant={badgeVariant}>{badge}</Badge>{/if}
+		{#if badge}<Badge tone={badgeVariant}>{badge}</Badge>{/if}
 	</div>
 	<p>{description}</p>
 </a>

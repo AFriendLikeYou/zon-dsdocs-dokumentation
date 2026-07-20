@@ -4,8 +4,8 @@
  * Erreichbar via `$types` (svelte.config.js-Alias).
  */
 
-/** Varianten der Badge-Komponente (src/components/ui/badge). */
-export type BadgeVariant = 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+/** Tones der Badge-Komponente (src/components/ui/badge) — Figma 840:13943 + accent. */
+export type BadgeVariant = 'default' | 'machine' | 'editorial' | 'warn' | 'ghost' | 'accent';
 
 /** Bekannte Component-Status; offen für redaktionelle Sonderwerte (Fallback im Hero). */
 export type SpecStatus = 'ready_for_dev' | 'completed' | 'changed';

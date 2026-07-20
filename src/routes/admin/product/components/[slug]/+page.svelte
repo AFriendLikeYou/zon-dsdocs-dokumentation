@@ -5,7 +5,7 @@
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { CloseIcon, ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
-	import { Pill } from '../../../ui';
+	import { Badge } from '$components/ui/badge';
 	import { Field, Select } from '$components/ui/field';
 	import { Button } from '$components/ui/button';
 	import MachineZone from './MachineZone.svelte';
@@ -718,7 +718,7 @@
 		<header class="editor-card__head">
 			<div class="editor-card__ident">
 				<span class="editor-card__name">{data.name}</span>
-				{#if data.status}<Pill tone="status">{data.status}</Pill>{/if}
+				{#if data.status}<Badge tone="machine">{data.status}</Badge>{/if}
 			</div>
 			<div class="editor-card__meta">
 				<span class="editor-card__sync">

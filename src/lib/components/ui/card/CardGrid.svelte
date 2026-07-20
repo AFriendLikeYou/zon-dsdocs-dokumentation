@@ -4,13 +4,14 @@
 -->
 <script lang="ts">
 	import Card from './Card.svelte';
+	import type { BadgeVariant } from '$types/spec';
 
 	type CardItem = {
 		url: string;
 		title: string;
 		description: string;
 		badge?: string;
-		badgeVariant?: 'neutral' | 'ready' | 'done' | 'warn' | 'accent';
+		badgeVariant?: BadgeVariant;
 	};
 
 	// Bewusst leerer Default — die alten Lorem-Platzhalter-Karten zeigten auf tote URLs.

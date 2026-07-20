@@ -226,8 +226,8 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				key: 'badgeVariant',
 				label: 'Badge-Stil',
 				type: 'select',
-				options: ['neutral', 'ready', 'done', 'warn', 'accent'],
-				default: 'neutral'
+				options: ['default', 'machine', 'editorial', 'warn', 'ghost', 'accent'],
+				default: 'default'
 			}
 		]
 	},

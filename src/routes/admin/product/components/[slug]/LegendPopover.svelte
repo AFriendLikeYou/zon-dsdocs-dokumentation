@@ -9,7 +9,8 @@
 -->
 <script lang="ts">
 	import { InfoIcon } from '$lib/icons';
-	import { PopoverSheet, Pill } from '../../../ui';
+	import { PopoverSheet } from '../../../ui';
+	import { Badge } from '$components/ui/badge';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 
 	let open = $state(false);
@@ -55,11 +56,11 @@
 		</p>
 		<hr class="legend-pop__sep" />
 		<p class="legend-pop__row">
-			<Pill tone="neutral">abgeleitet</Pill>
+			<Badge tone="default">abgeleitet</Badge>
 			aus anderen Werten berechnet
 		</p>
 		<p class="legend-pop__row">
-			<Pill tone="estimate" icon="≈">geschätzt</Pill>
+			<Badge tone="warn">≈ geschätzt</Badge>
 			Platzhalter, noch nicht aus Figma
 		</p>
 		<p class="legend-pop__note">Maße ohne Badge sind direkt aus Figma gemessen.</p>

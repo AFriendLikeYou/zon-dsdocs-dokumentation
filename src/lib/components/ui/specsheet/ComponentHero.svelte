@@ -13,15 +13,15 @@
 		version?: string;
 	} = $props();
 
-	const STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
-		ready_for_dev: { label: 'Ready for dev', variant: 'ready' },
-		completed: { label: 'Completed', variant: 'done' },
-		changed: { label: 'Geändert', variant: 'warn' }
+	const STATUS: Record<string, { label: string; tone: BadgeVariant }> = {
+		ready_for_dev: { label: 'Ready for dev', tone: 'machine' },
+		completed: { label: 'Completed', tone: 'editorial' },
+		changed: { label: 'Geändert', tone: 'warn' }
 	};
 	const status = $derived(
 		STATUS[spec.status ?? ''] ?? {
 			label: spec.status ?? 'unbekannt',
-			variant: 'neutral' as BadgeVariant
+			tone: 'default' as BadgeVariant
 		}
 	);
 </script>
@@ -30,7 +30,7 @@
 	{#if spec.kategorie}<p class="eyebrow">Komponente · {spec.kategorie}</p>{/if}
 
 	<div class="row">
-		<Badge variant={status.variant}>{status.label}</Badge>
+		<Badge tone={status.tone}>{status.label}</Badge>
 		{#if version}<span class="meta">{version}</span>{/if}
 		{#if spec.aktualisiertAm}<span class="meta">Stand {spec.aktualisiertAm}</span>{/if}
 	</div>

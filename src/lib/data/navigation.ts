@@ -25,7 +25,7 @@ export interface MenuItem extends FooterVisible {
 	label: string;
 	href: string;
 	badge?: string;
-	/** Optik des Badges; ohne Angabe = 'ready' (z. B. „Neu"). 'neutral' für „Geplant". */
+	/** Tone des Badges; ohne Angabe = 'machine' (z. B. „Neu"). 'ghost' für „Geplant". */
 	badgeVariant?: BadgeVariant;
 	locked?: boolean; // Add locked field to indicate if the item is locked
 }
@@ -100,7 +100,7 @@ const COMPONENT_MENU_ITEMS: MenuSection[] = [
 			title: p.label,
 			href: `/product/components/${p.slug}`,
 			badge: 'Geplant',
-			badgeVariant: 'neutral',
+			badgeVariant: 'ghost',
 			isInFooter: true
 		})
 	)
@@ -224,8 +224,8 @@ const flattenMenu = (menu: MenuSection[]): MenuItem[] =>
 			acc.push({
 				label: item.title,
 				href: item.href,
-				// badgeVariant MIT kopieren — sonst fällt „Geplant" (neutral) auf den
-				// ready-Fallback der SearchPalette zurück und färbt sich grün.
+				// badgeVariant MIT kopieren — sonst fällt „Geplant" (ghost) auf den
+				// machine-Fallback der SearchPalette zurück und färbt sich blau.
 				...(item.badge && { badge: item.badge, badgeVariant: item.badgeVariant })
 			});
 		}

@@ -133,7 +133,7 @@
 						>
 							<span class="result__label">{item.label}</span>
 							{#if item.badge}
-								<Badge variant={item.badgeVariant ?? 'ready'}>{item.badge}</Badge>
+								<Badge tone={item.badgeVariant ?? 'machine'}>{item.badge}</Badge>
 							{/if}
 							<span class="result__path">{item.href}</span>
 						</a>

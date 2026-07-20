@@ -3,7 +3,8 @@
 	import { invalidateAll, goto } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
-	import { AdminPageHeader, AdminRow, AdminBadge } from '../ui';
+	import { AdminPageHeader, AdminRow } from '../ui';
+	import { Badge } from '$components/ui/badge';
 	import { Alert } from '$components/ui/alert';
 	import { Button } from '$components/ui/button';
 	import { sectionKind, type NavSection } from './core/brand-nav';
@@ -272,7 +273,7 @@
 						{@render grip(data.writable)}
 						<span class="icon" aria-hidden="true">{@render folderIcon()}</span>
 						<span class="name">{section.title}</span>
-						<AdminBadge tone="accent">Thema</AdminBadge>
+						<Badge tone="accent">Thema</Badge>
 						<span class="count">{section.items?.length} Seiten</span>
 						{@render nudges(
 							() => nudgeTop(i, -1),
@@ -303,7 +304,7 @@
 								{:else}
 									<span class="name name--locked">{child.label}</span>
 								{/if}
-								{#if child.badge}<AdminBadge tone="default">{child.badge}</AdminBadge>{/if}
+								{#if child.badge}<Badge tone="default">{child.badge}</Badge>{/if}
 								<span class="path">{child.href}</span>
 								{@render nudges(
 									() => nudgeChild(i, ci, -1),
@@ -327,7 +328,7 @@
 						{:else}
 							<span class="name name--locked">{section.title}</span>
 						{/if}
-						{#if section.badge}<AdminBadge tone="default">{section.badge}</AdminBadge>{/if}
+						{#if section.badge}<Badge tone="default">{section.badge}</Badge>{/if}
 						<span class="path">{section.href}</span>
 						{@render nudges(
 							() => nudgeTop(i, -1),

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { AdminPageHeader, AdminRow, AdminBadge, Pill } from './ui';
+	import { AdminPageHeader, AdminRow } from './ui';
+	import { Badge } from '$components/ui/badge';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -63,26 +64,26 @@
 					href="{editHref}#cluster-design"
 					title="Design-Drift — figma-raw.json ist neuer als model.json. Re-Import prüfen."
 				>
-					<Pill tone="estimate" icon="⚠">Drift</Pill>
+					<Badge tone="warn">⚠ Drift</Badge>
 				</a>
 			{:else}
-				<Pill tone="estimate" icon="⚠" title="Design-Drift — Re-Import prüfen.">Drift</Pill>
+				<Badge tone="warn" title="Design-Drift — Re-Import prüfen.">⚠ Drift</Badge>
 			{/if}
 		{/if}
 		{#if !status.hasRaw}
-			<Pill tone="planned" title="Kein figma-raw.json — Design-Drift lässt sich nicht prüfen."
-				>kein raw</Pill
+			<Badge tone="ghost" title="Kein figma-raw.json — Design-Drift lässt sich nicht prüfen."
+				>kein raw</Badge
 			>
 		{:else if status.gate1}
-			<Pill tone="planned" title="Gate 1 — Import unvollständig, Token-Namen fehlen.">Gate 1</Pill>
+			<Badge tone="ghost" title="Gate 1 — Import unvollständig, Token-Namen fehlen.">Gate 1</Badge>
 		{/if}
 		{#each docGaps(status.kriterien) as gap (gap.anchor)}
 			{#if editHref}
 				<a class="chip-link" href="{editHref}#{gap.anchor}" title={gap.title}>
-					<Pill tone="estimate">{gap.label}</Pill>
+					<Badge tone="warn">{gap.label}</Badge>
 				</a>
 			{:else}
-				<Pill tone="estimate" title={gap.title}>{gap.label}</Pill>
+				<Badge tone="warn" title={gap.title}>{gap.label}</Badge>
 			{/if}
 		{/each}
 	</span>
@@ -148,7 +149,7 @@
 							</span>
 							{#if item.planned}
 								<span class="chips">
-									<Pill tone="planned" title="Geplant — wartet auf den Figma-Import.">Geplant</Pill>
+									<Badge tone="ghost" title="Geplant — wartet auf den Figma-Import.">Geplant</Badge>
 								</span>
 							{:else if item.status}
 								{@render componentChips(item.status, item.editHref)}
@@ -165,13 +166,13 @@
 						<AdminRow tag="div">
 							<span class="name">
 								{item.title}
-								{#if item.badge}<AdminBadge tone="default">{item.badge}</AdminBadge>{/if}
+								{#if item.badge}<Badge tone="default">{item.badge}</Badge>{/if}
 							</span>
 							<span class="actions">
 								{#if item.editHref}
 									<a class="act act--edit" href={item.editHref}>Bearbeiten</a>
 								{:else}
-									<AdminBadge tone="muted">Code-Seite</AdminBadge>
+									<Badge tone="ghost">Code-Seite</Badge>
 								{/if}
 								{#if item.href}
 									<a class="act" href={item.href} title="Live-Seite ansehen">Ansehen&nbsp;↗</a>

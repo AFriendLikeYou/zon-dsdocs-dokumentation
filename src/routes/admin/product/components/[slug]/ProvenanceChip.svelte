@@ -3,14 +3,15 @@
   - variant „machine":   ⇣ aus Figma (Info-Blau) — vom Import gepflegt, hier read-only.
   - variant „editorial": ✎ Redaktion (Positiv-Grün) — von Redakteur:innen editierbar.
 
-  Dünner Wrapper um die geteilte Pill (admin/ui): setzt Icon, Label und den
-  erklärenden Default-Tooltip je Herkunft. Der Tooltip der Maschinen-Zone sagt, wie
-  eine Änderung möglich ist (in Figma ändern → Re-Import), damit niemand hier
-  vergeblich sucht. Optik/Tints liegen zentral in Pill + den --ds-tint-*-Rollen.
+  Dünner Wrapper um das geteilte ui/Badge (K3-Konsolidierung): setzt Icon, Label und
+  den erklärenden Default-Tooltip je Herkunft. „Herkunft" bleibt als CMS-Fachsprache
+  eine eigene Semantik-Schicht; die Optik kommt aus Badge (Tone machine/editorial).
+  Der Tooltip der Maschinen-Zone sagt, wie eine Änderung möglich ist (in Figma
+  ändern → Re-Import), damit niemand hier vergeblich sucht.
 -->
 <script lang="ts">
 	import { ImportIcon, PencilIcon } from '$lib/icons';
-	import { Pill } from '../../../ui';
+	import { Badge } from '$components/ui/badge';
 
 	let {
 		variant,
@@ -31,4 +32,4 @@
 	{#if variant === 'machine'}<ImportIcon />{:else}<PencilIcon />{/if}
 {/snippet}
 
-<Pill tone={variant} iconSnippet={icon} title={title ?? defaultTitle}>{label}</Pill>
+<Badge tone={variant} {icon} title={title ?? defaultTitle}>{label}</Badge>

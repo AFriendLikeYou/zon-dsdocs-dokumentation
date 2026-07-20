@@ -93,7 +93,7 @@ jo
 	description="testest"
 	url="https://w"
 	badge="test"
-	badgeVariant="ready"
+	badgeVariant="machine"
 />
 
 

@@ -24,7 +24,7 @@
 		description?: string;
 		/** Optionaler Badge-Text (z. B. „Im Aufbau"). */
 		badge?: string;
-		/** Badge-Variante; Default = 'neutral'. */
+		/** Badge-Tone; Default = 'default'. */
 		badgeVariant?: BadgeVariant;
 	};
 
@@ -40,7 +40,7 @@
 			<a class="tile" href={tile.href}>
 				<span class="tile__head">
 					<span class="tile__title">{tile.title}</span>
-					{#if tile.badge}<Badge variant={tile.badgeVariant ?? 'neutral'}>{tile.badge}</Badge>{/if}
+					{#if tile.badge}<Badge tone={tile.badgeVariant ?? 'default'}>{tile.badge}</Badge>{/if}
 				</span>
 				{#if tile.description}<span class="tile__desc">{tile.description}</span>{/if}
 			</a>

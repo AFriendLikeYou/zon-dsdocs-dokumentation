@@ -20,7 +20,7 @@
 <script lang="ts">
 	import { Swatch } from '$components/ui/swatch';
 	import { TokenPill } from '$components/ui/token-pill';
-	import { Pill } from '../../../ui';
+	import { Badge } from '$components/ui/badge';
 
 	type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
 	type MeasureRow = { label: string; px: string; token?: string; herkunft: Herkunft };
@@ -54,7 +54,7 @@
 
 {#snippet herkunftBadge(h: Herkunft)}
 	{#if h === 'geschätzt'}
-		<Pill tone="estimate" icon="≈">geschätzt</Pill>
+		<Badge tone="warn">≈ geschätzt</Badge>
 	{:else}
 		<!-- gemessen/abgeleitet: ruhiger Klartext rechts (kein Pill) — wie im Mockup. -->
 		<span class="herkunft-text">{h}</span>

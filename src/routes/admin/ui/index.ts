@@ -4,6 +4,4 @@
 // `from './ui'` je Ebene.
 export { default as AdminPageHeader } from './AdminPageHeader.svelte';
 export { default as AdminRow } from './AdminRow.svelte';
-export { default as AdminBadge } from './AdminBadge.svelte';
-export { default as Pill } from './Pill.svelte';
 export { default as PopoverSheet } from './PopoverSheet.svelte';

@@ -69,9 +69,10 @@ Motion nach dem emil-design-eng-Skill (`.agents/skills/`): Tokens
 Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann die
 übrigen erraten — Mensch wie Agent.
 
-1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Alert`, `Badge`,
-   `DoDont`, …) — nie `type`/`kind`/`appearance`. `type` bleibt nativen
-   HTML-Attributen vorbehalten (`<button type>`, `<input type>`).
+1. **Erscheinungsbild-Achse heißt `variant`** (`Button`, `Alert`, `DoDont`, …)
+   — nie `type`/`kind`/`appearance`. `type` bleibt nativen HTML-Attributen
+   vorbehalten (`<button type>`, `<input type>`). Ausnahme: farb-getönte Pillen
+   (`Badge`, `TokenPill`) nutzen `tone` als Farbrollen-Achse.
 2. **Text-Slots nach fester Bedeutung:** `title` = Überschrift eines Inhalts ·
    `label` = Beschriftung eines Bedienelements · `caption` = Unterschrift zu
    Medien/Beispielen · `description` = ergänzender Fließtext.
@@ -98,7 +99,10 @@ prüfen** — in dieser Reihenfolge:
 
 1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`),
    `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
-   `ui/badge/`, `ui/token-pill/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
+   `ui/badge/` (EIN Label-/Status-/Herkunfts-Pill nach Figma 840:13943 — Achse
+   `tone: default|machine|editorial|warn|ghost|accent`, optionales `icon`-Snippet;
+   ersetzt die früheren admin/AdminBadge + admin/Pill),
+   `ui/token-pill/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
    Label-Chips — Achsen `tone: default|accent|machine|editorial|warn|ghost` und
    `font: mono|text`; Default = neutraler Figma-Chip 845:14187, Optik folgt der
    Figma-Vorlage 845:14173/14186),

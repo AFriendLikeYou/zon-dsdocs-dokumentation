@@ -41,11 +41,11 @@ describe('MENU_ITEMS_PRODUCT · Components-Sektion (katalog-getrieben)', () => {
 		expect(buttonItem?.badge).toBe(catalogButton?.badge);
 	});
 
-	it('markiert geplante Stubs mit „Geplant" (neutral)', () => {
+	it('markiert geplante Stubs mit „Geplant" (ghost)', () => {
 		for (const planned of PLANNED_COMPONENTS) {
 			const item = MENU_ITEMS_PRODUCT.find((s) => s.href === `/product/components/${planned.slug}`);
 			expect(item?.badge).toBe('Geplant');
-			expect(item?.badgeVariant).toBe('neutral');
+			expect(item?.badgeVariant).toBe('ghost');
 		}
 	});
 

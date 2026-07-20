@@ -31,7 +31,7 @@
 		initiallyOpen = false,
 		onclick = () => {},
 		badge,
-		badgeVariant = 'ready',
+		badgeVariant = 'machine',
 		isUserLoggedIn
 	}: Props = $props();
 
@@ -52,7 +52,7 @@
 	<span class="collapsible-title-content">
 		{title}
 		{#if badge}
-			<Badge variant={badgeVariant}>{badge}</Badge>
+			<Badge tone={badgeVariant}>{badge}</Badge>
 		{/if}
 	</span>
 	{#if items.length > 0}
@@ -111,7 +111,7 @@
 							>
 								{item.label}
 								{#if item.badge}
-									<Badge variant={item.badgeVariant ?? 'ready'}>{item.badge}</Badge>
+									<Badge tone={item.badgeVariant ?? 'machine'}>{item.badge}</Badge>
 								{/if}
 								{#if item.locked}
 									{@render lockIcon(isUserLoggedIn)}

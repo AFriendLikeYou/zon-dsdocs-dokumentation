@@ -81,7 +81,7 @@
 								<a class="footer__link" href={link.href}>
 									<span>{link.label}</span>
 									{#if link.badge}
-										<Badge variant={link.badgeVariant ?? 'ready'}>{link.badge}</Badge>
+										<Badge tone={link.badgeVariant ?? 'machine'}>{link.badge}</Badge>
 									{/if}
 								</a>
 							</li>

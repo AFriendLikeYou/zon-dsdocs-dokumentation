@@ -54,21 +54,21 @@ Komponente ist. Sie werden redaktionell gesetzt, nicht automatisch:
 
 <div class="status-defs">
 	<div class="status-def">
-		<Badge variant="neutral">Geplant</Badge>
+		<Badge tone="ghost">Geplant</Badge>
 		<p>Die Komponente ist vorgesehen, aber noch nicht dokumentiert. Route existiert als
 		ehrlicher Platzhalter, es gibt noch kein <code>model.json</code>.</p>
 	</div>
 	<div class="status-def">
-		<Badge variant="ready">Ready for dev</Badge>
+		<Badge tone="machine">Ready for dev</Badge>
 		<p>Design und Doku stehen, die Komponente ist zur Umsetzung freigegeben. Gesetzt,
 		wenn Figma „ready for dev" ist und der Steckbrief exportiert wurde.</p>
 	</div>
 	<div class="status-def">
-		<Badge variant="done">Completed</Badge>
+		<Badge tone="editorial">Completed</Badge>
 		<p>Komponente ist umgesetzt und im Einsatz — Design, Code und Doku stimmen überein.</p>
 	</div>
 	<div class="status-def">
-		<Badge variant="warn">Geändert</Badge>
+		<Badge tone="warn">Geändert</Badge>
 		<p>Eine bestehende Komponente wurde überarbeitet. Der Hinweis macht auf Änderungen
 		aufmerksam, die betroffene Nutzung prüfen sollten.</p>
 	</div>
