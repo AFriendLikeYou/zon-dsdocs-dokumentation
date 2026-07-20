@@ -23,7 +23,7 @@ title: Farbe
 		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-100"
 		borderColor="--z-ds-color-border-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="100"
 		description="Pure Black"
 	/>
@@ -31,7 +31,7 @@ title: Farbe
 		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-80"
 		borderColor="--z-ds-color-border-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="80"
 		description="80% Black"
 	/>
@@ -39,7 +39,7 @@ title: Farbe
 		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-60"
 		borderColor="--z-ds-color-border-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="60"
 		description="60% Black"
 	/>
@@ -47,7 +47,7 @@ title: Farbe
 		showValue={true}
 		colorCustomProperty="--z-ds-color-general-black-40"
 		borderColor="--z-ds-color-border-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="40"
 		description="40% Black"
 	/>
@@ -164,14 +164,14 @@ title: Farbe
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-accent-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="Accent / 100"
 		description="Z+ Highlight"
 	/>
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-accent-70"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="Accent / 70"
 		description="Z+ Hover"
 	/>
@@ -185,7 +185,7 @@ title: Farbe
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-error-70"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="Error / 70"
 		description="Error Message Text"
 	/>
@@ -193,7 +193,7 @@ title: Farbe
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-background-warning"
-		fontColorCustomProperty="--z-ds-color-general-black-0"
+		fontColorCustomProperty="--z-ds-color-general-black-100"
 		title="Warning / 0"
 		description="Warning Background"
 	/>
@@ -201,7 +201,7 @@ title: Farbe
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-focus-100"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="Focus / 100"
 		description="Focus Outline"
 	/>
@@ -209,7 +209,7 @@ title: Farbe
 	<Color
 		showValue={true}
 		colorCustomProperty="--z-ds-color-background-success"
-		fontColorCustomProperty="--z-ds-color-general-white-0"
+		fontColorCustomProperty="--z-ds-color-general-white-100"
 		title="Success / 100"
 		description="Success Background"
 	/>

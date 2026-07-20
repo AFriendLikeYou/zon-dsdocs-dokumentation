@@ -12,7 +12,9 @@
  *                     (Definitionen, nicht var()-Nutzungen).
  * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer styles-zds.css,
  *                     alle pattern.css unter src/routes/, <style>-Blöcke in
- *                     src/**\/*.{svelte,svx}) UND Token-NAMEN als Daten
+ *                     src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
+ *                     derselben Dateien (z. B. `colorCustomProperty="--z-ds-…"`)
+ *                     UND Token-NAMEN als Daten
  *                     (tokens[].items[].name / masse+spacing .token /
  *                     farbrollen tokensProZustand in model.json; String-Literale in
  *                     src/lib/data/foundation-tokens.ts + color-roles.ts).
@@ -66,6 +68,33 @@ export function collectVarRefs(cssText) {
 /** Inhalt aller <style>…</style>-Blöcke eines Svelte/mdsvex-Dokuments (konkateniert). */
 export function extractStyleBlocks(text) {
 	return [...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
+}
+
+/**
+ * Nur das Template eines Svelte/mdsvex-Dokuments: ohne <style> (deckt collectVarRefs
+ * ab), ohne <script> (dort stehen Präfix-Strings wie `.replace('--z-ds-space-', '')`,
+ * die keine Referenz sind) und ohne HTML-Kommentare (JSDoc-Köpfe enthalten
+ * Nutzungsbeispiele mit Platzhalter-Tokens).
+ */
+export function extractMarkup(text) {
+	return text
+		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+		.replace(/<!--[\s\S]*?-->/g, '');
+}
+
+/**
+ * Token-NAMEN als Komponenten-Prop-Werte im Markup, z. B.
+ * `<Color colorCustomProperty="--z-ds-color-general-black-100" />`.
+ *
+ * Solche Namen sind echte Referenzen — die Komponente setzt daraus zur Laufzeit ein
+ * `var()`. Sie standen bisher in keiner Scan-Kategorie: `--z-ds-color-general-white-0`
+ * war zehnmal in `brand/color/+page.svx` verwendet, existierte upstream aber nie
+ * (die Skala beginnt bei 40) — der Check schwieg, die Kacheln rendern falsch.
+ * Wie bei TS gilt nur das voll-gequotete Literal, damit Prosa-Globs außen bleiben.
+ */
+export function collectMarkupTokens(text) {
+	return [...extractMarkup(text).matchAll(TS_LITERAL_RE)].map((m) => m[2]);
 }
 
 /**
@@ -176,8 +205,12 @@ function main() {
 	for (const f of walkFiles(
 		srcDir,
 		(name, full) => /\.(svelte|svx)$/.test(name) && !isGeneratedDoc(full)
-	))
-		addRefs(collectVarRefs(extractStyleBlocks(fs.readFileSync(f, 'utf8'))), f);
+	)) {
+		const text = fs.readFileSync(f, 'utf8');
+		addRefs(collectVarRefs(extractStyleBlocks(text)), f);
+		// Token-Namen als Prop-Werte im Markup (z. B. <Color colorCustomProperty="…">).
+		addRefs(collectMarkupTokens(text), f);
+	}
 
 	// 2d) Token-Namen als Daten: model.json der Komponenten.
 	const componentsDir = path.join(root, 'src/routes/product/components');
