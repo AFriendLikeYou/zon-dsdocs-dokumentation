@@ -43,6 +43,10 @@
 
 	let fieldState = $state(data.fields.map((f) => ({ ...f })));
 
+	// Genau ein Frontmatter-Feld namens `title`? Dann reicht die Sektions-Überschrift
+	// „Titel" — das Feld-Label darüber wäre eine Dopplung.
+	const soloTitleField = $derived(fieldState.length === 1 && fieldState[0].key === 'title');
+
 	// Palette: Pseudo-Typ „Bild" (bare img-natural) + die registrierten Komponenten.
 	// Typen (Def/ChildItem/Item) + Block-Logik leben in ../core/block-model.
 	const IMAGE_DEF: Def = {
@@ -540,10 +544,15 @@
 
 		{#if fieldState.length}
 			<section class="block">
-				<h2 class="block-title">Frontmatter</h2>
+				<!-- Der Regelfall ist genau ein Feld (`title`) — dann trägt die Sektions-
+				     Überschrift den Feldnamen und das Label darüber entfällt. Kämen mehrere
+				     Frontmatter-Felder dazu, greift wieder „Frontmatter" + Labels je Feld. -->
+				<h2 class="block-title">{soloTitleField ? 'Titel' : 'Frontmatter'}</h2>
 				{#each fieldState as field (field.key)}
 					<label class="frontmatter-field">
-						<span class="frontmatter-field__label">{field.key}</span>
+						{#if !soloTitleField}
+							<span class="frontmatter-field__label">{field.key}</span>
+						{/if}
 						<Field density="compact" bind:value={field.value} />
 					</label>
 				{/each}
@@ -1209,7 +1218,7 @@
 	   Hover-Tint, disabled-Opacity und Fokus-Ring kommen aus dem Atom, das ↑/↓-Paar
 	   fasst ui/ButtonGroup(attached). Hier bleibt nur das Reveal-Layout oben. */
 	.block-card__body {
-		padding: 2px 0 var(--z-ds-space-s);
+		padding: 2px 0 0;
 	}
 	.block-card__code {
 		margin: var(--z-ds-space-s) 0 0;
@@ -1221,15 +1230,32 @@
 	.block-card__details {
 		font-size: var(--ds-text-sm);
 	}
+	/* Disclosure-Trigger: als Bedienelement lesbar (Kontur + Fläche wie ein ruhiger
+	   Ghost-Button), nicht als Fließtext. Hover/offen hebt Text und Kontur an. */
 	.block-card__summary {
 		cursor: pointer;
 		list-style: none;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
+		border: 1px solid var(--ds-border);
+		border-radius: var(--ds-radius-sm);
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		user-select: none;
+		transition:
+			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
+			border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.block-card__summary:hover {
+			color: var(--ds-text);
+			border-color: var(--ds-border-strong);
+		}
+	}
+	.block-card__details[open] .block-card__summary {
+		color: var(--ds-text);
 	}
 	.block-card__summary::-webkit-details-marker {
 		display: none;
