@@ -5,12 +5,13 @@
   TokenReference, ColorRoles, ContrastMatrix, RadiusScale, SpacingScale, TypeSpecimen)
   durch EINE Pille mit integriertem Copy-Icon.
 
-  Zwei Achsen (additiv — Figma-Chip-Set, node 845:14173 / 845:14186):
-  - `tone` — Farbfamilie. Default `accent` = die dezente Akzent-Tönung, mit der die
-    ~12 öffentlichen Consumer unverändert weiterlaufen (Bestandsschutz). Die übrigen
-    Tones sind reine Zusatz-Modifier über den semantischen --ds-tint-*/-surface-Rollen:
-      accent     dezente Akzent-Tönung (Default, öffentliche Token-Tabellen)
-      default    weiche Fläche, gedämpfter Text (--ds-surface-raised)
+  Zwei Achsen (Figma-Chip-Set, node 845:14173 / 845:14186 — Optik folgt der Vorlage:
+  padding 4/8, gap 6, radius-sm, 12px/lh 1, 12px-Icon):
+  - `tone` — Farbfamilie. Default `default` = der neutrale Figma-Chip (Fläche
+    --ds-surface-raised, gedämpfter Text) — bewusste Umstellung der öffentlichen
+    Token-Tabellen weg von der Akzent-Tönung (User-Entscheid 2026-07-20):
+      default    weiche Fläche, gedämpfter Text (Figma „Chip", Default)
+      accent     dezente Akzent-Tönung (Alt-Look, weiter verfügbar)
       machine    Info-Blau  — Maschinen-/Import-Herkunft (--ds-tint-info-*)
       editorial  Positiv-Grün — redaktionell (--ds-tint-positive-*)
       warn       Warn — geschätzt/Achtung (--ds-tint-warning-*)
@@ -42,7 +43,7 @@
 		label?: string;
 		/** Copy-Verhalten (Icon + Klick + Toast). false = reine Anzeige-Pille. */
 		copy?: boolean;
-		/** Farbfamilie. Default `accent` schützt die bestehenden öffentlichen Consumer. */
+		/** Farbfamilie. Default `default` = neutraler Figma-Chip (845:14187). */
 		tone?: 'accent' | 'default' | 'machine' | 'editorial' | 'warn' | 'ghost';
 		/** Schrift: `mono` (<code>, Default) oder `text` (<span>, normale UI-Schrift). */
 		font?: 'mono' | 'text';
@@ -53,7 +54,7 @@
 		value,
 		label,
 		copy = true,
-		tone = 'accent',
+		tone = 'default',
 		font = 'mono',
 		class: className = ''
 	}: Props = $props();
@@ -116,23 +117,24 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--z-ds-space-6);
-		padding: 2px var(--z-ds-space-8);
+		/* Figma-Chip 845:14187: padding 4/8. */
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
 		border-radius: var(--ds-radius-sm);
 		vertical-align: middle;
 		max-width: 100%;
 		cursor: copy;
 		border: 1px solid transparent;
 	}
-	/* ── Tone: accent (Default) — dezente Akzent-Tönung, läuft in Light/Dark ruhig mit
-	   (wie SpacingContext). Bestandsschutz: die öffentlichen Token-Tabellen. ── */
-	:global(.token-pill--accent) {
-		background: color-mix(in srgb, var(--ds-accent) 10%, transparent);
-		color: var(--ds-accent);
-	}
-	/* ── Zusatz-Tones über die semantischen Rollen-Tokens (global.css). ── */
+	/* ── Tone: default — der neutrale Figma-Chip (845:14187), Standard für alle
+	   Code-/Token-Pills inkl. der öffentlichen Tabellen. ── */
 	:global(.token-pill--default) {
 		background: var(--ds-surface-raised);
 		color: var(--ds-text-muted);
+	}
+	/* ── Zusatz-Tones über die semantischen Rollen-Tokens (global.css). ── */
+	:global(.token-pill--accent) {
+		background: color-mix(in srgb, var(--ds-accent) 10%, transparent);
+		color: var(--ds-accent);
 	}
 	:global(.token-pill--machine) {
 		background: var(--ds-tint-info-surface);
@@ -155,7 +157,9 @@
 	:global(.token-pill .token-pill__text) {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
-		line-height: 1.4;
+		/* Figma: leading-none; das 4px-Padding trägt die Höhe. Umbrochene Langtoken
+		   bekommen über die Zeilen-Gap trotzdem Luft (overflow-wrap unten). */
+		line-height: 1.2;
 		/* Lange Token-Namen dürfen umbrechen statt abgeschnitten zu werden. */
 		overflow-wrap: anywhere;
 	}
@@ -172,10 +176,13 @@
 			opacity var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		/* Fläche verstärkt sich bei Hover nur im accent-Default; die getönten Tones
-		   behalten ihre Rollen-Fläche (sonst überschriebe der Akzent-Mix ihre Farbe). */
+		/* Fläche verstärkt sich bei Hover nur bei accent (Akzent-Mix) und default
+		   (Stufe höher); die getönten Tones behalten ihre Rollen-Fläche. */
 		:global(.token-pill--accent:hover) {
 			background: color-mix(in srgb, var(--ds-accent) 16%, transparent);
+		}
+		:global(.token-pill--default:hover) {
+			background: color-mix(in srgb, var(--ds-surface-raised) 82%, var(--ds-text));
 		}
 		/* Icon steigt bei Hover leicht an (Emil: gated, ease-out) — für alle Tones. */
 		:global(.token-pill:hover .token-pill__icon) {

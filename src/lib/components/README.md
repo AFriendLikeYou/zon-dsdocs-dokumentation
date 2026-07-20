@@ -99,8 +99,9 @@ prüfen** — in dieser Reihenfolge:
 1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`),
    `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
    `ui/badge/`, `ui/token-pill/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
-   Label-Chips — Achsen `tone: accent|default|machine|editorial|warn|ghost` und
-   `font: mono|text`; `accent`+`mono` = Bestandsschutz der öffentlichen Tabellen),
+   Label-Chips — Achsen `tone: default|accent|machine|editorial|warn|ghost` und
+   `font: mono|text`; Default = neutraler Figma-Chip 845:14187, Optik folgt der
+   Figma-Vorlage 845:14173/14186),
    Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
