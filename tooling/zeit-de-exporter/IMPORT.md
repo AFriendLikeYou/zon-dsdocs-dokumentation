@@ -223,7 +223,7 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 (die Seite liegt hinter Basic Auth).
 
 Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `callouts`, `a11y`,
-`tastatur`, `doDont`, `doDontBeispiele`, `verwendung`, `wording`, `komposition`,
+`tastatur`, `doDont`, `verwendung`, `wording`, `komposition`,
 `verwandt`, `version`, `variantInfo`, `codeBeispiele` sowie die feldweisen
 Snippet-Overrides `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` (gewinnen
 feldweise über die gleichnamigen `render`-Werte; leer = Maschine gewinnt)

@@ -15,10 +15,6 @@
 	// Array-Parsing). Der Server merged nur diese Keys zurück.
 	type A11yStatus = 'pass' | 'warn' | 'todo';
 	type CalloutRow = { nr: number; text: string; art?: string; optionalDurch?: string };
-	type DoDontPair = {
-		gut: { html: string; text: string };
-		schlecht: { html: string; text: string };
-	};
 	type Content = {
 		zweck: string;
 		status: string;
@@ -31,7 +27,6 @@
 		wording: { schlecht: string; gut: string; hinweis: string }[];
 		komposition: string[];
 		verwandt: string[];
-		doDontBeispiele: DoDontPair[];
 		playground: { align: 'center' | 'fill'; resizable: boolean };
 	};
 
@@ -47,10 +42,6 @@
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
 		komposition?: string[];
 		verwandt?: string[];
-		doDontBeispiele?: {
-			gut?: { html?: string; text?: string };
-			schlecht?: { html?: string; text?: string };
-		}[];
 		playground?: { align?: 'center' | 'fill'; resizable?: boolean };
 	};
 	// Frischer Content-Zustand aus content.json — Fabrik, damit „Verwerfen" (und der
@@ -89,10 +80,6 @@
 			})),
 			komposition: [...(c.komposition ?? [])],
 			verwandt: [...(c.verwandt ?? [])],
-			doDontBeispiele: (c.doDontBeispiele ?? []).map((r) => ({
-				gut: { html: r.gut?.html ?? '', text: r.gut?.text ?? '' },
-				schlecht: { html: r.schlecht?.html ?? '', text: r.schlecht?.text ?? '' }
-			})),
 			// Playground-Bühne: Defaults center/false, wenn content.json nichts setzt.
 			playground: {
 				align: c.playground?.align === 'fill' ? 'fill' : 'center',
@@ -159,20 +146,6 @@
 		// verwandt — Liste von Katalog-Slugs; leere/Dubletten entfernen.
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
-
-		// doDontBeispiele — Paare { gut, schlecht } je { html, text }. HTML EXAKT round-
-		// trippen (kein trim auf html!); nur der Prosa-Text wird getrimmt. Paar behalten,
-		// sobald irgendeines der vier Felder etwas enthält.
-		const doDontBeispiele = model.doDontBeispiele
-			.filter(
-				(r) =>
-					r.gut.html.trim() || r.gut.text.trim() || r.schlecht.html.trim() || r.schlecht.text.trim()
-			)
-			.map((r) => ({
-				gut: { html: r.gut.html, text: r.gut.text.trim() },
-				schlecht: { html: r.schlecht.html, text: r.schlecht.text.trim() }
-			}));
-		if (doDontBeispiele.length) out.doDontBeispiele = doDontBeispiele;
 
 		// playground — nur schreiben, wenn von den Defaults (center + false) abgewichen wird;
 		// jeweils nur den abweichenden Key setzen, damit content.json minimal bleibt.
@@ -498,55 +471,6 @@
 			</div>
 		</section>
 
-		<section class="card">
-			<div class="card-head">
-				<span class="card-title">Do/Don't-Beispiele (fortgeschritten)</span>
-			</div>
-			<div class="card-body">
-				<p class="hint">
-					HTML-Snippet — Klassen erhalten; wird 1:1 als Specimen gerendert. Text erklärt das
-					Beispiel.
-				</p>
-				{#each model.doDontBeispiele as _, i}
-					<div class="pair">
-						<div class="pair-grid">
-							<div class="pair-col">
-								<span class="sub-label">Gut — HTML</span>
-								<textarea class="mono-input" bind:value={model.doDontBeispiele[i].gut.html} rows="3"
-								></textarea>
-								<span class="sub-label">Gut — Text</span>
-								<textarea bind:value={model.doDontBeispiele[i].gut.text} rows="2"></textarea>
-							</div>
-							<div class="pair-col">
-								<span class="sub-label">Schlecht — HTML</span>
-								<textarea
-									class="mono-input"
-									bind:value={model.doDontBeispiele[i].schlecht.html}
-									rows="3"
-								></textarea>
-								<span class="sub-label">Schlecht — Text</span>
-								<textarea bind:value={model.doDontBeispiele[i].schlecht.text} rows="2"></textarea>
-							</div>
-						</div>
-						<button
-							type="button"
-							class="row-remove row-remove--pair"
-							onclick={() => removeFrom(model.doDontBeispiele, i)}>Paar entfernen</button
-						>
-					</div>
-				{/each}
-				<button
-					type="button"
-					class="row-add"
-					onclick={() =>
-						model.doDontBeispiele.push({
-							gut: { html: '', text: '' },
-							schlecht: { html: '', text: '' }
-						})}>+ Beispiel-Paar</button
-				>
-			</div>
-		</section>
-
 		{#if dirty}
 			<div class="savebar" role="status">
 				<span class="savebar-info">Ungespeicherte Änderungen</span>
@@ -660,37 +584,10 @@
 		max-width: 8rem;
 		flex: none;
 	}
-	.pair {
-		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius-sm);
-		background: var(--ds-surface);
-		padding: var(--z-ds-space-m);
-	}
-	.pair-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--z-ds-space-m);
-	}
-	.pair-col {
-		display: flex;
-		flex-direction: column;
-	}
 	.sub-label {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		margin: var(--z-ds-space-xs) 0 var(--z-ds-space-6);
-	}
-	.pair-col .sub-label:first-child {
-		margin-top: 0;
-	}
-	.mono-input {
-		font-family: var(--ds-font-mono, ui-monospace, monospace);
-		font-size: var(--ds-text-xs);
-	}
-	@media (max-width: 34rem) {
-		.pair-grid {
-			grid-template-columns: 1fr;
-		}
 	}
 	/* Entfernen-Icon-Button (CMS-Standard: 24×24-Quadrat, radius 4, Hover =
 	   negative Tönung — wie .blk-btn--del im Brand-Editor). */
@@ -715,19 +612,6 @@
 	.row-remove:hover {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
-	}
-	/* Text-Variante für „Paar entfernen" (mehr Kontext nötig als beim Icon). */
-	.row-remove--pair {
-		width: auto;
-		height: auto;
-		align-self: flex-start;
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		font-size: var(--ds-text-sm);
-	}
-	.row-remove--pair:hover {
-		border-color: var(--ds-negative, var(--ds-border));
 	}
 	/* Hinzufügen: gestrichelter Ghost-Button (wie .ins-btn im Brand-Editor). */
 	.row-add {

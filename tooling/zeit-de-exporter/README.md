@@ -32,7 +32,7 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
   `content.json` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
-  `doDontBeispiele`, `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
+  `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
   `variantInfo`) → **`content.json` von Hand**.
 - **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
   Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Nur
@@ -70,7 +70,6 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
 | `a11y`                    | `{ label, wert, status: pass\|warn\|todo }[]`                                                      | `A11yList` (eigener Tab)                                                                                                                                                                                                            |
 | `tastatur`                | `{ taste, aktion }[]`                                                                              | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur")                                                                                                                                                                         |
 | `doDont`                  | `{ do?: string[], dont?: string[] }`                                                               | `DoDontList`                                                                                                                                                                                                                        |
-| `doDontBeispiele`         | `{ gut: { html, text }, schlecht: { html, text } }[]`                                              | `DoDontVisual` (visuelle Specimen-Paare unter der Do&Don't-Liste)                                                                                                                                                                   |
 | `verwendung`              | `{ nutzen?: string[], nichtNutzen?: string[] }`                                                    | `UsageBlock`                                                                                                                                                                                                                        |
 | `wording`                 | `{ schlecht, gut, hinweis? }[]`                                                                    | `WordingList` (Texte & Wording)                                                                                                                                                                                                     |
 | `komposition`             | `string[]` (je Eintrag ein Satz-Hinweis)                                                           | Kompositions-Hinweise (wie mit anderen Komponenten kombinieren) — MCP `usage`-Sektion; wichtig für Agenten bei Formularen/Organismen                                                                                                |

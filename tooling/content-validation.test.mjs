@@ -104,12 +104,36 @@ describe('content-validation · checkContentData', () => {
 		expect(issues[0]).toContain('falschen Typ');
 	});
 
+	it('gültige tastatur + callouts → keine Befunde', () => {
+		const data = {
+			tastatur: [{ taste: 'Tab', aktion: 'Setzt den Fokus.' }],
+			callouts: [
+				{ nr: 1, text: 'Container — natives <button>.' },
+				{ nr: 2, text: 'Label — fett.', art: 'text', optionalDurch: 'hasIconStart' }
+			]
+		};
+		expect(checkContentData(data)).toEqual([]);
+	});
+
+	it('tastatur: fehlende taste/aktion → Befund', () => {
+		const issues = checkContentData({ tastatur: [{ taste: 'Tab' }] });
+		expect(issues.some((i) => i.includes('tastatur[0].aktion'))).toBe(true);
+	});
+
+	it('callouts: nr als String / fehlender text → Befund', () => {
+		const issues = checkContentData({ callouts: [{ nr: '1' }] });
+		expect(issues.some((i) => i.includes('callouts[0].nr'))).toBe(true);
+		expect(issues.some((i) => i.includes('callouts[0].text'))).toBe(true);
+	});
+
 	it('KNOWN_KEYS enthält die Kern-Editorial-Felder', () => {
 		expect(KNOWN_KEYS).toContain('zweck');
 		expect(KNOWN_KEYS).toContain('verwandt');
 		expect(KNOWN_KEYS).toContain('codeBeispiele');
 		expect(KNOWN_KEYS).toContain('repoNote');
 		expect(KNOWN_KEYS).not.toContain('masse');
+		// Feature entfernt (2026-07): visuelle Do/Don't-Paare gibt es nicht mehr.
+		expect(KNOWN_KEYS).not.toContain('doDontBeispiele');
 	});
 });
 

@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, DoDontVisual, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, CodeBlock, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground } from '$components/ui/playground';
 	import { generated } from './spec.generated';
@@ -154,7 +154,6 @@ kategorie: Formulare
 
 	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
 	<DoDontList doDont={spec.doDont} />
-	<DoDontVisual beispiele={spec.doDontBeispiele} />
 
 	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 	<RelatedComponents slugs={spec.verwandt} />

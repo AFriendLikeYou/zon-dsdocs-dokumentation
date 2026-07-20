@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { ImportIcon, PencilIcon } from '$lib/icons';
+	import { CloseIcon, ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
 	import { AdminFlash, Pill } from '../../../ui';
 	import MachineZone from './MachineZone.svelte';
@@ -55,6 +55,12 @@
 		a11y: { label: string; wert: string; status: A11yStatus }[];
 		wording: { schlecht: string; gut: string; hinweis: string }[];
 		verwandt: string[];
+		/** Tastatur-Bedienung: welche Taste löst welche Aktion aus. */
+		tastatur: { taste: string; aktion: string }[];
+		/** Wann welche Variante (Varianten-Label → Erklärsatz) — Keys aus den Maschinen-Varianten. */
+		variantInfo: Record<string, string>;
+		/** Anatomie-Beschriftungen; nr als String (Input-bind), Konvertierung im payload. */
+		callouts: { nr: string; text: string; art: string; optionalDurch: string }[];
 		/** Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). */
 		tokenHinweise: Record<string, string>;
 		codeBeispiele: { label: string; sprache: string; code: string; hinweis: string }[];
@@ -73,6 +79,9 @@
 		a11y?: { label?: string; wert?: string; status?: string }[];
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
 		verwandt?: string[];
+		tastatur?: { taste?: string; aktion?: string }[];
+		variantInfo?: Record<string, string>;
+		callouts?: { nr?: number; text?: string; art?: string; optionalDurch?: string }[];
 		tokenHinweise?: Record<string, string>;
 		codeBeispiele?: { label?: string; sprache?: string; code?: string; hinweis?: string }[];
 		codeSvelte?: string;
@@ -80,6 +89,16 @@
 		codeNote?: string;
 		repoNote?: string;
 	};
+
+	// Alle Varianten-Labels der Maschinen-Achsen (dedupliziert) — sie sind die
+	// SCHLÜSSEL der „Wann welche Variante"-Karte (Mechanik wie „Hinweis je Token").
+	const MACHINE_VARIANT_LABELS: string[] = [
+		...new Set(
+			((data.machine.varianten as { werte?: { label: string }[] }[]) ?? []).flatMap((axis) =>
+				(axis.werte ?? []).map((w) => w.label)
+			)
+		)
+	];
 
 	// Fabrik → „Verwerfen"/Reset stellen exakt den Ausgangsstand wieder her.
 	function makeState(): Editorial {
@@ -103,6 +122,24 @@
 				hinweis: r.hinweis ?? ''
 			})),
 			verwandt: [...(c.verwandt ?? [])],
+			tastatur: (c.tastatur ?? []).map((r) => ({ taste: r.taste ?? '', aktion: r.aktion ?? '' })),
+			// Alle Maschinen-Varianten-Labels mit '' vorbelegen (stabile bind:value-Ziele),
+			// dann die vorhandenen content-Sätze darüberlegen. Leere Werte fallen im
+			// payload wieder raus (delete-when-absent). Content-Keys OHNE Maschinen-Label
+			// bleiben erhalten und erscheinen als „unbekannt"-Zeilen (löschbar).
+			variantInfo: (() => {
+				const seed: Record<string, string> = {};
+				for (const label of MACHINE_VARIANT_LABELS) seed[label] = '';
+				return { ...seed, ...(c.variantInfo ?? {}) };
+			})(),
+			// nr als String für den number-Input; art/optionalDurch werden mitgeführt und
+			// beim Speichern erhalten (Round-Trip-sicher — keine Datenverluste an der Anatomie).
+			callouts: (c.callouts ?? []).map((r) => ({
+				nr: r.nr !== undefined ? String(r.nr) : '',
+				text: r.text ?? '',
+				art: r.art ?? '',
+				optionalDurch: r.optionalDurch ?? ''
+			})),
 			// Alle Token-Namen mit '' vorbelegen (stabile bind:value-Ziele), dann die
 			// vorhandenen Redaktions-Overrides darüberlegen. Leere Keys fallen im
 			// payload wieder raus → Maschinen-hinweis gewinnt (delete-when-absent).
@@ -141,6 +178,23 @@
 		{ key: 'wert' },
 		{ key: 'status', type: 'select', options: A11Y_STATUS_OPTIONS }
 	] as const;
+	const TASTATUR_COLUMNS = [{ key: 'taste' }, { key: 'aktion' }] as const;
+
+	// Art-Optionen der Anatomie-Beschriftungen (Schema: model.schema.json → callout.art);
+	// erste Option leer = „keine Art" (der Key fällt im payload weg).
+	const CALLOUT_ART_OPTIONS = [
+		{ value: '', label: '— Art —' },
+		{ value: 'instance', label: 'instance' },
+		{ value: 'text', label: 'text' },
+		{ value: 'slot', label: 'slot' },
+		{ value: 'container', label: 'container' },
+		{ value: 'structural', label: 'structural' }
+	];
+	const CALLOUT_COLUMNS = [
+		{ key: 'nr' },
+		{ key: 'text' },
+		{ key: 'art', type: 'select', options: CALLOUT_ART_OPTIONS }
+	] as const;
 
 	// ── Ghost-Karten: leere Redaktions-Abschnitte einladend statt als leeres Formular ──
 	// Ein Abschnitt gilt als „aufgeklappt“, sobald er beim Laden Inhalt hatte ODER die
@@ -153,6 +207,9 @@
 			a11y: !!c.a11y?.length,
 			wording: !!c.wording?.length,
 			verwandt: !!c.verwandt?.length,
+			tastatur: !!c.tastatur?.length,
+			variantInfo: !!(c.variantInfo && Object.keys(c.variantInfo).length),
+			callouts: !!c.callouts?.length,
 			tokenHinweise: !!(c.tokenHinweise && Object.keys(c.tokenHinweise).length),
 			codeBeispiele: !!c.codeBeispiele?.length,
 			snippets: !!(c.codeSvelte || c.repoCodeSvelte || c.codeNote || c.repoNote)
@@ -206,6 +263,19 @@
 			case 'verwandt':
 				model.verwandt = [];
 				break;
+			case 'tastatur':
+				model.tastatur = [];
+				break;
+			case 'variantInfo':
+				// Maschinen-Label-Zeilen leeren; „unbekannte" Content-Keys ganz entfernen.
+				for (const key of Object.keys(model.variantInfo)) {
+					if (MACHINE_VARIANT_LABELS.includes(key)) model.variantInfo[key] = '';
+					else delete model.variantInfo[key];
+				}
+				break;
+			case 'callouts':
+				model.callouts = [];
+				break;
 			case 'codeBeispiele':
 				model.codeBeispiele = [];
 				break;
@@ -253,6 +323,30 @@
 		if (wording.length) out.wording = wording;
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
+		// Tastatur: Zeile behalten, sobald Taste oder Aktion etwas enthält.
+		const tastatur = model.tastatur
+			.filter((r) => r.taste.trim() || r.aktion.trim())
+			.map((r) => ({ taste: r.taste.trim(), aktion: r.aktion.trim() }));
+		if (tastatur.length) out.tastatur = tastatur;
+		// Wann welche Variante: nur nicht-leere Erklärsätze — leere Inputs fallen raus
+		// (delete-when-absent, Mechanik wie tokenHinweise).
+		const variantInfo: Record<string, string> = {};
+		for (const [label, txt] of Object.entries(model.variantInfo)) {
+			const t = (txt ?? '').trim();
+			if (t) variantInfo[label] = t;
+		}
+		if (Object.keys(variantInfo).length) out.variantInfo = variantInfo;
+		// Anatomie-Beschriftungen: Text ist Pflicht; nr → Zahl; art/optionalDurch nur
+		// schreiben, wenn gesetzt (optionalDurch wird unsichtbar mitgeführt — erhalten).
+		const callouts = model.callouts
+			.filter((r) => r.text.trim())
+			.map((r) => {
+				const o: Record<string, unknown> = { nr: Number(r.nr) || 0, text: r.text.trim() };
+				if (r.art) o.art = r.art;
+				if (r.optionalDurch) o.optionalDurch = r.optionalDurch;
+				return o;
+			});
+		if (callouts.length) out.callouts = callouts;
 		// Token-Hinweise: nur nicht-leere Einträge; leere → Key raus → Maschinen-hinweis
 		// gewinnt wieder (delete-when-absent im EDITABLE-Muster).
 		const tokenHinweise: Record<string, string> = {};
@@ -404,21 +498,15 @@
 		machineA11y.filter((m) => !editorialA11yLabels.has((m.label ?? '').trim().toLowerCase()))
 	);
 
-	// v1-read-only Editorial-Felder als JSON-Hinweis („im Code pflegen").
-	const readonlyEditorialShown = $derived.by(() => {
-		const r = data.readonlyEditorial;
-		return (
-			[
-				['variantInfo', r.variantInfo],
-				['callouts', r.callouts],
-				['tastatur', r.tastatur],
-				['doDontBeispiele', r.doDontBeispiele]
-			] as const
-		).filter(([, v]) => v != null);
-	});
-	const weitereSummary = $derived(
-		`${readonlyEditorialShown.length} ${readonlyEditorialShown.length === 1 ? 'Feld' : 'Felder'} · read-only`
+	// „Wann welche Variante": Zeilen-Reihenfolge = Maschinen-Labels zuerst, danach
+	// Content-Keys ohne Maschinen-Label („unbekannt" — z. B. nach Varianten-Umbenennung
+	// in Figma). Unbekannte Zeilen sind löschbar; ihr Wert bleibt sonst erhalten.
+	const unknownVariantKeys = $derived(
+		Object.keys(model.variantInfo).filter((k) => !MACHINE_VARIANT_LABELS.includes(k))
 	);
+	function removeUnknownVariant(key: string) {
+		delete model.variantInfo[key];
+	}
 
 	// ── Cluster-Ankerleiste (V5): Klick scrollt smooth zum Cluster-Kopf ──────────
 	const ANCHORS = [
@@ -535,6 +623,41 @@
 		onchange={(v) => (entry.status = v)}
 		ariaLabel="Status"
 	/>
+{/snippet}
+{#snippet tastaturRow(entry: Record<string, string>)}
+	<input
+		class="row__input row__input--key"
+		bind:value={entry.taste}
+		placeholder="Taste (z. B. Tab)"
+		aria-label="Taste"
+	/>
+	<input
+		class="row__input"
+		bind:value={entry.aktion}
+		placeholder="Aktion (was die Taste bewirkt)"
+		aria-label="Aktion"
+	/>
+{/snippet}
+{#snippet calloutRow(entry: Record<string, string>)}
+	<input
+		class="row__input row__input--nr"
+		type="number"
+		min="1"
+		bind:value={entry.nr}
+		placeholder="Nr."
+		aria-label="Nummer"
+	/>
+	<input
+		class="row__input"
+		bind:value={entry.text}
+		placeholder="Begriff — Beschreibung"
+		aria-label="Text"
+	/>
+	<select class="row__select" bind:value={entry.art} aria-label="Art">
+		{#each CALLOUT_ART_OPTIONS as opt (opt.value)}
+			<option value={opt.value}>{opt.label}</option>
+		{/each}
+	</select>
 {/snippet}
 
 <!-- Drift-Banner-Inhalte: Text + Aktionen kennen den Re-Import-Befehl (Seiten-Scope). -->
@@ -738,6 +861,77 @@
 					</MachineZone>
 				{/if}
 
+				<!-- „Wann welche Variante" DIREKT unter den Varianten (zugehörig, wie
+				     „Hinweis je Token" bei den Tokens): die SCHLÜSSEL kommen aus den
+				     Maschinen-Varianten; je Label ein Input für den Erklärsatz. -->
+				{#if MACHINE_VARIANT_LABELS.length || unknownVariantKeys.length}
+					<EditorialCard
+						title="Wann welche Variante"
+						subline="Je Varianten-Label ein Erklärsatz — leer = keine Angabe"
+						id="sec-variantInfo"
+						attached
+						expanded={expanded.variantInfo}
+						ghostLabel="Wann welche Variante ergänzen"
+						ghostId="ghost-variantInfo"
+						onexpand={() => reveal('variantInfo')}
+						onremove={() => removeSection('variantInfo', 'Wann welche Variante geleert')}
+					>
+						{#each MACHINE_VARIANT_LABELS as label (label)}
+							<div class="variant-hint-row">
+								<span class="variant-hint-row__label">{label}</span>
+								<input
+									class="variant-hint-row__input"
+									bind:value={model.variantInfo[label]}
+									placeholder="Wann diese Variante nutzen?"
+									aria-label="Erklärsatz zu {label}"
+								/>
+							</div>
+						{/each}
+						{#each unknownVariantKeys as key (key)}
+							<div class="variant-hint-row variant-hint-row--unknown">
+								<span class="variant-hint-row__label">{key}</span>
+								<input
+									class="variant-hint-row__input"
+									bind:value={model.variantInfo[key]}
+									aria-label="Erklärsatz zu {key}"
+								/>
+								<span
+									class="variant-hint-row__flag"
+									title="Kein passendes Varianten-Label im Maschinen-Import — evtl. in Figma umbenannt"
+									>unbekannt</span
+								>
+								<button
+									type="button"
+									class="variant-hint-row__remove"
+									onclick={() => removeUnknownVariant(key)}
+									aria-label="Eintrag {key} entfernen"
+								>
+									<CloseIcon width={14} height={14} />
+								</button>
+							</div>
+						{/each}
+					</EditorialCard>
+				{/if}
+
+				<!-- Anatomie-Beschriftungen (callouts): Nr. · Text · Art. -->
+				<EditorialCard
+					title="Anatomie-Beschriftungen"
+					subline="Nummern korrespondieren mit der Anatomie-Bühne — nach Änderungen die Doku-Seite prüfen."
+					id="sec-callouts"
+					expanded={expanded.callouts}
+					ghostLabel="Anatomie-Beschriftungen ergänzen"
+					ghostId="ghost-callouts"
+					onexpand={() => reveal('callouts')}
+					onremove={() => removeSection('callouts', 'Anatomie-Beschriftungen geleert')}
+				>
+					<RowListField
+						list={model.callouts}
+						columns={CALLOUT_COLUMNS}
+						row={calloutRow}
+						addLabel="Anatomie-Beschriftung ergänzen"
+					/>
+				</EditorialCard>
+
 				<!-- ═══ INHALT ═══ -->
 				{@render clusterEyebrow('cluster-inhalt', 'Inhalt')}
 
@@ -832,6 +1026,25 @@
 					/>
 				</EditorialCard>
 
+				<!-- Tastatur-Bedienung: Taste · Aktion (KeyboardList im Barrierefreiheit-Tab). -->
+				<EditorialCard
+					title="Tastatur"
+					subline="Taste · Aktion"
+					id="sec-tastatur"
+					expanded={expanded.tastatur}
+					ghostLabel="Tastatur-Bedienung ergänzen"
+					ghostId="ghost-tastatur"
+					onexpand={() => reveal('tastatur')}
+					onremove={() => removeSection('tastatur', 'Tastatur geleert')}
+				>
+					<RowListField
+						list={model.tastatur}
+						columns={TASTATUR_COLUMNS}
+						row={tastaturRow}
+						addLabel="Tastatur-Bedienung ergänzen"
+					/>
+				</EditorialCard>
+
 				<!-- ⑨ Komposition -->
 				<EditorialCard
 					title="Komposition"
@@ -907,27 +1120,6 @@
 					</p>
 					<SnippetOverridesField {model} machine={data.machineSnippets} />
 				</EditorialCard>
-
-				<!-- ⑫ Weitere Felder (read-only, eingeklappt) -->
-				{#if readonlyEditorialShown.length}
-					<MachineZone
-						title="Weitere Felder"
-						subline="In v1 nur im Code (content.json) pflegen — kein Formular."
-						hint="Diese Felder bleiben in v1 ohne Formular — beim Speichern unverändert erhalten. Pflege direkt in content.json."
-						collapsible
-						summary={weitereSummary}
-						defaultOpen={false}
-						pillTitle="In v1 nur im Code (content.json) pflegen — kein Formular"
-						persistKey="{data.slug}:weitere"
-					>
-						{#each readonlyEditorialShown as [key, value] (key)}
-							<details class="ro-json">
-								<summary>{key}</summary>
-								<pre>{JSON.stringify(value, null, 2)}</pre>
-							</details>
-						{/each}
-					</MachineZone>
-				{/if}
 
 				{#if dirty}
 					<SaveBar writable={data.writable} ondiscard={discard} />
@@ -1313,23 +1505,94 @@
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-sm);
 	}
-	.ro-json {
+	/* Schmale Nummern-Spalte + Art-Select der Anatomie-Beschriftungen. */
+	.row__input--nr {
+		flex: 0 0 4rem;
+	}
+	.row__select {
+		flex: 0 1 8.5rem;
+		width: auto;
 		font-size: var(--ds-text-sm);
-	}
-	.ro-json summary {
-		cursor: pointer;
-		color: var(--ds-text-body);
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-	}
-	.ro-json pre {
-		margin: var(--z-ds-space-6) 0 0;
-		padding: var(--z-ds-space-8);
-		background: var(--ds-surface);
+		color: var(--ds-text);
+		background: var(--ds-surface-inset);
+		border: 1px solid var(--ds-border-strong);
 		border-radius: var(--ds-radius-sm);
-		overflow-x: auto;
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
+		padding: var(--z-ds-space-6) var(--z-ds-space-6);
+		cursor: pointer;
+	}
+	.row__select:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 1px;
+	}
+
+	/* ── Wann welche Variante: Maschinen-Label + Inline-Input je Zeile (Mechanik/Optik
+	   wie .token-hint-row bei „Hinweis je Token"). ── */
+	.variant-hint-row {
+		display: flex;
+		align-items: center;
+		gap: var(--z-ds-space-s);
+		border-bottom: 1px solid var(--ds-border-soft);
+	}
+	.variant-hint-row__label {
+		flex: 0 1 10rem;
+		min-width: 0;
+		font-size: var(--ds-text-sm);
+		font-weight: 600;
 		color: var(--ds-text-body);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.variant-hint-row__input {
+		flex: 1;
+		min-width: 0;
+		background: transparent;
+		border: none;
+		padding: var(--z-ds-space-6) var(--z-ds-space-6);
+	}
+	.variant-hint-row__input:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: -2px;
+	}
+	/* Content-Key ohne Maschinen-Label: gedämpft + „unbekannt"-Flag + Entfernen. */
+	.variant-hint-row--unknown .variant-hint-row__label {
+		color: var(--ds-text-muted);
+		font-style: italic;
+	}
+	.variant-hint-row__flag {
+		flex: none;
+		font-size: var(--ds-text-xs);
+		color: var(--ds-tint-warning-text, var(--ds-text-muted));
+	}
+	.variant-hint-row__remove {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		flex: none;
+		border: none;
+		background: none;
+		border-radius: var(--ds-radius-sm);
+		padding: 0;
+		color: var(--ds-text-muted);
+		cursor: pointer;
+		line-height: 1;
+		transition:
+			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
+			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	.variant-hint-row__remove:hover {
+		color: var(--ds-negative, var(--ds-text));
+		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
+	}
+	.variant-hint-row__remove:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.variant-hint-row__remove {
+			transition: none;
+		}
 	}
 </style>

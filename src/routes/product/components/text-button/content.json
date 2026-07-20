@@ -59,18 +59,6 @@
 			"On-Image-Variante nicht auf hellen/unruhigen Bildern nutzen — der Kontrast bricht ein."
 		]
 	},
-	"doDontBeispiele": [
-		{
-			"gut": {
-				"html": "<button type=\"button\" class=\"z-text-button\">Mehr anzeigen</button>",
-				"text": "Konkrete Aktion — sagt, was der Klick auslöst."
-			},
-			"schlecht": {
-				"html": "<button type=\"button\" class=\"z-text-button\">Mehr</button>",
-				"text": "Zu generisch — der Nutzer muss raten, was passiert."
-			}
-		}
-	],
 	"verwendung": {
 		"nutzen": [
 			"Für flächenlose, dezente Aktionen in dichten Layouts (Listen, Toolbars, Teaser).",

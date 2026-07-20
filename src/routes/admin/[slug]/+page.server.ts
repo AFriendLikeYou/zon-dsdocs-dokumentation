@@ -19,7 +19,6 @@ const EDITABLE = [
 	'wording',
 	'komposition',
 	'verwandt',
-	'doDontBeispiele',
 	'playground'
 ] as const;
 

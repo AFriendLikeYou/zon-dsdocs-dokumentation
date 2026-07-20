@@ -38,7 +38,6 @@ export const EDITORIAL_FIELDS = {
 	a11y: { check: isArray, typ: 'array' },
 	tastatur: { check: isArray, typ: 'array' },
 	doDont: { check: isObject, typ: 'objekt ({ do, dont })' },
-	doDontBeispiele: { check: isArray, typ: 'array' },
 	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
 	wording: { check: isArray, typ: 'array' },
 	komposition: { check: isArray, typ: 'array (Strings)' },
@@ -89,6 +88,32 @@ export function checkNested(key, value) {
 	if (key === 'variantInfo' && isObject(value)) {
 		for (const [label, text] of Object.entries(value))
 			if (!isString(text)) issues.push(`variantInfo["${label}"] muss ein String sein`);
+	}
+	if (key === 'tastatur' && isArray(value)) {
+		// Jede Regel: taste + aktion Pflicht (String) — Struktur des Spec-Editors.
+		for (const [i, item] of value.entries()) {
+			if (!isObject(item)) {
+				issues.push(`tastatur[${i}] muss ein Objekt { taste, aktion } sein`);
+				continue;
+			}
+			if (!isString(item.taste)) issues.push(`tastatur[${i}].taste muss ein String sein`);
+			if (!isString(item.aktion)) issues.push(`tastatur[${i}].aktion muss ein String sein`);
+		}
+	}
+	if (key === 'callouts' && isArray(value)) {
+		// Jede Beschriftung: nr (Zahl) + text (String) Pflicht; art/optionalDurch optional.
+		for (const [i, item] of value.entries()) {
+			if (!isObject(item)) {
+				issues.push(`callouts[${i}] muss ein Objekt { nr, text } sein`);
+				continue;
+			}
+			if (typeof item.nr !== 'number') issues.push(`callouts[${i}].nr muss eine Zahl sein`);
+			if (!isString(item.text)) issues.push(`callouts[${i}].text muss ein String sein`);
+			if (item.art !== undefined && !isString(item.art))
+				issues.push(`callouts[${i}].art muss ein String sein`);
+			if (item.optionalDurch !== undefined && !isString(item.optionalDurch))
+				issues.push(`callouts[${i}].optionalDurch muss ein String sein`);
+		}
 	}
 	if (key === 'tokenHinweise' && isObject(value)) {
 		for (const [name, text] of Object.entries(value))

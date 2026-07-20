@@ -14,9 +14,9 @@ import { validateContentRaw } from '$lib/server/content-validation';
 import { CATALOG } from '$data/catalog';
 
 // Redaktionelle Felder, die DIESER Editor schreiben darf. Teilmenge der
-// EDITORIAL_FIELDS (content-validation). Nicht gelistete Felder (variantInfo,
-// callouts, tastatur, doDontBeispiele, version, playground) bleiben unangetastet
-// erhalten — sie sind hier v1-read-only („im Code pflegen").
+// EDITORIAL_FIELDS (content-validation). Nicht gelistete Felder (version,
+// playground) bleiben unangetastet erhalten — sie sind hier v1-read-only
+// („im Code pflegen").
 const EDITABLE = [
 	'zweck',
 	'status',
@@ -26,6 +26,12 @@ const EDITABLE = [
 	'a11y',
 	'wording',
 	'verwandt',
+	// Tastatur-Bedienung ({ taste, aktion }) — Barrierefreiheit-Cluster.
+	'tastatur',
+	// Wann welche Variante (Varianten-Label → Erklärsatz) — Design-Cluster.
+	'variantInfo',
+	// Anatomie-Beschriftungen ({ nr, text, art?, optionalDurch? }) — Design-Cluster.
+	'callouts',
 	// Redaktioneller Hinweis-Text je Token (Token-Name → Freitext).
 	'tokenHinweise',
 	// Redaktionelle Code-Beispiele (Develop-Tab) + feldweise Snippet-Overrides.
@@ -136,13 +142,6 @@ export const load = ({ params }) => {
 		// ── Redaktionelle Rohdaten (content.json) ──
 		content,
 		machineSnippets,
-		// v1-read-only Editorial-Felder, die dieser Editor NICHT als Formular zeigt.
-		readonlyEditorial: {
-			variantInfo: content.variantInfo ?? null,
-			callouts: content.callouts ?? null,
-			tastatur: content.tastatur ?? null,
-			doDontBeispiele: content.doDontBeispiele ?? null
-		},
 		slugs,
 		validSlugs: allSlugs(),
 		// Slug → Anzeige-Name (aus dem Katalog) für die Verwandt-Chips; unbekannte Slugs

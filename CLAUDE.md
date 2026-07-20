@@ -157,7 +157,7 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
 
 - `admin/[slug]/` — **Component-`content.json`-Editor** (DS-Doku). Editierbare Keys:
   `zweck, status, verwendung, doDont, variantInfo, a11y, callouts, tastatur, wording,
-verwandt, doDontBeispiele`. Client-State → verstecktes JSON-Feld → Server merged
+verwandt`. Client-State → verstecktes JSON-Feld → Server merged
   **nur** diese Keys zurück (Rest der `content.json` bleibt).
 - `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub, ADR-029): Notion-artige
   Block-Karten (Figma-Vorlage 689:11503) mit Slash-Command, typ-bewusster Vorschau

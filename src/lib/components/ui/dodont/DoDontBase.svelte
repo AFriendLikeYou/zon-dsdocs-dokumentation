@@ -1,10 +1,9 @@
 <!--
   DoDontBase.svelte — geteiltes Gerüst für alle Do/Don't-Erscheinungen.
 
-  EINE technische Basis, ZWEI bewusste Erscheinungen: Die Brand-Karte (DoDont,
-  illustrativ) und das Product-Specimen-Paar (DoDontVisual) sind nur noch dünne
-  Spezialisierungen über dieser Hülle. Gebündelt wird hier ausschließlich das
-  echt Gemeinsame:
+  EINE technische Basis für die Do/Don't-Erscheinungen: Die Brand-Karte (DoDont,
+  illustrativ) ist nur noch eine dünne Spezialisierung über dieser Hülle.
+  Gebündelt wird hier ausschließlich das echt Gemeinsame:
     • der Farb-Kanal (`tone` → `--dd-accent`: do = --ds-positive, dont = --ds-negative),
     • die Karten-Hülle (flex-Spalte, Radius, überstehendes Clipping),
     • Body- und Caption-Slot als Snippets.

@@ -97,12 +97,6 @@ export type VariantGroup = {
 
 export type DoDont = { do?: string[]; dont?: string[] };
 
-/** Ein visuelles Do/Don't-Paar: gut vs. schlecht als echte Specimens (HTML) + Erklärung. */
-export type DoDontBeispiel = {
-	gut: { html: string; text: string };
-	schlecht: { html: string; text: string };
-};
-
 /** „Wann verwenden / Wann nicht" — Entscheidungshilfe ganz oben in der Component-Doku. */
 export type Verwendung = { nutzen?: string[]; nichtNutzen?: string[] };
 
@@ -187,8 +181,6 @@ export type ComponentSpec = {
 	a11y?: A11yItem[];
 	tastatur?: KeyboardRule[];
 	doDont?: DoDont | null;
-	/** Visuelle Do/Don't-Paare (echte Specimens) — ergänzen die Textliste. */
-	doDontBeispiele?: DoDontBeispiel[];
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
 	/** Kompositions-Hinweise: je Eintrag ein Satz, wie die Komponente mit anderen

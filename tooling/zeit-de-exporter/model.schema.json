@@ -85,11 +85,6 @@
 			"items": { "$ref": "#/$defs/keyboardRule" }
 		},
 		"doDont": { "$ref": "#/$defs/doDont" },
-		"doDontBeispiele": {
-			"type": "array",
-			"description": "Visuelle Do/Don't-Paare: gut vs. schlecht als echte Specimens (HTML) + Erklärtext. Ergänzt die doDont-Textliste. (Redaktionell.)",
-			"items": { "$ref": "#/$defs/doDontBeispiel" }
-		},
 		"verwendung": { "$ref": "#/$defs/verwendung" },
 		"wording": {
 			"type": "array",
@@ -318,28 +313,6 @@
 			"properties": {
 				"nutzen": { "type": "array", "items": { "type": "string" } },
 				"nichtNutzen": { "type": "array", "items": { "type": "string" } }
-			}
-		},
-		"doDontBeispiel": {
-			"type": "object",
-			"additionalProperties": false,
-			"required": ["gut", "schlecht"],
-			"description": "Ein visuelles Paar: gut vs. schlecht.",
-			"properties": {
-				"gut": { "$ref": "#/$defs/doDontBeispielSeite" },
-				"schlecht": { "$ref": "#/$defs/doDontBeispielSeite" }
-			}
-		},
-		"doDontBeispielSeite": {
-			"type": "object",
-			"additionalProperties": false,
-			"required": ["html", "text"],
-			"properties": {
-				"html": {
-					"type": "string",
-					"description": "Specimen-Markup (echte z-Klassen) für die Bühne."
-				},
-				"text": { "type": "string", "description": "Kurze Erklärung unter dem Specimen." }
 			}
 		},
 		"wordingRule": {

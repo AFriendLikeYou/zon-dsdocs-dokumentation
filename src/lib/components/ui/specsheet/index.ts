@@ -10,7 +10,6 @@ export { default as A11yList } from './A11yList.svelte';
 export { default as KeyboardList } from './KeyboardList.svelte';
 export { default as RelatedComponents } from './RelatedComponents.svelte';
 export { default as DoDontList } from './DoDontList.svelte';
-export { default as DoDontVisual } from './DoDontVisual.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';
 export { default as CodeBlock } from './CodeBlock.svelte';

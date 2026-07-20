@@ -110,7 +110,6 @@ const EDITORIAL = [
 	'a11y',
 	'tastatur',
 	'doDont',
-	'doDontBeispiele',
 	'verwendung',
 	'wording',
 	'komposition',
@@ -162,7 +161,6 @@ function renderGenerated(model) {
  *   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })
  *   tastatur         – Tastatur-Bedienung ({ taste, aktion })
  *   doDont           – { do: [...], dont: [...] }
- *   doDontBeispiele  – visuelle Do/Don't-Paare ({ gut, schlecht } je { html, text })
  *   verwendung       – { nutzen: [...], nichtNutzen: [...] }
  *   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })
  *   komposition      – Hinweise, wie die Komponente mit anderen kombiniert wird (Strings)
@@ -510,7 +508,6 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasStateRest = stateRest.length > 0;
 	const hasStates = hasStateGrid || hasStateRest;
 	const hasDoDont = Boolean(model.doDont);
-	const hasDoDontVisual = Array.isArray(model.doDontBeispiele) && model.doDontBeispiele.length > 0;
 	const anyCode = Boolean(hasHtmlCode || hasSvelteCode || cssForCode || hasRepoCode || patternCss);
 	const hasProps = props.length > 0;
 	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
@@ -538,7 +535,6 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasVariants || hasStateGrid) used.add('SpecimenGrid');
 	if (hasStateRest) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
-	if (hasDoDontVisual) used.add('DoDontVisual');
 	if (hasWording) used.add('WordingList');
 	if (hasRelated) used.add('RelatedComponents');
 	// CodeBlock rendert sowohl die Maschinen-Snippets als auch die redaktionellen
@@ -639,10 +635,9 @@ function renderPage(model, { patternCss = null } = {}) {
 		if (hasStateRest)
 			design += `\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
 	}
-	if (hasDoDont || hasDoDontVisual) {
+	if (hasDoDont) {
 		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n`;
-		if (hasDoDont) design += `\t<DoDontList doDont={${S}.doDont} />\n`;
-		if (hasDoDontVisual) design += `\t<DoDontVisual beispiele={${S}.doDontBeispiele} />\n`;
+		design += `\t<DoDontList doDont={${S}.doDont} />\n`;
 	}
 	if (hasRelated) {
 		design += `\n\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
@@ -842,20 +837,6 @@ function validate(model, { root = process.cwd() } = {}) {
 	if (Array.isArray(model.tastatur))
 		for (const [i, k] of model.tastatur.entries())
 			if (!k?.taste || !k?.aktion) errors.push(`tastatur[${i}]: taste und aktion sind nötig`);
-
-	// doDontBeispiele: je Paar gut+schlecht, je Seite html+text (Pflicht).
-	if (Array.isArray(model.doDontBeispiele))
-		for (const [i, b] of model.doDontBeispiele.entries()) {
-			for (const side of ['gut', 'schlecht']) {
-				const s = b?.[side];
-				if (!s || typeof s !== 'object')
-					errors.push(`doDontBeispiele[${i}].${side}: fehlt (braucht { html, text })`);
-				else {
-					if (!s.html) errors.push(`doDontBeispiele[${i}].${side}: html fehlt`);
-					if (!s.text) errors.push(`doDontBeispiele[${i}].${side}: text fehlt`);
-				}
-			}
-		}
 
 	// farbrollen: jeder Zustand-Key in tokensProZustand muss in zustaende existieren;
 	// Token-Namen müssen --z-ds-* oder "none" sein (sonst warnen — Härtetest deckt das ab).
