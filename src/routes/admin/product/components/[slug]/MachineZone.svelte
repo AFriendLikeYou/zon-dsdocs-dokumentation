@@ -135,7 +135,7 @@
 	.machine-zone {
 		border: 1px dashed var(--ds-border-strong);
 		border-radius: var(--ds-radius);
-		background: var(--ds-surface-soft);
+		background: var(--ds-surface);
 		margin-bottom: var(--z-ds-space-m);
 	}
 	.machine-zone__head {

@@ -71,7 +71,7 @@
 		gap: var(--z-ds-space-m);
 		padding: var(--z-ds-space-6) var(--z-ds-space-l);
 		border-bottom: 1px solid var(--ds-border);
-		background: var(--ds-surface-soft);
+		background: var(--ds-surface);
 	}
 	.anchor-bar__link {
 		font-size: var(--ds-text-xs);

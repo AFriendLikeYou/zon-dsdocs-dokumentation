@@ -1456,11 +1456,11 @@
 	}
 	.mini-pill--machine {
 		color: var(--ds-tint-info-text);
-		background: var(--ds-tint-info-strong);
+		background: var(--ds-tint-info-surface-strong);
 	}
 	.mini-pill--editorial {
 		color: var(--ds-tint-positive-text);
-		background: var(--ds-tint-positive-strong);
+		background: var(--ds-tint-positive-surface-strong);
 	}
 	/* Read-only Maschinen-Zeile in gemischter Liste: gedämpft, „nicht editierbar". */
 	.row--machine {

@@ -1,4 +1,20 @@
 :root {
+	/* ══════════════════════════════════════════════════════════════════════════
+	   ROLLEN-SCHICHT der Doku-UI. Vier Gruppen:
+	     (1) SITE-LOKAL   — eigene Werte der Doku-App, KEIN z-ds-Bezug
+	     (2) MOTION       — Dauer/Easing (Emil-Skill)
+	     (3) KERN-ROLLEN  — sprechende Rollen, gemappt auf --z-ds-* (theme-adaptiv)
+	     (4) TINT-REZEPT  — die tint-*-Familie, aus den Kern-Rollen abgeleitet
+	   Komponenten nutzen NUR diese Rollen. Rohe --z-ds-* erscheinen sonst nur noch:
+	   in Gruppe 3 (Mapping), in den originalgetreuen DS-Kopien (Playground-Specimens)
+	   und bei Abständen/Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind
+	   bereits semantisch).
+	   AUSNAHME (bewusst): ui/SegmentedControl und ui/StageToggle greifen direkt auf
+	   rohe --z-ds-*, damit sie sich der jeweiligen Bühne anpassen (Bühnen-Adaptivität)
+	   statt dem Seiten-Theme zu folgen. ══════════════════════════════════════════ */
+
+	/* ── (1) SITE-LOKAL ───────────────────────────────────────────────────────
+	   Eigene Werte der Doku-App ohne z-ds-Herkunft. */
 	--header-height: 64px;
 	/* Mobile: Navbar bricht in zwei Zeilen (Wortmarke+Actions / Hauptnav) —
 	   der Wert wird unten im Breakpoint-Override angehoben, damit alle
@@ -9,27 +25,44 @@
 	--sidebar-offset: 300px;
 	--sidebar-width: 300px;
 
-	/* Motion-Tokens (nach Emil Kowalskis Animations-Skill) */
+	/* Monospace-Stack (Code, Token-Namen, Maße) — bewusst site-lokal, kein z-ds-Token. */
+	--ds-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+	/* Größere Karten-Rundung (Product-CMS-Karten/Zonen). Site-lokal wie --ds-font-mono:
+	   das DS liefert nur radius-2/-4/-8, die abgenommene Referenz nutzt 12px.
+	   (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
+	--ds-radius-lg: 12px;
+
+	/* Zentrierte, responsive Lesespalte/Content-Breite (auf <main> angewandt).
+	   (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
+	--ds-content-width: 56rem;
+
+	/* ── (2) MOTION ───────────────────────────────────────────────────────────
+	   Dauer & Easing nach Emil Kowalskis Animations-Skill. */
 	--ds-dur: 160ms; /* Hover / Press */
 	--ds-dur-slow: 240ms; /* Dropdowns / Panels */
 	--ds-ease: ease; /* Hover- & Color-Changes */
 	--ds-ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* Enter/Exit, UI — starke ease-out */
+	/* (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
 	--ds-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* On-Screen-Movement / Morph */
 
-	/* Monospace-Stack (Code, Token-Namen, Maße) — bewusst site-lokal, kein z-ds-Token. */
-	--ds-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
-
-	/* ── Semantische Doku-Tokens ──────────────────────────────────────────────
-	   Sprechende Rollen-Namen für die Doku-UI, gemappt auf z-ds-Tokens (Werte
-	   kommen weiter aus @zeitonline/design-system → theme-adaptiv). Komponenten
-	   nutzen NUR diese Rollen. Rohe --z-ds-* erscheinen nur noch: hier (Mapping),
-	   in den originalgetreuen DS-Kopien (Playground-Specimens) und bei Abständen/
-	   Zeilenhöhen (--z-ds-space-* und --z-ds-lineheight-* sind bereits semantisch). */
+	/* ── (3) KERN-ROLLEN auf --z-ds ───────────────────────────────────────────
+	   Sprechende Rollen für die Doku-UI, gemappt auf z-ds-Tokens (Werte kommen aus
+	   @zeitonline/design-system → theme-adaptiv). */
 
 	/* Flächen */
 	--ds-surface: var(--z-ds-color-background-0); /* Seite, Karten, Navbar */
 	--ds-surface-raised: var(--z-ds-color-background-10); /* Pills, Hover, Code, Bühnen */
 	--ds-surface-sunken: var(--z-ds-color-background-20); /* aktive/dritte Ebene */
+	/* Zwischen-Flächen (Product-CMS-Spec-Editor) — Flächen-Treppe nach Mockup:
+	   Seite → --ds-surface-card (äußere Editor-Karte, von der Seite abgesetzt) →
+	   --ds-surface-raised (Redaktions-Karten, heben sich am stärksten ab).
+	   --ds-surface-inset = Input-Hintergrund, auf der Karten-Fläche „eingelassen".
+	   Beide über bestehende --ds-*-Rollen gemischt (kein rohes --z-ds-*, Token-Check
+	   bleibt grün) und folgen dem Theme automatisch, weil --ds-surface/-raised
+	   upstream je Modus neu gebunden werden. */
+	--ds-surface-card: color-mix(in srgb, var(--ds-surface) 55%, var(--ds-surface-raised));
+	--ds-surface-inset: color-mix(in srgb, var(--ds-surface) 45%, var(--ds-surface-raised));
 
 	/* Text */
 	--ds-text: var(--z-ds-color-text-100); /* Überschriften, primäre UI */
@@ -37,39 +70,39 @@
 	--ds-text-muted: var(--z-ds-color-text-55); /* Labels, Meta, Platzhalter */
 	--ds-text-faint: var(--z-ds-color-text-40); /* tertiär, disabled */
 
-	/* Linien (—ds-border-soft: siehe „Weiche Oberflächen" unten) */
+	/* Linien */
 	--ds-border: var(--z-ds-color-border-70);
 	--ds-border-strong: var(--z-ds-color-border-100);
+	--ds-border-hover: var(--z-ds-color-border-hover);
+	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
 
-	/* Interaktion */
+	/* Interaktion / Status */
 	--ds-accent: var(--z-ds-color-focus-100); /* Link-/Aktiv-Akzent */
 	--ds-focus-ring: var(--z-ds-color-focus-100); /* :focus-visible-Outline */
 	--ds-accent-brand: var(--z-ds-color-accent-100); /* ZEIT-Rot (Badges, Tips) */
-
-	/* Status */
 	--ds-positive: var(--z-ds-color-background-success); /* Do, pass */
 	--ds-negative: var(--z-ds-color-error-70); /* Don't, fail */
 	--ds-warning: var(--z-ds-color-background-warning); /* warn */
 
 	/* Sonderflächen */
+	/* (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
 	--ds-surface-inverse: var(
 		--z-ds-color-text-100
 	); /* inverse Fläche: dunkel im Light-, hell im Dark-Mode (z. B. Login-Fehlerbox) */
 	--ds-static-white: var(--z-ds-color-general-white-100); /* theme-invariant (app-button) */
 	--ds-static-black: var(--z-ds-color-general-black-100); /* theme-invariant (app-button) */
-	--ds-border-hover: var(--z-ds-color-border-hover);
 
 	/* Typo-Rollen */
 	--ds-heading-1: var(--z-ds-fontsize-30);
 	--ds-heading-2: var(--z-ds-fontsize-22);
 	--ds-heading-3: var(--z-ds-fontsize-18);
+	/* --ds-text-2xl/-xl: (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
 	--ds-text-2xl: var(--z-ds-fontsize-24);
 	--ds-text-xl: var(--z-ds-fontsize-20);
 	--ds-text-lg: var(--z-ds-fontsize-18);
 	--ds-text-base: var(--z-ds-fontsize-16);
 	--ds-text-sm: var(--z-ds-fontsize-14);
 	--ds-text-xs: var(--z-ds-fontsize-12);
-
 	/* Feine Uppercase-Labels (Sidebar-/Footer-/TOC-Kategorien) */
 	--ds-label-size: var(--z-ds-fontsize-12);
 	--ds-label-tracking: 0.07em;
@@ -78,54 +111,34 @@
 	--ds-radius: var(--z-ds-border-radius-8);
 	--ds-radius-sm: var(--z-ds-border-radius-4);
 	--ds-radius-xs: var(--z-ds-border-radius-2);
-	/* Größere Karten-Rundung (Product-CMS-Karten/Zonen). Site-lokal wie --ds-font-mono:
-	   das DS liefert nur radius-2/-4/-8, die abgenommene Referenz nutzt 12px. */
-	--ds-radius-lg: 12px;
 
-	/* ── Getönte Herkunfts-Pills (Product-CMS) ────────────────────────────────
-	   Pill-Familien für die Provenance-Kennzeichnung (⇣ aus Figma · ✎ Redaktion ·
-	   ≈ geschätzt): getönte Fläche + kräftiger Text DERSELBEN Farbfamilie. Der Text
-	   mischt die Rollenfarbe gegen --ds-text → in Light dunkel, in Dark hell; der
-	   Kontrast folgt dem Theme automatisch, weil der Dark-Block upstream --ds-text/
-	   --ds-accent/--ds-positive/--ds-warning neu bindet. Bewusst NUR über bestehende
-	   --ds-*-Rollen gemischt (kein neues rohes --z-ds-*, Token-Check bleibt grün). */
+	/* Schatten */
+	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
+	--ds-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.07), 0 8px 24px rgba(0, 0, 0, 0.09);
+	/* (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
+	--ds-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.1), 0 30px 60px -20px rgba(0, 0, 0, 0.35);
+
+	/* ── (4) TINT-REZEPT ──────────────────────────────────────────────────────
+	   Getönte Herkunfts-Pills (Product-CMS): Fläche + Text DERSELBEN Farbfamilie.
+	   REZEPT (bitte künftige Tints identisch bauen):
+	     · Fläche = Rolle @ Alpha       → color-mix(in srgb, <Rolle> N%, transparent)
+	     · Text   = Rolle gegen --ds-text gemischt → in Light dunkel, in Dark hell
+	   Suffix-Semantik: -surface / -surface-strong meint eine deckendere FLÄCHE;
+	   -border meint eine Linie. Der Kontrast folgt dem Theme automatisch, weil der
+	   Dark-Block upstream --ds-text/--ds-accent/--ds-positive/--ds-warning neu bindet.
+	   Bewusst NUR über bestehende --ds-*-Rollen gemischt (kein rohes --z-ds-*). */
 	--ds-tint-info-surface: color-mix(in srgb, var(--ds-accent) 14%, transparent);
 	--ds-tint-info-text: color-mix(in srgb, var(--ds-accent) 62%, var(--ds-text));
 	--ds-tint-positive-surface: color-mix(in srgb, var(--ds-positive) 16%, transparent);
 	--ds-tint-positive-text: color-mix(in srgb, var(--ds-positive) 58%, var(--ds-text));
 	--ds-tint-warning-surface: color-mix(in srgb, var(--ds-warning) 20%, transparent);
 	--ds-tint-warning-text: color-mix(in srgb, var(--ds-warning) 58%, var(--ds-text));
-	/* Rückwärtskompatibler Alias: bisher via var(--ds-warning-text, …) gefallbackt. */
-	--ds-warning-text: var(--ds-tint-warning-text);
-	/* Kräftigere Tint-Flächen für Icon-Mini-Pills (runde Fläche mit nur einem
-	   Icon) — brauchen mehr Deckung als die Text-Pill-Flächen, damit das kleine
-	   Icon trägt. Und die Kontur des Drift-Banners (Warn-Fläche mit sichtbarer
-	   Rahmenlinie). Alle über bestehende --ds-*-Rollen gemischt (Token-Check grün). */
-	--ds-tint-info-strong: color-mix(in srgb, var(--ds-accent) 20%, transparent);
-	--ds-tint-positive-strong: color-mix(in srgb, var(--ds-positive) 24%, transparent);
+	/* Deckendere Tint-Flächen für Icon-Mini-Pills (runde Fläche mit nur einem Icon) —
+	   brauchen mehr Deckung als die Text-Pill-Flächen, damit das kleine Icon trägt. */
+	--ds-tint-info-surface-strong: color-mix(in srgb, var(--ds-accent) 20%, transparent);
+	--ds-tint-positive-surface-strong: color-mix(in srgb, var(--ds-positive) 24%, transparent);
+	/* Kontur des Drift-Banners (Warn-Fläche mit sichtbarer Rahmenlinie) — echte Border. */
 	--ds-tint-warning-border: color-mix(in srgb, var(--ds-warning) 40%, transparent);
-
-	/* ── Zwischen-Flächen (Product-CMS-Spec-Editor) ───────────────────────────
-	   Vier-Stufen-Treppe nach Mockup: Seite → --ds-surface-card (äußere Editor-
-	   Karte, deutlich von der Seite abgesetzt) → --ds-surface-soft (Maschinen-
-	   Zonen: zur SEITE hin zurückgesetzt, wirken „eingelassen") → --ds-surface-raised
-	   (Redaktions-Karten, heben sich am stärksten ab). --ds-surface-inset = Input-
-	   Hintergrund, auf der Karten-Fläche „eingelassen". Alle NUR über bestehende
-	   --ds-*-Rollen gemischt (kein rohes --z-ds-*, Token-Check bleibt grün) und
-	   folgen dem Theme automatisch, weil --ds-surface/-raised upstream je Modus
-	   neu gebunden werden. */
-	--ds-surface-card: color-mix(in srgb, var(--ds-surface) 55%, var(--ds-surface-raised));
-	--ds-surface-soft: color-mix(in srgb, var(--ds-surface) 82%, var(--ds-surface-raised));
-	--ds-surface-inset: color-mix(in srgb, var(--ds-surface) 45%, var(--ds-surface-raised));
-
-	/* Weiche Oberflächen */
-	--ds-border-soft: color-mix(in srgb, var(--z-ds-color-text-100) 9%, transparent);
-	--ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05);
-	--ds-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.07), 0 8px 24px rgba(0, 0, 0, 0.09);
-	--ds-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.1), 0 30px 60px -20px rgba(0, 0, 0, 0.35);
-
-	/* Zentrierte, responsive Lesespalte/Content-Breite (auf <main> angewandt) */
-	--ds-content-width: 56rem;
 }
 
 /* Mobile: zweizeilige Navbar (Hauptnav als eigene Zeile) → Header ist höher.

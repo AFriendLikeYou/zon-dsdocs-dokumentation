@@ -102,7 +102,7 @@
 	}
 	.related__warn {
 		font-size: var(--ds-text-xs);
-		color: var(--ds-warning-text, var(--ds-text-muted));
+		color: var(--ds-tint-warning-text, var(--ds-text-muted));
 	}
 	.related__link {
 		display: inline-flex;
