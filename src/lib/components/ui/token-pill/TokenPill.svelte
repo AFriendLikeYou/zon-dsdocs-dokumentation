@@ -1,20 +1,34 @@
 <!--
-  TokenPill.svelte — einheitliche Inline-Pille für Token-Namen und Spec-Werte.
-  Ersetzt das zuvor je Komponente unterschiedlich gestylte `<code>` + separater
-  CopyButton-Flickenteppich (TokenTable, ColorRoleTable, MeasureTable, TokenReference,
-  ColorRoles, ContrastMatrix, RadiusScale, SpacingScale, TypeSpecimen) durch EINE
-  getönte Mono-Pille mit integriertem Copy-Icon.
+  TokenPill.svelte — einheitliche Inline-Pille für Token-Namen, Spec-Werte und
+  Label-Chips. Ersetzt das zuvor je Komponente unterschiedlich gestylte `<code>` +
+  separater CopyButton-Flickenteppich (TokenTable, ColorRoleTable, MeasureTable,
+  TokenReference, ColorRoles, ContrastMatrix, RadiusScale, SpacingScale, TypeSpecimen)
+  durch EINE Pille mit integriertem Copy-Icon.
 
-  Optik: dezente Akzent-Tönung (color-mix aus --ds-accent), Akzent-Text, mono, xs.
-  Die ganze Pille IST der Button (cursor: copy); rechts ein 12px Copy-Icon, das bei
-  Hover leicht ansteigt. Klick kopiert `value` und feuert den globalen Toast; kurz
-  danach zeigt die Pille ein CheckIcon. Reines :active/focus/reduced-motion-Verhalten
-  kommt aus der gemeinsamen Basis IconActionButton (wie bei CopyButton).
+  Zwei Achsen (additiv — Figma-Chip-Set, node 845:14173 / 845:14186):
+  - `tone` — Farbfamilie. Default `accent` = die dezente Akzent-Tönung, mit der die
+    ~12 öffentlichen Consumer unverändert weiterlaufen (Bestandsschutz). Die übrigen
+    Tones sind reine Zusatz-Modifier über den semantischen --ds-tint-*/-surface-Rollen:
+      accent     dezente Akzent-Tönung (Default, öffentliche Token-Tabellen)
+      default    weiche Fläche, gedämpfter Text (--ds-surface-raised)
+      machine    Info-Blau  — Maschinen-/Import-Herkunft (--ds-tint-info-*)
+      editorial  Positiv-Grün — redaktionell (--ds-tint-positive-*)
+      warn       Warn — geschätzt/Achtung (--ds-tint-warning-*)
+      ghost      transparent, 1px --ds-border-strong, gedämpfter Text
+  - `font` — Schrift. Default `mono` rendert `<code>` in der Mono-Stack (Code/Tokens);
+    `text` rendert ein `<span>` in der normalen UI-Schrift (Label-Chips, KEIN `<code>`).
+
+  Optik/Verhalten sonst identisch: die ganze Pille IST der Button (cursor: copy);
+  rechts ein 12px Copy-Icon, das bei Hover leicht ansteigt. Klick kopiert `value` und
+  feuert den globalen Toast; kurz danach zeigt die Pille ein CheckIcon. :active/focus/
+  reduced-motion kommt aus der gemeinsamen Basis IconActionButton (wie bei CopyButton).
 
   Nutzung:
-    <TokenPill value="--z-ds-space-16" />                 // Name = kopierter Text
-    <TokenPill value="16px" label="16 px" />              // eigene Anzeige
-    <TokenPill value="none" copy={false} />               // reine Anzeige, kein Copy
+    <TokenPill value="--z-ds-space-16" />                       // Name = kopierter Text
+    <TokenPill value="16px" label="16 px" />                    // eigene Anzeige
+    <TokenPill value="none" copy={false} />                     // reine Anzeige, kein Copy
+    <TokenPill value="--z-ds-color-x" tone="machine" />         // Maschinen-Zone (Import)
+    <TokenPill value="Primär" font="text" tone="editorial" />   // Label-Chip, UI-Schrift
 -->
 <script lang="ts">
 	import { getToastState } from '$stores/toast-state.svelte';
@@ -28,12 +42,27 @@
 		label?: string;
 		/** Copy-Verhalten (Icon + Klick + Toast). false = reine Anzeige-Pille. */
 		copy?: boolean;
+		/** Farbfamilie. Default `accent` schützt die bestehenden öffentlichen Consumer. */
+		tone?: 'accent' | 'default' | 'machine' | 'editorial' | 'warn' | 'ghost';
+		/** Schrift: `mono` (<code>, Default) oder `text` (<span>, normale UI-Schrift). */
+		font?: 'mono' | 'text';
 		class?: string;
 	};
 
-	let { value, label, copy = true, class: className = '' }: Props = $props();
+	let {
+		value,
+		label,
+		copy = true,
+		tone = 'accent',
+		font = 'mono',
+		class: className = ''
+	}: Props = $props();
 
 	const anzeige = $derived(label ?? value);
+	// Tone- und Font-Modifier additiv an die Basis-Klasse hängen.
+	const pillClass = $derived(
+		`token-pill token-pill--${tone}${font === 'text' ? ' token-pill--text' : ''} ${className}`
+	);
 	const toast = copy ? getToastState() : null;
 	let copied = $state(false);
 	let timer: ReturnType<typeof setTimeout>;
@@ -52,13 +81,22 @@
 	}
 </script>
 
+<!-- Text-Element: `<code>` (mono) oder `<span>` (text) — Copy-Verhalten identisch. -->
+{#snippet textEl()}
+	{#if font === 'text'}
+		<span class="token-pill__text">{anzeige}</span>
+	{:else}
+		<code class="token-pill__text">{anzeige}</code>
+	{/if}
+{/snippet}
+
 {#if copy}
 	<IconActionButton
 		ariaLabel={`${value} kopieren`}
 		onclick={handleCopy}
-		class="token-pill {className}{copied ? ' is-copied' : ''}"
+		class="{pillClass}{copied ? ' is-copied' : ''}"
 	>
-		<code class="token-pill__text">{anzeige}</code>
+		{@render textEl()}
 		{#if copied}
 			<CheckIcon class="token-pill__icon" width={12} height={12} />
 		{:else}
@@ -66,8 +104,8 @@
 		{/if}
 	</IconActionButton>
 {:else}
-	<span class="token-pill token-pill--static {className}">
-		<code class="token-pill__text">{anzeige}</code>
+	<span class="{pillClass} token-pill--static">
+		{@render textEl()}
 	</span>
 {/if}
 
@@ -80,19 +118,50 @@
 		gap: var(--z-ds-space-6);
 		padding: 2px var(--z-ds-space-8);
 		border-radius: var(--ds-radius-sm);
-		/* dezente Akzent-Tönung — läuft in Light/Dark ruhig mit (wie SpacingContext). */
-		background: color-mix(in srgb, var(--ds-accent) 10%, transparent);
-		color: var(--ds-accent);
 		vertical-align: middle;
 		max-width: 100%;
 		cursor: copy;
+		border: 1px solid transparent;
 	}
+	/* ── Tone: accent (Default) — dezente Akzent-Tönung, läuft in Light/Dark ruhig mit
+	   (wie SpacingContext). Bestandsschutz: die öffentlichen Token-Tabellen. ── */
+	:global(.token-pill--accent) {
+		background: color-mix(in srgb, var(--ds-accent) 10%, transparent);
+		color: var(--ds-accent);
+	}
+	/* ── Zusatz-Tones über die semantischen Rollen-Tokens (global.css). ── */
+	:global(.token-pill--default) {
+		background: var(--ds-surface-raised);
+		color: var(--ds-text-muted);
+	}
+	:global(.token-pill--machine) {
+		background: var(--ds-tint-info-surface);
+		color: var(--ds-tint-info-text);
+	}
+	:global(.token-pill--editorial) {
+		background: var(--ds-tint-positive-surface);
+		color: var(--ds-tint-positive-text);
+	}
+	:global(.token-pill--warn) {
+		background: var(--ds-tint-warning-surface);
+		color: var(--ds-tint-warning-text);
+	}
+	:global(.token-pill--ghost) {
+		background: transparent;
+		border-color: var(--ds-border-strong);
+		color: var(--ds-text-muted);
+	}
+
 	:global(.token-pill .token-pill__text) {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		line-height: 1.4;
 		/* Lange Token-Namen dürfen umbrechen statt abgeschnitten zu werden. */
 		overflow-wrap: anywhere;
+	}
+	/* Text-Variante: normale UI-Schrift (Tablet Gothic) statt Mono. */
+	:global(.token-pill--text .token-pill__text) {
+		font-family: inherit;
 	}
 	:global(.token-pill .token-pill__icon) {
 		flex: none;
@@ -103,10 +172,12 @@
 			opacity var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
-		:global(.token-pill:hover) {
+		/* Fläche verstärkt sich bei Hover nur im accent-Default; die getönten Tones
+		   behalten ihre Rollen-Fläche (sonst überschriebe der Akzent-Mix ihre Farbe). */
+		:global(.token-pill--accent:hover) {
 			background: color-mix(in srgb, var(--ds-accent) 16%, transparent);
 		}
-		/* Icon steigt bei Hover leicht an (Emil: gated, ease-out). */
+		/* Icon steigt bei Hover leicht an (Emil: gated, ease-out) — für alle Tones. */
 		:global(.token-pill:hover .token-pill__icon) {
 			opacity: 1;
 			transform: translateY(-1px);

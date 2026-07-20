@@ -19,6 +19,7 @@
 -->
 <script lang="ts">
 	import { Swatch } from '$components/ui/swatch';
+	import { TokenPill } from '$components/ui/token-pill';
 	import { Pill } from '../../../ui';
 
 	type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
@@ -68,7 +69,10 @@
 				<tr>
 					<td class="mz-table__label">{r.label}</td>
 					<td class="mz-table__value"
-						>{anzeigeWert(r.px)}{#if r.token} <code>{r.token}</code>{/if}</td
+						>{anzeigeWert(r.px)}{#if r.token} <TokenPill
+								value={r.token}
+								tone="machine"
+							/>{/if}</td
 					>
 					<td class="mz-table__herkunft">{@render herkunftBadge(r.herkunft)}</td>
 				</tr>
@@ -101,7 +105,7 @@
 								<Swatch color={t.wert || t.swatch} />
 							{/if}
 						</td>
-						<td class="mz-table__token"><code>{t.name}</code></td>
+						<td class="mz-table__token"><TokenPill value={t.name} tone="machine" /></td>
 						<td class="mz-table__value mz-table__value--mono">{t.wert || '…'}</td>
 						<td class="mz-table__hinweis">{t.hinweis ?? ''}</td>
 					</tr>
@@ -149,15 +153,11 @@
 		width: 100%;
 		color: var(--ds-text);
 	}
-	.mz-table__value--mono,
-	.mz-table__value code,
-	.mz-table__token code {
+	/* Mono-Wert-Spalte (tokens-Variante). Token-Name/inline-Maß tragen jetzt die
+	   <TokenPill> (tone="machine") mit eigenem Mono-Styling — kein <code> mehr hier. */
+	.mz-table__value--mono {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
-	}
-	.mz-table__value code,
-	.mz-table__token code {
-		color: var(--ds-text-muted);
 	}
 	.mz-table__herkunft {
 		text-align: right;

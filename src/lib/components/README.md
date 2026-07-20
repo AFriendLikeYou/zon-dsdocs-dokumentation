@@ -98,7 +98,10 @@ prüfen** — in dieser Reihenfolge:
 
 1. **Atome:** `ui/field/` (Field/Select — die einzige Feld-Optik, `field-base.css`),
    `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
-   `ui/badge/`, Icons aus `$lib/icons`.
+   `ui/badge/`, `ui/token-pill/` (Inline-Copy-Pille für Token-Namen/Spec-Werte/
+   Label-Chips — Achsen `tone: accent|default|machine|editorial|warn|ghost` und
+   `font: mono|text`; `accent`+`mono` = Bestandsschutz der öffentlichen Tabellen),
+   Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/alert/` (auch für Banner/Flash — `role`/`compact`/`actions`),
    `ui/empty-state/` (auch gestrichelt via `appearance="dashed"`),
    `admin/ui/PopoverSheet` (Popover mit Esc/Fokus/Outside-Click).
