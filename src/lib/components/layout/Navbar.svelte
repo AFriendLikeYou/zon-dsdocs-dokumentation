@@ -32,7 +32,9 @@
 	// legt er seine Fläche + Blur an, damit der Inhalt darunter lesbar bleibt.
 	let scrollY = $state(0);
 	const overlay = $derived(section === 'root');
-	const transparent = $derived(overlay && scrollY <= 8);
+	// Schwelle bewusst erst bei ~40px: so blendet die Fläche während des Scrollens
+	// auf, statt beim ersten Pixel umzuspringen.
+	const transparent = $derived(overlay && scrollY <= 40);
 </script>
 
 <svelte:window bind:scrollY />
@@ -82,10 +84,11 @@
 		backdrop-filter: blur(14px);
 		-webkit-backdrop-filter: blur(14px);
 		/* Nur Fläche/Blur animieren (kein `all`) — der Wechsel beim ersten Scroll-Stück
-		   soll weich sein, das Layout bleibt unberührt. */
+		   soll als sanftes Aufblenden lesbar sein, nicht als Umschalten. Deshalb die
+		   längere Panel-Dauer statt der kurzen Hover-Dauer; Layout bleibt unberührt. */
 		transition:
-			background-color var(--ds-dur) var(--ds-ease-out),
-			backdrop-filter var(--ds-dur) var(--ds-ease-out);
+			background-color var(--ds-dur-slow) var(--ds-ease-out),
+			backdrop-filter var(--ds-dur-slow) var(--ds-ease-out);
 		padding: var(--z-ds-space-m) var(--z-ds-space-l);
 		display: flex;
 		/* Desktop: eine Zeile (max-height greift). Actions rechts via margin-left. */
