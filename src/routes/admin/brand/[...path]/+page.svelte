@@ -922,7 +922,7 @@
 
 <style>
 	.edit {
-		max-width: 52rem;
+		max-width: var(--ds-container-admin);
 		margin: 0 auto;
 		/* unten Luft für die schwebende Save-Bar */
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l) 7rem;

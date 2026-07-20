@@ -1169,7 +1169,7 @@
 
 <style>
 	.spec-edit {
-		max-width: 52rem;
+		max-width: var(--ds-container-admin);
 		margin: 0 auto;
 		padding: var(--z-ds-space-l) var(--z-ds-space-l) 7rem;
 	}

@@ -35,6 +35,9 @@
 	   dupliziert). Wer eine Seite einfasst, nimmt beide zusammen. */
 	--ds-container-max: 76rem;
 	--ds-gutter: clamp(1rem, 4vw, 2.5rem);
+	/* Lesebreite im CMS — eine Breite für Übersichten, Medien UND Editoren
+	   (vorher 52/56/60rem nebeneinander, ohne dass die Unterschiede gewollt waren). */
+	--ds-container-admin: 56rem;
 
 	/* Monospace-Stack (Code, Token-Namen, Maße) — bewusst site-lokal, kein z-ds-Token. */
 	--ds-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;

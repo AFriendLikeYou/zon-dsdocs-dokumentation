@@ -396,7 +396,7 @@
 
 <style>
 	.admin {
-		max-width: 56rem;
+		max-width: var(--ds-container-admin);
 		margin: 0 auto;
 		padding: var(--z-ds-space-xl) var(--z-ds-space-l);
 	}
