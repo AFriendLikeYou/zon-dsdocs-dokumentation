@@ -194,6 +194,30 @@ Unscoped, co-located neben `model.json`. **Flache Regeln, keine At-Rules**
 (`@media`/`@keyframes` — der Exporter wirft sonst). Auf echten `--z-ds-*`-Tokens
 (originalgetreue DS-Kopie). Der Exporter scoped sie gegen `.spec-canvas` / `.pg-preview`.
 
+### 3b · Registry-Artefakte (`code`-Block, optional)
+
+Die **Component-Registry** (`/api/registry` + `zds`-CLI, shadcn-Modell: Dateien
+werden ins Zielprojekt **kopiert**) deckt den gesamten Katalog **automatisch** ab
+— jede Komponente mit `model.json` ist ohne weiteren Handgriff Registry-fähig.
+Ohne `code`-Block gilt implizit `html-css → pattern.css` (Status `kanonisch`).
+
+Der optionale Top-Level-`code`-Block ist der **Standard-Weg**, weitere
+Code-Formate je Komponente nachzuliefern (z. B. eine nach Svelte 5 portierte
+Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
+
+```jsonc
+"code": {
+  "artefakte": [
+    { "format": "html-css", "dateien": ["pattern.css"], "status": "kanonisch" },
+    { "format": "svelte", "dateien": ["code/Button.svelte"], "status": "portiert" }
+  ]
+}
+```
+
+`format`: `html-css` | `web-component` | `svelte` · `status`: `kanonisch` |
+`portiert` | `entwurf` · `dateien`: Pfade relativ zum Komponenten-Ordner
+(weitere Dateien in einem co-locateten `code/`-Unterordner ablegen).
+
 ## 4 · Exporter laufen lassen
 
 ```bash

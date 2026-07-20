@@ -122,3 +122,26 @@ curl -u <user>:<pass> -X POST http://localhost:5173/api/mcp \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search","arguments":{"query":"formular"}}}'
 ```
+
+## Component-Registry (`/api/registry`) — Copy-in (shadcn-Modell)
+
+Entwickler ziehen dokumentierte ZDS-Komponenten per CLI ins eigene Projekt: die
+Dateien werden **kopiert**, nicht als Paket installiert. Dünne Routen → pure Logik
+[`src/lib/server/registry.ts`](src/lib/server/registry.ts) (getestet), Datenbasis
+ist der `agent-catalog` (rohes `pattern.css`). Deckt den **gesamten Katalog
+automatisch** ab (Build-Zeit-Glob) — jede dokumentierte Komponente ist sofort
+verfügbar. Pro Komponente deklariert der optionale `code`-Block im `model.json`
+die Format-Artefakte (`html-css` | `web-component` | `svelte`); ohne Block gilt
+implizit `html-css → pattern.css`.
+
+- `GET /api/registry` — Index (slug, name, formate, status)
+- `GET /api/registry/<slug>[?format=html-css]` — Metadaten + Artefakte inkl.
+  Datei-Inhalten; 404 als JSON bei unbekanntem Slug
+
+CLI: [`tooling/zds-cli/`](tooling/zds-cli/README.md) — `zds list | info | add`
+(nur Node-Builtins). Config via `.zdsrc` oder `ZDS_REGISTRY_URL`/`ZDS_AUTH`.
+
+```bash
+curl -u <user>:<pass> http://localhost:5173/api/registry
+curl -u <user>:<pass> 'http://localhost:5173/api/registry/button?format=html-css'
+```

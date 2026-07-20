@@ -353,6 +353,18 @@ liegt in `lib/server/`, damit SvelteKit Client-Importe **compiler-seitig verbiet
 Liegt hinter Basic Auth wie alles. Details/Client-Config:
 [`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
 
+## Component-Registry (`/api/registry`) — Copy-in (shadcn-Modell)
+
+Entwickler ziehen dokumentierte Komponenten per CLI ins eigene Projekt — Dateien
+werden **kopiert**, nicht installiert. Endpoints (dünne Routen → pure Logik
+`src/lib/server/registry.ts`, getestet): `GET /api/registry` (Index) ·
+`GET /api/registry/<slug>[?format=html-css]` (Metadaten + Artefakte inkl.
+Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
+(Build-Zeit-Glob wie Manifest/MCP). Pro Komponente deklariert der optionale
+`code`-Block im `model.json` die Format-Artefakte (`html-css` | `web-component` |
+`svelte`); ohne Block gilt implizit `html-css → pattern.css` (kanonisch). CLI:
+`tooling/zds-cli/` (`zds list | info | add`, nur Node-Builtins).
+
 ## Stolperfallen
 
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +

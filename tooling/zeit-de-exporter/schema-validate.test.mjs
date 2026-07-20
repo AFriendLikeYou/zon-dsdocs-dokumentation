@@ -22,4 +22,25 @@ describe('schema-validate · validateModelSchema', () => {
 		const errors = validateModelSchema({ name: 'X', tokens: [{ kategorie: 'Farbe', items: 'nope' }] });
 		expect(errors.some((e) => e.includes('/tokens/0/items'))).toBe(true);
 	});
+
+	it('optionaler code-Block mit gültigen Artefakten → keine Fehler', () => {
+		const errors = validateModelSchema({
+			name: 'Button',
+			code: {
+				artefakte: [
+					{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' },
+					{ format: 'svelte', dateien: ['code/Button.svelte'], status: 'portiert' }
+				]
+			}
+		});
+		expect(errors).toEqual([]);
+	});
+
+	it('code-Artefakt mit unbekanntem format → enum-Fehler', () => {
+		const errors = validateModelSchema({
+			name: 'Button',
+			code: { artefakte: [{ format: 'vue', dateien: ['x'], status: 'entwurf' }] }
+		});
+		expect(errors.some((e) => e.includes('/code/artefakte/0/format'))).toBe(true);
+	});
 });

@@ -101,9 +101,43 @@
 			"description": "Kuratierte Querverweise auf verwandte Komponenten — Katalog-Slugs, z. B. [\"text-button\", \"icon-button\"]. Unbekannte Slugs werden still übersprungen. (Redaktionell.)",
 			"items": { "type": "string" }
 		},
-		"render": { "$ref": "#/$defs/render" }
+		"render": { "$ref": "#/$defs/render" },
+		"code": { "$ref": "#/$defs/code" }
 	},
 	"$defs": {
+		"code": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["artefakte"],
+			"description": "Code-Artefakte für die Component-Registry (shadcn-Modell: Dateien werden per CLI ins Zielprojekt kopiert). Optional/additiv — fehlt der Block, gilt implizit [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }], sofern pattern.css existiert.",
+			"properties": {
+				"artefakte": {
+					"type": "array",
+					"description": "Vorhandene Format-Artefakte der Komponente.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["format", "dateien", "status"],
+						"properties": {
+							"format": {
+								"enum": ["html-css", "web-component", "svelte"],
+								"description": "Code-Format des Artefakts."
+							},
+							"status": {
+								"enum": ["kanonisch", "portiert", "entwurf"],
+								"description": "Reifegrad: kanonisch (Quelle), portiert (aus dem Kanon abgeleitet) oder entwurf."
+							},
+							"dateien": {
+								"type": "array",
+								"minItems": 1,
+								"items": { "type": "string" },
+								"description": "Dateipfade relativ zum Komponenten-Ordner, z. B. \"pattern.css\" oder \"code/Button.svelte\"."
+							}
+						}
+					}
+				}
+			}
+		},
 		"measure": {
 			"type": "object",
 			"additionalProperties": false,

@@ -155,6 +155,33 @@ export type CodeBeispiel = {
 export type PlaygroundOptions = { align?: 'center' | 'fill'; resizable?: boolean };
 
 /**
+ * Format eines Code-Artefakts einer Komponente (Registry, shadcn-Modell).
+ *   html-css      – kanonisches, unscoped Pattern (pattern.css) auf --z-ds-Tokens
+ *   web-component  – gekapseltes Custom-Element
+ *   svelte        – nach Svelte 5 portierte Fassung
+ */
+export type CodeFormat = 'html-css' | 'web-component' | 'svelte';
+
+/** Reifegrad eines Code-Artefakts. */
+export type CodeStatus = 'kanonisch' | 'portiert' | 'entwurf';
+
+/** Ein Code-Artefakt: ein Format + die dazugehörigen Dateien (ordner-relativ). */
+export type CodeArtefakt = {
+	format: CodeFormat;
+	dateien: string[];
+	status: CodeStatus;
+};
+
+/**
+ * Deklariert die vorhandenen Code-Artefakte einer Komponente für die Registry
+ * (shadcn-Modell: Dateien werden per CLI ins Zielprojekt KOPIERT, nicht
+ * installiert). Optional/additiv — fehlt der Block, gilt implizit
+ * `[{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]`,
+ * sofern pattern.css existiert (siehe registry.ts).
+ */
+export type CodeManifest = { artefakte: CodeArtefakt[] };
+
+/**
  * Das gemergte Spec-Objekt (generated + content), das jede Component-Seite an die
  * Renderer reicht. Alle Felder optional: `content.ts` überschreibt partiell, die
  * Renderer guarden mit `if`/`length`.
@@ -188,6 +215,8 @@ export type ComponentSpec = {
 	komposition?: string[];
 	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
 	verwandt?: string[];
+	/** Code-Artefakte für die Registry (shadcn-Modell). Additiv; Fallback in registry.ts. */
+	code?: CodeManifest;
 	/**
 	 * Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). Überschreibt
 	 * feldweise den maschinellen `hinweis` eines Tokens (aus `model.tokens[]`) auf
