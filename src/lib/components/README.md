@@ -101,7 +101,10 @@ prüfen** — in dieser Reihenfolge:
    Field mit `multiline` + `font: text|mono` als vollwertige Textarea/Code-Eingabe),
    `ui/checkbox/` (echtes „an/aus"-Häkchen mit optionalem klickbaren `label` —
    NICHT der Toggle-Switch; für Boolean-Schalter, die als Häkchen gelesen werden),
-   `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`, `ui/icon-action-button/`,
+   `ui/button/` (mit `size: sm|md|lg`), `ui/kbd/`,
+   `ui/icon-action-button/` (Achsen `iconButton` = gerahmt, `subtle` = dezenter
+   CMS-Werkzeug-Look 24×24 + Hover-Tint, `tone: default|danger` für destruktive
+   Aktionen; `title` läuft intern über `ui/tooltip`),
    `ui/badge/` (EIN Label-/Status-/Herkunfts-Pill nach Figma 840:13943 — Achse
    `tone: default|machine|editorial|warn|ghost|accent`, optionales `icon`-Snippet;
    ersetzt die früheren admin/AdminBadge + admin/Pill),
@@ -136,9 +139,18 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    heben ihr `title`-Prop intern darauf),
    `ui/table/` (DER daten-getriebene Tabellen-Renderer — `columns` mit
    `render`-Snippets je Zelle und `header: true` für Zeilenköpfe (`<th scope="row">`),
-   `rows` ODER `groups` mit Eyebrow+Counter, `density: compact|comfortable|none`,
+   `rows` ODER `groups` mit Eyebrow+Counter,
+   **`variant: framed|plain`** (Erscheinungs-Achse; `framed` = Default und der
+   gemeinsame Tabellen-Look: gerahmter Block auf `--ds-surface` mit `--ds-radius`,
+   Hairline-Trenner je Folgezeile, 16px seitliche Innenkante — Referenz war
+   `/product/foundations/color`. `plain` nur für Tabellen, die schon in einem
+   Gehäuse stecken, z. B. die Maschinen-Zone des Spec-Editors),
+   `density: compact|comfortable|none`,
    `valign: middle|top|baseline`, `showHeader: false|true|'sr-only'`, sr-only
-   `caption`/`label`; Optik bringt der Wrapper als Skin-Klasse. **Jede tabellarische
+   `caption`/`label`; den Grundlook bringt das Atom, alles Bühnen-Eigene
+   (Spaltenbreiten, Mono-Werte, gestrichelte Trenner) weiter der Wrapper als
+   Skin-Klasse — Rhythmus feinjustierbar über `--ds-table-pad-y` /
+   `--ds-table-gap-x`. **Jede tabellarische
    Oberfläche der Doku-App läuft hierüber** — keine `<ul class="rows">`-Grids mehr),
    Icons aus `$lib/icons`.
 2. **Moleküle:** `ui/banner/` (Hinweis-/Status-Banner — `role`/`compact`/`actions`),
@@ -152,26 +164,28 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
 Fokus-Ringe für Neubauten über die Utility `.focus-ring` (`global.css`, 2px/2px);
 abweichende Offsets nur mit Kommentar-Begründung.
 
-**Tabellen (ehem. v2-Notiz M3, eingelöst in K8, vollendet in K9):** `ui/table/` ist
-der gemeinsame daten-getriebene Renderer ALLER tabellarischen Oberflächen. Wrapper
-sind dünn: Struktur + Semantik kommen aus dem Renderer, die je Bühne unterschiedliche
-Optik bringt eine scoped Skin-Klasse über die `.ds-table__*`-Hooks.
+**Tabellen (ehem. v2-Notiz M3, eingelöst in K8, vollendet in K9, vereinheitlicht in
+K11):** `ui/table/` ist der gemeinsame daten-getriebene Renderer ALLER tabellarischen
+Oberflächen. Wrapper sind dünn: Struktur, Semantik UND das Erscheinungsbild
+(`variant`) kommen aus dem Renderer; die Skin-Klasse über die `.ds-table__*`-Hooks
+trägt nur noch das je Bühne wirklich Eigene (Spaltenbreiten, Mono-Werte,
+gestrichelte Maschinen-Trenner).
 
 Consumer (alle mit unveränderter öffentlicher API — die generierten `.svx` importieren
 weiter aus `ui/specsheet/`):
 
-| Wrapper                             | Spaltenmodell                                                         |
-| ----------------------------------- | --------------------------------------------------------------------- |
-| `admin/…/SpecTable`                 | Maschinen-Optik: gestrichelte Trenner, machine-Chips, Gruppen+Counter |
-| `ui/specsheet/TokenTable`           | Swatch · Name · Hinweis · Wert (Gruppen mit Kategorie-Eyebrow)        |
-| `ui/specsheet/MeasureTable`         | Maß · Wert (+Token/Herkunft)                                          |
-| `ui/specsheet/A11yList`             | Kriterium (Zeilenkopf, Status-Punkt) · Befund                         |
-| `ui/specsheet/KeyboardList`         | Taste (Zeilenkopf) · Aktion                                           |
-| `ui/color-roles/ColorRoles`         | Vorschau · Rolle+Verwendung (Zeilenkopf) · Wert+Foundation-Token      |
-| `ui/token-reference/TokenReference` | (Swatch ·) Token+Einsatzzweck (Zeilenkopf) · Wert                     |
-| `ui/type-specimen/TypeSpecimen`     | Schriftprobe · Rolle+Einsatzzweck+Tokens (Zeilenkopf)                 |
-| `ui/scale/SpacingScale`             | Stufe (Zeilenkopf) · Balken-Probe · Wert+Token                        |
-| `ui/motion-demo/MotionDemo`         | Token (Zeilenkopf) · abspielbare Demo-Bühne                           |
+| Wrapper                             | Spaltenmodell                                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| `admin/…/SpecTable`                 | `variant="plain"` — Maschinen-Optik: gestrichelte Trenner, machine-Chips, Gruppen+Counter |
+| `ui/specsheet/TokenTable`           | Swatch · Name · Hinweis · Wert (Gruppen mit Kategorie-Eyebrow)                            |
+| `ui/specsheet/MeasureTable`         | Maß · Wert (+Token/Herkunft)                                                              |
+| `ui/specsheet/A11yList`             | Kriterium (Zeilenkopf, Status-Punkt) · Befund                                             |
+| `ui/specsheet/KeyboardList`         | Taste (Zeilenkopf) · Aktion                                                               |
+| `ui/color-roles/ColorRoles`         | Vorschau · Rolle+Verwendung (Zeilenkopf) · Wert+Foundation-Token                          |
+| `ui/token-reference/TokenReference` | (Swatch ·) Token+Einsatzzweck (Zeilenkopf) · Wert                                         |
+| `ui/type-specimen/TypeSpecimen`     | Schriftprobe · Rolle+Einsatzzweck+Tokens (Zeilenkopf)                                     |
+| `ui/scale/SpacingScale`             | Stufe (Zeilenkopf) · Balken-Probe · Wert+Token                                            |
+| `ui/motion-demo/MotionDemo`         | Token (Zeilenkopf) · abspielbare Demo-Bühne                                               |
 
 Proben/Bühnen (Schriftmuster, Spacing-Balken, Motion-Kacheln, Swatches) sind
 **Zellinhalt per `render`-Snippet** — die Table kennt diese Atome nicht.

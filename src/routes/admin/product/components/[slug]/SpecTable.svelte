@@ -82,7 +82,8 @@
 </script>
 
 {#snippet mLabel(r: MeasureRow)}{r.label}{/snippet}
-{#snippet mValue(r: MeasureRow)}{anzeigeWert(r.px)}{#if r.token} <Chip value={r.token} tone="machine" />{/if}{/snippet}
+{#snippet mValue(r: MeasureRow)}{anzeigeWert(r.px)}{#if r.token}
+		<Chip value={r.token} tone="machine" />{/if}{/snippet}
 {#snippet mHerkunft(r: MeasureRow)}
 	{#if r.herkunft === 'geschätzt'}
 		<Badge tone="warn">≈ geschätzt</Badge>
@@ -106,18 +107,19 @@
 {#if variant === 'measure'}
 	{#if subhead}<div class="mz-subhead">{subhead}</div>{/if}
 	<div class="mz-skin mz-skin--measure">
-		<Table columns={measureColumns} {rows} label="Maße (aus Figma)" />
+		<Table variant="plain" columns={measureColumns} {rows} label="Maße (aus Figma)" />
 	</div>
 {:else}
 	<div class="mz-skin mz-skin--tokens">
-		<Table columns={tokenColumns} groups={tokenGroups} label="Tokens (aus Figma)" />
+		<Table variant="plain" columns={tokenColumns} groups={tokenGroups} label="Tokens (aus Figma)" />
 	</div>
 {/if}
 
 <style>
 	/* ── Maschinen-Tabellen (GESTRICHELTE Trenner = „nicht editierbar"-Sprache) ──
-	   Optik unverändert aus der Vor-Merge-Fassung; Skin über :global auf die
-	   .ds-table-Hooks des geteilten Renderers. */
+	   Bewusst `variant="plain"`: die Tabelle steckt bereits im gestrichelten Gehäuse
+	   der MachineZone — der gerahmte Standard-Look (K11) würde hier doppelt rahmen
+	   und die Herkunfts-Sprache überschreiben. Trenner bleiben darum gestrichelt. */
 	.mz-skin :global(.ds-table__cell) {
 		padding: var(--z-ds-space-10) var(--z-ds-space-8) var(--z-ds-space-10) 0;
 		border-bottom: 1px dashed var(--ds-border);
@@ -177,18 +179,7 @@
 		padding: 0 0 var(--z-ds-space-6);
 		border-bottom: none;
 	}
-	.mz-skin--tokens :global(.ds-table__group-label) {
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--ds-text-muted);
-		font-weight: 600;
-	}
-	.mz-skin--tokens :global(.ds-table__group-count) {
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-faint);
-		font-variant-numeric: tabular-nums;
-	}
+	/* Eyebrow-/Counter-Typo kommt seit K11 aus dem Atom (identische Werte). */
 	/* Ab der zweiten Gruppe: 16px Luft + feine durchgehende Trennlinie darüber. */
 	.mz-skin--tokens :global(.ds-table__group + .ds-table__group .ds-table__group-inner) {
 		margin-top: var(--z-ds-space-m);

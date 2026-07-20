@@ -30,7 +30,6 @@
 		<Table
 			{columns}
 			rows={items}
-			density="none"
 			valign="baseline"
 			showHeader="sr-only"
 			caption="Tastatur-Bedienung — Tasten und Aktionen"
@@ -42,17 +41,8 @@
 	.keyboard-list {
 		max-width: 640px;
 	}
-	/* ── Skin: Zeilen-Rhythmus + Trenner (früher SpecRow). ── */
-	.keyboard-list :global(.ds-table__cell) {
-		padding: var(--z-ds-space-12) var(--z-ds-space-16) var(--z-ds-space-12) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	.keyboard-list :global(.ds-table__cell:last-child) {
-		padding-right: 0;
-	}
-	.keyboard-list :global(.ds-table__row:last-child .ds-table__cell) {
-		border-bottom: 0;
-	}
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"` ist Default) — kein eigener Skin mehr nötig. */
 	.keyboard-list__key {
 		font-family: var(--ds-font-mono, ui-monospace, monospace);
 		font-size: var(--ds-text-xs);

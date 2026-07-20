@@ -10,7 +10,9 @@
 	import type { Masse, MasseValue } from '$types/spec';
 	import { Chip } from '$components/ui/chip';
 	import { Table } from '$components/ui/table';
-	let { masse = null }: {
+	let {
+		masse = null
+	}: {
 		/** Maße (Höhe/Breite/Padding/Radius) als Spec-Zeilen; null blendet die Tabelle aus. */
 		masse?: Masse | null;
 	} = $props();
@@ -51,7 +53,8 @@
 {#snippet labelCell(row: MeasureRow)}{row.label}{/snippet}
 {#snippet valueCell(row: MeasureRow)}{px(row.value)}{row.unit}{#if herk(row.value)}<span
 			class="measure-table__provenance">{herk(row.value)}</span
-		>{/if}{#if tok(row.value)}<span class="measure-table__token"><Chip value={tok(row.value)!} /></span
+		>{/if}{#if tok(row.value)}<span class="measure-table__token"
+			><Chip value={tok(row.value)!} /></span
 		>{/if}{/snippet}
 
 {#if masse}
@@ -61,24 +64,23 @@
 {/if}
 
 <style>
-	/* ── Öffentliche Maß-Optik (unverändert übernommen; Skin über :global). ── */
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"` ist Default) — hier bleibt nur das Spaltenmodell. */
 	.measure-table-skin :global(.ds-table) {
 		/* Vor-Merge-Optik: kompakte Tabelle in Inhaltsbreite, nicht full-width. */
 		width: auto;
 		min-width: 260px;
+		/* Label und Wert brauchen mehr Luft als der Standard-Spaltenabstand. */
+		--ds-table-gap-x: 40px;
 	}
-	/* Label-Spalte (1.): links, gedämpft, breiter Abstand nach rechts. */
+	/* Label-Spalte (1.): links, gedämpft. */
 	.measure-table-skin :global(.ds-table__cell:first-child) {
 		color: var(--ds-text-muted);
-		padding: 9px 40px 9px 0;
-		border-bottom: 1px solid var(--ds-border);
 		font-weight: 400;
 	}
 	/* Wert-Spalte (2.): Mono, rechtsbündig. */
 	.measure-table-skin :global(.ds-table__cell:last-child) {
 		font-family: var(--ds-font-mono);
-		padding: 9px 0;
-		border-bottom: 1px solid var(--ds-border);
 	}
 	.measure-table-skin :global(.measure-table__token) {
 		display: block;

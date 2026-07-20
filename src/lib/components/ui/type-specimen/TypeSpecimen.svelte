@@ -101,7 +101,6 @@
 	<Table
 		{columns}
 		{rows}
-		density="none"
 		showHeader="sr-only"
 		caption="Text-Rollen mit Schriftprobe, Einsatzzweck und Tokens"
 	/>
@@ -111,13 +110,11 @@
 	.type-specimen {
 		margin: 0 0 1em;
 	}
-	/* ── Skin: Zeilen-Rhythmus + Trenner (vor der Migration am <li>). ── */
-	.type-specimen :global(.ds-table__cell) {
-		padding: var(--z-ds-space-20) var(--z-ds-space-24) var(--z-ds-space-20) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	.type-specimen :global(.ds-table__cell:last-child) {
-		padding-right: 0;
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"`). Schriftproben brauchen aber mehr Luft als der
+	   Standard-Rhythmus — nur die Zeilenhöhe wird darum hochgesetzt. */
+	.type-specimen :global(.ds-table) {
+		--ds-table-pad-y: var(--z-ds-space-20);
 	}
 	.type-specimen__specimen {
 		margin: 0;
@@ -177,8 +174,8 @@
 		.type-specimen :global(.ds-table__cell:first-child) {
 			width: auto;
 		}
-		.type-specimen :global(.ds-table__cell) {
-			padding-right: var(--z-ds-space-12);
+		.type-specimen :global(.ds-table) {
+			--ds-table-gap-x: var(--z-ds-space-12);
 		}
 	}
 </style>

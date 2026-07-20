@@ -74,7 +74,7 @@
 	<Table
 		{columns}
 		rows={tokens}
-		density="none"
+		density="compact"
 		showHeader="sr-only"
 		caption={type === 'easing'
 			? 'Beschleunigungskurven zum Abspielen'
@@ -86,13 +86,8 @@
 	.motion-demo {
 		margin-block: var(--z-ds-space-16);
 	}
-	/* ── Skin: 16px Zeilen- und Spaltenabstand (früher grid gap). ── */
-	.motion-demo :global(.ds-table__cell) {
-		padding: var(--z-ds-space-8) var(--z-ds-space-16) var(--z-ds-space-8) 0;
-	}
-	.motion-demo :global(.ds-table__cell:last-child) {
-		padding-right: 0;
-	}
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"`, `density="compact"`). Die Demo-Bühne bleibt Zellinhalt. */
 	.motion-demo__meta {
 		display: flex;
 		flex-direction: column;

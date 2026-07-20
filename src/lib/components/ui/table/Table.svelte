@@ -10,7 +10,12 @@
   Zell-Inhalte kommen über `render`-Snippets je Spalte — so konsumieren die Aufrufer
   Chip/Badge/Swatch in Zellen, ohne dass Table diese Atome kennt.
 
+  ERSCHEINUNGSBILD (K11): Der gemeinsame Tabellen-Look der Doku-App steckt jetzt
+  HIER (`variant="framed"`, Default) statt viermal kopiert in den Wrappern —
+  Referenz war die Farb-Rollen-Tabelle auf /product/foundations/color.
+
   Props:
+    · variant    — Erscheinungs-Achse: 'framed' (Default) | 'plain'.
     · columns    — Spaltendefinition: { key, label?, width?, align?, header?, render? }.
                    `render?: Snippet<[row]>` bestimmt den Zellinhalt (sonst row[key]).
                    `header: true` macht die Zelle zum Zeilenkopf (<th scope="row">).
@@ -24,8 +29,9 @@
     · caption    — a11y-Beschriftung (sr-only <caption>); `label` als Alias.
     · class      — Passthrough (Skin-Klasse des Wrappers landet am <table>).
 
-  Genau EINE Zeilenquelle nutzen (`rows` ODER `groups`). Für die Optik NICHT hier
-  Farben/Border setzen — das macht der Wrapper.
+  Genau EINE Zeilenquelle nutzen (`rows` ODER `groups`). Die je Bühne EIGENE Optik
+  (Spaltenbreiten, Mono-Werte, gestrichelte Maschinen-Trenner) bringt weiter der
+  Wrapper über die `.ds-table__*`-Hooks ein — den GRUNDLOOK nicht mehr.
 -->
 <script lang="ts" generics="Row extends Record<string, unknown>">
 	import type { Snippet } from 'svelte';
@@ -62,6 +68,7 @@
 		columns,
 		rows,
 		groups,
+		variant = 'framed',
 		density = 'comfortable',
 		showHeader = false,
 		valign = 'middle',
@@ -72,6 +79,17 @@
 		columns: Column[];
 		rows?: Row[];
 		groups?: Group[];
+		/**
+		 * Erscheinungsbild der Tabelle.
+		 * `'framed'` (Default) ist DER gemeinsame Tabellen-Look der Doku-App:
+		 * gerahmter Block auf `--ds-surface` mit `--ds-radius`, Hairline-Trenner je
+		 * Folgezeile und seitlicher Innenkante (Referenz: Farb-Rollen auf
+		 * /product/foundations/color).
+		 * `'plain'` nimmt Rahmen und Trenner zurück — für Tabellen, die BEREITS in
+		 * einem Gehäuse stecken (Maschinen-Zone des Spec-Editors) und sonst doppelt
+		 * gerahmt wären.
+		 */
+		variant?: 'framed' | 'plain';
 		/** Vertikaler Zeilen-Rhythmus; 'none' überlässt das Zell-Padding der Skin. */
 		density?: 'compact' | 'comfortable' | 'none';
 		/**
@@ -91,7 +109,13 @@
 	const captionText = $derived(caption ?? label);
 	const headMode = $derived(showHeader === 'sr-only' ? 'sr' : showHeader ? 'visible' : 'none');
 	const classes = $derived(
-		['ds-table', `ds-table--${density}`, `ds-table--valign-${valign}`, className]
+		[
+			'ds-table',
+			`ds-table--${variant}`,
+			`ds-table--${density}`,
+			`ds-table--valign-${valign}`,
+			className
+		]
 			.filter(Boolean)
 			.join(' ')
 	);
@@ -174,7 +198,8 @@
 </table>
 
 <style>
-	/* Nur Struktur + Rhythmus. Farben/Border-Stil bringt der Wrapper via Skin-Klasse. */
+	/* Struktur + Rhythmus + das gemeinsame Erscheinungsbild (`variant`). Alles darüber
+	   hinaus (Spaltenbreiten, Mono-Werte, Maschinen-Trenner) bringt der Wrapper. */
 	.ds-table {
 		width: 100%;
 		border-collapse: collapse;
@@ -221,16 +246,33 @@
 	.ds-table th[data-align='left'] {
 		text-align: left;
 	}
-	/* Standard-Zellabstand nach Dichte — Wrapper darf per :global überschreiben. */
-	.ds-table--comfortable .ds-table__cell {
-		padding: 9px 10px 9px 0;
+	/* ── Rhythmus über zwei Variablen, damit Dichte × Variante ohne Spezifitäts-
+	   Wettrüsten komponieren: `--ds-table-pad-y` (Zeilenhöhe) und `--ds-table-gap-x`
+	   (Spaltenabstand). Der Wrapper darf beide per :global überschreiben. ── */
+	.ds-table {
+		--ds-table-pad-y: 9px;
+		--ds-table-gap-x: 10px;
 	}
-	.ds-table--compact .ds-table__cell {
-		padding: var(--z-ds-space-8) var(--z-ds-space-8) var(--z-ds-space-8) 0;
+	.ds-table--compact {
+		--ds-table-pad-y: var(--z-ds-space-8);
+		--ds-table-gap-x: var(--z-ds-space-8);
 	}
 	/* 'none': kein eigener Rhythmus — die Skin des Wrappers setzt das Padding. */
-	.ds-table--none .ds-table__cell {
-		padding: 0;
+	.ds-table--none {
+		--ds-table-pad-y: 0px;
+		--ds-table-gap-x: 0px;
+	}
+	/* Der gerahmte Look atmet weiter: 12px Zeilen-, 16px Spaltenabstand. */
+	.ds-table--framed.ds-table--comfortable {
+		--ds-table-pad-y: var(--z-ds-space-s);
+		--ds-table-gap-x: var(--z-ds-space-m);
+	}
+	.ds-table--framed.ds-table--compact,
+	.ds-table--framed.ds-table--none {
+		--ds-table-gap-x: var(--z-ds-space-m);
+	}
+	.ds-table__cell {
+		padding: var(--ds-table-pad-y) var(--ds-table-gap-x) var(--ds-table-pad-y) 0;
 	}
 	.ds-table__group-cell,
 	.ds-table__group-desc {
@@ -241,5 +283,71 @@
 		align-items: baseline;
 		justify-content: space-between;
 		gap: var(--z-ds-space-8);
+	}
+	/* Gruppen-Eyebrow + Counter: gemeinsame Typo (war in TokenTable/SpecTable doppelt). */
+	.ds-table__group-label {
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ds-text-muted);
+	}
+	.ds-table__group-count {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		font-variant-numeric: tabular-nums;
+	}
+	.ds-table__group-desc {
+		max-width: 60ch;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text-body);
+	}
+
+	/* ── variant="framed" (Default) — DER gemeinsame Tabellen-Look ──────────────
+	   Gerahmter Block auf --ds-surface, 8px-Radius, Hairline-Trenner je Folgezeile,
+	   16px seitliche Innenkante. `border-collapse: collapse` unterdrückt in allen
+	   Engines den border-radius → der Rahmen braucht `separate` + `border-spacing: 0`. */
+	.ds-table--framed {
+		background: var(--ds-surface);
+		border: 1px solid var(--ds-border-soft);
+		border-radius: var(--ds-radius);
+		border-collapse: separate;
+		border-spacing: 0;
+	}
+	.ds-table--framed .ds-table__cell:first-child,
+	.ds-table--framed .ds-table__group-cell,
+	.ds-table--framed .ds-table__group-desc,
+	.ds-table--framed thead th:first-child {
+		padding-left: var(--z-ds-space-m);
+	}
+	.ds-table--framed .ds-table__cell:last-child,
+	.ds-table--framed .ds-table__group-cell,
+	.ds-table--framed .ds-table__group-desc,
+	.ds-table--framed thead th:last-child {
+		padding-right: var(--z-ds-space-m);
+	}
+	.ds-table--framed .ds-table__group-cell {
+		padding-top: var(--z-ds-space-m);
+		padding-bottom: var(--z-ds-space-8);
+	}
+	.ds-table--framed .ds-table__group-desc {
+		padding-bottom: var(--z-ds-space-8);
+	}
+	.ds-table--framed thead th {
+		padding-top: var(--ds-table-pad-y);
+		padding-bottom: var(--ds-table-pad-y);
+		font-weight: 600;
+		color: var(--ds-text-muted);
+	}
+	/* Trenner sitzt OBEN und nur ab der zweiten Zeile — so stößt die erste Zeile
+	   ohne doppelte Linie an den Rahmen. */
+	.ds-table--framed .ds-table__row + .ds-table__row > .ds-table__cell,
+	.ds-table--framed
+		thead:not(.ds-table__thead--sr)
+		+ tbody
+		.ds-table__row:first-child
+		> .ds-table__cell,
+	.ds-table--framed .ds-table__group + .ds-table__group .ds-table__group-cell {
+		border-top: 1px solid var(--ds-border-soft);
 	}
 </style>

@@ -58,7 +58,7 @@
 	const swatchColumn = { key: 'swatch', label: 'Vorschau', width: '22px', render: swatchCell };
 	const baseColumns = [
 		{ key: 'name', label: 'Token und Einsatzzweck', header: true, render: identCell },
-		{ key: 'wert', label: 'Aufgelöster Wert', render: valueCell }
+		{ key: 'wert', label: 'Aufgelöster Wert', align: 'right' as const, render: valueCell }
 	];
 	const columnsFor = (g: Group) => (g.isColor ? [swatchColumn, ...baseColumns] : baseColumns);
 </script>
@@ -102,7 +102,6 @@
 					<Table
 						columns={columnsFor(group)}
 						rows={group.items}
-						density="none"
 						showHeader="sr-only"
 						caption={`Foundation-Tokens — ${group.kategorie}`}
 					/>
@@ -133,16 +132,11 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
-	/* ── Skin: Zeilen-Rhythmus + durchgezogene Trenner (wie vor der Migration). ── */
-	.token-reference__skin :global(.ds-table__cell) {
-		padding: var(--z-ds-space-12) var(--z-ds-space-16) var(--z-ds-space-12) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	/* Wert-Spalte: rechts, so schmal wie ihr Inhalt, kein Zeilenumbruch. */
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"`) — hier bleibt nur die Spalten-Ausrichtung.
+	   Wert-Spalte: so schmal wie ihr Inhalt, kein Zeilenumbruch (rechts via `align`). */
 	.token-reference__skin :global(.ds-table__cell:last-child) {
 		width: 1%;
-		padding-right: 0;
-		text-align: right;
 		white-space: nowrap;
 	}
 	.token-reference__swatch {

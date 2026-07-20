@@ -69,20 +69,18 @@
 	<Table
 		{columns}
 		{rows}
-		density="none"
+		density="compact"
 		showHeader="sr-only"
 		caption="Abstands-Skala mit maßstabsgetreuen Balken"
 	/>
 </div>
 
 <style>
-	/* ── Skin: 10px Zeilenabstand (früher grid gap) + 16px Spaltenabstand. ── */
-	.spacing-scale :global(.ds-table__cell) {
-		padding: 5px var(--z-ds-space-16) 5px 0;
-	}
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"`, hier mit `density="compact"` für die enge Skala) —
+	   hier bleibt nur die Spalten-Ausrichtung. */
 	.spacing-scale :global(.ds-table__cell:last-child) {
 		width: 1%;
-		padding-right: 0;
 		white-space: nowrap;
 	}
 	.spacing-scale__step {

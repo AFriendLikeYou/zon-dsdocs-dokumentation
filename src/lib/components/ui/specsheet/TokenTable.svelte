@@ -84,34 +84,14 @@
 
 {#if tokens.length}
 	<div class="table-scroll token-table-skin">
-		<Table {columns} {groups} density="comfortable" label="Design-Tokens" />
+		<Table {columns} {groups} label="Design-Tokens" />
 	</div>
 {/if}
 
 <style>
-	/* ── Öffentliche Token-Optik (unverändert übernommen aus der Vor-Merge-Fassung) ──
-	   Skin über :global auf die vom geteilten Renderer erzeugten .ds-table-Hooks. */
-	.token-table-skin :global(.ds-table__cell) {
-		border-bottom: 1px solid var(--ds-border);
-	}
-	/* Kategorie-Eyebrow (Gruppen-Kopfzeile). */
-	.token-table-skin :global(.ds-table__group-cell) {
-		padding: var(--z-ds-space-20) 0 var(--z-ds-space-8);
-	}
-	.token-table-skin :global(.ds-table__group-label) {
-		color: var(--ds-text-muted);
-		font-size: var(--ds-text-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		font-weight: 600;
-	}
-	/* Beschreibungszeile unter dem Eyebrow. */
-	.token-table-skin :global(.ds-table__group-desc) {
-		padding: 0 0 var(--z-ds-space-8);
-		color: var(--ds-text-body);
-		font-size: var(--ds-text-sm);
-		max-width: 60ch;
-	}
+	/* Rahmen, Zeilen-Rhythmus, Trenner sowie Eyebrow-/Counter-/Beschreibungs-Typo
+	   kommen seit K11 aus dem Atom (`variant="framed"` ist Default) — hier bleibt
+	   nur das Spaltenmodell. */
 	/* Hinweis-Spalte (3. Spalte). */
 	.token-table-skin :global(.ds-table__cell:nth-child(3)) {
 		color: var(--ds-text-body);

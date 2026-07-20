@@ -5,7 +5,8 @@
 -->
 <script lang="ts">
 	import type { A11yItem } from '$data/a11y-issues';
-	import { GithubIcon } from '$lib/icons';
+	import { Field } from '$components/ui/field';
+	import { GithubIcon, SearchIcon } from '$lib/icons';
 
 	let {
 		/** A11y-Einträge (Kategorie, Titel, Beschreibung, Lösung, Links). */
@@ -27,7 +28,7 @@
 		Object.fromEntries(categoriesInOrder(issues).map((category, index) => [category, index === 0]))
 	);
 
-	/** Filter issues by search (title, description, solution, label, category) */
+	/** Filtert die Einträge über die Suche (Titel, Beschreibung, Lösung, Label, Kategorie). */
 	const filteredIssues = $derived(() =>
 		issues.filter((issue) =>
 			[issue.title, issue.description, issue.solution, issue.label, issue.category]
@@ -36,7 +37,7 @@
 		)
 	);
 
-	/** Group issues by category */
+	/** Gruppiert die Einträge nach Kategorie. */
 	const groupedIssues = $derived(() => {
 		const map = new Map<Category, A11yItem[]>();
 		for (const issue of filteredIssues()) {
@@ -111,7 +112,8 @@
 	}
 
 	/**
-	 * Highlights the search term in the given HTML string with <mark>, preserving existing HTML structure.
+	 * Hebt den Suchbegriff im übergebenen HTML mit <mark> hervor — die vorhandene
+	 * HTML-Struktur bleibt dabei erhalten.
 	 */
 	function highlightHTML(html: string): string {
 		if (!search.trim()) return html;
@@ -162,12 +164,14 @@
 
 <section class="faq__section">
 	<div class="search-bar">
-		<input
+		<Field
+			bind:value={search}
 			type="text"
-			placeholder="Search issues…"
-			value={search}
-			oninput={(e) => (search = (e.target as HTMLInputElement).value)}
-		/>
+			placeholder="Themen durchsuchen…"
+			aria-label="Themen durchsuchen"
+		>
+			{#snippet icon()}<SearchIcon width={18} height={18} />{/snippet}
+		</Field>
 	</div>
 
 	<div class="faq__inner">
@@ -234,11 +238,11 @@
 									</span>
 
 									<!-- Links (WCAG / GitHub) -->
-									<div class="accordion__links" role="group" aria-label="Reference links">
+									<div class="accordion__links" role="group" aria-label="Weiterführende Links">
 										{#if issue.links?.wcag}
 											<a
 												class="link--wcag"
-												aria-label="Open related WCAG Understanding page in new tab"
+												aria-label="Zugehörige WCAG-Understanding-Seite in neuem Tab öffnen"
 												href={issue.links.wcag}
 												target="_blank"
 												rel="noopener noreferrer"
@@ -263,7 +267,7 @@
 										{#if issue.links?.github}
 											<a
 												class="link--github"
-												aria-label="Open related GitHub reference in new tab"
+												aria-label="Zugehörige GitHub-Referenz in neuem Tab öffnen"
 												href={issue.links.github}
 												target="_blank"
 												rel="noopener noreferrer"
@@ -278,7 +282,7 @@
 								<p class="accordion__description">{@html highlightHTML(issue.description)}</p>
 
 								<p class="accordion__solution">
-									<strong>Solution:</strong>
+									<strong>Lösung:</strong>
 									{@html highlightHTML(issue.solution)}
 								</p>
 
@@ -295,13 +299,9 @@
 </section>
 
 <style>
+	/* Nur Layout — Fläche, Kontur und Fokus-Ring bringt das Field-Atom mit (K11). */
 	.search-bar {
-		margin-bottom: 1rem;
-	}
-	.search-bar input {
-		width: 100%;
-		padding: 0.5rem;
-		font-size: 1rem;
+		margin-bottom: var(--z-ds-space-16);
 	}
 
 	.issue {

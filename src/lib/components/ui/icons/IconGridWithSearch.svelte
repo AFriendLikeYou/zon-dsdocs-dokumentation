@@ -7,6 +7,7 @@
 	import { debounce } from '$lib/utils';
 	import type { Icon } from '$types/global';
 	import IconComponent from './IconComponent.svelte';
+	import { Field } from '$components/ui/field';
 	import { SearchIcon, CloseIcon } from '$lib/icons';
 
 	let {
@@ -17,7 +18,8 @@
 	const DEBOUNCE_TIME = 250;
 	const RESTORE_FOCUS_DELAY = 500;
 
-	let input: HTMLInputElement | null = null;
+	// Bedienelement liegt im Field-Atom → per bind:element geholt (Fokus nach „Leeren").
+	let input = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
 	let searchTerm = $state('');
 	let liveRegionText = $state('');
 	let filteredIcons = $state(icons.sort((a, b) => a.name.localeCompare(b.name)));
@@ -49,36 +51,39 @@
 		}, RESTORE_FOCUS_DELAY);
 	};
 
+	// Term BEWUSST aus dem Event statt aus `searchTerm` lesen: der Debounce darf nicht
+	// von der Reihenfolge zwischen bind:value-Update und Handler abhängen.
 	function onInput(event: Event) {
-		searchTerm = (event.target as HTMLInputElement).value;
-		handleSearch(searchTerm);
+		handleSearch((event.currentTarget as HTMLInputElement).value);
 	}
 </script>
 
 <div class="search__container">
 	<label for="icon-search" class="sr-only">Icons suchen</label>
 	<div class="search__input-wrapper">
-		<SearchIcon class="search__icon" />
-		<input
-			bind:this={input}
-			value={searchTerm}
+		<Field
+			bind:value={searchTerm}
+			bind:element={input}
 			id="icon-search"
 			type="text"
 			placeholder="Nach Icon suchen, z.B. Chevron, Search, etc."
 			oninput={onInput}
 			aria-describedby="search-results"
-			class="search__input"
-		/>
-		{#if searchTerm}
-			<button
-				type="button"
-				class="search__clear-button"
-				aria-label="Suche zurücksetzen"
-				onclick={resetSearch}
-			>
-				<CloseIcon class="search__clear-icon" />
-			</button>
-		{/if}
+		>
+			{#snippet icon()}<SearchIcon />{/snippet}
+			{#snippet shortcut()}
+				{#if searchTerm}
+					<button
+						type="button"
+						class="search__clear-button"
+						aria-label="Suche zurücksetzen"
+						onclick={resetSearch}
+					>
+						<CloseIcon class="search__clear-icon" />
+					</button>
+				{/if}
+			{/snippet}
+		</Field>
 	</div>
 </div>
 
@@ -120,34 +125,13 @@
 		margin-block: var(--z-ds-space-16);
 	}
 
+	/* Nur noch Layout: Fläche, Kontur, Fokus-Ring und das führende Icon bringt das
+	   Field-Atom mit (K11) — die frühere .search__input-/.search__icon-Optik entfällt. */
 	.search__input-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
 		margin-bottom: var(--z-ds-space-16);
 	}
 
-	/* Icons liegen in Kind-Komponenten → :global, sonst greift das Scoping nicht. */
-	.search__input-wrapper :global(.search__icon) {
-		position: absolute;
-		left: var(--z-ds-space-12);
-		color: var(--ds-text-body);
-		pointer-events: none;
-	}
-
-	.search__input {
-		width: 100%;
-		background-color: var(--ds-surface);
-		padding: var(--z-ds-space-12) var(--z-ds-space-12) var(--z-ds-space-12)
-			calc(var(--z-ds-space-12) + 24px);
-		font-size: var(--ds-text-base);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius);
-	}
-
 	.search__clear-button {
-		position: absolute;
-		right: var(--z-ds-space-12);
 		background: none;
 		border: none;
 		cursor: pointer;

@@ -137,7 +137,6 @@
 					<Table
 						columns={roleColumns}
 						rows={group.rollen}
-						density="none"
 						showHeader="sr-only"
 						caption={`Farbrollen — ${group.titel}`}
 					/>
@@ -156,7 +155,6 @@
 					<Table
 						columns={pairColumns}
 						rows={resolvedPairs}
-						density="none"
 						showHeader="sr-only"
 						caption="Kontrastverhältnisse der Text-auf-Fläche-Paare im aktuellen Theme"
 					/>
@@ -187,23 +185,8 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-body);
 	}
-	/* Gerahmter Block je Gruppe — ersetzt den früheren 1px-grid-gap-Trick der <ul>. */
-	.color-roles__frame {
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border-soft);
-		border-radius: var(--ds-radius);
-		overflow: hidden;
-	}
-	/* ── Skin auf die .ds-table-Hooks: Zeilen-Rhythmus + Hairline-Trenner. ── */
-	.color-roles__frame :global(.ds-table__cell) {
-		padding: var(--z-ds-space-s) var(--z-ds-space-m) var(--z-ds-space-s) 0;
-	}
-	.color-roles__frame :global(.ds-table__cell:first-child) {
-		padding-left: var(--z-ds-space-m);
-	}
-	.color-roles__frame :global(.ds-table__row + .ds-table__row .ds-table__cell) {
-		border-top: 1px solid var(--ds-border-soft);
-	}
+	/* Rahmen, Zeilen-Rhythmus und Hairline-Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"` ist Default) — hier bleibt nur die Spalten-Ausrichtung. */
 	/* Wert-Spalte so schmal wie ihr Inhalt (früher: flex: none). */
 	.color-roles__frame :global(.ds-table__cell:last-child) {
 		width: 1%;

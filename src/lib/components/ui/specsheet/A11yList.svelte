@@ -33,7 +33,6 @@
 		<Table
 			{columns}
 			rows={items}
-			density="none"
 			valign="baseline"
 			showHeader="sr-only"
 			caption="Barrierefreiheit — Kriterien und Befunde"
@@ -45,17 +44,8 @@
 	.a11y-list {
 		max-width: 640px;
 	}
-	/* ── Skin: Zeilen-Rhythmus + Trenner (früher SpecRow). ── */
-	.a11y-list :global(.ds-table__cell) {
-		padding: var(--z-ds-space-12) var(--z-ds-space-16) var(--z-ds-space-12) 0;
-		border-bottom: 1px solid var(--ds-border);
-	}
-	.a11y-list :global(.ds-table__cell:last-child) {
-		padding-right: 0;
-	}
-	.a11y-list :global(.ds-table__row:last-child .ds-table__cell) {
-		border-bottom: 0;
-	}
+	/* Rahmen, Zeilen-Rhythmus und Trenner kommen seit K11 aus dem Atom
+	   (`variant="framed"` ist Default) — kein eigener Skin mehr nötig. */
 	.a11y-list__label {
 		display: flex;
 		align-items: center;
