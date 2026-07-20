@@ -7,7 +7,8 @@
 <script lang="ts">
 	import type { CmsPropDef } from '../core/cms-components';
 	import { tokenToCssColor } from '../core/cms-components';
-	import { isImagePath } from '../core/media-types';
+	import { isImagePath, isVideoPath } from '../core/media-types';
+	import { Icon } from '$lib/icons/cms';
 
 	let {
 		name,
@@ -28,9 +29,29 @@
 
 	const MEDIA_KEYS = ['src', 'image', 'imgSrc'];
 	const thumb = $derived(MEDIA_KEYS.map(v).find((s) => s && isImagePath(s)) ?? '');
+	// Videoquellen liefern kein Thumbnail — sie zählen aber sehr wohl als Inhalt.
+	// Ohne diese Zeile landete jeder gefüllte <VideoPlayer> im „Noch ohne Inhalt"-
+	// Zustand (src/title stehen in SKIP, `thumb` bleibt bei .mp4 leer).
+	const video = $derived(MEDIA_KEYS.map(v).find((s) => s && isVideoPath(s)) ?? '');
+	const fileName = $derived(video.split('/').pop() ?? '');
 
 	const title = $derived(['title', 'caption', 'label'].map(v).find((s) => s) ?? '');
 	const desc = $derived(v('description') || v('subtitle'));
+
+	// `content` ist rohes HTML (DoDont-Beispielmarkup). Als Text-Snippet gekürzt ist
+	// es die EINZIGE Unterscheidung zwischen sonst identisch aussehenden DoDont-
+	// Blöcken — darum aus SKIP heraus und hier entschärft (Tags raus) dargestellt.
+	const CONTENT_SNIPPET_MAX = 90;
+	const contentSnippet = $derived.by(() => {
+		const raw = v('content');
+		if (!raw) return '';
+		const text = raw
+			.replace(/<[^>]*>/g, ' ')
+			.replace(/&nbsp;/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim();
+		return text.length > CONTENT_SNIPPET_MAX ? `${text.slice(0, CONTENT_SNIPPET_MAX)}…` : text;
+	});
 
 	const swatchBg = $derived(tokenToCssColor(v('colorCustomProperty')));
 	const textCol = $derived(tokenToCssColor(v('fontColorCustomProperty')));
@@ -45,6 +66,8 @@
 	};
 	const alertRole = $derived(ALERT_ROLE[v('variant')] ?? 'accent');
 
+	// `content` bleibt aus den Chips heraus (rohes HTML) — es wird oben als
+	// `contentSnippet` in Textform gezeigt.
 	const SKIP = new Set([
 		...MEDIA_KEYS,
 		'title',
@@ -66,7 +89,15 @@
 	);
 
 	const isEmpty = $derived(
-		childCount === null && !thumb && !title && !desc && !swatchBg && !textCol && chips.length === 0
+		childCount === null &&
+			!thumb &&
+			!video &&
+			!title &&
+			!desc &&
+			!swatchBg &&
+			!textCol &&
+			!contentSnippet &&
+			chips.length === 0
 	);
 </script>
 
@@ -84,6 +115,15 @@
 		<div class="block-preview__meta">
 			<span class="block-preview__title">{title || 'Bild'}</span>
 			{#if desc}<span class="block-preview__desc">{desc}</span>{/if}
+		</div>
+	</div>
+{:else if video}
+	<!-- Video: kein Thumbnail möglich → Icon-Kachel + Titel/Dateiname. -->
+	<div class="block-preview block-preview--media">
+		<span class="block-preview__thumb block-preview__thumb--video"><Icon name="video" /></span>
+		<div class="block-preview__meta">
+			<span class="block-preview__title">{title || 'Video'}</span>
+			<span class="block-preview__desc">{desc || fileName}</span>
 		</div>
 	</div>
 {:else if name === 'Color' && swatchBg}
@@ -118,6 +158,7 @@
 	<div class="block-preview block-preview--general">
 		{#if title}<span class="block-preview__title">{title}</span>{/if}
 		{#if desc}<span class="block-preview__desc">{desc}</span>{/if}
+		{#if contentSnippet}<span class="block-preview__snippet">{contentSnippet}</span>{/if}
 		{#if chips.length}
 			<div class="block-preview__chips">
 				{#each chips.slice(0, 4) as c (c.label)}
@@ -181,6 +222,23 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	/* Video-Kachel: gleiche Maße wie das Bild-Thumbnail, Icon zentriert. */
+	.block-preview__thumb--video {
+		display: grid;
+		place-items: center;
+		font-size: 1.1rem;
+		color: var(--ds-text-muted);
+	}
+	/* Gekürztes Text-Snippet aus `content` (DoDont) — zwei Zeilen, dann Ellipse. */
+	.block-preview__snippet {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		overflow: hidden;
 	}
 	.block-preview__token {
 		font-family: var(--ds-font-mono);

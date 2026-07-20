@@ -418,20 +418,37 @@ export function parseComponentTag(raw: string): { name: string; attrs: ParsedAtt
  * self-closing) in Name + Attribute + rohe Kind-Tags. `null`, wenn es kein sauberer
  * Container mit ausschließlich self-closing Kindern ist (dann bleibt die Insel geschützt).
  */
+/**
+ * Leerer, attributloser `<div></div>` am ENDE eines Containers — auf `brand/color`
+ * füllen solche Divs die letzte Grid-Zeile auf (Layout-Spacer, kein Inhalt). Sie
+ * machten den ganzen Container früher „nicht parsebar" (→ read-only). Wir tolerieren
+ * sie bewusst ENG: nur attributlos, nur leer, nur NACH dem letzten Kind. Editierbar
+ * werden sie nicht; sie werden als `trailingSpacers` gezählt und beim Serialisieren
+ * unverändert wieder ausgegeben (Round-Trip).
+ */
+const TRAILING_SPACER_RE = /\s*<div>\s*<\/div>\s*$/;
+
 export function parseContainerTag(
 	raw: string
-): { name: string; attrs: ParsedAttr[]; childrenRaw: string[] } | null {
+): { name: string; attrs: ParsedAttr[]; childrenRaw: string[]; trailingSpacers: number } | null {
 	const t = raw.trim();
 	const m = /^<([A-Z][A-Za-z0-9]*)\b([^>]*)>([\s\S]*)<\/([A-Z][A-Za-z0-9]*)>$/.exec(t);
 	if (!m) return null;
 	const [, name, attrsStr, inner, close] = m;
 	if (close !== name) return null;
 	if (attrsStr.trim().endsWith('/')) return null; // war self-closing → kein Container
+	// Nachlaufende Layout-Spacer abtrennen, bevor die Kinder geprüft werden.
+	let rest = inner;
+	let trailingSpacers = 0;
+	while (TRAILING_SPACER_RE.test(rest)) {
+		rest = rest.replace(TRAILING_SPACER_RE, '');
+		trailingSpacers++;
+	}
 	// Kinder: ausschließlich self-closing Tags; Rest muss Whitespace sein.
 	const childRe = /<[A-Z][A-Za-z0-9]*\b[^>]*?\/>/g;
-	const childrenRaw = inner.match(childRe) ?? [];
-	if (inner.replace(childRe, '').trim() !== '') return null;
-	return { name, attrs: tokenizeAttrs(attrsStr), childrenRaw };
+	const childrenRaw = rest.match(childRe) ?? [];
+	if (rest.replace(childRe, '').trim() !== '') return null;
+	return { name, attrs: tokenizeAttrs(attrsStr), childrenRaw, trailingSpacers };
 }
 
 /**
@@ -478,7 +495,9 @@ export function serializeComponentTag(
 export function serializeContainerTag(
 	def: CmsComponentDef,
 	attrs: Record<string, string | boolean>,
-	children: Array<{ name: string; values: Record<string, string | boolean> }>
+	children: Array<{ name: string; values: Record<string, string | boolean> }>,
+	/** Nachlaufende `<div></div>`-Layout-Spacer, unverändert wieder ausgeben. */
+	trailingSpacers = 0
 ): string {
 	const attrStr = def.props
 		.map((p) => formatAttr(p, attrs))
@@ -495,6 +514,7 @@ export function serializeContainerTag(
 				.join('\n');
 		})
 		.filter(Boolean);
+	for (let i = 0; i < trailingSpacers; i++) kids.push('\t<div></div>');
 	if (kids.length === 0) return `${open}</${def.name}>`;
 	return `${open}\n${kids.join('\n')}\n</${def.name}>`;
 }
@@ -570,6 +590,8 @@ export function containerIslandInfo(raw: string): {
 	def: CmsComponentDef;
 	attrs: Record<string, string | boolean>;
 	children: Array<{ def: CmsComponentDef; values: Record<string, string | boolean> }>;
+	/** Nachlaufende `<div></div>`-Layout-Spacer (nicht editierbar, bleiben erhalten). */
+	trailingSpacers: number;
 } | null {
 	const parsed = parseContainerTag(raw);
 	if (!parsed) return null;
@@ -584,7 +606,7 @@ export function containerIslandInfo(raw: string): {
 		if (def.childTypes && !def.childTypes.includes(info.def.name)) return null;
 		children.push({ def: info.def, values: info.values });
 	}
-	return { def, attrs, children };
+	return { def, attrs, children, trailingSpacers: parsed.trailingSpacers };
 }
 
 /** Kurzform: Insel ist ein mutabler, registrierter Container. */

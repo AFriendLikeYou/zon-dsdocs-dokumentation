@@ -133,14 +133,113 @@ function mustacheNet(line: string): number {
 	return opens - closes;
 }
 
-/** Verfolgt, ob am Zeilenende ein Tag (`<…`) noch offen ist (mehrzeilige Tags). */
-function scanTag(line: string, startInTag: boolean): boolean {
-	let t = startInTag;
+/** HTML-Void-Elemente: öffnen kein Element, auch ohne `/>`. */
+const VOID_ELEMENTS = new Set([
+	'area',
+	'base',
+	'br',
+	'col',
+	'embed',
+	'hr',
+	'img',
+	'input',
+	'link',
+	'meta',
+	'param',
+	'source',
+	'track',
+	'wbr'
+]);
+
+/**
+ * Zustand des Tag-Scanners — verfolgt über Zeilengrenzen hinweg, ob gerade ein Tag
+ * offen ist (`inTag`, mehrzeilige Tags) UND wie tief wir in verschachtelten
+ * Elementen stecken (`depth`). Die Tiefe ist die Zusatzinformation, die `segmentBody`
+ * braucht, um eine EINZELNE Leerzeile nur zwischen ABGESCHLOSSENEN Top-Level-Inseln
+ * als Trenner zu werten (Kinder in einem `<Grid>` dürfen nicht auseinanderfallen).
+ */
+interface TagScan {
+	inTag: boolean;
+	depth: number;
+	/** Nur währenddessen `inTag`: Schließ-Tag (`</…`)? Name? Letztes Nicht-WS-Zeichen? */
+	closing: boolean;
+	name: string;
+	readingName: boolean;
+	lastNonWs: string;
+	/** Offener Attribut-String (`"`/`'`) bzw. `{…}`-Ausdruck IM Tag — dort zählt kein `>`. */
+	quote: string | null;
+	braces: number;
+}
+
+const newTagScan = (): TagScan => ({
+	inTag: false,
+	depth: 0,
+	closing: false,
+	name: '',
+	readingName: false,
+	lastNonWs: '',
+	quote: null,
+	braces: 0
+});
+
+const NAME_CHAR = /[A-Za-z0-9:_-]/;
+
+/**
+ * Scannt EINE Zeile und fortschreibt `s` in-place. Zählt geöffnete/geschlossene
+ * Elemente: `<Name …>` öffnet, `</Name>` schließt, `<Name … />` und Void-Elemente
+ * sind neutral. Attribut-Strings (`"…"`/`'…'`) und `{…}`-Ausdrücke IM Tag werden
+ * übersprungen — sonst würde ein `>` in einem Wert (z. B. `content="<strong>x</strong>"`)
+ * das Tag verfrüht schließen und die Tiefe entgleisen. Negative Tiefen werden auf 0
+ * geklemmt; ein unbalanciertes Dokument bleibt damit schlicht ungetrennt (= bisheriges
+ * Verhalten), statt falsch zu trennen.
+ */
+function scanTagLine(line: string, s: TagScan): void {
 	for (const ch of line) {
-		if (!t && ch === '<') t = true;
-		else if (t && ch === '>') t = false;
+		if (!s.inTag) {
+			if (ch === '<') {
+				s.inTag = true;
+				s.closing = false;
+				s.name = '';
+				s.readingName = true;
+				s.lastNonWs = '';
+				s.quote = null;
+				s.braces = 0;
+			}
+			continue;
+		}
+		// Innerhalb eines Attribut-Strings bzw. `{…}`-Ausdrucks: nur dessen Ende suchen.
+		if (s.quote !== null) {
+			if (ch === s.quote) s.quote = null;
+			continue;
+		}
+		if (s.braces > 0) {
+			if (ch === '{') s.braces++;
+			else if (ch === '}') s.braces--;
+			continue;
+		}
+		if (ch === '"' || ch === "'") {
+			s.quote = ch;
+			s.readingName = false;
+			s.lastNonWs = ch;
+			continue;
+		}
+		if (ch === '{') {
+			s.braces = 1;
+			s.readingName = false;
+			s.lastNonWs = ch;
+			continue;
+		}
+		if (ch === '>') {
+			s.inTag = false;
+			if (s.closing) s.depth = Math.max(0, s.depth - 1);
+			else if (s.lastNonWs !== '/' && !VOID_ELEMENTS.has(s.name.toLowerCase())) s.depth++;
+			continue;
+		}
+		if (s.name === '' && s.readingName && ch === '/') s.closing = true;
+		else if (s.readingName && NAME_CHAR.test(ch)) s.name += ch;
+		else s.readingName = false;
+		if (!/\s/.test(ch)) s.lastNonWs = ch;
 	}
-	return t;
 }
 
 type Fenced = null | 'script' | 'style' | 'head' | 'comment';
@@ -161,11 +260,14 @@ export function segmentBody(body: string): Segment[] {
 	const lines = splitLines(body);
 
 	let fenced: Fenced = null;
-	let inTag = false;
+	const tags = newTagScan();
 	let mustacheDepth = 0;
 
 	type Cls = 'prosa' | 'insel' | 'blank';
 	const classes: Cls[] = [];
+	// Ist die Insel NACH dieser Zeile abgeschlossen (nichts offen)? Nur dann darf
+	// eine einzelne Leerzeile zwei Top-Level-Inseln trennen.
+	const closedAfter: boolean[] = [];
 
 	for (const pl of lines) {
 		const line = stripNl(pl);
@@ -174,13 +276,13 @@ export function segmentBody(body: string): Segment[] {
 		if (fenced !== null) {
 			cls = 'insel';
 			if (FENCE_CLOSE[fenced].test(line)) fenced = null;
-		} else if (inTag) {
+		} else if (tags.inTag) {
 			cls = 'insel';
-			inTag = scanTag(line, true);
+			scanTagLine(line, tags);
 		} else if (mustacheDepth > 0) {
 			cls = 'insel';
 			mustacheDepth = Math.max(0, mustacheDepth + mustacheNet(line));
-			inTag = scanTag(line, false);
+			scanTagLine(line, tags);
 		} else if (/<script[\s>]/.test(line)) {
 			cls = 'insel';
 			if (!/<\/script>/.test(line)) fenced = 'script';
@@ -197,29 +299,36 @@ export function segmentBody(body: string): Segment[] {
 			const net = mustacheNet(line);
 			const hasBrace = line.includes('{') || line.includes('}');
 			const hadAngle = line.includes('<');
-			inTag = scanTag(line, false);
+			scanTagLine(line, tags);
 			if (line.trim() === '') cls = 'blank';
-			else if (hadAngle || hasBrace || inTag) cls = 'insel';
+			else if (hadAngle || hasBrace || tags.inTag) cls = 'insel';
 			else cls = 'prosa';
 			if (net > 0) mustacheDepth += net;
 		}
 		classes.push(cls);
+		closedAfter.push(fenced === null && !tags.inTag && mustacheDepth === 0 && tags.depth === 0);
 	}
 
 	// Gruppieren: Leerzeilen (`blank`) setzen den laufenden Typ fort. Ein Wechsel
 	// zwischen `insel` und `prosa` startet ein neues Segment. So mischt ein
 	// Segment nie Insel- und Prosa-Zeilen.
 	//
-	// ZUSATZREGEL (für per-Komponente-Editing): zwei benachbarte INSEL-Blöcke, die
-	// durch ≥2 Leerzeilen getrennt sind, werden in EIGENE Segmente getrennt — so ist
-	// jede top-level-Komponente einzeln editier-/löschbar und neue Inserts (die genau
-	// diesen Doppelabstand nutzen) landen in einem eigenen Segment. Eine EINZELNE
-	// Leerzeile trennt NICHT (z. B. innerhalb eines `<Grid>` mit Leerzeilen zwischen
-	// Kindern bleibt der Block ein Segment) — bestehendes Verhalten unverändert.
+	// ZUSATZREGEL (für per-Komponente-Editing): zwei benachbarte INSEL-Blöcke werden
+	// in EIGENE Segmente getrennt — so ist jede top-level-Komponente einzeln
+	// editier-/löschbar und neue Inserts landen in einem eigenen Segment. Getrennt
+	// wird bei
+	//   · ≥2 Leerzeilen (der Abstand, den `rebuildFromBlocks` selbst schreibt), oder
+	//   · EINER Leerzeile, WENN die bisherige Insel abgeschlossen ist (`closedAfter`:
+	//     kein offener Fence/Kommentar/Tag, mustacheDepth 0, Element-Tiefe 0).
+	// Die Tiefen-Bedingung ist der Unterschied zwischen Top-Level und Kind: Leerzeilen
+	// zwischen `<Color>`-Kindern INNERHALB eines `<Grid>` stehen bei Tiefe 1 und
+	// trennen darum weiterhin nicht — der Container bleibt EIN Segment.
 	const segments: Segment[] = [];
 	let curType: SegmentType | null = null;
 	let curParts: string[] = [];
 	let blankRun = 0;
+	// Index der letzten NICHT-leeren Zeile — dort wird `closedAfter` abgefragt.
+	let lastContentIdx = -1;
 
 	const flush = () => {
 		if (curParts.length === 0) return;
@@ -239,7 +348,11 @@ export function segmentBody(body: string): Segment[] {
 		}
 
 		const desired: SegmentType = cls;
-		const splitOnBlankRun = blankRun >= 2 && curType === 'insel' && desired === 'insel';
+		const splitOnBlankRun =
+			blankRun > 0 &&
+			curType === 'insel' &&
+			desired === 'insel' &&
+			(blankRun >= 2 || (lastContentIdx >= 0 && closedAfter[lastContentIdx]));
 
 		if (curParts.length === 0) {
 			curType = desired;
@@ -257,6 +370,7 @@ export function segmentBody(body: string): Segment[] {
 			curParts.push(lines[i]);
 		}
 		blankRun = 0;
+		lastContentIdx = i;
 	}
 	flush();
 
@@ -558,12 +672,15 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
 		if (seg.type === 'prosa' && op.prose !== undefined) {
 			core = segmentCore(normalizeNl(op.prose));
 		} else if (seg.type === 'insel' && op.container && isMutableContainerIsland(core)) {
-			// Container bearbeiten: Attribute + Kinder re-serialisieren.
+			// Container bearbeiten: Attribute + Kinder re-serialisieren. Die nachlaufenden
+			// `<div></div>`-Layout-Spacer kommen aus dem ORIGINAL (der Client kennt sie
+			// nicht und kann sie darum weder verlieren noch fälschen).
 			const info = containerIslandInfo(core);
 			core = serializeContainerTag(
 				info!.def,
 				{ ...info!.attrs, ...op.container.attrs },
-				op.container.children
+				op.container.children,
+				info!.trailingSpacers
 			);
 		} else if (seg.type === 'insel' && op.component && isMutableComponentIsland(core)) {
 			const info = componentIslandInfo(core);

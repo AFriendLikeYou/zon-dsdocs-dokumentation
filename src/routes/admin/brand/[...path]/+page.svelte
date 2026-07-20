@@ -677,11 +677,18 @@
 
 							<div class="block-card__main">
 								<div class="block-card__head">
+									{#if it.blockKind === 'protected'}
+										<span class="block-card__ico"><Icon name={iconFor(it.label)} /></span>
+									{/if}
 									<span class="block-card__label"
 										>{it.label}{it.source === 'new' ? ' · neu' : ''}</span
 									>
 									{#if it.blockKind === 'structural'}
 										<span class="tech-chip">automatisch verwaltet</span>
+									{:else if it.blockKind === 'protected' && !TITLE_HEADING.test(it.content ?? '')}
+										<!-- Der `# {title}`-Block ist zwar geschützt, wird aber sehr wohl gepflegt
+										     (oben im Frontmatter) — für ihn wäre „im Code gepflegt" schlicht falsch. -->
+										<span class="tech-chip">im Code gepflegt</span>
 									{/if}
 									{#if errTotal > 0}
 										<span class="err-chip" title="Ungültige Felder">{errTotal} Fehler</span>
@@ -850,6 +857,15 @@
 											<p class="tech-hint">
 												Überschrift der Seite — wird oben im Abschnitt <strong>Frontmatter</strong>
 												über das <strong>Titel</strong>-Feld bearbeitet.
+											</p>
+										{:else}
+											<!-- P1.4: erkannter, aber nicht registrierter Baustein. Er bekommt Name +
+											     Icon (oben) und hier die Begründung. Bewusst KEINE erfundenen
+											     Editier-Felder: die Daten dieser Komponenten kommen aus dem
+											     <script>-Block — das ist die Sicherheitsgrenze des CMS. -->
+											<p class="tech-hint">
+												Wird im Code gepflegt — hier nicht bearbeitbar. Die Reihenfolge lässt sich
+												ändern; Inhalt und Löschen laufen über die <code>.svx</code>-Datei.
 											</p>
 										{/if}
 										<details class="block-card__details">
@@ -1058,8 +1074,23 @@
 		display: block;
 		border-radius: var(--ds-radius-sm);
 	}
-	.block-card--protected {
-		opacity: 0.8;
+	/* P1.4: Read-only-Bausteine sind BENANNTE Blöcke, keine anonymen Code-Kästen —
+	   dieselbe Kartenform wie die editierbaren, aber ruhiger (gedämpfte Fläche,
+	   gestrichelte Kontur) und mit Icon + „im Code gepflegt"-Chip im Kopf. */
+	.block-card--protected > .block-card__main {
+		border: 1px dashed var(--ds-border);
+		border-radius: var(--ds-radius, 8px);
+		padding: 12px;
+	}
+	.block-card--protected > .block-card__main > .block-card__head {
+		justify-content: flex-start;
+		gap: var(--z-ds-space-8);
+		padding: 0 0 8px;
+		border-bottom: 1px solid var(--ds-border-soft);
+	}
+	.block-card--protected > .block-card__main > .block-card__head .block-card__tools {
+		opacity: 1;
+		margin-left: auto;
 	}
 	/* Struktur-Blöcke (z. B. Head): technisch, nicht editierbar — bewusst anders als
 	   die Inhalts-Karten: gestrichelte Kontur statt Fläche, Chip + Erklärtext. */

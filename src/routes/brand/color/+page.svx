@@ -87,7 +87,8 @@ title: Farbe
 </Grid>
 
 
-<h2>Hintergrundfarben</h2>
+## Hintergrundfarben
+
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
 		showValue={true}
@@ -113,7 +114,8 @@ title: Farbe
 	<div></div>
 </Grid>
 
-<h2>Border</h2>
+## Border
+
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
 		showValue={true}
@@ -131,7 +133,8 @@ title: Farbe
 		<div></div>
 </Grid>
 
-<h2>Text</h2>
+## Text
+
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<TextColor
 		fontColorCustomProperty="--z-ds-color-text-100"
@@ -155,7 +158,8 @@ title: Farbe
 	/>
 </Grid>
 
-<h2>Akzentfarben</h2>
+## Akzentfarben
+
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
 		showValue={true}
@@ -175,7 +179,8 @@ title: Farbe
 	<div></div>
 </Grid>
 
-<h2>Andere (Error, Warning, Focus, Success)</h2>
+## Andere (Error, Warning, Focus, Success)
+
 <Grid auto columns={4} justify="start" align="start" rowGap="md" columnGap="md">
 	<Color
 		showValue={true}

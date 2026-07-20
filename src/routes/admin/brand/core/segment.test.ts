@@ -9,7 +9,7 @@ import {
 	hasScriptBlock,
 	IMG_ONLY_ISLAND
 } from './segment';
-import { containerIslandInfo } from './cms-components';
+import { containerIslandInfo, serializeContainerTag } from './cms-components';
 
 // Realistische Brand-.svx: Frontmatter, ein geschütztes <script>, eine bestehende
 // Bild-Insel (img-natural, wie auf den echten Brand-Seiten) und zwei Prosa-Blöcke.
@@ -199,6 +199,67 @@ describe('Pride-Fixture: Showcase', () => {
 	});
 });
 
+describe('P1.2: <div></div>-Layout-Spacer in Containern', () => {
+	const withSpacers = `<Grid columns={4}>\n\t<Color title="a" />\n\t<Color title="b" />\n\t<div></div>\n\t<div></div>\n</Grid>`;
+
+	it('macht den Container editierbar und zählt die Spacer separat', () => {
+		const info = containerIslandInfo(withSpacers);
+		expect(info).not.toBeNull();
+		expect(info!.children.map((c) => c.values.title)).toEqual(['a', 'b']);
+		expect(info!.trailingSpacers).toBe(2);
+	});
+
+	it('gibt die Spacer beim Serialisieren unverändert wieder aus', () => {
+		const info = containerIslandInfo(withSpacers)!;
+		const out = serializeContainerTag(
+			info.def,
+			info.attrs,
+			info.children.map((c) => ({ name: c.def.name, values: c.values })),
+			info.trailingSpacers
+		);
+		expect(out.match(/<div><\/div>/g)?.length).toBe(2);
+		expect(out.endsWith('\t<div></div>\n</Grid>')).toBe(true);
+	});
+
+	it('ein Spacer MITTENDRIN bleibt geschützt (konservativ)', () => {
+		const mid = `<Grid columns={4}>\n\t<div></div>\n\t<Color title="a" />\n</Grid>`;
+		expect(containerIslandInfo(mid)).toBeNull();
+	});
+
+	it('ein div MIT Attribut/Inhalt bleibt geschützt (konservativ)', () => {
+		expect(containerIslandInfo(`<Grid><Color title="a" /><div class="x"></div></Grid>`)).toBeNull();
+		expect(containerIslandInfo(`<Grid><Color title="a" /><div>x</div></Grid>`)).toBeNull();
+	});
+
+	it('echte Farb-Seite: Grid mit Spacern überlebt eine Container-Bearbeitung', () => {
+		const raw = readFileSync(resolve('src/routes/brand/color/+page.svx'), 'utf8');
+		const before = parseSvx(raw);
+		const idx = before.segments.findIndex((s) => {
+			const i = containerIslandInfo(s.text.trim());
+			return i !== null && i.trailingSpacers > 0;
+		});
+		expect(idx).toBeGreaterThanOrEqual(0);
+		const info = containerIslandInfo(before.segments[idx].text.trim())!;
+		const spacers = info.trailingSpacers;
+		const children = info.children.map((c) => ({ name: c.def.name, values: { ...c.values } }));
+		children[0].values = { ...children[0].values, title: 'GEÄNDERT' };
+		const blocks = before.segments.map((_, i) =>
+			i === idx ? { keep: i, container: { attrs: info.attrs, children } } : { keep: i }
+		);
+		const next = rebuild(raw, { blocks });
+		expect(next).toContain('title="GEÄNDERT"');
+		const after = parseSvx(next);
+		const stillThere = after.segments
+			.map((s) => containerIslandInfo(s.text.trim()))
+			.filter((i) => i !== null && i.trailingSpacers > 0);
+		// Alle Spacer sind erhalten geblieben (Anzahl unverändert).
+		expect(next.match(/<div><\/div>/g)?.length).toBe(raw.match(/<div><\/div>/g)?.length);
+		expect(stillThere.some((i) => i!.trailingSpacers === spacers)).toBe(true);
+		expect(after.safe).toBe(true);
+		expect(checkIslandGuard(before, after)).toEqual({ ok: true });
+	});
+});
+
 describe('reale Brand-Seite: Container editieren (Farb-Seite Grid)', () => {
 	const raw = readFileSync(resolve('src/routes/brand/color/+page.svx'), 'utf8');
 	const before = parseSvx(raw);
@@ -231,26 +292,42 @@ describe('reale Brand-Seite: Container editieren (Farb-Seite Grid)', () => {
 	});
 });
 
-describe('Segmenter: ≥2-Leerzeilen-Regel', () => {
-	const islandCount = (doc: string, needle: string) =>
-		parseSvx(doc).segments.filter((s) => s.type === 'insel' && s.text.includes(needle)).length;
+describe('Segmenter: Leerzeilen-Regel (Top-Level-Trennung)', () => {
+	const islands = (doc: string) => parseSvx(doc).segments.filter((s) => s.type === 'insel');
 
-	it('zwei Inseln mit EINER Leerzeile bleiben ein Segment (unverändert)', () => {
+	it('zwei Inseln mit EINER Leerzeile werden getrennt (P1.1)', () => {
 		const doc = `---\nt: x\n---\n\n<Banner title="a" />\n\n<Banner title="b" />\n`;
-		expect(parseSvx(doc).segments.filter((s) => s.type === 'insel').length).toBe(1);
-		expect(islandCount(doc, '<Banner')).toBe(1);
+		expect(islands(doc).length).toBe(2);
 	});
 
 	it('zwei Inseln mit ZWEI Leerzeilen werden getrennt', () => {
 		const doc = `---\nt: x\n---\n\n<Banner title="a" />\n\n\n<Banner title="b" />\n`;
-		expect(parseSvx(doc).segments.filter((s) => s.type === 'insel').length).toBe(2);
+		expect(islands(doc).length).toBe(2);
 	});
 
-	it('Grid mit einzelner interner Leerzeile bleibt EIN Segment', () => {
+	it('Grid mit einzelner interner Leerzeile bleibt EIN Segment (Kinder ≠ Top-Level)', () => {
 		const doc = `---\nt: x\n---\n\n<Grid columns={2}>\n\t<Color title="a" />\n\n\t<Color title="b" />\n</Grid>\n`;
-		const isl = parseSvx(doc).segments.filter((s) => s.type === 'insel');
+		const isl = islands(doc);
 		expect(isl.length).toBe(1);
 		expect(isl[0].text).toContain('</Grid>');
+	});
+
+	it('mehrzeiliges self-closing Tag bleibt zusammen, trennt aber danach', () => {
+		const doc = `---\nt: x\n---\n\n<VideoPlayer\n\tsrc="/a.mp4"\n\ttitle="A"\n/>\n\n<Banner title="b" />\n`;
+		const isl = islands(doc);
+		expect(isl.length).toBe(2);
+		expect(isl[0].text).toContain('<VideoPlayer');
+		expect(isl[1].text).toContain('<Banner');
+	});
+
+	it('unbalancierter Container trennt NICHT (konservativ)', () => {
+		const doc = `---\nt: x\n---\n\n<Grid columns={2}>\n\t<Color title="a" />\n\n<Banner title="b" />\n`;
+		expect(islands(doc).length).toBe(1);
+	});
+
+	it('Leerzeile INNERHALB eines mehrzeiligen Tags trennt nicht', () => {
+		const doc = `---\nt: x\n---\n\n<Banner\n\ttitle="a"\n\n\tdescription="d"\n/>\n`;
+		expect(islands(doc).length).toBe(1);
 	});
 
 	it('Round-Trip bleibt byte-identisch (serializeOk)', () => {
@@ -259,28 +336,50 @@ describe('Segmenter: ≥2-Leerzeilen-Regel', () => {
 	});
 });
 
-describe('Alle Brand-Seiten bleiben round-trip-sicher', () => {
-	function allSvx(dir: string): string[] {
-		const out: string[] = [];
-		for (const e of readdirSync(dir, { withFileTypes: true })) {
-			const full = resolve(dir, e.name);
-			if (e.isDirectory()) out.push(...allSvx(full));
-			else if (e.name === '+page.svx') out.push(full);
-		}
-		return out;
+// HARTE INVARIANTE: über ALLE `.svx` im Repo (brand + product, nicht nur brand)
+// muss `rebuild(raw, {}) === raw` byte-identisch gelten und `serializeOk` true sein.
+// Das ist die Absicherung der Segmentierung (P1.1: Trennung schon bei EINER
+// Leerzeile): Segmentgrenzen dürfen sich verschieben, die Konkatenation nie.
+function allSvx(dir: string): string[] {
+	const out: string[] = [];
+	for (const e of readdirSync(dir, { withFileTypes: true })) {
+		const full = resolve(dir, e.name);
+		if (e.isDirectory()) out.push(...allSvx(full));
+		else if (e.name === '+page.svx') out.push(full);
 	}
-	const files = allSvx(resolve('src/routes/brand'));
+	return out;
+}
 
-	it('findet mehrere Seiten', () => {
-		expect(files.length).toBeGreaterThan(10);
+describe('Alle .svx-Seiten bleiben round-trip-sicher', () => {
+	const files = [...allSvx(resolve('src/routes/brand')), ...allSvx(resolve('src/routes/product'))];
+
+	it('findet alle Repo-Seiten (brand + product)', () => {
+		expect(files.length).toBeGreaterThanOrEqual(40);
 	});
 
-	it.each(files)('serializeOk: %s', (file) => {
+	it.each(files)('serializeOk + rebuild-Identität: %s', (file) => {
 		const raw = readFileSync(file, 'utf8');
 		const p = parseSvx(raw);
 		expect(p.serializeOk).toBe(true);
-		// rebuild ohne Edits === Original.
+		// rebuild ohne Edits === Original (byte-identisch).
 		expect(rebuild(raw, {})).toBe(raw);
+		// Segment-Konkatenation === Body (lückenlose Slices).
+		expect(p.segments.map((s) => s.text).join('')).toBe(p.body);
+	});
+
+	it('keine Datei verschmilzt Container-Kinder in Nachbar-Segmente', () => {
+		// Jede Insel, die einen registrierten Container ÖFFNET, muss ihn im selben
+		// Segment auch schließen — sonst hätte P1.1 einen Container zerrissen.
+		for (const file of files) {
+			const p = parseSvx(readFileSync(file, 'utf8'));
+			for (const s of p.segments) {
+				for (const name of ['Grid', 'DoDontGroup', 'ImageGallery']) {
+					const opens = s.text.match(new RegExp(`<${name}[\\s>]`, 'g'))?.length ?? 0;
+					const closes = s.text.match(new RegExp(`</${name}>`, 'g'))?.length ?? 0;
+					expect(`${file} ${name} ${opens}/${closes}`).toBe(`${file} ${name} ${opens}/${opens}`);
+				}
+			}
+		}
 	});
 });
 
@@ -640,9 +739,10 @@ describe('hasScriptBlock (Insert-Gate)', () => {
 	});
 });
 
-describe('Guard-Regression: gemergter svelte:head + script', () => {
-	// Wie echte Brand-Seiten: svelte:head, script, H1 durch EINZELNE Leerzeilen →
-	// EIN Segment, das mit <svelte:head beginnt (nicht mit <script).
+describe('Guard-Regression: svelte:head + script (einzelne Leerzeile)', () => {
+	// Wie echte Brand-Seiten: svelte:head, script, H1 durch EINZELNE Leerzeilen.
+	// Seit P1.1 sind das EIGENE Segmente (vorher ein gemergter Riesenblock) — der
+	// Import-Sync darf die Script-Insel trotzdem anfassen, ohne den Guard zu reißen.
 	const MERGED = `---
 title: T
 ---
@@ -662,9 +762,11 @@ Intro.
 	const before = parseSvx(MERGED);
 	const headI = before.segments.findIndex((s) => s.text.includes('<script'));
 
-	it('svelte:head + script liegen in EINEM Segment (beginnt mit svelte:head)', () => {
-		expect(before.segments[headI].text.trim().startsWith('<svelte:head')).toBe(true);
-		expect(before.segments[headI].text).toContain('<script');
+	it('svelte:head und script sind EIGENE Segmente (P1.1)', () => {
+		expect(before.segments[headI].text.trim().startsWith('<script')).toBe(true);
+		expect(
+			before.segments.some((s) => s.text.trim().startsWith('<svelte:head') && !s.text.includes('<script'))
+		).toBe(true);
 	});
 
 	it('Element einfügen ⇒ Import-Sync ändert die head+script-Insel ⇒ Guard OK', () => {
