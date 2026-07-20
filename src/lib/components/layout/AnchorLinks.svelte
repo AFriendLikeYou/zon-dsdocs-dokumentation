@@ -44,22 +44,20 @@
 			setTimeout(() => (button.innerHTML = COPY_LINK_SVG), 1200);
 		});
 
-		// Steht die Überschrift in einer Kopfzeile mit weiteren Elementen (z. B. Titel +
-		// Badge), hängt der Button ans ENDE dieser Zeile statt in die Überschrift —
-		// sonst schöbe er sich zwischen Titel und Badge. Markierung: [data-anchor-row].
-		const row = header.parentElement?.closest<HTMLElement>('[data-anchor-row]');
-		if (row) {
-			row.classList.add('has-anchor-row');
-			row.appendChild(button);
-		} else {
-			header.appendChild(button);
-		}
+		header.appendChild(button);
 	}
 
 	afterNavigate(() => {
 		document.querySelectorAll<HTMLElement>('h2, h3').forEach((header) => {
-			// nur Header außerhalb von Akkordeons/Dialogen
-			if (!header.closest('.accordion') && !header.closest('.dialog__content')) {
+			// Nur Abschnitts-Überschriften: nicht in Akkordeons/Dialogen — und NICHT in
+			// verlinkten Karten. Dort wäre der Button interaktiver Inhalt in einem <a>
+			// (ungültiges HTML, mehrdeutig für Tastatur-Nutzer), und der kopierte Anker
+			// zeigte auf die Übersichtsseite, obwohl die Karte selbst schon verlinkt.
+			if (
+				!header.closest('.accordion') &&
+				!header.closest('.dialog__content') &&
+				!header.closest('a')
+			) {
 				createAnchorButton(header);
 			}
 		});
@@ -93,8 +91,7 @@
 	}
 	@media (hover: hover) and (pointer: fine) {
 		:global(h2.has-anchor:hover > .anchor-copy),
-		:global(h3.has-anchor:hover > .anchor-copy),
-		:global(.has-anchor-row:hover > .anchor-copy) {
+		:global(h3.has-anchor:hover > .anchor-copy) {
 			opacity: 1;
 		}
 	}

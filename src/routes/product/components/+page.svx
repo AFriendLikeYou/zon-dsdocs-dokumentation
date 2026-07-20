@@ -97,7 +97,7 @@ Design-System-Styles.
 					<span>{card.title}</span>
 				</div>
 			{/if}
-			<div class="cat-card__head" data-anchor-row>
+			<div class="cat-card__head">
 				<h3 class="cat-card__title">{card.title}</h3>
 				{#if card.badge}<Badge tone={card.badgeVariant}>{card.badge}</Badge>{/if}
 			</div>
