@@ -30,10 +30,17 @@
   - resizable: Drag-Handle am rechten Rand + px-Anzeige für breitenabhängige
     Patterns (impliziert die fill-Optik).
 
-  Details: Selects rendern als SegmentedControl, Booleans als Switch; der
+  Details: Selects rendern als SegmentedControl (size sm), Booleans als Switch; der
   Code-Block lässt geänderte Zeilen kurz aufleuchten (flash) und kappt lange
   Snippets (collapsible). Text-Zoom (Aa, 100→200 %) sitzt dezent unten rechts
   auf der Bühne — WCAG-2.2-Reflow-Check direkt am Specimen.
+
+  Der Code-Block liegt hinter einem Umschalter in der Steuerungszeile und startet
+  EINGEKLAPPT — die Bühne ist der Hauptinhalt, der Code das Angebot. Bewusst ein
+  Klick-/Tastatur-Toggle (aria-expanded + aria-controls), KEIN Hover-Reveal: das
+  wäre auf Touch nicht bedienbar. Der Zustand hält je Sitzung (sessionStorage,
+  Muster MachineZone.persistKey) und gilt seiten-übergreifend — wer den Code
+  einmal aufgeklappt hat, will ihn auch beim nächsten Pattern sehen.
 -->
 <script lang="ts" module>
 	export type PlaygroundOption = { value: string; label: string; cssClass?: string };
@@ -85,14 +92,14 @@
 </script>
 
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { Button } from '$components/ui/button';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { Switch } from '$components/ui/switch';
 	import { ResizeHandle } from '$components/ui/resize-handle';
-	import { ResetIcon } from '$lib/icons';
+	import { ResetIcon, ChevronIcon } from '$lib/icons';
 
 	type Props = {
 		controls?: PlaygroundControl[];
@@ -111,6 +118,8 @@
 		align?: 'center' | 'fill';
 		/** Drag-Handle + px-Anzeige für breitenabhängige Patterns (impliziert fill-Optik). */
 		resizable?: boolean;
+		/** sessionStorage-Schlüssel für „Code offen/zu"; Default: ein Schlüssel für alle Playgrounds. */
+		codePersistKey?: string;
 		class?: string;
 	};
 	let {
@@ -123,6 +132,7 @@
 		code,
 		align = 'center',
 		resizable = false,
+		codePersistKey = 'playground:code',
 		class: className = ''
 	}: Props = $props();
 
@@ -211,6 +221,32 @@
 		frameWidth = null;
 	}
 
+	// Code-Umschalter: startet zu und bleibt beim SSR deterministisch zu; erst nach
+	// dem Mount wird der Sitzungs-Zustand nachgezogen. `animated` gibt die Motion
+	// erst danach frei — sonst klappt der wiederhergestellte Code beim Laden auf
+	// (derselbe Fallstrick wie in MachineZone).
+	let codeOpen = $state(false);
+	let animated = $state(false);
+	const codeId = `playground-code-${Math.random().toString(36).slice(2, 8)}`;
+
+	onMount(() => {
+		try {
+			const saved = sessionStorage.getItem(codePersistKey);
+			if (saved === '1' || saved === '0') codeOpen = saved === '1';
+		} catch {
+			/* sessionStorage nicht verfügbar → eingeklappter Default bleibt */
+		}
+		requestAnimationFrame(() => (animated = true));
+	});
+
+	function toggleCode() {
+		codeOpen = !codeOpen;
+		try {
+			sessionStorage.setItem(codePersistKey, codeOpen ? '1' : '0');
+		} catch {
+			/* ignorieren — Persistenz ist nice-to-have */
+		}
+	}
 </script>
 
 <div class="playground {className}">
@@ -267,10 +303,14 @@
 		</Button>
 	</div>
 
-	{#if hint}
-		<div class="playground__controls"><span class="playground__hint">{hint}</span></div>
-	{:else if controls.length}
-		<div class="playground__controls">
+	<!-- EINE Steuerungszeile für alles unterhalb der Bühne: Controls (oder Hinweis)
+	     links, Aktionen (Zurücksetzen, Code-Umschalter) rechts. Sie rendert auch
+	     ohne Controls, weil der Code-Umschalter immer eine Heimat braucht — das
+	     spart gegenüber einer zweiten Leiste eine ganze Zeile. -->
+	<div class="playground__controls">
+		{#if hint}
+			<span class="playground__hint">{hint}</span>
+		{:else if controls.length}
 			{#each controls as c (c.key)}
 				<!-- Auswahl (SegmentedControl) und An/Aus (Switch) lesen sich jetzt als
 				     unterschiedliche Control-Typen — Trennlinie bündelt die Gruppen. -->
@@ -281,6 +321,7 @@
 							label={c.label}
 							options={c.options.map((o) => ({ value: o.value, label: o.label }))}
 							value={String(values[c.key])}
+							size="sm"
 							onchange={(v) => (values[c.key] = v)}
 						/>
 					{:else}
@@ -293,17 +334,45 @@
 					{/if}
 				</span>
 			{/each}
+		{/if}
 
+		<span class="playground__actions">
 			{#if isDirty}
-				<button type="button" class="playground__reset" onclick={reset}>
-					<ResetIcon width={12} height={12} />
+				<Button variant="quiet" size="sm" onclick={reset}>
+					{#snippet iconLeft()}<ResetIcon width={12} height={12} />{/snippet}
 					Zurücksetzen
-				</button>
+				</Button>
 			{/if}
-		</div>
-	{/if}
+			<Button
+				variant="quiet"
+				size="sm"
+				class="playground__code-toggle"
+				onclick={toggleCode}
+				aria-expanded={codeOpen}
+				aria-controls={codeId}
+			>
+				{#snippet iconLeft()}
+					<ChevronIcon
+						width={10}
+						height={10}
+						stroke-width="2.5"
+						class="playground__code-chevron {codeOpen ? 'is-open' : ''}"
+					/>
+				{/snippet}
+				{codeOpen ? 'Code ausblenden' : 'Code'}
+			</Button>
+		</span>
+	</div>
 
-	<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
+	<!-- Auf-/Zuklappen über grid-template-rows (keine Höhenmessung). Das Grid-Item
+	     (__code-clip) trägt weder Padding noch Rahmen — beides würde seine
+	     min-content-Höhe anheben und die 0fr-Einklappung undicht machen. Die
+	     Trennlinie zur Steuerung liefert der Rahmen des CodeBlock selbst. -->
+	<div class="playground__code" class:is-open={codeOpen} class:is-animated={animated}>
+		<div id={codeId} class="playground__code-clip" inert={!codeOpen}>
+			<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
+		</div>
+	</div>
 </div>
 
 <style>
@@ -331,6 +400,7 @@
 		background-color: var(--z-ds-color-background-0);
 		background-image: radial-gradient(circle, var(--z-ds-color-border-70) 1px, transparent 1px);
 		background-size: 12px 12px;
+		border-bottom: 1px solid var(--ds-border-soft);
 		transition: background-color var(--ds-dur) var(--ds-ease);
 	}
 	/* fill: „Ausschnitt aus Seite" statt „Objekt auf Bühne" — ruhige Fläche ohne
@@ -410,69 +480,77 @@
 		letter-spacing: 0.02em;
 	}
 
+	/* Steuerungszeile — bewusst dicht: die Trennlinie zur Bühne sitzt an der Bühne,
+	   damit die Zeile im eingeklappten Zustand sauber an der Gehäusekante endet
+	   (sonst stünde ihr border-bottom direkt auf dem Container-Rahmen). */
 	.playground__controls {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--z-ds-space-8);
-		padding: var(--z-ds-space-12) var(--z-ds-space-16);
-		border-bottom: 1px solid var(--ds-border-soft);
+		gap: var(--z-ds-space-6);
+		padding: var(--z-ds-space-6) var(--z-ds-space-12);
 	}
 	/* Control-Gruppe (ein select mit Label bzw. ein Switch) — Trennlinie zwischen
 	   den Gruppen, damit Booleans nicht wie weitere Variant-Werte lesen. */
 	.playground__group {
 		display: inline-flex;
 		align-items: center;
-		gap: var(--z-ds-space-8);
+		gap: var(--z-ds-space-6);
 	}
 	.playground__group + .playground__group {
 		border-left: 1px solid var(--ds-border-soft);
-		padding-left: var(--z-ds-space-12);
+		padding-left: var(--z-ds-space-10);
 	}
+	/* Label zurückgenommen: kein Versal-Micro-Label mehr, sondern eine ruhige
+	   xs-Beschriftung — in der dichten Zeile trägt die Segmented-Pille die Betonung. */
 	.playground__label {
-		font-size: var(--ds-label-size);
-		text-transform: uppercase;
-		letter-spacing: var(--ds-label-tracking);
-		font-weight: 600;
+		font-size: var(--ds-text-xs);
+		font-weight: 500;
 		color: var(--ds-text-muted);
 	}
 	.playground__hint {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
-	/* Reset — dezenter Ghost-Button, rechtsbündig, nur bei Abweichung vom Default */
-	.playground__reset {
+	/* Aktionen (Zurücksetzen, Code-Umschalter) — rechtsbündig, Optik aus dem
+	   Button-Atom (variant="quiet", size="sm"). */
+	.playground__actions {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: var(--z-ds-space-4);
 		margin-left: auto;
-		border: none;
-		background: none;
-		padding: 4px 8px;
-		border-radius: var(--ds-radius-sm);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-		cursor: pointer;
-		transition:
-			color var(--ds-dur) var(--ds-ease),
-			background-color var(--ds-dur) var(--ds-ease),
-			transform var(--ds-dur) var(--ds-ease-out);
 	}
-	@media (hover: hover) and (pointer: fine) {
-		.playground__reset:hover {
-			color: var(--ds-text);
-			background: var(--ds-surface-raised);
-		}
+	/* Chevron liegt in einer Kind-Komponente unter dem Button-Atom → :global. */
+	.playground__actions :global(.playground__code-chevron) {
+		transform: rotate(0deg);
+		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
-	.playground__reset:active {
-		transform: scale(0.96);
+	.playground__actions :global(.playground__code-chevron.is-open) {
+		transform: rotate(180deg);
 	}
-	.playground__reset:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
+
+	/* Code-Region: grid-template-rows 0fr → 1fr (Emil-Motion, ease-out, kurz).
+	   Animation erst nach dem Restore (is-animated), sonst klappt der aus der
+	   Sitzung wiederhergestellte Code beim Laden sichtbar auf. */
+	.playground__code {
+		display: grid;
+		grid-template-rows: 0fr;
+		transition: none;
+	}
+	.playground__code.is-animated {
+		transition: grid-template-rows var(--ds-dur-slow) var(--ds-ease-out);
+	}
+	.playground__code.is-open {
+		grid-template-rows: 1fr;
+	}
+	.playground__code-clip {
+		overflow: hidden;
+		min-height: 0;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.playground__stage {
+		.playground__stage,
+		.playground__code,
+		.playground__actions :global(.playground__code-chevron) {
 			transition: none;
 		}
 	}

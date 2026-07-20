@@ -4,11 +4,18 @@
   Zwei optionale Playground-Features:
   - flashKey/flashLines: bei jedem flashKey-Wechsel leuchten die genannten Zeilen
     kurz auf (Ease-out-Fade) — macht sichtbar, WAS ein Control am Code geändert
-    hat. Aktiviert zeilenweises Highlighting (kein Support für mehrzeilige
-    Kommentare — Playground-Code hat keine).
+    hat.
   - collapsible: lange Snippets (> 7 Zeilen) starten auf 4 Zeilen gekappt mit
     Fade-out + „Code aufklappen" (Mantine-Muster). Copy kopiert immer alles.
+
+  Zeilennummern (lineNumbers): rein über einen CSS-Counter als ::before der
+  Zeilen-Spans — die Ziffern stehen NICHT im DOM-Text. Damit liefert sowohl der
+  Copy-Button (kopiert ohnehin den rohen `code`-String) als auch eine manuelle
+  Text-Selektion ausschließlich den Code ohne Nummern. `user-select: none` auf
+  dem Pseudo-Element ist zusätzlich gesetzt, ändert am Ergebnis aber nichts:
+  Pseudo-Element-Inhalte sind per Spezifikation nicht Teil der Selektion.
 -->
+
 <script lang="ts">
 	import { CopyButton } from '$components/ui/copy-button';
 	import { ChevronIcon } from '$lib/icons';
@@ -20,7 +27,8 @@
 		lang = 'html',
 		flashKey,
 		flashLines = [],
-		collapsible = false
+		collapsible = false,
+		lineNumbers
 	}: {
 		/** Überschrift in der Kopfzeile des Blocks. */
 		title?: string;
@@ -34,6 +42,19 @@
 		flashLines?: number[];
 		/** Lange Snippets (> 7 Zeilen) starten gekappt mit „Code aufklappen". */
 		collapsible?: boolean;
+		/**
+		 * Zeilennummern in der Rinne (CSS-Counter, nicht im DOM-Text → Kopieren
+		 * liefert weiterhin nur den Code).
+		 *
+		 * Default ist bewusst AUTOMATISCH statt `false`: Nummern zeigen sich, sobald
+		 * der Block mehr als eine Zeile hat. Damit bekommen Playground und
+		 * Develop-Tab (HTML-/CSS-/Svelte-Blöcke) die Rinne ohne Änderung an den
+		 * generierten Seiten, während einzeilige Inline-Snippets im Fließtext
+		 * (Pattern-Seiten, Beispiel-Zeilen) unverändert nummernlos bleiben — eine
+		 * „1" an einer einzelnen Zeile trägt keine Information. Explizites
+		 * `lineNumbers={false}` bzw. `true` überschreibt die Automatik.
+		 */
+		lineNumbers?: boolean;
 	} = $props();
 
 	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -72,11 +93,13 @@
 		]
 	};
 
-	function highlight(src: string, language: Lang) {
+	/** Quelltext → Tokenfolge [Klasse|null, Text]. Eine Quelle für beide Renderpfade. */
+	function tokenize(src: string, language: Lang): [string | null, string][] {
 		const rules = (GRAMMAR[language] ?? []).map(
 			([cls, re]) => [cls, new RegExp(re.source, 'y')] as [string, RegExp]
 		);
-		let out = '';
+		const out: [string | null, string][] = [];
+		let plain = '';
 		let i = 0;
 		while (i < src.length) {
 			let hit = false;
@@ -84,24 +107,60 @@
 				re.lastIndex = i;
 				const m = re.exec(src);
 				if (m && m.index === i && m[0].length) {
-					out += `<span class="t-${cls}">${esc(m[0])}</span>`;
+					if (plain) {
+						out.push([null, plain]);
+						plain = '';
+					}
+					out.push([cls, m[0]]);
 					i += m[0].length;
 					hit = true;
 					break;
 				}
 			}
 			if (!hit) {
-				out += esc(src[i]);
+				plain += src[i];
 				i++;
 			}
+		}
+		if (plain) out.push([null, plain]);
+		return out;
+	}
+
+	const wrap = (cls: string | null, text: string) =>
+		cls ? `<span class="t-${cls}">${esc(text)}</span>` : esc(text);
+
+	function highlight(src: string, language: Lang) {
+		return tokenize(src, language)
+			.map(([cls, text]) => wrap(cls, text))
+			.join('');
+	}
+
+	/**
+	 * Zeilenweises Markup — für Flash-Highlighting und Zeilennummern.
+	 * Tokenisiert wird der GANZE Quelltext (nicht Zeile für Zeile), damit
+	 * mehrzeilige Tokens — allen voran CSS-Blockkommentare in pattern.css —
+	 * durchgehend eingefärbt bleiben; erst danach werden sie an den Zeilenumbrüchen
+	 * aufgeteilt und je Zeile neu umschlossen.
+	 */
+	function highlightLines(src: string, language: Lang) {
+		const out: string[] = [''];
+		for (const [cls, text] of tokenize(src, language)) {
+			const parts = text.split('\n');
+			parts.forEach((part, idx) => {
+				if (idx > 0) out.push('');
+				if (part) out[out.length - 1] += wrap(cls, part);
+			});
 		}
 		return out;
 	}
 
-	// Flash-Modus rendert zeilenweise (für gezieltes Aufleuchten), sonst am Stück.
-	const lineMode = $derived(flashKey !== undefined);
+	// Zeilenweise rendern, sobald Flash ODER Zeilennummern gebraucht werden;
+	// einzeilige Snippets ohne Flash bleiben beim schlanken Ein-Block-Pfad.
+	const lineCount = $derived(code.split('\n').length);
+	const showNumbers = $derived(lineNumbers ?? lineCount > 1);
+	const lineMode = $derived(flashKey !== undefined || showNumbers);
 	const highlighted = $derived(lineMode ? '' : highlight(code, lang));
-	const lines = $derived(lineMode ? code.split('\n').map((l) => highlight(l, lang)) : []);
+	const lines = $derived(lineMode ? highlightLines(code, lang) : []);
 
 	// Aufleuchten: flashKey-Wechsel setzt die Zeilen „heiß", kurz darauf faden sie
 	// über die CSS-Transition wieder aus. flashKey 0 = Initialzustand, kein Flash.
@@ -114,7 +173,6 @@
 	});
 
 	// Collapse: erst ab deutlicher Länge kappen, sonst bringt der Klick nichts.
-	const lineCount = $derived(code.split('\n').length);
 	const canCollapse = $derived(collapsible && lineCount > 7);
 	let expanded = $state(false);
 	const clipped = $derived(canCollapse && !expanded);
@@ -127,7 +185,7 @@
 	</figcaption>
 	<div class="code-block__clip" class:clipped>
 		{#if lineMode}
-			<pre class="code-block__pre"><code
+			<pre class="code-block__pre" class:code-block__pre--numbered={showNumbers}><code
 					>{#each lines as line, i (i)}<span class="code-block__line" class:hot={hot.has(i)}
 							>{@html line}</span
 						>{/each}</code
@@ -177,6 +235,8 @@
 		--cb-selector: #7a3e9d;
 		--cb-brace: #b91109;
 		--cb-punct: #5b6068;
+		/* Zeilennummern bleiben deutlich hinter dem Code zurück — Orientierung, kein Inhalt. */
+		--cb-line-number: color-mix(in srgb, var(--cb-muted) 55%, transparent);
 		--cb-block-gap: 18px; /* kein z-ds-Space zwischen 16 und 20 */
 
 		margin: 0 0 var(--cb-block-gap);
@@ -272,6 +332,26 @@
 		min-height: 1.6em;
 		border-radius: 3px;
 		transition: background-color 0.45s var(--ds-ease-out);
+	}
+	/* Zeilennummern-Rinne — reine Generated Content (::before), damit Kopieren (Button
+	   wie Text-Selektion) NUR den Code liefert. Der Counter läuft auf dem <code>-Element,
+	   nicht auf dem <pre>: so zählt er auch nach einem Re-Render sauber ab 1.
+	   A11y-Hinweis: Pseudo-Element-Inhalt lässt sich nicht per aria-hidden ausblenden
+	   (es gibt kein Element). Die Nummern sind daher bewusst Generated Content mit
+	   `user-select: none` — kein zusätzlicher Fokus-/Tab-Stopp, kein kopierbarer Text. */
+	.code-block__pre--numbered code {
+		counter-reset: code-line;
+	}
+	.code-block__pre--numbered .code-block__line::before {
+		counter-increment: code-line;
+		content: counter(code-line);
+		display: inline-block;
+		width: 2.5ch;
+		margin-right: var(--z-ds-space-12);
+		text-align: right;
+		color: var(--cb-line-number);
+		user-select: none;
+		-webkit-user-select: none;
 	}
 	.code-block__line.hot {
 		background-color: color-mix(in srgb, var(--cb-accent) 18%, transparent);

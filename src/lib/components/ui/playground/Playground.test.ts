@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import Playground, { instantiate } from './Playground.svelte';
 import type { PlaygroundControl, PlaygroundState } from './Playground.svelte';
 
@@ -103,5 +103,53 @@ describe('Playground — Template-Modus (Registry)', () => {
 		await fireEvent.click(screen.getByRole('switch', { name: 'Disabled' }));
 		expect(container.querySelector('.pg-preview button')!.hasAttribute('disabled')).toBe(true);
 	});
+});
 
+// ── Code-Umschalter (Klick/Tastatur, kein Hover-Reveal) ────────────────────
+describe('Playground — Code-Umschalter', () => {
+	beforeEach(() => sessionStorage.clear());
+
+	const codeToggle = () => screen.getByRole('button', { name: /^Code($| ausblenden)/ });
+
+	it('startet eingeklappt: aria-expanded=false, Code-Region inert', () => {
+		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
+
+		expect(codeToggle()).toHaveAttribute('aria-expanded', 'false');
+		const region = container.querySelector('.playground__code')!;
+		expect(region.classList.contains('is-open')).toBe(false);
+		expect((container.querySelector('.playground__code-clip') as HTMLElement).inert).toBe(true);
+	});
+
+	it('verknüpft Trigger und Region über aria-controls', () => {
+		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
+
+		const id = codeToggle().getAttribute('aria-controls');
+		expect(id).toBeTruthy();
+		expect(container.querySelector(`#${id}`)).toHaveClass('playground__code-clip');
+	});
+
+	it('Klick öffnet, beschriftet um und merkt den Zustand in der Sitzung', async () => {
+		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
+
+		await fireEvent.click(codeToggle());
+
+		expect(codeToggle()).toHaveAttribute('aria-expanded', 'true');
+		expect(codeToggle()).toHaveTextContent('Code ausblenden');
+		expect(container.querySelector('.playground__code')).toHaveClass('is-open');
+		expect((container.querySelector('.playground__code-clip') as HTMLElement).inert).toBe(false);
+		expect(sessionStorage.getItem('playground:code')).toBe('1');
+
+		await fireEvent.click(codeToggle());
+		expect(codeToggle()).toHaveAttribute('aria-expanded', 'false');
+		expect(sessionStorage.getItem('playground:code')).toBe('0');
+	});
+
+	it('stellt den Sitzungs-Zustand beim nächsten Rendern wieder her', async () => {
+		sessionStorage.setItem('playground:code', '1');
+		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
+
+		await tick();
+		expect(container.querySelector('.playground__code')).toHaveClass('is-open');
+		expect(codeToggle()).toHaveAttribute('aria-expanded', 'true');
+	});
 });
