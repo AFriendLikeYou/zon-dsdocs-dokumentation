@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '$components/ui/button';
 	import LoginForm from './LoginForm.svelte';
 	import type { ActionData } from './$types';
 
@@ -11,7 +12,7 @@
 {#if isLoggedIn || data.isUserLoggedIn}
 	<p>You are already logged in.</p>
 
-	<a class="app-button" href="/">Go to Dashboard</a>
+	<Button href="/">Go to Dashboard</Button>
 {:else}
 	<LoginForm {form} />
 {/if}

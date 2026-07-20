@@ -5,6 +5,7 @@
 	import { Icon } from '$lib/icons/cms';
 	import { AdminPageHeader, AdminRow, AdminBadge } from '../ui';
 	import { Alert } from '$components/ui/alert';
+	import { Button } from '$components/ui/button';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
 
@@ -183,11 +184,10 @@
 	<AdminPageHeader title="Brand-Seiten" crumb={{ href: '/admin', label: 'Admin' }}>
 		{#snippet actions()}
 			{#if data.writable}
-				<button
-					type="button"
-					class="new-btn"
+				<Button
+					variant="accent"
 					aria-expanded={showNew}
-					onclick={() => (showNew = !showNew)}>+ Neue Seite</button
+					onclick={() => (showNew = !showNew)}>+ Neue Seite</Button
 				>
 			{/if}
 		{/snippet}
@@ -221,10 +221,13 @@
 				</span>
 			</label>
 			<div class="np-actions">
-				<button type="submit" class="np-create" disabled={creating || !newTitle.trim() || !effSlug}
-					>{creating ? 'Wird angelegt …' : 'Anlegen & bearbeiten'}</button
+				<Button
+					type="submit"
+					variant="accent"
+					disabled={creating || !newTitle.trim() || !effSlug}
+					>{creating ? 'Wird angelegt …' : 'Anlegen & bearbeiten'}</Button
 				>
-				<button type="button" class="np-cancel" onclick={() => (showNew = false)}>Abbrechen</button>
+				<Button variant="quiet" onclick={() => (showNew = false)}>Abbrechen</Button>
 				<span class="np-hint"
 					>Erscheint am Ende der Sidebar — Position danach per Drag&nbsp;&amp;&nbsp;Drop.</span
 				>
@@ -518,27 +521,7 @@
 		outline-offset: 1px;
 	}
 
-	/* ── Neue Seite anlegen ── */
-	.new-btn {
-		border: none;
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
-		border-radius: 999px;
-		padding: var(--z-ds-space-8) var(--z-ds-space-l);
-		cursor: pointer;
-		white-space: nowrap;
-		transition: opacity var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.new-btn:hover {
-		opacity: 0.88;
-	}
-	.new-btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
+	/* ── Neue Seite anlegen ── (Buttons: <Button variant="accent|quiet">) */
 	.new-panel {
 		display: grid;
 		gap: var(--z-ds-space-s);
@@ -589,39 +572,6 @@
 		align-items: center;
 		gap: var(--z-ds-space-s);
 		flex-wrap: wrap;
-	}
-	.np-create {
-		border: none;
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		font-weight: 600;
-		border-radius: 999px;
-		padding: var(--z-ds-space-8) var(--z-ds-space-l);
-		cursor: pointer;
-	}
-	.np-create:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-	.np-create:focus-visible,
-	.np-cancel:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	.np-cancel {
-		border: none;
-		background: none;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text-muted);
-		cursor: pointer;
-		border-radius: 999px;
-		padding: var(--z-ds-space-8) var(--z-ds-space-s);
-	}
-	.np-cancel:hover {
-		color: var(--ds-text);
 	}
 	.np-hint {
 		font-size: var(--ds-text-xs);

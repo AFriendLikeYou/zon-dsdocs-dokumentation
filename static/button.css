@@ -33,6 +33,9 @@
 	border: none;
 	transition:
 		background-color var(--ds-dur, 160ms) var(--ds-ease, ease),
+		border-color var(--ds-dur, 160ms) var(--ds-ease-out, ease-out),
+		color var(--ds-dur, 160ms) var(--ds-ease, ease),
+		opacity var(--ds-dur, 160ms) var(--ds-ease-out, ease-out),
 		transform var(--ds-dur, 160ms) var(--ds-ease-out, ease-out);
 }
 
@@ -58,15 +61,57 @@
 	color: var(--ds-text-faint);
 }
 
-.app-button--transparent:not(:is(:hover, :focus)) {
-	color: var(--ds-static-black);
-	background-color: transparent;
+/*
+ * Varianten-Cluster (empirisch aus der App-UI abgeleitet, 2026-07-20):
+ *   · default (Basis oben) — gefüllt dunkel
+ *   · accent  — gefüllte Akzent-Fläche, weißer Text (Speichern/Anlegen)
+ *   · ghost   — gerahmt auf Surface, Hover-Akzent-Rand (Werkzeug/Chip)
+ *   · quiet   — transparent, gedämpfter Text (Verwerfen/Abbrechen)
+ *   · danger  — transparent, Negativ-Farbe (Entfernen)
+ * Diese Modifier gelten identisch für <button> (Button.svelte) und <a>.
+ */
+.app-button--accent {
+	background-color: var(--ds-accent);
+	color: var(--ds-static-white);
+	font-weight: 600;
+}
+.app-button--accent:hover {
+	opacity: 0.9;
 }
 
-.app-button--outline {
-	background-color: transparent;
-	border: 1px solid var(--ds-text);
+.app-button--ghost {
+	background-color: var(--ds-surface);
+	border: 1px solid var(--ds-border);
 	color: var(--ds-text);
+}
+.app-button--ghost:hover {
+	background-color: var(--ds-surface);
+	border-color: var(--ds-accent);
+}
+
+.app-button--quiet:not(:is(:hover, :focus)) {
+	color: var(--ds-text-muted);
+	background-color: transparent;
+}
+.app-button--quiet:hover {
+	background-color: rgb(from var(--ds-text) r g b / 0.08);
+	color: var(--ds-text);
+}
+
+.app-button--danger:not(:is(:hover, :focus)) {
+	color: var(--ds-negative, var(--ds-text));
+	background-color: transparent;
+}
+.app-button--danger:hover {
+	background-color: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
+	color: var(--ds-negative, var(--ds-text));
+}
+
+/* Deaktiviert-Look für den <a>-Zweig (echtes <button>:disabled greift oben). */
+.app-button--disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	color: var(--ds-text-faint);
 }
 
 /* Größen-Modifier — dieselben Stufen für Component- und Klassen-Nutzer. */

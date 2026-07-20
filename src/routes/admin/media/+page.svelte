@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { AdminPageHeader } from '../ui';
 	import { Alert } from '$components/ui/alert';
+	import { Button } from '$components/ui/button';
 	import { EmptyState } from '$components/ui/empty-state';
 
 	let { data, form }: import('./$types').PageProps = $props();
@@ -118,7 +119,7 @@
 		<p class="hint">
 			PNG, JPG, WebP, SVG, GIF oder AVIF · max. 5 MB — oder Datei einfach hierher ziehen.
 		</p>
-		<button type="submit" class="save" disabled={!data.writable}>Hochladen</button>
+		<Button type="submit" variant="accent" disabled={!data.writable}>Hochladen</Button>
 	</form>
 
 	<div class="filter">
@@ -239,23 +240,6 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.save {
-		background: var(--ds-accent);
-		color: var(--ds-static-white);
-		border: none;
-		border-radius: 999px;
-		padding: var(--z-ds-space-10) var(--z-ds-space-xl);
-		font-weight: 600;
-		cursor: pointer;
-		transition: opacity var(--ds-dur) var(--ds-ease-out);
-	}
-	.save:hover:not(:disabled) {
-		opacity: 0.88;
-	}
-	.save:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
 	.count {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
@@ -341,8 +325,7 @@
 		}
 	}
 	.tool:focus-visible,
-	.link:focus-visible,
-	.save:focus-visible {
+	.link:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}

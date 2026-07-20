@@ -7,6 +7,7 @@
 	import { resolveCssVar } from '$lib/utils';
 	import { Pill } from '../../../ui';
 	import { Field, Select } from '$components/ui/field';
+	import { Button } from '$components/ui/button';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
 	import RowListField from './RowListField.svelte';
@@ -689,11 +690,12 @@
 	bewusst ein manueller CLI-Schritt — die Doku rät nie.
 {/snippet}
 {#snippet driftActions()}
-	<button type="button" class="drift__btn" onclick={copyReImport}>
-		<ImportIcon width={13} height={13} /> Re-Import-Befehl kopieren
-	</button>
-	<a class="drift__btn" href={data.importGuideHref} target="_blank" rel="noreferrer"
-		>Zur Anleitung ↗</a
+	<Button variant="ghost" onclick={copyReImport}>
+		{#snippet iconLeft()}<ImportIcon width={13} height={13} />{/snippet}
+		Re-Import-Befehl kopieren
+	</Button>
+	<Button variant="ghost" href={data.importGuideHref} target="_blank" rel="noreferrer"
+		>Zur Anleitung ↗</Button
 	>
 {/snippet}
 
@@ -1166,37 +1168,7 @@
 		padding: var(--z-ds-space-l) var(--z-ds-space-l) 7rem;
 	}
 
-	/* Drift-Hinweis: die zwei kleinen Outline-Aktions-Buttons. Früher in DriftBanner
-	   scoped; seit dem Merge auf <Alert> leben die Snippet-Inhalte hier (Seiten-Scope)
-	   und werden lokal gestylt. Inline-<code> im Erklärtext trägt global.css. */
-	.drift__btn {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--z-ds-space-4);
-		width: auto;
-		font-size: var(--ds-text-xs);
-		font-weight: 600;
-		color: var(--ds-text);
-		text-decoration: none;
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-4) var(--z-ds-space-8);
-		background: var(--ds-surface);
-		cursor: pointer;
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.drift__btn:hover {
-		border-color: var(--ds-accent);
-	}
-	.drift__btn:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.drift__btn {
-			transition: none;
-		}
-	}
+	/* Drift-Hinweis-Aktionen nutzen jetzt <Button variant="ghost"> (K1). */
 
 	/* ── „← Alle Komponenten" klein oberhalb der Karte ── */
 	.crumb {

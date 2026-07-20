@@ -10,6 +10,7 @@
 	import BlockPreview from '../editor/BlockPreview.svelte';
 	import ProseEditor from '../editor/ProseEditor.svelte';
 	import InsertMenu from '../editor/InsertMenu.svelte';
+	import { Button } from '$components/ui/button';
 	import SlashMenu from '../editor/SlashMenu.svelte';
 	import { validateValues, countErrors } from '../core/validation';
 	import { readSlash } from '../core/slash';
@@ -855,8 +856,8 @@
 							Komponente.
 						</p>
 						<div class="empty-actions">
-							<button type="button" class="empty-cta" onclick={() => insertType('Prose')}
-								>Textblock beginnen</button
+							<Button variant="ghost" onclick={() => insertType('Prose')}
+								>Textblock beginnen</Button
 							>
 							<InsertMenu items={paletteItems} onpick={insertType} label="Element einfügen" />
 						</div>
@@ -1257,25 +1258,7 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
-	.empty-cta {
-		border: 1px solid var(--ds-border);
-		background: var(--ds-surface-raised, var(--ds-surface));
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		border-radius: 999px;
-		padding: var(--z-ds-space-6) var(--z-ds-space-l);
-		cursor: pointer;
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	.empty-cta:hover {
-		border-color: var(--ds-accent);
-	}
-	.empty-cta:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
-	}
-	/* Prosa: gleiche Karten-Behandlung wie die Komponenten (Wunsch 2026-07-10). */
+/* Prosa: gleiche Karten-Behandlung wie die Komponenten (Wunsch 2026-07-10). */
 
 	/* Gutter-Controls (Figma: 24px-Icon-Buttons, radius 4, auf Kopfhöhe der Karte):
 	   absolut links AUSSERHALB des Containers, bei Hover/Fokus eingeblendet. */

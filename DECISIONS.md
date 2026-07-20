@@ -196,6 +196,24 @@ Global nur, wenn es nachweislich von Nicht-Komponenten (Anker/Prosa) geteilt wir
 — dann dokumentiert in `button.css`/`global.css`.
 **Status:** Aktiv.
 
+**Nachtrag 2026-07-20 (Paket K1 — EINE allgemeine Button-Komponente):**
+User-Entscheid: „Die Buttons und die App-Buttons sind nicht sinnvoll als zwei
+getrennte Dinge — lieber EINE allgemeine Button-Komponente mit entsprechenden
+Props." Konsequenz: `ui/button/Button.svelte` ist ab jetzt **die** Button-
+Komponente der App-UI. Sie kann per `href` auch als `<a>` rendern und trägt fünf
+empirisch aus dem Bestand abgeleitete Varianten:
+`default | accent | ghost | quiet | danger` (plus `size`, `iconLeft/iconRight`,
+`disabled`, `class`-Passthrough). Roh-`<button>` mit eigenem CSS in der App-UI
+werden schrittweise auf `<Button>` migriert; der Look lebt weiterhin in **einer**
+Quelle — der Utility-Schicht `static/button.css` (`.app-button` + `--accent/
+--ghost/--quiet/--danger/--md/--lg`), **keine** Doppel-Definition im Component-
+Scope. Die Utility-Klasse bleibt bestehen als **CSS-Backend der Komponente** und
+für die wenigen Nicht-Komponenten-Nutzer (`<a>` in `GitHubEdit`, Prosa in
+`.svx`). Reine Icon-Aktionen bleiben bei `IconActionButton`. Ausgenommen von der
+Migration (eigene Pakete/Gründe): pill-förmige SaveBar-Buttons (K2), Segmented-/
+Switch-/Tab-Controls (K4), sowie kontextuelle Micro-Chips, `aria-pressed`-Toggles
+und contenteditable-Toolbars (Verhaltensrisiko).
+
 ## ADR-012 — Component-Ordner-Konvention, Barrels & Nav-Drift-Check
 
 **Kontext:** Audit-Befunde zu „selbsterklärend/wartbar": (1) eine leere
