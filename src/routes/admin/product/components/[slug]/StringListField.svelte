@@ -16,6 +16,7 @@
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
 	import { Field } from '$components/ui/field';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 
 	let {
 		list,
@@ -64,11 +65,10 @@
 				bind:value={list[i]}
 				{placeholder}
 			/>
-			<button
-				type="button"
+			<IconActionButton
 				class="string-list__remove"
 				onclick={() => list.splice(i, 1)}
-				aria-label="Entfernen"><Icon name="close" /></button
+				ariaLabel="Entfernen"><Icon name="close" /></IconActionButton
 			>
 		</div>
 	{/each}
@@ -116,7 +116,10 @@
 	:global(.string-list__ghost .field__control::placeholder) {
 		color: var(--ds-text-faint);
 	}
-	.string-list__remove {
+	/* Der Entfernen-Button ist jetzt ui/IconActionButton; die Klasse wird durchgereicht
+	   → Passthrough-Regeln als :global (unter der scoped .string-list__row verankert,
+	   damit kein globaler Leak). Base-Look/Hover/Fokus/Touch bleiben wie zuvor. */
+	.string-list__row :global(.string-list__remove) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -136,27 +139,27 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.string-list__row:hover .string-list__remove,
-	.string-list__row:focus-within .string-list__remove {
+	.string-list__row:hover :global(.string-list__remove),
+	.string-list__row:focus-within :global(.string-list__remove) {
 		opacity: 1;
 	}
-	.string-list__remove:hover {
+	.string-list__row :global(.string-list__remove:hover) {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	.string-list__remove:focus-visible {
+	.string-list__row :global(.string-list__remove:focus-visible) {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 		opacity: 1;
 	}
 	/* Touch-Geräte ohne Hover: Entfernen-Button dauerhaft sichtbar. */
 	@media (hover: none) {
-		.string-list__remove {
+		.string-list__row :global(.string-list__remove) {
 			opacity: 1;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.string-list__remove {
+		.string-list__row :global(.string-list__remove) {
 			transition: none;
 		}
 	}

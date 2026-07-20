@@ -5,7 +5,7 @@
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { CloseIcon, ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
-	import { AdminFlash, Pill } from '../../../ui';
+	import { Pill } from '../../../ui';
 	import { Field, Select } from '$components/ui/field';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
@@ -19,7 +19,7 @@
 	import SpecTable from './SpecTable.svelte';
 	import StatusSegmentedControl from './StatusSegmentedControl.svelte';
 	import AnchorBar from './AnchorBar.svelte';
-	import DriftBanner from './DriftBanner.svelte';
+	import { Alert } from '$components/ui/alert';
 
 	let { data }: import('./$types').PageProps = $props();
 	const toast = getToastState();
@@ -708,10 +708,10 @@
 	<nav class="crumb"><a href="/admin">← Alle Komponenten</a></nav>
 
 	{#if !data.writable}
-		<AdminFlash tone="warn">
+		<Alert compact variant="warning">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Prod öffnet später einen
 			GitHub-PR).
-		</AdminFlash>
+		</Alert>
 	{/if}
 
 	<!-- EIN äußerer Karten-Container um den gesamten Editor (Delta 1). -->
@@ -755,11 +755,14 @@
 		<div class="editor-card__body">
 			<!-- Drift-Banner (nur wenn figma-raw.json neuer als model.json) — Delta 7. -->
 			{#if data.figmaRawNeuerAlsModel}
-				<DriftBanner
+				<Alert
+					variant="warning"
+					role="status"
 					title="Design hat sich seit dem letzten Import geändert"
-					text={driftText}
 					actions={driftActions}
-				/>
+				>
+					{@render driftText()}
+				</Alert>
 			{/if}
 
 			<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>
@@ -1161,6 +1164,38 @@
 		max-width: 52rem;
 		margin: 0 auto;
 		padding: var(--z-ds-space-l) var(--z-ds-space-l) 7rem;
+	}
+
+	/* Drift-Hinweis: die zwei kleinen Outline-Aktions-Buttons. Früher in DriftBanner
+	   scoped; seit dem Merge auf <Alert> leben die Snippet-Inhalte hier (Seiten-Scope)
+	   und werden lokal gestylt. Inline-<code> im Erklärtext trägt global.css. */
+	.drift__btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--z-ds-space-4);
+		width: auto;
+		font-size: var(--ds-text-xs);
+		font-weight: 600;
+		color: var(--ds-text);
+		text-decoration: none;
+		border: 1px solid var(--ds-border-strong);
+		border-radius: var(--ds-radius-sm);
+		padding: var(--z-ds-space-4) var(--z-ds-space-8);
+		background: var(--ds-surface);
+		cursor: pointer;
+		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
+	}
+	.drift__btn:hover {
+		border-color: var(--ds-accent);
+	}
+	.drift__btn:focus-visible {
+		outline: 2px solid var(--ds-focus-ring);
+		outline-offset: 2px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.drift__btn {
+			transition: none;
+		}
 	}
 
 	/* ── „← Alle Komponenten" klein oberhalb der Karte ── */

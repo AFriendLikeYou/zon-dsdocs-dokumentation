@@ -153,8 +153,19 @@
 	}
 
 	/* Text-/Zahl-/Auswahl-Controls kommen jetzt aus den geteilten Atomen
-	   Field/Select (field-base.css, density=comfortable). Hier bleibt nur das
-	   PropField-Eigene: Switch (Boolean) + Segmented Control (kurze Enums). */
+	   Field/Select (field-base.css, density=comfortable). Hier bleibt bewusst das
+	   PropField-Eigene: Switch (Boolean) + Segmented Control (kurze Enums).
+
+	   Warum NICHT ui/SegmentedControl / ui/Switch (Paket 3, D4):
+	   - ui/SegmentedControl ist eine Pill-Optik (999px, halbtransparent, backdrop-blur)
+	     auf RAW --z-ds-Token für Bühnen-Adaptivität. PropField folgt der Figma-Vorlage
+	     689:11510 (Rechteck, radius 8, --ds-surface/--ds-border). Der Editor hat KEINE
+	     .ds-stage → ein Tausch würde die Form sichtbar verändern (verschlimmbessern),
+	     ohne Adaptivitäts-Gewinn. Darum bleibt .seg lokal.
+	   - ui/Switch bündelt sein eigenes Label (label-Prop, text-sm). PropField setzt das
+	     Label separat als .pf-lbl (text-xs, muted, order:1 in der Boolean-Zeile). Ein
+	     Tausch brächte doppeltes/abweichend gestyltes Label → auch hier bleibt .switch
+	     lokal, damit die Boolean-Zeile der Vorlage treu bleibt. */
 
 	/* Switch statt Checkbox. */
 	.switch {

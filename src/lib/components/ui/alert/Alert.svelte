@@ -2,6 +2,13 @@
   Alert.svelte — Callout/Hinweis-Box. Adaptiv über z-ds-Tokens.
   Inhalt entweder über title/description (einfach) ODER als children (rich content).
   Varianten: default · info · success · warning · danger · tip.
+
+  Zusatz-Slots/Modi (additiv, ändern die Bestands-Consumer nicht):
+  - actions:  Button-/Link-Zeile unter dem Text (Muster vom früheren DriftBanner).
+  - role:     ARIA-Rolle der Fläche — 'note' (Default) · 'status' · 'alert'.
+  - compact:  schmales Hinweis-Band (kleineres Padding/Radius, kein Block-Abstand),
+              ersetzt das frühere AdminFlash-Statusband.
+  - class:    Klassen-Passthrough (z. B. rahmenlose Sonderoptik ohne Consumer-Bruch).
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -12,7 +19,11 @@
 		variant = 'default',
 		title,
 		description,
-		children
+		children,
+		actions,
+		role = 'note',
+		compact = false,
+		class: className = ''
 	}: {
 		/** Ton/Semantik der Box. */
 		variant?: Variant;
@@ -22,10 +33,18 @@
 		description?: string;
 		/** Reicher Inhalt statt description (z. B. Markup in .svx). */
 		children?: Snippet;
+		/** Aktions-Zeile (Buttons/Links) unter dem Text. */
+		actions?: Snippet;
+		/** ARIA-Rolle der Fläche. */
+		role?: 'note' | 'status' | 'alert';
+		/** Schmales Statusband (à la Flash) statt großzügiger Callout-Box. */
+		compact?: boolean;
+		/** Zusätzliche Klassen (Passthrough). */
+		class?: string;
 	} = $props();
 </script>
 
-<div class="alert alert--{variant}" role="note">
+<div class="alert alert--{variant} {className}" class:alert--compact={compact} {role}>
 	<span class="alert__icon" aria-hidden="true">
 		{#if variant === 'success'}
 			<svg
@@ -94,6 +113,9 @@
 		{:else if description}
 			<p class="alert__desc">{description}</p>
 		{/if}
+		{#if actions}
+			<div class="alert__actions">{@render actions()}</div>
+		{/if}
 	</div>
 </div>
 
@@ -129,6 +151,26 @@
 	.alert__desc {
 		margin: 0;
 		font-size: var(--ds-text-sm);
+	}
+	/* Aktions-Zeile (Buttons/Links) unter dem Text — Muster vom früheren DriftBanner. */
+	.alert__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--z-ds-space-6);
+		margin-top: var(--z-ds-space-8);
+	}
+	/* Schmales Statusband (compact): weniger Padding, kleinerer Radius, kein
+	   Block-Abstand — ersetzt das frühere AdminFlash. Icon oben-zentriert. */
+	.alert--compact {
+		align-items: center;
+		gap: var(--z-ds-space-8);
+		padding: var(--z-ds-space-8) var(--z-ds-space-16);
+		border-radius: var(--ds-radius-sm);
+		margin-block: 0 var(--z-ds-space-24);
+		font-size: var(--ds-text-sm);
+	}
+	.alert--compact .alert__icon {
+		margin-top: 0;
 	}
 	/* Rich-Content: erste/letzte Ränder zähmen, damit der Block bündig sitzt. */
 	.alert__content :global(> :first-child) {

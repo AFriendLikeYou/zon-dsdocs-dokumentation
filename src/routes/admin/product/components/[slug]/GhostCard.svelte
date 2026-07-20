@@ -1,6 +1,7 @@
 <!--
   GhostCard — die gestrichelte „+ … ergänzen"-Einladung für einen leeren
-  Redaktions-Abschnitt. Ein Klick expandiert den Abschnitt (→ onexpand). Der Kopf
+  Redaktions-Abschnitt. Keine Leere-Anzeige, sondern interaktive Einladung — bewusst
+  getrennt von EmptyState. Ein Klick expandiert den Abschnitt (→ onexpand). Der Kopf
   bleibt ruhig; nur Kontur/Farbe reagieren auf Hover (Emil-ease-out), auf :active
   gibt es ein zartes Flächen-Feedback.
 

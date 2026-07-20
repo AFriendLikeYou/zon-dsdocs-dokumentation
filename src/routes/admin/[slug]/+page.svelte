@@ -4,7 +4,8 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
-	import { AdminPageHeader, AdminFlash } from '../ui';
+	import { AdminPageHeader } from '../ui';
+	import { Alert } from '$components/ui/alert';
 
 	let { data }: import('./$types').PageProps = $props();
 
@@ -285,9 +286,9 @@
 	</AdminPageHeader>
 
 	{#if !data.writable}
-		<AdminFlash tone="warn">
+		<Alert compact variant="warning">
 			Nur-Lese-Vorschau: Schreiben ist im Prod-Modus deaktiviert (Phase 1b: GitHub-PR).
-		</AdminFlash>
+		</Alert>
 	{/if}
 
 	<form method="POST" bind:this={formEl} use:enhance={handleSubmit}>

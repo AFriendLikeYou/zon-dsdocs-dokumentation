@@ -15,6 +15,7 @@
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
 	import { Select } from '$components/ui/field';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 
 	let {
 		list,
@@ -57,11 +58,10 @@
 					title="Öffentliche Doku-Seite ansehen"
 					aria-label="Doku-Seite von {nameOf(slug)} ansehen">↗</a
 				>
-				<button
-					type="button"
+				<IconActionButton
 					class="related__remove"
 					onclick={() => list.splice(i, 1)}
-					aria-label="{nameOf(slug)} entfernen"><Icon name="close" /></button
+					ariaLabel="{nameOf(slug)} entfernen"><Icon name="close" /></IconActionButton
 				>
 			</span>
 		{/each}
@@ -127,7 +127,9 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.related__remove {
+	/* Entfernen-Button = ui/IconActionButton (Klasse durchgereicht) → Passthrough-Regeln
+	   als :global unter dem scoped .related__chip (kein globaler Leak). */
+	.related__chip :global(.related__remove) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -145,11 +147,11 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.related__remove:hover {
+	.related__chip :global(.related__remove:hover) {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	.related__remove:focus-visible {
+	.related__chip :global(.related__remove:focus-visible) {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
@@ -167,8 +169,10 @@
 		border-color: var(--ds-accent);
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.related__link,
-		.related__remove {
+		.related__link {
+			transition: none;
+		}
+		.related__chip :global(.related__remove) {
 			transition: none;
 		}
 	}

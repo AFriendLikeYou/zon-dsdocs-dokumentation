@@ -6,7 +6,8 @@
 -->
 <script lang="ts">
 	import BlockMenuList from './BlockMenuList.svelte';
-	import PopoverSheet from './PopoverSheet.svelte';
+	import { PopoverSheet } from '../../ui';
+	import { Field } from '$components/ui/field';
 	import { Icon } from '$lib/icons/cms';
 	import { cycleIndex } from '../core/cycle';
 
@@ -26,7 +27,7 @@
 	let open = $state(false);
 	let query = $state('');
 	let activeIdx = $state(0);
-	let input = $state<HTMLInputElement | null>(null);
+	let input = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
 	let triggerEl = $state<HTMLElement | null>(null);
 
 	const filtered = $derived(
@@ -91,8 +92,8 @@
 		maxWidth="80vw"
 		onclose={close}
 	>
-		<input
-			bind:this={input}
+		<Field
+			bind:element={input}
 			class="insert-menu__search"
 			type="text"
 			placeholder="Suchen…"
@@ -145,19 +146,10 @@
 		flex: none;
 	}
 
-	.insert-menu__search {
+	/* Suchfeld ist jetzt ui/Field (Fläche/Kontur/Fokus trägt das Atom); hier bleibt
+	   nur die Layout-Einbettung im Popover. */
+	:global(.insert-menu__search) {
 		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-8);
 		margin-bottom: var(--z-ds-space-6);
-	}
-	.insert-menu__search:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 </style>

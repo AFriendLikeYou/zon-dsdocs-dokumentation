@@ -9,8 +9,8 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { matchesMedia, MOBILE_QUERY } from '../core/media.svelte';
-	import { clickOutside, anchoredPopover } from '../core/actions';
+	import { matchesMedia, MOBILE_QUERY } from '../brand/core/media.svelte';
+	import { clickOutside, anchoredPopover } from '../brand/core/actions';
 
 	let {
 		open,

@@ -22,6 +22,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { Icon } from '$lib/icons/cms';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 
 	/** Zeilen-Objekt: Feld-Key → Wert. Bewusst flach (String-Felder + Status-Selects). */
 	type Row = Record<string, string>;
@@ -89,11 +90,10 @@
 	{#each list as _, i (i)}
 		<div class="rlf__row">
 			{@render row(list[i], i)}
-			<button
-				type="button"
+			<IconActionButton
 				class="rlf__remove"
 				onclick={() => list.splice(i, 1)}
-				aria-label="Entfernen"><Icon name="close" /></button
+				ariaLabel="Entfernen"><Icon name="close" /></IconActionButton
 			>
 		</div>
 	{/each}
@@ -140,7 +140,9 @@
 		color: var(--ds-text-faint);
 		font-size: var(--ds-text-sm);
 	}
-	.rlf__remove {
+	/* Entfernen-Button = ui/IconActionButton (Klasse durchgereicht) → Passthrough-Regeln
+	   als :global unter der scoped .rlf__row (kein globaler Leak). */
+	.rlf__row :global(.rlf__remove) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -160,26 +162,26 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.rlf__row:hover .rlf__remove,
-	.rlf__row:focus-within .rlf__remove {
+	.rlf__row:hover :global(.rlf__remove),
+	.rlf__row:focus-within :global(.rlf__remove) {
 		opacity: 1;
 	}
-	.rlf__remove:hover {
+	.rlf__row :global(.rlf__remove:hover) {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	.rlf__remove:focus-visible {
+	.rlf__row :global(.rlf__remove:focus-visible) {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 		opacity: 1;
 	}
 	@media (hover: none) {
-		.rlf__remove {
+		.rlf__row :global(.rlf__remove) {
 			opacity: 1;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.rlf__remove {
+		.rlf__row :global(.rlf__remove) {
 			transition: none;
 		}
 	}

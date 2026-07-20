@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { AdminPageHeader, AdminFlash, AdminEmpty } from '../ui';
+	import { AdminPageHeader } from '../ui';
+	import { Alert } from '$components/ui/alert';
+	import { EmptyState } from '$components/ui/empty-state';
 
 	let { data, form }: import('./$types').PageProps = $props();
 
@@ -67,22 +69,22 @@
 	</AdminPageHeader>
 
 	{#if form?.uploaded}
-		<AdminFlash tone="ok" role="status">
+		<Alert compact variant="success" role="status">
 			Hochgeladen: <code>{form.path}</code>
 			<button type="button" class="link" onclick={() => copyPath(String(form?.path))}>
 				{copied === form.path ? 'Kopiert!' : 'Pfad kopieren'}
 			</button>
-		</AdminFlash>
+		</Alert>
 	{:else if form?.deleted}
-		<AdminFlash tone="ok" role="status">Gelöscht: <code>{form.path}</code></AdminFlash>
+		<Alert compact variant="success" role="status">Gelöscht: <code>{form.path}</code></Alert>
 	{:else if form?.message}
-		<AdminFlash tone="err" role="alert">{form.message}</AdminFlash>
+		<Alert compact variant="danger" role="alert">{form.message}</Alert>
 	{/if}
 	{#if !data.writable}
-		<AdminFlash tone="warn">
+		<Alert compact variant="warning">
 			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht persistent
 			→ Blob-Store/GitHub, Phase 3).
-		</AdminFlash>
+		</Alert>
 	{/if}
 
 	<form
@@ -181,7 +183,7 @@
 		{/each}
 	</ul>
 	{#if filtered.length === 0}
-		<AdminEmpty>Kein Treffer — Suche oder Ordner-Filter anpassen.</AdminEmpty>
+		<EmptyState appearance="dashed">Kein Treffer — Suche oder Ordner-Filter anpassen.</EmptyState>
 	{/if}
 </div>
 

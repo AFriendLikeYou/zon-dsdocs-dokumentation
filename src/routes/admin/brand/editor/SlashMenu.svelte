@@ -10,7 +10,7 @@
 -->
 <script lang="ts">
 	import BlockMenuList from './BlockMenuList.svelte';
-	import PopoverSheet from './PopoverSheet.svelte';
+	import { PopoverSheet } from '../../ui';
 
 	type Item = { name: string; label: string; icon: string };
 	let {

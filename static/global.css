@@ -606,3 +606,14 @@ a[href]:not([class]) {
 ul ul {
 	margin-block: var(--z-ds-space-16);
 }
+
+/* ── Fokus-Ring-Utility (ADR-011-Schicht) ─────────────────────────────────────
+   Kanonischer Tastatur-Fokus für NEU gebaute interaktive Elemente: 2px --ds-focus-ring,
+   offset 2px. Bündelt das hand-wiederholte Standard-Muster an EINER Stelle.
+   Nutzung: class="… focus-ring" auf Buttons/Links/Feldern.
+   Bestehende, bereits korrekte 2px/2px-Regeln in Komponenten dürfen bleiben; bewusste
+   Abweichungen (z. B. offset -2 in engen Toggles) tragen einen Begründungs-Kommentar. */
+.focus-ring:focus-visible {
+	outline: 2px solid var(--ds-focus-ring);
+	outline-offset: 2px;
+}

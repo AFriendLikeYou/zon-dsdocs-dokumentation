@@ -12,6 +12,7 @@
 -->
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
+	import { IconActionButton } from '$components/ui/icon-action-button';
 
 	type Beispiel = { label: string; sprache: string; code: string; hinweis: string };
 
@@ -45,11 +46,10 @@
 						<option value={s.value}>{s.label}</option>
 					{/each}
 				</select>
-				<button
-					type="button"
+				<IconActionButton
 					class="code-examples__remove"
 					onclick={() => list.splice(i, 1)}
-					aria-label="Beispiel entfernen"><Icon name="close" /></button
+					ariaLabel="Beispiel entfernen"><Icon name="close" /></IconActionButton
 				>
 			</div>
 			<textarea
@@ -146,7 +146,9 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: -1px;
 	}
-	.code-examples__remove {
+	/* Entfernen-Button = ui/IconActionButton (Klasse durchgereicht) → Passthrough-Regeln
+	   als :global unter dem scoped .code-examples__head (kein globaler Leak). */
+	.code-examples__head :global(.code-examples__remove) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -164,11 +166,11 @@
 			background var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out),
 			color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
 	}
-	.code-examples__remove:hover {
+	.code-examples__head :global(.code-examples__remove:hover) {
 		color: var(--ds-negative, var(--ds-text));
 		background: rgb(from var(--ds-negative, var(--ds-text)) r g b / 0.1);
 	}
-	.code-examples__remove:focus-visible {
+	.code-examples__head :global(.code-examples__remove:focus-visible) {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}

@@ -10,7 +10,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
-	import PopoverSheet from './PopoverSheet.svelte';
+	import { PopoverSheet } from '../../ui';
+	import { Field } from '$components/ui/field';
 	import { isImagePath, isVideoPath } from '../core/media-types';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
@@ -38,7 +39,7 @@
 
 	let open = $state(false);
 	let query = $state('');
-	let input = $state<HTMLInputElement | null>(null);
+	let input = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
 	let triggerEl = $state<HTMLElement | null>(null);
 
 	const current = $derived(media.find((m) => m.path === value));
@@ -176,8 +177,8 @@
 		maxWidth="82vw"
 		onclose={close}
 	>
-		<input
-			bind:this={input}
+		<Field
+			bind:element={input}
 			class="media-picker__search"
 			type="text"
 			placeholder={canUpload
@@ -329,20 +330,11 @@
 		outline-offset: 1px;
 	}
 
-	.media-picker__search {
+	/* Suchfeld ist jetzt ui/Field (Fläche/Kontur/Fokus trägt das Atom); hier bleibt
+	   nur die Layout-Einbettung im Popover. */
+	:global(.media-picker__search) {
 		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-8);
 		margin-bottom: var(--z-ds-space-6);
-	}
-	.media-picker__search:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 	.media-picker__grid {
 		display: grid;

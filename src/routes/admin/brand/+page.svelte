@@ -3,7 +3,8 @@
 	import { invalidateAll, goto } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
 	import { Icon } from '$lib/icons/cms';
-	import { AdminPageHeader, AdminRow, AdminFlash, AdminBadge } from '../ui';
+	import { AdminPageHeader, AdminRow, AdminBadge } from '../ui';
+	import { Alert } from '$components/ui/alert';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
 
@@ -232,9 +233,9 @@
 	{/if}
 
 	{#if !data.writable}
-		<AdminFlash tone="warn">
+		<Alert compact variant="warning">
 			Nur-Lese-Vorschau: Umsortieren ist im Prod-Modus deaktiviert (Phase 2b: GitHub-PR).
-		</AdminFlash>
+		</Alert>
 	{/if}
 
 	<ul class="tree" class:is-saving={saving}>

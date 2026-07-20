@@ -3,6 +3,12 @@
   „Code-Seite", Status). Vereinheitlicht die zuvor je Seite eigenen .badge/.tag/
   .code-note-Stile auf eine Form (999px-Radius, xs, weicher Rahmen).
 
+  BEWUSST getrennt von ui/Badge: Badge ist ein Status-Pill mit Farb-Tint + Punkt
+  (::before) und Status-Semantik (neutral/ready/done/warn). AdminBadge ist eine
+  rahmen-basierte Meta-Pille OHNE Punkt/Tint und trägt eine eigene, punktlose
+  ‚muted'-Variante (kursiver Nur-Text, z. B. „Code-Seite"), die es im Badge-Vokabular
+  nicht gibt. Ein Merge würde die CMS-Übersichten sichtbar verändern → kein Merge.
+
   Props:
   - tone: ‚default' (weicher Rahmen) | ‚accent' (Akzent-Rahmen) | ‚muted' (nur Text,
           kursiv — z. B. „Code-Seite").

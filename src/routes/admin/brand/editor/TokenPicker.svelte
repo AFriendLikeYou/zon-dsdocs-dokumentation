@@ -66,6 +66,11 @@
 		class:token-picker__swatch--empty={!value.trim()}
 		style:background={swatchColor}
 	></span>
+	<!-- Bewusst KEIN ui/Field (Paket 3, P2): inputEl ist zugleich der Anker von
+	     use:anchoredPopover (matchWidth am RohElement) UND trägt einen führenden Swatch
+	     im selben Feldrahmen. Field kapselt das Element in einen Wrapper und leitet
+	     keine `use:`-Action durch → ein Tausch würde die Popover-Anker-/Breiten-Logik
+	     und das Swatch-Layout umbauen (Verhaltensrisiko). Darum bleibt es ein Roh-Input. -->
 	<input
 		bind:this={inputEl}
 		class="token-picker__input"

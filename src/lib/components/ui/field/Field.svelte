@@ -38,6 +38,8 @@
 		error?: boolean;
 		/** Zusätzliche Klassen auf dem Wrapper. */
 		class?: string;
+		/** Bedienelement (input/textarea) — bind:element für Fokus-/Anker-Zugriff. */
+		element?: HTMLInputElement | HTMLTextAreaElement | null;
 	} & Omit<HTMLInputAttributes & HTMLTextareaAttributes, 'value' | 'class'>;
 
 	let {
@@ -49,6 +51,7 @@
 		shortcut,
 		error = false,
 		class: className = '',
+		element = $bindable(null),
 		...restProps
 	}: Props = $props();
 </script>
@@ -62,9 +65,9 @@
 		<span class="field__icon">{@render icon()}</span>
 	{/if}
 	{#if multiline}
-		<textarea class="field__control" bind:value {rows} {...restProps}></textarea>
+		<textarea class="field__control" bind:this={element} bind:value {rows} {...restProps}></textarea>
 	{:else}
-		<input class="field__control" bind:value {...restProps} />
+		<input class="field__control" bind:this={element} bind:value {...restProps} />
 	{/if}
 	{#if shortcut}
 		<span class="field__shortcut">{@render shortcut()}</span>

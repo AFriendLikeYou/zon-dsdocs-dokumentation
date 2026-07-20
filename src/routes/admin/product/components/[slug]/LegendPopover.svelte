@@ -3,14 +3,13 @@
   (früher in der Fußzeile) in einem Popover öffnet: was „⇣ aus Figma“ / „✎ Redaktion“
   bedeuten und wann ein Herkunft-Badge erscheint.
 
-  Nutzt die geteilte PopoverSheet-Hülle des Brand-Editors (Desktop: verankertes
+  Nutzt die geteilte PopoverSheet-Hülle (admin/ui, Desktop: verankertes
   Popover mit Outside-Click, Mobile: Bottom-Sheet). Esc schließt und gibt den Fokus
   an den Trigger zurück; aria-haspopup/-expanded verknüpfen Trigger und Dialog.
 -->
 <script lang="ts">
 	import { InfoIcon } from '$lib/icons';
-	import PopoverSheet from '../../../brand/editor/PopoverSheet.svelte';
-	import { Pill } from '../../../ui';
+	import { PopoverSheet, Pill } from '../../../ui';
 	import ProvenanceChip from './ProvenanceChip.svelte';
 
 	let open = $state(false);
