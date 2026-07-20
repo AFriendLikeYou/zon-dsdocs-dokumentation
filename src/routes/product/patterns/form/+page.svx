@@ -17,7 +17,8 @@ title: Formular
 	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns.
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { CardGrid } from '$components/ui/card';
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
 
 	import inputCss from '../../components/input/pattern.css?raw';
 	import checkboxCss from '../../components/checkbox/pattern.css?raw';
@@ -58,24 +59,6 @@ title: Formular
 
   <button class="z-button z-button--primary" type="submit">Anmelden</button>
 </form>`;
-
-	const related = [
-		{
-			url: '/product/components/input',
-			title: 'Input',
-			description: 'Das Eingabefeld — Zustände, Fehler und Slots.'
-		},
-		{
-			url: '/product/components/checkbox',
-			title: 'Checkbox',
-			description: 'Das Auswahlkästchen für Zustimmungen und Optionen.'
-		},
-		{
-			url: '/product/components/button',
-			title: 'Button',
-			description: 'Die Aktion, die das Formular absendet.'
-		}
-	];
 
 	const regeln = {
 		nutzen: [
@@ -120,7 +103,23 @@ Component-Ordnern.
 
 ## Beteiligte Komponenten
 
-<CardGrid cards={related} />
+<Grid auto={true} autoMode="fill" minWidth="340px" rowGap="xxl" columnGap="lg" marginBlock="lg">
+	<Card
+		title="Input"
+		description="Das Eingabefeld — Zustände, Fehler und Slots."
+		url="/product/components/input"
+	/>
+	<Card
+		title="Checkbox"
+		description="Das Auswahlkästchen für Zustimmungen und Optionen."
+		url="/product/components/checkbox"
+	/>
+	<Card
+		title="Button"
+		description="Die Aktion, die das Formular absendet."
+		url="/product/components/button"
+	/>
+</Grid>
 
 <style>
 	.pf-stage {

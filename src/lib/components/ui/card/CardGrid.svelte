@@ -1,6 +1,17 @@
 <!--
-  CardGrid.svelte — responsives Grid aus Card-Karten für Übersichtsseiten
-  (Product-/Foundations-/Patterns-Index, RelatedComponents im Specsheet).
+  CardGrid.svelte — DATEN-GETRIEBENES Karten-Raster: Karten entstehen im Code aus
+  einem Array (`cards={…}`), nicht als literales Markup.
+
+  Rollenteilung zu `ui/grid/Grid.svelte`:
+    - `CardGrid` ist für Aufrufer, die ihre Karten programmatisch bilden — allen
+      voran `ui/specsheet/RelatedComponents.svelte` auf den generierten
+      Component-Seiten. Das Ausdruck-Prop `cards={…}` ist für das CMS
+      prinzipiell nicht editierbar (`coerceAttrs` lehnt `kind === 'expr'`
+      bewusst ab), deshalb gehört CardGrid NICHT in redaktionelle Seiten.
+    - Handgepflegte Übersichtsseiten nutzen stattdessen `<Grid autoMode="fill"
+      minWidth="340px" rowGap="xxl" columnGap="lg" marginBlock="lg">` mit
+      literalen `<Card>`-Kindern — dann sind Raster UND jede Karte im CMS
+      editierbar. Die Grid-Props oben ergeben exakt dieses Raster hier.
 -->
 <script lang="ts">
 	import Card from './Card.svelte';

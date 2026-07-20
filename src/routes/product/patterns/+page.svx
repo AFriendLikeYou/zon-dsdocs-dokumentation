@@ -9,19 +9,10 @@ title: Patterns
 <script lang="ts">
 	// HANDKURATIERT: Patterns sind Kompositions-Rezepte, nicht einzelne Komponenten.
 	// Sie laufen NICHT über den Component-Exporter — die Übersicht wird hier von Hand
-	// gepflegt (bewusst, siehe DECISIONS.md ADR-026).
-	import { CardGrid } from '$components/ui/card';
-
-	const patterns = [
-		{
-			url: '/product/patterns/form',
-			title: 'Formular',
-			description:
-				'Label, Eingabefeld, Checkbox, Button und Fehlertext zu einem zugänglichen Formular zusammengesetzt.',
-			badge: 'Neu',
-			badgeVariant: 'accent' as const
-		}
-	];
+	// gepflegt (bewusst, siehe DECISIONS.md ADR-026). Die Karten stehen literal im
+	// Markup, damit die Redaktion sie im CMS einzeln pflegen kann.
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
 </script>
 
 # {title}
@@ -31,4 +22,12 @@ Ein Pattern ist ein erprobtes Rezept für eine wiederkehrende Aufgabe: welche Ko
 in welcher Reihenfolge, mit welchen Abständen und welchen Regeln. Sie nutzen dieselben
 `z-`-Klassen wie die Component-Seiten, ohne CSS zu duplizieren.
 
-<CardGrid cards={patterns} />
+<Grid auto={true} autoMode="fill" minWidth="340px" rowGap="xxl" columnGap="lg" marginBlock="lg">
+	<Card
+		title="Formular"
+		description="Label, Eingabefeld, Checkbox, Button und Fehlertext zu einem zugänglichen Formular zusammengesetzt."
+		url="/product/patterns/form"
+		badge="Neu"
+		badgeVariant="accent"
+	/>
+</Grid>

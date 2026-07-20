@@ -244,18 +244,33 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 			{ key: 'columns', label: 'Spalten', type: 'number', default: '1' },
 			{ key: 'auto', label: 'Auto-Fit', type: 'boolean', default: false },
 			{
+				key: 'autoMode',
+				label: 'Auto-Verhalten',
+				type: 'select',
+				options: ['fit', 'fill'],
+				default: 'fit'
+			},
+			{ key: 'minWidth', label: 'Mindestbreite Spalte', type: 'text', default: '100px' },
+			{
 				key: 'rowGap',
 				label: 'Zeilen-Abstand',
 				type: 'select',
-				options: ['none', 'xs', 'sm', 'md', 'lg', 'xl'],
+				options: ['none', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
 				default: 'md'
 			},
 			{
 				key: 'columnGap',
 				label: 'Spalten-Abstand',
 				type: 'select',
-				options: ['none', 'xs', 'sm', 'md', 'lg', 'xl'],
+				options: ['none', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
 				default: 'md'
+			},
+			{
+				key: 'marginBlock',
+				label: 'Außenabstand oben/unten',
+				type: 'select',
+				options: ['none', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
+				default: 'none'
 			},
 			{
 				key: 'justify',
@@ -458,6 +473,10 @@ export function parseContainerTag(
  */
 function formatAttr(p: CmsPropDef, values: Record<string, string | boolean>): string | null {
 	const v = values[p.key];
+	// Gar nicht gesetzt = Default → weglassen. Wichtig, sobald die Registry um ein
+	// Prop wächst: Aufrufer mit älterem Werte-Objekt dürfen kein `neuesProp=""`
+	// ins Markup schreiben. (Ein ausdrücklich leerer String bleibt davon unberührt.)
+	if (v === undefined && !p.required) return null;
 	if (p.type === 'boolean') {
 		const b = v === true || v === 'true';
 		return b !== (p.default === true) ? `${p.key}={${b}}` : null;

@@ -218,6 +218,32 @@ describe('Container: parse / serialize / info', () => {
 		expect(out).toContain('</Grid>');
 		// align/rowGap/columnGap = Default → weggelassen
 		expect(out).not.toContain('align=');
+		// Nicht übergebene Props (hier die Raster-Props autoMode/minWidth/marginBlock)
+		// dürfen NICHT als leeres Attribut auftauchen.
+		expect(out).not.toContain('autoMode=');
+		expect(out).not.toContain('minWidth=');
+		expect(out).not.toContain('marginBlock=');
+		expect(out).not.toContain('=""');
+	});
+
+	it('serialisiert das Karten-Raster der Übersichtsseiten verlustfrei', () => {
+		const values = {
+			auto: true,
+			autoMode: 'fill',
+			minWidth: '340px',
+			rowGap: 'xxl',
+			columnGap: 'lg',
+			marginBlock: 'lg'
+		};
+		const out = serializeContainerTag(CMS_MAP.Grid, values, [
+			{ name: 'Card', values: { title: 'T', description: 'D', url: '/x' } }
+		]);
+		expect(out).toContain('autoMode="fill"');
+		expect(out).toContain('minWidth="340px"');
+		expect(out).toContain('rowGap="xxl"');
+		expect(out).toContain('columnGap="lg"');
+		expect(out).toContain('marginBlock="lg"');
+		expect(out).toContain('\t<Card');
 	});
 
 	it('Round-trip: containerIslandInfo(serialize(...)) ergibt dieselben Werte', () => {

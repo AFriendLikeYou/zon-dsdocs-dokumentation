@@ -92,47 +92,128 @@ function inline(s: string): string {
 		.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
 }
 
+/** Aufzählungspunkt `- Text`. */
+const UL_ITEM = /^-\s+/;
+/** Nummerierter Punkt `1. Text` — die Zahl selbst wird nicht mit ausgegeben. */
+const OL_ITEM = /^\d+\.\s+/;
+/** Zitatzeile `> Text` (das Leerzeichen ist optional). */
+const QUOTE_LINE = /^>\s?/;
+/** Tabellenzeile — muss am Zeilenanfang mit `|` beginnen. */
+const TABLE_LINE = /^\|/;
+/** Trennzeile einer Tabelle: nur `|`, `-`, `:` und Leerraum, mindestens ein `-`. */
+const TABLE_DIVIDER = /^\|[\s:|-]*-[\s:|-]*\|?\s*$/;
+
+/** `| a | b |` → `['a', 'b']` (führendes/abschließendes Pipe fällt weg). */
+function tableCells(line: string): string[] {
+	return line
+		.replace(/^\|/, '')
+		.replace(/\|\s*$/, '')
+		.split('|')
+		.map((c) => c.trim());
+}
+
 /**
- * Kleine, sichere Markdown-Vorschau: Überschriften, Listen, Absätze, fett/kursiv/
- * Code/Links. Erst escapen, dann übersetzen — eingegebenes HTML bleibt Text.
+ * Kleine, sichere Markdown-Vorschau: Überschriften, Absätze, Aufzählungen (`-`),
+ * nummerierte Listen (`1.`), Zitate (`> `), Tabellen (`| … |` mit Trennzeile) und
+ * inline fett/kursiv/Code/Links.
  *
- * Zeilenbasiert wie CommonMark/mdsvex: `# Überschrift` und `- Punkt` brauchen
- * KEINE Leerzeile davor (sie unterbrechen Absätze); einzelne Zeilenumbrüche in
- * einem Absatz sind Soft-Breaks und fließen zusammen.
+ * SICHERHEIT: Jeder Textschnipsel läuft durch `inline(escapeHtml(…))` — erst
+ * escapen, dann die wenigen Muster übersetzen. Eingegebenes HTML bleibt damit
+ * überall Text, auch in Tabellenzellen, Zitaten und Listenpunkten. Die Vorschau
+ * landet per `{@html}` im Editor; es darf KEINEN Pfad geben, auf dem Redaktions-
+ * Text ungeescapet ins Markup gelangt.
+ *
+ * Zeilenbasiert wie CommonMark/mdsvex: Blockstarter brauchen KEINE Leerzeile
+ * davor (sie unterbrechen Absätze); einzelne Zeilenumbrüche in einem Absatz sind
+ * Soft-Breaks und fließen zusammen. Eingerückte Folgezeilen einer Liste hängen am
+ * vorherigen Punkt (Lazy Continuation) statt einen neuen Absatz zu beginnen.
  */
 export function renderPreview(md: string): string {
 	const out: string[] = [];
 	let para: string[] = [];
-	let list: string[] = [];
+	let ul: string[] = [];
+	let ol: string[] = [];
+	let quote: string[] = [];
+	let table: string[] = [];
+
+	const cell = (s: string) => inline(escapeHtml(s));
+
 	const flushPara = () => {
-		if (para.length) out.push(`<p>${para.map((l) => inline(escapeHtml(l))).join(' ')}</p>`);
+		if (para.length) out.push(`<p>${para.map(cell).join(' ')}</p>`);
 		para = [];
 	};
-	const flushList = () => {
-		if (list.length)
-			out.push(`<ul>${list.map((l) => `<li>${inline(escapeHtml(l))}</li>`).join('')}</ul>`);
-		list = [];
+	const flushUl = () => {
+		if (ul.length) out.push(`<ul>${ul.map((l) => `<li>${cell(l)}</li>`).join('')}</ul>`);
+		ul = [];
 	};
+	const flushOl = () => {
+		if (ol.length) out.push(`<ol>${ol.map((l) => `<li>${cell(l)}</li>`).join('')}</ol>`);
+		ol = [];
+	};
+	const flushQuote = () => {
+		if (quote.length) out.push(`<blockquote><p>${quote.map(cell).join(' ')}</p></blockquote>`);
+		quote = [];
+	};
+	const flushTable = () => {
+		if (!table.length) return;
+		// Ohne Kopf- UND Trennzeile ist es keine Tabelle → als Absatz zeigen, nicht schlucken.
+		if (table.length < 2 || !TABLE_DIVIDER.test(table[1])) {
+			out.push(`<p>${table.map(cell).join(' ')}</p>`);
+			table = [];
+			return;
+		}
+		const head = tableCells(table[0])
+			.map((c) => `<th>${cell(c)}</th>`)
+			.join('');
+		// Zeile 1 ist die Trennzeile — sie ist Syntax, kein Inhalt.
+		const body = table
+			.slice(2)
+			.map((r) => `<tr>${tableCells(r).map((c) => `<td>${cell(c)}</td>`).join('')}</tr>`)
+			.join('');
+		out.push(`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`);
+		table = [];
+	};
+	/** Alle Puffer außer dem gerade befüllten leeren — es ist immer höchstens einer offen. */
+	const flushAll = (keep?: 'para' | 'ul' | 'ol' | 'quote' | 'table') => {
+		if (keep !== 'para') flushPara();
+		if (keep !== 'ul') flushUl();
+		if (keep !== 'ol') flushOl();
+		if (keep !== 'quote') flushQuote();
+		if (keep !== 'table') flushTable();
+	};
+
 	for (const raw of md.split('\n')) {
 		const line = raw.trimEnd();
 		const h = /^(#{1,6})\s+(.*)$/.exec(line);
+		const indented = /^\s+\S/.test(raw);
+
 		if (h) {
-			flushPara();
-			flushList();
+			flushAll();
 			const level = Math.min(h[1].length, 6);
 			out.push(`<h${level}>${inline(escapeHtml(h[2]))}</h${level}>`);
-		} else if (/^-\s+/.test(line)) {
-			flushPara();
-			list.push(line.replace(/^-\s+/, ''));
+		} else if (UL_ITEM.test(line)) {
+			flushAll('ul');
+			ul.push(line.replace(UL_ITEM, ''));
+		} else if (OL_ITEM.test(line)) {
+			flushAll('ol');
+			ol.push(line.replace(OL_ITEM, ''));
+		} else if (QUOTE_LINE.test(line)) {
+			flushAll('quote');
+			quote.push(line.replace(QUOTE_LINE, ''));
+		} else if (TABLE_LINE.test(line)) {
+			flushAll('table');
+			table.push(line);
 		} else if (line.trim() === '') {
-			flushPara();
-			flushList();
+			flushAll();
+		} else if (indented && (ul.length || ol.length)) {
+			// Lazy Continuation: eingerückte Folgezeile gehört zum letzten Listenpunkt.
+			const buf = ol.length ? ol : ul;
+			buf[buf.length - 1] += ` ${line.trim()}`;
 		} else {
-			flushList();
+			flushAll('para');
 			para.push(line);
 		}
 	}
-	flushPara();
-	flushList();
+	flushAll();
 	return out.join('') || '<p class="md-empty">Noch kein Inhalt.</p>';
 }

@@ -236,9 +236,33 @@
 	.pe-preview :global(p) {
 		margin: 0.35em 0;
 	}
-	.pe-preview :global(ul) {
+	.pe-preview :global(ul),
+	.pe-preview :global(ol) {
 		margin: 0.35em 0;
 		padding-left: 1.2em;
+	}
+	.pe-preview :global(blockquote) {
+		margin: 0.5em 0;
+		padding-left: 0.8em;
+		border-left: 3px solid var(--ds-border-strong);
+		color: var(--ds-text-muted);
+	}
+	.pe-preview :global(table) {
+		width: 100%;
+		margin: 0.5em 0;
+		border-collapse: collapse;
+	}
+	.pe-preview :global(th),
+	.pe-preview :global(td) {
+		border: 1px solid var(--ds-border-soft);
+		padding: 0.25em 0.5em;
+		text-align: left;
+		vertical-align: top;
+	}
+	.pe-preview :global(th) {
+		color: var(--ds-text);
+		font-weight: 600;
+		background: var(--ds-surface-raised, var(--ds-surface));
 	}
 	.pe-preview :global(code) {
 		font-family: var(--ds-font-mono);

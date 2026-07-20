@@ -7,23 +7,8 @@ title: Willkommen
 </svelte:head>
 
 <script lang="ts">
-	import { CardGrid } from '$components/ui/card';
-
-	// Zwei Einstiegs-Strecken als Karten (Anker auf die Abschnitte weiter unten).
-	const tracks = [
-		{
-			url: '#fuer-designerinnen',
-			title: 'Für Designer:innen',
-			description:
-				'Von der Figma-Library zur fertigen Komponente — welche wann, und wie du eine Component-Seite liest.'
-		},
-		{
-			url: '#fuer-entwicklerinnen',
-			title: 'Für Entwickler:innen',
-			description:
-				'DS-CSS einbinden, z-Klassen und pattern.css verstehen, Props, Tokens und der MCP-Endpoint.'
-		}
-	];
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
 </script>
 
 # {title}
@@ -33,7 +18,18 @@ Komponenten und die Regeln dahinter. Diese Seite ist der Einstieg: Sie richtet s
 zwei Rollen und zeigt jeder einen kurzen, sinnvollen Weg durch die Doku. Such dir deine
 Strecke aus — beide brauchen kein Vorwissen.
 
-<CardGrid cards={tracks} />
+<Grid auto={true} autoMode="fill" minWidth="340px" rowGap="xxl" columnGap="lg" marginBlock="lg">
+	<Card
+		title="Für Designer:innen"
+		description="Von der Figma-Library zur fertigen Komponente — welche wann, und wie du eine Component-Seite liest."
+		url="#fuer-designerinnen"
+	/>
+	<Card
+		title="Für Entwickler:innen"
+		description="DS-CSS einbinden, z-Klassen und pattern.css verstehen, Props, Tokens und der MCP-Endpoint."
+		url="#fuer-entwicklerinnen"
+	/>
+</Grid>
 
 ---
 
