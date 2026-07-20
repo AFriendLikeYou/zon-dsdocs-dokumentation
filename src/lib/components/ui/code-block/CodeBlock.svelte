@@ -186,6 +186,12 @@
 		background: var(--cb-bg);
 		font-family: var(--ds-font-mono);
 	}
+	/* Der Block-Abstand trennt vom FOLGENDEN Inhalt. Steht der Code-Block am Ende
+	   seines Gehäuses (z. B. als letztes Element im Playground), bliebe unten sonst
+	   ein toter Streifen. */
+	.code-block:last-child {
+		margin-bottom: 0;
+	}
 
 	/* Syntax (Dark) — aufgehellte Varianten, gleicher Farbton.
      Der globale html-Vorfahre muss in :global(), sonst prunt Svelte den Selektor. */
