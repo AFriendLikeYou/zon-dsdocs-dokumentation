@@ -9,6 +9,7 @@
 	import type { CmsPropDef } from '../core/cms-components';
 	import MediaPicker from './MediaPicker.svelte';
 	import TokenPicker from './TokenPicker.svelte';
+	import { Field, Select } from '$components/ui/field';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
 	let {
@@ -51,9 +52,9 @@
 				onchange={(e) => set(e.currentTarget.checked)}
 			/>
 		{:else if prop.type === 'number'}
-			<input
+			<Field
 				type="number"
-				class:err={!!error}
+				error={!!error}
 				value={str}
 				placeholder="0"
 				aria-invalid={!!error}
@@ -72,11 +73,11 @@
 				{/each}
 			</span>
 		{:else if prop.type === 'select'}
-			<select value={str} onchange={(e) => set(e.currentTarget.value)}>
+			<Select value={str} onchange={(e) => set(e.currentTarget.value)}>
 				{#each prop.options ?? [] as o (o)}
 					<option value={o}>{o}</option>
 				{/each}
-			</select>
+			</Select>
 		{:else if prop.type === 'media'}
 			<MediaPicker
 				value={str}
@@ -89,16 +90,17 @@
 		{:else if prop.format === 'token-color'}
 			<TokenPicker value={str} {tokens} {error} set={(v) => set(v)} />
 		{:else if prop.type === 'textarea'}
-			<textarea
-				class:err={!!error}
+			<Field
+				multiline
+				error={!!error}
 				value={str}
 				{placeholder}
 				aria-invalid={!!error}
 				oninput={(e) => set(e.currentTarget.value)}
-			></textarea>
+			/>
 		{:else}
-			<input
-				class:err={!!error}
+			<Field
+				error={!!error}
 				value={str}
 				{placeholder}
 				inputmode={prop.format === 'url' ? 'url' : undefined}
@@ -150,59 +152,9 @@
 		padding-left: 2px;
 	}
 
-	/* Controls: Fläche = Seite (--ds-surface), Rand, radius 8, Werte 16px. */
-	input,
-	textarea,
-	select {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-base);
-		color: var(--ds-text);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius, 8px);
-		padding: 9px 12px;
-		transition: border-color var(--ds-dur, 0.15s) var(--ds-ease-out, ease-out);
-	}
-	input::placeholder,
-	textarea::placeholder {
-		color: var(--ds-text-faint, var(--ds-text-muted));
-	}
-	input:hover,
-	textarea:hover,
-	select:hover {
-		border-color: var(--ds-border-hover, var(--ds-border-strong, var(--ds-border)));
-	}
-	input:focus-visible,
-	textarea:focus-visible,
-	select:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	input.err,
-	textarea.err {
-		border-color: var(--ds-negative, #b91109);
-	}
-	textarea {
-		resize: vertical;
-		line-height: 1.5;
-		field-sizing: content;
-		min-height: 2.6rem;
-	}
-	select {
-		appearance: none;
-		background-image:
-			linear-gradient(45deg, transparent 50%, var(--ds-text-muted) 50%),
-			linear-gradient(135deg, var(--ds-text-muted) 50%, transparent 50%);
-		background-position:
-			calc(100% - 18px) 50%,
-			calc(100% - 13px) 50%;
-		background-size:
-			5px 5px,
-			5px 5px;
-		background-repeat: no-repeat;
-		padding-right: 32px;
-	}
+	/* Text-/Zahl-/Auswahl-Controls kommen jetzt aus den geteilten Atomen
+	   Field/Select (field-base.css, density=comfortable). Hier bleibt nur das
+	   PropField-Eigene: Switch (Boolean) + Segmented Control (kurze Enums). */
 
 	/* Switch statt Checkbox. */
 	.switch {
@@ -285,9 +237,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		input,
-		textarea,
-		select,
 		.switch,
 		.switch::after,
 		.seg-opt {

@@ -14,6 +14,7 @@
 -->
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
+	import { Select } from '$components/ui/field';
 
 	let {
 		list,
@@ -67,12 +68,18 @@
 	</div>
 {/if}
 {#if available.length}
-	<select class="related__add" value="" onchange={add} aria-label="Verwandte Komponente hinzufügen">
+	<Select
+		class="related__add"
+		density="compact"
+		value=""
+		onchange={add}
+		aria-label="Verwandte Komponente hinzufügen"
+	>
 		<option value="" disabled selected>+ Komponente hinzufügen</option>
 		{#each available as s (s)}
 			<option value={s}>{nameOf(s)}</option>
 		{/each}
-	</select>
+	</Select>
 {/if}
 
 <style>
@@ -146,24 +153,18 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 1px;
 	}
-	.related__add {
+	/* Feld-Optik kommt aus dem Select-Atom (compact); hier nur die gestrichelte
+	   „Hinzufügen"-Kontur, intrinsische Breite und der Accent-Hover. */
+	:global(.related__add) {
 		align-self: flex-start;
 		width: auto;
 		max-width: 100%;
-		font-size: var(--ds-text-sm);
+		border-style: dashed;
+		border-color: var(--ds-border);
 		color: var(--ds-text-body);
-		background: var(--ds-surface-inset);
-		border: 1px dashed var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-m);
-		cursor: pointer;
 	}
-	.related__add:hover {
+	:global(.related__add:hover) {
 		border-color: var(--ds-accent);
-	}
-	.related__add:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 2px;
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.related__link,

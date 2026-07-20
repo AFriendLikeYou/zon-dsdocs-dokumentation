@@ -6,6 +6,7 @@
 	import { CloseIcon, ImportIcon, PencilIcon } from '$lib/icons';
 	import { resolveCssVar } from '$lib/utils';
 	import { AdminFlash, Pill } from '../../../ui';
+	import { Field, Select } from '$components/ui/field';
 	import MachineZone from './MachineZone.svelte';
 	import StringListField from './StringListField.svelte';
 	import RowListField from './RowListField.svelte';
@@ -594,16 +595,24 @@
      Das Zeilen-Objekt ist flach getippt (Record<string, string>) — passend zum
      generischen Feld; die Feld-Keys entsprechen den Spalten-Schemata. -->
 {#snippet wordingRow(entry: Record<string, string>)}
-	<input
+	<Field
 		class="row__input"
+		density="compact"
 		bind:value={entry.schlecht}
 		placeholder="Schlecht"
 		aria-label="Schlecht"
 	/>
 	<span class="row__arrow" aria-hidden="true">→</span>
-	<input class="row__input" bind:value={entry.gut} placeholder="Gut" aria-label="Gut" />
-	<input
+	<Field
+		class="row__input"
+		density="compact"
+		bind:value={entry.gut}
+		placeholder="Gut"
+		aria-label="Gut"
+	/>
+	<Field
 		class="row__input row__input--hint"
+		density="compact"
 		bind:value={entry.hinweis}
 		placeholder="Hinweis (optional)"
 		aria-label="Hinweis"
@@ -611,13 +620,20 @@
 {/snippet}
 {#snippet a11yRow(entry: Record<string, string>)}
 	{@render miniPill('editorial')}
-	<input
+	<Field
 		class="row__input row__input--key"
+		density="compact"
 		bind:value={entry.label}
 		placeholder="Label"
 		aria-label="Label"
 	/>
-	<input class="row__input" bind:value={entry.wert} placeholder="Wert" aria-label="Wert" />
+	<Field
+		class="row__input"
+		density="compact"
+		bind:value={entry.wert}
+		placeholder="Wert"
+		aria-label="Wert"
+	/>
 	<StatusSegmentedControl
 		value={entry.status}
 		onchange={(v) => (entry.status = v)}
@@ -625,39 +641,45 @@
 	/>
 {/snippet}
 {#snippet tastaturRow(entry: Record<string, string>)}
-	<input
+	<Field
 		class="row__input row__input--key"
+		density="compact"
 		bind:value={entry.taste}
 		placeholder="Taste (z. B. Tab)"
 		aria-label="Taste"
 	/>
-	<input
+	<Field
 		class="row__input"
+		density="compact"
 		bind:value={entry.aktion}
 		placeholder="Aktion (was die Taste bewirkt)"
 		aria-label="Aktion"
 	/>
 {/snippet}
 {#snippet calloutRow(entry: Record<string, string>)}
-	<input
+	<Field
 		class="row__input row__input--nr"
+		density="compact"
 		type="number"
 		min="1"
 		bind:value={entry.nr}
 		placeholder="Nr."
 		aria-label="Nummer"
 	/>
-	<input
+	<Field
 		class="row__input"
+		density="compact"
 		bind:value={entry.text}
 		placeholder="Begriff — Beschreibung"
 		aria-label="Text"
 	/>
-	<select class="row__select" bind:value={entry.art} aria-label="Art">
-		{#each CALLOUT_ART_OPTIONS as opt (opt.value)}
-			<option value={opt.value}>{opt.label}</option>
-		{/each}
-	</select>
+	<Select
+		class="row__select"
+		density="compact"
+		bind:value={entry.art}
+		aria-label="Art"
+		options={CALLOUT_ART_OPTIONS}
+	/>
 {/snippet}
 
 <!-- Drift-Banner-Inhalte: Text + Aktionen kennen den Re-Import-Befehl (Seiten-Scope). -->
@@ -749,8 +771,13 @@
 					subline="Zweck & Status in einer Karte"
 					id="cluster-overview"
 				>
-					<textarea bind:value={model.zweck} rows="3" placeholder="Wozu dient die Komponente? …"
-					></textarea>
+					<Field
+						density="compact"
+						multiline
+						rows={3}
+						bind:value={model.zweck}
+						placeholder="Wozu dient die Komponente? …"
+					/>
 					<div class="overview-status">
 						<span class="overview-status__label">Status</span>
 						<select
@@ -1326,27 +1353,11 @@
 	.hint code {
 		font-family: var(--ds-font-mono);
 	}
-	textarea,
-	select,
-	input {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-inset);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-8);
-	}
-	textarea {
-		resize: vertical;
-	}
-	textarea:focus-visible,
-	select:focus-visible,
-	input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
+	/* Die boxed-Feld-Optik (Zweck-Textarea, Zeilen-Inputs/-Selects) kommt jetzt aus den
+	   Atomen Field/Select (density=compact). Verbleibend sind bewusst KEINE boxed Felder:
+	   die randlosen Inline-Inputs (token-hint/variant-hint) und das Pill-Select (Status)
+	   tragen ihre Typografie darum selbst. */
+
 	/* ── Hinweis je Token (Delta 6): mono-Name + Inline-Input je Zeile ── */
 	.token-hint-row {
 		display: flex;
@@ -1367,6 +1378,9 @@
 	.token-hint-row__input {
 		flex: 1;
 		min-width: 0;
+		font: inherit;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text);
 		background: transparent;
 		border: none;
 		padding: var(--z-ds-space-6) var(--z-ds-space-6);
@@ -1421,26 +1435,19 @@
 		gap: var(--z-ds-space-6);
 		border-bottom: 1px solid var(--ds-border-soft);
 	}
-	/* Echte Feld-Optik (wie StringListField): Inset-Fläche, deutliche Kontur, Radius. */
-	.row__input {
+	/* Feld-Optik (Inset-Fläche, Kontur, Radius, Fokus) kommt aus dem Field-Atom
+	   (compact); hier nur die Zeilen-Breiten der einzelnen Spalten. */
+	:global(.row__input) {
 		flex: 1;
 		min-width: 0;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-inset);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-6);
 	}
-	.row__input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.row__input--key {
+	:global(.row__input--key) {
 		flex: 0 1 11rem;
 	}
-	.row__input--hint {
+	:global(.row__input--hint) {
 		flex: 0 1 12rem;
+	}
+	:global(.row__input--hint .field__control) {
 		color: var(--ds-text-muted);
 	}
 	/* Icon-only Mini-Pill am Zeilenanfang (Delta 4): runde Tint-Fläche NUR mit Icon.
@@ -1487,6 +1494,7 @@
 	.status-select {
 		flex: none;
 		width: auto;
+		font: inherit;
 		font-size: var(--ds-text-xs);
 		font-weight: 600;
 		border-radius: 999px;
@@ -1506,23 +1514,13 @@
 		font-size: var(--ds-text-sm);
 	}
 	/* Schmale Nummern-Spalte + Art-Select der Anatomie-Beschriftungen. */
-	.row__input--nr {
+	:global(.row__input--nr) {
 		flex: 0 0 4rem;
 	}
-	.row__select {
+	/* Feld-Optik kommt aus dem Select-Atom (compact); hier nur die Spaltenbreite. */
+	:global(.row__select) {
 		flex: 0 1 8.5rem;
 		width: auto;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-inset);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-6);
-		cursor: pointer;
-	}
-	.row__select:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 
 	/* ── Wann welche Variante: Maschinen-Label + Inline-Input je Zeile (Mechanik/Optik
@@ -1546,6 +1544,9 @@
 	.variant-hint-row__input {
 		flex: 1;
 		min-width: 0;
+		font: inherit;
+		font-size: var(--ds-text-sm);
+		color: var(--ds-text);
 		background: transparent;
 		border: none;
 		padding: var(--z-ds-space-6) var(--z-ds-space-6);

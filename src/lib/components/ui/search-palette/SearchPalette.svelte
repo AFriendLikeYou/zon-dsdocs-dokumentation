@@ -7,6 +7,8 @@
 	import { FLAT_MENU_ITEMS_BRAND, FLAT_MENU_ITEMS_PRODUCT, type MenuItem } from '$data/navigation';
 	import { Badge } from '$components/ui/badge';
 	import { EmptyState } from '$components/ui/empty-state';
+	import { Field } from '$components/ui/field';
+	import { Kbd } from '$components/ui/kbd';
 	import { goto } from '$app/navigation';
 	import { SearchIcon } from '$lib/icons';
 
@@ -26,7 +28,6 @@
 	}: { items?: MenuItem[] } = $props();
 
 	let dialog = $state<HTMLDialogElement>();
-	let inputEl = $state<HTMLInputElement>();
 	let query = $state('');
 	let activeIndex = $state(0);
 
@@ -45,8 +46,9 @@
 	function open() {
 		query = '';
 		dialog?.showModal();
-		// Fokus ins Eingabefeld (a11y) — nach dem Öffnen.
-		requestAnimationFrame(() => inputEl?.focus());
+		// Fokus ins Eingabefeld (a11y) — nach dem Öffnen. Das Input liegt im Field-Atom,
+		// darum per Query aus dem Dialog statt über ein Element-Binding.
+		requestAnimationFrame(() => dialog?.querySelector('input')?.focus());
 	}
 	function close() {
 		dialog?.close();
@@ -83,10 +85,15 @@
 
 <svelte:window onkeydown={onWindowKeydown} />
 
-<button type="button" class="search-trigger" onclick={open} aria-keyshortcuts="Meta+K Control+K">
-	<SearchIcon />
+<button
+	type="button"
+	class="search-trigger field field--comfortable"
+	onclick={open}
+	aria-keyshortcuts="Meta+K Control+K"
+>
+	<span class="field__icon"><SearchIcon /></span>
 	<span class="search-trigger__label">Suchen</span>
-	<kbd class="search-trigger__kbd">⌘K</kbd>
+	<span class="search-trigger__kbd"><Kbd>⌘K</Kbd></span>
 </button>
 
 <dialog
@@ -100,16 +107,17 @@
 >
 	<div class="panel">
 		<div class="inputrow">
-			<SearchIcon width={18} height={18} />
-			<input
-				bind:this={inputEl}
+			<Field
 				bind:value={query}
+				density="comfortable"
 				type="text"
 				placeholder="Seiten durchsuchen…"
 				aria-label="Seiten durchsuchen"
 				autocomplete="off"
-			/>
-			<kbd class="esc">Esc</kbd>
+			>
+				{#snippet icon()}<SearchIcon width={18} height={18} />{/snippet}
+				{#snippet shortcut()}<Kbd>Esc</Kbd>{/snippet}
+			</Field>
 		</div>
 
 		{#if results.length}
@@ -139,40 +147,24 @@
 </dialog>
 
 <style>
+	/* Trigger nutzt die geteilte Feld-Basis (.field .field--comfortable); hier nur
+	   das Trigger-Spezifische: intrinsische Breite, Zeiger, Hover-Fläche, Text-Farbe. */
 	.search-trigger {
-		display: inline-flex;
-		align-items: center;
+		width: auto;
 		gap: var(--z-ds-space-8);
-		padding: var(--z-ds-space-xs) var(--z-ds-space-s);
-		background: var(--ds-surface-raised);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius);
 		color: var(--ds-text-body);
-		font-size: var(--ds-text-sm);
 		cursor: pointer;
-		transition:
-			background-color var(--ds-dur) var(--ds-ease),
-			border-color var(--ds-dur) var(--ds-ease);
 	}
 	@media (hover: hover) and (pointer: fine) {
 		.search-trigger:hover {
 			background: var(--ds-surface-sunken);
 			color: var(--ds-text);
+			border-color: var(--ds-border);
 		}
 	}
 	.search-trigger:focus-visible {
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
-	}
-	.search-trigger__kbd,
-	.esc {
-		font-family: var(--ds-font-mono);
-		font-size: var(--ds-text-xs);
-		color: var(--ds-text-muted);
-		background: var(--ds-surface);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: 0 var(--z-ds-space-4);
 	}
 	@media (max-width: 560px) {
 		.search-trigger__label,
@@ -203,20 +195,8 @@
 		max-height: 70vh;
 	}
 	.inputrow {
-		display: flex;
-		align-items: center;
-		gap: var(--z-ds-space-8);
 		padding: var(--z-ds-space-12) var(--z-ds-space-16);
 		border-bottom: 1px solid var(--ds-border);
-		color: var(--ds-text-body);
-	}
-	.inputrow input {
-		flex: 1;
-		border: none;
-		background: none;
-		color: var(--ds-text);
-		font-size: var(--ds-text-base);
-		outline: none;
 	}
 	.results {
 		list-style: none;

@@ -12,6 +12,8 @@
   - machine: Maschinen-Werte je Feld (Platzhalter, aus model.json.render).
 -->
 <script lang="ts">
+	import { Field } from '$components/ui/field';
+
 	/** Die vier feldweisen Snippet-Override-Keys (leer = Maschine gewinnt). */
 	type OverrideKey = 'codeSvelte' | 'repoCodeSvelte' | 'codeNote' | 'repoNote';
 
@@ -36,18 +38,20 @@
 	<div class="override">
 		<label class="override__label" for="ov-{f.key}">{f.label}</label>
 		{#if f.multiline}
-			<textarea
+			<Field
 				id="ov-{f.key}"
-				class="override__input override__input--mono"
-				rows="4"
+				class="override__mono"
+				density="compact"
+				multiline
+				rows={4}
 				spellcheck="false"
 				bind:value={model[f.key]}
 				placeholder={machine[f.key] || '(kein Maschinen-Wert)'}
-			></textarea>
+			/>
 		{:else}
-			<input
+			<Field
 				id="ov-{f.key}"
-				class="override__input"
+				density="compact"
 				bind:value={model[f.key]}
 				placeholder={machine[f.key] || '(kein Maschinen-Wert)'}
 			/>
@@ -74,26 +78,13 @@
 		color: var(--ds-text-muted);
 		font-weight: 600;
 	}
-	.override__input {
-		width: 100%;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-inset);
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-8);
-	}
-	.override__input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
-	}
-	.override__input--mono {
+	/* Feld-Optik kommt aus dem Field-Atom (compact). Mono-Overrides brauchen zusätzlich
+	   die Monospace-Darstellung auf dem inneren Control. */
+	:global(.override__mono .field__control) {
 		font-family: var(--ds-font-mono);
 		font-size: var(--ds-text-xs);
 		line-height: 1.6;
 		white-space: pre;
-		resize: vertical;
 	}
 	.override__note {
 		font-size: var(--ds-text-xs);

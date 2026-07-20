@@ -12,13 +12,20 @@
  * Komponenten-spezifisches Styling gehört dagegen in den scoped <style>-Block
  * der jeweiligen Komponente.
  */
+/*
+ * Größenstufen aus den realen Padding-Clustern der Alt-Buttons:
+ *   · sm (Default) = 6px/12px + font-sm   — hebt den früheren 4px-Block bewusst auf 6px
+ *   · md           = 8px/24px + font-base  (.app-button--md)
+ *   · lg           = 10px/32px + font-base (.app-button--lg)
+ * Klassen-Nutzer (<a>: GitHubEdit, Login, .svx) bekommen dieselben Stufen.
+ */
 .app-button {
 	border-radius: var(--ds-radius-sm);
 	color: var(--ds-surface);
-	padding-inline: var(--z-ds-space-s);
-	padding-block: var(--z-ds-space-xxs);
+	padding-inline: var(--z-ds-space-12);
+	padding-block: var(--z-ds-space-6);
 	background-color: var(--ds-text);
-	font-size: calc(var(--ds-text-sm));
+	font-size: var(--ds-text-sm);
 	gap: var(--z-ds-space-xs);
 	display: inline-flex;
 	align-items: center;
@@ -60,6 +67,19 @@
 	background-color: transparent;
 	border: 1px solid var(--ds-text);
 	color: var(--ds-text);
+}
+
+/* Größen-Modifier — dieselben Stufen für Component- und Klassen-Nutzer. */
+.app-button--md {
+	padding-inline: var(--z-ds-space-24);
+	padding-block: var(--z-ds-space-8);
+	font-size: var(--ds-text-base);
+}
+.app-button--lg {
+	padding-inline: var(--z-ds-space-32);
+	/* 10px = bewusstes Zwischenmaß des lg-Clusters (kein Space-Token deckt 10px). */
+	padding-block: 10px;
+	font-size: var(--ds-text-base);
 }
 
 /* Hinweis: Das `.footer-nav__button`-Styling wurde nach FooterNavigation.svelte

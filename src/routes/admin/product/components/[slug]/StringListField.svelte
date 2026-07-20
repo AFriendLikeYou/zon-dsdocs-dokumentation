@@ -15,6 +15,7 @@
 -->
 <script lang="ts">
 	import { Icon } from '$lib/icons/cms';
+	import { Field } from '$components/ui/field';
 
 	let {
 		list,
@@ -29,7 +30,6 @@
 	} = $props();
 
 	let draft = $state('');
-	let ghostEl = $state<HTMLInputElement | null>(null);
 
 	/** Nicht-leeren Entwurf anlegen; Feld leeren. Gibt zurück, ob angelegt wurde. */
 	function commit(): boolean {
@@ -46,7 +46,7 @@
 		} else if (e.key === 'Escape') {
 			e.preventDefault();
 			draft = '';
-			ghostEl?.blur();
+			(e.target as HTMLElement | null)?.blur();
 		}
 	}
 	function onGhostBlur() {
@@ -58,7 +58,12 @@
 <div class="string-list">
 	{#each list as _, i (i)}
 		<div class="string-list__row">
-			<input class="string-list__input" bind:value={list[i]} {placeholder} />
+			<Field
+				class="string-list__input"
+				density="compact"
+				bind:value={list[i]}
+				{placeholder}
+			/>
 			<button
 				type="button"
 				class="string-list__remove"
@@ -68,9 +73,9 @@
 		</div>
 	{/each}
 	<div class="string-list__row string-list__row--ghost">
-		<input
-			bind:this={ghostEl}
-			class="string-list__input string-list__ghost"
+		<Field
+			class="string-list__ghost"
+			density="compact"
 			bind:value={draft}
 			placeholder={addLabel}
 			aria-label={addLabel}
@@ -92,31 +97,23 @@
 		align-items: center;
 		gap: var(--z-ds-space-6);
 	}
-	/* Echte Feld-Optik: Inset-Fläche, deutliche Kontur, kleiner Radius. */
-	.string-list__input {
+	/* Feld-Optik (Inset-Fläche, Kontur, Radius, Fokus) kommt aus dem Field-Atom
+	   (compact). Das Field füllt die Zeile. */
+	:global(.string-list__input) {
 		flex: 1;
-		min-width: 0;
-		font: inherit;
-		font-size: var(--ds-text-sm);
-		color: var(--ds-text);
-		background: var(--ds-surface-inset);
-		border: 1px solid var(--ds-border-strong);
-		border-radius: var(--ds-radius-sm);
-		padding: var(--z-ds-space-6) var(--z-ds-space-6);
-	}
-	.string-list__input:focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 	/* Ghost-Zeile bleibt klar unterscheidbar: gestrichelte Kontur, gedämpfter Text,
 	   leise/transparente Fläche — noch kein „echtes" Feld. */
-	.string-list__ghost {
+	:global(.string-list__ghost) {
+		flex: 1;
 		background: transparent;
 		border-style: dashed;
 		border-color: var(--ds-border);
+	}
+	:global(.string-list__ghost .field__control) {
 		color: var(--ds-text-muted);
 	}
-	.string-list__ghost::placeholder {
+	:global(.string-list__ghost .field__control::placeholder) {
 		color: var(--ds-text-faint);
 	}
 	.string-list__remove {

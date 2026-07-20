@@ -9,6 +9,8 @@
   - ondiscard: Verwerfen-Klick — stellt den Ausgangsstand wieder her.
 -->
 <script lang="ts">
+	import { Kbd } from '$components/ui/kbd';
+
 	let {
 		writable,
 		ondiscard
@@ -21,7 +23,9 @@
 <div class="savebar" role="status">
 	<span class="savebar__info">Ungespeicherte Änderungen</span>
 	<button type="button" class="savebar__discard" onclick={ondiscard}>Verwerfen</button>
-	<button type="submit" class="savebar__save" disabled={!writable}>Speichern <kbd>⌘S</kbd></button>
+	<button type="submit" class="savebar__save" disabled={!writable}
+		>Speichern <Kbd variant="on-accent">⌘S</Kbd></button
+	>
 </div>
 
 <style>
@@ -97,13 +101,8 @@
 		outline: 2px solid var(--ds-focus-ring);
 		outline-offset: 2px;
 	}
-	.savebar kbd {
-		font-family: var(--ds-font-mono);
-		font-size: 0.72em;
-		opacity: 0.75;
+	/* ⌘S nutzt jetzt das Kbd-Atom (variant on-accent); nur der linke Abstand bleibt. */
+	.savebar__save :global(.kbd) {
 		margin-left: 0.3em;
-		background: rgb(from var(--ds-static-white) r g b / 0.18);
-		padding: 1px 5px;
-		border-radius: 4px;
 	}
 </style>
