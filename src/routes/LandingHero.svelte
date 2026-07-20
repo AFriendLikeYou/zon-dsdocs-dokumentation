@@ -80,7 +80,10 @@
 		/* Band von der angehobenen Fläche zur Basis-Fläche (= Seitenhintergrund)
 		   → nahtloser Übergang. Semantische Rollen, flippen mit Light/Dark. */
 		background: linear-gradient(180deg, var(--ds-surface-raised) 0%, var(--ds-surface) 100%);
-		padding-block: clamp(3rem, 8vw, 6rem) 0;
+		/* Der Header liegt auf der Startseite ÜBER dem Hero (fixed, siehe Navbar) —
+		   seine Höhe kommt hier oben drauf, damit der Verlauf dahinter durchläuft,
+		   der Text aber nicht unter den Header rutscht. */
+		padding-block: calc(var(--header-height) + clamp(3rem, 8vw, 6rem)) 0;
 		overflow: hidden; /* Glow + gekippte Bühne dürfen nicht ausbrechen */
 	}
 	.hero__inner {

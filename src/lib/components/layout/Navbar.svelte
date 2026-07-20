@@ -26,9 +26,18 @@
 
 	// Auf der Startseite (`root`) gibt es keine Sidebar → Burger entfällt.
 	const showSidebarButton = $derived(section !== 'root');
+
+	// Startseite: der Header liegt ÜBER dem Hero (fixed) und ist am Seitenanfang
+	// durchsichtig, damit der Hero-Verlauf durchscheint. Ab dem ersten Scroll-Stück
+	// legt er seine Fläche + Blur an, damit der Inhalt darunter lesbar bleibt.
+	let scrollY = $state(0);
+	const overlay = $derived(section === 'root');
+	const transparent = $derived(overlay && scrollY <= 8);
 </script>
 
-<header class="navbar">
+<svelte:window bind:scrollY />
+
+<header class="navbar" class:navbar--overlay={overlay} class:navbar--transparent={transparent}>
 	<div class="navbar__main">
 		{#if showSidebarButton}
 			<SidebarButton />
@@ -72,6 +81,11 @@
 		background-color: rgb(from var(--ds-surface) r g b / 0.85);
 		backdrop-filter: blur(14px);
 		-webkit-backdrop-filter: blur(14px);
+		/* Nur Fläche/Blur animieren (kein `all`) — der Wechsel beim ersten Scroll-Stück
+		   soll weich sein, das Layout bleibt unberührt. */
+		transition:
+			background-color var(--ds-dur) var(--ds-ease-out),
+			backdrop-filter var(--ds-dur) var(--ds-ease-out);
 		padding: var(--z-ds-space-m) var(--z-ds-space-l);
 		display: flex;
 		/* Desktop: eine Zeile (max-height greift). Actions rechts via margin-left. */
@@ -83,6 +97,24 @@
 		a {
 			text-decoration: none;
 			color: var(--ds-text);
+		}
+	}
+
+	/* Startseite: aus dem Fluss genommen, damit der Hero bis unter den Header läuft.
+	   Der Hero gleicht die Höhe per padding-top aus (LandingHero.svelte). */
+	.navbar--overlay {
+		position: fixed;
+		inset-inline: 0;
+	}
+	/* Am Seitenanfang: Fläche und Blur zurück auf null → der Hero-Verlauf scheint durch. */
+	.navbar--transparent {
+		background-color: transparent;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.navbar {
+			transition: none;
 		}
 	}
 
