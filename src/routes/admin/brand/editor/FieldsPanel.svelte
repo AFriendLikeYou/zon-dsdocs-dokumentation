@@ -18,6 +18,7 @@
 		media = [],
 		tokens = [],
 		uploadable = false,
+		childCount = null,
 		open = false,
 		onToggle,
 		set
@@ -29,6 +30,12 @@
 		media?: MediaImage[];
 		tokens?: readonly string[];
 		uploadable?: boolean;
+		/**
+		 * Zahl der Kind-Blöcke (nur bei Containern). Der Spalten-Regler zeigt damit
+		 * in seiner Miniatur, wie sich die vorhandenen Elemente auf die Spalten
+		 * verteilen; `null` = keine Container-Karte, also unbekannt.
+		 */
+		childCount?: number | null;
 		open?: boolean;
 		/** Nutzer-Toggle — der Auf/Zu-Zustand gehört dem Aufrufer (Item/Child). */
 		onToggle: (open: boolean) => void;
@@ -51,6 +58,8 @@
 				{media}
 				{uploadable}
 				{tokens}
+				{childCount}
+				siblings={values}
 				error={errors[p.key]}
 				set={(v) => set(p.key, v)}
 			/>

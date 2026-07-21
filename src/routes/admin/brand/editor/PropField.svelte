@@ -3,14 +3,22 @@
   (12px, muted), darunter das volle-Breite-Control auf --ds-surface mit --ds-border
   und radius 8; Werte 16px. Kurze Enums als Segmented Control, Booleans als Switch,
   Textareas wachsen mit. Fehler inline (rote Meldung + roter Rand), Pflichtfelder
-  mit ∗. API unverändert: prop + value rein, set(v) raus.
+  mit ∗. API: prop + value rein, set(v) raus.
+
+  Eine Ausnahme von „ein Feld kennt nur seinen Wert": `type: 'columns'` rendert
+  ui/column-picker, und dessen Miniatur soll das RASTER zeigen, nicht die Zahl.
+  Dafür bekommt das Feld zusätzlich die Nachbarwerte des Blocks (`siblings`:
+  columnGap/rowGap/auto/minWidth) und die Kinderzahl (`childCount`) durch-
+  gereicht. Beides ist rein darstellend — geschrieben wird weiter nur `set(v)`.
 -->
 <script lang="ts">
 	import type { CmsPropDef } from '../core/cms-components';
+	import { COLUMN_CHOICES } from '../core/cms-components';
 	import MediaPicker from './MediaPicker.svelte';
 	import TokenPicker from './TokenPicker.svelte';
 	import { Field, Select } from '$components/ui/field';
 	import { SegmentedControl } from '$components/ui/segmented-control';
+	import { ColumnPicker } from '$components/ui/column-picker';
 
 	type MediaImage = { path: string; name: string; kind?: 'image' | 'video' };
 	let {
@@ -20,6 +28,8 @@
 		tokens = [],
 		error = null,
 		uploadable = false,
+		siblings = {},
+		childCount = null,
 		set
 	}: {
 		prop: CmsPropDef;
@@ -28,12 +38,34 @@
 		tokens?: readonly string[];
 		error?: string | null;
 		uploadable?: boolean;
+		/**
+		 * Die übrigen Werte DESSELBEN Blocks. Der Spalten-Regler ist das einzige
+		 * Feld, das mehr als seinen eigenen Wert zeigt: seine Miniatur bildet auch
+		 * `columnGap`/`rowGap`/`auto`/`minWidth` ab, sonst zeigte sie ein Raster,
+		 * das es so nicht gibt.
+		 */
+		siblings?: Record<string, string | boolean>;
+		/** Zahl der Kind-Blöcke (nur bei Containern); `null` = unbekannt. */
+		childCount?: number | null;
 		set: (v: string | boolean) => void;
 	} = $props();
 
 	const str = $derived(typeof value === 'string' ? value : '');
+	/** Nachbarwert als String (Selects/Text) bzw. als Flag (Booleans). */
+	const sibStr = (k: string, fallback: string): string => {
+		const x = siblings[k];
+		return typeof x === 'string' && x !== '' ? x : fallback;
+	};
+	const sibBool = (k: string): boolean => siblings[k] === true || siblings[k] === 'true';
 	// Kurze Enums als Segmented Control, lange bleiben ein Select.
 	const segmented = $derived(prop.type === 'select' && (prop.options ?? []).length <= 4);
+
+	// Spalten-Regler: nur, solange der Wert im angebotenen Bereich liegt. Ein
+	// bestehendes `columns={8}` (oder Leerwert) bekäme sonst eine Radiogruppe OHNE
+	// gewählte Option — dann ist per roving tabindex kein Segment fokussierbar. Für
+	// solche Ausreisser bleibt das Zahlenfeld stehen.
+	const columnChoices = COLUMN_CHOICES.map(String);
+	const columnsInRange = $derived(columnChoices.includes(str));
 	const placeholder = $derived(
 		prop.format === 'url' ? 'https://… oder /pfad' : `${prop.label} eingeben …`
 	);
@@ -58,6 +90,28 @@
 				error={!!error}
 				value={str}
 				placeholder="0"
+				aria-invalid={!!error}
+				oninput={(e) => set(e.currentTarget.value)}
+			/>
+		{:else if prop.type === 'columns' && columnsInRange}
+			<ColumnPicker
+				label={prop.label}
+				choices={COLUMN_CHOICES}
+				value={Number(str)}
+				columnGap={sibStr('columnGap', 'md')}
+				rowGap={sibStr('rowGap', 'md')}
+				auto={sibBool('auto')}
+				autoMode={sibStr('autoMode', 'fit') === 'fill' ? 'fill' : 'fit'}
+				minWidth={sibStr('minWidth', '100px')}
+				{childCount}
+				onchange={(n) => set(String(n))}
+			/>
+		{:else if prop.type === 'columns'}
+			<Field
+				type="number"
+				error={!!error}
+				value={str}
+				placeholder="1"
 				aria-invalid={!!error}
 				oninput={(e) => set(e.currentTarget.value)}
 			/>
@@ -108,6 +162,9 @@
 		{#if error}
 			<span class="pf-err" role="alert">{error}</span>
 		{/if}
+		{#if prop.hint}
+			<span class="pf-hint">{prop.hint}</span>
+		{/if}
 	</span>
 </label>
 
@@ -148,6 +205,18 @@
 		color: var(--ds-negative, #b91109);
 		padding-left: 2px;
 	}
+	/* Hinweis unter dem Feld — sagt Verhalten, das man dem Wert nicht ansieht
+	   (z. B. „mobil immer eine Spalte"). Bewusst leiser als das Label. */
+	.pf-hint {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-muted);
+		line-height: 1.35;
+		padding-left: 2px;
+	}
+
+	/* Der Spalten-Regler (`type: 'columns'`) bringt sein Layout selbst mit —
+	   ui/column-picker rendert Bühne, Auswahl und Klartext in EINER Spalte und
+	   fügt sich damit unverändert in die .pf-val-Stapelung. */
 
 	/* Text-/Zahl-/Auswahl-Controls kommen aus den geteilten Atomen Field/Select
 	   (field-base.css). Kurze Enums rendert jetzt ui/SegmentedControl variant="flat"

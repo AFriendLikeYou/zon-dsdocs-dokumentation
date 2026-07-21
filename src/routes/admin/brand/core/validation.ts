@@ -26,6 +26,14 @@ export function validateProp(
 	if (prop.type === 'number') {
 		return /^-?\d+$/.test(s) ? null : 'Bitte eine ganze Zahl eingeben.';
 	}
+	// `columns` ist eine Zahl MIT Bereich: der Regler bietet 1–6 an, geschriebenes
+	// Markup darf aber mehr enthalten (Alt-Inhalte) — deshalb hier nur die obere/
+	// untere Plausibilitätsgrenze des Rasters (Grid klemmt selbst auf 1–12).
+	if (prop.type === 'columns') {
+		if (!/^\d+$/.test(s)) return 'Bitte eine ganze Zahl eingeben.';
+		const n = Number(s);
+		return n >= 1 && n <= 12 ? null : 'Spalten müssen zwischen 1 und 12 liegen.';
+	}
 	if (prop.type === 'media') {
 		if (prop.mediaKind === 'image' && !isImagePath(s))
 			return 'Bitte eine Bilddatei wählen (png, jpg, webp, svg …).';

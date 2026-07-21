@@ -741,6 +741,7 @@
 												errors={errs}
 												media={data.media}
 												uploadable={data.writable}
+												childCount={(it.children ?? []).length}
 												{tokens}
 												open={it.fieldsOpen}
 												onToggle={(o) => (it.fieldsOpen = o)}

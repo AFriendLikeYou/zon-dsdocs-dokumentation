@@ -9,6 +9,11 @@
 		"isInFooter": false
 	},
 	{
+		"title": "Komponenten-Schau",
+		"href": "/brand/component-showcase",
+		"isInFooter": true
+	},
+	{
 		"title": "Grundlagen",
 		"isCategory": true
 	},
@@ -105,16 +110,6 @@
 	{
 		"title": "KI-Richtlinien",
 		"href": "/brand/ai-guidelines",
-		"isInFooter": true
-	},
-	{
-		"title": "Inklusion",
-		"isCategory": true,
-		"isInFooter": true
-	},
-	{
-		"title": "Pride Kommunikation",
-		"href": "/brand/pride-communication",
 		"isInFooter": true
 	},
 	{

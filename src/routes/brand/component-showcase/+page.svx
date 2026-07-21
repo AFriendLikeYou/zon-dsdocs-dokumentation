@@ -1,0 +1,224 @@
+---
+title: Komponenten-Schau
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	import { Banner } from '$components/ui/banner';
+	import { DoDont } from '$components/ui/dodont';
+	import { DoDontGroup } from '$components/ui/dodont';
+	import { Color } from '$components/ui/colors';
+	import { TextColor } from '$components/ui/colors';
+	import { Lightbox } from '$components/ui/lightbox';
+	import { VideoPlayer } from '$components/ui/videoplayer';
+	import { DownloadSpecimen } from '$components/ui/downloadspecimen';
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
+	import { Breakout } from '$components/ui/breakout';
+	import { Figure } from '$components/ui/figure';
+</script>
+
+# {title}
+
+<Banner
+	variant="info"
+	title="Blindtext — diese Seite zeigt Bausteine, keine Inhalte"
+	description="Alle Texte hier sind Platzhalter. Die Seite ist eine lebende Übersicht aller Bausteine, die im Brand-CMS eingefügt werden können, und zugleich Prüffläche für die Layout-Optionen."
+/>
+
+Diese Seite versammelt jeden Baustein, den das Brand-CMS kennt, einmal in
+Benutzung. Wer eine neue Brand-Seite anlegt, kann hier nachsehen, was zur
+Verfügung steht und wie es aussieht — statt es im Editor zu erraten.
+
+## Textelemente
+
+Fließtext ist der Normalfall. Alles, was Markdown kann, funktioniert ohne eigenen
+Baustein: **fetter Text**, *kursiver Text*, ein [Link](https://www.zeit.de) und
+Aufzählungen.
+
+- Erster Punkt einer Liste
+- Zweiter Punkt einer Liste
+- Dritter Punkt einer Liste
+
+### Überschrift dritter Ordnung
+
+Überschriften ab H2 tauchen automatisch in der Spalte „Auf dieser Seite" rechts
+auf. Das ist der Grund, aus dem eine Seite ohne H2 keine Gliederung anbietet —
+sie hat schlicht keine.
+
+## Hinweise
+
+Der Hinweis-Baustein hat mehrere Tonlagen. Er ist für Randbemerkungen gedacht,
+die den Lesefluss nicht unterbrechen sollen — nicht als Ersatz für Fließtext.
+
+<Banner
+	variant="tip"
+	title="Sparsam einsetzen"
+	description="Drei Hinweiskästen hintereinander lesen sich wie ein Formular. Wenn alles hervorgehoben ist, ist nichts hervorgehoben."
+/>
+
+<Banner
+	variant="success"
+	title="Blindtext-Bestätigung"
+	description="Platzhaltertext für einen Hinweis, der einen erwünschten Zustand meldet."
+/>
+
+## Bilder
+
+Der Bild-Baustein zeigt ein Bild mit optionaler Unterschrift. Der Alternativtext
+ist Pflicht — ein Bild ohne ihn ist für Screenreader ein Loch in der Seite.
+
+<Figure
+	src="/media/brand/icons/icon-anatomy-1.png"
+	alt="Blindtext-Platzhalter: schematische Darstellung einer Icon-Anatomie"
+	caption="Bildunterschrift als Blindtext"
+/>
+
+Soll das Bild auf Klick vergrößert werden, ist der Lightbox-Baustein der richtige
+— er bringt Schaltfläche und Dialog mit.
+
+<Lightbox
+	src="/media/brand/icons/icon-anatomy-2.png"
+	alt="Blindtext-Platzhalter: zweite schematische Darstellung, per Klick vergrößerbar"
+	caption="Unterschrift eines vergrößerbaren Bildes"
+/>
+
+## Ausbruch aus dem Textrahmen
+
+Der Lesetext ist auf eine feste Spaltenbreite begrenzt, damit die Zeilen nicht zu
+lang werden. Manche Inhalte brauchen aber mehr Platz — dafür gibt es den
+Ausbruch-Baustein mit drei Stufen: Inhaltsbreite, weit und voll.
+
+<Breakout width="wide">
+	<Figure
+		src="/media/brand/icons/icon-anatomy-1.png"
+		alt="Blindtext-Platzhalter, eine Stufe breiter als die Lesespalte dargestellt"
+		caption="Stufe „weit“ — greift erst, wenn der Bildschirm den Platz dafür hat"
+	/>
+</Breakout>
+
+<Banner
+	variant="warning"
+	title="Der Ausbruch braucht Platz, den es nicht immer gibt"
+	description="Neben dem Text stehen die Seitennavigation und die Spalte „Auf dieser Seite“. Ist der Bildschirm zu schmal, fällt der Ausbruch auf Inhaltsbreite zurück, statt die Seite zu sprengen — auf einem üblichen Laptop bleibt er deshalb wirkungslos."
+/>
+
+## Raster
+
+Das Raster ordnet Kacheln in Spalten. Die Spaltenzahl gilt für den Desktop —
+unterhalb von 768 Pixeln steht immer eine Spalte, damit auf dem Telefon nichts
+zerquetscht wird.
+
+<Grid columns={4} auto={true}>
+	<Card
+		title="Erste Kachel"
+		description="Blindtext für eine Kachel im vierspaltigen Raster."
+		url="https://www.zeit.de"
+		badge="Blindtext"
+	/>
+	<Card
+		title="Zweite Kachel"
+		description="Blindtext für eine Kachel im vierspaltigen Raster."
+		url="https://www.zeit.de"
+		badge="Blindtext"
+	/>
+	<Card
+		title="Dritte Kachel"
+		description="Blindtext für eine Kachel im vierspaltigen Raster."
+		url="https://www.zeit.de"
+		badge="Blindtext"
+	/>
+	<Card
+		title="Vierte Kachel"
+		description="Blindtext für eine Kachel im vierspaltigen Raster."
+		url="https://www.zeit.de"
+		badge="Blindtext"
+	/>
+</Grid>
+
+Dasselbe Raster mit zwei Spalten — jede Kachel bekommt mehr Raum für
+Beschreibungstext:
+
+<Grid columns={2} auto={true}>
+	<Card
+		title="Breitere Kachel"
+		description="Blindtext. Bei zwei Spalten hat jede Kachel Platz für mehrere Zeilen, ohne dass die Zeilen zu lang werden."
+		url="https://www.zeit.de"
+	/>
+	<Card
+		title="Zweite breitere Kachel"
+		description="Blindtext. Zwei Spalten eignen sich für Kacheln mit Text, vier für kompakte Übersichten."
+		url="https://www.zeit.de"
+	/>
+</Grid>
+
+## Farben
+
+Farbfelder zeigen einen Farbwert samt Namen und lassen ihn in die Zwischenablage
+kopieren.
+
+<Grid columns={2} auto={true}>
+	<Color
+		title="Akzentfarbe"
+		description="Blindtext zur Beschreibung einer Farbrolle."
+		colorCustomProperty="--ds-accent"
+		fontColorCustomProperty="#ffffff"
+		showValue={true}
+	/>
+	<Color
+		title="Zurückhaltende Fläche"
+		description="Blindtext zur Beschreibung einer zweiten Farbrolle."
+		colorCustomProperty="--ds-border-soft"
+		fontColorCustomProperty="#333333"
+		showValue={true}
+	/>
+</Grid>
+
+Für Schriftfarben gibt es ein eigenes Feld, das die Farbe am Buchstaben zeigt
+statt an einer Fläche.
+
+<TextColor
+	title="Textfarbe"
+	description="Blindtext zur Beschreibung einer Schriftfarbe."
+/>
+
+## Do & Don't
+
+Gegenüberstellungen zeigen eine erwünschte und eine unerwünschte Anwendung
+nebeneinander. Sie tragen mehr als eine Regel im Fließtext, weil man den
+Unterschied sieht.
+
+<DoDontGroup columns={2}>
+	<DoDont
+		caption="So — Blindtext für das gute Beispiel"
+		imgSrc="/media/brand/icons/icon-anatomy-1.png"
+	/>
+	<DoDont
+		variant="dont"
+		caption="Nicht so — Blindtext für das schlechte Beispiel"
+		imgSrc="/media/brand/icons/icon-anatomy-2.png"
+		strikeThrough={true}
+	/>
+</DoDontGroup>
+
+## Bewegtbild
+
+<VideoPlayer
+	src="/media/brand/animation/motion.mp4"
+	title="Blindtext-Titel eines Beispielvideos"
+/>
+
+## Downloads
+
+Der Download-Baustein verweist auf eine Datei oder eine externe Quelle und
+benennt, worum es sich handelt.
+
+<DownloadSpecimen
+	variant="figma"
+	title="Blindtext-Titel eines Downloads"
+	subtitle="Blindtext-Untertitel mit Format und Größe"
+	url="https://www.zeit.de"
+/>

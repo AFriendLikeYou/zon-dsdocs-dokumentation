@@ -11,7 +11,21 @@
 // Inseln mit dynamischen Ausdrücken (`prop={ausdruck}`) bleiben bewusst geschützt
 // (nicht form-editierbar) — kein neuer ausführbarer Code über das CMS.
 
-export type CmsPropType = 'text' | 'textarea' | 'select' | 'boolean' | 'number' | 'media';
+// `columns` ist ein Sonderfall von `number`: im Markup steht weiterhin eine
+// Literal-Zahl (`columns={4}`) — die Sicherheitsgrenze und der byte-erhaltende
+// Round-Trip bleiben also unberührt. Nur die EINGABE ist eine andere: statt eines
+// nackten Zahlenfelds ein visueller Spalten-Regler (PropField → SegmentedControl).
+export type CmsPropType =
+	| 'text'
+	| 'textarea'
+	| 'select'
+	| 'boolean'
+	| 'number'
+	| 'columns'
+	| 'media';
+
+/** Spaltenzahlen, die der visuelle Regler (`type: 'columns'`) anbietet. */
+export const COLUMN_CHOICES = [1, 2, 3, 4, 5, 6] as const;
 
 /** Menü-Kategorien fürs Einfügen (Reihenfolge = Anzeige-Reihenfolge). */
 export type CmsCategory = 'Text' | 'Medien' | 'Layout' | 'Komponenten';
@@ -26,6 +40,11 @@ export interface CmsPropDef {
 	/** Default-Wert; String für text/textarea/select/media/number, boolean für boolean. */
 	default: string | boolean;
 	required?: boolean;
+	/**
+	 * Kurzer Hinweis UNTER dem Feld — für Verhalten, das man dem Wert nicht ansieht
+	 * (z. B. „mobil gilt immer eine Spalte"). Kein Ersatz für das Label.
+	 */
+	hint?: string;
 	/** Zusätzliche Validierung/Eingabehilfe: URL-Feld bzw. Farb-Token-Feld (Token-Picker). */
 	format?: 'url' | 'token-color';
 	/** Für `type: 'media'`: erwarteter Medientyp (filtert Picker + validiert). */
@@ -150,6 +169,23 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		]
 	},
 	{
+		// Heisst NICHT `Image`: diesen Namen belegt der Pseudo-Typ für rohe
+		// `<img class="img-natural">`-Inseln (siehe `insert: 'Image'` in segment.ts und
+		// IMAGE_DEF in admin/brand/[...path]/+page.svelte). Ein Registry-Eintrag gleichen
+		// Namens würde in der Palette verdeckt und beim Einfügen still umgeleitet.
+		name: 'Figure',
+		label: 'Bild mit Unterschrift',
+		importStatement: "import { Figure } from '$components/ui/figure';",
+		category: 'Medien',
+		props: [
+			{ key: 'src', label: 'Bild', type: 'media', default: '', required: true, mediaKind: 'image' },
+			// Alt-Text ist PFLICHT — ohne Alternativtext kein Bild. Bewusst strenger als
+			// `Lightbox`, wo `alt` historisch optional ist.
+			{ key: 'alt', label: 'Alt-Text', type: 'text', default: '', required: true },
+			{ key: 'caption', label: 'Bildunterschrift', type: 'text', default: '' }
+		]
+	},
+	{
 		name: 'Lightbox',
 		label: 'Lightbox-Bild',
 		importStatement: "import { Lightbox } from '$components/ui/lightbox';",
@@ -239,9 +275,19 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 		container: true,
 		category: 'Layout',
 		// Generischer Layout-Container: alle „kachelbaren" Leaves erlaubt.
-		childTypes: ['Color', 'TextColor', 'Card', 'Lightbox', 'DoDont', 'DownloadSpecimen'],
+		childTypes: ['Color', 'TextColor', 'Card', 'Figure', 'Lightbox', 'DoDont', 'DownloadSpecimen'],
 		props: [
-			{ key: 'columns', label: 'Spalten', type: 'number', default: '1' },
+			{
+				key: 'columns',
+				// Das Label sagt ehrlich, WORAUF sich die Zahl bezieht: `Grid` zwingt
+				// unterhalb von 768px alles auf eine Spalte (ausser bei `auto`), die Zahl
+				// ist also immer die DESKTOP-Spaltenzahl. Das stand bisher nirgends und
+				// hat die Redaktion überrascht.
+				label: 'Spalten (Desktop)',
+				type: 'columns',
+				default: '1',
+				hint: 'Gilt ab 768px Breite — mobil steht immer eine Spalte.'
+			},
 			{ key: 'auto', label: 'Auto-Fit', type: 'boolean', default: false },
 			{
 				key: 'autoMode',
@@ -285,6 +331,30 @@ export const CMS_COMPONENTS: CmsComponentDef[] = [
 				type: 'select',
 				options: ['stretch', 'start', 'center', 'end'],
 				default: 'stretch'
+			}
+		]
+	},
+	{
+		name: 'Breakout',
+		label: 'Ausbruch (breiter als der Text)',
+		importStatement: "import { Breakout } from '$components/ui/breakout';",
+		container: true,
+		category: 'Layout',
+		// Dieselben „kachelbaren" Leaves wie `Grid`. Ein verschachteltes `<Grid>` darin
+		// RENDERT korrekt, wenn es in der Datei steht — der Insel-Parser
+		// (`parseContainerTag`) kennt aber nur EINE Verschachtelungsebene, deshalb ist
+		// `Grid` hier NICHT als Kind gelistet: über das Menü eingefügt landete ein
+		// leeres `<Grid />` im Markup (rendert nichts) und der Block wäre sofort
+		// geschützt. Siehe Hinweis in der Rückgabe/Doku.
+		childTypes: ['Color', 'TextColor', 'Card', 'Figure', 'Lightbox', 'DoDont', 'DownloadSpecimen'],
+		props: [
+			{
+				key: 'width',
+				label: 'Breite',
+				type: 'select',
+				options: ['content', 'wide', 'full'],
+				default: 'content',
+				hint: 'Ausbruch greift erst ab sehr breiten Fenstern (wide ab 1640px, full ab 1840px) — darunter bleibt der Block auf Inhaltsbreite.'
 			}
 		]
 	},
@@ -341,7 +411,9 @@ const ICON_KEY: Record<string, string> = {
 	DownloadSpecimen: 'download',
 	BrandHero: 'hero',
 	Card: 'card',
-	Grid: 'grid'
+	Figure: 'image',
+	Grid: 'grid',
+	Breakout: 'grid'
 };
 export const iconFor = (name: string): string => ICON_KEY[name] ?? 'block';
 
@@ -481,7 +553,8 @@ function formatAttr(p: CmsPropDef, values: Record<string, string | boolean>): st
 		const b = v === true || v === 'true';
 		return b !== (p.default === true) ? `${p.key}={${b}}` : null;
 	}
-	if (p.type === 'number') {
+	// `columns` serialisiert exakt wie `number` — Literal-Zahl im Markup.
+	if (p.type === 'number' || p.type === 'columns') {
 		const s = v == null ? '' : String(v);
 		const d = String(p.default);
 		if (s === '' || (s === d && !p.required)) return null;
@@ -566,7 +639,10 @@ function coerceAttrs(
 		if (!p) return null;
 		if (p.type === 'boolean') {
 			values[a.key] = a.kind === 'bare' ? true : a.value === 'true';
-		} else if (p.type === 'number') {
+		} else if (p.type === 'number' || p.type === 'columns') {
+			// Auch `columns` akzeptiert bewusst JEDE Literal-Zahl — sonst würde ein
+			// bestehendes `columns={8}` die Insel schützen (nicht mehr editierbar).
+			// Der Regler zeigt 1–6, PropField fängt Ausreisser separat ab.
 			if (a.kind !== 'number') return null;
 			values[a.key] = a.value;
 		} else {

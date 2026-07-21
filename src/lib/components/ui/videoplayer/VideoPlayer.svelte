@@ -1,7 +1,7 @@
 <!--
 	VideoPlayer.svelte — schlichter Video-Loop mit Play/Pause-Button (stumme
 	Demo-Clips, autoplay/loop). Genutzt auf Brand-Seiten (strategy, animation, logo,
-	pride-communication) und als CMS-Block (cms-components.ts).
+	component-showcase) und als CMS-Block (cms-components.ts).
 -->
 <script lang="ts">
 	import { RoundButton } from '$components/ui/round-button';

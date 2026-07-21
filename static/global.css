@@ -72,6 +72,16 @@
 	   (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
 	--ds-content-width: 56rem;
 
+	/* Ausbruchs-Stufen für `ui/breakout` — die ZIEL-Aussenbreite eines Blocks, der
+	   breiter sein darf als die Lesespalte. Nur zwei Stufen über `--ds-content-width`,
+	   damit die Redaktion keine freien CSS-Längen wählt (Auswahl statt Eingabe).
+	   Die Werte sind an der real verfügbaren Inhaltsspalte gemessen, nicht geraten:
+	   neben `main` stehen Sidebar (300px) und „Auf dieser Seite" (300px), die Spalte
+	   ist also `Viewport − 600px` breit. Ein Ziel T passt genau dann, wenn
+	   `T ≤ Spalte` — daraus folgen die Schaltpunkte in Breakout.svelte. */
+	--ds-breakout-wide: 64rem; /* 1024px — braucht ≥ 1624px Viewport */
+	--ds-breakout-full: 76rem; /* 1216px — braucht ≥ 1816px Viewport */
+
 	/* ── (2) MOTION ───────────────────────────────────────────────────────────
 	   Dauer & Easing nach Emil Kowalskis Animations-Skill. */
 	--ds-dur: 160ms; /* Hover / Press */

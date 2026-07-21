@@ -18,7 +18,9 @@ import type { PageServerLoad, Actions } from './$types';
 const PRODUCT_PALETTE_NAMES = [
 	'Banner',
 	'Grid',
+	'Breakout',
 	'Card',
+	'Figure',
 	'Lightbox',
 	'ImageGallery',
 	'DoDont',

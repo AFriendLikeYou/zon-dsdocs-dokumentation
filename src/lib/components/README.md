@@ -161,6 +161,14 @@ prüfen** — in dieser Reihenfolge:
    flat = Editor-Rechteck Figma 689:11510) und optionales `tone` je Option für
    Status-Flächen; Radiogroup + roving tabindex + Pfeiltasten. StatusSegmentedControl
    (✓/⚠/○) ist ein dünner Wrapper darüber, PropField nutzt `variant="flat"`),
+   `ui/column-picker/` (Spaltenwahl AM RASTER — große Miniatur des Rasters
+   (Spaltenzahl, `columnGap`/`rowGap`, `auto` + `minWidth`, je eine Kachel pro
+   vorhandenem Kind) plus die Auswahl 1–n als klickbare Raster-Kacheln und ein
+   Klartext-Resümee. Bewusst NICHT `ui/segmented-control/`: dessen Options-Slot
+   ist ein 24×24-Icon-Kasten in EINER Zeile — Raster-Kachel plus Bühne wäre eine
+   dritte Variante mit fremder Metrik. Der Radiogroup-Vertrag (roving tabindex,
+   Pfeiltasten mit Umlauf, dazu Home/End) ist identisch. Consumer:
+   `admin/brand/editor/PropField` für `CmsPropType: 'columns'`),
    `ui/tab/` (Tabs — barrierefreies Panel-Umschalter-Atom: `tabs: {id?,label,icon?,
 component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    roving tabindex + Pfeiltasten/Home/End. NICHT die AnchorBar-Sprungnavigation,
@@ -176,6 +184,18 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    `variant: solid|dashed` (dashed = Maschinen-Sprache), optionales `label` in der
    Linie, `spacing: sm|md|lg`; NICHT für Karten-/Tabellen-/Kopfzeilen-Borders,
    die zur Komponente gehören),
+   `ui/figure/` (DAS schlichte Bild — `src` + PFLICHT-`alt`, optionale `caption`
+   (Prop-Konvention: `caption` = Medien-Unterschrift), `class`-Passthrough; rendert
+   `<figure>` + `<img>` + optionales `<figcaption>`. Für Raster-Kacheln und
+   Fliesstext. NICHT `ui/lightbox/` (Zoom-Overlay mit `<dialog>`), NICHT `ui/card/`
+   (verlinkte Kachel). Heisst bewusst NICHT `Image` — den Namen belegt im CMS der
+   Pseudo-Typ für rohe `<img class="img-natural">`-Inseln),
+   `ui/breakout/` (DER Ausbruch aus der 56rem-Lesespalte — `width:
+   content|wide|full`, sonst nichts. Rechnet symmetrische negative `margin-inline`
+   aus `--ds-content-width` und `--ds-breakout-wide/-full`; kein `100vw` (Scrollbar)
+   und kein `transform` (bräche `position: fixed`-Kinder). Greift per Media Query
+   erst, wenn die Inhaltsspalte nachweislich Platz hat — sonst bleibt der Block auf
+   Inhaltsbreite. Nimmt die kachelbaren Leaves auf),
    `ui/card/` (DIE verlinkte Übersichtskarte — Medienfläche + Titel + Beschreibung,
    `<a>` ohne interaktive Kinder. Achsen: `variant: plain|framed` (plain = Rahmen auf
    der Medienfläche, Text frei darunter; framed = Gehäuse mit Rahmen/Fläche/Padding,

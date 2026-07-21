@@ -1,6 +1,6 @@
 <!--
   Color.svelte — Farb-Swatch mit Token-Name, optionalem Hex-Wert und Copy-Button.
-  Verwendet auf den Brand-Farbseiten (color, pride-communication) und als
+  Verwendet auf den Brand-Farbseiten (color, component-showcase) und als
   CMS-Block „Farbfeld" (cms-components.ts); Copy läuft über CopyButton.
 -->
 <script lang="ts">

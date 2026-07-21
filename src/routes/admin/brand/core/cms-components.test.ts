@@ -258,6 +258,43 @@ describe('Container: parse / serialize / info', () => {
 		expect(back?.children.map((c) => c.def.name)).toEqual(['Color', 'TextColor']);
 	});
 
+	it('`columns` bleibt trotz visuellem Regler eine Literal-Zahl im Markup', () => {
+		// Sicherheitsgrenze + Round-Trip hängen daran: `type: 'columns'` ändert NUR die
+		// Eingabe im Editor, nicht die Serialisierung.
+		expect(CMS_MAP.Grid.props.find((p) => p.key === 'columns')?.type).toBe('columns');
+		const out = serializeContainerTag(CMS_MAP.Grid, { columns: '4' }, []);
+		expect(out).toBe('<Grid columns={4}></Grid>');
+		expect(containerIslandInfo(out)?.attrs.columns).toBe('4');
+	});
+
+	it('Breakout mit Bild-Kindern ist editierbar', () => {
+		const bo = `<Breakout width="wide">\n\t<Figure src="/media/a.png" alt="Ein Logo" />\n</Breakout>`;
+		const info = containerIslandInfo(bo);
+		expect(info?.def.name).toBe('Breakout');
+		expect(info?.attrs.width).toBe('wide');
+		expect(info?.children.map((c) => c.def.name)).toEqual(['Figure']);
+		expect(info?.children[0].values.alt).toBe('Ein Logo');
+	});
+
+	it('belegt `Image` NICHT — der Name gehört dem rohen <img>-Pseudo-Typ', () => {
+		// Regression: eine Registry-Komponente namens `Image` würde in der Editor-
+		// Palette vom Pseudo-Typ verdeckt (defByName trifft IMAGE_DEF zuerst) und beim
+		// Einfügen still zu `<img class="img-natural">` umgeleitet (segment.ts).
+		expect(CMS_MAP.Image).toBeUndefined();
+		expect(CMS_MAP.Figure?.label).toBe('Bild mit Unterschrift');
+	});
+
+	it('Breakout lehnt eine unbekannte Breite ab (Enum-Grenze)', () => {
+		expect(containerIslandInfo(`<Breakout width="100vw">\n</Breakout>`)).toBeNull();
+	});
+
+	it('Image emittiert Pflichtfelder auch leer, damit der Alt-Text sichtbar fehlt', () => {
+		const out = serializeComponentTag(CMS_MAP.Figure, { src: '/media/a.png', alt: '', caption: '' });
+		expect(out).toContain('src="/media/a.png"');
+		expect(out).toContain('alt=""');
+		expect(out).not.toContain('caption');
+	});
+
 	it('DoDontGroup mit DoDont-Kindern ist editierbar', () => {
 		const dg = `<DoDontGroup columns={2}>\n\t<DoDont variant="do" caption="ok" />\n\t<DoDont variant="dont" caption="nein" strikeThrough={true} />\n</DoDontGroup>`;
 		const info = containerIslandInfo(dg);

@@ -54,6 +54,17 @@ describe('validateProp', () => {
 		expect(validateProp(num, 'vier', TOKENS)).toMatch(/ganze Zahl/);
 	});
 
+	it('prüft Spalten als ganze Zahl im Rasterbereich', () => {
+		const cols = p({ type: 'columns' });
+		for (const ok of ['1', '4', '6', '12']) expect(validateProp(cols, ok, TOKENS)).toBeNull();
+		expect(validateProp(cols, '0', TOKENS)).toMatch(/zwischen 1 und 12/);
+		expect(validateProp(cols, '13', TOKENS)).toMatch(/zwischen 1 und 12/);
+		expect(validateProp(cols, '2.5', TOKENS)).toMatch(/ganze Zahl/);
+		expect(validateProp(cols, 'zwei', TOKENS)).toMatch(/ganze Zahl/);
+		// Leer + nicht required → kein Fehler (Default greift).
+		expect(validateProp(cols, '', TOKENS)).toBeNull();
+	});
+
 	it('booleans sind immer valide', () => {
 		expect(validateProp(p({ type: 'boolean' }), true, TOKENS)).toBeNull();
 		expect(validateProp(p({ type: 'boolean' }), false, TOKENS)).toBeNull();

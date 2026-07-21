@@ -44,7 +44,7 @@ export function validateNewPage(
 }
 
 /**
- * Minimales Seiten-Gerüst (Muster: pride-communication): Frontmatter-Titel,
+ * Minimales Seiten-Gerüst (Muster: component-showcase): Frontmatter-Titel,
  * Head-Titel, LEERER Script-Block (macht Komponenten sofort einfügbar, siehe
  * hasScript-Gate im Editor), H1 + Start-Absatz.
  *

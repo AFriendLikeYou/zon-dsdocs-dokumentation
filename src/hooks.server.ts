@@ -48,7 +48,11 @@ const REDIRECTS: Record<string, string> = {
 	'/brand/typografie': '/brand/typography',
 	'/brand/bildsprache': '/brand/imagery',
 	'/brand/ki-richtlinien': '/brand/ai-guidelines',
-	'/brand/pride-kommunikation': '/brand/pride-communication',
+	// Die Seite unter diesen beiden Alt-Pfaden bestand nur aus Testtexten und ist zur
+	// Komponenten-Schau umgewidmet worden (User-Entscheidung 2026-07-21). Beide zeigen
+	// direkt auf das neue Ziel — keine Weiterleitungskette.
+	'/brand/pride-kommunikation': '/brand/component-showcase',
+	'/brand/pride-communication': '/brand/component-showcase',
 	'/brand/icons/aufbau': '/brand/icons/anatomy',
 	'/brand/marke': '/brand/identity',
 	'/brand/marke/markenstrategie': '/brand/identity/strategy',
