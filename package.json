@@ -17,6 +17,7 @@
 		"check:component-drift": "node tooling/check-component-drift.mjs",
 		"check:content": "node tooling/check-content.mjs",
 		"check:doc-coverage": "node tooling/check-doc-coverage.mjs",
+		"check:prod-drift": "node tooling/check-prod-drift.mjs",
 		"gen:icons": "node tooling/gen-icons.mjs",
 		"gen:brand-assets": "node tooling/gen-brand-assets.mjs",
 		"gen:assets": "npm run gen:icons && npm run gen:brand-assets",

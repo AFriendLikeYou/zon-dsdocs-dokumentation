@@ -50,6 +50,12 @@ npx vitest run   # Component-/Daten-Tests
 > ergänzen. Neue Checks starten im Warn-Modus und werden scharf geschaltet,
 > sobald ihr Befund 0 ist.
 >
+> **Nicht im Gate:** `check-prod-drift` vergleicht die Doku mit der **Produktion**
+> (zeit.de) — Playwright misst gerenderte Werte gegen `masse`. Er braucht Netz und
+> hängt an einer fremden Seite, deshalb eigener nächtlicher Job
+> (`.github/workflows/prod-drift.yml`), nicht `npm run check`. Fundstellen: der
+> optionale `produktion`-Block im `model.json` (Anleitung in IMPORT.md).
+>
 > `npm run lint` läuft mit `--max-warnings 27` (Ratsche gegen Warnungs-Wildwuchs):
 > Fehler sind immer 0, und die Warnungszahl darf nur sinken. Wer Warnungen abbaut,
 > senkt die Zahl in `package.json` mit.

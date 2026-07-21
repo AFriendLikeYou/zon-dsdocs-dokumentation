@@ -47,7 +47,8 @@ static/
 
 tooling/                        Generatoren (gen-icons, gen-brand-assets), Drift-Checks
                                 (check-nav, check-tokens, check-assets, check-component-drift,
-                                check-zds-sync), zeit-de-exporter/ (model.json → Component-Seite,
+                                check-zds-sync), check-prod-drift (Doku ↔ zeit.de, nächtlich,
+                                nicht im Gate), zeit-de-exporter/ (model.json → Component-Seite,
                                 export:all, figma-measure.js)
 ```
 
@@ -74,7 +75,14 @@ npm run build              # Produktions-Build (adapter-vercel)
 npm test                   # Vitest (Testing Library)
 npm run gen:assets         # Icon-/Brand-Logo-Registries neu generieren
 npm run copy:icons         # Icons aus @zeitonline/icons ziehen (+ Registry-Regen)
+npm run check:prod-drift   # Doku ↔ Produktion (zeit.de) — braucht Netz, NICHT im Gate
 ```
+
+`check:prod-drift` misst mit Playwright die gerenderten Maße echter
+zeit.de-Instanzen gegen die `masse`-Angaben der Doku. Er läuft bewusst **nicht**
+in `npm run check` (fremde Seite, Netz) sondern nächtlich in
+`.github/workflows/prod-drift.yml`. Fundstellen pflegt der optionale
+`produktion`-Block im `model.json` — siehe `tooling/zeit-de-exporter/IMPORT.md`.
 
 Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site liegt hinter Basic Auth.
 

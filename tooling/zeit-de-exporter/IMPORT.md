@@ -218,6 +218,59 @@ Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
 `portiert` | `entwurf` · `dateien`: Pfade relativ zum Komponenten-Ordner
 (weitere Dateien in einem co-locateten `code/`-Unterordner ablegen).
 
+### 3c · Produktions-Referenz (`produktion`-Block, optional)
+
+Alle anderen Drift-Checks vergleichen das Repo **mit sich selbst** — sie können
+grün sein, während die Doku trotzdem falsch ist, nämlich wenn sich das auf
+zeit.de ausgelieferte CSS bewegt hat. Der optionale Top-Level-`produktion`-Block
+schließt diese Lücke: er zeigt auf **real ausgelieferte Instanzen** der
+Komponente, die `tooling/check-prod-drift.mjs` nachmisst.
+
+```jsonc
+"produktion": {
+  "referenzen": [
+    {
+      "url": "https://www.zeit.de/index",
+      "selektor": ".z-button.z-button--primary",
+      "beschreibung": "Primary-Buttons auf der Startseite"
+    },
+    {
+      "url": "https://www.zeit.de/index",
+      "selektor": ".z-button.z-button--primary",
+      "zustand": "hover"
+    }
+  ]
+  // "toleranzPx": 0.5   // Default; nur bei nachweislich fluiden Maßen erhöhen
+}
+```
+
+- `url` — öffentlich erreichbar. **Keine Paywall-/Login-Seite** wählen; die ist
+  aus CI nicht messbar und produziert nur „übersprungen".
+- `selektor` — möglichst **ohne seitenspezifische Zusatzklasse**. `.z-button`
+  allein ist gut, `.newsletter-signup__button` schlecht: solche Klassen
+  überschreiben Maße und erzeugen Abweichungen, die nichts über das DS aussagen.
+- `zustand` (optional) — `hover` | `focus` | `disabled`, vor dem Messen erzwungen.
+- `pruefe` (optional) — Teilmenge von `hoehe` | `breite` | `padding` | `radius`.
+  Fehlt das Feld, wird alles verglichen, was unter `masse` dokumentiert ist.
+
+**Vergleichsbasis ist `masse`** — also genau die Werte, die die Doku ohnehin
+behauptet. Gemessen wird der **erste sichtbare** Treffer (Instanzen in
+zugeklappten Menüs melden Höhe 0 und werden nicht als 0 verglichen).
+
+Prüfen:
+
+```bash
+npm run check:prod-drift                          # alle Komponenten
+node tooling/check-prod-drift.mjs --only button   # eine
+```
+
+Der Check ist **nicht Teil von `npm run check`** (er braucht Netz) — er läuft
+nächtlich in `.github/workflows/prod-drift.yml`. Ohne `produktion`-Block gilt
+eine Komponente als „nicht prüfbar" und wird übersprungen, nicht bemängelt.
+Details zu Kategorien, Toleranz und dem, was er bewusst **nicht** prüft
+(CSS-Quelltext-Gleichheit), stehen im Kopfkommentar von
+`tooling/check-prod-drift.mjs`.
+
 ## 4 · Exporter laufen lassen
 
 ```bash

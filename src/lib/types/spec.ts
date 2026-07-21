@@ -31,6 +31,36 @@ export type Masse = {
 	radius?: MasseValue;
 };
 
+/** Maße, die gegen die Produktion geprüft werden können (Schlüssel aus `Masse`). */
+export type ProduktionsMass = 'hoehe' | 'breite' | 'padding' | 'radius';
+
+/** Zustand, den der Prod-Drift-Check vor dem Messen erzwingt. */
+export type ProduktionsZustand = 'hover' | 'focus' | 'disabled';
+
+/**
+ * Eine real ausgelieferte Instanz der Komponente auf zeit.de: Seite + Selektor.
+ * Gemessen wird der erste SICHTBARE Treffer.
+ */
+export type ProduktionsReferenz = {
+	url: string;
+	selektor: string;
+	beschreibung?: string;
+	zustand?: ProduktionsZustand;
+	/** Teilmenge der zu prüfenden Maße; fehlt sie, gilt alles aus `masse`. */
+	pruefe?: ProduktionsMass[];
+};
+
+/**
+ * Referenzen auf die Produktion (zeit.de). Rein für `tooling/check-prod-drift.mjs` —
+ * NICHT im PR-Gate, sondern in einem eigenen nächtlichen CI-Job. Der Block ist
+ * optional; ohne ihn gilt eine Komponente als „nicht prüfbar".
+ */
+export type Produktion = {
+	referenzen: ProduktionsReferenz[];
+	/** Erlaubte Abweichung je Einzelwert in px. Default 0.5 (Sub-Pixel-Rundung). */
+	toleranzPx?: number;
+};
+
 /** Interner Abstand (Spacing-Redline): benannter Gap zwischen Teilen, mit Token. */
 export type SpacingSpec = {
 	label: string;
@@ -230,6 +260,8 @@ export type ComponentSpec = {
 	version?: string;
 	verwendung?: Verwendung | null;
 	masse?: Masse | null;
+	/** Fundstellen in der Produktion (zeit.de) — nur für den Prod-Drift-Check. */
+	produktion?: Produktion | null;
 	spacing?: SpacingSpec[];
 	callouts?: Callout[];
 	tokens?: TokenGroup[];

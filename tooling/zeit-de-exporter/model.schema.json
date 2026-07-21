@@ -112,9 +112,61 @@
 			"items": { "type": "string" }
 		},
 		"render": { "$ref": "#/$defs/render" },
-		"code": { "$ref": "#/$defs/code" }
+		"code": { "$ref": "#/$defs/code" },
+		"produktion": { "$ref": "#/$defs/produktion" }
 	},
 	"$defs": {
+		"produktion": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["referenzen"],
+			"description": "Referenzen auf real ausgelieferte Instanzen dieser Komponente auf zeit.de. Optional/additiv — nur `tooling/check-prod-drift.mjs` liest diesen Block (nicht im PR-Gate, eigener nächtlicher CI-Job). Fehlt er, gilt die Komponente als „nicht prüfbar“ und wird übersprungen.",
+			"properties": {
+				"referenzen": {
+					"type": "array",
+					"minItems": 1,
+					"description": "Eine oder mehrere Fundstellen. Pro URL wird die Seite nur EINMAL geladen (höfliche Requests).",
+					"items": { "$ref": "#/$defs/produktionsReferenz" }
+				},
+				"toleranzPx": {
+					"type": "number",
+					"minimum": 0,
+					"description": "Erlaubte Abweichung je Einzelwert in px. Default 0.5 (Sub-Pixel-Rundung des Layout-Engines). Nur erhöhen, wenn die Komponente nachweislich fluide Maße hat."
+				}
+			}
+		},
+		"produktionsReferenz": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["url", "selektor"],
+			"description": "Eine konkrete Fundstelle: Seite + CSS-Selektor. Gemessen wird der erste SICHTBARE Treffer (Elemente in zugeklappten Menüs haben Höhe 0 und werden übersprungen).",
+			"properties": {
+				"url": {
+					"type": "string",
+					"pattern": "^https?://",
+					"description": "Öffentlich erreichbare zeit.de-URL. Keine Paywall-/Login-Seiten wählen — die sind aus CI nicht messbar."
+				},
+				"selektor": {
+					"type": "string",
+					"minLength": 1,
+					"description": "CSS-Selektor der Instanz, z. B. \".z-button.z-button--primary\". Möglichst OHNE seitenspezifische Zusatzklassen (z. B. \".newsletter-signup__button\"), die Maße überschreiben könnten."
+				},
+				"beschreibung": {
+					"type": "string",
+					"description": "Wo auf der Seite die Instanz sitzt — hilft beim Nachprüfen, wenn der Selektor bricht."
+				},
+				"zustand": {
+					"enum": ["hover", "focus", "disabled"],
+					"description": "Zustand, der vor dem Messen erzwungen wird. Fehlt das Feld, wird der Ruhezustand gemessen."
+				},
+				"pruefe": {
+					"type": "array",
+					"minItems": 1,
+					"description": "Teilmenge der zu prüfenden Maße. Fehlt das Feld, wird alles geprüft, was unter `masse` dokumentiert ist.",
+					"items": { "enum": ["hoehe", "breite", "padding", "radius"] }
+				}
+			}
+		},
 		"code": {
 			"type": "object",
 			"additionalProperties": false,

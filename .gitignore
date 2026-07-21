@@ -34,3 +34,7 @@ vite.config.ts.timestamp-*
 # Playwright-Artefakte
 test-results/
 playwright-report/
+
+# Prod-Drift-Bericht (tooling/check-prod-drift.mjs --json/--summary, CI-Artefakt)
+/prod-drift.json
+/prod-drift.md

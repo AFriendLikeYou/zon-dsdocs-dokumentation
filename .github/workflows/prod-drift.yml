@@ -1,0 +1,72 @@
+# Prod-Drift — „Doku vs. Produktion (zeit.de)"
+#
+# BEWUSST NICHT IM PR-GATE (.github/workflows/ci.yml). Dieser Job lädt echte
+# zeit.de-Seiten und misst gerenderte Werte. Damit hängt sein Ergebnis an einer
+# fremden, sich bewegenden Seite: ein zeit.de-Ausfall, ein Relaunch oder ein
+# Netzproblem im Runner darf niemals einen Merge blockieren. Deshalb ein eigener,
+# nächtlicher `schedule`-Job — `npm run check` bleibt unberührt und offline.
+#
+# Exit-Semantik von tooling/check-prod-drift.mjs (mit --strict):
+#   A) Abweichung        → Exit 1  (Doku und Produktion sind auseinandergelaufen)
+#   B) Referenz veraltet → Exit 1  (URL/Selektor zeigt ins Leere)
+#   ·) Übersprungen      → Exit 0  (Netzfehler/Timeout/HTTP — Umweltproblem)
+# Der Job wird also nur rot, wenn wirklich etwas über UNSERE Doku gesagt wurde.
+# Genau deshalb ist `--strict` hier vertretbar, obwohl es im PR-Gate nicht wäre.
+name: Prod-Drift (zeit.de)
+
+on:
+  schedule:
+    # 03:17 UTC. Krumme Minute absichtlich: die vollen Stunden sind bei GitHub
+    # am stärksten belegt und Jobs starten dort mit der größten Verzögerung.
+    - cron: '17 3 * * *'
+  # Für manuelles Nachprüfen nach einem zeit.de-Release.
+  workflow_dispatch:
+
+# Ein nächtlicher Lauf reicht; ein manuell nachgeschobener löst den alten ab.
+concurrency:
+  group: prod-drift
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    # Die Seite ist fremd — ein Hänger soll nicht eine Stunde Runner verbrennen.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Nur Chromium: der Check misst gerenderte Geometrie, keine Browser-Matrix.
+      - name: Playwright-Browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Prod-Drift prüfen
+        id: drift
+        run: |
+          node tooling/check-prod-drift.mjs \
+            --strict \
+            --json prod-drift.json \
+            --summary prod-drift.md
+
+      # `always()`: Gerade der ROTE Lauf ist der, dessen Bericht man sehen will.
+      - name: Job-Summary schreiben
+        if: always()
+        run: cat prod-drift.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Bericht als Artefakt sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-drift
+          path: |
+            prod-drift.json
+            prod-drift.md
+          retention-days: 30
+          if-no-files-found: warn

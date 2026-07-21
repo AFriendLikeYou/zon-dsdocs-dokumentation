@@ -24,6 +24,21 @@ export const generated = {
 			"herkunft": "gemessen"
 		}
 	},
+	"produktion": {
+		"referenzen": [
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": ".z-button.z-button--primary",
+				"beschreibung": "Primary-Buttons auf der Startseite (u. a. Embed-Dialog-Trigger und Angebots-Links). Bewusst OHNE seitenspezifische Zusatzklasse gewählt — .newsletter-signup__button etwa überschreibt Maße."
+			},
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": ".z-button.z-button--primary",
+				"zustand": "hover",
+				"beschreibung": "Derselbe Button im Hover — prüft, dass Hover nur die Farbe ändert und die Geometrie stehen bleibt."
+			}
+		]
+	},
 	"tokens": [
 		{
 			"kategorie": "Farbe · Default",
