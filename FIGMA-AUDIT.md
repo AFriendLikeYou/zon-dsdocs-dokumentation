@@ -312,8 +312,17 @@ strukturell unvereinbar. Vier unabhängige Fälle:
 | --- | --- | --- |
 | **Hero · `Size`** | zwei gebaute Varianten | **ein Breakpoint** derselben Klasse |
 | **Standard · `Size`** | zwei gebaute Varianten (Wide/Small) | **intrinsischer Reflow**, gar kein Breakpoint: `repeat(auto-fit, minmax(min(100%, 336px), 1fr))` — der Teaser klappt ab ca. 704 px Containerbreite um. Nur die Titelgröße (22 ↔ 20) hängt an einer Media Query |
-| **Standard · `Type`** (10 Werte) | zehn Varianten-Werte | **kein einziger Wurzel-Modifier.** Keiner der 50 Standard-Teaser auf `/index` trägt eine Typ-Klasse; der Typ zeigt sich nur über eingesetzte Bausteine (`zon-teaser__media-addition--podcastcover`, `zon-teaser-action--liveblog`) |
+| **Standard · `Type`** (10 Werte) | zehn Varianten-Werte | **kein einziger Wurzel-Modifier.** Keiner der **51** Standard-Teaser auf `/index` trägt eine Typ-Klasse; der Typ zeigt sich nur über eingesetzte Bausteine (`zon-teaser__media-addition--podcastcover`, `zon-teaser-action--liveblog`) |
 | **`Style = Background Image`** (Hero **und** Standard) | Wurzel-Variante | Klasse sitzt auf dem **inneren Container** (`zon-teaser__container--on-image`) plus `--overlay-background-color` **je Artikel** |
+
+**Nachgeprüft am 2026-07-21** an `zeit.de/index` bei Viewport 1440 × 1000, per
+`getComputedStyle` auf den echten Instanzen (nicht am CSS-Quelltext): 51 Standard-Teaser,
+Wurzelklassen ausgezählt. Die einzigen Wurzel-Modifier sind `--standard` (51×) und
+`--printbox` (1×) — letzterer ist eine Print-Promo-Box und **kein** Wert aus Figmas
+`Type`-Achse. Der Befund hält also. Bestätigt wurden dabei auch die Rasterwerte: der
+Teaser **selbst** ist das Grid (`display: grid`, `grid-template-columns: 430px 430px`,
+`gap: 16px 32px`), nicht sein Elterncontainer (`cp-area--standard` ist schlicht `block`);
+Titel 22 px / 26,4 px über `.zon-teaser__title`.
 
 Dazu zwei inhaltliche Abweichungen, bei denen Figma schlicht etwas anderes zeichnet als
 läuft:
