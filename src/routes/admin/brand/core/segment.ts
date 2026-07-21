@@ -622,28 +622,48 @@ function appendBlock(text: string, tag: string): string {
 	return `${base}\n\n${tag}\n`;
 }
 
+/** Ein Body-Block auf dem Weg zur Serialisierung. */
+interface BuiltPart {
+	/** Kern des Blocks (ohne umgebende Leerzeilen, ohne Trailing-`\n`). */
+	text: string;
+	isIsland: boolean;
+	/** Original-Segment-Index bei `keep`, sonst `null` (neu eingefügt). */
+	origIndex: number | null;
+	/** Original-Leerzeilen VOR dem Kern (nur bei `keep`). */
+	lead: string;
+	/** Original-Trailing-`\n` + Leerzeilen NACH dem Kern (nur bei `keep`). */
+	tail: string;
+}
+
 /**
  * Baut den Body aus einer geordneten Blockliste neu (WYSIWYG). Reihenfolge,
  * Einfügen an beliebiger Stelle, Löschen und Editieren ergeben sich aus der Liste.
- * Abstände werden normalisiert: zwei benachbarte INSELN erhalten ZWEI Leerzeilen
- * (≥2-Regel ⇒ eigene Segmente beim Re-Parse), sonst EINE. `syncComponentImports`
- * gleicht anschließend die Imports ab.
+ *
+ * ABSTÄNDE — byte-erhaltend (ADR: „Speichern formatiert nicht um"):
+ * Blockgrenzen, die es im Original schon gab (zwei `keep`-Blöcke, die im Original
+ * direkt aufeinander folgten), behalten ihren Original-Abstand VERBATIM — inklusive
+ * Leerzeilen mit Whitespace. Nur GENUINE NEUE Grenzen (Einfügen, Löschen, Umsortieren)
+ * werden normalisiert: zwei benachbarte INSELN bekommen ZWEI Leerzeilen (≥2-Regel ⇒
+ * garantiert eigene Segmente beim Re-Parse, unabhängig von `closedAfter`), sonst EINE.
+ * Dadurch gilt: Speichern ohne inhaltliche Änderung === Datei byte-identisch, und ein
+ * geänderter Block erzeugt nur die Zeilen SEINES Kerns als Diff.
+ * `syncComponentImports` gleicht anschließend die Imports ab.
  */
 function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
-	const parts: Array<{ text: string; isIsland: boolean }> = [];
+	const parts: BuiltPart[] = [];
+	const pushNew = (text: string, isIsland: boolean) =>
+		parts.push({ text, isIsland, origIndex: null, lead: '', tail: '' });
+
 	for (const op of blocks) {
 		if ('insertProse' in op) {
 			const core = segmentCore(normalizeNl(op.insertProse));
-			if (core.trim() !== '') parts.push({ text: core, isIsland: false });
+			if (core.trim() !== '') pushNew(core, false);
 			continue;
 		}
 		if ('insertContainer' in op) {
 			const def = CMS_MAP[op.insertContainer];
 			if (!def || !def.container) continue;
-			parts.push({
-				text: serializeContainerTag(def, op.attrs ?? {}, op.children ?? []),
-				isIsland: true
-			});
+			pushNew(serializeContainerTag(def, op.attrs ?? {}, op.children ?? []), true);
 			continue;
 		}
 		if ('insert' in op) {
@@ -652,23 +672,18 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
 				const src = String(op.values?.src ?? '').trim();
 				if (!src) continue;
 				const alt = String(op.values?.alt ?? 'Bild').replace(/["<>]/g, '');
-				parts.push({
-					text: `<img class="img-natural" src="${src}" alt="${alt}" />`,
-					isIsland: true
-				});
+				pushNew(`<img class="img-natural" src="${src}" alt="${alt}" />`, true);
 				continue;
 			}
 			const def = CMS_MAP[op.insert];
 			if (!def || def.container) continue;
-			parts.push({
-				text: serializeComponentTag(def, op.values ?? {}),
-				isIsland: true
-			});
+			pushNew(serializeComponentTag(def, op.values ?? {}), true);
 			continue;
 		}
 		const seg = parsed.segments[op.keep];
 		if (!seg) continue;
-		let core = segmentCore(seg.text);
+		const frame = proseFrame(seg.text);
+		let core = frame.core;
 		if (seg.type === 'prosa' && op.prose !== undefined) {
 			core = segmentCore(normalizeNl(op.prose));
 		} else if (seg.type === 'insel' && op.container && isMutableContainerIsland(core)) {
@@ -695,19 +710,45 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
 			core = segmentCore(op.img);
 		}
 		if (core.trim() === '') continue; // geleerte Prosa fällt weg
-		parts.push({ text: core, isIsland: seg.type === 'insel' });
+		parts.push({
+			text: core,
+			isIsland: seg.type === 'insel',
+			origIndex: op.keep,
+			lead: frame.lead,
+			tail: (frame.coreTrailNl ? '\n' : '') + frame.trail
+		});
 	}
 
-	let body = '';
-	for (let i = 0; i < parts.length; i++) {
-		if (i > 0) {
-			const twoBlank = parts[i - 1].isIsland && parts[i].isIsland;
-			body += twoBlank ? '\n\n\n' : '\n\n';
-		}
-		body += parts[i].text;
+	// Nur Imports entfernen, die DURCH DIESEN SAVE verwaisen (im Original genutzt).
+	const prunable = new Set(usedRegisteredComponents(parsed.body));
+
+	if (parts.length === 0) return syncComponentImports('\n', true, prunable);
+
+	// Zwei `keep`-Blöcke, die im Original DIREKT aufeinander folgten, behalten ihren
+	// Original-Abstand (`prev.tail + cur.lead`) verbatim — daher ist ein Save ohne
+	// Änderung byte-identisch. Alle anderen Grenzen sind neu und werden normalisiert.
+	const contiguous = (prev: BuiltPart, cur: BuiltPart) =>
+		prev.origIndex !== null && cur.origIndex !== null && cur.origIndex === prev.origIndex + 1;
+
+	const first = parts[0];
+	const last = parts[parts.length - 1];
+	// Datei-Anfang/-Ende ebenfalls nur dann verbatim, wenn der Block dort im Original
+	// auch stand; sonst die kanonische EINE Leerzeile nach dem Frontmatter bzw. am Ende.
+	let body = first.origIndex === 0 ? first.lead : '\n';
+	body += first.text;
+	for (let i = 1; i < parts.length; i++) {
+		const prev = parts[i - 1];
+		const cur = parts[i];
+		body += contiguous(prev, cur)
+			? prev.tail + cur.lead
+			: prev.isIsland && cur.isIsland
+				? '\n\n\n'
+				: '\n\n';
+		body += cur.text;
 	}
-	body = `\n${body}\n`;
-	return syncComponentImports(body);
+	body += last.origIndex === parsed.segments.length - 1 ? last.tail : '\n';
+
+	return syncComponentImports(body, true, prunable);
 }
 
 /**
@@ -720,7 +761,15 @@ function rebuildFromBlocks(parsed: ParsedSvx, blocks: BlockOp[]): string {
  * Gemergte oder fremde Imports (z. B. `{ Color, TextColor }`, `Callout`) werden NIE
  * angefasst. Ohne Script-Block: unverändert.
  */
-export function syncComponentImports(body: string, prune = true): string {
+export function syncComponentImports(
+	body: string,
+	prune = true,
+	/** Whitelist der entfernbaren Namen. Der Block-Editor übergibt hier die im
+	 *  ORIGINAL genutzten Komponenten: nur ein Import, der DURCH DIESEN SAVE
+	 *  verwaist ist, fliegt raus. Schon vorher tote Imports bleiben stehen —
+	 *  sonst erzeugte jedes Speichern Diff-Rauschen in fremden Zeilen. */
+	prunable?: ReadonlySet<string>
+): string {
 	const m = /(<script\b[^>]*>)([\s\S]*?)(<\/script>)/.exec(body);
 	if (!m) return body;
 	const [, open, inner, close] = m;
@@ -733,7 +782,8 @@ export function syncComponentImports(body: string, prune = true): string {
 	const lines = prune
 		? inner.split('\n').filter((l) => {
 				const name = canonicalToName.get(l.trim());
-				return !(name && !used.has(name));
+				if (!name || used.has(name)) return true;
+				return prunable ? !prunable.has(name) : false;
 			})
 		: inner.split('\n');
 

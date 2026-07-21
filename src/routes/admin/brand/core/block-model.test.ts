@@ -9,7 +9,6 @@ import {
 	imgAlt,
 	withImgAttr,
 	type Def,
-	type Item,
 	type SegmentInput
 } from './block-model';
 
