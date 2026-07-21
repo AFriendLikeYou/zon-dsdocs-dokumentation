@@ -1,0 +1,106 @@
+[
+	{
+		"title": "Getting started",
+		"isCategory": true
+	},
+	{
+		"title": "Willkommen",
+		"href": "/product",
+		"isInFooter": false
+	},
+	{
+		"title": "Grundlagen",
+		"isCategory": true
+	},
+	{
+		"title": "Design Principles",
+		"href": "/product/design-principles",
+		"isInFooter": true
+	},
+	{
+		"title": "Foundations",
+		"href": "/product/foundations",
+		"isInFooter": true
+	},
+	{
+		"title": "Tokens",
+		"href": "/product/foundations/tokens",
+		"isInFooter": true
+	},
+	{
+		"title": "Farbe",
+		"href": "/product/foundations/color",
+		"isInFooter": true
+	},
+	{
+		"title": "Typografie",
+		"href": "/product/foundations/typography",
+		"isInFooter": true
+	},
+	{
+		"title": "Spacing",
+		"href": "/product/foundations/spacing",
+		"isInFooter": true
+	},
+	{
+		"title": "Shape",
+		"href": "/product/foundations/shape",
+		"isInFooter": true
+	},
+	{
+		"title": "Motion & Elevation",
+		"href": "/product/foundations/motion",
+		"isInFooter": true
+	},
+	{
+		"title": "Icons",
+		"href": "/product/foundations/icons",
+		"isInFooter": true
+	},
+	{
+		"title": "Barrierefreiheit",
+		"href": "/product/foundations/accessibility",
+		"isInFooter": true
+	},
+	{
+		"title": "Components",
+		"isCategory": true
+	},
+	{
+		"title": "Übersicht",
+		"href": "/product/components",
+		"isInFooter": true
+	},
+	{
+		"title": "Komponenten (Katalog)",
+		"isCatalog": true
+	},
+	{
+		"title": "Patterns",
+		"isCategory": true
+	},
+	{
+		"title": "Übersicht",
+		"href": "/product/patterns",
+		"isInFooter": true
+	},
+	{
+		"title": "Formular",
+		"href": "/product/patterns/form",
+		"isInFooter": true
+	},
+	{
+		"title": "Resources",
+		"isCategory": true
+	},
+	{
+		"title": "Mitwirken",
+		"href": "/product/contribute",
+		"isInFooter": true
+	},
+	{
+		"title": "Changelog",
+		"href": "/product/changelog",
+		"isInFooter": true
+	}
+]

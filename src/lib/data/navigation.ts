@@ -21,6 +21,15 @@ import { CATALOG } from '$data/catalog';
 // (nicht mehr als href-Literale hier) — der Drift-Check liest sie zusätzlich ein.
 import brandNav from './brand-nav.json';
 
+// Product-Navigation: dieselbe Mechanik für die Design-System-Sidebar (ADR-030).
+// Sortierbar sind die STATISCHEN Einträge (Kategorien, Foundations, Patterns,
+// Resources); die Komponenten-Sektion bleibt katalog-getrieben (ADR-025) und steht
+// in der Config nur als EIN Platzhalter-Knoten (`isCatalog`), der unten gegen
+// COMPONENT_MENU_ITEMS ersetzt wird. Umsortierbar ist damit die POSITION der
+// Sektion, nicht ihr Inhalt — die Registry-Automatik bleibt unangetastet.
+// Hinweis für tooling/check-nav.mjs: die Product-Hrefs stehen nun in dieser JSON.
+import productNav from './product-nav.json';
+
 export interface MenuItem extends FooterVisible {
 	label: string;
 	href: string;
@@ -39,6 +48,16 @@ export interface MenuSection extends FooterVisible {
 	items?: MenuItem[];
 	badge?: string; // Add badge field
 	badgeVariant?: BadgeVariant;
+}
+
+/**
+ * Config-Knoten der Product-Nav: eine MenuSection plus dem Platzhalter-Flag für
+ * automatisch generierte Sektionen. Existiert NUR in der JSON-Config — nach dem
+ * Auffalten unten enthält MENU_ITEMS_PRODUCT keine Slots mehr.
+ */
+export interface ProductNavEntry extends MenuSection {
+	/** Platzhalter für die katalog-getriebene Komponenten-Sektion (ADR-025). */
+	isCatalog?: boolean;
 }
 
 // Aus der JSON-Config abgeleitet (SSOT, s. o.). Reihenfolge, Kategorien-Header,
@@ -106,112 +125,16 @@ const COMPONENT_MENU_ITEMS: MenuSection[] = [
 	)
 ];
 
-export const MENU_ITEMS_PRODUCT: MenuSection[] = [
-	{
-		title: 'Getting started',
-		isCategory: true
-	},
-	{
-		title: 'Willkommen',
-		href: '/product',
-		isInFooter: false
-	},
-	{
-		title: 'Grundlagen',
-		isCategory: true
-	},
-	{
-		title: 'Design Principles',
-		href: '/product/design-principles',
-		isInFooter: true
-	},
-	{
-		title: 'Foundations',
-		href: '/product/foundations',
-		isInFooter: true
-	},
-	{
-		title: 'Tokens',
-		href: '/product/foundations/tokens',
-		isInFooter: true
-	},
-	{
-		title: 'Farbe',
-		href: '/product/foundations/color',
-		isInFooter: true
-	},
-	{
-		title: 'Typografie',
-		href: '/product/foundations/typography',
-		isInFooter: true
-	},
-	{
-		title: 'Spacing',
-		href: '/product/foundations/spacing',
-		isInFooter: true
-	},
-	{
-		title: 'Shape',
-		href: '/product/foundations/shape',
-		isInFooter: true
-	},
-	{
-		title: 'Motion & Elevation',
-		href: '/product/foundations/motion',
-		isInFooter: true
-	},
-	{
-		title: 'Icons',
-		href: '/product/foundations/icons',
-		isInFooter: true
-	},
-	{
-		title: 'Barrierefreiheit',
-		href: '/product/foundations/accessibility',
-		isInFooter: true
-	},
-	{
-		title: 'Components',
-		isCategory: true
-	},
-	{
-		title: 'Übersicht',
-		href: '/product/components',
-		isInFooter: true
-	},
-	// Ab hier katalog-getrieben (ADR-025): dokumentierte Komponenten + geplante Stubs.
-	...COMPONENT_MENU_ITEMS,
-	{
-		title: 'Patterns',
-		isCategory: true
-	},
-	// Patterns sind handkuratiert (ADR-026), keine katalog-getriebene Sektion — daher
-	// literale hrefs (check-nav.mjs scannt navigation.ts als Text).
-	{
-		title: 'Übersicht',
-		href: '/product/patterns',
-		isInFooter: true
-	},
-	{
-		title: 'Formular',
-		href: '/product/patterns/form',
-		isInFooter: true
-	},
-	{
-		title: 'Resources',
-		isCategory: true
-	},
-	{
-		title: 'Mitwirken',
-		href: '/product/contribute',
-		isInFooter: true
-	},
-	{
-		title: 'Changelog',
-		href: '/product/changelog',
-		isInFooter: true
-	}
-];
+// Aus der JSON-Config abgeleitet (SSOT, ADR-030): die statischen Einträge stehen dort
+// in ihrer sortierbaren Reihenfolge; der `isCatalog`-Platzhalter wird hier gegen die
+// katalog-getriebene Komponenten-Sektion aufgefaltet (ADR-025). Nach außen bleibt die
+// API unverändert (MenuSection[]) — Sidebar, Footer, Suche und die Drift-Checks
+// konsumieren wie bisher.
+const PRODUCT_NAV_CONFIG = productNav as ProductNavEntry[];
+
+export const MENU_ITEMS_PRODUCT: MenuSection[] = PRODUCT_NAV_CONFIG.flatMap(
+	({ isCatalog, ...section }): MenuSection[] => (isCatalog ? COMPONENT_MENU_ITEMS : [section])
+);
 
 const flattenMenu = (menu: MenuSection[]): MenuItem[] =>
 	menu.reduce<MenuItem[]>((acc, item) => {

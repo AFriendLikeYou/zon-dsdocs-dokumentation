@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { getToastState } from '$stores/toast-state.svelte';
-	import { Icon } from '$lib/icons/cms';
-	import { AdminPageHeader, AdminRow } from '../ui';
+	import { AdminPageHeader, AdminRow, DragGrip, NudgeButtons } from '../ui';
 	import { Badge } from '$components/ui/badge';
 	import { Banner } from '$components/ui/banner';
 	import { Button } from '$components/ui/button';
-	import { ButtonGroup } from '$components/ui/button-group';
 	import { Field } from '$components/ui/field';
+	import { Reorder } from '../core/reorder.svelte';
 	import { sectionKind, type NavSection } from './core/brand-nav';
 	import { slugify } from './core/new-page';
 
@@ -19,124 +18,18 @@
 	// sagt pro Nav-Knoten, ob er im CMS editierbar ist und unter welchem Editor-Pfad.
 	const pageByUrl = new Map(data.pages.map((p) => [p.url, p]));
 
-	// Arbeits-Baum (umsortierbar) — aus der Server-Config geklont. Reihenfolge +
-	// Hierarchie leben in src/lib/data/brand-nav.json (SSOT, ADR-028); die Sidebar
-	// leitet daraus ab. Ein Reorder persistiert via ?/reorder zurück in die Config.
-	let tree = $state<NavSection[]>(structuredClone(data.navTree));
-	let saving = $state(false);
-
-	// Resync auf den Server-Stand: data.navTree ändert sich nach invalidateAll (unten)
-	// und nach einem HMR-Remount. Beides soll die Ansicht dem gespeicherten Stand
-	// folgen lassen — den Arbeits-Baum daher neu aus data.navTree aufbauen, sobald der
-	// sich WIRKLICH ändert (Signatur-Vergleich, damit optimistische Edits ungestört
-	// bleiben, solange der Server noch nichts Neues gemeldet hat).
-	let serverSig = JSON.stringify(data.navTree);
-	$effect(() => {
-		const sig = JSON.stringify(data.navTree);
-		if (sig !== serverSig) {
-			serverSig = sig;
-			tree = structuredClone(data.navTree);
-		}
+	// Arbeits-Baum (umsortierbar) — Reihenfolge + Hierarchie leben in
+	// src/lib/data/brand-nav.json (SSOT, ADR-028); die Sidebar leitet daraus ab. Die
+	// gesamte Mechanik (Klonen, Server-Resync, optimistisches Persistieren via
+	// ?/reorder, ↑/↓-Nudges, natives Drag&Drop auf zwei Ebenen) liegt in der
+	// gemeinsamen Reorder-Klasse — dieselbe Quelle nutzt die Design-System-Übersicht
+	// auf /admin (ADR-030).
+	const reorder = new Reorder<NavSection>({
+		initial: data.navTree,
+		writable: () => data.writable,
+		notify: (title, body) => toast?.add(title, body)
 	});
-
-	// Persistenz per direktem Action-fetch. Nach Erfolg invalidateAll(): der Server-Load
-	// liest die Config frisch → data.navTree spiegelt den gespeicherten Stand. Nötig,
-	// weil das Schreiben der Config im Dev einen Vite-HMR-Remount von Layout/Seite
-	// auslöst (die Sidebar importiert die Config); der neu gemountete Baum initialisiert
-	// dann aus frischem data.navTree statt aus dem veralteten SSR-Stand.
-	async function persist() {
-		if (!data.writable) return; // Prod: read-only (Phase 2b: GitHub-PR)
-		const body = new FormData();
-		body.set('tree', JSON.stringify($state.snapshot(tree)));
-		saving = true;
-		try {
-			const res = await fetch('?/reorder', {
-				method: 'POST',
-				headers: { 'x-sveltekit-action': 'true' },
-				body
-			});
-			const result = deserialize(await res.text());
-			if (result.type === 'success') {
-				toast?.add('Reihenfolge gespeichert', 'Sidebar & Übersicht wurden aktualisiert.');
-				await invalidateAll();
-			} else {
-				const msg =
-					result.type === 'failure'
-						? (result.data as { message?: string } | undefined)?.message
-						: undefined;
-				toast?.add('Nicht gespeichert', msg ?? 'Speichern fehlgeschlagen.');
-				tree = structuredClone(data.navTree); // optimistische Änderung verwerfen
-			}
-		} catch (e) {
-			toast?.add('Fehler', e instanceof Error ? e.message : 'Speichern fehlgeschlagen.');
-			tree = structuredClone(data.navTree);
-		} finally {
-			saving = false;
-		}
-	}
-
-	// ---- Move-Operationen (mutieren tree an eine ZIEL-Endposition, dann persist) ----
-	function repositionTop(from: number, final: number) {
-		if (final < 0 || final >= tree.length || from === final) return;
-		const a = tree.slice();
-		const [item] = a.splice(from, 1);
-		a.splice(final, 0, item);
-		tree = a;
-		persist();
-	}
-	function repositionChild(group: number, from: number, final: number) {
-		const items = tree[group].items;
-		if (!items || final < 0 || final >= items.length || from === final) return;
-		const a = items.slice();
-		const [item] = a.splice(from, 1);
-		a.splice(final, 0, item);
-		tree[group].items = a;
-		persist();
-	}
-	// Drop auf die Anzeige-Zeile „to" = „vor diesem Eintrag einfügen" → Endindex.
-	const dropFinal = (from: number, to: number) => (from < to ? to - 1 : to);
-	// ↑/↓ (barrierefreie, präzise Basis — Tastatur/ohne Maus). dir −1 = nach oben.
-	const nudgeTop = (i: number, dir: -1 | 1) => repositionTop(i, i + dir);
-	const nudgeChild = (g: number, i: number, dir: -1 | 1) => repositionChild(g, i, i + dir);
-
-	// ---- Native HTML5 Drag&Drop (dep-frei), zwei Ebenen, gleicher Scope nötig ----
-	type DragCtx = { kind: 'top'; index: number } | { kind: 'child'; group: number; index: number };
-	let drag = $state<DragCtx | null>(null);
-	let overKey = $state<string | null>(null);
-
-	const keyOf = (c: DragCtx) => (c.kind === 'top' ? `t${c.index}` : `c${c.group}.${c.index}`);
-	const sameScope = (a: DragCtx, b: DragCtx) =>
-		a.kind === 'top' ? b.kind === 'top' : b.kind === 'child' && a.group === b.group;
-
-	// stopPropagation: Kind-Drags dürfen NICHT zum umschließenden Top-Level-<li>
-	// hochblubbern (sonst überschriebe der Gruppen-Kontext den Kind-Kontext).
-	function onDragStart(e: DragEvent, ctx: DragCtx) {
-		e.stopPropagation();
-		drag = ctx;
-		if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
-	}
-	function onDragOver(e: DragEvent, ctx: DragCtx) {
-		if (!drag || !sameScope(drag, ctx)) return;
-		e.preventDefault();
-		e.stopPropagation();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-		overKey = keyOf(ctx);
-	}
-	function onDrop(e: DragEvent, ctx: DragCtx) {
-		if (!drag || !sameScope(drag, ctx)) return;
-		e.preventDefault();
-		e.stopPropagation();
-		if (drag.kind === 'top' && ctx.kind === 'top')
-			repositionTop(drag.index, dropFinal(drag.index, ctx.index));
-		else if (drag.kind === 'child' && ctx.kind === 'child')
-			repositionChild(ctx.group, drag.index, dropFinal(drag.index, ctx.index));
-		drag = null;
-		overKey = null;
-	}
-	const onDragEnd = () => {
-		drag = null;
-		overKey = null;
-	};
+	$effect(() => reorder.sync(data.navTree));
 
 	const canEdit = (href?: string) => (href ? (pageByUrl.get(href)?.editable ?? false) : false);
 	const editPath = (href: string) => pageByUrl.get(href)?.path ?? '';
@@ -242,45 +135,49 @@
 		</Banner>
 	{/if}
 
-	<ul class="tree" class:is-saving={saving}>
-		{#each tree as section, i (section.title)}
+	<ul class="tree" class:is-saving={reorder.saving}>
+		{#each reorder.tree as section, i (section.title)}
 			{@const kind = sectionKind(section)}
 			<!-- Top-Level-<li> ist die Drag-Quelle (implizite listitem-Rolle → a11y ok);
 			     der Drop-Indikator sitzt auf der sichtbaren .row darunter. -->
 			<li
 				class="item"
 				draggable={data.writable}
-				ondragstart={(e) => onDragStart(e, { kind: 'top', index: i })}
-				ondragover={(e) => onDragOver(e, { kind: 'top', index: i })}
-				ondrop={(e) => onDrop(e, { kind: 'top', index: i })}
-				ondragend={onDragEnd}
+				ondragstart={(e) => reorder.onDragStart(e, { kind: 'top', index: i })}
+				ondragover={(e) => reorder.onDragOver(e, { kind: 'top', index: i })}
+				ondrop={(e) => reorder.onDrop(e, { kind: 'top', index: i })}
+				ondragend={reorder.onDragEnd}
 			>
 				{#if kind === 'category'}
 					<!-- Kategorie = Abschnitts-Überschrift (kein Link, aber umsortierbar). -->
-					<AdminRow tag="div" class="row--cat" dragover={overKey === `t${i}`}>
-						{@render grip(data.writable)}
+					<AdminRow tag="div" class="row--cat" dragover={reorder.isOver({ kind: 'top', index: i })}>
+						<DragGrip enabled={data.writable} />
 						<span class="cat-title">{section.title}</span>
-						{@render nudges(
-							() => nudgeTop(i, -1),
-							() => nudgeTop(i, 1),
-							i === 0,
-							i === tree.length - 1
-						)}
+						{#if data.writable}
+							<NudgeButtons
+								up={() => reorder.nudgeTop(i, -1)}
+								down={() => reorder.nudgeTop(i, 1)}
+								atTop={i === 0}
+								atBottom={i === reorder.tree.length - 1}
+							/>
+						{/if}
 					</AdminRow>
 				{:else if kind === 'group'}
 					<!-- Thema mit Unterseiten. -->
-					<AdminRow tag="div" class="row--group" dragover={overKey === `t${i}`}>
-						{@render grip(data.writable)}
+					<AdminRow tag="div" class="row--group" dragover={reorder.isOver({ kind: 'top', index: i })}>
+						<DragGrip enabled={data.writable} />
 						<span class="icon" aria-hidden="true">{@render folderIcon()}</span>
 						<span class="name">{section.title}</span>
 						<Badge tone="accent">Thema</Badge>
 						<span class="count">{section.items?.length} Seiten</span>
-						{@render nudges(
-							() => nudgeTop(i, -1),
-							() => nudgeTop(i, 1),
-							i === 0,
-							i === tree.length - 1
-						)}
+						{#if data.writable}
+							<NudgeButtons
+								up={() => reorder.nudgeTop(i, -1)}
+								down={() => reorder.nudgeTop(i, 1)}
+								atTop={i === 0}
+								atBottom={i === reorder.tree.length - 1}
+							/>
+						{/if}
 					</AdminRow>
 					<ul class="children">
 						{#each section.items ?? [] as child, ci (child.href)}
@@ -288,15 +185,16 @@
 							<AdminRow
 								tag="li"
 								indent
-								dragover={overKey === `c${i}.${ci}`}
+								dragover={reorder.isOver({ kind: 'child', group: i, index: ci })}
 								draggable={data.writable}
 								ondragstart={(e: DragEvent) =>
-									onDragStart(e, { kind: 'child', group: i, index: ci })}
-								ondragover={(e: DragEvent) => onDragOver(e, { kind: 'child', group: i, index: ci })}
-								ondrop={(e: DragEvent) => onDrop(e, { kind: 'child', group: i, index: ci })}
-								ondragend={onDragEnd}
+									reorder.onDragStart(e, { kind: 'child', group: i, index: ci })}
+								ondragover={(e: DragEvent) =>
+									reorder.onDragOver(e, { kind: 'child', group: i, index: ci })}
+								ondrop={(e: DragEvent) => reorder.onDrop(e, { kind: 'child', group: i, index: ci })}
+								ondragend={reorder.onDragEnd}
 							>
-								{@render grip(data.writable)}
+								<DragGrip enabled={data.writable} />
 								<span class="icon" aria-hidden="true">{@render pageIcon()}</span>
 								{#if ed}
 									<a class="name" href="/admin/brand/{editPath(child.href)}" draggable="false"
@@ -307,20 +205,22 @@
 								{/if}
 								{#if child.badge}<Badge tone="default">{child.badge}</Badge>{/if}
 								<span class="path">{child.href}</span>
-								{@render nudges(
-									() => nudgeChild(i, ci, -1),
-									() => nudgeChild(i, ci, 1),
-									ci === 0,
-									ci === (section.items?.length ?? 0) - 1
-								)}
+								{#if data.writable}
+									<NudgeButtons
+										up={() => reorder.nudgeChild(i, ci, -1)}
+										down={() => reorder.nudgeChild(i, ci, 1)}
+										atTop={ci === 0}
+										atBottom={ci === (section.items?.length ?? 0) - 1}
+									/>
+								{/if}
 							</AdminRow>
 						{/each}
 					</ul>
 				{:else}
 					<!-- Blatt-Seite. -->
 					{@const ed = canEdit(section.href)}
-					<AdminRow tag="div" class="row--leaf" dragover={overKey === `t${i}`}>
-						{@render grip(data.writable)}
+					<AdminRow tag="div" class="row--leaf" dragover={reorder.isOver({ kind: 'top', index: i })}>
+						<DragGrip enabled={data.writable} />
 						<span class="icon" aria-hidden="true">{@render pageIcon()}</span>
 						{#if ed && section.href}
 							<a class="name" href="/admin/brand/{editPath(section.href)}" draggable="false"
@@ -331,12 +231,14 @@
 						{/if}
 						{#if section.badge}<Badge tone="default">{section.badge}</Badge>{/if}
 						<span class="path">{section.href}</span>
-						{@render nudges(
-							() => nudgeTop(i, -1),
-							() => nudgeTop(i, 1),
-							i === 0,
-							i === tree.length - 1
-						)}
+						{#if data.writable}
+							<NudgeButtons
+								up={() => reorder.nudgeTop(i, -1)}
+								down={() => reorder.nudgeTop(i, 1)}
+								atTop={i === 0}
+								atBottom={i === reorder.tree.length - 1}
+							/>
+						{/if}
 					</AdminRow>
 				{/if}
 			</li>
@@ -371,25 +273,6 @@
 		<path d="M4 1.5h5L12.5 5v9a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5v-12a.5.5 0 0 1 .5-.5z" />
 		<path d="M9 1.5V5h3.5" />
 	</svg>
-{/snippet}
-
-<!-- Griff-Affordanz (CMS-Icon), nur wenn schreibbar. -->
-{#snippet grip(enabled: boolean)}
-	<span class="grip" class:grip--off={!enabled} aria-hidden="true"><Icon name="grip" /></span>
-{/snippet}
-
-<!-- ↑/↓-Buttons (präzise, barrierefreie Umsortierung; CMS-Pfeil-Icons). -->
-{#snippet nudges(up: () => void, down: () => void, atTop: boolean, atBottom: boolean)}
-	{#if data.writable}
-		<ButtonGroup attached label="Position ändern" class="nudge">
-			<button type="button" onclick={up} disabled={atTop} aria-label="Nach oben"
-				><Icon name="arrow-up" /></button
-			>
-			<button type="button" onclick={down} disabled={atBottom} aria-label="Nach unten"
-				><Icon name="arrow-down" /></button
-			>
-		</ButtonGroup>
-	{/if}
 {/snippet}
 
 <style>
@@ -445,22 +328,6 @@
 		font-weight: 600;
 	}
 
-	.grip {
-		display: inline-flex;
-		color: var(--ds-text-muted);
-		cursor: grab;
-		opacity: 0.3;
-		transition: opacity var(--ds-dur) var(--ds-ease-out);
-	}
-	:global(.admin-row:hover) .grip {
-		opacity: 0.7;
-	}
-	.grip:active {
-		cursor: grabbing;
-	}
-	.grip--off {
-		visibility: hidden;
-	}
 	.icon {
 		display: inline-flex;
 		color: var(--ds-text-muted);
@@ -484,45 +351,6 @@
 	.count {
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
-	}
-
-	/* Layout (inline-flex, Segment-Merge) trägt jetzt ButtonGroup(attached); hier
-	   bleibt nur das Hover-Reveal-Verhalten der Zeile. `.nudge` hängt am
-	   ButtonGroup-Element (class-Passthrough) → :global, die Buttons darin sind
-	   weiter in diesem Scope. */
-	.tree :global(.nudge) {
-		margin-left: var(--z-ds-space-s);
-		opacity: 0.35;
-		transition: opacity var(--ds-dur) var(--ds-ease-out);
-	}
-	.tree :global(.admin-row:hover .nudge),
-	.tree :global(.admin-row:focus-within .nudge) {
-		opacity: 1;
-	}
-	:global(.nudge > button) {
-		width: 1.4rem;
-		height: 1.4rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid var(--ds-border);
-		border-radius: var(--ds-radius-xs, 0.25rem);
-		background: var(--ds-surface);
-		color: var(--ds-text);
-		cursor: pointer;
-		font-size: var(--ds-text-xs);
-		line-height: 1;
-	}
-	:global(.nudge > button):hover:not(:disabled) {
-		background: var(--ds-surface-raised);
-	}
-	:global(.nudge > button):disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
-	}
-	:global(.nudge > button):focus-visible {
-		outline: 2px solid var(--ds-focus-ring);
-		outline-offset: 1px;
 	}
 
 	/* ── Neue Seite anlegen ── (Buttons: <Button variant="accent|quiet">) */

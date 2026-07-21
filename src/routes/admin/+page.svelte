@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { AdminPageHeader, AdminRow } from './ui';
+	import { getToastState } from '$stores/toast-state.svelte';
+	import { AdminPageHeader, AdminRow, DragGrip, NudgeButtons } from './ui';
 	import { Badge } from '$components/ui/badge';
+	import { Banner } from '$components/ui/banner';
+	import { Reorder } from './core/reorder.svelte';
 
 	let { data }: import('./$types').PageProps = $props();
+	const toast = getToastState();
 
 	// Einstiegs-Karten in die übrigen Welten (Startseite, Medien, Brand-Seiten).
 	// Die Startseite ist eine komponierte Seite → Formular-Editor, kein Block-Editor.
@@ -13,6 +17,18 @@
 	];
 
 	const totals = $derived(data.totals);
+
+	// Arbeits-Baum (umsortierbar) — Reihenfolge der statischen Design-System-Einträge
+	// lebt in src/lib/data/product-nav.json (SSOT, ADR-030); die Sidebar leitet daraus
+	// ab. Mechanik (Klonen, Server-Resync, Persistieren via ?/reorder, ↑/↓-Nudges,
+	// natives Drag&Drop) kommt aus derselben Reorder-Klasse wie bei /admin/brand.
+	type NavRow = (typeof data.navTree)[number];
+	const reorder = new Reorder<NavRow>({
+		initial: data.navTree,
+		writable: () => data.writable,
+		notify: (title, body) => toast?.add(title, body)
+	});
+	$effect(() => reorder.sync(data.navTree));
 
 	// ── Doku-Lücken → Chips mit Deep-Link in den passenden Editor-Abschnitt ──────
 	// Jedes fehlende Kriterium ergibt EINEN kleinen warn-Chip, der genau auf seinen
@@ -118,10 +134,12 @@
 		<div class="block-head">
 			<h2 class="block-title">Design-System-Inhalte</h2>
 			<p class="hint">
-				Struktur &amp; Reihenfolge = Live-Sidebar. Umsortieren passiert im Code (<code
-					>navigation.ts</code
-				>
-				· <code>CATALOG_OVERRIDES</code>), nicht per Drag&nbsp;&amp;&nbsp;Drop.
+				Struktur &amp; Reihenfolge = Live-Sidebar. Ziehe Einträge am Griff
+				<span class="grip-inline" aria-hidden="true"></span>
+				oder nutze die Pfeile — die Änderung wird sofort gespeichert und wirkt in der ganzen
+				Design-System-Sektion. Der <strong>Komponenten-Block</strong> ist katalog-getrieben: seine
+				Position lässt sich verschieben, seine Einträge kommen automatisch aus den
+				<code>model.json</code> (Reihenfolge via <code>CATALOG_OVERRIDES</code>).
 			</p>
 			<p class="totals">
 				raw {totals.raw}/{totals.total} · vollständig {totals.vollstaendig}/{totals.total}
@@ -130,59 +148,99 @@
 			</p>
 		</div>
 
-		<ul class="list">
-			{#each data.productNav as item (item.title + (item.href ?? ''))}
-				{#if item.isCategory}
-					<li>
-						<AdminRow tag="div" interactive={false} class="cat">
-							<span class="cat-title" aria-hidden="true">{item.title}</span>
+		{#if !data.writable}
+			<Banner compact variant="warning">
+				Nur-Lese-Vorschau: Umsortieren ist im Prod-Modus deaktiviert (Phase 2b: GitHub-PR).
+			</Banner>
+		{/if}
+
+		<ul class="tree" class:is-saving={reorder.saving}>
+			{#each reorder.tree as entry, i (entry.title + (entry.href ?? ''))}
+				<!-- Top-Level-<li> ist die Drag-Quelle (implizite listitem-Rolle → a11y ok);
+				     der Drop-Indikator sitzt auf der sichtbaren Zeile darunter. -->
+				<li
+					class="item"
+					draggable={data.writable}
+					ondragstart={(e) => reorder.onDragStart(e, { kind: 'top', index: i })}
+					ondragover={(e) => reorder.onDragOver(e, { kind: 'top', index: i })}
+					ondrop={(e) => reorder.onDrop(e, { kind: 'top', index: i })}
+					ondragend={reorder.onDragEnd}
+				>
+					{#if entry.isCategory}
+						<!-- Kategorie = Abschnitts-Überschrift (kein Link, aber umsortierbar). -->
+						<AdminRow tag="div" class="row--cat" dragover={reorder.isOver({ kind: 'top', index: i })}>
+							<DragGrip enabled={data.writable} />
+							<span class="cat-title">{entry.title}</span>
+							{@render nudges(i)}
 						</AdminRow>
-					</li>
-				{:else if item.isComponent}
-					<!-- Komponenten-Zeile: EIN Eintrag, Status als Chips, Link auf den Spec-Editor. -->
-					<li>
-						<AdminRow tag="div">
-							<span class="name">
-								{#if item.editHref}
-									<a class="comp-name" href={item.editHref}>{item.title}</a>
-								{:else}
-									<span class="comp-name comp-name--muted">{item.title}</span>
-								{/if}
-							</span>
-							{#if item.planned}
-								<span class="chips">
-									<Badge tone="ghost" title="Geplant — wartet auf den Figma-Import.">Geplant</Badge>
-								</span>
-							{:else if item.status}
-								{@render componentChips(item.status, item.editHref)}
-							{/if}
-							{#if item.href}
-								<a class="act act--view" href={item.href} title="Live-Seite ansehen"
-									>Ansehen&nbsp;↗</a
-								>
-							{/if}
+					{:else if entry.isCatalog}
+						<!-- Katalog-Block: POSITION sortierbar, INHALT automatisch (ADR-025). -->
+						<AdminRow
+							tag="div"
+							class="row--catalog"
+							dragover={reorder.isOver({ kind: 'top', index: i })}
+						>
+							<DragGrip enabled={data.writable} />
+							<span class="name">{entry.title}</span>
+							<Badge tone="ghost" title="Aus den model.json generiert — nicht von Hand sortierbar."
+								>automatisch</Badge
+							>
+							<span class="count">{entry.components?.length ?? 0} Einträge</span>
+							{@render nudges(i)}
 						</AdminRow>
-					</li>
-				{:else}
-					<li>
-						<AdminRow tag="div">
+						<ul class="children">
+							{#each entry.components ?? [] as comp (comp.href)}
+								<!-- Komponenten-Zeile: EIN Eintrag, Status als Chips, Link auf den Spec-Editor.
+								     Bewusst NICHT ziehbar — die Reihenfolge kommt aus dem Katalog. -->
+								<AdminRow tag="li" indent>
+									<span class="name">
+										{#if comp.editHref}
+											<a class="comp-name" href={comp.editHref} draggable="false">{comp.title}</a>
+										{:else}
+											<span class="comp-name comp-name--muted">{comp.title}</span>
+										{/if}
+									</span>
+									{#if comp.planned}
+										<span class="chips">
+											<Badge tone="ghost" title="Geplant — wartet auf den Figma-Import."
+												>Geplant</Badge
+											>
+										</span>
+									{:else if comp.status}
+										{@render componentChips(comp.status, comp.editHref)}
+									{/if}
+									{#if comp.href}
+										<a class="act act--view" href={comp.href} title="Live-Seite ansehen"
+											>Ansehen&nbsp;↗</a
+										>
+									{/if}
+								</AdminRow>
+							{/each}
+						</ul>
+					{:else}
+						<!-- Statische Seite (Foundations, Patterns, Resources …). -->
+						<AdminRow tag="div" dragover={reorder.isOver({ kind: 'top', index: i })}>
+							<DragGrip enabled={data.writable} />
 							<span class="name">
-								{item.title}
-								{#if item.badge}<Badge tone="default">{item.badge}</Badge>{/if}
+								{entry.title}
+								{#if entry.badge}<Badge tone="default">{entry.badge}</Badge>{/if}
 							</span>
 							<span class="actions">
-								{#if item.editHref}
-									<a class="act act--edit" href={item.editHref}>Bearbeiten</a>
+								{#if entry.editHref}
+									<a class="act act--edit" href={entry.editHref} draggable="false">Bearbeiten</a>
 								{:else}
 									<Badge tone="ghost">Code-Seite</Badge>
 								{/if}
-								{#if item.href}
-									<a class="act" href={item.href} title="Live-Seite ansehen">Ansehen&nbsp;↗</a>
+								{#if entry.href}
+									<a class="act" href={entry.href} draggable="false" title="Live-Seite ansehen"
+										>Ansehen&nbsp;↗</a
+									>
 								{/if}
 							</span>
+							{@render nudges(i)}
 						</AdminRow>
-					</li>
-				{/if}
+					{/if}
+				</li>
 			{/each}
 		</ul>
 		<p class="hint list-legend">
@@ -194,6 +252,18 @@
 		</p>
 	</section>
 </div>
+
+<!-- ↑/↓ für einen Top-Level-Eintrag (nur wenn schreibbar). -->
+{#snippet nudges(i: number)}
+	{#if data.writable}
+		<NudgeButtons
+			up={() => reorder.nudgeTop(i, -1)}
+			down={() => reorder.nudgeTop(i, 1)}
+			atTop={i === 0}
+			atBottom={i === reorder.tree.length - 1}
+		/>
+	{/if}
+{/snippet}
 
 <style>
 	.admin {
@@ -268,23 +338,53 @@
 	.list-legend {
 		margin-top: var(--z-ds-space-s);
 	}
-	.list {
+	/* Griff-Glyphe im Beschreibungstext (erklärt die Drag-Affordanz). */
+	.grip-inline {
+		display: inline-block;
+		width: 0.6em;
+		height: 0.9em;
+		vertical-align: -0.1em;
+		background-image: radial-gradient(currentColor 1px, transparent 1px);
+		background-size: 0.3em 0.3em;
+		opacity: 0.5;
+	}
+
+	.tree {
 		list-style: none;
-		margin: 0;
+		margin: var(--z-ds-space-s) 0 0;
 		padding: 0;
 	}
-	.list > li {
+	.tree > li {
 		list-style: none;
 	}
-	/* Kategorie-Zeile: Abschnitts-Label wie in der Sidebar (kein Link, kein Hover). */
-	.list :global(.cat) {
+	.tree.is-saving {
+		opacity: 0.7;
+		pointer-events: none;
+	}
+	.children {
+		list-style: none;
+		margin: 0 0 0 var(--z-ds-space-l);
+		padding: 0;
+		border-left: 2px solid var(--ds-border-soft);
+	}
+
+	/* Kategorie-Zeile: Abschnitts-Label wie in der Sidebar. */
+	.tree :global(.row--cat) {
 		margin-top: var(--z-ds-space-m);
 	}
 	.cat-title {
+		flex: 1;
 		font-size: var(--ds-label-size, var(--ds-text-xs));
 		text-transform: uppercase;
 		letter-spacing: var(--ds-label-tracking);
 		font-weight: 700;
+		color: var(--ds-text-muted);
+	}
+	:global(.row--catalog) .name {
+		font-weight: 600;
+	}
+	.count {
+		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 	}
 	.name {

@@ -742,6 +742,43 @@ einfügbar/editierbar"):
 
 ---
 
+## ADR-030 — Product-Nav als Config-SSOT + sortierbare `/admin`-Übersicht (Katalog-Slot)
+
+**Kontext:** Die Brand-Seiten waren seit ADR-028 per Drag&Drop sortierbar, die
+Design-System-Inhalte auf `/admin` nicht: ihre Reihenfolge lag als hartkodiertes
+Array-Literal `MENU_ITEMS_PRODUCT` in `navigation.ts` und war damit nicht schreibbar.
+Die Übersicht sagte das auch so („Umsortieren passiert im Code"). Naiv dieselbe
+Mechanik anzuwenden hätte aber die **katalog-getriebene Komponenten-Sektion**
+(ADR-025) ausgehebelt: sobald eine Handliste persistiert wird, erscheint ein neu
+dokumentiertes Pattern nicht mehr von allein.
+
+**Entscheidung:** Reihenfolge + Struktur der **statischen** Product-Einträge leben als
+JSON-Config `src/lib/data/product-nav.json` (SSOT). Die Komponenten-Sektion bleibt
+automatisch und steht in der Config als **EIN Platzhalter-Knoten** `{ "title": …,
+"isCatalog": true }` (Katalog-Slot). `navigation.ts` faltet ihn beim Ableiten gegen
+`COMPONENT_MENU_ITEMS` auf — die öffentliche API (`MENU_ITEMS_PRODUCT`,
+`FLAT_MENU_ITEMS_PRODUCT`) bleibt unverändert, Sidebar/Footer/Suche/Drift-Checks
+merken nichts. **Sortierbar ist damit die POSITION des Komponenten-Blocks, nicht sein
+Inhalt** — die Registry-Automatik bleibt vollständig erhalten, Reihenfolge/Ausschlüsse
+innerhalb des Blocks regelt weiter `CATALOG_OVERRIDES`, geplante Stubs
+`PLANNED_COMPONENTS`. Die Übersicht rendert die Komponenten-Zeilen sichtbar, aber ohne
+Griff und ohne ↑/↓, mit einem `automatisch`-Badge am Block-Header.
+
+**Wiederverwendung statt Kopie:** Die vorher inline in `/admin/brand/+page.svelte`
+liegende Mechanik ist nach `src/routes/admin/core/reorder.svelte.ts` gewandert
+(`Reorder`-Klasse: Arbeits-Baum, Server-Resync, optimistisches Persistieren,
+↑/↓-Nudges, natives 2-Ebenen-DnD); Griff und Pfeil-Paar sind die Atome
+`ui/DragGrip.svelte` und `ui/NudgeButtons.svelte`. Validierung und kanonische
+Serialisierung liegen generisch in `src/routes/admin/core/nav-config.ts`
+(Href-Präfix + `allowCatalog` als Optionen); `brand-nav.ts` und `product-nav.ts` sind
+nur noch dünne Ausprägungen. Die **Konservierung** gilt jetzt auch für Katalog-Slots:
+ein Reorder darf keinen erfinden oder verlieren. `tooling/check-nav.mjs` liest die
+Product-Hrefs zusätzlich aus der neuen JSON.
+
+**Status:** Aktiv (Dev-only-Writes; Prod → GitHub-PR analog ADR-028).
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können

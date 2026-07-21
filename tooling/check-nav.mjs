@@ -71,10 +71,15 @@ const navHrefs = new Set([...nav.matchAll(/href:\s*['"]([^'"]+)['"]/g)].map((m) 
 // src/lib/data/brand-nav.json, nicht mehr als href-Literale in navigation.ts. Die
 // Hrefs von dort (Blatt-Links + Gruppen-Kinder) mit einlesen, sonst meldete der
 // Check alle Brand-Routen fälschlich als „nicht verlinkt".
-const brandNavFile = path.join(root, 'src/lib/data/brand-nav.json');
-for (const section of JSON.parse(fs.readFileSync(brandNavFile, 'utf8'))) {
-	if (section.href) navHrefs.add(section.href);
-	for (const child of section.items ?? []) if (child.href) navHrefs.add(child.href);
+// Dasselbe gilt seit ADR-030 für die Product-Nav: die statischen Design-System-
+// Einträge stehen in src/lib/data/product-nav.json (umsortierbar über /admin), die
+// Komponenten-Sektion bleibt katalog-getrieben (s. isComponentCovered unten).
+const configFiles = ['src/lib/data/brand-nav.json', 'src/lib/data/product-nav.json'];
+for (const rel of configFiles) {
+	for (const section of JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'))) {
+		if (section.href) navHrefs.add(section.href);
+		for (const child of section.items ?? []) if (child.href) navHrefs.add(child.href);
+	}
 }
 
 // Components-Sektion ist katalog-getrieben (ADR-025): die Einträge stehen nicht mehr als

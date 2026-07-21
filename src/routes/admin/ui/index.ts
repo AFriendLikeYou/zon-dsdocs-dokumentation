@@ -4,4 +4,6 @@
 // `from './ui'` je Ebene.
 export { default as AdminPageHeader } from './AdminPageHeader.svelte';
 export { default as AdminRow } from './AdminRow.svelte';
+export { default as DragGrip } from './DragGrip.svelte';
+export { default as NudgeButtons } from './NudgeButtons.svelte';
 export { default as PopoverSheet } from './PopoverSheet.svelte';
