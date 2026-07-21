@@ -28,7 +28,10 @@
   - align 'fill': Ausschnitt aus Seite — volle Breite, ruhige Fläche ohne Raster
     (für Patterns wie Cell/Input, die im Einsatz nie frei schweben).
   - resizable: Drag-Handle am rechten Rand + px-Anzeige für breitenabhängige
-    Patterns (impliziert die fill-Optik).
+    Patterns (impliziert die fill-Optik). Dazu eine Leiste mit festen Viewport-
+    Voreinstellungen (Frei · Mobil 560 · Tablet 768 · Desktop 1280) — die Werte
+    sind die real im Repo genutzten @media-Grenzen, nicht gegriffene Zahlen.
+    Freies Ziehen bleibt erhalten und setzt die Auswahl auf „Frei" zurück.
 
   Details: Selects rendern als SegmentedControl (size sm), Booleans als Switch; der
   Code-Block lässt geänderte Zeilen kurz aufleuchten (flash) und kappt lange
@@ -183,24 +186,63 @@
 	// Resize: Breite des Vorschau-Rahmens (null = volle Breite); px-Anzeige läuft
 	// über ResizeObserver mit, damit auch Fenster-Resizes stimmen.
 	const isFill = $derived(align === 'fill' || resizable);
+	const MIN_WIDTH = 200;
 	let frameWidth = $state<number | null>(null);
 	let frameEl = $state<HTMLDivElement>();
 	let measuredWidth = $state(0);
+	// Verfügbare Bühnenbreite = Obergrenze des Ziehens (für die Slider-Semantik des
+	// Griffs). Wird am Elternelement des Rahmens gemessen, nicht geraten.
+	let maxWidth = $state(0);
 	$effect(() => {
 		if (!frameEl) return;
 		const ro = new ResizeObserver(() => {
-			if (frameEl) measuredWidth = Math.round(frameEl.getBoundingClientRect().width);
+			if (!frameEl) return;
+			measuredWidth = Math.round(frameEl.getBoundingClientRect().width);
+			const stage = frameEl.parentElement;
+			if (stage) maxWidth = Math.round(stage.clientWidth);
 		});
 		ro.observe(frameEl);
+		if (frameEl.parentElement) ro.observe(frameEl.parentElement);
 		return () => ro.disconnect();
 	});
+
+	// ── Viewport-Voreinstellungen ─────────────────────────────────────────────
+	// Responsive-Verhalten prüft man an DEFINIERTEN Punkten, nicht nur freihändig.
+	// Die Werte sind KEINE Erfindung, sondern die Breakpoints, an denen dieses Repo
+	// tatsächlich umschaltet (grep über `@media` in static/*.css + src/lib/components):
+	//   560 px  — schmalste real genutzte Grenze (Detailregeln in ui/-Komponenten)
+	//   768 px  — DIE App-Grenze: +layout.svelte, layout/Sidebar, ui/grid/Grid;
+	//             static/global.css spiegelt sie als `max-width: 767px`
+	//   1280 px — größte real genutzte Grenze (breite Desktop-Stufe)
+	// „Frei" ist kein Breakpoint, sondern der Ausgangszustand (volle Breite) — und
+	// der Zustand, in den die Auswahl zurückfällt, sobald wieder gezogen wird.
+	// Es MUSS ein echtes Segment sein: SegmentedControl vergibt den Tabstop über
+	// `value === o.value`; ein Wert ohne passendes Segment machte die Gruppe
+	// unerreichbar für die Tastatur.
+	const VIEWPORT_PRESETS = [
+		{ value: 'frei', label: 'Frei', width: null },
+		{ value: 'mobil', label: 'Mobil', width: 560 },
+		{ value: 'tablet', label: 'Tablet', width: 768 },
+		{ value: 'desktop', label: 'Desktop', width: 1280 }
+	] as const;
+	let viewport = $state<string>('frei');
+
+	function selectViewport(v: string) {
+		viewport = v;
+		// Auch die erneute Wahl von „Frei" ist eine Aktion: sie löst die feste Breite
+		// wieder auf die volle Bühne — der Rückweg aus einem gezogenen Zustand.
+		frameWidth = VIEWPORT_PRESETS.find((p) => p.value === v)?.width ?? null;
+	}
 	// Das ResizeHandle-Atom meldet nur das Delta; die min-Grenze (200px) und die
 	// aktuelle Breite bleiben hier im Consumer. Basis ist die zuletzt gesetzte Breite,
 	// sonst die LIVE gemessene Rahmenbreite (erstes Ziehen aus der 100%-Ausgangslage —
 	// nicht der ggf. noch nicht befüllte measuredWidth-State).
 	function handleResize(delta: number) {
 		const base = frameWidth ?? frameEl?.getBoundingClientRect().width ?? measuredWidth;
-		frameWidth = Math.max(200, Math.round(base + delta));
+		frameWidth = Math.max(MIN_WIDTH, Math.round(base + delta));
+		// Freies Ziehen hebt die Voreinstellung auf — die Breite ist jetzt wieder frei
+		// gewählt und gehört zu keinem Breakpoint mehr.
+		viewport = 'frei';
 	}
 
 	// Reset erscheint nur, wenn vom Default abgewichen wurde (Porsche-Configurator-Muster).
@@ -219,6 +261,7 @@
 		themeMode = 'auto';
 		zoom = 1;
 		frameWidth = null;
+		viewport = 'frei';
 	}
 
 	// Code-Umschalter: startet zu und bleibt beim SSR deterministisch zu; erst nach
@@ -279,8 +322,17 @@
 					direction="horizontal"
 					onresize={handleResize}
 					label="Vorschau-Breite ändern (ziehen oder Pfeiltasten)"
+					value={measuredWidth}
+					min={MIN_WIDTH}
+					max={Math.max(maxWidth, measuredWidth, MIN_WIDTH)}
+					valueText="{measuredWidth} Pixel{viewport === 'frei'
+						? ''
+						: `, ${VIEWPORT_PRESETS.find((p) => p.value === viewport)?.label}`}"
 				/>
 			</div>
+			<!-- Sichtbare px-Anzeige bleibt aria-hidden: den Wert spricht der Griff selbst
+			     als role="slider" aus (aria-valuenow/-valuetext), bei jeder Änderung und
+			     ohne die Dopplung einer zusätzlichen Live-Region. -->
 			<span class="playground__width" aria-hidden="true">{measuredWidth} px</span>
 		{:else}
 			<div class="pg-preview" style:zoom>
@@ -334,6 +386,27 @@
 					{/if}
 				</span>
 			{/each}
+		{/if}
+
+		<!-- Viewport-Voreinstellungen: nur dort, wo die Bühne überhaupt in der Breite
+		     veränderbar ist. Dasselbe Bedienmuster wie die Varianten-Auswahl
+		     (SegmentedControl, size sm) — die Auswahl ist damit auch per Pfeiltasten
+		     bedienbar (Radiogroup). -->
+		{#if resizable}
+			<span class="playground__group">
+				<span class="playground__label">Breite</span>
+				<SegmentedControl
+					label="Vorschau-Breite"
+					options={VIEWPORT_PRESETS.map((p) => ({
+						value: p.value,
+						label: p.label,
+						title: p.width ? `${p.label} — ${p.width} px` : 'Volle Breite der Bühne'
+					}))}
+					value={viewport}
+					size="sm"
+					onchange={selectViewport}
+				/>
+			</span>
 		{/if}
 
 		<span class="playground__actions">

@@ -5,19 +5,45 @@
 		{
 			"titel": "Semantik",
 			"beschreibung": "Die Variante trägt die Gewichtung der Aktion, nicht die Optik-Laune: Primary genau einmal pro Aktionsgruppe für die Hauptaktion, Default für alles Nachrangige. Z+ bleibt Aktionen im ZEIT+-/Abo-Kontext vorbehalten.",
-			"instanzen": [{ "variant": "default" }, { "variant": "primary" }, { "variant": "zplus" }],
-			"abdeckt": ["Default", "Primary", "Z+"]
+			"instanzen": [
+				{
+					"variant": "default"
+				},
+				{
+					"variant": "primary"
+				},
+				{
+					"variant": "zplus"
+				}
+			],
+			"abdeckt": [
+				"Default",
+				"Primary",
+				"Z+"
+			]
 		},
 		{
 			"titel": "Volle Breite",
 			"beschreibung": "In schmalen Spalten — Formularen, Dialogen, mobilen Layouts — streckt sich der Button über die volle Breite seines Containers. In freiem Fließtext bleibt er bei seiner Inhaltsbreite.",
-			"instanzen": [{ "variant": "primary", "fullwidth": true }],
-			"abdeckt": ["Fullwidth"]
+			"instanzen": [
+				{
+					"variant": "primary",
+					"fullwidth": true
+				}
+			],
+			"abdeckt": [
+				"Fullwidth"
+			]
 		},
 		{
 			"titel": "Gesperrte Aktion",
 			"beschreibung": "Gesperrt wird nur, was gleich wieder möglich ist — etwa während des Absendens. Ist eine Aktion dauerhaft nicht verfügbar, gehört sie gar nicht erst auf die Seite.",
-			"instanzen": [{ "variant": "primary", "disabled": true }]
+			"instanzen": [
+				{
+					"variant": "primary",
+					"disabled": true
+				}
+			]
 		}
 	],
 	"callouts": [
@@ -87,11 +113,25 @@
 		"In einer Aktionsgruppe (z. B. button-group) nur eine Primary-Aktion einsetzen, weitere Aktionen als Default.",
 		"Für reine Navigation statt Button einen Link bzw. text-button verwenden."
 	],
-	"verwandt": ["text-button", "icon-button", "button-group"],
+	"verwandt": [
+		"text-button",
+		"icon-button",
+		"button-group"
+	],
 	"variantInfo": {
 		"Default": "Neutrale Aktion — helle Fläche, dunkles Label.",
 		"Primary": "Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal.",
 		"Z+": "Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext).",
 		"Fullwidth": "Streckt den Button auf 100 % Breite (z-button--fullwidth)."
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).",
+			"Für klar auslösende Aktionen: Speichern, Senden, Bestätigen."
+		],
+		"nichtNutzen": [
+			"Für reine Navigation / Seitenwechsel — dafür einen Link (Link-Button).",
+			"Mehrere gleichwertige Primary-Buttons nebeneinander."
+		]
 	}
 }

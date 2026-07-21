@@ -10,8 +10,9 @@ kategorie: Medien
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, A11yList, KeyboardList, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
+	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -320,7 +321,7 @@ kategorie: Medien
 <Tabs tabs={[
 		{ id: 'designTab', label: 'Design', component: designTab },
 		{ id: 'developTab', label: 'Develop', component: developTab },
-		{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab },
+		...((spec.a11y?.length || spec.tastatur?.length) ? [{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab }] : []),
 		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
@@ -346,6 +347,16 @@ kategorie: Medien
 		{#snippet preview()}<div class="z-carousel"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__dots-wrapper" role="radiogroup" aria-label="Slide-Auswahl"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 3"></div></div>{/snippet}
 	</Anatomy>
 
+	{#if spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length}
+		<h2 id="verwendung" class="section-anchor">Verwendung</h2>
+		<UsageBlock verwendung={spec.verwendung} />
+	{/if}
+
+	{#if spec.wording?.length}
+		<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
+		<WordingList items={spec.wording} />
+	{/if}
+
 	{#if offeneVariantItems.length}
 		<h2 id="varianten" class="section-anchor">
 			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
@@ -355,6 +366,16 @@ kategorie: Medien
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover (Pfeile/Dots)"},{"label":"focus-visible"},{"label":"disabled (Pfeile am Rand)"},{"label":"checked (aktiver Dot)"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
+
+	{#if spec.doDont?.do?.length || spec.doDont?.dont?.length}
+		<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
+		<DoDontList doDont={spec.doDont} />
+	{/if}
+
+	{#if spec.verwandt?.length}
+		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+		<RelatedComponents slugs={spec.verwandt} />
+	{/if}
 {/snippet}
 
 {#snippet developTab()}
@@ -376,10 +397,14 @@ kategorie: Medien
 {/snippet}
 
 {#snippet a11yTab()}
-	<A11yList items={spec.a11y} />
+	{#if spec.a11y?.length}
+		<A11yList items={spec.a11y} />
+	{/if}
 
-	<h2>Tastatur</h2>
-	<KeyboardList items={spec.tastatur} />
+	{#if spec.tastatur?.length}
+		<h2>Tastatur</h2>
+		<KeyboardList items={spec.tastatur} />
+	{/if}
 {/snippet}
 
 {#snippet specsTab()}

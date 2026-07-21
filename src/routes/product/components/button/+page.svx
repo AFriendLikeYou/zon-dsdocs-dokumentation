@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, A11yList, KeyboardList, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
@@ -118,7 +118,7 @@ kategorie: Aktionen
 <Tabs tabs={[
 		{ id: 'designTab', label: 'Design', component: designTab },
 		{ id: 'developTab', label: 'Develop', component: developTab },
-		{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab },
+		...((spec.a11y?.length || spec.tastatur?.length) ? [{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab }] : []),
 		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
@@ -144,8 +144,15 @@ kategorie: Aktionen
 		{#snippet preview()}<button class="z-button z-button--primary" type="button">Button</button>{/snippet}
 	</Anatomy>
 
-	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
-	<UsageBlock verwendung={spec.verwendung} />
+	{#if spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length}
+		<h2 id="verwendung" class="section-anchor">Verwendung</h2>
+		<UsageBlock verwendung={spec.verwendung} />
+	{/if}
+
+	{#if spec.wording?.length}
+		<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
+		<WordingList items={spec.wording} />
+	{/if}
 
 	{#if offeneVariantItems.length}
 		<h2 id="varianten" class="section-anchor">
@@ -158,11 +165,15 @@ kategorie: Aktionen
 	<SpecimenGrid items={stateItems} />
 	<StateList states={[{"label":"hover","vorhanden":true},{"label":"focus"},{"label":"active"},{"label":"loading"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
-	<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
-	<DoDontList doDont={spec.doDont} />
+	{#if spec.doDont?.do?.length || spec.doDont?.dont?.length}
+		<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
+		<DoDontList doDont={spec.doDont} />
+	{/if}
 
-	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
-	<RelatedComponents slugs={spec.verwandt} />
+	{#if spec.verwandt?.length}
+		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+		<RelatedComponents slugs={spec.verwandt} />
+	{/if}
 {/snippet}
 
 {#snippet developTab()}
@@ -189,10 +200,14 @@ kategorie: Aktionen
 {/snippet}
 
 {#snippet a11yTab()}
-	<A11yList items={spec.a11y} />
+	{#if spec.a11y?.length}
+		<A11yList items={spec.a11y} />
+	{/if}
 
-	<h2>Tastatur</h2>
-	<KeyboardList items={spec.tastatur} />
+	{#if spec.tastatur?.length}
+		<h2>Tastatur</h2>
+		<KeyboardList items={spec.tastatur} />
+	{/if}
 {/snippet}
 
 {#snippet specsTab()}

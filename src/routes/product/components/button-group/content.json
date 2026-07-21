@@ -1,7 +1,10 @@
 {
 	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
 	"status": "ready_for_dev",
-	"verwandt": ["button", "icon-button"],
+	"verwandt": [
+		"button",
+		"icon-button"
+	],
 	"a11y": [
 		{
 			"label": "Rolle",
@@ -53,5 +56,22 @@
 			"Nicht für Mehrfachauswahl oder viele Optionen — dafür Checkboxen bzw. Select.",
 			"Nicht für auslösende Aktionen (Speichern/Senden) — dafür Button."
 		]
-	}
+	},
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Gruppe — <ul> mit 0.125rem-Rahmen in Background-10, Radius 4 an den Außenecken; die Segmente stoßen fugenlos aneinander.",
+			"art": "container"
+		},
+		{
+			"nr": 2,
+			"text": "Segment — <button>, Padding 8·16; inaktiv Background-10 / Text-55, aktiv Background-0 / Text-100.",
+			"art": "container"
+		},
+		{
+			"nr": 3,
+			"text": "Trennstrich — 1px Border/100 zwischen inaktiven Segmenten (entfällt am aktiven Segment).",
+			"art": "container"
+		}
+	]
 }

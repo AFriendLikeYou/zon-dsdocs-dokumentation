@@ -51,6 +51,36 @@ function curatedSlugs() {
 }
 
 const THIN_STUB_KEYS = new Set(['status', 'zweck', 'verwandt']);
+
+/**
+ * Redaktionelle Felder (EDITORIAL in tooling/zeit-de-exporter/export.mjs). Sie werden
+ * aus spec.generated.ts GESTRIPPT — zur Laufzeit liest die Seite sie also
+ * ausschließlich aus content.json. Steht so ein Feld nur in model.json, ist der Text
+ * zwar geschrieben, erscheint aber NIE (der content.json-Stub wird nur einmalig beim
+ * ersten Export erzeugt und danach nie wieder angefasst — später im model.json
+ * ergänzte Redaktion landet folglich nirgends).
+ */
+const EDITORIAL_KEYS = [
+	'zweck',
+	'status',
+	'beispiele',
+	'callouts',
+	'a11y',
+	'tastatur',
+	'doDont',
+	'verwendung',
+	'wording',
+	'komposition',
+	'verwandt'
+];
+
+/** Trägt der Wert überhaupt Inhalt? (leere Liste/leeres Objekt zählt nicht) */
+function hasContent(value) {
+	if (value == null) return false;
+	if (Array.isArray(value)) return value.length > 0;
+	if (typeof value === 'object') return Object.values(value).some(hasContent);
+	return String(value).trim().length > 0;
+}
 const curated = curatedSlugs();
 const findings = [];
 
@@ -107,6 +137,16 @@ for (const slug of slugs) {
 		else if (offen.length)
 			gaps.push(`\`beispiele\` decken ${werte(offen.length)} nicht ab (${offen.join(', ')})`);
 	}
+
+	// (h) Redaktion, die nur im model.json liegt → wird zur Laufzeit nie gelesen.
+	// Eine Zeile pro Komponente, damit der Check leise bleibt.
+	const verwaist = EDITORIAL_KEYS.filter(
+		(k) => hasContent(model[k]) && !hasContent(content[k])
+	);
+	if (verwaist.length)
+		gaps.push(
+			`nur in model.json, nicht in content.json → wird nie gerendert: ${verwaist.join(', ')}`
+		);
 
 	const contentKeys = Object.keys(content);
 	if (contentKeys.length > 0 && contentKeys.every((k) => THIN_STUB_KEYS.has(k)))

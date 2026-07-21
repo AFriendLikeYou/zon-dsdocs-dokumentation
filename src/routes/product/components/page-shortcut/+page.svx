@@ -10,8 +10,9 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, ExampleBlock, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, StateList, DoDontList, WordingList, RelatedComponents, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
+	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
@@ -65,6 +66,7 @@ kategorie: Aktionen
 <Tabs tabs={[
 		{ id: 'designTab', label: 'Design', component: designTab },
 		{ id: 'developTab', label: 'Develop', component: developTab },
+		...((spec.a11y?.length || spec.tastatur?.length) ? [{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab }] : []),
 		{ id: 'specsTab', label: 'Specs', component: specsTab }
 ]} sticky />
 
@@ -92,11 +94,28 @@ kategorie: Aktionen
 </button>{/snippet}
 	</Anatomy>
 
+	{#if spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length}
+		<h2 id="verwendung" class="section-anchor">Verwendung</h2>
+		<UsageBlock verwendung={spec.verwendung} />
+	{/if}
+
+	{#if spec.wording?.length}
+		<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
+		<WordingList items={spec.wording} />
+	{/if}
+
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover","vorhanden":true},{"label":"focus","vorhanden":true},{"label":"aktiv"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
-	<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
-	<RelatedComponents slugs={spec.verwandt} />
+	{#if spec.doDont?.do?.length || spec.doDont?.dont?.length}
+		<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
+		<DoDontList doDont={spec.doDont} />
+	{/if}
+
+	{#if spec.verwandt?.length}
+		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+		<RelatedComponents slugs={spec.verwandt} />
+	{/if}
 {/snippet}
 
 {#snippet developTab()}
@@ -111,6 +130,17 @@ kategorie: Aktionen
 			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
 			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
 		{/each}
+	{/if}
+{/snippet}
+
+{#snippet a11yTab()}
+	{#if spec.a11y?.length}
+		<A11yList items={spec.a11y} />
+	{/if}
+
+	{#if spec.tastatur?.length}
+		<h2>Tastatur</h2>
+		<KeyboardList items={spec.tastatur} />
 	{/if}
 {/snippet}
 

@@ -1,7 +1,10 @@
 {
 	"zweck": "Umrandeter Shortcut zu einem Seitenziel — ein einzelner Stil mit Hover- und Focus-State, bewusst ohne Varianten.",
 	"status": "ready_for_dev",
-	"verwandt": ["button", "text-button"],
+	"verwandt": [
+		"button",
+		"text-button"
+	],
 	"a11y": [
 		{
 			"label": "Rolle",
@@ -63,5 +66,17 @@
 			"Nicht als primäre Aktion einer Seite — dafür Button (Primary).",
 			"Nicht als Ersatz für eine Button-Group / Tabs bei mehreren gleichrangigen Zielen."
 		]
-	}
+	},
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Container — natives <button>, transparente Fläche, 1px-Rahmen in Border/70, Radius 4, Padding 8.",
+			"art": "container"
+		},
+		{
+			"nr": 2,
+			"text": "Icon + Label — Icon-Slot 18×18, Label Tablet Gothic 16 in Text/100, Gap 8 (--z-ds-space-xs).",
+			"art": "text"
+		}
+	]
 }

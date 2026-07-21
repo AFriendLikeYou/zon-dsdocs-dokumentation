@@ -13,6 +13,11 @@
 	  onresize(delta): Delta in px seit dem letzten Ereignis. Positiv = größer.
 	  step:  Tastaturschritt in px (Default 16).
 	  label: ARIA-Label des Griffs (Pflicht für sinnvolle A11y).
+	  value/min/max/valueText: OPTIONALE Slider-Semantik. Sind sie gesetzt, meldet
+	    sich der Griff als role="slider" mit aria-valuenow/-valuemin/-valuemax — dann
+	    sprechen Screenreader die aktuelle Größe bei JEDER Änderung von selbst aus
+	    (Ziehen wie Pfeiltasten), ohne dass der Consumer eine Live-Region braucht.
+	    Ohne sie bleibt es ein schlichter Button (Abwärtskompatibilität).
 -->
 <script lang="ts">
 	type Props = {
@@ -24,6 +29,14 @@
 		label?: string;
 		/** Schrittweite der Tastatursteuerung in px. */
 		step?: number;
+		/** Aktuelle Größe in px — aktiviert zusammen mit min/max die Slider-Semantik. */
+		value?: number;
+		/** Kleinste erreichbare Größe in px (Slider-Semantik). */
+		min?: number;
+		/** Größte erreichbare Größe in px (Slider-Semantik). */
+		max?: number;
+		/** Gesprochene Fassung des Werts (Default: „<value> Pixel"). */
+		valueText?: string;
 		class?: string;
 	};
 
@@ -32,8 +45,27 @@
 		onresize,
 		label = 'Größe ändern (ziehen)',
 		step = 16,
+		value,
+		min,
+		max,
+		valueText,
 		class: className = ''
 	}: Props = $props();
+
+	// Slider-Semantik nur, wenn der Consumer den Wertebereich wirklich kennt —
+	// ein role="slider" ohne valuemin/valuemax wäre für Screenreader schlechter
+	// als der schlichte Button.
+	const sliderAttrs = $derived(
+		value === undefined || min === undefined || max === undefined
+			? {}
+			: {
+					role: 'slider',
+					'aria-valuenow': Math.round(value),
+					'aria-valuemin': Math.round(min),
+					'aria-valuemax': Math.round(max),
+					'aria-valuetext': valueText ?? `${Math.round(value)} Pixel`
+				}
+	);
 
 	const axis = (e: PointerEvent) => (direction === 'horizontal' ? e.clientX : e.clientY);
 
@@ -75,6 +107,7 @@
 	type="button"
 	class="resize-handle resize-handle--{direction} {className}"
 	aria-label={label}
+	{...sliderAttrs}
 	onpointerdown={startDrag}
 	onkeydown={onKeyDown}
 ></button>

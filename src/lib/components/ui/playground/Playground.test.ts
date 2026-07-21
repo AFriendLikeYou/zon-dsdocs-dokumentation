@@ -153,3 +153,81 @@ describe('Playground — Code-Umschalter', () => {
 		expect(codeToggle()).toHaveAttribute('aria-expanded', 'true');
 	});
 });
+
+// ── Viewport-Voreinstellungen (Breakpoint-Presets) ─────────────────────────
+// Die Werte stammen aus den real im Repo genutzten @media-Grenzen (560/768/1280);
+// „Frei" ist der Ausgangszustand UND der Rückfall nach freiem Ziehen.
+describe('Playground — Viewport-Voreinstellungen', () => {
+	const widthGroup = () => screen.queryByRole('radiogroup', { name: 'Vorschau-Breite' });
+	const frame = (container: HTMLElement) =>
+		container.querySelector('.playground__frame') as HTMLElement;
+
+	it('zeigt keine Breiten-Leiste, wenn der Playground nicht resizable ist', () => {
+		render(Playground, { props: { controls: tplControls, template: tpl } });
+		expect(widthGroup()).toBeNull();
+	});
+
+	it('zeigt die Leiste bei resizable — Ausgangszustand „Frei" (volle Breite)', () => {
+		const { container } = render(Playground, {
+			props: { controls: tplControls, template: tpl, resizable: true }
+		});
+
+		expect(widthGroup()).not.toBeNull();
+		for (const label of ['Frei', 'Mobil', 'Tablet', 'Desktop'])
+			expect(screen.getByRole('radio', { name: label })).toBeInTheDocument();
+		expect(screen.getByRole('radio', { name: 'Frei' })).toHaveAttribute('aria-checked', 'true');
+		expect(frame(container).style.width).toBe('100%');
+	});
+
+	it('eine Voreinstellung setzt die Breite auf ihren Breakpoint', async () => {
+		const { container } = render(Playground, {
+			props: { controls: tplControls, template: tpl, resizable: true }
+		});
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Tablet' }));
+		expect(frame(container).style.width).toBe('768px');
+		expect(screen.getByRole('radio', { name: 'Tablet' })).toHaveAttribute('aria-checked', 'true');
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Mobil' }));
+		expect(frame(container).style.width).toBe('560px');
+	});
+
+	it('freies Ziehen (hier: Pfeiltaste am Griff) hebt die Auswahl wieder auf', async () => {
+		const { container } = render(Playground, {
+			props: { controls: tplControls, template: tpl, resizable: true }
+		});
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Tablet' }));
+		expect(frame(container).style.width).toBe('768px');
+
+		// ResizeHandle meldet ein Delta (Schrittweite 16px) → Breite bleibt gesetzt,
+		// die Voreinstellung fällt auf „Frei" zurück.
+		await fireEvent.keyDown(screen.getByRole('slider'), { key: 'ArrowLeft' });
+		expect(frame(container).style.width).toBe('752px');
+		expect(screen.getByRole('radio', { name: 'Frei' })).toHaveAttribute('aria-checked', 'true');
+		expect(screen.getByRole('radio', { name: 'Tablet' })).toHaveAttribute('aria-checked', 'false');
+	});
+
+	it('„Frei" löst eine gesetzte Breite wieder auf die volle Bühne', async () => {
+		const { container } = render(Playground, {
+			props: { controls: tplControls, template: tpl, resizable: true }
+		});
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Desktop' }));
+		expect(frame(container).style.width).toBe('1280px');
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Frei' }));
+		expect(frame(container).style.width).toBe('100%');
+	});
+
+	it('der Griff trägt Slider-Semantik — die Breite ist für Screenreader ablesbar', async () => {
+		render(Playground, {
+			props: { controls: tplControls, template: tpl, resizable: true }
+		});
+
+		await fireEvent.click(screen.getByRole('radio', { name: 'Mobil' }));
+		const handle = screen.getByRole('slider');
+		expect(handle).toHaveAttribute('aria-valuemin', '200');
+		expect(handle.getAttribute('aria-valuetext')).toContain('Mobil');
+	});
+});

@@ -71,6 +71,27 @@ const SECTION_IDS = {
 	'Verwandte Komponenten': 'verwandte'
 };
 
+/**
+ * Laufzeit-Bedingungen der REIN REDAKTIONELLEN Sektionen. Ihre Daten stehen nur in
+ * content.json (aus spec.generated.ts als EDITORIAL gestrippt) — der Exporter kennt
+ * sie zur Build-Zeit also grundsätzlich nicht und darf content.json auch nicht lesen
+ * (Content-Unabhängigkeit/Idempotenz). Die Sektion wird darum immer emittiert und
+ * hier gegated. Geprüft wird der INHALT (Listenlänge), NICHT die Existenz des
+ * Schlüssels: `{ nutzen: [] }` ist genauso leer wie `undefined`.
+ * Referenziert `spec` — die zusammengeführte Konstante (generated + content), die der
+ * Generat-Kopf unter dem Namen S anlegt.
+ */
+const EDITORIAL_WHEN = {
+	verwendung: 'spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length',
+	wording: 'spec.wording?.length',
+	doDont: 'spec.doDont?.do?.length || spec.doDont?.dont?.length',
+	verwandt: 'spec.verwandt?.length',
+	a11y: 'spec.a11y?.length',
+	tastatur: 'spec.tastatur?.length'
+};
+/** Der Barrierefreiheit-Tab trägt beide a11y-Sektionen — er lebt, wenn eine davon lebt. */
+const A11Y_HAS_CONTENT = `(${EDITORIAL_WHEN.a11y} || ${EDITORIAL_WHEN.tastatur})`;
+
 /** Wrap markup as a named Svelte-5-Snippet (Anatomy nutzt Snippet-Props preview/variant). */
 function asSnippet(html, name) {
 	return `{#snippet ${name}()}${String(html).trim()}{/snippet}`;
@@ -526,11 +547,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasStateGrid = stateItems.length > 0;
 	const hasStateRest = stateRest.length > 0;
 	const hasStates = hasStateGrid || hasStateRest;
-	const hasDoDont = Boolean(model.doDont);
 	const anyCode = Boolean(hasHtmlCode || hasSvelteCode || cssForCode || hasRepoCode || patternCss);
 	const hasProps = props.length > 0;
-	const hasA11y = Array.isArray(model.a11y) && model.a11y.length > 0;
-	const hasKeyboard = Array.isArray(model.tastatur) && model.tastatur.length > 0;
 	const hasTokens = Array.isArray(model.tokens) && model.tokens.length > 0;
 	const hasColorRoles = Boolean(
 		model.farbrollen &&
@@ -540,11 +558,16 @@ function renderPage(model, { patternCss = null } = {}) {
 			model.farbrollen.elemente.length
 	);
 	const hasMasse = Boolean(model.masse);
-	const hasUsage = Boolean(
-		model.verwendung && (model.verwendung.nutzen?.length || model.verwendung.nichtNutzen?.length)
-	);
-	const hasWording = Array.isArray(model.wording) && model.wording.length > 0;
-	const hasRelated = Array.isArray(model.verwandt) && model.verwandt.length > 0;
+	// REIN REDAKTIONELLE Sektionen (verwendung, wording, doDont, verwandt, a11y,
+	// tastatur) haben KEIN Build-Time-Gate mehr. Ihre Daten stehen ausschließlich in
+	// content.json — `renderGenerated` strippt sie als EDITORIAL aus spec.generated.ts.
+	// Ein Gate auf `model.X` war darum in BEIDE Richtungen falsch:
+	//   · model.X gesetzt, content.X fehlt  → Überschrift ohne Inhalt (leere Sektion),
+	//   · content.X gesetzt, model.X fehlt  → geschriebene Redaktion erscheint NIE.
+	// Der Exporter darf content.json nicht lesen (Content-Unabhängigkeit/Idempotenz),
+	// also wird die Sektion IMMER emittiert und ZUR LAUFZEIT auf ihren tatsächlichen
+	// Inhalt gegated — dasselbe Muster wie `beispiele`/`codeBeispiele`. Die Bedingung
+	// prüft den Inhalt, nicht die Existenz des Schlüssels.
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse || hasColorRoles;
 	// `editorial` (content.json als Partial<ComponentSpec>) trägt alle Felder, die
@@ -559,22 +582,27 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasExamples) used.add('ExampleBlock');
 	if (hasVariants || hasStateGrid) used.add('SpecimenGrid');
 	if (hasStateRest) used.add('StateList');
-	if (hasDoDont) used.add('DoDontList');
-	if (hasWording) used.add('WordingList');
-	if (hasRelated) used.add('RelatedComponents');
+	// Redaktionelle Renderer: immer importieren — ob sie etwas zeigen, entscheidet
+	// die Laufzeit-Bedingung um die jeweilige Sektion (s. o.).
+	used.add('DoDontList');
+	used.add('WordingList');
+	used.add('RelatedComponents');
+	used.add('A11yList');
+	used.add('KeyboardList');
 	// CodeBlock rendert sowohl die Maschinen-Snippets als auch die redaktionellen
 	// codeBeispiele (laufzeit-gated im Develop-Tab) → immer bei vorhandenem Develop-Tab.
 	if (hasDevelop) used.add('CodeBlock');
 	if (hasProps) used.add('PropsTable');
-	if (hasA11y) used.add('A11yList');
-	if (hasKeyboard) used.add('KeyboardList');
 	if (hasMasse) used.add('MeasureTable');
 	if (hasColorRoles) used.add('ColorRoleTable');
 	if (hasTokens) used.add('TokenTable');
 
 	const tabs = [{ label: 'Design', name: 'designTab' }];
 	if (hasDevelop) tabs.push({ label: 'Develop', name: 'developTab' });
-	if (hasA11y || hasKeyboard) tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab' });
+	// Der Barrierefreiheit-Tab ist rein redaktionell (a11y + tastatur) und wird darum
+	// wie seine Sektionen ZUR LAUFZEIT gegated (`when`) — sonst stünde bei fehlender
+	// Redaktion ein leerer Tab in der Leiste.
+	tabs.push({ label: 'Barrierefreiheit', name: 'a11yTab', when: A11Y_HAS_CONTENT });
 	if (hasSpecs) tabs.push({ label: 'Specs', name: 'specsTab' });
 
 	// CodeBlock aus dem Spec-UI-Kit-Import lösen — es hat einen eigenen Barrel.
@@ -583,7 +611,8 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\timport { Tabs } from '$components/ui/tab';\n` +
 		`\timport { ${usedSpec.join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(used.has('CodeBlock') ? `\timport { CodeBlock } from '${CODE_BLOCK_IMPORT}';\n` : '') +
-		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
+		// Redaktioneller Renderer wie DoDontList & Co. — immer importiert, laufzeit-gated.
+		`\timport { UsageBlock } from '$components/ui/usage-block';\n` +
 		// Playground UND Beispiele teilen sich `instantiate` — eine Quelle für beide.
 		(hasTemplatePg
 			? `\timport { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';\n`
@@ -681,12 +710,16 @@ function renderPage(model, { patternCss = null } = {}) {
 			previewSlot +
 			`\t</Anatomy>\n`;
 	}
-	if (hasUsage) {
-		design += `\n\t<h2 id="${SECTION_IDS.Verwendung}" class="section-anchor">Verwendung</h2>\n\t<UsageBlock verwendung={${S}.verwendung} />\n`;
-	}
-	if (hasWording) {
-		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
-	}
+	design +=
+		`\n\t{#if ${EDITORIAL_WHEN.verwendung}}\n` +
+		`\t\t<h2 id="${SECTION_IDS.Verwendung}" class="section-anchor">Verwendung</h2>\n` +
+		`\t\t<UsageBlock verwendung={${S}.verwendung} />\n` +
+		`\t{/if}\n`;
+	design +=
+		`\n\t{#if ${EDITORIAL_WHEN.wording}}\n` +
+		`\t\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n` +
+		`\t\t<WordingList items={${S}.wording} />\n` +
+		`\t{/if}\n`;
 	// Varianten-Raster: nur noch das, was KEIN Beispiel abdeckt. Sind alle Werte
 	// abgedeckt, entfällt die Sektion ganz; gibt es überhaupt Beispiele, heißt sie
 	// „Weitere Varianten" (der Rest neben dem Erklärten). Die Anker-id bleibt stabil
@@ -709,13 +742,16 @@ function renderPage(model, { patternCss = null } = {}) {
 		if (hasStateRest)
 			design += `\t<StateList states={${JSON.stringify(stateRest)}} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />\n`;
 	}
-	if (hasDoDont) {
-		design += `\n\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n`;
-		design += `\t<DoDontList doDont={${S}.doDont} />\n`;
-	}
-	if (hasRelated) {
-		design += `\n\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n\t<RelatedComponents slugs={${S}.verwandt} />\n`;
-	}
+	design +=
+		`\n\t{#if ${EDITORIAL_WHEN.doDont}}\n` +
+		`\t\t<h2 id="${SECTION_IDS["Do & Don't"]}" class="section-anchor">Do & Don't</h2>\n` +
+		`\t\t<DoDontList doDont={${S}.doDont} />\n` +
+		`\t{/if}\n`;
+	design +=
+		`\n\t{#if ${EDITORIAL_WHEN.verwandt}}\n` +
+		`\t\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n` +
+		`\t\t<RelatedComponents slugs={${S}.verwandt} />\n` +
+		`\t{/if}\n`;
 
 	// ---- Develop-Tab ----
 	let develop = '';
@@ -752,10 +788,14 @@ function renderPage(model, { patternCss = null } = {}) {
 	}
 
 	// ---- Barrierefreiheit-Tab ----
-	// A11yList nur bei hasA11y (der Body ist sonst leer); Tastatur-Abschnitt danach.
+	// Beide Abschnitte sind redaktionell → laufzeit-gated (der Tab selbst ebenso, s. `when`).
 	let a11y = '';
-	if (hasA11y) a11y += `\t<A11yList items={${S}.a11y} />\n`;
-	if (hasKeyboard) a11y += `\n\t<h2>Tastatur</h2>\n\t<KeyboardList items={${S}.tastatur} />\n`;
+	a11y += `\t{#if ${EDITORIAL_WHEN.a11y}}\n\t\t<A11yList items={${S}.a11y} />\n\t{/if}\n`;
+	a11y +=
+		`\n\t{#if ${EDITORIAL_WHEN.tastatur}}\n` +
+		`\t\t<h2>Tastatur</h2>\n` +
+		`\t\t<KeyboardList items={${S}.tastatur} />\n` +
+		`\t{/if}\n`;
 
 	// ---- Specs-Tab ----
 	let specs = '';
@@ -771,7 +811,12 @@ function renderPage(model, { patternCss = null } = {}) {
 		.map((t) => `{#snippet ${t.name}()}\n${bodies[t.name]}{/snippet}`)
 		.join('\n\n');
 	const tabsItems = tabs
-		.map((t) => `\t\t{ id: '${t.name}', label: '${t.label}', component: ${t.name} }`)
+		.map((t) => {
+			const entry = `{ id: '${t.name}', label: '${t.label}', component: ${t.name} }`;
+			// Laufzeit-gateter Tab → als Spread einer leeren/einelementigen Liste, damit
+			// die Tab-Leiste ihn bei fehlendem Inhalt gar nicht erst anlegt.
+			return t.when ? `\t\t...(${t.when} ? [${entry}] : [])` : `\t\t${entry}`;
+		})
 		.join(',\n');
 
 	return (
