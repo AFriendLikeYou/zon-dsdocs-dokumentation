@@ -90,6 +90,11 @@
 		"isInFooter": true
 	},
 	{
+		"title": "Themenklammer",
+		"href": "/product/patterns/themenklammer",
+		"isInFooter": true
+	},
+	{
 		"title": "Resources",
 		"isCategory": true
 	},

@@ -1,0 +1,136 @@
+/* Themenklammer-Pattern — NUR Layout-Glue (Klammer-Linien, Kopfzeile, Rhythmus).
+   KEIN kopiertes Komponenten-CSS: die z-Klassen (zon-teaser, z-cell, z-text-button)
+   liefern die Component-Ordner via ?raw (Single Source of Truth).
+
+   Klassen sind ausgeschrieben + BEM (Projektregel: keine Kurzpräfixe). Die aus der
+   Produktion stammenden z-*-Klassen bleiben unberührt.
+
+   Alle Werte stehen auf echten --z-ds-*-Tokens. Der vertikale Rhythmus nutzt
+   --z-ds-space-teaser — derselbe Token, mit dem .zon-teaser--wide in der
+   Component-CSS arbeitet (1.5rem, ab 48em 3.5rem, siehe static/styles-zds.css). */
+
+.themenklammer {
+	max-width: 892px;
+	margin-inline: auto;
+	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	color: var(--z-ds-color-text-100);
+}
+
+/* Die eigentliche „Klammer": zwei Haarlinien fassen die Sektion oben und unten ein.
+   In Figma sind das die Border-Layer in „Heading / Primary" (oben) und im
+   CTA-Frame (unten) — je 1 px auf --z-ds-color-border-70. */
+.themenklammer__kopf {
+	border-top: 1px solid var(--z-ds-color-border-70);
+	padding-top: var(--z-ds-space-xl);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--z-ds-space-l);
+	text-align: center;
+}
+
+/* Spitzmarke und Titel bilden eine Gruppe (Figma: „Title", gap xxs). */
+.themenklammer__titelgruppe {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--z-ds-space-xxs);
+	width: 100%;
+}
+
+.themenklammer__spitzmarke {
+	margin: 0;
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.5;
+	color: var(--z-ds-color-text-55);
+}
+
+.themenklammer__titel {
+	margin: 0;
+	font-size: var(--z-ds-fontsize-30);
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--z-ds-color-text-100);
+}
+
+/* Optionale Themen-Links unter dem Titel (Figma: „Topics"). Umbruchfähige Zeile;
+   der Zeilenabstand ist bewusst größer als der Spaltenabstand. */
+.themenklammer__links {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	row-gap: var(--z-ds-space-l);
+	column-gap: var(--z-ds-space-m);
+}
+
+/* Der Link trägt sein Ziel selbst: 18 px Textzeile + 2 × 8 px Padding = 34 px —
+   damit über dem WCAG-2.2-Minimum von 24 px. Das negative Margin holt die optische
+   Ausrichtung zurück, ohne die Trefferfläche zu verkleinern (so macht es zeit.de). */
+.themenklammer__link {
+	display: inline-flex;
+	align-items: center;
+	padding: var(--z-ds-space-xs);
+	margin: calc(-1 * var(--z-ds-space-xs));
+	font-size: var(--z-ds-fontsize-14);
+	line-height: 1.125rem;
+	color: var(--z-ds-color-text-100);
+	text-decoration: none;
+	border-radius: var(--z-ds-border-radius-4);
+	transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.themenklammer__link:hover {
+	background-color: var(--z-ds-color-background-10);
+}
+
+.themenklammer__link:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+}
+
+/* Rhythmus: jeder Block nach dem ersten bekommt den Teaser-Abstand. Der Aufmacher
+   folgt dem Kopf enger (Figma: „Intro", gap xl). */
+.themenklammer > * + * {
+	margin-block-start: var(--z-ds-space-teaser);
+}
+
+.themenklammer__aufmacher {
+	margin-block-start: var(--z-ds-space-xl);
+}
+
+/* .zon-teaser--wide bringt eigenes margin-bottom mit — hier trägt der Container
+   den Rhythmus, sonst addieren sich beide Abstände. */
+.themenklammer__aufmacher.zon-teaser--wide {
+	margin-bottom: 0;
+}
+
+.themenklammer__liste {
+	list-style: none;
+	margin-inline: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-teaser);
+}
+
+/* .z-cell ist auf 343 px Zellbreite gebaut; in der Klammer steht sie in voller
+   Spaltenbreite. Reine Layout-Zuweisung, die Komponente bleibt unangetastet. */
+.themenklammer__liste .z-cell {
+	width: 100%;
+}
+
+.themenklammer__fuss {
+	border-bottom: 1px solid var(--z-ds-color-border-70);
+	padding-bottom: var(--z-ds-space-xl);
+	display: flex;
+	justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.themenklammer__link {
+		transition: none;
+	}
+}

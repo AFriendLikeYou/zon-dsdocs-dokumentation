@@ -1,0 +1,211 @@
+{
+	"zweck": "Der Standard-Teaser ist das Arbeitspferd von zeit.de — auf der Startseite stehen rund 50 Stück davon, mehr als von allen anderen Teaser-Formaten zusammen. Er zeigt einen Artikel als Bild, Spitzmarke, Überschrift, Zusammenfassung, Metadaten und Aktionszeile. Ob Bild und Text nebeneinander oder untereinander stehen, entscheidet nicht eine Variante, sondern der verfügbare Platz: das Raster reflowt von allein.",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Teaser-Bild — 3:2 im Normalfall (zon-teaser__media--desktop-super); in zwei Spalten 430 px breit, in einer Spalte volle Teaser-Breite."
+		},
+		{
+			"nr": 2,
+			"text": "Spitzmarke (Kicker) — Ressort oder Thema in Akzentrot, Tablet Gothic 14. Bei Verlagsangeboten färbt zon-teaser__kicker--ad sie auf Text-55 um."
+		},
+		{
+			"nr": 3,
+			"text": "Artikel-Überschrift — Tablet Gothic Bold 22/1.2 in zwei Spalten, 20/1.2 in einer Spalte. Sie ist das einzige Element, das ein Breakpoint umschaltet."
+		},
+		{
+			"nr": 4,
+			"text": "Zusammenfassung — Fließtext in Text-70, 16/1.5. Die Textspalte ist auf 740 px begrenzt (Figma-Variable »Text Max Width«)."
+		},
+		{
+			"nr": 5,
+			"text": "Metadaten — Autor und Zeitstempel in Text-55, 14/1.5.",
+			"art": "text",
+			"optionalDurch": "author / datetime"
+		},
+		{
+			"nr": 6,
+			"text": "Aktionszeile — Vorlesen, Kommentare, Merken. Sitzt per margin-top:auto immer am unteren Rand der Textspalte.",
+			"art": "container",
+			"optionalDurch": "actions"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Struktur",
+			"wert": "Ein <article> pro Teaser; die Überschrift steckt in einem <h3 class=\"zon-teaser__heading\">, nicht optisch gefälscht.",
+			"status": "pass"
+		},
+		{
+			"label": "Spitzmarke",
+			"wert": "Der Kicker ist eine redaktionelle Kategorie, keine Überschrift — Produktion setzt ihn als <span> in die Überschrift und schiebt ein <span class=\"visually-hidden\">: </span> dazwischen, damit Screenreader »Ressort: Titel« vorlesen.",
+			"status": "pass"
+		},
+		{
+			"label": "Ein Linkziel",
+			"wert": "Produktion legt einen zusätzlichen zon-teaser__faux-link (position:absolute, 100%×100%, opacity:0, z-index:2) mit tabindex=\"-1\" und aria-hidden=\"true\" über die Fläche: die Maus trifft überall, die Tastatur erreicht nur den sichtbaren Titel-Link.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": ".zon-teaser__link:focus-visible bekommt outline: 2px solid var(--z-ds-color-focus-100) (#005fcc) — sichtbar, nicht nur ein Farbwechsel.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Überschrift",
+			"wert": "#252525 auf #ffffff ≈ 15,3:1 · AAA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Zusammenfassung",
+			"wert": "#444444 auf #ffffff ≈ 9,7:1 · AAA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Byline & Aktionen",
+			"wert": "#69696c auf #ffffff ≈ 5,5:1 · AA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Touch-Ziele",
+			"wert": "Figma dokumentiert im Beispiel-Frame »Touch Targets« 44 px hohe Ziele (Vorlesen 85×44, Kommentare 49×44, Merken 44×44). Produktion liefert 34 px (18 px Icon + 2 × 8 px Innenabstand) — gemessen auf zeit.de/index. WCAG 2.5.8 (24×24, AA) ist erfüllt, 2.5.5 (44×44, AAA) und die Figma-Vorgabe sind es nicht.",
+			"status": "warn"
+		},
+		{
+			"label": "Bild",
+			"wert": "Das Teaser-Bild trägt Bedeutung und braucht alt-Text. In der Doku steht hier eine neutrale Platzhalterfläche mit aria-hidden.",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Fokussiert den Titel-Link; der Fauxlink über der Fläche wird per tabindex=\"-1\" übersprungen."
+		},
+		{
+			"taste": "Enter",
+			"aktion": "Öffnet den Artikel."
+		},
+		{
+			"taste": "Tab (weiter)",
+			"aktion": "Läuft durch die Aktionszeile: Vorlesen · Kommentare · Merken."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Den Standard-Teaser als Default für Artikel-Listen und Ressort-Strecken nehmen — er ist das Format, für das der Rest der Startseite gebaut ist.",
+			"Dem Teaser Platz zum Reflowen lassen: unter rund 704 px Containerbreite klappt er von selbst auf eine Spalte.",
+			"Die Zusammenfassung auf zwei bis drei Zeilen halten; die Textspalte bricht bei 740 px um."
+		],
+		"dont": [
+			"Die Spaltenzahl nicht von Hand erzwingen — die Breite entscheidet, nicht eine Variante.",
+			"Den Standard-Teaser nicht als Aufmacher missbrauchen; dafür gibt es Hero.",
+			"Die Aktionszeile nicht weglassen, wenn Vorlesen oder Kommentare zum Artikel existieren — sie ist der einzige Einstieg in diese Funktionen aus der Liste heraus."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für die Mehrheit der Artikel auf Startseite, Ressort- und Themenseiten.",
+			"Überall dort, wo Bild, Überschrift und Zusammenfassung zusammen gezeigt werden sollen.",
+			"In Bereichen, deren Breite variiert — der Teaser passt sich ohne Zutun an."
+		],
+		"nichtNutzen": [
+			"Nicht als erstes Element einer Startseite — das ist der Aufmacher (Hero).",
+			"Nicht in dichten Listen ohne Bild — dafür Cell.",
+			"Nicht als Navigationselement — der Teaser ist ein Inhalts-, kein Menüelement."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "Artikel-Überschrift",
+			"gut": "»Einmal hörte ich die Durchsage: ›Jetzt ärgern wir die reichen Säcke‹«",
+			"hinweis": "Die Überschrift ist die echte Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "HAMBURG",
+			"gut": "HafenCity in Hamburg",
+			"hinweis": "Die Spitzmarke ist Ressort oder Thema — kurz, in normaler Schreibung, nicht in Versalien."
+		}
+	],
+	"verwandt": [
+		"hero",
+		"cell",
+		"carousel"
+	],
+	"version": "Figma-Node 216:49 · zeit.de/index 2026-07-21",
+	"variantInfo": {
+		"Super (3:2)": "Der Normalfall — jeder Standard-Teaser auf zeit.de/index nutzt diesen Zuschnitt.",
+		"Wide (16:9)": "Breiter Zuschnitt für Motive, die Panorama brauchen; derselbe Zuschnitt wie beim Aufmacher.",
+		"Narrow (2:3)": "Hochformat für Porträts. Figma nennt die Idee »Portrait« und zeichnet sie 1:1 — Produktion liefert 2:3."
+	},
+	"beispiele": [
+		{
+			"titel": "Der Normalfall",
+			"beschreibung": "Bild links, Text rechts, 3:2-Zuschnitt — so steht der Teaser rund 50-mal auf zeit.de/index. Diese Fassung ist live nachgemessen: 892 px breit, zwei Spalten à 430 px, 32 px dazwischen.",
+			"instanzen": [
+				{
+					"bildformat": "super"
+				}
+			],
+			"abdeckt": [
+				"Super (3:2)"
+			]
+		},
+		{
+			"titel": "Wenn das Motiv Weite braucht",
+			"beschreibung": "Der 16:9-Zuschnitt nimmt dem Bild Höhe und gibt ihm Breite — für Landschaften, Innenräume und Szenen, bei denen der Rand die Geschichte trägt. Es ist derselbe Zuschnitt, den der Aufmacher standardmäßig nutzt.",
+			"instanzen": [
+				{
+					"bildformat": "wide"
+				}
+			],
+			"abdeckt": [
+				"Wide (16:9)"
+			]
+		},
+		{
+			"titel": "Wenn das Motiv eine Person ist",
+			"beschreibung": "Hochformat für Porträts. Achtung beim Figma-Abgleich: dort heißt die Idee »Portrait« und ist 1:1 gezeichnet — ausgeliefert wird 2:3 (auf schmalen Viewports 3:4). Wer nach Figma baut, bekommt ein anderes Bild als die Redaktion sieht.",
+			"instanzen": [
+				{
+					"bildformat": "narrow"
+				}
+			],
+			"abdeckt": [
+				"Narrow (2:3)"
+			]
+		}
+	],
+	"komposition": [
+		"Die Aktionszeile setzt sich aus z-text-button-Instanzen zusammen (Vorlesen, Kommentare, Merken) — Maße und Zustände stehen dort.",
+		"Mehrere Standard-Teaser stehen untereinander in einer Inhaltsspalte; den vertikalen Abstand liefert der Teaser selbst über --z-ds-space-teaser (56 px).",
+		"In schmalen Bereichen (Sidebars, Karussells) übernehmen die Geschwister-Layouts --upright, --tile, --list oder --carousel — nicht der Standard-Teaser mit erzwungener Breite."
+	],
+	"faq": [
+		{
+			"frage": "Warum gibt es keine CSS-Klasse für »Small« und »Wide«?",
+			"antwort": "Weil Produktion die Größe nicht als Variante ausliefert — und anders als beim Aufmacher nicht einmal als Media Query. `.zon-teaser--standard` setzt `grid-template-columns: repeat(auto-fit, minmax(min(100%, 336px), 1fr))`: solange jede Spalte mindestens 336 px bekommt (also ab rund 704 px Containerbreite), stehen Bild und Text nebeneinander, darunter untereinander. Gemessen: bei 1280 px Viewport 892 px breit mit zwei 430-px-Spalten und 32 px Spaltenabstand, bei 375 px eine Spalte à 343 px mit 16 px Zeilenabstand. Beides ist dieselbe Klasse, dasselbe Markup. In Figma ist »Size« dagegen eine echte Varianten-Achse mit zwei gebauten Ständen — das ist eine Modellierungs-, keine Verhaltensdifferenz. Einzige echte Breakpoint-Umschaltung: die Schriftgröße der Überschrift (22 px ↔ 20 px)."
+		},
+		{
+			"frage": "Wo sind die zehn Typen aus Figma (Video, Podcast, Liveblog, Autor …)?",
+			"antwort": "Nicht am Wurzelelement. Auf zeit.de/index trägt kein einziger der 50 Standard-Teaser eine Typ-Modifier-Klasse. Der Typ zeigt sich stattdessen an eingesetzten Bausteinen — `zon-teaser__media-addition--podcastcover` fürs Podcast-Cover, `zon-teaser-action--liveblog` für die Liveblog-Zeile, `zon-teaser__media--gallery` für die Galerie-Punkte — und an einem anderen Bildzuschnitt. Deshalb steht hier keine erfundene `zon-teaser--video`-Klasse: Der Typ ist Inhalt, nicht Modifier."
+		},
+		{
+			"frage": "Warum fehlt der Stil »Background Image«?",
+			"antwort": "Weil er sich hier noch nicht ehrlich zeigen ließe — dasselbe Bild wie beim Aufmacher. Die Klasse sitzt in Produktion nicht auf dem `<article>`, sondern auf dem Textcontainer (`zon-teaser__container--on-image`), und sie braucht zusätzlich die Custom Property `--overlay-background-color` pro Artikel sowie einen 16-stufigen Verlauf. Der datengetriebene Playground setzt Klassen an genau einer Stelle des Templates — der Stil ist deshalb bewusst offen und kommt nach, sobald die Seite ein eigenes `Specimen.svelte` statt eines Templates nutzt. Laut Figma-Beschreibung ist er ohnehin nur für die kleine Teaser-Größe vorgesehen."
+		},
+		{
+			"frage": "Warum heißt der Hochformat-Zuschnitt hier »Narrow (2:3)« und nicht »Portrait«?",
+			"antwort": "Weil »Portrait« der Figma-Name ist und dort 1:1 bedeutet. Im ausgelieferten CSS gibt es überhaupt keine 1:1-Zuschnittklasse für den Teaser; die Formate heißen `--desktop-wide` (16:9), `--desktop-super` (3:2) und `--desktop-narrow` (2:3), auf schmalen Viewports zusätzlich `--mobile-portrait` (3:4). Dokumentiert ist deshalb, was ausgeliefert wird. Die Abweichung ist real und gehört ins Design-Review, nicht in die Doku wegretuschiert."
+		},
+		{
+			"frage": "Warum sind die Aktions-Buttons nur 34 px hoch, wenn Figma 44 px zeigt?",
+			"antwort": "Auch das ist eine echte Divergenz, an beiden Enden nachgemessen. Der Figma-Beispiel-Frame »Touch Targets« zeichnet die drei Ziele als 85×44, 49×44 und 44×44 px. Produktion liefert 34 px Höhe: 18 px Icon plus 2 × 8 px Innenabstand. Damit ist WCAG 2.5.8 (24×24 px, AA) erfüllt, WCAG 2.5.5 (44×44 px, AAA) und die Figma-Vorgabe nicht."
+		},
+		{
+			"frage": "Was ist der unsichtbare Link über der ganzen Fläche?",
+			"antwort": "Der `zon-teaser__faux-link`: ein `<a>` mit `position:absolute`, 100 % × 100 %, `opacity:0`, `z-index:2`, `tabindex=\"-1\"` und `aria-hidden=\"true\"`. Er macht die gesamte Kachel mausklickbar, ohne ein zweites Tastatur- oder Screenreader-Ziel zu erzeugen — die Tastatur erreicht nur den sichtbaren Titel-Link. Im Doku-Template ist er weggelassen, weil er auf der Bühne nur Zeiger-Ereignisse schlucken würde."
+		}
+	]
+}

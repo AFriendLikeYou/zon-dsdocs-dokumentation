@@ -1,0 +1,291 @@
+---
+title: Themenklammer
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	// ── HANDKURATIERTES PATTERN ────────────────────────────────────────────────
+	// Patterns sind Kompositions-Rezepte und laufen NICHT über den Component-Exporter
+	// (der bleibt einzelnen Komponenten vorbehalten). Diese Seite ist von Hand
+	// geschrieben. Begründung: DECISIONS.md ADR-026.
+	//
+	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus den
+	// Component-Ordnern (Single Source of Truth). Nur das Layout-Glue (Klammer-Linien,
+	// Kopfzeile, Rhythmus) lebt co-located als pattern.css dieses Patterns.
+	import { CodeBlock } from '$components/ui/code-block';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Banner } from '$components/ui/banner';
+	import { Table } from '$components/ui/table';
+	import { Card } from '$components/ui/card';
+	import { Grid } from '$components/ui/grid';
+
+	import heroCss from '../../components/hero/pattern.css?raw';
+	import cellCss from '../../components/cell/pattern.css?raw';
+	import textButtonCss from '../../components/text-button/pattern.css?raw';
+	import glueCss from './pattern.css?raw';
+
+	// Die z-Selektoren sind seitenweit eindeutig → pattern.css EINMAL UNSCOPED
+	// einbinden (dokumentierte Entscheidung, ADR-026). Die Live-Vorschau sitzt
+	// zusätzlich auf .ds-stage, damit die --z-ds-*-Token dort auf helle
+	// Artboard-Werte gepinnt sind und der Light/Dark-Schalter unabhängig greift.
+	const patternCss = [heroCss, cellCss, textButtonCss, glueCss].join('\n');
+
+	// Komplettes Klammer-Markup — EINE Quelle für Live-Vorschau UND Code-Block.
+	const klammerMarkup = `<section class="themenklammer" aria-labelledby="themenklammer-titel">
+  <header class="themenklammer__kopf">
+    <div class="themenklammer__titelgruppe">
+      <p class="themenklammer__spitzmarke">Serie</p>
+      <h2 class="themenklammer__titel" id="themenklammer-titel">Energiekrise</h2>
+    </div>
+    <ul class="themenklammer__links">
+      <li><a class="themenklammer__link" href="#live-monitor">Live Monitor</a></li>
+      <li><a class="themenklammer__link" href="#gasverbrauch">Gasverbrauch</a></li>
+      <li><a class="themenklammer__link" href="#versorgung">Versorgung</a></li>
+    </ul>
+  </header>
+
+  <article class="zon-teaser zon-teaser--wide zon-teaser--is-lead themenklammer__aufmacher">
+    <figure class="zon-teaser__media zon-teaser__media--desktop-wide" aria-hidden="true"></figure>
+    <div class="zon-teaser__container">
+      <h3 class="zon-teaser__heading">
+        <span class="zon-teaser__kicker"><span class="zon-teaser__kicker-text">Gasverbrauch</span></span>
+        <span class="zon-teaser__title zon-teaser__title--extralarge">So viel Gas spart Deutschland wirklich</span>
+      </h3>
+      <p class="zon-teaser__summary">Heizen die Menschen in Deutschland plötzlich weniger – oder ist es nur wärmer geworden? Unsere Datenanalyse zeigt, was Sparverhalten ist – und was bloß Wetter.</p>
+      <div class="zon-teaser__byline"><span class="zon-teaser__author">Von Vorname Nachname</span><span class="zon-teaser__datetime">Vor 2 Stunden</span></div>
+    </div>
+  </article>
+
+  <ul class="themenklammer__liste">
+    <li>
+      <article class="z-cell z-cell--artikel">
+        <div class="z-cell__media" aria-hidden="true"></div>
+        <div class="z-cell__body">
+          <p class="z-cell__kicker">Industrie</p>
+          <h3 class="z-cell__title">Wo die Produktion zuerst stillsteht</h3>
+          <p class="z-cell__byline">Von Vorname Nachname</p>
+        </div>
+      </article>
+    </li>
+    <li>
+      <article class="z-cell z-cell--artikel">
+        <div class="z-cell__media" aria-hidden="true"></div>
+        <div class="z-cell__body">
+          <p class="z-cell__kicker">Haushalte</p>
+          <h3 class="z-cell__title">Was eine Kilowattstunde jetzt kostet</h3>
+          <p class="z-cell__byline">Von Vorname Nachname</p>
+        </div>
+      </article>
+    </li>
+    <li>
+      <article class="z-cell z-cell--artikel">
+        <div class="z-cell__media" aria-hidden="true"></div>
+        <div class="z-cell__body">
+          <p class="z-cell__kicker">Europa</p>
+          <h3 class="z-cell__title">Wie die Nachbarländer durch den Winter kommen</h3>
+          <p class="z-cell__byline">Von Vorname Nachname</p>
+        </div>
+      </article>
+    </li>
+  </ul>
+
+  <div class="themenklammer__fuss">
+    <a class="z-text-button z-text-button--large z-text-button--bold" href="#alle-beitraege">Mehr zum Thema</a>
+  </div>
+</section>`;
+
+	const regeln = {
+		nutzen: [
+			'Genau eine Klammer je Thema — Spitzmarke, Titel und CTA benennen dasselbe Thema.',
+			'Die Sektion als <section> mit aria-labelledby an den Klammer-Titel binden.',
+			'Der Titel ist die einzige Überschrift der Klammer; die Teaser liegen eine Ebene darunter.',
+			'Bedienbare Ziele (Themen-Links, CTA) mindestens 24 × 24 px groß halten — Padding statt größerer Schrift.',
+			'Den Rhythmus über --z-ds-space-teaser setzen, nicht über feste Pixelwerte.'
+		],
+		nichtNutzen: [
+			'Den CTA auf die reine Textzeile (18 px) schrumpfen — das reißt das Touch-Target-Minimum.',
+			'Die Klammer allein über die beiden Haarlinien erklären; ohne Titel fehlt der thematische Bezug.',
+			'Mehr als einen CTA an den Fuß stellen — die Klammer hat genau einen Ausgang.',
+			'Teaser-Abstände von Hand setzen und damit vom Teaser-Token abweichen.'
+		]
+	};
+
+	// Belege — was WO gemessen wurde. Bewusst getrennt: Figma-Zeichnung ≠ Produktion.
+	const belegSpalten = [
+		{ key: 'was', label: 'Größe', header: true },
+		{ key: 'figma', label: 'Figma (❖ ZDS)' },
+		{ key: 'produktion', label: 'Produktion (zeit.de/index)' }
+	];
+	const belegZeilen = [
+		{
+			was: 'Inhaltsspalte',
+			figma: '892 px (Frame 1440, Rand 274)',
+			produktion: '892 px (Rand 54 in 1000er Fläche)'
+		},
+		{
+			was: 'Klammer-Titel',
+			figma: '32 px / 1,2 · zentriert · fett',
+			produktion: '32 px / 38,4 px · zentriert · 700'
+		},
+		{
+			was: 'Klammer-Titel (375er Frame)',
+			figma: '30 px / 1,2 · zentriert',
+			produktion: 'nicht gemessen'
+		},
+		{
+			was: 'Teaser (Standard)',
+			figma: '892 × 286,67 px',
+			produktion: '892 × 286,66 px'
+		},
+		{
+			was: 'Abstand zwischen Teasern',
+			figma: '54 px (Desktop) · 32 px (375)',
+			produktion: '56 px (--z-ds-space-teaser, 3.5rem ab 48em)'
+		},
+		{
+			was: 'CTA — Trefferfläche',
+			figma: '242 × 18 px',
+			produktion: '212,64 × 34 px (Padding 8 px, Zeile 18 px)'
+		},
+		{
+			was: 'Haarlinien der Klammer',
+			figma: '1 px auf --z-ds-color-border-70',
+			produktion: 'nicht separat gemessen'
+		}
+	];
+</script>
+
+<!-- Komponenten-CSS (?raw, unscoped) + Glue EINMAL seitenweit. Via {@html}, weil ein
+     Svelte-<style>-Block kein JS interpoliert. Quelle = Component-Ordner (vertrauenswürdig). -->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>${patternCss}</style>`}
+
+# {title}
+
+Die **Themenklammer** ist ein redaktionelles Kompositions-Rezept: Sie fasst mehrere
+Beiträge zu einem Thema zusammen und macht diesen Zusammenhang sichtbar. Zwei
+Haarlinien klammern die Sektion oben und unten ein, dazwischen stehen Kopfzeile,
+ein Aufmacher, eine Teaser-Liste und genau ein Ausgang.
+
+Optional sind **Spitzmarke** (über dem Titel) und **Themen-Links** (unter dem Titel) —
+in Figma heißen die Frame-Varianten entsprechend `(Spitzmarke)`, `(Links)` und
+`(Spitzmarke + Links)`.
+
+## Vorschau
+
+<div class="themenklammer-stage spec-canvas ds-stage">
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html klammerMarkup}
+</div>
+
+## Code
+
+<CodeBlock title="HTML" lang="html" code={klammerMarkup} />
+
+## Regeln
+
+<UsageBlock verwendung={regeln} />
+
+## Belege
+
+Die Tabelle trennt, was **in Figma gezeichnet** ist, von dem, was **in Produktion
+gemessen** wurde (Playwright gegen `https://www.zeit.de/index`, Viewport 1440 × 1000,
+`getComputedStyle` + `getBoundingClientRect`). Wo nichts gemessen wurde, steht das da.
+
+<Table columns={belegSpalten} rows={belegZeilen} showHeader={true} valign="top" caption="Gemessene Größen der Themenklammer in Figma und Produktion" />
+
+## Befund: Der CTA in den Figma-Beispielen ist zu klein
+
+In **allen zehn** Themenklammer-Frames der Figma-Sektion `Examples` misst die
+CTA-Instanz `Text Button` exakt **242 × 18 px** (u. a. `4421:38383`, `4864:225496`,
+`4849:40757`). 18 px unterschreiten das Minimum von **24 × 24 px** aus
+[WCAG 2.2, 2.5.8 Target Size (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html).
+
+Die dokumentierte Komponente ist davon **nicht** betroffen: `.z-text-button` setzt
+`padding: var(--z-ds-space-xs)` (8 px) auf eine 18-px-Zeile — macht **34 px**. In
+Produktion gemessen: der Klammer-CTA („Mehr exklusive Beiträge") ist
+**212,64 × 34 px**, und über die ganze Startseite liegen alle 302 `.z-text-button`
+zwischen **30 und 34 px** Höhe. Produktion und Component-CSS sind also korrekt —
+**nachziehen müssen die Figma-Beispiele**: Die Instanzen dort sind auf die reine
+Textzeile gepinnt, das Padding fehlt.
+
+<Banner
+	variant="warning"
+	title="Zu tun in Figma"
+	description="Die zehn Beispiel-Frames zeigen den CTA ohne Padding (18 px hoch). Die Instanzen sollten auf die echte Trefferfläche von 34 px gehen, damit die Zeichnung nicht kleiner aussieht als das, was ausgeliefert wird."
+/>
+
+## Offene Frage: Wie hoch ist die Kopfzeile?
+
+Im Figma-Audit fiel auf, dass mehrere gleich benannte `Themenklammer`-Frames
+unterschiedlich hohe `Heading / Primary`-Instanzen haben — **109 / 71 / 56 px**. Beim
+Nachmessen löst sich der größere Teil davon auf: Die Höhen ergeben sich aus dem
+Inhalt und sind **rechnerisch nachvollziehbar**.
+
+- `71 px` = 1 px Linie + 32 px Abstand + 38,4 px Titel (32 px × 1,2) — nur Titel.
+- `109 px` = 71 px + 24 px Abstand + 14 px Themen-Link-Zeile — Variante `(Links)`,
+  Frame `4421:38373`.
+- `98 px` = 71 px + 6 px + 21 px Spitzmarke (14 px × 1,5) — Variante `(Spitzmarke)`.
+- `136 px` = 98 px + 24 px + 14 px — Variante `(Spitzmarke + Links)`.
+- `56,08 px` = 1 px + 32 px + 23,08 px **Logo-Lockup** — der Frame `4864:226202`
+  trägt statt eines Text-Titels die Wortmarke `Logo / Full / Wochenende`.
+
+Die 375er Gegenstücke liegen jeweils **2 px darunter** (107 / 69 / 96 / 134), weil der
+Titel dort auf 30 px statt 32 px steht (30 × 1,2 = 36 statt 38,4). Auch das ist eine
+Regel, keine Abweichung.
+
+Was **bleibt**, ist ein Benennungsproblem: Die Geschwister-Frames heißen nach ihrer
+Variante — `(Links)`, `(Spitzmarke)`, `(Spitzmarke + Links)` — die Frames mit
+Text-Titel und mit Logo-Titel aber **beide** nur `Themenklammer`
+(`4864:225486` / `4864:225499` gegen `4864:226202` / `4864:225968`). Aus dem Namen
+allein ist nicht zu erkennen, dass es zwei verschiedene Kopf-Varianten sind.
+
+<Banner
+	variant="info"
+	title="Vorschlag — nicht belegte Spezifikation"
+	description="Der Kopf sollte als eine Komponente mit drei unabhängigen Schaltern beschrieben werden: Spitzmarke (an/aus), Titel (Text oder Logo-Lockup) und Themen-Links (an/aus). Die Höhe fiele dann als Ergebnis heraus und müsste nirgends spezifiziert werden. Die Beispiel-Frames sollten entsprechend heißen, z. B. „Themenklammer (Logo)“. Ob das die gewünschte Modellierung ist, ist mit dem Design-Team noch zu klären."
+/>
+
+## Beteiligte Komponenten
+
+<Banner
+	variant="info"
+	compact={true}
+	description="In Figma und in Produktion stehen in der Klammer „Standard“-Teaser (892 × 286,66 px). Diese Komponente ist noch nicht dokumentiert — sobald sie es ist, wird die Liste hier gegen sie getauscht. Bis dahin steht die dokumentierte Zelle (Cell) an ihrer Stelle."
+/>
+
+<Grid auto={true} autoMode="fill" minWidth="340px" rowGap="xxl" columnGap="lg" marginBlock="lg">
+	<Card
+		title="Hero"
+		description="Der Aufmacher — größtes Teaser-Element, eröffnet die Klammer unter der Kopfzeile."
+		url="/product/components/hero"
+	/>
+	<Card
+		title="Cell"
+		description="Die Teaser-Zelle für die Liste unter dem Aufmacher — Platzhalter für den Standard-Teaser."
+		url="/product/components/cell"
+	/>
+	<Card
+		title="Text Button"
+		description="Der eine Ausgang am Fuß der Klammer — flächenlos, mit eigener Trefferfläche."
+		url="/product/components/text-button"
+	/>
+</Grid>
+
+<style>
+	.themenklammer-stage {
+		padding: var(--z-ds-space-32) var(--z-ds-space-24);
+		border: 1px solid var(--ds-border-soft);
+		border-radius: var(--ds-radius);
+		/* Gepinnt helle Bühne (s. .catalog-preview): im Dark-Mode trägt die Fläche,
+		   nicht der Schatten. */
+		box-shadow: var(--ds-elevation-shadow);
+		/* RAW-Token wie die anderen Bühnen → Fläche bleibt eigenständig hell. */
+		background: var(--z-ds-color-background-10);
+		margin-block: var(--ds-rhythm-block);
+		overflow-x: auto;
+	}
+</style>

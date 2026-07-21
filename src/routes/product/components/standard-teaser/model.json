@@ -1,0 +1,589 @@
+{
+	"$schema": "../../../../../tooling/zeit-de-exporter/model.schema.json",
+	"name": "Standard Teaser",
+	"status": "ready_for_dev",
+	"kategorie": "Inhalte",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=216-49",
+	"aktualisiertAm": "2026-07-21",
+	"dokumentiertAm": "2026-07-21",
+	"zweck": "Der Standard-Teaser ist das Arbeitspferd von zeit.de — auf der Startseite stehen rund 50 Stück davon, mehr als von allen anderen Teaser-Formaten zusammen. Er zeigt einen Artikel als Bild, Spitzmarke, Überschrift, Zusammenfassung, Metadaten und Aktionszeile. Ob Bild und Text nebeneinander oder untereinander stehen, entscheidet nicht eine Variante, sondern der verfügbare Platz: das Raster reflowt von allein.",
+	"masse": {
+		"breite": {
+			"px": "892",
+			"herkunft": "gemessen"
+		},
+		"hoehe": {
+			"px": "287",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "0",
+			"herkunft": "gemessen"
+		},
+		"radius": {
+			"px": "0",
+			"herkunft": "gemessen"
+		}
+	},
+	"spacing": [
+		{
+			"label": "Bild ↔ Textspalte (zwei Spalten)",
+			"px": "32 px",
+			"token": "--z-ds-space-xl",
+			"art": "gap",
+			"selector": ".zon-teaser--standard",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Bild ↔ Textspalte (eine Spalte)",
+			"px": "16 px",
+			"token": "--z-ds-space-m",
+			"art": "gap",
+			"selector": ".zon-teaser--standard",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Spitzmarke ↔ Überschrift",
+			"px": "4 px",
+			"token": "--z-ds-space-xxxs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Überschrift ↔ Zusammenfassung",
+			"px": "8 px",
+			"token": "--z-ds-space-xs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Zusammenfassung ↔ Byline",
+			"px": "4 px",
+			"token": "--z-ds-space-xxxs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Byline-Gap (Autor · Zeitstempel)",
+			"px": "12 px",
+			"token": "--z-ds-space-s",
+			"art": "gap",
+			"selector": ".zon-teaser__byline",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Byline ↔ Aktionszeile",
+			"px": "8 px",
+			"token": "--z-ds-space-xs",
+			"art": "padding",
+			"richtung": "vertikal",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Innenabstand der Aktions-Buttons",
+			"px": "8 px",
+			"token": "--z-ds-space-xs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Abstand zum nächsten Teaser",
+			"px": "56 px",
+			"token": "--z-ds-space-teaser",
+			"herkunft": "gemessen"
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Teaser-Bild — 3:2 im Normalfall (zon-teaser__media--desktop-super); in zwei Spalten 430 px breit, in einer Spalte volle Teaser-Breite."
+		},
+		{
+			"nr": 2,
+			"text": "Spitzmarke (Kicker) — Ressort oder Thema in Akzentrot, Tablet Gothic 14. Bei Verlagsangeboten färbt zon-teaser__kicker--ad sie auf Text-55 um."
+		},
+		{
+			"nr": 3,
+			"text": "Artikel-Überschrift — Tablet Gothic Bold 22/1.2 in zwei Spalten, 20/1.2 in einer Spalte. Sie ist das einzige Element, das ein Breakpoint umschaltet."
+		},
+		{
+			"nr": 4,
+			"text": "Zusammenfassung — Fließtext in Text-70, 16/1.5. Die Textspalte ist auf 740 px begrenzt (Figma-Variable »Text Max Width«)."
+		},
+		{
+			"nr": 5,
+			"text": "Metadaten — Autor und Zeitstempel in Text-55, 14/1.5.",
+			"art": "text",
+			"optionalDurch": "author / datetime"
+		},
+		{
+			"nr": 6,
+			"text": "Aktionszeile — Vorlesen, Kommentare, Merken. Sitzt per margin-top:auto immer am unteren Rand der Textspalte.",
+			"art": "container",
+			"optionalDurch": "actions"
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe",
+			"items": [
+				{
+					"name": "--z-ds-color-accent-100",
+					"hinweis": "Spitzmarke",
+					"swatch": "#b91109"
+				},
+				{
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Überschrift",
+					"swatch": "#252525"
+				},
+				{
+					"name": "--z-ds-color-text-70",
+					"hinweis": "Zusammenfassung",
+					"swatch": "#444444"
+				},
+				{
+					"name": "--z-ds-color-text-55",
+					"hinweis": "Byline · Aktionszeile · Überschrift im Hover · Anzeigen-Spitzmarke",
+					"swatch": "#69696c"
+				},
+				{
+					"name": "--z-ds-color-background-0",
+					"hinweis": "Seitenfläche hinter dem Teaser (der Teaser selbst hat keinen eigenen Hintergrund)",
+					"swatch": "#ffffff"
+				},
+				{
+					"name": "--z-ds-color-background-10",
+					"hinweis": "Bild-Platzhalter (nur Doku)",
+					"swatch": "#eeeeee"
+				},
+				{
+					"name": "--z-ds-color-focus-100",
+					"hinweis": "Fokusring des Titel-Links (2 px)",
+					"swatch": "#005fcc"
+				},
+				{
+					"name": "--z-ds-color-general-white-100",
+					"hinweis": "Überschrift · Spitzmarke · Zusammenfassung auf dunkler Fläche (--light-Modifier)",
+					"swatch": "#ffffff"
+				},
+				{
+					"name": "--z-ds-color-general-white-80",
+					"hinweis": "Überschrift im Hover auf dunkler Fläche",
+					"swatch": "#ffffffcc",
+					"translucent": true
+				},
+				{
+					"name": "--z-ds-color-general-white-60",
+					"hinweis": "Byline · Aktionszeile auf dunkler Fläche",
+					"swatch": "#ffffff99",
+					"translucent": true
+				}
+			]
+		},
+		{
+			"kategorie": "Typografie",
+			"items": [
+				{
+					"name": "--z-ds-fontsize-22",
+					"hinweis": "Überschrift, zwei Spalten"
+				},
+				{
+					"name": "--z-ds-fontsize-20",
+					"hinweis": "Überschrift, eine Spalte"
+				},
+				{
+					"name": "--z-ds-fontsize-16",
+					"hinweis": "Zusammenfassung"
+				},
+				{
+					"name": "--z-ds-fontsize-14",
+					"hinweis": "Spitzmarke · Byline · Aktionszeile"
+				},
+				{
+					"name": "--z-ds-lineheight-12",
+					"hinweis": "Überschrift (1.2 → 26,4 px bzw. 24 px)"
+				},
+				{
+					"name": "--z-ds-lineheight-15",
+					"hinweis": "Zusammenfassung · Byline (1.5)"
+				}
+			]
+		},
+		{
+			"kategorie": "Spacing",
+			"items": [
+				{
+					"name": "--z-ds-space-xl",
+					"hinweis": "32px · Spaltenabstand Bild ↔ Text"
+				},
+				{
+					"name": "--z-ds-space-m",
+					"hinweis": "16px · Zeilenabstand, wenn der Teaser auf eine Spalte umbricht"
+				},
+				{
+					"name": "--z-ds-space-s",
+					"hinweis": "12px · Byline-Gap"
+				},
+				{
+					"name": "--z-ds-space-xs",
+					"hinweis": "8px · Überschrift↔Zusammenfassung, Aktionszeile, Button-Innenabstand"
+				},
+				{
+					"name": "--z-ds-space-xxs",
+					"hinweis": "6px · Byline-Zeilenabstand beim Umbruch"
+				},
+				{
+					"name": "--z-ds-space-xxxs",
+					"hinweis": "4px · Spitzmarke↔Überschrift, Zusammenfassung↔Byline, Icon↔Label"
+				},
+				{
+					"name": "--z-ds-space-4",
+					"hinweis": "4px · Z+-Logo ↔ Spitzmarken-Text"
+				},
+				{
+					"name": "--z-ds-space-teaser",
+					"hinweis": "56px · Abstand zum nächsten Inhaltselement"
+				}
+			]
+		}
+	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"hover",
+			"auf dunkler Fläche"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche",
+				"tokensProZustand": {
+					"default": "none",
+					"hover": "none",
+					"auf dunkler Fläche": "none"
+				},
+				"hinweis": "Der Teaser bringt bewusst keinen eigenen Hintergrund mit — er sitzt auf der Fläche der Seite bzw. des umgebenden Bereichs."
+			},
+			{
+				"teil": "Spitzmarke",
+				"tokensProZustand": {
+					"default": "--z-ds-color-accent-100",
+					"hover": "--z-ds-color-accent-100",
+					"auf dunkler Fläche": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Kein eigener Hover-Wert; bei Verlagsangeboten ersetzt zon-teaser__kicker--ad das Akzentrot durch Text-55."
+			},
+			{
+				"teil": "Überschrift",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-55",
+					"auf dunkler Fläche": "--z-ds-color-general-white-100"
+				},
+				"hinweis": "Der Farbwechsel läuft über 300 ms ease-out; auf dunkler Fläche geht er auf White-80."
+			},
+			{
+				"teil": "Zusammenfassung",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-70",
+					"hover": "--z-ds-color-text-70",
+					"auf dunkler Fläche": "--z-ds-color-general-white-100"
+				}
+			},
+			{
+				"teil": "Byline",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55",
+					"hover": "--z-ds-color-text-55",
+					"auf dunkler Fläche": "--z-ds-color-general-white-60"
+				}
+			},
+			{
+				"teil": "Aktionszeile",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55",
+					"hover": "--z-ds-color-text-55",
+					"auf dunkler Fläche": "--z-ds-color-general-white-60"
+				},
+				"hinweis": "Die einzelnen Buttons sind z-text-button-Instanzen und bringen ihren eigenen Hover mit."
+			}
+		]
+	},
+	"varianten": [
+		{
+			"prop": "Bildformat",
+			"werte": [
+				{
+					"label": "Super (3:2)",
+					"cssClass": "zon-teaser__media--desktop-super",
+					"default": true
+				},
+				{
+					"label": "Wide (16:9)",
+					"cssClass": "zon-teaser__media--desktop-wide"
+				},
+				{
+					"label": "Narrow (2:3)",
+					"cssClass": "zon-teaser__media--desktop-narrow"
+				}
+			]
+		}
+	],
+	"zustaende": [
+		{
+			"label": "default",
+			"vorhanden": true
+		},
+		{
+			"label": "hover",
+			"vorhanden": true
+		},
+		{
+			"label": "fokus",
+			"vorhanden": true
+		}
+	],
+	"a11y": [
+		{
+			"label": "Struktur",
+			"wert": "Ein <article> pro Teaser; die Überschrift steckt in einem <h3 class=\"zon-teaser__heading\">, nicht optisch gefälscht.",
+			"status": "pass"
+		},
+		{
+			"label": "Spitzmarke",
+			"wert": "Der Kicker ist eine redaktionelle Kategorie, keine Überschrift — Produktion setzt ihn als <span> in die Überschrift und schiebt ein <span class=\"visually-hidden\">: </span> dazwischen, damit Screenreader »Ressort: Titel« vorlesen.",
+			"status": "pass"
+		},
+		{
+			"label": "Ein Linkziel",
+			"wert": "Produktion legt einen zusätzlichen zon-teaser__faux-link (position:absolute, 100%×100%, opacity:0, z-index:2) mit tabindex=\"-1\" und aria-hidden=\"true\" über die Fläche: die Maus trifft überall, die Tastatur erreicht nur den sichtbaren Titel-Link.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": ".zon-teaser__link:focus-visible bekommt outline: 2px solid var(--z-ds-color-focus-100) (#005fcc) — sichtbar, nicht nur ein Farbwechsel.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Überschrift",
+			"wert": "#252525 auf #ffffff ≈ 15,3:1 · AAA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Zusammenfassung",
+			"wert": "#444444 auf #ffffff ≈ 9,7:1 · AAA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Byline & Aktionen",
+			"wert": "#69696c auf #ffffff ≈ 5,5:1 · AA (berechnet)",
+			"status": "pass"
+		},
+		{
+			"label": "Touch-Ziele",
+			"wert": "Figma dokumentiert im Beispiel-Frame »Touch Targets« 44 px hohe Ziele (Vorlesen 85×44, Kommentare 49×44, Merken 44×44). Produktion liefert 34 px (18 px Icon + 2 × 8 px Innenabstand) — gemessen auf zeit.de/index. WCAG 2.5.8 (24×24, AA) ist erfüllt, 2.5.5 (44×44, AAA) und die Figma-Vorgabe sind es nicht.",
+			"status": "warn"
+		},
+		{
+			"label": "Bild",
+			"wert": "Das Teaser-Bild trägt Bedeutung und braucht alt-Text. In der Doku steht hier eine neutrale Platzhalterfläche mit aria-hidden.",
+			"status": "warn"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Fokussiert den Titel-Link; der Fauxlink über der Fläche wird per tabindex=\"-1\" übersprungen."
+		},
+		{
+			"taste": "Enter",
+			"aktion": "Öffnet den Artikel."
+		},
+		{
+			"taste": "Tab (weiter)",
+			"aktion": "Läuft durch die Aktionszeile: Vorlesen · Kommentare · Merken."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Den Standard-Teaser als Default für Artikel-Listen und Ressort-Strecken nehmen — er ist das Format, für das der Rest der Startseite gebaut ist.",
+			"Dem Teaser Platz zum Reflowen lassen: unter rund 704 px Containerbreite klappt er von selbst auf eine Spalte.",
+			"Die Zusammenfassung auf zwei bis drei Zeilen halten; die Textspalte bricht bei 740 px um."
+		],
+		"dont": [
+			"Die Spaltenzahl nicht von Hand erzwingen — die Breite entscheidet, nicht eine Variante.",
+			"Den Standard-Teaser nicht als Aufmacher missbrauchen; dafür gibt es Hero.",
+			"Die Aktionszeile nicht weglassen, wenn Vorlesen oder Kommentare zum Artikel existieren — sie ist der einzige Einstieg in diese Funktionen aus der Liste heraus."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Für die Mehrheit der Artikel auf Startseite, Ressort- und Themenseiten.",
+			"Überall dort, wo Bild, Überschrift und Zusammenfassung zusammen gezeigt werden sollen.",
+			"In Bereichen, deren Breite variiert — der Teaser passt sich ohne Zutun an."
+		],
+		"nichtNutzen": [
+			"Nicht als erstes Element einer Startseite — das ist der Aufmacher (Hero).",
+			"Nicht in dichten Listen ohne Bild — dafür Cell.",
+			"Nicht als Navigationselement — der Teaser ist ein Inhalts-, kein Menüelement."
+		]
+	},
+	"verwandt": [
+		"hero",
+		"cell",
+		"carousel"
+	],
+	"wording": [
+		{
+			"schlecht": "Artikel-Überschrift",
+			"gut": "»Einmal hörte ich die Durchsage: ›Jetzt ärgern wir die reichen Säcke‹«",
+			"hinweis": "Die Überschrift ist die echte Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "HAMBURG",
+			"gut": "HafenCity in Hamburg",
+			"hinweis": "Die Spitzmarke ist Ressort oder Thema — kurz, in normaler Schreibung, nicht in Versalien."
+		}
+	],
+	"produktion": {
+		"referenzen": [
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": "article.zon-teaser--standard",
+				"beschreibung": "Der Standard-Teaser der Startseite. Der Selektor ist bewusst auf article eingeschränkt: dieselbe Klasse hängt dort auch an Widget-Wrappern (<div class=\"duv-wrapper zon-teaser zon-teaser--standard\">), die kein Teaser sind. Ohne seitenspezifische Zusatzklasse, damit gemessen wird, was das DS liefert.",
+				"pruefe": [
+					"breite"
+				]
+			}
+		]
+	},
+	"render": {
+		"controls": [
+			{
+				"key": "bildformat",
+				"label": "Bildformat",
+				"type": "select",
+				"default": "super",
+				"options": [
+					{
+						"value": "super",
+						"label": "Super (3:2)",
+						"cssClass": "zon-teaser__media--desktop-super"
+					},
+					{
+						"value": "wide",
+						"label": "Wide (16:9)",
+						"cssClass": "zon-teaser__media--desktop-wide"
+					},
+					{
+						"value": "narrow",
+						"label": "Narrow (2:3)",
+						"cssClass": "zon-teaser__media--desktop-narrow"
+					}
+				]
+			}
+		],
+		"template": "<article class=\"zon-teaser zon-teaser--standard\"{attrs}>\n  <figure class=\"zon-teaser__media{classes}\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <a class=\"zon-teaser__link\" href=\"#0\">\n      <h3 class=\"zon-teaser__heading\">\n        <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">HafenCity in Hamburg</span></span>\n        <span class=\"visually-hidden\">: </span>\n        <span class=\"zon-teaser__title\">»Einmal hörte ich die Durchsage: ›Jetzt ärgern wir die reichen Säcke‹«</span>\n      </h3>\n    </a>\n    <p class=\"zon-teaser__summary\">Sie wohnen in einem der spektakulärsten Luxushochhäuser Hamburgs: Elbblick, sechs Balkone, Dampfsauna. Aber Macken gibt es sogar hier.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Viola Diem, Hamburg</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n    <div class=\"zon-teaser__actions\">\n      <button type=\"button\" class=\"z-text-button\">Vorlesen</button>\n      <a class=\"z-text-button zon-teaser__commentcount\" href=\"#0\">323 Kommentare</a>\n      <button type=\"button\" class=\"z-text-button\">Merken</button>\n    </div>\n  </div>\n</article>",
+		"cssFile": "./pattern.css",
+		"align": "fill",
+		"resizable": true,
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "left",
+				"y": 45,
+				"selector": ".zon-teaser__media"
+			},
+			{
+				"nr": 2,
+				"side": "top",
+				"x": 70,
+				"selector": ".zon-teaser__kicker"
+			},
+			{
+				"nr": 3,
+				"side": "right",
+				"y": 30,
+				"selector": ".zon-teaser__title"
+			},
+			{
+				"nr": 4,
+				"side": "right",
+				"y": 58,
+				"selector": ".zon-teaser__summary"
+			},
+			{
+				"nr": 5,
+				"side": "right",
+				"y": 78,
+				"selector": ".zon-teaser__byline"
+			},
+			{
+				"nr": 6,
+				"side": "bottom",
+				"x": 70,
+				"selector": ".zon-teaser__actions"
+			}
+		],
+		"props": [
+			{
+				"name": "image",
+				"typ": "{ src, alt, ratio }",
+				"default": "ratio: \"super\"",
+				"erlaubteWerte": [
+					"super",
+					"wide",
+					"narrow"
+				],
+				"beschreibung": "Teaser-Bild samt Zuschnitt. Der Zuschnitt landet als zon-teaser__media--desktop-*-Klasse auf dem <figure>."
+			},
+			{
+				"name": "kicker",
+				"typ": "string",
+				"beschreibung": "Spitzmarke — Ressort oder Thema."
+			},
+			{
+				"name": "title",
+				"typ": "string",
+				"pflicht": true,
+				"beschreibung": "Artikel-Überschrift; trägt den einzigen tastaturerreichbaren Link."
+			},
+			{
+				"name": "href",
+				"typ": "string",
+				"pflicht": true,
+				"beschreibung": "Artikel-URL. Wird zusätzlich auf den aria-hidden-Fauxlink über der Fläche gelegt."
+			},
+			{
+				"name": "summary",
+				"typ": "string",
+				"beschreibung": "Zusammenfassung des Artikels."
+			},
+			{
+				"name": "author",
+				"typ": "string",
+				"beschreibung": "Autor:in in der Byline."
+			},
+			{
+				"name": "datetime",
+				"typ": "string",
+				"beschreibung": "Zeitstempel in der Byline."
+			},
+			{
+				"name": "actions",
+				"typ": "Action[]",
+				"beschreibung": "Aktionszeile (Vorlesen, Kommentare, Merken); leer lassen blendet die Zeile aus."
+			},
+			{
+				"name": "isAd",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Kennzeichnet ein Verlagsangebot — setzt zon-teaser__kicker--ad und färbt die Spitzmarke auf Text-55."
+			}
+		],
+		"codeNote": "Teaser-Styles global einbinden. Die Größe (Small/Wide) ist KEINE Klasse: das Raster reflowt über repeat(auto-fit, minmax(…)) von allein, sobald der Container unter rund 704 px fällt. Nur die Schriftgröße der Überschrift (22 ↔ 20) hängt an einem Breakpoint.",
+		"repoNote": "Erst-Import: Struktur, Varianten-Achsen und Maße aus Figma (❖ ZDS, Component-Set 216:49, 24 gebaute Varianten), Klassennamen, CSS und alle Zahlen live von https://www.zeit.de/index abgenommen und per getComputedStyle nachgemessen (2026-07-21, 1280×900 und 375×900). Das Bild ist hier eine neutrale Platzhalterfläche; in Produktion steckt dort ein <picture> mit srcset. Die Aktions-Buttons sind Textplatzhalter statt Icons — Maße und Zustände stehen in der Doku zu text-button. Redaktionelle Beispieltexte vor Freigabe prüfen.",
+		"version": "Figma-Node 216:49 · zeit.de/index 2026-07-21",
+		"variantInfo": {
+			"Super (3:2)": "Der Normalfall — jeder Standard-Teaser auf zeit.de/index nutzt diesen Zuschnitt.",
+			"Wide (16:9)": "Breiter Zuschnitt für Motive, die Panorama brauchen; derselbe Zuschnitt wie beim Aufmacher.",
+			"Narrow (2:3)": "Hochformat für Porträts. Figma nennt die Idee »Portrait« und zeichnet sie 1:1 — Produktion liefert 2:3."
+		}
+	}
+}

@@ -29,12 +29,13 @@ const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
 	'button-group': { order: 4 },
 	'icon-button': { order: 5 },
 	cell: { order: 6 },
-	hero: { order: 7 },
-	input: { order: 8 },
-	checkbox: { order: 9 },
-	toggle: { order: 10 },
-	stepper: { order: 11 },
-	carousel: { order: 12 }
+	'standard-teaser': { order: 7 },
+	hero: { order: 8 },
+	input: { order: 9 },
+	checkbox: { order: 10 },
+	toggle: { order: 11 },
+	stepper: { order: 12 },
+	carousel: { order: 13 }
 };
 
 /**

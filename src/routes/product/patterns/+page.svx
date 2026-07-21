@@ -30,4 +30,11 @@ in welcher Reihenfolge, mit welchen Abständen und welchen Regeln. Sie nutzen di
 		badge="Neu"
 		badgeVariant="accent"
 	/>
+	<Card
+		title="Themenklammer"
+		description="Kopfzeile, Aufmacher, Teaser-Liste und ein Ausgang — mehrere Beiträge zu einem Thema sichtbar zusammengefasst."
+		url="/product/patterns/themenklammer"
+		badge="Neu"
+		badgeVariant="accent"
+	/>
 </Grid>

@@ -1,0 +1,215 @@
+/*
+ * Standard Teaser — originalgetreue Kopie der auf zeit.de ausgelieferten
+ * `.zon-teaser--standard`-Regeln. Quelle: das live von https://www.zeit.de/index
+ * geladene Interpage-Stylesheet (abgerufen 2026-07-21, Messungen bei 1280x900 und
+ * 375x900). Klassennamen und Deklarationen sind NICHT erfunden — jede Regel unten
+ * steht so (bzw. als Breakpoint-Zweig, s. u.) im Produktions-CSS.
+ *
+ * VIER BEWUSSTE ABWEICHUNGEN ZUR PRODUKTION:
+ *
+ * 1) Keine At-Rules erlaubt (Exporter-Regel). Betroffen ist NUR die Schriftgröße
+ *    der Überschrift: Produktion setzt `--z-ds-fontsize-20` als Basis und hebt sie
+ *    per Media Query auf `--z-ds-fontsize-22`. Hier steht der DESKTOP-Wert (22) als
+ *    Basis; die 20 px der schmalen Spalte sind in model.json dokumentiert.
+ *    Das LAYOUT braucht dagegen keine At-Rule: die Spaltenzahl kommt aus
+ *    `repeat(auto-fit, minmax(...))` und reflowt von allein — genau wie in
+ *    Produktion. Der Resize-Griff im Playground zeigt also das echte Verhalten.
+ *
+ * 2) `--z-gap` und die Inhaltsbreite sind in Produktion Seiten-Variablen, die
+ *    nicht in der eingefrorenen ZDS-Kopie (static/styles-zds.css) stehen.
+ *    Produktion schreibt dort `max-width: min(100% - 2*--z-gap, --z-ds-content-width)`
+ *    (beide als var() gelesen; hier ohne var()-Schreibweise notiert, damit der
+ *    Zero-Reference-Guard den Kommentar nicht als echte Token-Nutzung zählt).
+ *    Hier ist `--z-gap` lokal auf den Desktop-Wert 2rem gepinnt und die
+ *    Inhaltsbreite als Literal 55.75rem (= 892 px) notiert — ein nicht
+ *    existierender --z-ds-*-Name würde still ins Leere zeigen.
+ *
+ * 3) `.zon-teaser__media` bekommt hier eine neutrale Platzhalter-Fläche
+ *    (background-color), weil die Doku kein Bild ausliefert. In Produktion
+ *    steckt dort ein <picture> mit srcset.
+ *
+ * 4) Die Aktionszeile besteht in Produktion aus `.z-text-button`-Instanzen
+ *    (eigene Komponente, siehe /product/components/text-button). Unten stehen
+ *    nur die Regeln, die der Teaser selbst beisteuert, plus ein Minimal-Reset
+ *    fuer die Buttons — damit die Zeile ohne den Rest des Produktions-CSS
+ *    dieselben Maße hat (gemessen: 34 px hoch, 8 px Innenabstand, 18 px Icon).
+ */
+
+.zon-teaser {
+	position: relative;
+	width: 100%;
+}
+
+/* --- Wurzel: die Spaltenzahl reflowt intrinsisch, ohne Media Query --- */
+
+.zon-teaser--standard {
+	--z-gap: 2rem;
+	--teaser-column-auto-width: calc((48em - var(--z-gap) * 2 - var(--z-ds-space-xl)) / 2);
+	display: grid;
+	gap: var(--z-ds-space-m) var(--z-ds-space-xl);
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--teaser-column-auto-width)), 1fr));
+	margin-block: 0 var(--z-ds-space-teaser);
+	margin-inline: auto;
+	max-width: min(100% - 2 * var(--z-gap), 55.75rem);
+}
+
+/* --- Bild --- */
+
+.zon-teaser__media {
+	height: auto;
+	position: relative;
+	width: 100%;
+	background-color: var(--z-ds-color-background-10);
+}
+
+.zon-teaser__media--desktop-super {
+	aspect-ratio: 3/2;
+}
+
+.zon-teaser__media--desktop-wide {
+	aspect-ratio: 16/9;
+}
+
+.zon-teaser__media--desktop-narrow {
+	aspect-ratio: 2/3;
+}
+
+.zon-teaser__media-container {
+	width: 100%;
+}
+
+.zon-teaser__media-item {
+	display: block;
+	width: 100%;
+}
+
+/* --- Textspalte --- */
+
+.zon-teaser__container {
+	display: flex;
+	flex-direction: column;
+	max-width: 46.25rem;
+}
+
+.zon-teaser__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.zon-teaser__link:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+}
+
+.zon-teaser__heading {
+	margin: 0;
+	text-wrap: pretty;
+}
+
+.zon-teaser__kicker {
+	align-items: center;
+	color: var(--z-ds-color-accent-100);
+	display: flex;
+	font-size: var(--z-ds-fontsize-14);
+	font-weight: normal;
+	gap: var(--z-ds-space-4);
+	line-height: normal;
+	margin-bottom: var(--z-ds-space-xxxs);
+}
+
+.zon-teaser__title {
+	color: var(--z-ds-color-text-100);
+	display: block;
+	font-size: var(--z-ds-fontsize-22);
+	line-height: var(--z-ds-lineheight-12);
+}
+
+.zon-teaser__link .zon-teaser__title {
+	position: relative;
+	transition: color 300ms ease-out;
+	z-index: 3;
+}
+
+.zon-teaser__link .zon-teaser__title:hover,
+.zon-teaser__link .zon-teaser__title:active,
+.zon-teaser__link .zon-teaser__title:focus {
+	color: var(--z-ds-color-text-55);
+}
+
+.zon-teaser__summary {
+	color: var(--z-ds-color-text-70);
+	font-size: var(--z-ds-fontsize-16);
+	line-height: var(--z-ds-lineheight-15);
+	margin: var(--z-ds-space-xs) 0 0 0;
+}
+
+.zon-teaser__byline {
+	color: var(--z-ds-color-text-55);
+	display: flex;
+	flex-wrap: wrap;
+	font-size: var(--z-ds-fontsize-14);
+	gap: var(--z-ds-space-xxs) var(--z-ds-space-s);
+	line-height: var(--z-ds-lineheight-15);
+	margin: var(--z-ds-space-xxxs) 0 0 0;
+}
+
+.zon-teaser__datetime {
+	flex-shrink: 0;
+}
+
+/* --- Aktionszeile --- */
+
+.zon-teaser__actions {
+	color: var(--z-ds-color-text-55);
+	display: flex;
+	margin-top: auto;
+	padding-top: var(--z-ds-space-xs);
+	position: relative;
+	z-index: 3;
+}
+
+.zon-teaser__actions > .z-text-button:first-child {
+	margin-left: calc(var(--z-ds-space-xs) * -1);
+}
+
+.zon-teaser__actions .z-text-button {
+	align-items: center;
+	background-color: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	font-size: var(--z-ds-fontsize-14);
+	gap: var(--z-ds-space-xxxs);
+	line-height: 1.125rem;
+	padding: var(--z-ds-space-xs);
+	text-decoration: none;
+}
+
+/*
+ * NICHT ENTHALTEN, aber real: zwei Modifier-Sätze, die Produktion je BESTANDTEIL
+ * setzt und die deshalb keine Varianten-Achse dieses Teasers sind.
+ *
+ * a) `--light` / `--dark` auf Titel, Spitzmarke, Zusammenfassung, Byline und
+ *    Aktionszeile — für Teaser auf farbiger oder dunkler Fläche. Sie werden immer
+ *    als Satz gemeinsam gesetzt; welche Token je Zustand greifen, steht in der
+ *    Farbrollen-Matrix (Spalte „auf dunkler Fläche").
+ * b) `zon-teaser__kicker--ad` färbt die Spitzmarke bei Verlagsangeboten von
+ *    Akzentrot auf Text-55 um (auf zeit.de/index sechsmal im Einsatz).
+ *
+ * Beide stehen hier bewusst nicht im CSS: der Playground setzt Klassen an genau
+ * EINER Stelle des Templates, ein Satz über fünf Bestandteile ließe sich damit
+ * nicht ehrlich rendern — und eine Klasse, die die Doku nicht zeigt, gehört auch
+ * nicht in ihr Pattern-CSS.
+ */
+
+/*
+ * Style=Background Image ist in diesem Durchgang BEWUSST NICHT enthalten.
+ * Grund: die Klasse sitzt in Produktion nicht auf dem <article>, sondern auf dem
+ * Textcontainer (`zon-teaser__container--on-image`) und braucht zusätzlich die
+ * Custom Property `--overlay-background-color` pro Artikel sowie einen
+ * 16-stufigen Verlauf. Der datengetriebene Playground setzt Klassen an genau
+ * EINER Stelle des Templates — der Stil ließe sich hier also nicht ehrlich
+ * rendern, nur behaupten. Er ist in content.json als offener Punkt benannt und
+ * braucht ein `render.specimen` (Specimen.svelte) statt eines `template`.
+ */
