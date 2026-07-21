@@ -39,8 +39,20 @@ npx vitest run   # Component-/Daten-Tests
 > überbrücken; `.env` **nie** committen. Basic-Auth blockiert Browser-Preview →
 > Absicherung über Tests + Gate; visuelle Abnahme macht der Mensch.
 >
-> **Gate vor „fertig":** `npm run check` 0/0 · `build` EXIT 0 · `vitest` grün.
-> Die Drift-Checks (`tooling/check-*.mjs`) sind **warn/exit 0** (`--strict` für CI).
+> **Gate vor „fertig":** `npm run check` 0/0 · `lint` 0 Fehler · `build` EXIT 0 ·
+> `vitest` grün.
+>
+> Die Drift-Checks (`tooling/check-*.mjs`) laufen **scharf**: 7 von 8 mit
+> `--strict`, d. h. ein Befund bricht `npm run check` mit Exit 1 ab — nav, tokens,
+> assets, component-drift, content, zds-sync, token-refs. **Ausnahme:**
+> `check-doc-coverage` bleibt Warn-Modus, solange es Lücken meldet (aktuell 1:
+> `cell` hat nur 1 dokumentierten Zustand). Lücke füllen → dort `--strict`
+> ergänzen. Neue Checks starten im Warn-Modus und werden scharf geschaltet,
+> sobald ihr Befund 0 ist.
+>
+> `npm run lint` läuft mit `--max-warnings 27` (Ratsche gegen Warnungs-Wildwuchs):
+> Fehler sind immer 0, und die Warnungszahl darf nur sinken. Wer Warnungen abbaut,
+> senkt die Zahl in `package.json` mit.
 
 ## Dateistruktur (aktuell)
 

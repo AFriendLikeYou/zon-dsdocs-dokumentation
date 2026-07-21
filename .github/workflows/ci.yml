@@ -1,9 +1,17 @@
 # CI-Gate — spiegelt das lokale „Gate vor fertig" (CLAUDE.md):
-#   npm run check (svelte-check hart + Drift-Checks warn) · lint · vitest · build
+#   npm run check (svelte-check + Drift-Checks) · lint · vitest · build
 #
-# Die Drift-Checks laufen hier wie lokal im Warn-Modus (Exit 0) — sie erscheinen
-# im Log, blockieren aber nicht. Aufrüst-Pfad: einzelne Checks auf --strict heben,
-# sobald ihr Befund auf 0 ist (check-doc-coverage meldet aktuell bewusst 4 Lücken).
+# Drift-Checks: 7 von 8 laufen mit `--strict` und blockieren bei Befund (nav,
+# tokens, assets, component-drift, content, zds-sync, token-refs). Einzige
+# Ausnahme ist check-doc-coverage — es meldet aktuell 1 bewusste Lücke
+# (`cell`: nur 1 Zustand dokumentiert) und bleibt daher im Warn-Modus.
+# Aufrüst-Pfad: sobald die Lücke gefüllt ist, auch dort `--strict` ergänzen.
+#
+# `npm run lint` läuft mit `--max-warnings 27` als Ratsche: 0 Fehler, und die
+# Warnungszahl darf nicht über den Status quo wachsen. Die 27 verbleibenden
+# Warnungen sind fast alle `custom_element_props_identifier` aus den Icon-/
+# Row-Komponenten (`{...rest}`-Spread) — irrelevant, weil hier nichts als
+# Custom Element kompiliert wird. Wer sie abbaut, zieht die Zahl mit nach unten.
 name: CI
 
 on:

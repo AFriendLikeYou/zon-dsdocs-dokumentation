@@ -612,7 +612,8 @@
 					</div>
 				{/snippet}
 
-				<!-- svelte-ignore a11y_no_noninteractive_element_interactions — focusin ist passives Tracking für Shortcuts -->
+				<!-- onfocusin ist passives Tracking für Shortcuts, keine Interaktion —
+				     der Compiler warnt dafür nicht (mehr), daher kein svelte-ignore. -->
 				<!-- use:blockDnd bündelt die native Drag-Mechanik (Reorder bleibt hier);
 				     die Drop-Linie rendert der Host über die class:-Bindungen unten. -->
 				<ol

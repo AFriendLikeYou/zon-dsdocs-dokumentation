@@ -205,7 +205,9 @@
 		<form class="new-panel" onsubmit={createPage}>
 			<label class="np-field">
 				<span class="np-lbl">Titel</span>
-				<!-- svelte-ignore a11y_autofocus — bewusst: Panel öffnet auf Klick, Fokus gehört ins Feld -->
+				<!-- autofocus ist bewusst: Panel öffnet auf Klick, der Fokus gehört ins Feld.
+				     (Kein svelte-ignore nötig — der Compiler warnt hier nicht, weil `autofocus`
+				     als Prop an <Field> geht und nicht direkt am Element steht.) -->
 				<Field bind:value={newTitle} placeholder="Seitentitel eingeben …" autofocus />
 			</label>
 			<label class="np-field">

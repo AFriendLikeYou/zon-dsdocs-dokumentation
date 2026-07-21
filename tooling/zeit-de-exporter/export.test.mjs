@@ -88,7 +88,6 @@ describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
 		for (const file of ['+page.svx', 'spec.generated.ts']) {
 			const got = readFileSync(path.join(outDir, file));
 			const want = readFileSync(path.join(srcDir, file));
-			// eslint-disable-next-line no-unused-expressions
 			expect(got.equals(want), `${slug}/${file} weicht vom committeten Stand ab (Drift)`).toBe(
 				true
 			);

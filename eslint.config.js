@@ -53,7 +53,14 @@ export default ts.config(
 		},
 		rules: {
 			'svelte/no-at-html-tags': 'off',
-			'svelte/valid-compile': 'warn'
+			'svelte/valid-compile': 'warn',
+			// `no-undef` ist in TS-Projekten grundsätzlich aus (typescript-eslint empfiehlt
+			// das, weil TS selbst die Autorität für Bindungen ist) — in `.svelte` ist es
+			// zusätzlich schlicht falsch: die ESLint-Scope-Analyse kennt das
+			// `<script generics="Row extends …">`-Attribut nicht und meldet jeden
+			// Typparameter als „not defined" (Table.svelte `Row`, Select.svelte `T`).
+			// Abgedeckt wird das von `npm run check` (svelte-check, 0/0).
+			'no-undef': 'off'
 		}
 	}
 );
