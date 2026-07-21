@@ -11,7 +11,7 @@ export const generated = {
 	"dokumentiertAm": "2026-07-02",
 	"masse": {
 		"hoehe": {
-			"px": "18",
+			"px": "34",
 			"herkunft": "gemessen"
 		},
 		"padding": {

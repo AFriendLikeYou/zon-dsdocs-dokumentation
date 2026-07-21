@@ -14,6 +14,44 @@ braucht ein `model.json`).
 
 ---
 
+## ⚠️ Mit den Devs abklären: Das ZON-Frontend liefert fast nichts aus dem ZDS aus
+
+**Befund (2026-07-21, aus `tooling/check-prod-drift.mjs`).** Eine Inventur aller
+`z-*`-Klassen über **20 öffentliche Seiten** (Startseite, Politik/Kultur/Wirtschaft/
+ZEIT-Magazin/Campus/Video/Spiele, Suche, Newsletter, 3 Artikel, Liveblog, shop./meine./
+abo./premium.zeit.de — Desktop 1280 **und** Mobil 375) ergab: Aus dem Design-System
+kommen im Web nur **vier** Klassenfamilien an —
+
+`z-button` · `z-text-button` · `z-audio-button` · `z-accordion`
+(dazu `z-box`, `z-topic`, `z-notification-live-region`)
+
+**Teaser und Formulare rendert das Frontend mit eigenen Klassen** (`zon-teaser__*`,
+`newsletter-signup__*`), nicht mit den dokumentierten `z-cell`/`z-input`/`z-checkbox`/
+`z-toggle`/`z-stepper`/`z-carousel`/`z-page-shortcut`.
+
+**Konsequenz:** 9 der 11 dokumentierten Komponenten sind gegen die Produktion **nicht
+prüfbar** — nicht weil Referenzen fehlen, sondern weil sie im Web gar nicht ausgeliefert
+werden. Sie leben offenbar in Figma und/oder in den Apps.
+
+**Zu klären:**
+
+1. Ist das so gewollt (ZDS = Figma-/App-Wahrheit, Web hat eigene Implementierung) oder
+   ist das Frontend hinter dem DS zurück?
+2. Wenn gewollt: Was dokumentieren wir dann — die Figma-Wahrheit, die Web-Wahrheit oder
+   beide getrennt? Heute suggeriert die Doku eine Web-Implementierung, die es nicht gibt.
+3. Gibt es einen Migrationsplan `zon-teaser__*` → `z-cell`? Falls ja, gehört er in die Doku.
+4. Falls nein: sollten die `zon-*`-Klassen als eigene Ebene dokumentiert werden (dann wäre
+   der Prod-Drift-Check für sie nutzbar)?
+
+**Warum das zählt:** Ohne Antwort dokumentieren wir möglicherweise ein System, das im
+größten Consumer nicht verwendet wird — und `zds add <slug>` liefert Entwickler:innen CSS,
+das neben dem echten Frontend steht statt darin.
+
+Beleg: `node tooling/check-prod-drift.mjs` (Kategorie C), Details im Commit
+„Prod-Drift: text-button-Referenz ergänzt …".
+
+---
+
 ## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
 
 Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.
