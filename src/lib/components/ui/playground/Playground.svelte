@@ -38,12 +38,10 @@
   Snippets (collapsible). Text-Zoom (Aa, 100→200 %) sitzt dezent unten rechts
   auf der Bühne — WCAG-2.2-Reflow-Check direkt am Specimen.
 
-  Der Code-Block liegt hinter einem Umschalter in der Steuerungszeile und startet
-  EINGEKLAPPT — die Bühne ist der Hauptinhalt, der Code das Angebot. Bewusst ein
-  Klick-/Tastatur-Toggle (aria-expanded + aria-controls), KEIN Hover-Reveal: das
-  wäre auf Touch nicht bedienbar. Der Zustand hält je Sitzung (sessionStorage,
-  Muster MachineZone.persistKey) und gilt seiten-übergreifend — wer den Code
-  einmal aufgeklappt hat, will ihn auch beim nächsten Pattern sehen.
+  Der Code steht sichtbar unter der Steuerung — lange Snippets kappt der CodeBlock
+  selbst auf vier Zeilen mit „Code aufklappen". Bewusst KEIN äußerer
+  Alles-oder-nichts-Umschalter: dass es überhaupt Code gibt, muss man sehen; der
+  Anriss ist die Einladung, ihn zu öffnen.
 -->
 <script lang="ts" module>
 	export type PlaygroundOption = { value: string; label: string; cssClass?: string };
@@ -95,14 +93,14 @@
 </script>
 
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { Button } from '$components/ui/button';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { Switch } from '$components/ui/switch';
 	import { ResizeHandle } from '$components/ui/resize-handle';
-	import { ResetIcon, ChevronIcon } from '$lib/icons';
+	import { ResetIcon } from '$lib/icons';
 
 	type Props = {
 		controls?: PlaygroundControl[];
@@ -121,8 +119,6 @@
 		align?: 'center' | 'fill';
 		/** Drag-Handle + px-Anzeige für breitenabhängige Patterns (impliziert fill-Optik). */
 		resizable?: boolean;
-		/** sessionStorage-Schlüssel für „Code offen/zu"; Default: ein Schlüssel für alle Playgrounds. */
-		codePersistKey?: string;
 		class?: string;
 	};
 	let {
@@ -135,7 +131,6 @@
 		code,
 		align = 'center',
 		resizable = false,
-		codePersistKey = 'playground:code',
 		class: className = ''
 	}: Props = $props();
 
@@ -264,32 +259,6 @@
 		viewport = 'frei';
 	}
 
-	// Code-Umschalter: startet zu und bleibt beim SSR deterministisch zu; erst nach
-	// dem Mount wird der Sitzungs-Zustand nachgezogen. `animated` gibt die Motion
-	// erst danach frei — sonst klappt der wiederhergestellte Code beim Laden auf
-	// (derselbe Fallstrick wie in MachineZone).
-	let codeOpen = $state(false);
-	let animated = $state(false);
-	const codeId = `playground-code-${Math.random().toString(36).slice(2, 8)}`;
-
-	onMount(() => {
-		try {
-			const saved = sessionStorage.getItem(codePersistKey);
-			if (saved === '1' || saved === '0') codeOpen = saved === '1';
-		} catch {
-			/* sessionStorage nicht verfügbar → eingeklappter Default bleibt */
-		}
-		requestAnimationFrame(() => (animated = true));
-	});
-
-	function toggleCode() {
-		codeOpen = !codeOpen;
-		try {
-			sessionStorage.setItem(codePersistKey, codeOpen ? '1' : '0');
-		} catch {
-			/* ignorieren — Persistenz ist nice-to-have */
-		}
-	}
 </script>
 
 <div class="playground {className}">
@@ -356,9 +325,8 @@
 	</div>
 
 	<!-- EINE Steuerungszeile für alles unterhalb der Bühne: Controls (oder Hinweis)
-	     links, Aktionen (Zurücksetzen, Code-Umschalter) rechts. Sie rendert auch
-	     ohne Controls, weil der Code-Umschalter immer eine Heimat braucht — das
-	     spart gegenüber einer zweiten Leiste eine ganze Zeile. -->
+	     links, Aktionen (Zurücksetzen) rechts — das spart gegenüber einer zweiten
+	     Leiste eine ganze Zeile. -->
 	<div class="playground__controls">
 		{#if hint}
 			<span class="playground__hint">{hint}</span>
@@ -416,36 +384,14 @@
 					Zurücksetzen
 				</Button>
 			{/if}
-			<Button
-				variant="quiet"
-				size="sm"
-				class="playground__code-toggle"
-				onclick={toggleCode}
-				aria-expanded={codeOpen}
-				aria-controls={codeId}
-			>
-				{#snippet iconLeft()}
-					<ChevronIcon
-						width={10}
-						height={10}
-						stroke-width="2.5"
-						class="playground__code-chevron {codeOpen ? 'is-open' : ''}"
-					/>
-				{/snippet}
-				{codeOpen ? 'Code ausblenden' : 'Code'}
-			</Button>
 		</span>
 	</div>
 
-	<!-- Auf-/Zuklappen über grid-template-rows (keine Höhenmessung). Das Grid-Item
-	     (__code-clip) trägt weder Padding noch Rahmen — beides würde seine
-	     min-content-Höhe anheben und die 0fr-Einklappung undicht machen. Die
-	     Trennlinie zur Steuerung liefert der Rahmen des CodeBlock selbst. -->
-	<div class="playground__code" class:is-open={codeOpen} class:is-animated={animated}>
-		<div id={codeId} class="playground__code-clip" inert={!codeOpen}>
-			<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
-		</div>
-	</div>
+	<!-- Der Code steht sichtbar unter der Steuerung; lange Snippets kappt der
+	     CodeBlock selbst auf vier Zeilen mit „Code aufklappen" (collapsible).
+	     Bewusst KEIN äußerer Alles-oder-nichts-Umschalter: dass es überhaupt Code
+	     gibt, muss man sehen — der Anriss ist die Einladung, ihn zu öffnen. -->
+	<CodeBlock code={codeStr} {lang} {flashKey} {flashLines} collapsible />
 </div>
 
 <style>
@@ -585,8 +531,8 @@
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
 	}
-	/* Aktionen (Zurücksetzen, Code-Umschalter) — rechtsbündig, Optik aus dem
-	   Button-Atom (variant="quiet", size="sm"). */
+	/* Aktionen (Zurücksetzen) — rechtsbündig, Optik aus dem Button-Atom
+	   (variant="quiet", size="sm"). */
 	.playground__actions {
 		display: inline-flex;
 		align-items: center;
@@ -598,32 +544,8 @@
 		transform: rotate(0deg);
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}
-	.playground__actions :global(.playground__code-chevron.is-open) {
-		transform: rotate(180deg);
-	}
-
-	/* Code-Region: grid-template-rows 0fr → 1fr (Emil-Motion, ease-out, kurz).
-	   Animation erst nach dem Restore (is-animated), sonst klappt der aus der
-	   Sitzung wiederhergestellte Code beim Laden sichtbar auf. */
-	.playground__code {
-		display: grid;
-		grid-template-rows: 0fr;
-		transition: none;
-	}
-	.playground__code.is-animated {
-		transition: grid-template-rows var(--ds-dur-slow) var(--ds-ease-out);
-	}
-	.playground__code.is-open {
-		grid-template-rows: 1fr;
-	}
-	.playground__code-clip {
-		overflow: hidden;
-		min-height: 0;
-	}
 	@media (prefers-reduced-motion: reduce) {
-		.playground__stage,
-		.playground__code,
-		.playground__actions :global(.playground__code-chevron) {
+		.playground__stage {
 			transition: none;
 		}
 	}

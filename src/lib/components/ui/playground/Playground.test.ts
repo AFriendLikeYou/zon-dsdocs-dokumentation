@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import { createRawSnippet, tick } from 'svelte';
+import { createRawSnippet } from 'svelte';
 import Playground, { instantiate } from './Playground.svelte';
 import type { PlaygroundControl, PlaygroundState } from './Playground.svelte';
 
@@ -105,52 +105,23 @@ describe('Playground — Template-Modus (Registry)', () => {
 	});
 });
 
-// ── Code-Umschalter (Klick/Tastatur, kein Hover-Reveal) ────────────────────
-describe('Playground — Code-Umschalter', () => {
-	beforeEach(() => sessionStorage.clear());
-
-	const codeToggle = () => screen.getByRole('button', { name: /^Code($| ausblenden)/ });
-
-	it('startet eingeklappt: aria-expanded=false, Code-Region inert', () => {
+// ── Code steht sichtbar (kein äußerer Umschalter) ──────────────────────────
+// Bewusste Umkehr des früheren Alles-oder-nichts-Toggles: dass es Code GIBT, muss
+// man sehen. Das Kappen langer Snippets leistet der CodeBlock selbst.
+describe('Playground — Code-Block', () => {
+	it('rendert den Code sichtbar, ohne äußeren Umschalter', () => {
 		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
 
-		expect(codeToggle()).toHaveAttribute('aria-expanded', 'false');
-		const region = container.querySelector('.playground__code')!;
-		expect(region.classList.contains('is-open')).toBe(false);
-		expect((container.querySelector('.playground__code-clip') as HTMLElement).inert).toBe(true);
+		expect(container.querySelector('.code-block')).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: /^Code($| ausblenden)/ })).toBeNull();
+		// Keine eingeklappte Hülle mehr, die den Code verstecken könnte.
+		expect(container.querySelector('.playground__code-clip')).toBeNull();
 	});
 
-	it('verknüpft Trigger und Region über aria-controls', () => {
+	it('zeigt den aktuellen Code-Stand direkt an', () => {
 		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
 
-		const id = codeToggle().getAttribute('aria-controls');
-		expect(id).toBeTruthy();
-		expect(container.querySelector(`#${id}`)).toHaveClass('playground__code-clip');
-	});
-
-	it('Klick öffnet, beschriftet um und merkt den Zustand in der Sitzung', async () => {
-		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
-
-		await fireEvent.click(codeToggle());
-
-		expect(codeToggle()).toHaveAttribute('aria-expanded', 'true');
-		expect(codeToggle()).toHaveTextContent('Code ausblenden');
-		expect(container.querySelector('.playground__code')).toHaveClass('is-open');
-		expect((container.querySelector('.playground__code-clip') as HTMLElement).inert).toBe(false);
-		expect(sessionStorage.getItem('playground:code')).toBe('1');
-
-		await fireEvent.click(codeToggle());
-		expect(codeToggle()).toHaveAttribute('aria-expanded', 'false');
-		expect(sessionStorage.getItem('playground:code')).toBe('0');
-	});
-
-	it('stellt den Sitzungs-Zustand beim nächsten Rendern wieder her', async () => {
-		sessionStorage.setItem('playground:code', '1');
-		const { container } = render(Playground, { props: { controls: tplControls, template: tpl } });
-
-		await tick();
-		expect(container.querySelector('.playground__code')).toHaveClass('is-open');
-		expect(codeToggle()).toHaveAttribute('aria-expanded', 'true');
+		expect(container.querySelector('.code-block__pre')?.textContent).toContain('z-button');
 	});
 });
 
