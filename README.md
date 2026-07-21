@@ -88,6 +88,12 @@ Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site li
 
 ## MCP-Endpoint (`/api/mcp`) — agent-ready
 
+> **Für Nutzer:innen** steht die Anleitung auf der Site selbst:
+> [`/product/agents`](src/routes/product/agents/+page.svx) („Agenten anbinden") — fertige
+> Client-Configs für Claude Code und generische MCP-Clients, Auth-Hinweis, Tool-Referenz mit
+> echten Beispiel-Antworten und die Querverweise auf Manifest, Registry/CLI und `llms.txt`.
+> Dieser Abschnitt bleibt die technische Kurzfassung fürs Repo.
+
 Die Doku-Site ist selbst ein **MCP-Server**: KI-Agenten können die Komponenten-Registry
 abfragen und mit dem ZEIT-Designsystem UIs bauen (Vorbild: Astryx). Umgesetzt als
 minimaler, handgerollter Handler (MCP Streamable HTTP, **stateless**, JSON-RPC 2.0) — kein
@@ -97,13 +103,20 @@ SDK, keine neue Abhängigkeit. Route: [`src/routes/api/mcp/+server.ts`](src/rout
 
 - rohem `pattern.css`, nur serverseitig).
 
-**Tools:**
+**Tools** (vier — `tools/list` ist die Wahrheit):
 
+- `list {}` — alle dokumentierten Komponenten kompakt (`slug · name · kategorie`); Einstieg
+  ohne Suchbegriff.
 - `search { query, limit? }` — sucht über Name, Slug, Zweck, Kategorie, Varianten- und
-  Token-Namen; liefert `{ slug, name, kategorie, zweck }` (Default-Limit 8).
+  Token-Namen; liefert `{ slug, name, kategorie, zweck }` (Default-Limit 8, geklemmt auf 1…50).
 - `get { slug, section? }` — Doku einer Komponente als Text. Ohne `section` eine kompakte
   Gesamtsicht; mit `section` gezielt `overview | markup | tokens | a11y | usage`. Antworten
   sind auf ~4.000 Zeichen budgetiert (bei Kappung Hinweis auf die `section`-Parameter).
+- `foundations { section? }` — Farb-Rollen, Spacing, Typografie bzw. alle Foundation-Tokens
+  (`farben | spacing | typografie | tokens`) mit aufgelösten Light- und Dark-Werten.
+
+Jedes Tool-Ergebnis trägt neben dem Text zusätzlich `structuredContent` (voller JSON-Vertrag
+laut `outputSchema`, ungekappt).
 
 **Auth:** Der Endpoint liegt wie alle Routen hinter Basic Auth (`hooks.server.ts`) —
 MCP-Clients senden den `Authorization: Basic …`-Header. Beispiel-Client-Config:

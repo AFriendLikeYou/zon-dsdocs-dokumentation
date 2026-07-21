@@ -94,6 +94,11 @@
 		"isCategory": true
 	},
 	{
+		"title": "Agenten anbinden",
+		"href": "/product/agents",
+		"isInFooter": true
+	},
+	{
 		"title": "Mitwirken",
 		"href": "/product/contribute",
 		"isInFooter": true

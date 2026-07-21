@@ -1,0 +1,300 @@
+---
+title: Agenten anbinden
+---
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+<script lang="ts">
+	// ── HANDKURATIERTE SEITE ───────────────────────────────────────────────────
+	// Der eine Ort für MASCHINEN-Zugriff auf diese Doku: MCP-Endpoint, Manifest,
+	// Registry/CLI, llms.txt. Bewusst von Hand geschrieben (kein Exporter — der
+	// bleibt einzelnen Komponenten vorbehalten).
+	//
+	// QUELLE DER WAHRHEIT für alles auf dieser Seite: src/routes/api/mcp/+server.ts
+	// (Transport) und src/lib/server/mcp.ts (Tools, Schemas, Budgets). Die Beispiel-
+	// Antworten unten sind ECHTE, nur gekürzte Ausgaben des laufenden Endpunkts —
+	// nichts davon ist nachgebaut. Ändert sich ein Tool, gehören sie nachgezogen.
+	import { CodeBlock } from '$components/ui/code-block';
+	import { Banner } from '$components/ui/banner';
+	import { Table } from '$components/ui/table';
+
+	const claudeCodeCli = `claude mcp add --transport http zeit-ds https://<deploy-host>/api/mcp \\
+  --header "Authorization: Basic <base64(user:passwort)>"`;
+
+	const mcpJson = `{
+  "mcpServers": {
+    "zeit-ds": {
+      "type": "http",
+      "url": "https://<deploy-host>/api/mcp",
+      "headers": {
+        "Authorization": "Basic <base64(user:passwort)>"
+      }
+    }
+  }
+}`;
+
+	const genericJson = `{
+  "mcpServers": {
+    "zeit-ds": {
+      "url": "https://<deploy-host>/api/mcp",
+      "headers": {
+        "Authorization": "Basic <base64(user:passwort)>"
+      }
+    }
+  }
+}`;
+
+	const basicAuthHeader = `# Header-Wert erzeugen (nicht ins Repo, nicht in ein Ticket):
+printf '%s' 'user:passwort' | base64`;
+
+	const toolColumns = [
+		{ key: 'tool', label: 'Tool' },
+		{ key: 'params', label: 'Parameter' },
+		{ key: 'liefert', label: 'Liefert' }
+	];
+
+	const toolRows = [
+		{
+			tool: 'list',
+			params: '—',
+			liefert:
+				'Alle dokumentierten Komponenten als „slug · name · kategorie“ je Zeile. Einstieg ohne Suchbegriff.'
+		},
+		{
+			tool: 'search',
+			params: 'query (Pflicht), limit (optional)',
+			liefert:
+				'Treffer als { slug, name, kategorie, zweck }. Sucht über Name, Slug, Zweck, Kategorie, Varianten- und Token-Namen.'
+		},
+		{
+			tool: 'get',
+			params: 'slug (Pflicht), section (optional)',
+			liefert:
+				'Doku einer Komponente als Text, dazu der volle Manifest-Eintrag { slug, spec, patternCss } als structuredContent.'
+		},
+		{
+			tool: 'foundations',
+			params: 'section (optional)',
+			liefert:
+				'Farb-Rollen, Spacing, Typografie und alle Foundation-Tokens mit aufgelösten Light- und Dark-Werten.'
+		}
+	];
+
+	const searchCall = `{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "search",
+    "arguments": { "query": "button", "limit": 3 }
+  }
+}`;
+
+	// Echte Antwort (gekürzt: „zweck“-Texte gestutzt, dritter Treffer entfällt).
+	const searchResponse = `{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "- button · Button (Aktionen): Löst eine Aktion aus. …\\n- button-group · Button Group (Aktionen): Segmentierte Auswahl …"
+      }
+    ],
+    "structuredContent": {
+      "hits": [
+        { "slug": "button", "name": "Button", "kategorie": "Aktionen", "zweck": "Löst eine Aktion aus. …" },
+        { "slug": "button-group", "name": "Button Group", "kategorie": "Aktionen", "zweck": "Segmentierte Auswahl …" }
+      ]
+    }
+  }
+}`;
+
+	const getCall = `{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": {
+    "name": "get",
+    "arguments": { "slug": "button", "section": "overview" }
+  }
+}`;
+
+	// Echte Antwort, gekürzt: hier nur der Text-Teil. Zusätzlich liefert die Antwort
+	// structuredContent mit { slug, spec, patternCss } — unabhängig von `section`.
+	const getResponse = `# Button (button)
+Kategorie: Aktionen
+Zweck: Löst eine Aktion aus. Default für nachrangige Aktionen, Primary für die
+Hauptaktion, Z+ als Premium-Akzent (ZEIT+). …
+Verwenden für:
+  - Für die wichtigste Aktion in einem Kontext (Primary — pro Gruppe nur einmal).
+  - Für klar auslösende Aktionen: Speichern, Senden, Bestätigen.
+Nicht verwenden für:
+  - Für reine Navigation / Seitenwechsel — dafür einen Link (Link-Button).
+  - Mehrere gleichwertige Primary-Buttons nebeneinander.
+Varianten:
+  - Variante: Default, Primary (.z-button--primary), Z+ (.z-button--zplus)
+  - Layout: Fullwidth (.z-button--fullwidth)
+Zustände: default, hover, disabled, focus, active, loading`;
+
+	const smokeTest = `curl -u <user>:<passwort> -X POST https://<deploy-host>/api/mcp \\
+  -H 'Content-Type: application/json' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'`;
+
+	// Echte Antwort auf `initialize` (gekürzt: instructions-Text gestutzt).
+	const initializeResponse = `{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": { "tools": {} },
+    "serverInfo": { "name": "zeit-ds-doku", "version": "1.1.0" },
+    "instructions": "ZEIT-Designsystem-Doku. Alle Patterns folgen derselben Klassen-Grammatik: .z-<komponente> (Block) · .z-<komponente>__<teil> · .z-<komponente>--<variante> (Modifier, kombinierbar). …"
+  }
+}`;
+</script>
+
+# {title}
+
+Diese Doku ist nicht nur zum Lesen gebaut — sie ist selbst ein **MCP-Server**. Wer einen
+KI-Assistenten anbindet, gibt ihm damit direkten Zugriff auf den Komponenten-Katalog: Er
+kann live nach Komponenten suchen, das echte Markup samt `pattern.css` abrufen und die
+Token-Werte nachschlagen, statt sich Klassennamen und Farben auszudenken.
+
+Der Unterschied ist praktisch spürbar: Ohne Anbindung rät ein Assistent, wie ein ZEIT-Button
+heißt. Mit Anbindung liest er `.z-button--primary` aus derselben Registry, aus der auch diese
+Seiten entstehen — eine Quelle, kein Drift.
+
+## Was der Endpunkt spricht
+
+Der Endpunkt ist eine **einzelne POST-Route**: `POST /api/mcp`.
+
+- **Protokoll:** MCP über Streamable HTTP, **stateless** — keine Session, kein SSE-Kanal.
+  Jede Anfrage ist für sich vollständig.
+- **Format:** JSON-RPC 2.0. Einzelnachricht oder Batch (Array). Notifications ohne `id`
+  werden mit `202` und leerem Body quittiert.
+- **Protokoll-Version:** `2025-06-18`. Server meldet sich als `zeit-ds-doku` (Version `1.1.0`).
+- **Methoden:** `initialize`, `notifications/initialized`, `ping`, `tools/list`, `tools/call`.
+  Alles andere quittiert der Server mit `-32601`.
+- **`GET /api/mcp` ist bewusst `405`** (`Allow: POST`) — ohne SSE-Session gibt es hier nichts
+  abzuholen. Ein Client, der auf einen GET-Stream besteht, ist falsch konfiguriert.
+
+Umgesetzt ist das als minimaler, handgerollter Handler ohne MCP-SDK. Die Route bleibt dünn,
+die Logik liegt in `src/lib/server/mcp.ts`.
+
+## Einrichten
+
+### Claude Code
+
+Am schnellsten über die CLI — der Server landet dann in der lokalen Konfiguration:
+
+<CodeBlock lang="shell" title="Terminal" code={claudeCodeCli} />
+
+Soll die Anbindung für alle im Projekt gelten, gehört sie stattdessen in eine `.mcp.json`
+im Projekt-Root (bzw. `claude mcp add … --scope project`):
+
+<CodeBlock lang="js" title=".mcp.json" code={mcpJson} />
+
+### Andere MCP-fähige Werkzeuge
+
+Die meisten Clients nutzen dieselbe `mcpServers`-Struktur; das Feld `type` heißt je nach
+Werkzeug anders oder entfällt. Entscheidend sind **URL und Header**:
+
+<CodeBlock lang="js" title="Generische Client-Config" code={genericJson} />
+
+> Der genaue Ort der Config unterscheidet sich je Werkzeug — **im jeweiligen Handbuch prüfen.**
+> Was hier steht, gilt für den Endpunkt, nicht für das Dateiformat eines bestimmten Clients.
+
+## Zugang
+
+<Banner
+	variant="warning"
+	title="Die ganze Site liegt hinter Basic Auth"
+	description="Das gilt auch für /api/mcp. Ohne Authorization-Header antwortet der Endpunkt mit 401, bevor JSON-RPC überhaupt greift."
+/>
+
+MCP-Clients schicken den Zugang als statischen Header mit:
+`Authorization: Basic <base64(user:passwort)>`. Den Wert erzeugst du lokal:
+
+<CodeBlock lang="shell" title="Header-Wert erzeugen" code={basicAuthHeader} />
+
+Die Zugangsdaten selbst stammen aus der `USERS`-Variable in der `.env` des Doku-Repos —
+**erfrage sie beim Team**, sie stehen bewusst in keiner Doku. Und sie gehören nirgendwo hin,
+wo sie versehentlich mitreisen:
+
+- **Nicht ins Repo.** Weder `.env` noch eine ausgefüllte `.mcp.json` mit echtem Header gehören
+  in einen Commit. Wer die Projekt-Variante nutzt, prüft vorher den `.gitignore`.
+- **Nicht in Tickets, Screenshots oder Chat-Verläufe.** Ein Basic-Auth-Header ist nur
+  Base64 — das ist Kodierung, keine Verschlüsselung, und in einer Sekunde zurückgerechnet.
+- **Lokal** (`npm run dev`) greift der Dev-Bypass: Da braucht der Endpunkt keinen Header.
+  Für einen Test gegen `http://localhost:5199/api/mcp` genügt die nackte Anfrage.
+
+## Was die Tools können
+
+`tools/list` meldet vier Tools. `list` und `search` finden, `get` und `foundations` liefern
+die Details:
+
+<Table columns={toolColumns} rows={toolRows} showHeader label="MCP-Tools" />
+
+Ein paar Eigenheiten, die beim Bauen von Prompts helfen:
+
+- **Text _und_ JSON.** Jedes Tool-Ergebnis enthält eine lesbare Text-Serialisierung — und
+  zusätzlich `structuredContent` mit dem vollen JSON-Vertrag laut `outputSchema`.
+- **Kontext-Budget.** Bei `get` und `foundations` ist der Text-Teil auf rund 4.000 Zeichen
+  gekappt; wird gekürzt, hängt der Server den Hinweis an, wie man gezielt nachlädt.
+  `structuredContent` bleibt ungekappt. `list` und `search` begrenzt stattdessen der Katalog
+  selbst bzw. `limit`.
+- **`section` schneidet nur den Text.** Bei `get` sind `overview`, `markup`, `tokens`, `a11y`
+  und `usage` erlaubt; der Manifest-Eintrag kommt unabhängig davon immer vollständig.
+- **`limit` wird geklemmt, nicht abgelehnt.** Fehlend oder unbrauchbar → 8, sonst auf 1…50
+  begrenzt. Ein fehlendes `query` bzw. `slug` ist dagegen ein harter `-32602`.
+- **Tippfehler-Hilfe.** Ein unbekannter Slug liefert keinen Fehler, sondern die nächsten
+  Treffer: „Meintest du: …?“
+
+### Beispiel: `search`
+
+<CodeBlock lang="js" title="Anfrage" code={searchCall} />
+<CodeBlock lang="js" title="Antwort (gekürzt)" code={searchResponse} />
+
+### Beispiel: `get`
+
+<CodeBlock lang="js" title="Anfrage" code={getCall} />
+
+Der Text-Teil der Antwort — daneben liefert dieselbe Antwort `structuredContent` mit
+`{ slug, spec, patternCss }`:
+
+<CodeBlock lang="shell" title="Antwort, content[0].text (gekürzt)" code={getResponse} />
+
+## Verbindung testen
+
+Vor der Fehlersuche im Client lohnt der direkte Griff zum Endpunkt. Antwortet `initialize`,
+stimmen URL und Zugang:
+
+<CodeBlock lang="shell" title="Smoke-Test" code={smokeTest} />
+
+<CodeBlock lang="js" title="Antwort (gekürzt)" code={initializeResponse} />
+
+Die `instructions` sind kein Beiwerk: Der Server gibt dort die Klassen-Grammatik des
+Designsystems mit (`.z-<komponente>`, `__<teil>`, `--<variante>`), damit ein Assistent das
+Markup auch für Komponenten ableiten kann, die er nicht einzeln geladen hat.
+
+## Andere Wege für Maschinen
+
+MCP ist der bequemste, aber nicht der einzige Zugang. Alle vier Wege speisen sich aus
+derselben Registry:
+
+- **`GET /api/manifest.json`** — der gesamte Katalog als JSON: Komponenten inklusive
+  `render`-Template und rohem `pattern.css`, Foundations mit Live-Werten, dazu die
+  Konventionen. Einzeln mit `?component=<slug>`. Ideal, wenn ein Werkzeug kein MCP spricht.
+- **`GET /api/registry`** und die **`zds`-CLI** — der Copy-in-Weg nach dem shadcn-Modell:
+  Komponenten werden in ein Projekt **kopiert**, nicht als Paket installiert. Ablauf im
+  Zielprojekt: `zds init` → `zds add <slug>` → `zds diff`. Details stehen in
+  `tooling/zds-cli/README.md`.
+- **`/llms.txt`** — kompakter Agenten-Einstieg nach dem llms.txt-Standard: Markdown-Übersicht
+  mit Links auf alle Komponenten und Foundations.
+- **`/llms-full.txt`** — derselbe Bestand als ungekappter Volltext, wenn ein Modell lieber
+  einmal alles liest, als einzeln nachzufragen.
+
+Alle vier liegen wie der Rest der Site hinter Basic Auth.
