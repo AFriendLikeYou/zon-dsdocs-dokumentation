@@ -20,7 +20,7 @@
 	import { CopyButton } from '$components/ui/copy-button';
 	import { ChevronIcon } from '$lib/icons';
 
-	type Lang = 'html' | 'css' | 'svelte' | 'js';
+	type Lang = 'html' | 'css' | 'svelte' | 'js' | 'shell';
 	let {
 		title = '',
 		code = '',
@@ -93,7 +93,12 @@
 			],
 			['number', /\b\d+(?:\.\d+)?\b/],
 			['punct', /[{}()[\];:,.=]/]
-		]
+		],
+		// Terminal-Befehle (Bezugs-Sektion „Komponente holen"): bewusst OHNE Regeln.
+		// Ein `zds add button` besteht aus Programm und Argumenten — jede Einfärbung
+		// wäre eine Behauptung über Syntax, die hier nichts erklärt. Der Block bleibt
+		// aber ein CodeBlock: Copy-Button und Zeilennummern-Automatik gelten weiter.
+		shell: []
 	};
 
 	/** Quelltext → Tokenfolge [Klasse|null, Text]. Eine Quelle für beide Renderpfade. */

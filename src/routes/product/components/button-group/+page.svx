@@ -10,7 +10,7 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, StateList, DoDontList, WordingList, RelatedComponents, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, StateList, DoDontList, FaqList, WordingList, RelatedComponents, A11yList, KeyboardList, GetComponent, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import Specimen from './Specimen.svelte';
@@ -117,9 +117,16 @@ button.buttongroup-button {
 		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 		<RelatedComponents slugs={spec.verwandt} />
 	{/if}
+
+	{#if spec.faq?.length}
+		<h2 id="faq" class="section-anchor">FAQ</h2>
+		<FaqList items={spec.faq} />
+	{/if}
 {/snippet}
 
 {#snippet developTab()}
+	<h2>Komponente holen</h2>
+	<GetComponent artefakte={spec.code?.artefakte} />
 
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />

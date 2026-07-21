@@ -157,5 +157,16 @@ export const generated = {
 			"label": "aktiv",
 			"vorhanden": true
 		}
-	]
+	],
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	}
 } satisfies Partial<ComponentSpec>;

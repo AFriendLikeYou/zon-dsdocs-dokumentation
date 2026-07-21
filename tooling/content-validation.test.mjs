@@ -100,6 +100,28 @@ describe('content-validation · checkContentData', () => {
 		expect(issues[0]).toContain('falschen Typ');
 	});
 
+	it('gültige faq → keine Befunde', () => {
+		const data = {
+			faq: [{ frage: 'Kann ich den Button als Link verwenden?', antwort: 'Ja — die Klasse …' }]
+		};
+		expect(checkContentData(data)).toEqual([]);
+	});
+
+	it('faq: fehlende frage/antwort → Befund', () => {
+		const issues = checkContentData({ faq: [{ frage: 'Nur die Frage?' }] });
+		expect(issues.some((i) => i.includes('faq[0].antwort'))).toBe(true);
+	});
+
+	it('faq: Fremdkey je Item → Befund', () => {
+		const issues = checkContentData({ faq: [{ frage: 'F', antwort: 'A', quelle: 'x' }] });
+		expect(issues.some((i) => i.includes('unbekannter Key'))).toBe(true);
+	});
+
+	it('faq: Nicht-Objekt-Item → Befund', () => {
+		const issues = checkContentData({ faq: ['kein objekt'] });
+		expect(issues.some((i) => i.includes('faq[0] muss ein Objekt'))).toBe(true);
+	});
+
 	it('gültige tastatur + callouts → keine Befunde', () => {
 		const data = {
 			tastatur: [{ taste: 'Tab', aktion: 'Setzt den Fokus.' }],

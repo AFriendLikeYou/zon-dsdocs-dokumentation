@@ -119,6 +119,14 @@ export type Beispiel = {
 	abdeckt?: string[];
 };
 
+/**
+ * Eine FAQ-Position (letzte Sektion der Component-Doku). Redaktionell: FAQs
+ * beantworten die RESTFRAGEN, die die Specs nicht beantworten — „kann ich den
+ * Button als Link verwenden?" steht in keiner Maß- oder Token-Tabelle. Ein
+ * Eintrag, der bereits dokumentierte Werte wiederholt, gehört nicht ins FAQ.
+ */
+export type Faq = { frage: string; antwort: string };
+
 export type DoDont = { do?: string[]; dont?: string[] };
 
 /** „Wann verwenden / Wann nicht" — Entscheidungshilfe ganz oben in der Component-Doku. */
@@ -234,6 +242,8 @@ export type ComponentSpec = {
 	a11y?: A11yItem[];
 	tastatur?: KeyboardRule[];
 	doDont?: DoDont | null;
+	/** FAQs — letzte Sektion des Design-Tabs; redaktionell, content.json. */
+	faq?: Faq[];
 	wording?: WordingRule[];
 	variantInfo?: Record<string, string>;
 	/** Kompositions-Hinweise: je Eintrag ein Satz, wie die Komponente mit anderen

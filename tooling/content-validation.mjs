@@ -38,6 +38,9 @@ export const EDITORIAL_FIELDS = {
 	a11y: { check: isArray, typ: 'array' },
 	tastatur: { check: isArray, typ: 'array' },
 	doDont: { check: isObject, typ: 'objekt ({ do, dont })' },
+	// FAQs (letzte Sektion der Component-Doku) — Restfragen, die die Specs nicht
+	// beantworten. Je Eintrag Frage + Antwort.
+	faq: { check: isArray, typ: 'array (Objekte { frage, antwort })' },
 	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
 	wording: { check: isArray, typ: 'array' },
 	komposition: { check: isArray, typ: 'array (Strings)' },
@@ -156,6 +159,21 @@ export function checkNested(key, value) {
 					issues.push(
 						`beispiele[${i}]: unbekannter Key „${k}" (erlaubt: titel, beschreibung, instanzen, abdeckt)`
 					);
+		}
+	}
+	if (key === 'faq' && isArray(value)) {
+		// Jede Position: frage + antwort Pflicht (String), keine Fremdkeys je Item.
+		const erlaubt = new Set(['frage', 'antwort']);
+		for (const [i, item] of value.entries()) {
+			if (!isObject(item)) {
+				issues.push(`faq[${i}] muss ein Objekt { frage, antwort } sein`);
+				continue;
+			}
+			if (!isString(item.frage)) issues.push(`faq[${i}].frage muss ein String sein`);
+			if (!isString(item.antwort)) issues.push(`faq[${i}].antwort muss ein String sein`);
+			for (const k of Object.keys(item))
+				if (!erlaubt.has(k))
+					issues.push(`faq[${i}]: unbekannter Key „${k}" (erlaubt: frage, antwort)`);
 		}
 	}
 	if (key === 'tokenHinweise' && isObject(value)) {

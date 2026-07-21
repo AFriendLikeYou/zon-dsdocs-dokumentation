@@ -90,6 +90,11 @@
 			"items": { "$ref": "#/$defs/keyboardRule" }
 		},
 		"doDont": { "$ref": "#/$defs/doDont" },
+		"faq": {
+			"type": "array",
+			"description": "FAQs — LETZTE Sektion des Design-Tabs, als auf-/zuklappbare Fragen. Gedacht für die Restfragen, die die Specs nicht beantworten (\"Kann ich den Button als Link verwenden?\", \"Wie mache ich ihn über die volle Breite?\"). Keine Wiederholung von Maßen, Tokens oder Varianten. (Redaktionell — gehört in content.json.)",
+			"items": { "$ref": "#/$defs/faqItem" }
+		},
 		"verwendung": { "$ref": "#/$defs/verwendung" },
 		"wording": {
 			"type": "array",
@@ -376,6 +381,22 @@
 			"properties": {
 				"do": { "type": "array", "items": { "type": "string" } },
 				"dont": { "type": "array", "items": { "type": "string" } }
+			}
+		},
+		"faqItem": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["frage", "antwort"],
+			"description": "Eine FAQ-Position: eine Frage, die die Specs NICHT beantworten, plus die Antwort.",
+			"properties": {
+				"frage": {
+					"type": "string",
+					"description": "Die Frage, wie ein Nutzer sie stellen würde — z. B. \"Kann ich den Button als Link verwenden?\"."
+				},
+				"antwort": {
+					"type": "string",
+					"description": "Knappe Antwort in ein bis drei Sätzen. Keine Wiederholung dokumentierter Werte (Maße, Tokens, Varianten) — die stehen in den Specs."
+				}
 			}
 		},
 		"verwendung": {

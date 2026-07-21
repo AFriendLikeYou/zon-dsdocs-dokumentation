@@ -11,6 +11,9 @@ export { default as A11yList } from './A11yList.svelte';
 export { default as KeyboardList } from './KeyboardList.svelte';
 export { default as RelatedComponents } from './RelatedComponents.svelte';
 export { default as DoDontList } from './DoDontList.svelte';
+export { default as FaqList } from './FaqList.svelte';
+// Bezugs-Sektion „Komponente holen" (zds init/add + Format-Angabe) — Develop-Tab.
+export { default as GetComponent } from './GetComponent.svelte';
 export { default as WordingList } from './WordingList.svelte';
 export { default as PropsTable } from './PropsTable.svelte';
 // CodeBlock ist nach `$components/ui/code-block` umgezogen (eigener Barrel).

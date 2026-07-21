@@ -108,6 +108,20 @@
 			"Buttons nicht für reine Navigation verwenden — dafür Links."
 		]
 	},
+	"faq": [
+		{
+			"frage": "Kann ich den Button als Link verwenden?",
+			"antwort": "Ja — die Klasse .z-button setzt keine button-spezifischen Eigenschaften voraus und sitzt genauso auf einem <a href>. Entscheidend ist die Semantik: Wer die Seite wechselt, braucht ein <a>, wer eine Aktion auslöst, ein <button>. Achtung: :disabled greift auf einem <a> nicht — ein gesperrter Link muss stattdessen aus dem Markup fallen oder ohne href auskommen."
+		},
+		{
+			"frage": "Wie mache ich den Button über die volle Breite?",
+			"antwort": "Mit der Modifier-Klasse .z-button--fullwidth. Sie setzt nur width: 100 % — die tatsächliche Breite kommt also vom umgebenden Container, nicht vom Button. In einer breiten Spalte wird der Button entsprechend sehr breit; die Begrenzung gehört ins Layout darum herum."
+		},
+		{
+			"frage": "Warum bricht ein langes Label nicht um?",
+			"antwort": "Das Pattern setzt white-space: nowrap — die Beschriftung bleibt immer einzeilig und der Button wird stattdessen breiter (in engen Spalten schiebt er über den Rand hinaus). Das ist Absicht: ein umbrechendes Button-Label liest sich als Fließtext. Kurze Verb-Labels sind die Lösung, nicht ein Umbruch."
+		}
+	],
 	"version": "Figma-Node 4185:3778",
 	"komposition": [
 		"In einer Aktionsgruppe (z. B. button-group) nur eine Primary-Aktion einsetzen, weitere Aktionen als Default.",

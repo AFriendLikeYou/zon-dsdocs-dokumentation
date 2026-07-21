@@ -10,7 +10,7 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, A11yList, KeyboardList, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, FaqList, WordingList, RelatedComponents, A11yList, KeyboardList, GetComponent, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
@@ -140,9 +140,17 @@ kategorie: Formulare
 		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
 		<RelatedComponents slugs={spec.verwandt} />
 	{/if}
+
+	{#if spec.faq?.length}
+		<h2 id="faq" class="section-anchor">FAQ</h2>
+		<FaqList items={spec.faq} />
+	{/if}
 {/snippet}
 
 {#snippet developTab()}
+	<h2>Komponente holen</h2>
+	<GetComponent artefakte={spec.code?.artefakte} />
+
 	<h2>Properties</h2>
 	<PropsTable props={propsData} />
 

@@ -247,7 +247,7 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 (die Seite liegt hinter Basic Auth).
 
 Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `beispiele`,
-`callouts`, `a11y`, `tastatur`, `doDont`, `verwendung`, `wording`, `komposition`,
+`callouts`, `a11y`, `tastatur`, `doDont`, `faq`, `verwendung`, `wording`, `komposition`,
 `verwandt`, `version`, `variantInfo`, `codeBeispiele` sowie die feldweisen
 Snippet-Overrides `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` (gewinnen
 feldweise über die gleichnamigen `render`-Werte; leer = Maschine gewinnt)
@@ -261,6 +261,42 @@ Rest bleibt sichtbar stehen. Pflegbar im Spec-Editor (`/admin/product/components
 `komposition` (`string[]`, je Eintrag ein Satz) beschreibt, wie die Komponente mit
 anderen kombiniert wird/werden darf — nützlich für Agenten bei Formularen/Organismen;
 nur befüllen, wenn fachlich sicher ableitbar.
+`faq` (`{ frage, antwort }[]`) ist die **letzte** Sektion der Seite: die Restfragen,
+die nach Playground, Beispielen, Anatomie, Verwendung und Specs übrig bleiben. Jede
+Frage ist ein Disclosure (`ui/accordion`, Tastatur + `prefers-reduced-motion`
+inklusive). Die Sektion ist laufzeit-gated — ohne Inhalt erscheint keine Überschrift.
+Auch hier gilt: pflegbar im Spec-Editor (`/admin/product/components/<slug>`).
+
+### Redaktionelle Leitlinie: ein Beispiel beantwortet eine Frage
+
+Das ist die Lehre aus den Doku-Vorbildern (Untitled UI, Astryx) und die schärfste
+Regel für `beispiele` **und** `faq`:
+
+> **Ein Beispiel beantwortet eine Frage bzw. einen Anwendungsfall — es zählt keine
+> Regler-Werte auf.**
+
+Der Playground zählt bereits jede Option auf, und das Varianten-Raster zeigt jeden
+Wert. Ein Beispiel, das „Default · Primary · Z+" nebeneinanderstellt und
+„die drei Varianten" darüberschreibt, wiederholt also nur, was zwei Sektionen weiter
+oben schon vollständig dasteht. Wertvoll wird es erst, wenn der Titel eine
+Entscheidung benennt („Semantik", „Volle Breite", „Gesperrte Aktion") und der
+Erklärsatz sagt, **wann** man dazu greift.
+
+Dieselbe Probe für FAQs: Steht die Antwort schon in einer Maß-, Token- oder
+Varianten-Tabelle, gehört sie **nicht** ins FAQ („Wie hoch ist der Button?" → Specs).
+Ins FAQ gehört, was zwischen den Sektionen durchfällt — „Kann ich den Button als Link
+verwenden?", „Wie mache ich ihn über die volle Breite?", „Warum bricht ein langes
+Label nicht um?".
+
+### Bezugs-Sektion „Komponente holen" (Develop-Tab)
+
+Jede generierte Seite bekommt als **erste Sektion des Develop-Tabs** den Weg ins
+eigene Projekt: `zds init` (einmalig, holt die Token-Basis — ohne sie rendert die
+Kopie ungestylt), `zds add <slug>` und die verfügbaren Formate. Dafür ist **nichts zu
+pflegen**: die Formate kommen aus `code.artefakte` bzw. dem `pattern.css`-Fallback,
+aufgelöst über `tooling/artefakte.mjs` — dieselbe Funktion, mit der `/api/registry`
+die CLI beantwortet. Hat eine Komponente kein Artefakt, zeigt die Sektion einen
+ehrlichen Hinweis statt eines Befehls, der an der Registry scheitern würde.
 
 ## Checkliste
 

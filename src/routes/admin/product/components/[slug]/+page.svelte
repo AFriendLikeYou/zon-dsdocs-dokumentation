@@ -55,6 +55,8 @@
 		status: string;
 		verwendung: { nutzen: string[]; nichtNutzen: string[] };
 		doDont: { do: string[]; dont: string[] };
+		/** FAQs: Frage + Antwort, letzte Sektion der Doku-Seite. */
+		faq: { frage: string; antwort: string }[];
 		komposition: string[];
 		a11y: { label: string; wert: string; status: A11yStatus }[];
 		wording: { schlecht: string; gut: string; hinweis: string }[];
@@ -86,6 +88,7 @@
 		status?: string;
 		verwendung?: { nutzen?: string[]; nichtNutzen?: string[] };
 		doDont?: { do?: string[]; dont?: string[] };
+		faq?: { frage?: string; antwort?: string }[];
 		komposition?: string[];
 		a11y?: { label?: string; wert?: string; status?: string }[];
 		wording?: { schlecht?: string; gut?: string; hinweis?: string }[];
@@ -131,6 +134,7 @@
 				nichtNutzen: [...(c.verwendung?.nichtNutzen ?? [])]
 			},
 			doDont: { do: [...(c.doDont?.do ?? [])], dont: [...(c.doDont?.dont ?? [])] },
+			faq: (c.faq ?? []).map((r) => ({ frage: r.frage ?? '', antwort: r.antwort ?? '' })),
 			komposition: [...(c.komposition ?? [])],
 			a11y: (c.a11y ?? []).map((r) => ({
 				label: r.label ?? '',
@@ -208,6 +212,9 @@
 		{ key: 'status', type: 'select', options: A11Y_STATUS_OPTIONS }
 	] as const;
 	const TASTATUR_COLUMNS = [{ key: 'taste' }, { key: 'aktion' }] as const;
+	// FAQ: Frage + Antwort, beide Pflicht-Inputs (die Ghost-Zeile committet, sobald
+	// eines der beiden getippt ist — der payload verlangt danach beide).
+	const FAQ_COLUMNS = [{ key: 'frage' }, { key: 'antwort' }] as const;
 
 	// Art-Optionen der Anatomie-Beschriftungen (Schema: model.schema.json → callout.art);
 	// erste Option leer = „keine Art" (der Key fällt im payload weg).
@@ -232,6 +239,7 @@
 		return {
 			verwendung: !!(c.verwendung?.nutzen?.length || c.verwendung?.nichtNutzen?.length),
 			doDont: !!(c.doDont?.do?.length || c.doDont?.dont?.length),
+			faq: !!c.faq?.length,
 			komposition: !!c.komposition?.length,
 			a11y: !!c.a11y?.length,
 			wording: !!c.wording?.length,
@@ -285,6 +293,9 @@
 				break;
 			case 'wording':
 				model.wording = [];
+				break;
+			case 'faq':
+				model.faq = [];
 				break;
 			case 'a11y':
 				model.a11y = [];
@@ -356,6 +367,13 @@
 				return o;
 			});
 		if (wording.length) out.wording = wording;
+		// FAQ: eine Position zählt nur, wenn Frage UND Antwort dastehen — eine Frage
+		// ohne Antwort ist keine FAQ, sondern eine offene Aufgabe (und würde auf der
+		// Seite ein leeres Panel aufklappen).
+		const faq = model.faq
+			.filter((r) => r.frage.trim() && r.antwort.trim())
+			.map((r) => ({ frage: r.frage.trim(), antwort: r.antwort.trim() }));
+		if (faq.length) out.faq = faq;
 		const verwandt = [...new Set(model.verwandt.map((s) => s.trim()).filter(Boolean))];
 		if (verwandt.length) out.verwandt = verwandt;
 		// Tastatur: Zeile behalten, sobald Taste oder Aktion etwas enthält.
@@ -706,6 +724,22 @@
 		bind:value={entry.aktion}
 		placeholder="Aktion (was die Taste bewirkt)"
 		aria-label="Aktion"
+	/>
+{/snippet}
+{#snippet faqRow(entry: Record<string, string>)}
+	<Field
+		class="row__input row__input--key"
+		density="compact"
+		bind:value={entry.frage}
+		placeholder="Frage (wie ein Nutzer sie stellt)"
+		aria-label="Frage"
+	/>
+	<Field
+		class="row__input"
+		density="compact"
+		bind:value={entry.antwort}
+		placeholder="Antwort (ein bis drei Sätze)"
+		aria-label="Antwort"
 	/>
 {/snippet}
 {#snippet calloutRow(entry: Record<string, string>)}
@@ -1105,6 +1139,31 @@
 						columns={WORDING_COLUMNS}
 						row={wordingRow}
 						addLabel="Wording-Regel ergänzen"
+					/>
+				</EditorialCard>
+
+				<!-- FAQ: steht auf der Doku-Seite als LETZTE Sektion (Untitled-UI-Muster).
+				     Gedacht für Restfragen, die die Specs nicht beantworten. -->
+				<EditorialCard
+					title="FAQ"
+					subline="Letzte Sektion der Doku-Seite — Frage · Antwort"
+					id="sec-faq"
+					expanded={expanded.faq}
+					ghostLabel="FAQ ergänzen"
+					ghostId="ghost-faq"
+					onexpand={() => reveal('faq')}
+					onremove={() => removeSection('faq', 'FAQ geleert')}
+				>
+					<p class="hint">
+						Nur Fragen, die die Dokumentation NICHT schon beantwortet — „Kann ich den Button als
+						Link verwenden?" statt „Wie hoch ist der Button?". Maße, Tokens und Varianten stehen
+						in den Specs. Einträge ohne Antwort werden nicht gespeichert.
+					</p>
+					<RowListField
+						list={model.faq}
+						columns={FAQ_COLUMNS}
+						row={faqRow}
+						addLabel="FAQ-Eintrag ergänzen"
 					/>
 				</EditorialCard>
 

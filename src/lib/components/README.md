@@ -186,6 +186,13 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    (z. B. `catalog-preview ds-stage`), Hintergrund-Hook `--ds-card-media-bg`,
    `class`-Passthrough. Raster über `ui/card/CardGrid`; seit K12 laufen Katalog-
    Karten und Landing-„Welten" hierüber — keine handgebauten Karten mehr),
+   `ui/accordion/` (EIN Disclosure — `titel`, bindbares `open`, `headingLevel: 2|3|4`,
+   Inhalt als Children. Trägt den kompletten a11y-Vertrag an einer Stelle: echter
+   `<button type="button">` in einer Überschrift, `aria-expanded` + `aria-controls`,
+   `inert` am geschlossenen Panel, Klappen über `grid-template-rows` (ease-out,
+   `prefers-reduced-motion`). Erster Consumer ist `specsheet/FaqList`; die älteren
+   Ad-hoc-Disclosures in `ExampleBlock`/`Playground`/`MachineZone`/`IssuesList`/
+   `layout/MenuCollapsible` bleiben vorerst, gehören aber hierher),
    `ui/tooltip/` (Action `use:tooltip={'Text'}` bzw. `{ text, position }` — ersetzt
    native `title=`: ~400ms Hover-Delay, auch bei Tastatur-Fokus, Esc schließt,
    aria-describedby, kein Tooltip auf Touch; Badge/IconActionButton/SegmentedControl

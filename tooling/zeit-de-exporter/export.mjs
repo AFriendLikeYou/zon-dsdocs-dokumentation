@@ -27,6 +27,7 @@ import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSyn
 import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateModelSchema } from './schema-validate.mjs';
+import { resolveArtefakte } from '../artefakte.mjs';
 
 const TARGET = 'zeit-de';
 const ROUTE_BASE = 'src/routes/product/components';
@@ -68,7 +69,8 @@ const SECTION_IDS = {
 	Varianten: 'varianten',
 	Zustände: 'zustaende',
 	"Do & Don't": 'do-dont',
-	'Verwandte Komponenten': 'verwandte'
+	'Verwandte Komponenten': 'verwandte',
+	FAQ: 'faq'
 };
 
 /**
@@ -85,6 +87,7 @@ const EDITORIAL_WHEN = {
 	verwendung: 'spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length',
 	wording: 'spec.wording?.length',
 	doDont: 'spec.doDont?.do?.length || spec.doDont?.dont?.length',
+	faq: 'spec.faq?.length',
 	verwandt: 'spec.verwandt?.length',
 	a11y: 'spec.a11y?.length',
 	tastatur: 'spec.tastatur?.length'
@@ -138,6 +141,9 @@ const EDITORIAL = [
 	'a11y',
 	'tastatur',
 	'doDont',
+	// FAQs: Restfragen, die die Specs nicht beantworten — reine Redaktion, kein
+	// Figma-Fakt → content.json gewinnt (Muster wie `beispiele`).
+	'faq',
 	'verwendung',
 	'wording',
 	'komposition',
@@ -145,7 +151,7 @@ const EDITORIAL = [
 ];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
-function renderGenerated(model) {
+function renderGenerated(model, { hatPatternCss = false } = {}) {
 	// `render` ist Repo-Verdrahtung (Slot-Markup/CSS), gehört nicht ins Datenmodell.
 	// `$schema` ist nur Editor-Komfort (Autocomplete) und darf nicht ins Modell leaken.
 	const { render: _render, $schema: _schema, ...rest } = model;
@@ -161,6 +167,14 @@ function renderGenerated(model) {
 	if (render.align !== undefined) playground.align = render.align;
 	if (render.resizable !== undefined) playground.resizable = render.resizable;
 	if (Object.keys(playground).length) spec.playground = playground;
+	// Code-Artefakte AUFGELÖST einbacken (deklarierter `code`-Block ODER der
+	// pattern.css-Fallback) — dieselbe Funktion, mit der die Registry `zds add`
+	// beantwortet. Die Bezugs-Sektion der Seite liest `spec.code.artefakte` und nennt
+	// damit garantiert die Formate, die die CLI auch liefert. Leere Liste = kein
+	// Artefakt → der Key bleibt weg (die Seite zeigt dann den ehrlichen Hinweis).
+	const artefakte = resolveArtefakte(model.code, hatPatternCss);
+	if (artefakte.length) spec.code = { artefakte };
+	else delete spec.code;
 	const json = JSON.stringify(spec, null, '\t');
 	return (
 		`// AUTOGENERIERT vom zeit-de-Exporter — NICHT von Hand editieren (wird bei jedem Sync überschrieben).\n` +
@@ -190,6 +204,7 @@ function renderGenerated(model) {
  *   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })
  *   tastatur         – Tastatur-Bedienung ({ taste, aktion })
  *   doDont           – { do: [...], dont: [...] }
+ *   faq              – FAQs, letzte Sektion ({ frage, antwort })
  *   verwendung       – { nutzen: [...], nichtNutzen: [...] }
  *   wording          – Formulierungs-Regeln ({ schlecht, gut, hinweis? })
  *   komposition      – Hinweise, wie die Komponente mit anderen kombiniert wird (Strings)
@@ -585,6 +600,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	// Redaktionelle Renderer: immer importieren — ob sie etwas zeigen, entscheidet
 	// die Laufzeit-Bedingung um die jeweilige Sektion (s. o.).
 	used.add('DoDontList');
+	used.add('FaqList');
 	used.add('WordingList');
 	used.add('RelatedComponents');
 	used.add('A11yList');
@@ -592,6 +608,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	// CodeBlock rendert sowohl die Maschinen-Snippets als auch die redaktionellen
 	// codeBeispiele (laufzeit-gated im Develop-Tab) → immer bei vorhandenem Develop-Tab.
 	if (hasDevelop) used.add('CodeBlock');
+	// Bezugs-Sektion: erste Sektion des Develop-Tabs — existiert der Tab, existiert sie.
+	if (hasDevelop) used.add('GetComponent');
 	if (hasProps) used.add('PropsTable');
 	if (hasMasse) used.add('MeasureTable');
 	if (hasColorRoles) used.add('ColorRoleTable');
@@ -752,10 +770,29 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\t\t<h2 id="${SECTION_IDS['Verwandte Komponenten']}" class="section-anchor">Verwandte Komponenten</h2>\n` +
 		`\t\t<RelatedComponents slugs={${S}.verwandt} />\n` +
 		`\t{/if}\n`;
+	// FAQ ganz zuletzt (Untitled-UI-Muster): es beantwortet die RESTFRAGEN, die nach
+	// Playground, Beispielen, Anatomie, Verwendung und Do/Don't übrig bleiben. Weiter
+	// oben würde es mit der eigentlichen Dokumentation konkurrieren. Rein redaktionell
+	// → laufzeit-gated wie alle EDITORIAL-Sektionen (nie eine leere Überschrift).
+	design +=
+		`\n\t{#if ${EDITORIAL_WHEN.faq}}\n` +
+		`\t\t<h2 id="${SECTION_IDS.FAQ}" class="section-anchor">FAQ</h2>\n` +
+		`\t\t<FaqList items={${S}.faq} />\n` +
+		`\t{/if}\n`;
 
 	// ---- Develop-Tab ----
+	// „Komponente holen" steht GANZ OBEN — vor Properties und Code. Wer den
+	// Develop-Tab öffnet, will den Code ins eigene Projekt bekommen; der Bezugsweg
+	// (`zds init` → `zds add <slug>`) gehört deshalb vor das, was danach gelesen
+	// wird. Unter dem Hero wäre er falsch platziert: der Design-Tab ist der erste
+	// und bedient Designer, für die ein Terminal-Befehl kein Einstieg ist.
+	// Die Artefakt-Liste kommt aus spec.code (vom Exporter aufgelöst über
+	// tooling/artefakte.mjs — dieselbe Regel wie in der Registry). Ohne Artefakt
+	// rendert die Komponente den ehrlichen Hinweis statt eines Befehls, der scheitert.
 	let develop = '';
-	if (hasProps) develop += `\t<h2>Properties</h2>\n\t<PropsTable props={propsData} />\n`;
+	develop +=
+		`\t<h2>Komponente holen</h2>\n` + `\t<GetComponent artefakte={${S}.code?.artefakte} />\n`;
+	if (hasProps) develop += `\n\t<h2>Properties</h2>\n\t<PropsTable props={propsData} />\n`;
 	if (anyCode) {
 		develop += `\n\t<h2>Code</h2>\n`;
 		if (hasHtmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
@@ -1122,10 +1159,15 @@ function main() {
 		patternCss = readFileSync(cssPath, 'utf8');
 	}
 
+	// Existiert eine pattern.css im Ordner? Genau DIESE Frage stellt auch die Registry
+	// (import.meta.glob über `*/pattern.css`) — deshalb wird die Datei geprüft und
+	// nicht die render.cssFile-Referenz, sonst könnten Seite und `zds add` auseinanderlaufen.
+	const hatPatternCss = existsSync(resolve(outDir, 'pattern.css'));
+
 	// Maschinen-Dateien werden immer geschrieben; content.json nur beim ersten Mal (Stub).
 	const machineFiles = [
-		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss }) },
-		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
+		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss, hatPatternCss }) },
+		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model, { hatPatternCss }) }
 	];
 
 	console.log(`zeit-de-Exporter · "${model.name}" -> ${ROUTE_BASE}/${kebab}/`);

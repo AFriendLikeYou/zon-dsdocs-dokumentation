@@ -243,5 +243,16 @@ export const generated = {
 		{
 			"label": "loading"
 		}
-	]
+	],
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	}
 } satisfies Partial<ComponentSpec>;

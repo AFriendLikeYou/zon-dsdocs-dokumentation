@@ -68,6 +68,7 @@ const EDITORIAL_KEYS = [
 	'a11y',
 	'tastatur',
 	'doDont',
+	'faq',
 	'verwendung',
 	'wording',
 	'komposition',

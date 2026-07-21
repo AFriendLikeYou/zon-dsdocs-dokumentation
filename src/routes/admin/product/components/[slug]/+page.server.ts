@@ -22,6 +22,8 @@ const EDITABLE = [
 	'status',
 	'verwendung',
 	'doDont',
+	// FAQs ({ frage, antwort }) — letzte Sektion der Doku-Seite, Inhalt-Cluster.
+	'faq',
 	'komposition',
 	'a11y',
 	'wording',

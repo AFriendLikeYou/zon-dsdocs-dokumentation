@@ -15,6 +15,7 @@
  */
 import { createHash } from 'node:crypto';
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
+import { resolveArtefakte } from '../../../tooling/artefakte.mjs';
 import type { CodeArtefakt, CodeFormat, CodeStatus } from '$types/spec';
 
 /** Weitere Artefakt-Dateien aus co-locateten `code/`-Unterordnern (roh, Build-Zeit). */
@@ -42,13 +43,14 @@ function fileContent(entry: AgentCatalogEntry, datei: string): string | null {
  * (Fallback) implizit `html-css → pattern.css` (kanonisch), sofern pattern.css
  * existiert. So sind alle Bestandskomponenten sofort Registry-fähig, ohne dass
  * ihr model.json angefasst werden muss.
+ *
+ * Die Regel selbst liegt in tooling/artefakte.mjs — dieselbe Funktion benutzt der
+ * Exporter, um den `code`-Block in spec.generated.ts zu schreiben. Die Bezugs-
+ * Sektion der Doku-Seite nennt damit garantiert die Formate, die `zds add` auch
+ * wirklich liefert (eine Regel, kein Drift).
  */
 function artefakteOf(entry: AgentCatalogEntry): CodeArtefakt[] {
-	const declared = entry.spec.code?.artefakte;
-	if (declared?.length) return declared;
-	if (entry.patternCss)
-		return [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }];
-	return [];
+	return resolveArtefakte(entry.spec.code, Boolean(entry.patternCss)) as CodeArtefakt[];
 }
 
 /** Länge des gekürzten Hex-Hashes — 16 Zeichen (64 Bit) reichen für Drift-Erkennung. */
