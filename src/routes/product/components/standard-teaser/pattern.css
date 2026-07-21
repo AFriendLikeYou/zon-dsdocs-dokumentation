@@ -105,6 +105,24 @@
 	text-wrap: pretty;
 }
 
+/* Der Doppelpunkt zwischen Spitzmarke und Titel ist NUR für Screenreader da: er
+   trennt „HafenCity in Hamburg" und die Überschrift zu einem lesbaren Satz, ohne
+   sichtbar zu werden. Das Markup ist originalgetreu von zeit.de übernommen — die
+   Regel dazu fehlte, weil sie dort global definiert ist und nicht am Teaser hängt.
+   Folge: Der Doppelpunkt stand sichtbar in der Doku (5 × 24px).
+   Werte an einer echten Instanz auf zeit.de/index gemessen, nicht nachgebaut. */
+.zon-teaser__heading .visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	clip-path: inset(0 100% 100% 0);
+}
+
 .zon-teaser__kicker {
 	align-items: center;
 	color: var(--z-ds-color-accent-100);
