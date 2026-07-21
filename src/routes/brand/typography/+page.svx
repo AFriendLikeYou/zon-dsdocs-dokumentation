@@ -4,6 +4,10 @@ description: Schrift und Typografie der Marke DIE ZEIT
 category: brand
 ---
 
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
 <script lang="ts">
 	import { Banner } from '$components/ui/banner';
 	import { DoDont, DoDontGroup } from '$components/ui/dodont';

@@ -39,17 +39,22 @@ test.describe.serial('CMS-Kernflüsse', () => {
 		// Dateien geschrieben haben → verspäteter Vite-HMR-Remount würde das frisch
 		// geöffnete Panel sonst wieder schließen. Plus ein Retry-Klick als Gurt.
 		await page.waitForLoadState('networkidle');
+		// Rollen-basierte Locators statt Klassen: die frühere `.new-btn`/`.np-create`
+		// waren beim Umbau auf das Button-Atom (ui/button) ersatzlos entfallen — der
+		// Test lief seitdem in einen Timeout. Über die sichtbare Beschriftung sind
+		// die Buttons unabhängig von der internen Klassen-Struktur greifbar.
+		const neueSeite = page.getByRole('button', { name: '+ Neue Seite' });
 		const titel = page.locator('.new-panel input').first();
-		await page.locator('.new-btn').click();
+		await neueSeite.click();
 		try {
 			await titel.waitFor({ timeout: 3000 });
 		} catch {
-			await page.locator('.new-btn').click();
+			await neueSeite.click();
 			await titel.waitFor();
 		}
 		await titel.fill('E2E Smoke');
 		await expect(page.locator('.np-slug input')).toHaveValue(SLUG);
-		await page.locator('.np-create').click();
+		await page.getByRole('button', { name: 'Anlegen & bearbeiten' }).click();
 
 		// Nicht auf Toast/SPA-Navigation verlassen: die neue Route-Datei löst im Dev
 		// einen Vite-Full-Reload aus, der beides wegreißen kann (HMR-Race). Die
@@ -64,16 +69,26 @@ test.describe.serial('CMS-Kernflüsse', () => {
 			await page.goto(`/admin/brand/${SLUG}`);
 		}
 		await page.waitForLoadState('networkidle');
-		await expect(page.locator('.block-card')).toHaveCount(2);
+		// Keine feste Blockzahl mehr: die frische Seite aus `pageTemplate()` enthält
+		// zwei geschützte Inseln (<svelte:head>, <script>) plus die Prosa; wie viele
+		// Karten der Parser daraus macht, ist ein Implementierungsdetail, das sich
+		// mit dem Block-Modell mitbewegt (war 2, ist 3). Geprüft wird, was der Smoke
+		// wirklich zusichern will: der Editor lädt Blöcke UND die Prosa ist da.
+		await expect(page.locator('.block-card').first()).toBeVisible();
+		await expect(page.locator('.block-card--prosa')).toHaveCount(1);
 
 		const prosa = page.locator('.block-card--prosa textarea');
 		await prosa.fill('# E2E Smoke\n\nE2E war hier.');
-		await expect(page.locator('.savebar')).toBeVisible();
+		// Die schwebende Save-Bar ist inzwischen `ui/dialog` (Dialog variant="bar",
+		// erscheint sobald `dirty`) — die alten `.savebar`/`.savebar .save` gibt es
+		// nicht mehr. Über Rolle + Beschriftung bleibt der Test vom Umbau unabhängig.
+		const speichern = page.getByRole('button', { name: /Speichern/ });
+		await expect(speichern).toBeVisible();
 		// Der Save-POST muss mit success antworten (nicht nur ein Toast, den der
 		// Vite-Reload wegreißen kann).
 		const [saveRes] = await Promise.all([
 			page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes(SLUG)),
-			page.locator('.savebar .save').click()
+			speichern.click()
 		]);
 		expect(await saveRes.text()).toContain('"type":"success"');
 
@@ -94,7 +109,10 @@ test.describe.serial('CMS-Kernflüsse', () => {
 		await expect(page.getByRole('heading', { name: 'Medien' })).toBeVisible();
 		const alle = await page.locator('.card').count();
 		expect(alle).toBeGreaterThan(3);
-		await page.locator('.search').fill('logo');
+		// `.search` liegt seit dem Umbau auf das Field-Atom am WRAPPER, nicht mehr am
+		// <input> — `.fill()` lief deshalb ins Leere. Rolle statt Klasse (type="search"
+		// → role=searchbox).
+		await page.getByRole('searchbox', { name: /suchen/i }).fill('logo');
 		// Retryende Assertion statt sofortigem count(): Svelte filtert asynchron.
 		await expect(page.locator('.card')).not.toHaveCount(alle);
 		expect(await page.locator('.card').count()).toBeGreaterThan(0);

@@ -48,9 +48,16 @@ jobs:
       - name: Build
         run: npm run build
 
-  # E2E-Smoke (Playwright): CMS-Kernflüsse gegen den Dev-Server. Läuft mit den
-  # committeten Hooks (Basic-Auth aktiv) — die Tests authentifizieren sich mit
-  # den Dummy-USERS via httpCredentials (playwright.config.ts).
+  # E2E (Playwright): CMS-Kernflüsse, MCP/llms.txt, **visuelle Regression**
+  # (Screenshot-Snapshots, hell + dunkel) und **A11y** (axe-core, WCAG 2.0/2.1 A+AA).
+  # Läuft mit den committeten Hooks (Basic-Auth aktiv) — die Tests
+  # authentifizieren sich mit den Dummy-USERS via httpCredentials
+  # (playwright.config.ts).
+  #
+  # Snapshot-Hinweis: Die Referenzbilder liegen plattformgetrennt unter
+  # e2e/__screenshots__/<platform>/. CI vergleicht gegen `linux`; lokal auf macOS
+  # entsteht `darwin`. Ein Snapshot-Fehlschlag lädt unten den HTML-Report als
+  # Artefakt hoch (erwartet/aktuell/diff) — sonst ist er nicht diagnostizierbar.
   e2e:
     runs-on: ubuntu-latest
     env:
@@ -69,5 +76,25 @@ jobs:
       - name: Playwright-Browser
         run: npx playwright install --with-deps chromium
 
-      - name: E2E-Smoke
+      - name: E2E (Smoke + Visuelle Regression + A11y)
         run: npx playwright test
+
+      # Bei Fehlschlag: Report + Diff-Bilder sichern. `if: failure()` — im
+      # Grünfall gibt es nichts zu holen.
+      - name: Playwright-Report hochladen
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      # Die rohen Artefakte enthalten die *-actual.png / *-diff.png je Fehlschlag —
+      # damit lässt sich ein Snapshot-Bruch ohne lokalen Nachbau beurteilen.
+      - name: Test-Artefakte hochladen (Screenshots/Diffs/Traces)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 14

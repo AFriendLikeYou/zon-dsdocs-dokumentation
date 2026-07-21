@@ -21,13 +21,20 @@
 	let {
 		list,
 		addLabel = '+ Punkt ergänzen',
-		placeholder = ''
+		placeholder = '',
+		itemLabel = 'Eintrag'
 	}: {
 		list: string[];
 		/** Platzhalter der Ghost-Zeile (Aufforderung zum Anlegen). */
 		addLabel?: string;
 		/** Platzhalter der bestehenden Zeilen (leerer Eintrag). */
 		placeholder?: string;
+		/**
+		 * Basis für das `aria-label` der bestehenden Zeilen („Eintrag 1", „Eintrag 2" …).
+		 * Die Zeilen tragen keine sichtbare Beschriftung — ohne dieses Label wären sie
+		 * für Screenreader namenlos (axe-Regel `label`, WCAG 4.1.2).
+		 */
+		itemLabel?: string;
 	} = $props();
 
 	let draft = $state('');
@@ -64,6 +71,7 @@
 				density="compact"
 				bind:value={list[i]}
 				{placeholder}
+				aria-label={`${itemLabel} ${i + 1}`}
 			/>
 			<IconActionButton
 				class="string-list__remove"
