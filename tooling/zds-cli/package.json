@@ -3,6 +3,22 @@
 	"version": "0.1.0",
 	"private": true,
 	"description": "CLI, um dokumentierte ZEIT-Designsystem-Komponenten per Copy-in (shadcn-Modell) ins eigene Projekt zu ziehen.",
+	"license": "UNLICENSED",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AFriendLikeYou/zon-dsdocs-dokumentation.git",
+		"directory": "tooling/zds-cli"
+	},
+	"homepage": "https://github.com/AFriendLikeYou/zon-dsdocs-dokumentation/tree/main/tooling/zds-cli#readme",
+	"bugs": {
+		"url": "https://github.com/AFriendLikeYou/zon-dsdocs-dokumentation/issues"
+	},
+	"keywords": [
+		"zeit-online",
+		"design-system",
+		"registry",
+		"cli"
+	],
 	"type": "module",
 	"bin": {
 		"zds": "./zds.mjs"

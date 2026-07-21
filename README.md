@@ -136,12 +136,27 @@ implizit `html-css → pattern.css`.
 
 - `GET /api/registry` — Index (slug, name, formate, status)
 - `GET /api/registry/<slug>[?format=html-css]` — Metadaten + Artefakte inkl.
-  Datei-Inhalten; 404 als JSON bei unbekanntem Slug
+  Datei-Inhalten **und Inhalts-Hash je Datei** (`sha256-<16 hex>`, gekürzter
+  SHA-256); 404 als JSON bei unbekanntem Slug
+- `GET /api/registry/foundations` — Token-Basis `static/styles-zds.css` (Inhalt +
+  Hash + Einbau-Hinweis) für `zds init`. Statische Route, gewinnt gegen `[slug]`
 
-CLI: [`tooling/zds-cli/`](tooling/zds-cli/README.md) — `zds list | info | add`
-(nur Node-Builtins). Config via `.zdsrc` oder `ZDS_REGISTRY_URL`/`ZDS_AUTH`.
+CLI: [`tooling/zds-cli/`](tooling/zds-cli/README.md) — `zds init | list | info |
+add | diff` (nur Node-Builtins). Bezug: das Paket ist bewusst `private` (keine
+interne npm-Registry) → `git clone` + `npm install -g ./tooling/zds-cli` bzw.
+`npx ./tooling/zds-cli`; `npx github:…` kann kein Unterverzeichnis auflösen.
+Config via `.zdsrc` oder `ZDS_REGISTRY_URL`/`ZDS_AUTH` — **`.zdsrc` enthält
+Credentials und gehört ins `.gitignore` des Zielprojekts.**
+
+Ablauf im Zielprojekt: **`init` → `add` → `diff`**. `init` holt die Token-Basis
+(ohne sie rendern kopierte Komponenten ungestylt), `add` kopiert die Artefakte
+und schreibt Dateien + Hashes nach `.zds-manifest.json`, `diff` vergleicht
+Manifest · lokale Datei · Registry und meldet je Datei
+_aktuell · lokal geändert · Registry neuer · fehlt_ (Exit 1 bei Abweichung).
+`diff` überschreibt nie — aktualisiert wird mit `zds add <slug> --force`.
 
 ```bash
 curl -u <user>:<pass> http://localhost:5173/api/registry
 curl -u <user>:<pass> 'http://localhost:5173/api/registry/button?format=html-css'
+curl -u <user>:<pass> http://localhost:5173/api/registry/foundations
 ```

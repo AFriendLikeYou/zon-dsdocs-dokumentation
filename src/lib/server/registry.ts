@@ -13,6 +13,7 @@
  * Dateisystem-Zugriff (Vercel!). Wie manifest.ts/mcp.ts: dünne Route → pure,
  * getestete Funktionen hier.
  */
+import { createHash } from 'node:crypto';
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
 import type { CodeArtefakt, CodeFormat, CodeStatus } from '$types/spec';
 
@@ -50,8 +51,28 @@ function artefakteOf(entry: AgentCatalogEntry): CodeArtefakt[] {
 	return [];
 }
 
-/** Ein Datei-Eintrag der Registry-Antwort: ordner-relativer Pfad + roher Inhalt. */
-export type RegistryDatei = { pfad: string; inhalt: string | null };
+/** Länge des gekürzten Hex-Hashes — 16 Zeichen (64 Bit) reichen für Drift-Erkennung. */
+const HASH_LENGTH = 16;
+
+/**
+ * Inhalts-Hash einer Artefakt-Datei: gekürzter SHA-256 im Format
+ * `sha256-<16 hex>`. Pure Funktion (nur Node-Builtin `crypto`) — Grundlage für
+ * `.zds-manifest.json` und `zds diff`: gleicher Inhalt ⇒ gleicher Hash,
+ * unabhängig von Pfad, Zeitpunkt und Zielprojekt. `null` bleibt `null` (Datei
+ * deklariert, Inhalt nicht auffindbar).
+ */
+export function fileHash(inhalt: string): string;
+export function fileHash(inhalt: string | null): string | null;
+export function fileHash(inhalt: string | null): string | null {
+	if (inhalt == null) return null;
+	return `sha256-${createHash('sha256').update(inhalt, 'utf8').digest('hex').slice(0, HASH_LENGTH)}`;
+}
+
+/**
+ * Ein Datei-Eintrag der Registry-Antwort: ordner-relativer Pfad + roher Inhalt
+ * + Inhalts-Hash (für Aktualitäts-Vergleiche in der CLI).
+ */
+export type RegistryDatei = { pfad: string; inhalt: string | null; hash: string | null };
 
 /** Ein Artefakt der Registry-Antwort: Format + Status + Dateien inkl. Inhalten. */
 export type RegistryArtefakt = {
@@ -114,7 +135,10 @@ function componentEntry(entry: AgentCatalogEntry, format?: string): RegistryComp
 		artefakte: artefakte.map((a) => ({
 			format: a.format,
 			status: a.status,
-			dateien: a.dateien.map((datei) => ({ pfad: datei, inhalt: fileContent(entry, datei) }))
+			dateien: a.dateien.map((datei) => {
+				const inhalt = fileContent(entry, datei);
+				return { pfad: datei, inhalt, hash: fileHash(inhalt) };
+			})
 		}))
 	};
 }
@@ -127,4 +151,47 @@ function componentEntry(entry: AgentCatalogEntry, format?: string): RegistryComp
 export function registryComponent(slug: string, format?: string): RegistryComponent | null {
 	const entry = AGENT_CATALOG.find((e) => e.slug === String(slug));
 	return entry ? componentEntry(entry, format) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Foundations — Token-Basis für `zds init`
+// ---------------------------------------------------------------------------
+
+/**
+ * Rohe Token-Basis (`static/styles-zds.css`) zur Build-Zeit — dieselbe Datei,
+ * die die Doku-Site ausliefert. Eine kopierte Komponente rendert ohne diese
+ * `--z-ds-*`-Deklarationen ungestylt; `zds init` legt sie im Zielprojekt ab.
+ */
+const foundationsCss = Object.values(
+	import.meta.glob('/static/styles-zds.css', {
+		eager: true,
+		query: '?raw',
+		import: 'default'
+	}) as Record<string, string>
+)[0];
+
+/** Antwort von `GET /api/registry/foundations`: eine Datei + Hash + Einbau-Hinweis. */
+export type RegistryFoundations = {
+	datei: string;
+	beschreibung: string;
+	hinweis: string;
+	inhalt: string;
+	hash: string;
+};
+
+/**
+ * Token-Basis des ZEIT-Designsystems als Registry-Artefakt — Struktur bewusst
+ * parallel zu {@link RegistryDatei} (`pfad`-Äquivalent `datei` + `inhalt` +
+ * `hash`), damit die CLI sie im selben Manifest führen kann.
+ */
+export function registryFoundations(): RegistryFoundations {
+	return {
+		datei: 'styles-zds.css',
+		beschreibung:
+			'Token-Basis des ZEIT-Designsystems (--z-ds-*). Voraussetzung dafür, dass kopierte Komponenten korrekt rendern.',
+		hinweis:
+			'Einmal global einbinden, VOR den Komponenten-Stylesheets — z. B. <link rel="stylesheet" href="/styles-zds.css"> oder @import "styles-zds.css"; im globalen CSS.',
+		inhalt: foundationsCss,
+		hash: fileHash(foundationsCss)
+	};
 }
