@@ -80,6 +80,36 @@ const CONSENT_SELEKTOREN = [
 	'#privacy-accept'
 ];
 
+/**
+ * CMP-Overlay neutralisieren — im Seitenkontext ausgeführt.
+ *
+ * zeit.de fährt einen Sourcepoint-CMP: ein `#sp_message_container_<id>` liegt als
+ * `position: fixed` über der ganzen Seite (z-index 2147483647) und der CMP setzt
+ * dazu die Klasse `sp-message-open` auf <html>, die `body { position: fixed;
+ * overflow: hidden }` scharf schaltet — eine SCROLL-SPERRE. Folge: Playwright kann
+ * kein Element unterhalb des ersten Viewports mehr anfahren („element is outside of
+ * the viewport"), jede `zustand`-Referenz weiter unten läuft in einen Timeout und
+ * wird fälschlich als „Referenz veraltet" gemeldet.
+ *
+ * Warum WEGRÄUMEN statt WEGKLICKEN: der Dialog kennt nur „Zustimmen und weiter"
+ * bzw. „Abo abschließen" — es gibt keinen Ablehnen-Knopf. Ein Klick wäre eine
+ * echte Tracking-Einwilligung im Namen des Hauses; ein vorgefertigtes Consent-Cookie
+ * wäre geraten. Beides wollen wir nicht. Das Overlay ist `fixed` und damit aus dem
+ * Fluss — es zu entfernen verschiebt kein Layout (empirisch geprüft: Button-Maße
+ * mit und ohne Overlay identisch), macht die Seite aber wieder scrollbar.
+ */
+const CMP_NEUTRALISIEREN = () => {
+	let entfernt = 0;
+	for (const el of document.querySelectorAll('[id^="sp_message_container_"]')) {
+		el.remove();
+		entfernt++;
+	}
+	const html = document.documentElement;
+	const scrollSperre = html.classList.contains('sp-message-open');
+	if (scrollSperre) html.classList.remove('sp-message-open');
+	return { entfernt, scrollSperre };
+};
+
 const MASS_LABEL = {
 	hoehe: 'Höhe',
 	breite: 'Breite',
@@ -222,7 +252,13 @@ const MESS_FN = (selektor) => {
 /** Zustand erzwingen. hover/focus über Playwright, disabled über das DOM. */
 async function erzwingeZustand(page, selektor, zustand) {
 	const el = page.locator(selektor).first();
-	if (zustand === 'hover') await el.hover({ timeout: 5_000 });
+	// Vorm Hover erst scrollen: reale Fundstellen liegen oft tief in einer langen
+	// Seite (auf zeit.de/index bei y≈11.500). Das Scrollen selbst kostet Zeit und
+	// stößt Lazy-Loading an — deshalb getrennt und mit eigenem, großzügigem Budget.
+	if (zustand === 'hover') {
+		await el.scrollIntoViewIfNeeded({ timeout: 10_000 });
+		await el.hover({ timeout: 10_000 });
+	}
 	else if (zustand === 'focus') await el.evaluate((n) => n.focus?.());
 	else if (zustand === 'disabled')
 		await el.evaluate((n) => {
@@ -314,6 +350,11 @@ async function main() {
 			continue;
 		}
 
+		// Der CMP wird per Skript nachgeladen und erscheint erst ~1–2s nach
+		// `domcontentloaded`. Ohne diese Wartezeit räumen wir gelegentlich auf, BEVOR
+		// das Overlay da ist — und die Scroll-Sperre schnappt danach doch noch zu.
+		await page.waitForTimeout(2_000);
+
 		// Consent-Banner best effort wegklicken. Für getComputedStyle ist er meist
 		// irrelevant (er überdeckt nur), aber er kann das Layout verschieben.
 		for (const sel of CONSENT_SELEKTOREN) {
@@ -328,7 +369,20 @@ async function main() {
 			}
 		}
 
+		// Was danach noch überdeckt oder das Scrollen sperrt, wird weggeräumt (s. o.).
+		let cmp = { entfernt: 0, scrollSperre: false };
+		try {
+			cmp = await page.evaluate(CMP_NEUTRALISIEREN);
+		} catch {
+			/* Seite ohne CMP oder Evaluate blockiert — kein Grund abzubrechen */
+		}
+
 		console.log(`📄 ${url}`);
+		if (cmp.entfernt || cmp.scrollSperre)
+			console.log(
+				`   (CMP-Overlay neutralisiert: ${cmp.entfernt} Container entfernt` +
+					`${cmp.scrollSperre ? ', Scroll-Sperre gelöst' : ''})`
+			);
 
 		for (const { slug, ref, masse, toleranz } of eintraege) {
 			const zustandLabel = ref.zustand ? ` [${ref.zustand}]` : '';
@@ -336,6 +390,9 @@ async function main() {
 
 			if (ref.zustand) {
 				try {
+					// Zweiter Griff ans Overlay: ein spät nachgeladener CMP sperrt sonst
+					// genau hier das Scrollen und lässt jedes Hover in den Timeout laufen.
+					await page.evaluate(CMP_NEUTRALISIEREN).catch(() => {});
 					await erzwingeZustand(page, ref.selektor, ref.zustand);
 				} catch (e) {
 					// Zustand nicht erzwingbar heißt fast immer: Element weg/verdeckt.

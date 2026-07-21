@@ -25,6 +25,21 @@ export const generated = {
 			"herkunft": "gemessen"
 		}
 	},
+	"produktion": {
+		"referenzen": [
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": ".z-text-button:not([class*=\"--\"])",
+				"beschreibung": "Basis-Text-Buttons auf der Startseite (Bookmark, Kommentarzähler, „Podcast abonnieren“). Das :not([class*=\"--\"]) schließt die Modifier --slim/--large/--icon/--unpadded aus, deren Maße bewusst abweichen (slim = Padding 6 statt 8); seitenspezifische Wrapper-Klassen wie .bookmark ändern die Geometrie nicht — alle Basis-Instanzen messen identisch 34 hoch, Padding 8, Radius 4."
+			},
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": ".z-text-button:not([class*=\"--\"])",
+				"zustand": "hover",
+				"beschreibung": "Derselbe Text-Button im Hover — prüft, dass Hover nur Fläche und Farbe setzt und die Geometrie stehen bleibt."
+			}
+		]
+	},
 	"spacing": [
 		{
 			"label": "Icon ↔ Label (Gap)",
