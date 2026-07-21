@@ -10,12 +10,23 @@
 	// (+layout.svelte) — keine zweite Routen-Logik hier.
 	let {
 		isUserLoggedIn,
-		section
+		section,
+		overlay = false
 	}: {
 		/** Login-Status; blendet den Login-Button aus, wenn eingeloggt. */
 		isUserLoggedIn: boolean;
 		/** Aktive Top-Level-Welt; markiert die Haupt-Nav und blendet den Burger auf `root` aus. */
 		section: Section;
+		/**
+		 * Header liegt ÜBER dem Inhalt (fixed) und ist oben durchsichtig — nur für die
+		 * Landing, deren Hero dahinter durchlaufen soll. Der Consumer gleicht die
+		 * Header-Höhe selbst aus (LandingHero.svelte).
+		 *
+		 * Bewusst eine eigene Prop statt `section === 'root'`: `root` umfasst auch
+		 * /admin, /login und 404 — dort verdeckte der fixierte Header die erste
+		 * Inhaltszeile und machte sie unklickbar.
+		 */
+		overlay?: boolean;
 	} = $props();
 
 	// Hauptnavigation: die zwei „Welten" wie auf der Landing/Footer benannt.
@@ -27,11 +38,10 @@
 	// Auf der Startseite (`root`) gibt es keine Sidebar → Burger entfällt.
 	const showSidebarButton = $derived(section !== 'root');
 
-	// Startseite: der Header liegt ÜBER dem Hero (fixed) und ist am Seitenanfang
-	// durchsichtig, damit der Hero-Verlauf durchscheint. Ab dem ersten Scroll-Stück
-	// legt er seine Fläche + Blur an, damit der Inhalt darunter lesbar bleibt.
+	// Landing: der Header liegt ÜBER dem Hero und ist am Seitenanfang durchsichtig,
+	// damit der Hero-Verlauf durchscheint. Ab dem ersten Scroll-Stück legt er seine
+	// Fläche + Blur an, damit der Inhalt darunter lesbar bleibt.
 	let scrollY = $state(0);
-	const overlay = $derived(section === 'root');
 	// Schwelle bewusst erst bei ~40px: so blendet die Fläche während des Scrollens
 	// auf, statt beim ersten Pixel umzuspringen.
 	const transparent = $derived(overlay && scrollY <= 40);

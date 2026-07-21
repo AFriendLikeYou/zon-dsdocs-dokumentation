@@ -28,6 +28,10 @@
 	const isProduct = $derived(section === 'product');
 	// Startseite (`/`) ist eine vollflächige Landing — ohne Sidebar/Breadcrumbs/TOC.
 	const isRoot = $derived(section === 'root');
+	// NUR die echte Landing (`/`) — `section === 'root'` umfasst auch /admin, /login
+	// und 404. Dort darf der Header NICHT über dem Inhalt liegen (er verdeckte sonst
+	// die erste Zeile und machte sie unklickbar).
+	const isLanding = $derived(url === '/');
 	const menuItems = $derived(isProduct ? MENU_ITEMS_PRODUCT : MENU_ITEMS_BRAND);
 	const flatMenuItems = $derived(isProduct ? FLAT_MENU_ITEMS_PRODUCT : FLAT_MENU_ITEMS_BRAND);
 	const showFooterNav = $derived(section !== 'root');
@@ -58,7 +62,7 @@
 
 <SkipToMainContentLink />
 
-<Navbar isUserLoggedIn={data.isUserLoggedIn} {section} />
+<Navbar isUserLoggedIn={data.isUserLoggedIn} {section} overlay={isLanding} />
 
 <div class="flex" class:flex--root={isRoot}>
 	{#if !isRoot}
