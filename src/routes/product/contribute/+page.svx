@@ -105,7 +105,7 @@ das noch _künftig_.
 		display: flex;
 		flex-direction: column;
 		gap: var(--z-ds-space-16);
-		margin-block: var(--z-ds-space-24);
+		margin-block: var(--ds-rhythm-block);
 	}
 	.status-def {
 		display: grid;

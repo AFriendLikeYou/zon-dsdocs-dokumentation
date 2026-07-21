@@ -113,7 +113,10 @@ Design-System-Styles.
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 		gap: var(--z-ds-space-32) var(--z-ds-space-24);
-		margin-block: var(--z-ds-space-32);
+		/* Das Katalog-Raster IST der Abschnitt unter seiner Überschrift → Block-Stufe
+		   (vorher 32px, ein Wert für sich). Der Innenabstand des Rasters (gap) bleibt
+		   davon unberührt — das ist Raster, nicht Rhythmus. */
+		margin-block: var(--ds-rhythm-block);
 		width: 100%;
 		max-width: 100%;
 	}

@@ -63,7 +63,7 @@ title: Fonts
 		display: grid;
 		grid-template-columns: 1fr;
 		gap: 0.5rem;
-		margin-bottom: 2rem;
+		margin-bottom: var(--ds-rhythm-block);
         max-width: 700px;
 	}
 

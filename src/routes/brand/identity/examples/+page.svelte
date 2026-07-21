@@ -150,7 +150,9 @@
 		background: #ffffff;
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
-		box-shadow: var(--ds-shadow-sm);
+		/* Gepinnt weiße Bühne — steht im Dark-Mode ohnehin maximal gegen die Seite;
+		   der Schlagschatten trug dort 1,05 : 1. Light behält ihn. */
+		box-shadow: var(--ds-elevation-shadow);
 		overflow: hidden;
 	}
 	.ex-canvas--square {

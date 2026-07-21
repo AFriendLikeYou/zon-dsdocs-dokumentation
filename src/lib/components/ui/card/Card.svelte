@@ -141,7 +141,7 @@
 		transform: translateY(-3px);
 	}
 	.card--plain:focus-visible .card__media {
-		box-shadow: var(--ds-shadow-md);
+		box-shadow: var(--ds-elevation-shadow-raised);
 	}
 	.card--framed:focus-visible {
 		border-color: var(--ds-border-hover);
@@ -179,7 +179,11 @@
 		);
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
-		box-shadow: var(--ds-shadow-sm);
+		/* Ruhende Kante: im Dark-Mode trug der Schatten gemessen 1,05 : 1 — die
+		   Trennung leistet dort die 1px-Border (--ds-border-soft) zusammen mit der
+		   eigenen Medienfläche. Im Light-Mode bleibt der Schatten. Der Hover-Lift
+		   oben nutzt dieselbe Mechanik eine Stufe höher. */
+		box-shadow: var(--ds-elevation-shadow);
 		transition: box-shadow var(--ds-dur) var(--ds-ease);
 	}
 	.card__placeholder {

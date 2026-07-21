@@ -125,6 +125,10 @@
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius);
 		padding: var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-6) var(--z-ds-space-l);
+		/* BEWUSST als Schatten belassen: die Farbe kommt aus --ds-text, wird im
+		   Dark-Mode also zum HELLEN Halo statt zu schwarzem Nichts — gemessen
+		   1,81 : 1 gegen die Seite und damit die stärkste Höhen-Aussage im Haus.
+		   Vorbild für theme-korrekte Schatten, kein Fall für --ds-elevation-*. */
 		box-shadow: 0 8px 24px rgb(from var(--ds-text) r g b / 0.18);
 		animation: dialog-bar-in 0.2s var(--ds-ease-out, ease-out);
 	}

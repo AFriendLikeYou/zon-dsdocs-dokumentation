@@ -90,6 +90,36 @@ export async function gotoStable(page: Page, path: string, theme: ThemeName) {
 	await page.evaluate(() => document.fonts.ready.then(() => undefined));
 	// Ein rAF-Tick, damit nach einem Font-Swap einmal neu gelayoutet ist.
 	await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(undefined))));
+	await waitForStableLayout(page);
+}
+
+/**
+ * Wartet, bis die Seitenhöhe über mehrere Frames konstant bleibt.
+ *
+ * Die Schritte davor (networkidle, Theme-Klasse, `document.fonts.ready`) decken
+ * nicht ab, dass Layout NACH dem ersten Paint noch nachrückt — z. B. wenn ein
+ * spät angewandtes Stylesheet die Navbar von einer auf zwei Zeilen umbrechen
+ * lässt. Der Katalog-Snapshot fiel genau darüber sporadisch um ~68px versetzt aus:
+ * kein Rendering-Unterschied, sondern ein Zeitpunkt-Unterschied.
+ */
+async function waitForStableLayout(page: Page, ruhigeFrames = 3, maxFrames = 60) {
+	await page.evaluate(
+		({ ruhig, max }: { ruhig: number; max: number }) =>
+			new Promise<void>((fertig) => {
+				let letzte = -1;
+				let stabil = 0;
+				let frames = 0;
+				const tick = () => {
+					const jetzt = document.documentElement.scrollHeight;
+					stabil = jetzt === letzte ? stabil + 1 : 0;
+					letzte = jetzt;
+					if (stabil >= ruhig || ++frames >= max) return fertig();
+					requestAnimationFrame(tick);
+				};
+				requestAnimationFrame(tick);
+			}),
+		{ ruhig: ruhigeFrames, max: maxFrames }
+	);
 }
 
 /** Kurzform: Bühne vorbereiten + navigieren. */

@@ -51,7 +51,10 @@ function ensureStyles() {
 			transition:
 				opacity 180ms var(--ds-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
 				transform 180ms var(--ds-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
-			box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+			/* Die Sprechblase ist eine INVERSE Fläche (--ds-text als Hintergrund) und
+			   steht im Dark-Mode als helle Fläche auf dunkler Seite — dort braucht sie
+			   keinen Schatten (der rohe schwarze trug 1,01 : 1). Light behält ihn. */
+			box-shadow: var(--ds-elevation-shadow-raised, 0 4px 12px rgb(0 0 0 / 0.2));
 		}
 		.ds-tooltip[data-show='true'] {
 			opacity: 1;

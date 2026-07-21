@@ -62,6 +62,9 @@
 		height: 14px;
 		border-radius: 50%;
 		background: var(--ds-surface);
+		/* BEWUSST belassen: 14px-Punkt auf einer farbigen Bahn — der Kontrast kommt
+		   aus der Bahnfarbe, der Schatten ist reine Plastizität und trägt keine
+		   Hierarchie. Eine Flächenstufe wäre auf dieser Größe nicht wahrnehmbar. */
 		box-shadow: var(--ds-shadow-sm);
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}

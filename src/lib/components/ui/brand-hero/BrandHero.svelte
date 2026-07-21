@@ -58,7 +58,10 @@
 		aspect-ratio: 4 / 3;
 		border-radius: var(--ds-radius);
 		overflow: hidden;
-		box-shadow: var(--ds-shadow-sm);
+		/* Die Medienfläche steht schon auf --ds-surface-raised und damit im Dark-Mode
+		   mit 1,19 : 1 gegen die Seite; der Schatten kam dort auf 1,05 : 1 und war
+		   reines Rauschen. Light behält ihn. */
+		box-shadow: var(--ds-elevation-shadow);
 		background: var(--ds-surface-raised);
 	}
 	.brand-hero__media img {

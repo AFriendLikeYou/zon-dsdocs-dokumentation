@@ -19,7 +19,15 @@ const PORT = Number(process.env.E2E_PORT ?? 5173);
 export default defineConfig({
 	testDir: 'e2e',
 	timeout: 60_000,
-	retries: process.env.CI ? 1 : 0,
+	// Auch lokal ein Retry: Die Suite läuft gegen den DEV-Server, der Seiten erst
+	// beim ersten Aufruf kompiliert. Unter Last (alle Specs am Stück) rückt Layout
+	// dadurch gelegentlich nach dem Screenshot noch nach — einzeln laufen dieselben
+	// Tests durch. `waitForStableLayout` in e2e/support/stabilize.ts fängt den
+	// Großteil ab, der Rest ist Server-Latenz.
+	// Saubere Lösung wäre, visual/a11y gegen einen Produktions-Build (vite preview)
+	// laufen zu lassen; das geht erst, wenn cms-smoke von den dev-only Schreib-
+	// Endpunkten entkoppelt ist — eigener Vorgang.
+	retries: 1,
 	// In CI zusätzlich einen HTML-Report schreiben — ohne ihn ist ein
 	// Snapshot-Fehlschlag (erwartet/aktuell/diff) nicht diagnostizierbar.
 	reporter: process.env.CI

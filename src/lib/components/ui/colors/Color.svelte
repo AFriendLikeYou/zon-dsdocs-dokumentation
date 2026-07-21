@@ -127,8 +127,10 @@
 		--copy-icon-size: 12px;
 		padding: var(--z-ds-space-4);
 		border-radius: var(--ds-radius-sm);
+		/* Inverse Mini-Fläche auf einem Farbfeld — der Kontrast kommt aus der
+		   Invertierung selbst; der Schatten trug im Dark-Mode 1,05 : 1. */
 		background: var(--ds-text);
 		color: var(--ds-surface);
-		box-shadow: var(--ds-shadow-sm);
+		box-shadow: var(--ds-elevation-shadow);
 	}
 </style>

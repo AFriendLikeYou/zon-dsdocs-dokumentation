@@ -188,10 +188,12 @@
 		width: 70%;
 		height: 100vh;
 		z-index: 50;
-		background-color: var(--ds-surface);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		/* Mobiler Drawer über dem Seiteninhalt. Vorher rohe schwarze Schatten
+		   (0.1/0.05) — im Dark-Mode gemessen ~1,01 : 1, der Drawer war von der Seite
+		   dahinter faktisch nicht zu unterscheiden. Jetzt Flächenstufe im Dark,
+		   Schatten im Light. */
+		background-color: var(--ds-elevation-overlay-bg);
+		box-shadow: var(--ds-elevation-shadow-raised);
 		transform: translateX(-100%);
 		/* Drawer-Entry → starke ease-out (Panels: --ds-dur-slow) */
 		transition: transform var(--ds-dur-slow) var(--ds-ease-out);

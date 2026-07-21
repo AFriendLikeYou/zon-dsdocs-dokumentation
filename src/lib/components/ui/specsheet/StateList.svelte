@@ -44,6 +44,7 @@
 	.hint {
 		font-size: var(--ds-text-sm);
 		color: var(--ds-text-muted);
-		margin: var(--z-ds-space-12) 0 0;
+		/* Hinweis gehört zur Liste darüber → „eng" (Wert unverändert 12px). */
+		margin: var(--ds-rhythm-tight) 0 0;
 	}
 </style>

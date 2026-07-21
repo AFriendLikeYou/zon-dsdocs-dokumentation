@@ -64,6 +64,49 @@ Motion nach dem emil-design-eng-Skill (`.agents/skills/`): Tokens
 `--ds-dur`/`--ds-ease*`, nie `transition: all`, Hover hinter `(hover: hover)`,
 `:active`-Feedback auf Pressables.
 
+**Vertikaler Rhythmus (Pflicht):** Abstände zwischen Abschnitten und Blöcken kommen
+aus **einer** Skala mit drei Stufen — empirisch aus den gemessenen Clustern der
+öffentlichen Seiten abgeleitet, nicht erfunden:
+
+| Token                   | Wert       | Bedeutung                                        |
+| ----------------------- | ---------- | ------------------------------------------------ |
+| `--ds-rhythm-section`   | `3rem`/48px | neuer Abschnitt — Luft **vor** `h2`/`h3`/`h4`/`h5` |
+| `--ds-rhythm-block`     | `1.5rem`/24px | Block ↔ Block innerhalb eines Abschnitts       |
+| `--ds-rhythm-tight`     | `0.75rem`/12px | Überschrift → ihr Inhalt, Hinweis → Bezug    |
+
+Die Regel dahinter: **gleiche Bedeutung = gleicher Abstand** — unabhängig von
+Überschriften-Ebene und Bereich (Brandhub wie DS-Doku). Überschriften-Ränder sind
+deshalb *nicht* mehr em-relativ; `2.2em` lieferte je Ebene 48/40/35px für dieselbe
+Aussage.
+
+Konsequenzen für neue Komponenten:
+
+- Ein Block-Baustein bringt **keinen eigenen Außenabstand nach oben** mit — den Abstand
+  setzt der Kontext (Überschrift bzw. Rhythmus-Regel). Nur wo ein Element zu seinem
+  Vorgänger *gehört* (Hinweis, Bildunterschrift), steht `--ds-rhythm-tight`.
+- Bewusst außerhalb der Skala und so zu belassen: der Zeilenfluss `p → p`
+  (`main p`, 1em) und das Anheften von Bildunterschriften (6px) — das ist Typografie
+  bzw. Kopplung, kein Abschnitts-Rhythmus. Gleiches gilt für Raster-`gap`s.
+- Jede gewollte Abweichung (Hero, Bühne) bekommt einen Kommentar mit Begründung.
+
+**Elevation (Pflicht bei Höhe):** Höhe wird **nicht** direkt über `--ds-shadow-*`
+ausgedrückt, sondern über `--ds-elevation-*`. Auf hellen Flächen trägt der Schatten,
+auf dunklen die **Fläche** — ein schwarzer Schatten kann auf `#121212` kaum abdunkeln
+(gemessen 1,05 : 1 für `--ds-shadow-sm`, gegenüber 1,19 : 1 für eine Flächenstufe).
+Consumer setzen immer **beide** Eigenschaften; je Modus ist eine davon neutral:
+
+```css
+.karte {
+	background: var(--ds-elevation-raised-bg); /* Light: No-Op · Dark: Flächenstufe */
+	box-shadow: var(--ds-elevation-shadow-raised); /* Light: Schatten · Dark: none */
+}
+```
+
+Ausnahmen (dokumentiert am Ort): Schatten, die ihre Farbe aus `--ds-text` ziehen
+(werden im Dark-Mode zum hellen Halo und sind von Haus aus theme-korrekt), und
+Schatten auf gepinnt hellen `.ds-stage`-Bühnen. `--ds-shadow-*` bleibt die Wahrheit
+für `foundations/motion`, das genau diese Tokens dokumentiert.
+
 ## Prop-API-Styleguide (fünf Regeln)
 
 Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann die

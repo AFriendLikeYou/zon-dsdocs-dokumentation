@@ -69,7 +69,11 @@
 
 <style>
 	.hero {
-		margin: -0.5rem 0 1.5rem;
+		/* Kein negativer Rand mehr: die -0.5rem waren gegen die alten, em-relativen
+		   18px unter dem h1 gerechnet, um den Hero an die Überschrift zu binden.
+		   Diese Bindung ist jetzt die „eng"-Stufe der Skala (12px) — der Hero gehört
+		   zur Überschrift, nicht zu einem eigenen Abschnitt. Unten die Block-Stufe. */
+		margin: 0 0 var(--ds-rhythm-block);
 	}
 	.eyebrow {
 		font-family: var(--ds-font-mono);

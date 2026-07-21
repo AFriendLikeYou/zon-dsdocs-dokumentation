@@ -180,9 +180,13 @@
 		padding: 0;
 		border: 1px solid var(--ds-border);
 		border-radius: var(--ds-radius);
-		background: var(--ds-surface);
+		/* Overlay über beliebigem Seiteninhalt: im Dark-Mode lag die Palette exakt auf
+		   der Seitenfarbe (--ds-surface auf --ds-surface) und wurde nur von der Border
+		   gehalten — der Schatten trug 1,06 : 1 bei. Dark hebt jetzt die Fläche
+		   (1,19 : 1), Light behält den Schatten. */
+		background: var(--ds-elevation-overlay-bg);
 		color: var(--ds-text);
-		box-shadow: var(--ds-shadow-md);
+		box-shadow: var(--ds-elevation-shadow-raised);
 		overflow: hidden;
 	}
 	.search-dialog::backdrop {

@@ -164,9 +164,11 @@
 		padding: var(--z-ds-space-8);
 		border: none;
 		border-radius: 999px;
-		background: var(--ds-surface);
+		/* Schließen-Knopf liegt über beliebigem Bildinhalt — im Dark-Mode konnte der
+		   Schatten (1,06 : 1) ihn dort nicht abheben; die Flächenstufe kann es. */
+		background: var(--ds-elevation-overlay-bg);
 		color: var(--ds-text);
-		box-shadow: var(--ds-shadow-md);
+		box-shadow: var(--ds-elevation-shadow-raised);
 		cursor: pointer;
 		transition: transform var(--ds-dur) var(--ds-ease-out);
 	}

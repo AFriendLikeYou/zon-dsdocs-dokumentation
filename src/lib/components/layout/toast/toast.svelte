@@ -99,9 +99,11 @@
 		padding: 0 2.25rem 0 var(--z-ds-space-m);
 		border: 1px solid var(--ds-border-soft);
 		border-radius: var(--ds-radius);
+		/* Fläche ist bereits eine Stufe über der Seite (im Dark 1,19 : 1) — die trägt
+		   die Höhe. Der Schatten bleibt nur im Light-Mode. */
 		background-color: var(--ds-surface-raised);
 		color: var(--ds-text);
-		box-shadow: var(--ds-shadow-md);
+		box-shadow: var(--ds-elevation-shadow-raised);
 	}
 
 	.toast__body {

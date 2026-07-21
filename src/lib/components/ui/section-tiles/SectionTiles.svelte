@@ -69,6 +69,7 @@
 		transition:
 			transform var(--ds-dur) var(--ds-ease-out),
 			box-shadow var(--ds-dur) var(--ds-ease),
+			background-color var(--ds-dur) var(--ds-ease),
 			border-color var(--ds-dur) var(--ds-ease);
 	}
 	.tile__head {
@@ -94,7 +95,12 @@
 		.tile:hover {
 			transform: translateY(-3px);
 			border-color: var(--ds-border);
-			box-shadow: var(--ds-shadow-md);
+			/* Die Kachel liegt auf --ds-surface, also auf der SEITENFARBE: im Dark-Mode
+			   trug der Hover-Schatten gemessen 1,06 : 1 — der Lift war praktisch nur
+			   die Bewegung. Jetzt hebt sich im Dark die Fläche (1,19 : 1), im Light
+			   weiterhin der Schatten. */
+			background-color: var(--ds-elevation-raised-bg);
+			box-shadow: var(--ds-elevation-shadow-raised);
 		}
 	}
 	.tile:active {

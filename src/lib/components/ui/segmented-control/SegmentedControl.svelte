@@ -205,6 +205,9 @@
 		position: absolute;
 		border-radius: 999px;
 		background: var(--seg-thumb-bg);
+		/* BEWUSST als Schatten belassen: der Thumb sitzt überwiegend auf einer
+		   gepinnt HELLEN .ds-stage — dort trägt der Schatten gemessen 2,85 : 1 und
+		   ist genau das Mittel der Wahl. Kein Fall für --ds-elevation-*. */
 		box-shadow: var(--ds-shadow-sm);
 	}
 	.segmented-control__thumb--ready {
