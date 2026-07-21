@@ -4,21 +4,30 @@
 	// „Welten"-Einstiege und „Was ist neu".
 	// Die kleine Produkt-Vorschau in der Welten-Karte nutzt echte z-Klassen;
 	// deren Pattern-CSS kommt via ?raw aus den Component-Ordnern.
+	// Alle Texte kommen aus `landing.content.json` (Formular-Editor /admin/start);
+	// Gestaltung/Logik — Pattern-CSS-Importe, Welten-Vorschau, Changelog-Zugriff,
+	// Link-Ziele — bleiben bewusst hier im Code.
 	import { CHANGELOG } from '$data/changelog';
 	import { Card } from '$components/ui/card';
 	import LandingHero from './LandingHero.svelte';
+	import type { LandingContent } from '$types/landing';
+	import contentJson from './landing.content.json';
 	import buttonCss from './product/components/button/pattern.css?raw';
 	import toggleCss from './product/components/toggle/pattern.css?raw';
 	import checkboxCss from './product/components/checkbox/pattern.css?raw';
 
 	const worldCss = [buttonCss, toggleCss, checkboxCss].join('\n');
 
+	const content = contentJson as LandingContent;
+	const { brandhub, designSystem } = content.welten;
+	const wasIstNeu = content.wasIstNeu;
+
 	// „Was ist neu" — neuester Datumsblock aus dem Changelog.
 	const latest = CHANGELOG[0]?.dates[0];
 </script>
 
 <svelte:head>
-	<title>DIE ZEIT — Design System &amp; Brandhub</title>
+	<title>{content.seitentitel}</title>
 </svelte:head>
 
 <!-- Pattern-CSS der Welten-Vorschau einmalig einbinden (gültiges HTML, {@html}). -->
@@ -35,18 +44,18 @@
 				url="/brand"
 				variant="framed"
 				headingLevel={2}
-				title="Brandhub"
-				description="Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles, was die Marke DIE ZEIT ausmacht."
+				title={brandhub.titel}
+				description={brandhub.beschreibung}
 				image="/media/brand/logo/wordmark-1.webp"
-				cta="Zur Marke →"
+				cta={brandhub.cta}
 			/>
 			<Card
 				url="/product"
 				variant="framed"
 				headingLevel={2}
-				title="Design-System"
-				description="Design Principles, Foundations, Tokens und dokumentierte Komponenten mit interaktivem Playground — für konsistente, barrierearme Interfaces."
-				cta="Zum System →"
+				title={designSystem.titel}
+				description={designSystem.beschreibung}
+				cta={designSystem.cta}
 			>
 				{#snippet media()}
 					<div class="world-demo">
@@ -64,8 +73,8 @@
 		{#if latest}
 			<section class="whatsnew">
 				<div class="whatsnew__head">
-					<h2>Was ist neu</h2>
-					<a href="/product/changelog">Alle Änderungen →</a>
+					<h2>{wasIstNeu.titel}</h2>
+					<a href="/product/changelog">{wasIstNeu.alleAenderungen}</a>
 				</div>
 				<ul class="whatsnew__list">
 					{#each latest.notes.slice(0, 4) as note}
@@ -73,7 +82,7 @@
 						<li>{@html note}</li>
 					{/each}
 				</ul>
-				<p class="whatsnew__date">Stand {latest.date}</p>
+				<p class="whatsnew__date">{wasIstNeu.standPrefix} {latest.date}</p>
 			</section>
 		{/if}
 	</div>

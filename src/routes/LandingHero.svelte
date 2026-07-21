@@ -7,27 +7,37 @@
 	// Single-Route-Consumer (nur „/") → per Konvention (components/README.md) hier
 	// bei der Route co-located, kein ui/-Barrel. Selbst-enthalten: zieht die
 	// Komponenten-Anzahl direkt aus dem Katalog.
+	//
+	// REDAKTION vs. GESTALTUNG: alle Texte kommen aus `landing.content.json`
+	// (Formular-Editor unter /admin/start). Im Code bleiben bewusst: Bühnen-Markup,
+	// die scroll-getriebene Animation, das CSS, die Link-Ziele (/product, /brand)
+	// und die Komponenten-Zahl aus dem Katalog.
 	import { CATALOG } from '$data/catalog';
+	import type { LandingContent } from '$types/landing';
+	import contentJson from './landing.content.json';
 
+	const hero = (contentJson as LandingContent).hero;
 	const componentCount = CATALOG.length;
 </script>
 
 <section class="hero">
 	<div class="hero__inner">
 		<div class="hero__copy">
-			<p class="eyebrow">DIE ZEIT · Design System</p>
-			<h1>Marke und Produkt,<br />an einem Ort.</h1>
+			<p class="eyebrow">{hero.eyebrow}</p>
+			<!-- Zeilenumbrüche der H1 sind redaktionell (eine Zeile je Eintrag). -->
+			<h1>{#each hero.ueberschriftZeilen as zeile, i (i)}{#if i > 0}<br />{/if}{zeile}{/each}</h1>
 			<p class="lead">
-				Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und agent-ready.
+				{hero.lead}
 			</p>
 			<div class="hero__cta">
-				<a class="btn btn--primary" href="/product">Zum Design-System</a>
-				<a class="btn" href="/brand">Zum Brandhub</a>
+				<a class="btn btn--primary" href="/product">{hero.primaerCta}</a>
+				<a class="btn" href="/brand">{hero.sekundaerCta}</a>
 			</div>
 			<ul class="stats">
-				<li><strong>{componentCount}</strong> Komponenten</li>
-				<li>Light &amp; Dark</li>
-				<li>agent-ready</li>
+				<li><strong>{componentCount}</strong> {hero.komponentenLabel}</li>
+				{#each hero.fakten as fakt (fakt)}
+					<li>{fakt}</li>
+				{/each}
 			</ul>
 		</div>
 

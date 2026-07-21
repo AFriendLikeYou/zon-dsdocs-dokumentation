@@ -4,8 +4,10 @@
 
 	let { data }: import('./$types').PageProps = $props();
 
-	// Einstiegs-Karten in die beiden „anderen Welten" (Medien, Brand-Seiten).
+	// Einstiegs-Karten in die übrigen Welten (Startseite, Medien, Brand-Seiten).
+	// Die Startseite ist eine komponierte Seite → Formular-Editor, kein Block-Editor.
 	const SECTIONS = [
+		{ href: '/admin/start', name: 'Startseite', desc: 'Hero, Welten-Karten & „Was ist neu"' },
 		{ href: '/admin/media', name: 'Medien', desc: 'Bilder hochladen & verwalten' },
 		{ href: '/admin/brand', name: 'Brand-Seiten', desc: 'Prosa & Frontmatter bearbeiten' }
 	];

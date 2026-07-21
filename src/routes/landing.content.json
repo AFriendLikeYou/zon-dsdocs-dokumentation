@@ -1,0 +1,35 @@
+{
+	"seitentitel": "DIE ZEIT — Design System & Brandhub",
+	"hero": {
+		"eyebrow": "DIE ZEIT · Design System",
+		"ueberschriftZeilen": [
+			"Marke und Produkt,",
+			"an einem Ort."
+		],
+		"lead": "Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und agent-ready.",
+		"primaerCta": "Zum Design-System",
+		"sekundaerCta": "Zum Brandhub",
+		"komponentenLabel": "Komponenten",
+		"fakten": [
+			"Light & Dark",
+			"agent-ready"
+		]
+	},
+	"welten": {
+		"brandhub": {
+			"titel": "Brandhub",
+			"beschreibung": "Markenstrategie, Logo, Farbe, Typografie, Bildsprache und Barrierefreiheit — alles, was die Marke DIE ZEIT ausmacht.",
+			"cta": "Zur Marke →"
+		},
+		"designSystem": {
+			"titel": "Design-System",
+			"beschreibung": "Design Principles, Foundations, Tokens und dokumentierte Komponenten mit interaktivem Playground — für konsistente, barrierearme Interfaces.",
+			"cta": "Zum System →"
+		}
+	},
+	"wasIstNeu": {
+		"titel": "Was ist neu",
+		"alleAenderungen": "Alle Änderungen →",
+		"standPrefix": "Stand"
+	}
+}

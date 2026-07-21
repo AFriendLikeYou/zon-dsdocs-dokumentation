@@ -4,6 +4,12 @@ src/routes/product/components/*/spec.generated.ts
 src/routes/product/components/*/figma-raw.json
 src/routes/product/components/*/model.draft.json
 
+# Redaktionelle Startseiten-Texte: das Format gehört dem Editor (/admin/start).
+# Er schreibt kanonisch mit JSON.stringify(…, '\t'); Prettier würde kurze Arrays
+# einzeilig zusammenziehen und damit den byte-stabilen Roundtrip brechen
+# (src/routes/admin/start/landing-content.test.ts).
+src/routes/landing.content.json
+
 # Build-/Paket-Artefakte
 .svelte-kit/
 build/
