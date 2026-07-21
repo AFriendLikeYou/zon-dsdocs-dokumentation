@@ -12,7 +12,7 @@ import {
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { kebabCase } from './export.mjs';
+import { kebabCase, renderPage, renderGenerated, renderContentStub } from './export.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
@@ -215,4 +215,101 @@ describe('export.mjs · --init-Scaffold', () => {
 		expect(second.stderr).toContain('Existiert bereits');
 		expect(readFileSync(modelPath, 'utf8')).toBe(before);
 	}, 15000);
+});
+
+// ---------------------------------------------------------------------------
+// Benannte Beispiele (Design-Tab, hinter dem Playground)
+// ---------------------------------------------------------------------------
+// Die Beispiele sind REDAKTIONELL (content.json) und werden zur Laufzeit über
+// dasselbe `instantiate()` gerendert wie der Playground. Diese Tests sichern die
+// drei Eigenschaften ab, die dabei leicht kaputtgehen: (1) es entsteht kein
+// zweiter Render-Pfad, (2) die Generat-Struktur bleibt content-unabhängig
+// (Idempotenz), (3) das Varianten-Raster wird nur so weit abgelöst, wie
+// Beispiele es abdecken.
+
+/** Minimales Modell mit Template, Controls und zwei Varianten-Achsen. */
+function beispielModell(extra = {}) {
+	return {
+		name: 'Demo',
+		varianten: [
+			{
+				prop: 'Variante',
+				werte: [{ label: 'Default', default: true }, { label: 'Primary', cssClass: 'z-demo--primary' }]
+			}
+		],
+		render: {
+			controls: [
+				{
+					key: 'variant',
+					label: 'Variant',
+					type: 'select',
+					options: [
+						{ value: 'default', label: 'Default' },
+						{ value: 'primary', label: 'Primary', cssClass: 'z-demo--primary' }
+					]
+				}
+			],
+			template: '<button class="z-demo{classes}"{attrs}>Demo</button>'
+		},
+		...extra
+	};
+}
+
+describe('export.mjs · benannte Beispiele', () => {
+	it('emittiert die Beispiel-Sektion hinter dem Playground und vor der Anatomie', () => {
+		const page = renderPage(beispielModell({ masse: { hoehe: '40' } }));
+		const playground = page.indexOf('id="playground"');
+		const beispiele = page.indexOf('id="beispiele"');
+		const anatomie = page.indexOf('id="anatomie"');
+		expect(playground).toBeGreaterThan(-1);
+		expect(beispiele).toBeGreaterThan(playground);
+		expect(anatomie).toBeGreaterThan(beispiele);
+	});
+
+	it('nutzt denselben Render-Pfad wie der Playground (instantiate, kein zweiter Weg)', () => {
+		const page = renderPage(beispielModell());
+		expect(page).toContain("import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';");
+		expect(page).toContain('instantiate(playgroundTemplate, playgroundControls, werte)');
+		// Genau EINE Template-Konstante — Vorschau, Code und Beispiele teilen sie.
+		expect(page.match(/const playgroundTemplate =/g)).toHaveLength(1);
+	});
+
+	it('Generat bleibt content-unabhängig (laufzeit-gated, nichts eingebacken)', () => {
+		const page = renderPage(beispielModell());
+		expect(page).toContain('{#if beispiele.length}');
+		expect(page).toContain('const beispiele = editorial.beispiele ?? [];');
+		// Kein content.json-Wert im Generat — das ist die Idempotenz-Bedingung.
+		expect(page).not.toContain('titel: ');
+	});
+
+	it('Varianten-Raster zeigt nur, was kein Beispiel abdeckt', () => {
+		const page = renderPage(beispielModell());
+		expect(page).toContain(
+			'const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));'
+		);
+		expect(page).toContain('{#if offeneVariantItems.length}');
+		expect(page).toContain("{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}");
+		// Anker-id bleibt stabil (Deep-Links / TableOfContents).
+		expect(page).toContain('id="varianten"');
+	});
+
+	it('ohne render.template (Specimen-Escape-Hatch) gibt es keine Beispiel-Sektion', () => {
+		const model = beispielModell();
+		delete model.render.template;
+		model.render.specimen = './Specimen.svelte';
+		const page = renderPage(model);
+		expect(page).not.toContain('<ExampleBlock');
+		expect(page).not.toContain('id="beispiele"');
+	});
+
+	it('beispiele sind redaktionell: nicht im Maschinen-Modell, aber im content-Stub', () => {
+		const model = beispielModell({
+			beispiele: [{ titel: 'Semantik', instanzen: [{ variant: 'primary' }], abdeckt: ['Primary'] }]
+		});
+		expect(renderGenerated(model)).not.toContain('beispiele');
+		const stub = JSON.parse(renderContentStub(model));
+		expect(stub.beispiele).toEqual([
+			{ titel: 'Semantik', instanzen: [{ variant: 'primary' }], abdeckt: ['Primary'] }
+		]);
+	});
 });

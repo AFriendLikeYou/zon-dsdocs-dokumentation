@@ -10,18 +10,20 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-text-button"},{"nr":2,"side":"top","x":50}];
-	const playgroundControls = [{"key":"size","label":"Size","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"slim","label":"Slim","cssClass":"z-text-button--slim"},{"value":"large","label":"Large","cssClass":"z-text-button--large"}]},{"key":"bold","label":"Bold","type":"toggle","cssClass":"z-text-button--bold"},{"key":"active","label":"Active","type":"toggle","cssClass":"z-text-button--active"},{"key":"onImage","label":"On Image","type":"toggle","cssClass":"z-text-button--on-image"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
+	const playgroundControls = [{"key":"size","label":"Size","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"slim","label":"Slim","cssClass":"z-text-button--slim"},{"value":"large","label":"Large","cssClass":"z-text-button--large"}]},{"key":"bold","label":"Bold","type":"toggle","cssClass":"z-text-button--bold"},{"key":"active","label":"Active","type":"toggle","cssClass":"z-text-button--active"},{"key":"onImage","label":"On Image","type":"toggle","cssClass":"z-text-button--on-image"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}] as PlaygroundControl[];
 	const playgroundTemplate = `<button type="button" class="z-text-button{classes}"{attrs}>Mehr anzeigen</button>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
 	const patternCssCode = `/* z-text-button — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .z-text-button {
 	align-items: center;
@@ -76,6 +78,7 @@ kategorie: Aktionen
 }
 `;
 	const variantItems = [{"label":"Default","html":"<button type=\"button\" class=\"z-text-button\">Mehr anzeigen</button>","note":"Flächenloser Text-Button in Tablet Gothic 14 — Standard für sekundäre Aktionen."},{"label":"Slim","html":"<button type=\"button\" class=\"z-text-button z-text-button--slim\">Mehr anzeigen</button>","note":"Reduzierte vertikale Höhe (6px statt 8px) für dichte Layouts."},{"label":"Large","html":"<button type=\"button\" class=\"z-text-button z-text-button--large\">Mehr anzeigen</button>","note":"Größeres Label (Tablet Gothic 16) für prominentere Kontexte."},{"label":"Bold","html":"<button type=\"button\" class=\"z-text-button z-text-button--bold\">Mehr anzeigen</button>","note":"Fettes Label zur stärkeren Betonung."},{"label":"Active","html":"<button type=\"button\" class=\"z-text-button z-text-button--active\">Mehr anzeigen</button>","note":"Persistenter Aktiv-Look (Background-10 + Text-100) — z. B. für den aktiven Eintrag."},{"label":"On Image","html":"<button type=\"button\" class=\"z-text-button z-text-button--on-image\">Mehr anzeigen</button>","note":"Helle Beschriftung (General-White-60) für Flächen auf Bildern; Hover mit dunkler Fläche."}];
+	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const stateItems = [{"label":"default","html":"<button type=\"button\" class=\"z-text-button\">Mehr anzeigen</button>"},{"label":"disabled","html":"<button type=\"button\" class=\"z-text-button\" disabled>Mehr anzeigen</button>"},{"label":"active","html":"<button type=\"button\" class=\"z-text-button z-text-button--active\">Mehr anzeigen</button>"}];
 </script>
 
@@ -97,13 +100,30 @@ kategorie: Aktionen
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} darkKey="onImage" align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button type="button" class="z-text-button">Mehr anzeigen</button>{/snippet}
 	</Anatomy>
 
-	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<SpecimenGrid items={variantItems} />
+	{#if offeneVariantItems.length}
+		<h2 id="varianten" class="section-anchor">
+			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
+		</h2>
+		<SpecimenGrid items={offeneVariantItems} />
+	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<SpecimenGrid items={stateItems} />

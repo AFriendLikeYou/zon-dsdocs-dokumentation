@@ -122,10 +122,45 @@ describe('content-validation · checkContentData', () => {
 		expect(issues.some((i) => i.includes('callouts[0].text'))).toBe(true);
 	});
 
+	it('beispiele: vollständiger Eintrag → keine Befunde', () => {
+		const data = {
+			beispiele: [
+				{
+					titel: 'Semantik',
+					beschreibung: 'Primary genau einmal pro Aktionsgruppe.',
+					instanzen: [{ variant: 'default' }, { variant: 'primary', fullwidth: true }],
+					abdeckt: ['Default', 'Primary']
+				},
+				// Minimal: nur der Titel ist Pflicht (Instanzen fallen auf die Default-Instanz).
+				{ titel: 'Nur Titel' }
+			]
+		};
+		expect(checkContentData(data)).toEqual([]);
+	});
+
+	it('beispiele: fehlender titel → Befund', () => {
+		const issues = checkContentData({ beispiele: [{ beschreibung: 'ohne Titel' }] });
+		expect(issues.some((i) => i.includes('beispiele[0].titel'))).toBe(true);
+	});
+
+	it('beispiele: Instanz-Wert weder String noch Boolean → Befund', () => {
+		const issues = checkContentData({ beispiele: [{ titel: 'X', instanzen: [{ variant: 3 }] }] });
+		expect(issues.some((i) => i.includes('beispiele[0].instanzen[0]["variant"]'))).toBe(true);
+	});
+
+	it('beispiele: abdeckt muss ein String-Array sein · Fremdkey wird gemeldet', () => {
+		const issues = checkContentData({
+			beispiele: [{ titel: 'X', abdeckt: [1], variante: 'nope' }]
+		});
+		expect(issues.some((i) => i.includes('beispiele[0].abdeckt'))).toBe(true);
+		expect(issues.some((i) => i.includes('unbekannter Key'))).toBe(true);
+	});
+
 	it('KNOWN_KEYS enthält die Kern-Editorial-Felder', () => {
 		expect(KNOWN_KEYS).toContain('zweck');
 		expect(KNOWN_KEYS).toContain('verwandt');
 		expect(KNOWN_KEYS).toContain('codeBeispiele');
+		expect(KNOWN_KEYS).toContain('beispiele');
 		expect(KNOWN_KEYS).toContain('repoNote');
 		expect(KNOWN_KEYS).not.toContain('masse');
 		// Feature entfernt (2026-07): visuelle Do/Don't-Paare gibt es nicht mehr.

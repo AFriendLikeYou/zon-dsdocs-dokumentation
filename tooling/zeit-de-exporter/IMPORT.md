@@ -246,12 +246,18 @@ Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) 
 **Platzhalter/geschätzt** (Beispieltexte, gerechnete a11y-Kontraste). Visuell abnehmen
 (die Seite liegt hinter Basic Auth).
 
-Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `callouts`, `a11y`,
-`tastatur`, `doDont`, `verwendung`, `wording`, `komposition`,
+Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `beispiele`,
+`callouts`, `a11y`, `tastatur`, `doDont`, `verwendung`, `wording`, `komposition`,
 `verwandt`, `version`, `variantInfo`, `codeBeispiele` sowie die feldweisen
 Snippet-Overrides `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` (gewinnen
 feldweise über die gleichnamigen `render`-Werte; leer = Maschine gewinnt)
 (Schema-Referenz: [README](./README.md#schema-referenz-modeljson)).
+`beispiele` (`{ titel, beschreibung?, instanzen?, abdeckt? }[]`) sind die **benannten
+Beispiele** direkt hinter dem Playground: ein Playground zeigt Optionen, ein Beispiel
+zeigt Absicht („wann nehme ich Primary?"). Jede Instanz ist ein Satz Control-Werte und
+wird über dasselbe `instantiate()` gerendert wie der Playground. Was ein Beispiel per
+`abdeckt` dokumentiert, fällt aus dem Varianten-Raster („Weitere Varianten") — der
+Rest bleibt sichtbar stehen. Pflegbar im Spec-Editor (`/admin/product/components/<slug>`).
 `komposition` (`string[]`, je Eintrag ein Satz) beschreibt, wie die Komponente mit
 anderen kombiniert wird/werden darf — nützlich für Agenten bei Formularen/Organismen;
 nur befüllen, wenn fachlich sicher ableitbar.

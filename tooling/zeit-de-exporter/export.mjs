@@ -60,6 +60,7 @@ function camelCase(kebab) {
  *  damit „Do & Don't"/„Texte & Wording" saubere, URL-freundliche ids bekommen und
  *  über Re-Exports hinweg stabil bleiben. */
 const SECTION_IDS = {
+	Beispiele: 'beispiele',
 	Playground: 'playground',
 	Anatomie: 'anatomie',
 	Verwendung: 'verwendung',
@@ -109,6 +110,9 @@ function renderFrontmatter(model) {
 const EDITORIAL = [
 	'zweck',
 	'status',
+	// Benannte Beispiele: redaktionell (Titel/Erklärsatz/Instanz-Auswahl sind eine
+	// Kuratierungs-Entscheidung, keine Figma-Tatsache) → content.json gewinnt.
+	'beispiele',
 	'callouts',
 	'a11y',
 	'tastatur',
@@ -160,6 +164,7 @@ function renderGenerated(model) {
  *   status           – ready_for_dev | completed | changed
  *   version          – Snapshot-/Versions-Label im Hero
  *   variantInfo      – Wann welche Variante nutzen (Label → Text)
+ *   beispiele        – Benannte Beispiele ({ titel, beschreibung?, instanzen?, abdeckt? })
  *   callouts         – Anatomie-Beschriftungen ({ nr, text })
  *   a11y             – Barrierefreiheit-Hinweise ({ label, wert, status })
  *   tastatur         – Tastatur-Bedienung ({ taste, aktion })
@@ -500,6 +505,17 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasTemplatePg = Boolean(pgTemplate) && !pgSpecimen;
 	const hasSpecimenPg = Boolean(pgSpecimen);
 
+	// Benannte Beispiele (erste Design-Sektion, vor dem Playground). Sie sind
+	// REDAKTIONELL (content.json → editorial) und werden darum ZUR LAUFZEIT
+	// instanziiert — mit demselben `instantiate()`, das der Playground benutzt
+	// (Import aus $components/ui/playground). Es gibt also keinen zweiten
+	// Render-Pfad: ein Beispiel ist „n Instanzen mit je einem Satz Control-Werten".
+	// Die Generat-Struktur bleibt dadurch content-unabhängig (Idempotenz) — ob
+	// tatsächlich Beispiele erscheinen, entscheidet ein `{#if}` zur Laufzeit.
+	// Voraussetzung ist ein render.template; im Specimen-Escape-Hatch (Loops/
+	// Interaktion) gibt es nichts zu instanziieren → keine Beispiel-Sektion.
+	const hasExamples = hasTemplatePg;
+
 	// Verfügbarkeit je Abschnitt.
 	const hasAnatomy = Boolean(
 		render.preview || model.callouts?.length || model.masse || model.spacing?.length
@@ -531,10 +547,16 @@ function renderPage(model, { patternCss = null } = {}) {
 	const hasRelated = Array.isArray(model.verwandt) && model.verwandt.length > 0;
 	const hasDevelop = anyCode || hasProps;
 	const hasSpecs = hasTokens || hasMasse || hasColorRoles;
+	// `editorial` (content.json als Partial<ComponentSpec>) trägt alle Felder, die
+	// ZUR LAUFZEIT aus der Redaktion kommen: Snippet-Overrides, codeBeispiele — und
+	// seit den benannten Beispielen auch `beispiele` (samt der `abdeckt`-Ablöse der
+	// Varianten-Sektion). Darum reicht `hasDevelop` als Bedingung nicht mehr.
+	const hasEditorial = hasDevelop || hasExamples || hasVariants;
 
 	// Nur tatsächlich genutzte Komponenten importieren.
 	const used = new Set(['ComponentHero']);
 	if (hasAnatomy) used.add('Anatomy');
+	if (hasExamples) used.add('ExampleBlock');
 	if (hasVariants || hasStateGrid) used.add('SpecimenGrid');
 	if (hasStateRest) used.add('StateList');
 	if (hasDoDont) used.add('DoDontList');
@@ -562,23 +584,37 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\timport { ${usedSpec.join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(used.has('CodeBlock') ? `\timport { CodeBlock } from '${CODE_BLOCK_IMPORT}';\n` : '') +
 		(hasUsage ? `\timport { UsageBlock } from '$components/ui/usage-block';\n` : '') +
-		(hasTemplatePg ? `\timport { Playground } from '$components/ui/playground';\n` : '') +
+		// Playground UND Beispiele teilen sich `instantiate` — eine Quelle für beide.
+		(hasTemplatePg
+			? `\timport { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';\n`
+			: '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
 		`\timport content from './content.json';\n` +
-		(hasDevelop ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
+		(hasEditorial ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
 
 	const decls =
 		`\t// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.\n` +
 		`\tconst ${S} = { ...generated, ...content };\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
-			? `\tconst playgroundControls = ${JSON.stringify(pgControls)};\n` +
+			? `\tconst playgroundControls = ${JSON.stringify(pgControls)} as PlaygroundControl[];\n` +
 				`\tconst playgroundTemplate = \`${tl(pgTemplate)}\`;\n`
 			: '') +
 		// editorial = content.json als Partial<ComponentSpec> — Träger der feldweisen
-		// Snippet-Overrides und der redaktionellen codeBeispiele (content gewinnt).
-		(hasDevelop ? `\tconst editorial = content as Partial<ComponentSpec>;\n` : '') +
+		// Snippet-Overrides, der redaktionellen codeBeispiele und der benannten
+		// Beispiele (content gewinnt).
+		(hasEditorial ? `\tconst editorial = content as Partial<ComponentSpec>;\n` : '') +
+		// Benannte Beispiele + die daraus abgeleitete Ablöse der Varianten-Sektion.
+		// `abdeckt` nennt die Varianten-Werte-Labels, die ein Beispiel dokumentiert;
+		// nur die NICHT abgedeckten Werte bleiben im Specimen-Raster („Weitere
+		// Varianten"). Das Raster entsteht vollständig per Konstruktion aus den
+		// Figma-Achsen, die Beispiele sind redaktionell und dürfen lückenhaft sein —
+		// so verschwindet nie etwas unbemerkt, und Redaktionsarbeit lohnt sichtbar.
+		(hasExamples || hasVariants ? `\tconst beispiele = editorial.beispiele ?? [];\n` : '') +
+		(hasVariants
+			? `\tconst abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));\n`
+			: '') +
 		(hasHtmlCode
 			? `\tconst htmlBody = \`${tl(htmlBodyMachine)}\`;\n` +
 				`\tconst codeNote = editorial.codeNote ?? \`${tl(machineCodeNote)}\`;\n` +
@@ -593,14 +629,19 @@ function renderPage(model, { patternCss = null } = {}) {
 			: '') +
 		(cssForCode ? `\tconst cssCode = \`${tl(cssForCode)}\`;\n` : '') +
 		(patternCss ? `\tconst patternCssCode = \`${tl(patternCss)}\`;\n` : '') +
-		(hasVariants ? `\tconst variantItems = ${serializeItems(variantItems)};\n` : '') +
+		(hasVariants
+			? `\tconst variantItems = ${serializeItems(variantItems)};\n` +
+				`\tconst offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));\n`
+			: '') +
 		(hasStateGrid ? `\tconst stateItems = ${serializeItems(stateItems)};\n` : '') +
 		(hasProps ? `\tconst propsData = ${JSON.stringify(props)};\n` : '');
 
 	// ---- Design-Tab ----
-	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02):
-	// 1) Playground · 2) Anatomy · 3) Usage-/Content-Guidelines (Verwendung, Varianten,
-	// Zustände) · 4) Do/Don'ts.
+	// Kanonische Reihenfolge (Nutzer-Entscheid 2026-07-02, ergänzt 2026-07-21):
+	// 1) Playground · 2) Beispiele · 3) Anatomy · 4) Usage-/Content-Guidelines
+	// (Verwendung, Varianten, Zustände) · 5) Do/Don'ts.
+	// Der Playground bleibt der Einstieg (ausprobieren), die benannten Beispiele
+	// stehen direkt dahinter (erklären: „wann nehme ich Primary?").
 	// Jede Sektion trägt eine stabile id + class="section-anchor"; die rechte
 	// TableOfContents des Layouts sammelt die h2[id] und listet sie auf.
 	let design = '';
@@ -613,6 +654,25 @@ function renderPage(model, { patternCss = null } = {}) {
 			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
 			design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} align={${S}.playground?.align} resizable={${S}.playground?.resizable} />\n`;
 		}
+	}
+	// Benannte Beispiele — laufzeit-gated (`{#if}`), damit die Generat-Struktur
+	// content-unabhängig bleibt (Idempotenz: es wird nie ein content.json-Wert
+	// eingebacken). Jede Instanz entsteht aus `instantiate(template, controls, werte)`
+	// — dieselbe Funktion, die der Playground für Vorschau UND Code nutzt.
+	if (hasExamples) {
+		design +=
+			`\n\t{#if beispiele.length}\n` +
+			`\t\t<h2 id="${SECTION_IDS.Beispiele}" class="section-anchor">Beispiele</h2>\n` +
+			`\t\t{#each beispiele as beispiel, i (i)}\n` +
+			`\t\t\t<ExampleBlock\n` +
+			`\t\t\t\ttitel={beispiel.titel}\n` +
+			`\t\t\t\tbeschreibung={beispiel.beschreibung}\n` +
+			`\t\t\t\tinstanzen={(beispiel.instanzen ?? [{}]).map((werte) =>\n` +
+			`\t\t\t\t\tinstantiate(playgroundTemplate, playgroundControls, werte)\n` +
+			`\t\t\t\t)}\n` +
+			`\t\t\t/>\n` +
+			`\t\t{/each}\n` +
+			`\t{/if}\n`;
 	}
 	if (hasAnatomy) {
 		design +=
@@ -627,10 +687,18 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasWording) {
 		design += `\n\t<h2 id="${SECTION_IDS.Wording}" class="section-anchor">Texte &amp; Wording</h2>\n\t<WordingList items={${S}.wording} />\n`;
 	}
+	// Varianten-Raster: nur noch das, was KEIN Beispiel abdeckt. Sind alle Werte
+	// abgedeckt, entfällt die Sektion ganz; gibt es überhaupt Beispiele, heißt sie
+	// „Weitere Varianten" (der Rest neben dem Erklärten). Die Anker-id bleibt stabil
+	// `varianten`, damit Deep-Links und die TableOfContents nicht brechen.
 	if (hasVariants) {
 		design +=
-			`\n\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">Varianten</h2>\n` +
-			`\t<SpecimenGrid items={variantItems} />\n`;
+			`\n\t{#if offeneVariantItems.length}\n` +
+			`\t\t<h2 id="${SECTION_IDS.Varianten}" class="section-anchor">\n` +
+			`\t\t\t{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}\n` +
+			`\t\t</h2>\n` +
+			`\t\t<SpecimenGrid items={offeneVariantItems} />\n` +
+			`\t{/if}\n`;
 	}
 	if (hasStates) {
 		design += `\n\t<h2 id="${SECTION_IDS.Zustände}" class="section-anchor">Zustände</h2>\n`;

@@ -10,19 +10,21 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-button"},{"nr":2,"side":"top","x":50}];
-	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
+	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}] as PlaygroundControl[];
 	const playgroundTemplate = `<button type="submit" class="z-button{classes}"{attrs}>Click me</button>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
 	const htmlBody = `<button class="z-button z-button--primary" type="button">Button</button>
 <button class="z-button" type="button">Button</button>`;
 	const codeNote = editorial.codeNote ?? `Button-Styles global einbinden (button.css); echte --z-ds-Tokens.`;
@@ -100,6 +102,7 @@ kategorie: Aktionen
 }
 `;
 	const variantItems = [{"label":"Default","html":"<button type=\"submit\" class=\"z-button\">Click me</button>","note":"Neutrale Aktion — helle Fläche, dunkles Label."},{"label":"Primary","html":"<button type=\"submit\" class=\"z-button z-button--primary\">Click me</button>","note":"Wichtigste Aktion im Kontext — dunkle Fläche, pro Aktionsgruppe nur einmal."},{"label":"Z+","html":"<button type=\"submit\" class=\"z-button z-button--zplus\">Click me</button>","note":"Aktion mit ZEIT-Rot-Akzent (Z+/Abo-Kontext)."},{"label":"Fullwidth","html":"<button type=\"submit\" class=\"z-button z-button--fullwidth\">Click me</button>"}];
+	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const stateItems = [{"label":"default","html":"<button class=\"z-button\" type=\"button\">Button</button>"},{"label":"disabled","html":"<button type=\"submit\" class=\"z-button\" disabled>Click me</button>"}];
 	const propsData = [{"name":"variant","typ":"\"default\" | \"primary\" | \"zplus\"","default":"\"default\"","erlaubteWerte":["default","primary","zplus"],"beschreibung":"Visuelle Gewichtung der Aktion (Modifier z-button--primary / z-button--zplus)."},{"name":"fullwidth","typ":"boolean","default":"false","beschreibung":"Streckt den Button auf 100% Breite (z-button--fullwidth)."},{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Button (nativ; visuell via opacity 0.5)."},{"name":"label","typ":"string","default":"\"Button\"","beschreibung":"Sichtbarer Button-Text."}];
 </script>
@@ -123,6 +126,19 @@ kategorie: Aktionen
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="z-button z-button--primary" type="button">Button</button>{/snippet}
@@ -131,8 +147,12 @@ kategorie: Aktionen
 	<h2 id="verwendung" class="section-anchor">Verwendung</h2>
 	<UsageBlock verwendung={spec.verwendung} />
 
-	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<SpecimenGrid items={variantItems} />
+	{#if offeneVariantItems.length}
+		<h2 id="varianten" class="section-anchor">
+			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
+		</h2>
+		<SpecimenGrid items={offeneVariantItems} />
+	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<SpecimenGrid items={stateItems} />

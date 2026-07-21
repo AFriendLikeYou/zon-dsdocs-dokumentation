@@ -10,20 +10,21 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, StateList, RelatedComponents, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-page-shortcut"},{"nr":2,"side":"bottom","x":50}];
-	const playgroundControls = [];
+	const playgroundControls = [] as PlaygroundControl[];
 	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>
   <span>Zur Startseite</span>
 </button>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
 	const patternCssCode = `/* z-page-shortcut — Pattern-CSS (unscoped, originalgetreu von zeit.de portiert). */
 .z-page-shortcut {
 	align-items: center;
@@ -70,6 +71,19 @@ kategorie: Aktionen
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." align={spec.playground?.align} resizable={spec.playground?.resizable} />
+
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

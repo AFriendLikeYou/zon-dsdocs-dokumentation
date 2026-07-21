@@ -150,13 +150,22 @@ speist **Live-Vorschau und Code-Block** — kein Drift. Escape-Hatch für
 Loops/Interaktion: `render.specimen` (co-located `Specimen.svelte`, darf nur
 Registry-Daten konsumieren).
 
+**Benannte Beispiele** (`beispiele[]`, redaktionell in `content.json`): je Eintrag
+`titel` + `beschreibung` + `instanzen` (n Sätze Control-Werte) + optional
+`abdeckt` (Varianten-Labels). Ein Playground dokumentiert **Optionen**, ein
+Beispiel dokumentiert **Absicht**. Gerendert über **dasselbe** `instantiate()` wie
+der Playground (kein zweiter Render-Pfad) durch `specsheet/ExampleBlock`; braucht
+ein `render.template`. Varianten-Werte, die ein `abdeckt` nennt, fallen aus dem
+Specimen-Raster — der Rest bleibt als **„Weitere Varianten"** stehen, sind alle
+abgedeckt, entfällt die Sektion. Redaktionell pflegbar im Spec-Editor.
+
 **Spec-UI-Kit** `src/lib/components/ui/specsheet/` — theme-adaptive Renderer, die
 die Seiten-Styles erben (keine verschachtelten weißen Cards): `ComponentHero ·
-Anatomy · SpecimenGrid · StateList · TokenTable · MeasureTable · A11yList ·
-DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
+Anatomy · ExampleBlock · SpecimenGrid · StateList · TokenTable · MeasureTable ·
+A11yList · DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
 Artboard-Fläche; CSS wird gegen `.spec-canvas` / `.pg-preview` gescopt.
 
-**Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Anatomie · 3) Verwendung/Varianten/Zustände · 4) Do & Don't.
+**Design-Tab-Reihenfolge (kanonisch):** 1) Playground · 2) Beispiele · 3) Anatomie · 4) Verwendung/Varianten/Zustände · 5) Do & Don't.
 
 ## Brand-CMS (`/admin`) — redaktionelles Editieren im Browser
 
@@ -168,8 +177,8 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
 **Editoren & Übersicht:**
 
 - `admin/[slug]/` — **Component-`content.json`-Editor** (DS-Doku). Editierbare Keys:
-  `zweck, status, verwendung, doDont, variantInfo, a11y, callouts, tastatur, wording,
-verwandt`. Client-State → verstecktes JSON-Feld → Server merged
+  `zweck, status, verwendung, doDont, variantInfo, beispiele, a11y, callouts, tastatur,
+wording, verwandt`. Client-State → verstecktes JSON-Feld → Server merged
   **nur** diese Keys zurück (Rest der `content.json` bleibt).
 - `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub, ADR-029): Notion-artige
   Block-Karten (Figma-Vorlage 689:11503) mit Slash-Command, typ-bewusster Vorschau

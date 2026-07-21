@@ -10,18 +10,20 @@ kategorie: Aktionen
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, RelatedComponents, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, RelatedComponents, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-icon-button"},{"nr":2,"side":"top","x":50,"selector":".z-icon-button svg"}];
-	const playgroundControls = [{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}];
+	const playgroundControls = [{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}] as PlaygroundControl[];
 	const playgroundTemplate = `<button class="z-icon-button{classes}" type="button" aria-label="Favorit"{attrs}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
 	const htmlBody = `<button class="z-icon-button" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>
 <button class="z-icon-button" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>`;
 	const codeNote = editorial.codeNote ?? `Icon-Button-Styles global einbinden — aria-label ist Pflicht (kein sichtbares Label).`;
@@ -71,6 +73,7 @@ kategorie: Aktionen
 }
 `;
 	const variantItems = [{"label":"Default","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>","note":"Neutrale ikonografische Aktion — helle Fläche (--z-ds-color-background-10), dunkles Icon (--z-ds-color-text-100)."}];
+	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const stateItems = [{"label":"default","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"},{"label":"disabled","html":"<button class=\"z-icon-button\" type=\"button\" aria-label=\"Favorit\" disabled><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>"}];
 	const propsData = [{"name":"disabled","typ":"boolean","default":"false","beschreibung":"Sperrt den Button (nativ; Icon in --z-ds-color-text-40)."},{"name":"icon","typ":"Snippet / ReactNode","default":"—","beschreibung":"Das anzuzeigende Icon (20×20)."},{"name":"aria-label","typ":"string (Pflicht)","default":"—","beschreibung":"Beschreibt die Aktion — Pflicht, da kein sichtbares Label."}];
 </script>
@@ -94,13 +97,30 @@ kategorie: Aktionen
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<button class="z-icon-button" type="button" aria-label="Favorit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"></polygon></svg></button>{/snippet}
 	</Anatomy>
 
-	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<SpecimenGrid items={variantItems} />
+	{#if offeneVariantItems.length}
+		<h2 id="varianten" class="section-anchor">
+			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
+		</h2>
+		<SpecimenGrid items={offeneVariantItems} />
+	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<SpecimenGrid items={stateItems} />

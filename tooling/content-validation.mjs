@@ -41,6 +41,12 @@ export const EDITORIAL_FIELDS = {
 	verwendung: { check: isObject, typ: 'objekt ({ nutzen, nichtNutzen })' },
 	wording: { check: isArray, typ: 'array' },
 	komposition: { check: isArray, typ: 'array (Strings)' },
+	// Benannte Beispiele (Design-Tab, vor dem Playground) — je Eintrag Titel,
+	// Erklärsatz und die zu zeigenden Instanzen (Control-Wert-Sätze).
+	beispiele: {
+		check: isArray,
+		typ: 'array (Objekte { titel, beschreibung?, instanzen?, abdeckt? })'
+	},
 	verwandt: { check: isArray, typ: 'array' },
 	// Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). Überschreibt
 	// feldweise den maschinellen Token-hinweis (model.tokens[].hinweis) auf der Seite.
@@ -113,6 +119,43 @@ export function checkNested(key, value) {
 				issues.push(`callouts[${i}].art muss ein String sein`);
 			if (item.optionalDurch !== undefined && !isString(item.optionalDurch))
 				issues.push(`callouts[${i}].optionalDurch muss ein String sein`);
+		}
+	}
+	if (key === 'beispiele' && isArray(value)) {
+		// Jedes Beispiel: titel Pflicht (String); beschreibung optional (String);
+		// instanzen = Liste flacher Control-Wert-Objekte (string|boolean);
+		// abdeckt = Liste von Varianten-Labels (Strings). Keine Fremdkeys je Item.
+		const erlaubt = new Set(['titel', 'beschreibung', 'instanzen', 'abdeckt']);
+		for (const [i, item] of value.entries()) {
+			if (!isObject(item)) {
+				issues.push(`beispiele[${i}] muss ein Objekt sein`);
+				continue;
+			}
+			if (!isString(item.titel)) issues.push(`beispiele[${i}].titel muss ein String sein`);
+			if (item.beschreibung !== undefined && !isString(item.beschreibung))
+				issues.push(`beispiele[${i}].beschreibung muss ein String sein`);
+			if (item.instanzen !== undefined) {
+				if (!isArray(item.instanzen)) issues.push(`beispiele[${i}].instanzen muss ein Array sein`);
+				else
+					for (const [j, inst] of item.instanzen.entries()) {
+						if (!isObject(inst)) {
+							issues.push(`beispiele[${i}].instanzen[${j}] muss ein Objekt sein`);
+							continue;
+						}
+						for (const [k, v] of Object.entries(inst))
+							if (!isString(v) && typeof v !== 'boolean')
+								issues.push(
+									`beispiele[${i}].instanzen[${j}]["${k}"] muss ein String oder Boolean sein`
+								);
+					}
+			}
+			if (item.abdeckt !== undefined && (!isArray(item.abdeckt) || !item.abdeckt.every(isString)))
+				issues.push(`beispiele[${i}].abdeckt muss ein Array von Strings (Varianten-Labels) sein`);
+			for (const k of Object.keys(item))
+				if (!erlaubt.has(k))
+					issues.push(
+						`beispiele[${i}]: unbekannter Key „${k}" (erlaubt: titel, beschreibung, instanzen, abdeckt)`
+					);
 		}
 	}
 	if (key === 'tokenHinweise' && isObject(value)) {

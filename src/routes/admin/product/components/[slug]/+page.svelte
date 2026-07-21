@@ -16,6 +16,7 @@
 	import SnippetOverridesField from './SnippetOverridesField.svelte';
 	import { Dialog } from '$components/ui/dialog';
 	import CodeExamplesField from './CodeExamplesField.svelte';
+	import ExamplesField, { blankBeispiel, type Control } from './ExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
 	import EditorialCard from './EditorialCard.svelte';
 	import SpecTable from './SpecTable.svelte';
@@ -62,6 +63,13 @@
 		tastatur: { taste: string; aktion: string }[];
 		/** Wann welche Variante (Varianten-Label → Erklärsatz) — Keys aus den Maschinen-Varianten. */
 		variantInfo: Record<string, string>;
+		/** Benannte Beispiele: Titel, Erklärsatz, gezeigte Instanzen, abgedeckte Varianten. */
+		beispiele: {
+			titel: string;
+			beschreibung: string;
+			instanzen: Record<string, string | boolean>[];
+			abdeckt: string[];
+		}[];
 		/** Anatomie-Beschriftungen; nr als String (Input-bind), Konvertierung im payload. */
 		callouts: { nr: string; text: string; art: string; optionalDurch: string }[];
 		/** Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). */
@@ -84,6 +92,12 @@
 		verwandt?: string[];
 		tastatur?: { taste?: string; aktion?: string }[];
 		variantInfo?: Record<string, string>;
+		beispiele?: {
+			titel?: string;
+			beschreibung?: string;
+			instanzen?: Record<string, string | boolean>[];
+			abdeckt?: string[];
+		}[];
 		callouts?: { nr?: number; text?: string; art?: string; optionalDurch?: string }[];
 		tokenHinweise?: Record<string, string>;
 		codeBeispiele?: { label?: string; sprache?: string; code?: string; hinweis?: string }[];
@@ -102,6 +116,10 @@
 			)
 		)
 	];
+
+	// Playground-Controls der Komponente (render.controls) — die Achsen, aus denen eine
+	// Beispiel-Instanz besteht. Sie kommen read-only aus dem model.json.
+	const MACHINE_CONTROLS = (data.machine.controls as Control[]) ?? [];
 
 	// Fabrik → „Verwerfen"/Reset stellen exakt den Ausgangsstand wieder her.
 	function makeState(): Editorial {
@@ -135,6 +153,14 @@
 				for (const label of MACHINE_VARIANT_LABELS) seed[label] = '';
 				return { ...seed, ...(c.variantInfo ?? {}) };
 			})(),
+			// Beispiele: Titel/Beschreibung als Strings (Input-bind), Instanzen und
+			// abdeckt als flache Kopien — der payload lässt leere Einträge wieder raus.
+			beispiele: (c.beispiele ?? []).map((b) => ({
+				titel: b.titel ?? '',
+				beschreibung: b.beschreibung ?? '',
+				instanzen: (b.instanzen ?? []).map((inst) => ({ ...inst })),
+				abdeckt: [...(b.abdeckt ?? [])]
+			})),
 			// nr als String für den number-Input; art/optionalDurch werden mitgeführt und
 			// beim Speichern erhalten (Round-Trip-sicher — keine Datenverluste an der Anatomie).
 			callouts: (c.callouts ?? []).map((r) => ({
@@ -212,6 +238,7 @@
 			verwandt: !!c.verwandt?.length,
 			tastatur: !!c.tastatur?.length,
 			variantInfo: !!(c.variantInfo && Object.keys(c.variantInfo).length),
+			beispiele: !!c.beispiele?.length,
 			callouts: !!c.callouts?.length,
 			tokenHinweise: !!(c.tokenHinweise && Object.keys(c.tokenHinweise).length),
 			codeBeispiele: !!c.codeBeispiele?.length,
@@ -228,6 +255,8 @@
 		expanded[key] = true;
 		if (key === 'codeBeispiele' && model.codeBeispiele.length === 0)
 			model.codeBeispiele.push({ label: '', sprache: 'svelte', code: '', hinweis: '' });
+		if (key === 'beispiele' && model.beispiele.length === 0)
+			model.beispiele.push(blankBeispiel(MACHINE_CONTROLS));
 		await tick();
 		const focusFirst = () => {
 			const sec = document.getElementById(`sec-${key}`);
@@ -275,6 +304,9 @@
 					if (MACHINE_VARIANT_LABELS.includes(key)) model.variantInfo[key] = '';
 					else delete model.variantInfo[key];
 				}
+				break;
+			case 'beispiele':
+				model.beispiele = [];
 				break;
 			case 'callouts':
 				model.callouts = [];
@@ -339,6 +371,28 @@
 			if (t) variantInfo[label] = t;
 		}
 		if (Object.keys(variantInfo).length) out.variantInfo = variantInfo;
+		// Benannte Beispiele: Titel ist Pflicht (ohne Titel kein Beispiel — es ist genau
+		// das, was ein Playground-Regler NICHT liefert). beschreibung/instanzen/abdeckt
+		// nur schreiben, wenn gesetzt → content.json bleibt schlank und die Doku-Seite
+		// fällt sauber auf ihre Defaults zurück (fehlende instanzen = eine Default-Instanz).
+		const beispiele = model.beispiele
+			.filter((b) => b.titel.trim())
+			.map((b) => {
+				const o: Record<string, unknown> = { titel: b.titel.trim() };
+				const beschreibung = b.beschreibung.trim();
+				if (beschreibung) o.beschreibung = beschreibung;
+				// Ausgeschaltete Schalter (false) fallen raus: ein nicht gesetzter Toggle/Attr
+				// bewirkt in `instantiate()` exakt nichts — er stünde nur als Ballast in
+				// content.json. Beim Laden ergibt der fehlende Key wieder `false`.
+				if (b.instanzen.length)
+					o.instanzen = b.instanzen.map((inst) =>
+						Object.fromEntries(Object.entries(inst).filter(([, v]) => v !== false))
+					);
+				const abdeckt = [...new Set(b.abdeckt.filter(Boolean))];
+				if (abdeckt.length) o.abdeckt = abdeckt;
+				return o;
+			});
+		if (beispiele.length) out.beispiele = beispiele;
 		// Anatomie-Beschriftungen: Text ist Pflicht; nr → Zahl; art/optionalDurch nur
 		// schreiben, wenn gesetzt (optionalDurch wird unsichtbar mitgeführt — erhalten).
 		const callouts = model.callouts
@@ -945,6 +999,32 @@
 						{/each}
 					</EditorialCard>
 				{/if}
+
+				<!-- Benannte Beispiele: stehen auf der Doku-Seite direkt hinter dem
+				     Playground. Der Playground zeigt OPTIONEN, ein Beispiel zeigt ABSICHT —
+				     abgedeckte Varianten fallen aus dem „Weitere Varianten"-Raster. -->
+				<EditorialCard
+					title="Beispiele"
+					subline="Design-Tab, hinter dem Playground — Titel, Erklärsatz, gezeigte Instanzen"
+					id="sec-beispiele"
+					expanded={expanded.beispiele}
+					ghostLabel="Beispiel ergänzen"
+					ghostId="ghost-beispiele"
+					onexpand={() => reveal('beispiele')}
+					onremove={() => removeSection('beispiele', 'Beispiele geleert')}
+				>
+					<p class="hint">
+						Ein Playground dokumentiert Optionen, ein Beispiel dokumentiert Absicht — „wann nehme
+						ich Primary?" beantwortet kein Regler. Jede Instanz ist ein Satz Control-Werte und
+						wird mit demselben Template gerendert wie der Playground.
+					</p>
+					<ExamplesField
+						list={model.beispiele}
+						controls={MACHINE_CONTROLS}
+						hatTemplate={!!data.machine.hatTemplate}
+						variantLabels={MACHINE_VARIANT_LABELS}
+					/>
+				</EditorialCard>
 
 				<!-- Anatomie-Beschriftungen (callouts): Nr. · Text · Art. -->
 				<EditorialCard

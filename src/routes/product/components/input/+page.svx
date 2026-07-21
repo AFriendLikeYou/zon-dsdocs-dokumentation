@@ -10,23 +10,25 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, WordingList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-input"},{"nr":2,"side":"top","x":40,"selector":".z-input__field"},{"nr":3,"side":"right","y":50}];
-	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"active","label":"Active","cssClass":"z-input--active"},{"value":"filled","label":"Filled","cssClass":"z-input--filled"},{"value":"error","label":"Error","cssClass":"z-input--error"},{"value":"disabled","label":"Disabled","cssClass":"z-input--disabled"}]},{"key":"lead","label":"Leading Icon","type":"toggle","cssClass":"z-input--lead"},{"key":"dropdown","label":"Dropdown","type":"toggle","cssClass":"z-input--dropdown"}];
+	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"active","label":"Active","cssClass":"z-input--active"},{"value":"filled","label":"Filled","cssClass":"z-input--filled"},{"value":"error","label":"Error","cssClass":"z-input--error"},{"value":"disabled","label":"Disabled","cssClass":"z-input--disabled"}]},{"key":"lead","label":"Leading Icon","type":"toggle","cssClass":"z-input--lead"},{"key":"dropdown","label":"Dropdown","type":"toggle","cssClass":"z-input--dropdown"}] as PlaygroundControl[];
 	const playgroundTemplate = `<div class="z-input{classes}">
   <span class="z-input__lead" aria-hidden="true"></span>
   <input class="z-input__field" type="text" placeholder="Platzhalter" aria-label="Beispiel-Eingabe" />
   <span class="z-input__chevron" aria-hidden="true"></span>
 </div>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
 	const htmlBody = `<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>
 <div class="z-input z-input--error"><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>`;
 	const codeNote = editorial.codeNote ?? ``;
@@ -112,6 +114,7 @@ kategorie: Formulare
 }
 `;
 	const variantItems = [{"label":"Leading Icon","html":"<div class=\"z-input z-input--lead\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>","note":"Führendes Icon, z. B. Suche."},{"label":"Dropdown","html":"<div class=\"z-input z-input--dropdown\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>","note":"Chevron als Auswahl-/Combobox-Trigger."}];
+	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const stateItems = [{"label":"default","html":"<div class=\"z-input\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"},{"label":"active / focus","html":"<div class=\"z-input z-input--active\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"},{"label":"filled","html":"<div class=\"z-input z-input--filled\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Eingegebener Text\" aria-label=\"Beispiel\" /></div>"},{"label":"error","html":"<div class=\"z-input z-input--error\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"},{"label":"disabled","html":"<div class=\"z-input z-input--disabled\"><input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel\" /></div>"}];
 	const propsData = [{"name":"value","typ":"string","default":"\"\"","beschreibung":"Eingabewert."},{"name":"placeholder","typ":"string","default":"—","beschreibung":"Beispieltext im leeren Feld (kein Ersatz fürs Label)."},{"name":"state","typ":"\"default\" | \"active\" | \"filled\" | \"error\" | \"disabled\"","default":"\"default\"","erlaubteWerte":["default","active","filled","error","disabled"],"beschreibung":"Visueller Zustand (meist aus Fokus/Validierung abgeleitet)."},{"name":"leadingIcon","typ":"boolean","default":"false","beschreibung":"Zeigt ein führendes Icon."},{"name":"dropdown","typ":"boolean","default":"false","beschreibung":"Zeigt den Dropdown-Chevron (Auswahl-Trigger)."},{"name":"clearable","typ":"boolean","default":"false","beschreibung":"Clear-Button bei gefülltem Feld."}];
 </script>
@@ -135,6 +138,19 @@ kategorie: Formulare
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<div class="z-input z-input--filled"><span class="z-input__lead" aria-hidden="true"></span><input class="z-input__field" type="text" placeholder="name@beispiel.de" aria-label="E-Mail" /></div>{/snippet}
@@ -146,8 +162,12 @@ kategorie: Formulare
 	<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
 	<WordingList items={spec.wording} />
 
-	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<SpecimenGrid items={variantItems} />
+	{#if offeneVariantItems.length}
+		<h2 id="varianten" class="section-anchor">
+			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
+		</h2>
+		<SpecimenGrid items={offeneVariantItems} />
+	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<SpecimenGrid items={stateItems} />

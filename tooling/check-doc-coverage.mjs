@@ -12,6 +12,9 @@
  *   (c) `masse` (Maße) und `callouts` (Anatomie-Legende) vorhanden?
  *   (d) `tokens` vorhanden?
  *   (e) `doDont` vorhanden (model ODER content)?
+ *   (e2) benannte `beispiele` vorhanden, wo sie überhaupt renderbar sind
+ *        (render.template + Varianten-Achsen)? Ohne sie zeigt die Seite nur
+ *        Optionen (Playground/Varianten-Raster), aber keine Absicht.
  *   (f) content.json mehr als ein Thin-Stub (nur status/zweck/verwandt)?
  *   (g) Slug in CATALOG_OVERRIDES kuratiert? (sonst order 999 ans Ende —
  *       der carousel-Fall: fertig dokumentiert, aber unkuratiert gelandet)
@@ -84,6 +87,26 @@ for (const slug of slugs) {
 		gaps.push('keine `callouts` (Anatomie-Legende)');
 	if ((model.tokens ?? []).length === 0) gaps.push('keine `tokens`');
 	if (!model.doDont && !content.doDont) gaps.push('kein `doDont`');
+
+	// Benannte Beispiele: nur dort einfordern, wo sie technisch entstehen können —
+	// sie brauchen ein `render.template` (der Specimen-Escape-Hatch hat nichts zu
+	// instanziieren). Gemeldet wird zusätzlich, WIE VIELE Varianten-Werte noch
+	// unerklärt im „Weitere Varianten"-Raster landen (das ist der sichtbare Rest).
+	const beispiele = content.beispiele ?? model.beispiele ?? [];
+	const variantLabels = (model.varianten ?? []).flatMap((axis) =>
+		(axis.werte ?? []).map((w) => w.label)
+	);
+	if (typeof model.render?.template === 'string' && variantLabels.length) {
+		const abgedeckt = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
+		const offen = variantLabels.filter((l) => !abgedeckt.has(l));
+		const werte = (n) => `${n} Varianten-Wert${n === 1 ? '' : 'e'}`;
+		if (beispiele.length === 0)
+			gaps.push(
+				`keine \`beispiele\` — ${werte(variantLabels.length)} nur als Raster, ohne Absicht`
+			);
+		else if (offen.length)
+			gaps.push(`\`beispiele\` decken ${werte(offen.length)} nicht ab (${offen.join(', ')})`);
+	}
 
 	const contentKeys = Object.keys(content);
 	if (contentKeys.length > 0 && contentKeys.every((k) => THIN_STUB_KEYS.has(k)))

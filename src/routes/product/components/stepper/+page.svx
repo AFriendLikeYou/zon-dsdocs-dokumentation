@@ -10,23 +10,24 @@ kategorie: Formulare
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, DoDontList, WordingList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, DoDontList, WordingList, RelatedComponents, PropsTable, A11yList, KeyboardList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50,"selector":".z-stepper"},{"nr":2,"side":"top","x":50,"selector":".z-stepper__val"},{"nr":3,"side":"right","y":50,"selector":".z-stepper__plus"}];
-	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-stepper--hover"},{"value":"focus","label":"Focus","cssClass":"z-stepper--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-stepper--disabled"}]}];
+	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-stepper--hover"},{"value":"focus","label":"Focus","cssClass":"z-stepper--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-stepper--disabled"}]}] as PlaygroundControl[];
 	const playgroundTemplate = `<div class="z-stepper{classes}">
   <button class="z-stepper__minus" type="button" aria-label="Weniger"></button>
   <span class="z-stepper__val">2</span>
   <button class="z-stepper__plus" type="button" aria-label="Mehr"></button>
 </div>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
 	const htmlBody = `<div class="z-stepper"><button class="z-stepper__minus" type="button" aria-label="Weniger"></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr"></button></div>
 <div class="z-stepper z-stepper--disabled"><button class="z-stepper__minus" type="button" aria-label="Weniger" disabled></button><span class="z-stepper__val">2</span><button class="z-stepper__plus" type="button" aria-label="Mehr" disabled></button></div>`;
 	const codeNote = editorial.codeNote ?? ``;
@@ -139,6 +140,19 @@ kategorie: Formulare
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>

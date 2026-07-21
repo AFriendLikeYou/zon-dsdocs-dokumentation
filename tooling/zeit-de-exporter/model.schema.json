@@ -69,6 +69,11 @@
 			"description": "Varianten-Achsen wie in Figma (Typ, Größe …). cssClass verknüpft eine Variante mit ihrer Modifier-Klasse (Drift-Check).",
 			"items": { "$ref": "#/$defs/variantGroup" }
 		},
+		"beispiele": {
+			"type": "array",
+			"description": "Benannte Beispiele: je Eintrag ein Konzept mit Titel, Erklärsatz und den zu zeigenden Instanzen. Ein Playground dokumentiert Optionen, ein Beispiel dokumentiert Absicht („wann nehme ich Primary?\"). Steht als ERSTE Sektion des Design-Tabs vor dem Playground. (Redaktionell — gehört in content.json.)",
+			"items": { "$ref": "#/$defs/beispiel" }
+		},
 		"zustaende": {
 			"type": "array",
 			"description": "Zustände (default, hover, focus, disabled …). vorhanden=true, wenn im Design abgedeckt.",
@@ -297,6 +302,36 @@
 							"default": { "type": "boolean" }
 						}
 					}
+				}
+			}
+		},
+		"beispiel": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["titel"],
+			"description": "Ein benanntes Beispiel. Die Instanzen entstehen über DIESELBE Render-Mechanik wie Playground und Varianten-Raster: render.template wird je Instanz mit einem Satz Control-Werten instanziiert — kein zweiter Render-Pfad. Ohne render.template (Specimen-Escape-Hatch) werden Beispiele nicht gerendert.",
+			"properties": {
+				"titel": {
+					"type": "string",
+					"description": "Überschrift des Beispiels, z. B. \"Semantik\" oder \"Volle Breite\"."
+				},
+				"beschreibung": {
+					"type": "string",
+					"description": "Ein bis zwei Sätze: Was zeigt das Beispiel und wann greift man dazu? Optional."
+				},
+				"instanzen": {
+					"type": "array",
+					"description": "Die zu zeigenden Instanzen — je Eintrag EIN Satz Control-Werte (render.controls key → Wert), identisch zum Playground-State. Leeres Objekt {} = Default-Zustand. Fehlt die Liste, zeigt das Beispiel eine Default-Instanz.",
+					"items": {
+						"type": "object",
+						"description": "Control-Key → Wert (string für select, boolean für toggle/attr).",
+						"additionalProperties": { "type": ["string", "boolean"] }
+					}
+				},
+				"abdeckt": {
+					"type": "array",
+					"description": "Varianten-Werte-Labels (aus varianten[].werte[].label), die dieses Beispiel dokumentiert. Abgedeckte Werte fallen aus dem Varianten-Raster („Weitere Varianten\") — sind alle abgedeckt, entfällt die Sektion. Optional.",
+					"items": { "type": "string" }
 				}
 			}
 		},

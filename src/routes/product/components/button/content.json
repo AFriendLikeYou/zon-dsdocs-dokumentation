@@ -1,6 +1,25 @@
 {
 	"zweck": "Löst eine Aktion aus. Default für nachrangige Aktionen, Primary für die Hauptaktion, Z+ als Premium-Akzent (ZEIT+). Optional über volle Breite (Fullwidth) und mit optionalen Icon-Slots (Start/Ende).",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Semantik",
+			"beschreibung": "Die Variante trägt die Gewichtung der Aktion, nicht die Optik-Laune: Primary genau einmal pro Aktionsgruppe für die Hauptaktion, Default für alles Nachrangige. Z+ bleibt Aktionen im ZEIT+-/Abo-Kontext vorbehalten.",
+			"instanzen": [{ "variant": "default" }, { "variant": "primary" }, { "variant": "zplus" }],
+			"abdeckt": ["Default", "Primary", "Z+"]
+		},
+		{
+			"titel": "Volle Breite",
+			"beschreibung": "In schmalen Spalten — Formularen, Dialogen, mobilen Layouts — streckt sich der Button über die volle Breite seines Containers. In freiem Fließtext bleibt er bei seiner Inhaltsbreite.",
+			"instanzen": [{ "variant": "primary", "fullwidth": true }],
+			"abdeckt": ["Fullwidth"]
+		},
+		{
+			"titel": "Gesperrte Aktion",
+			"beschreibung": "Gesperrt wird nur, was gleich wieder möglich ist — etwa während des Absendens. Ist eine Aktion dauerhaft nicht verfügbar, gehört sie gar nicht erst auf die Seite.",
+			"instanzen": [{ "variant": "primary", "disabled": true }]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

@@ -30,6 +30,8 @@ const EDITABLE = [
 	'tastatur',
 	// Wann welche Variante (Varianten-Label → Erklärsatz) — Design-Cluster.
 	'variantInfo',
+	// Benannte Beispiele ({ titel, beschreibung?, instanzen?, abdeckt? }) — Design-Cluster.
+	'beispiele',
 	// Anatomie-Beschriftungen ({ nr, text, art?, optionalDurch? }) — Design-Cluster.
 	'callouts',
 	// Redaktioneller Hinweis-Text je Token (Token-Name → Freitext).
@@ -134,6 +136,12 @@ export const load = ({ params }) => {
 			spacing: Array.isArray(model.spacing) ? model.spacing : [],
 			tokens: Array.isArray(model.tokens) ? model.tokens : [],
 			varianten: Array.isArray(model.varianten) ? model.varianten : [],
+			// Playground-Controls (render.controls) — der Beispiel-Editor bietet damit
+			// je Instanz genau die Werte an, die das Template auch kennt (keine freien
+			// Strings → keine kaputten Instanzen). Fehlt ein Template, gibt es nichts
+			// zu instanziieren; das Feld meldet das dann im Editor.
+			controls: Array.isArray(render.controls) ? render.controls : [],
+			hatTemplate: typeof render.template === 'string',
 			zustaende: Array.isArray(model.zustaende) ? model.zustaende : [],
 			// Maschinelle A11y-Angaben (aus Figma/model) — read-only Zeilen der
 			// gemischten Barrierefreiheit-Liste; content.a11y bleibt editierbar.

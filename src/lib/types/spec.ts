@@ -95,6 +95,30 @@ export type VariantGroup = {
 	werte: { label: string; cssClass?: string; default?: boolean }[];
 };
 
+/**
+ * Ein Satz Control-Werte (render.controls key → Wert) — exakt der Playground-State.
+ * `instantiate()` macht daraus mit `render.template` fertiges Markup.
+ */
+export type BeispielInstanz = Record<string, string | boolean>;
+
+/**
+ * Ein benanntes Beispiel (erste Sektion des Design-Tabs, vor dem Playground).
+ * Ein Playground dokumentiert OPTIONEN, ein Beispiel dokumentiert ABSICHT: „wann
+ * nehme ich Primary?" beantwortet kein Regler, sondern ein betiteltes Specimen mit
+ * Erklärsatz und eigenem Code.
+ *   titel        – Überschrift des Beispiels
+ *   beschreibung – ein bis zwei erklärende Sätze (optional)
+ *   instanzen    – die zu zeigenden Instanzen, je ein Satz Control-Werte
+ *   abdeckt      – Varianten-Werte-Labels, die dieses Beispiel dokumentiert →
+ *                  sie fallen aus dem „Weitere Varianten"-Raster
+ */
+export type Beispiel = {
+	titel: string;
+	beschreibung?: string;
+	instanzen?: BeispielInstanz[];
+	abdeckt?: string[];
+};
+
 export type DoDont = { do?: string[]; dont?: string[] };
 
 /** „Wann verwenden / Wann nicht" — Entscheidungshilfe ganz oben in der Component-Doku. */
@@ -204,6 +228,8 @@ export type ComponentSpec = {
 	/** Farbrollen-Matrix (Teil × Zustand → Token) — im Specs-Tab vor der TokenTable. */
 	farbrollen?: ColorRoles | null;
 	varianten?: VariantGroup[];
+	/** Benannte Beispiele (Design-Tab, vor dem Playground) — redaktionell, content.json. */
+	beispiele?: Beispiel[];
 	zustaende?: SpecState[];
 	a11y?: A11yItem[];
 	tastatur?: KeyboardRule[];

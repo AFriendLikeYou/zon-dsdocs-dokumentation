@@ -10,17 +10,17 @@ kategorie: Inhalte
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
-	import { ComponentHero, Anatomy, SpecimenGrid, StateList, DoDontList, WordingList, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, WordingList, PropsTable, A11yList, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
-	import { Playground } from '$components/ui/playground';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
 	import content from './content.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-cell__media"},{"nr":2,"side":"top","x":55,"selector":".z-cell__kicker"},{"nr":3,"side":"right","y":45,"selector":".z-cell__title"},{"nr":4,"side":"bottom","x":55,"selector":".z-cell__byline"}];
-	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}];
+	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="z-cell{classes}">
   <div class="z-cell__media" aria-hidden="true"></div>
   <div class="z-cell__body">
@@ -31,6 +31,8 @@ kategorie: Inhalte
   </div>
 </article>`;
 	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
 	const htmlBody = `<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>
 <article class="z-cell z-cell--author"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><h3 class="z-cell__title">Vorname Nachname</h3><p class="z-cell__byline">Redakteurin im Ressort Politik</p></div></article>`;
 	const codeNote = editorial.codeNote ?? `Cell-Styles global einbinden (z. B. cell.css)`;
@@ -288,6 +290,7 @@ kategorie: Inhalte
 }
 `;
 	const variantItems = [{"label":"Pinned","html":"<article class=\"z-cell z-cell--pinned\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"In Navigations-Menüs für regelmäßig aktualisierte oder empfohlene Inhalte — Platz begrenzt."},{"label":"Article","html":"<article class=\"z-cell z-cell--article\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Aktuelle Schlagzeilen, die gerade eintreffen — Zeitstempel bevorzugt."},{"label":"Headline","html":"<article class=\"z-cell z-cell--headline\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Reduziert auf den Titel, oben mit Trennlinie."},{"label":"Artikel","html":"<article class=\"z-cell z-cell--artikel\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Standard-Teaser mit Bild, Spitzmarke, Titel und Byline."},{"label":"Author","html":"<article class=\"z-cell z-cell--author\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Autor/Autorin mit rundem Avatar, Name und Funktion."},{"label":"Podcast Series","html":"<article class=\"z-cell z-cell--podcast-series\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Podcast-Serie mit farbigem Cover, Titel und Abo-Hinweis."},{"label":"Anzeige","html":"<article class=\"z-cell z-cell--anzeige\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Werblicher Teaser auf getönter Fläche mit Versal-Label."},{"label":"Wide","html":"<article class=\"z-cell\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Standardbreite (343)."},{"label":"Small","html":"<article class=\"z-cell z-cell--small\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>","note":"Kompakt — kleinerer Titel und kleinere Fläche."}];
+	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const propsData = [{"name":"type","typ":"\"Pinned\" | \"Article\" | \"Headline\" | \"Artikel\" | \"Author\" | \"Podcast Series\" | \"Anzeige\"","default":"\"Article\"","beschreibung":"Teaser-Typ — steuert Struktur (Fläche/Meta) und Layout."},{"name":"size","typ":"\"Wide\" | \"Small\"","default":"\"Wide\"","beschreibung":"Kompakte Variante mit kleinerem Titel und kleinerer Fläche."},{"name":"kicker","typ":"string","default":"—","beschreibung":"Spitzmarke / redaktionelle Kategorie (nicht bei Headline/Author)."},{"name":"title","typ":"string","default":"—","beschreibung":"Teaser-Titel; beim Author der Name."},{"name":"byline","typ":"string","default":"—","beschreibung":"Autor/Subline; beim Author die Funktion."},{"name":"showKicker","typ":"boolean","default":"true","beschreibung":"Spitzmarke ein-/ausblenden."}];
 </script>
 
@@ -310,6 +313,19 @@ kategorie: Inhalte
 	<h2 id="playground" class="section-anchor">Playground</h2>
 	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
 
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<article class="z-cell z-cell--artikel"><div class="z-cell__media" aria-hidden="true"></div><div class="z-cell__body"><p class="z-cell__kicker">Politik</p><h3 class="z-cell__title">Artikel Überschrift</h3><p class="z-cell__byline">Von Vorname Nachname</p></div></article>{/snippet}
@@ -321,8 +337,12 @@ kategorie: Inhalte
 	<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
 	<WordingList items={spec.wording} />
 
-	<h2 id="varianten" class="section-anchor">Varianten</h2>
-	<SpecimenGrid items={variantItems} />
+	{#if offeneVariantItems.length}
+		<h2 id="varianten" class="section-anchor">
+			{abgedeckteVarianten.size ? 'Weitere Varianten' : 'Varianten'}
+		</h2>
+		<SpecimenGrid items={offeneVariantItems} />
+	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
 	<StateList states={[{"label":"default","vorhanden":true}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
