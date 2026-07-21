@@ -74,7 +74,10 @@ describe('itemFromSegment', () => {
 		const g = createUidGen();
 		const values = { text: 'Hi', kind: 'warn' };
 		const it = itemFromSegment(
-			seg({ kind: 'component', component: { name: 'Alert', label: 'Hinweis', props: ALERT.props, values } }),
+			seg({
+				kind: 'component',
+				component: { name: 'Alert', label: 'Hinweis', props: ALERT.props, values }
+			}),
 			g.next
 		);
 		expect(it.compName).toBe('Alert');
@@ -93,7 +96,14 @@ describe('itemFromSegment', () => {
 					props: LIST.props,
 					values: { title: 'X' },
 					childTypes: ['Alert'],
-					children: [{ name: 'Alert', label: 'Hinweis', props: ALERT.props, values: { text: 'a', kind: 'info' } }]
+					children: [
+						{
+							name: 'Alert',
+							label: 'Hinweis',
+							props: ALERT.props,
+							values: { text: 'a', kind: 'info' }
+						}
+					]
 				}
 			}),
 			g.next
@@ -172,7 +182,14 @@ describe('cloneItem', () => {
 					props: LIST.props,
 					values: { title: 'X' },
 					childTypes: ['Alert'],
-					children: [{ name: 'Alert', label: 'Hinweis', props: ALERT.props, values: { text: 'a', kind: 'info' } }]
+					children: [
+						{
+							name: 'Alert',
+							label: 'Hinweis',
+							props: ALERT.props,
+							values: { text: 'a', kind: 'info' }
+						}
+					]
 				}
 			}),
 			g.next
@@ -186,7 +203,10 @@ describe('cloneItem', () => {
 
 	it('img → Image-Pseudo-Block mit src/alt aus dem Tag', () => {
 		const g = createUidGen();
-		const src = itemFromSegment(seg({ kind: 'img', content: '<img src="a/b.png" alt="Foo">' }), g.next);
+		const src = itemFromSegment(
+			seg({ kind: 'img', content: '<img src="a/b.png" alt="Foo">' }),
+			g.next
+		);
 		const copy = cloneItem(src, defByName, g.next)!;
 		expect(copy.compName).toBe('Image');
 		expect(copy.compValues).toMatchObject({ src: 'a/b.png', alt: 'Foo' });
@@ -194,7 +214,10 @@ describe('cloneItem', () => {
 
 	it('structural/protected → null (nicht duplizierbar)', () => {
 		const g = createUidGen();
-		const src = itemFromSegment(seg({ kind: 'structural', movable: false, deletable: false }), g.next);
+		const src = itemFromSegment(
+			seg({ kind: 'structural', movable: false, deletable: false }),
+			g.next
+		);
 		expect(cloneItem(src, defByName, g.next)).toBeNull();
 	});
 });
@@ -202,13 +225,19 @@ describe('cloneItem', () => {
 describe('serializeBlocks', () => {
 	it('bestehender, unberührter Block → schlichtes keep', () => {
 		const g = createUidGen();
-		const it = itemFromSegment(seg({ index: 3, type: 'prosa', kind: 'prosa', content: 'x' }), g.next);
+		const it = itemFromSegment(
+			seg({ index: 3, type: 'prosa', kind: 'prosa', content: 'x' }),
+			g.next
+		);
 		expect(serializeBlocks([it])).toEqual([{ keep: 3 }]);
 	});
 
 	it('bestehender, editierter Block → keep mit Edit', () => {
 		const g = createUidGen();
-		const it = itemFromSegment(seg({ index: 3, type: 'prosa', kind: 'prosa', content: 'x' }), g.next);
+		const it = itemFromSegment(
+			seg({ index: 3, type: 'prosa', kind: 'prosa', content: 'x' }),
+			g.next
+		);
 		it.prose = 'y';
 		it.touched = true;
 		expect(serializeBlocks([it])).toEqual([{ keep: 3, prose: 'y' }]);
@@ -234,7 +263,10 @@ describe('serializeBlocks', () => {
 
 	it('bearbeitete Bild-Insel (touched) → keep mit img-Tag', () => {
 		const g = createUidGen();
-		const it = itemFromSegment(seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }), g.next);
+		const it = itemFromSegment(
+			seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }),
+			g.next
+		);
 		it.content = withImgAttr(it.content ?? '', 'src', 'b.png');
 		it.touched = true;
 		expect(serializeBlocks([it])).toEqual([{ keep: 7, img: '<img src="b.png" alt="A">' }]);
@@ -242,7 +274,10 @@ describe('serializeBlocks', () => {
 
 	it('unberührte Bild-Insel → schlichtes keep (kein img-Feld)', () => {
 		const g = createUidGen();
-		const it = itemFromSegment(seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }), g.next);
+		const it = itemFromSegment(
+			seg({ index: 7, kind: 'img', content: '<img src="a.png" alt="A">' }),
+			g.next
+		);
 		expect(serializeBlocks([it])).toEqual([{ keep: 7 }]);
 	});
 });

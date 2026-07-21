@@ -90,10 +90,8 @@
 	{#each list as _, i (i)}
 		<div class="rlf__row">
 			{@render row(list[i], i)}
-			<IconActionButton
-				class="rlf__remove"
-				onclick={() => list.splice(i, 1)}
-				ariaLabel="Entfernen"><Icon name="close" /></IconActionButton
+			<IconActionButton class="rlf__remove" onclick={() => list.splice(i, 1)} ariaLabel="Entfernen"
+				><Icon name="close" /></IconActionButton
 			>
 		</div>
 	{/each}

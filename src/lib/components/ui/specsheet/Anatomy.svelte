@@ -322,7 +322,8 @@
 					<span class="dimension-label" title="Breite">B&nbsp;{apx(masse.breite)}</span>
 				</div>{/if}
 			{#if masse.radius}<div class="radius-label" aria-hidden="true">
-					<span title="Eckenradius">r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
+					<span title="Eckenradius"
+						>r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
 								class="drift-mark"
 								title="Weicht ab — gerendert {drift.radius.ist}px">&nbsp;⚠</span
 							>{/if}</span

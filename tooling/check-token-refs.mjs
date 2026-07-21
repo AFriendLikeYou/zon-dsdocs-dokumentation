@@ -178,7 +178,8 @@ function main() {
 	const refs = [];
 	/** @type {{token:string,file:string}[]} */
 	const pinned = [];
-	const addRefs = (tokens, file) => tokens.forEach((token) => refs.push({ token, file: rel(file) }));
+	const addRefs = (tokens, file) =>
+		tokens.forEach((token) => refs.push({ token, file: rel(file) }));
 	const addPinned = (tokens, file) =>
 		tokens.forEach((token) => pinned.push({ token, file: rel(file) }));
 
@@ -247,7 +248,9 @@ function main() {
 			`\n⚠️  Gepinnt, aber upstream unbekannt: ${unknownPinned.size} in .ds-stage gepinnte(s) --z-ds-Token fehlt in static/${DEFINITION_FILE}:`
 		);
 		for (const token of [...unknownPinned.keys()].sort())
-			console.warn(`   • ${token}  (gepinnt in ${[...unknownPinned.get(token)].sort().join(', ')})`);
+			console.warn(
+				`   • ${token}  (gepinnt in ${[...unknownPinned.get(token)].sort().join(', ')})`
+			);
 		console.warn('   → Bühnen-Palette (global.css .ds-stage) an den Upstream-Namen angleichen.');
 	}
 

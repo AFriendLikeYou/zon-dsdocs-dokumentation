@@ -179,9 +179,7 @@
 			bind:element={input}
 			class="media-picker__search"
 			type="text"
-			placeholder={canUpload
-				? 'Durchsuchen — oder Bild einfügen/hineinziehen …'
-				: 'Durchsuchen …'}
+			placeholder={canUpload ? 'Durchsuchen — oder Bild einfügen/hineinziehen …' : 'Durchsuchen …'}
 			bind:value={query}
 			onkeydown={onkey}
 			onpaste={onPasteUpload}

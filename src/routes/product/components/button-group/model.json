@@ -6,10 +6,7 @@
 	"aktualisiertAm": "2026-07-11",
 	"dokumentiertAm": "2026-07-02",
 	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
-	"verwandt": [
-		"button",
-		"icon-button"
-	],
+	"verwandt": ["button", "icon-button"],
 	"masse": {
 		"hoehe": {
 			"px": "32",
@@ -128,11 +125,7 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": [
-			"inaktiv",
-			"inaktiv+hover",
-			"aktiv"
-		],
+		"zustaende": ["inaktiv", "inaktiv+hover", "aktiv"],
 		"elemente": [
 			{
 				"teil": "Segment · Hintergrund",

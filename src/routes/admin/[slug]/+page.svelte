@@ -363,7 +363,12 @@
 			<div class="card-body">
 				{#each model.a11y as _, i}
 					<div class="field-row field-row--a11y">
-						<Field class="field-row__key" density="compact" bind:value={model.a11y[i].label} placeholder="Label" />
+						<Field
+							class="field-row__key"
+							density="compact"
+							bind:value={model.a11y[i].label}
+							placeholder="Label"
+						/>
 						<Field density="compact" bind:value={model.a11y[i].wert} placeholder="Wert" />
 						<Select
 							class="field-row__status"
@@ -414,7 +419,11 @@
 							bind:value={model.callouts[i].nr}
 							aria-label="Nummer"
 						/>
-						<Field density="compact" bind:value={model.callouts[i].text} placeholder="Beschreibung" />
+						<Field
+							density="compact"
+							bind:value={model.callouts[i].text}
+							placeholder="Beschreibung"
+						/>
 						<button
 							type="button"
 							class="row-remove"
@@ -438,9 +447,17 @@
 			<div class="card-body">
 				{#each model.wording as _, i}
 					<div class="field-row">
-						<Field density="compact" bind:value={model.wording[i].schlecht} placeholder="Schlecht" />
+						<Field
+							density="compact"
+							bind:value={model.wording[i].schlecht}
+							placeholder="Schlecht"
+						/>
 						<Field density="compact" bind:value={model.wording[i].gut} placeholder="Gut" />
-						<Field density="compact" bind:value={model.wording[i].hinweis} placeholder="Hinweis (optional)" />
+						<Field
+							density="compact"
+							bind:value={model.wording[i].hinweis}
+							placeholder="Hinweis (optional)"
+						/>
 						<button
 							type="button"
 							class="row-remove"

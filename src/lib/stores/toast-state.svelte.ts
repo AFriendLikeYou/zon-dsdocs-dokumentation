@@ -21,7 +21,12 @@ export class ToastState {
 		}
 	}
 
-	add(title: string, message: string, durationMs = DEFAULT_DURATION_MS, action?: ToastType['action']) {
+	add(
+		title: string,
+		message: string,
+		durationMs = DEFAULT_DURATION_MS,
+		action?: ToastType['action']
+	) {
 		// Dedupe: identischer Titel+Text bereits sichtbar → nur Zähler hoch und
 		// Timer neu starten, statt einen weiteren Toast zu stapeln.
 		const existing = this.toasts.find((t) => t.title === title && t.message === message);

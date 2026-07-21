@@ -15,12 +15,7 @@
 		children: import('svelte').Snippet;
 	}
 
-	let {
-		title,
-		gap = 'var(--z-ds-space-16)',
-		direction = 'responsive',
-		children
-	}: Props = $props();
+	let { title, gap = 'var(--z-ds-space-16)', direction = 'responsive', children }: Props = $props();
 
 	// Gap als CSS-Variable an den Container reichen.
 	let containerStyle = $derived(`--gap: ${gap};`);

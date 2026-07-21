@@ -31,14 +31,22 @@ export const COLOR_ROLE_GROUPS: RoleGroup[] = [
 		rollen: [
 			{ token: '--ds-text', raw: '--z-ds-color-text-100', usage: 'Überschriften, primäre UI.' },
 			{ token: '--ds-text-body', raw: '--z-ds-color-text-70', usage: 'Fließtext, sekundäre UI.' },
-			{ token: '--ds-text-muted', raw: '--z-ds-color-text-55', usage: 'Labels, Meta, Platzhalter.' },
+			{
+				token: '--ds-text-muted',
+				raw: '--z-ds-color-text-55',
+				usage: 'Labels, Meta, Platzhalter.'
+			},
 			{ token: '--ds-text-faint', raw: '--z-ds-color-text-40', usage: 'Tertiär, disabled.' }
 		]
 	},
 	{
 		titel: 'Linien',
 		rollen: [
-			{ token: '--ds-border', raw: '--z-ds-color-border-70', usage: 'Standard-Rahmen und Trenner.' },
+			{
+				token: '--ds-border',
+				raw: '--z-ds-color-border-70',
+				usage: 'Standard-Rahmen und Trenner.'
+			},
 			{
 				token: '--ds-border-strong',
 				raw: '--z-ds-color-border-100',

@@ -136,7 +136,9 @@ export function checkNested(key, value) {
 				issues.push(`codeBeispiele[${i}].hinweis muss ein String sein`);
 			for (const k of Object.keys(item))
 				if (!erlaubt.has(k))
-					issues.push(`codeBeispiele[${i}]: unbekannter Key „${k}" (erlaubt: label, code, sprache, hinweis)`);
+					issues.push(
+						`codeBeispiele[${i}]: unbekannter Key „${k}" (erlaubt: label, code, sprache, hinweis)`
+					);
 		}
 	}
 	if (key === 'playground' && isObject(value)) {

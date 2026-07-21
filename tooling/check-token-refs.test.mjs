@@ -28,7 +28,8 @@ describe('collectDefinedTokens', () => {
 
 describe('collectVarRefs', () => {
 	it('sammelt var()-Nutzungen (auch mit Whitespace/Fallback)', () => {
-		const css = 'a{color:var(--z-ds-color-text-100)} b{font-family:var( --z-ds-font-mono, monospace)}';
+		const css =
+			'a{color:var(--z-ds-color-text-100)} b{font-family:var( --z-ds-font-mono, monospace)}';
 		expect(collectVarRefs(css)).toEqual(['--z-ds-color-text-100', '--z-ds-font-mono']);
 	});
 

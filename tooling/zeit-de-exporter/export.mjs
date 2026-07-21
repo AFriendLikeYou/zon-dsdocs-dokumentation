@@ -655,7 +655,8 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (anyCode) {
 		develop += `\n\t<h2>Code</h2>\n`;
 		if (hasHtmlCode) develop += `\t<CodeBlock title="HTML" lang="html" code={htmlCode} />\n`;
-		if (hasSvelteCode) develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
+		if (hasSvelteCode)
+			develop += `\t<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />\n`;
 		if (hasRepoCode) {
 			// repoNote (content-Override gewinnt über Maschine) als Fließtext über dem
 			// Repo-Snippet; {repoNote} wird von Svelte escaped. Nur zeigen, wenn nicht leer.

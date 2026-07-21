@@ -86,12 +86,7 @@
 				onclose();
 			}}
 		></div>
-		<div
-			class="popover-sheet__sheet"
-			role="dialog"
-			aria-label={label}
-			onpointerdown={grabPointer}
-		>
+		<div class="popover-sheet__sheet" role="dialog" aria-label={label} onpointerdown={grabPointer}>
 			<div class="popover-sheet__grip" aria-hidden="true"></div>
 			{@render children()}
 		</div>

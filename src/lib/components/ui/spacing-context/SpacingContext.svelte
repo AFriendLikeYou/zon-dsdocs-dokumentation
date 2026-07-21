@@ -31,21 +31,34 @@
 	<figure class="spacing-context__panel">
 		<figcaption class="spacing-context__caption">Innenabstand</figcaption>
 		<div class="spacing-context__stage">
-			<div class="spacing-context__pad" style={`--sc-pb: var(${paddingBlock}); --sc-pi: var(${paddingInline});`}>
+			<div
+				class="spacing-context__pad"
+				style={`--sc-pb: var(${paddingBlock}); --sc-pi: var(${paddingInline});`}
+			>
 				<span class="spacing-context__core">Button</span>
 			</div>
 		</div>
 		<ul class="spacing-context__legend">
 			<li>
-				<span class="spacing-context__swatch"></span><Chip value={paddingBlock} label={short(paddingBlock)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip
+					value={paddingBlock}
+					label={short(paddingBlock)}
+					copy={false}
+				/>
 				<span class="spacing-context__dim">vertikal</span>
 			</li>
 			<li>
-				<span class="spacing-context__swatch"></span><Chip value={paddingInline} label={short(paddingInline)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip
+					value={paddingInline}
+					label={short(paddingInline)}
+					copy={false}
+				/>
 				<span class="spacing-context__dim">horizontal</span>
 			</li>
 		</ul>
-		<p class="spacing-context__note">Abstand <em>innerhalb</em> eines Elements — zwischen Rahmen und Inhalt.</p>
+		<p class="spacing-context__note">
+			Abstand <em>innerhalb</em> eines Elements — zwischen Rahmen und Inhalt.
+		</p>
 	</figure>
 
 	<figure class="spacing-context__panel">
@@ -58,7 +71,11 @@
 		</div>
 		<ul class="spacing-context__legend">
 			<li>
-				<span class="spacing-context__swatch"></span><Chip value={gap} label={short(gap)} copy={false} />
+				<span class="spacing-context__swatch"></span><Chip
+					value={gap}
+					label={short(gap)}
+					copy={false}
+				/>
 				<span class="spacing-context__dim">gap</span>
 			</li>
 		</ul>
@@ -104,11 +121,7 @@
 		display: inline-flex;
 		padding: var(--sc-pb) var(--sc-pi);
 		background-color: var(--sc-tint);
-		background-image: repeating-linear-gradient(
-			45deg,
-			var(--sc-hatch) 0 2px,
-			transparent 2px 7px
-		);
+		background-image: repeating-linear-gradient(45deg, var(--sc-hatch) 0 2px, transparent 2px 7px);
 		border: 1px dashed var(--ds-accent);
 		border-radius: var(--ds-radius-sm);
 	}
@@ -128,11 +141,7 @@
 		display: inline-flex;
 		gap: var(--sc-gap);
 		background-color: var(--sc-tint);
-		background-image: repeating-linear-gradient(
-			45deg,
-			var(--sc-hatch) 0 2px,
-			transparent 2px 7px
-		);
+		background-image: repeating-linear-gradient(45deg, var(--sc-hatch) 0 2px, transparent 2px 7px);
 		border-radius: var(--ds-radius-sm);
 	}
 	.spacing-context__block {
@@ -161,11 +170,7 @@
 		width: 14px;
 		height: 14px;
 		background-color: var(--sc-tint);
-		background-image: repeating-linear-gradient(
-			45deg,
-			var(--sc-hatch) 0 2px,
-			transparent 2px 5px
-		);
+		background-image: repeating-linear-gradient(45deg, var(--sc-hatch) 0 2px, transparent 2px 5px);
 		border: 1px dashed var(--ds-accent);
 		border-radius: var(--ds-radius-xs);
 	}

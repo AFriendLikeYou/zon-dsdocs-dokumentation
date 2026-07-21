@@ -573,7 +573,9 @@ Text nach dem Bild.
 
 	it('neuer src → Output enthält neuen <img>, Rest byte-identisch, bleibt <img>', () => {
 		const newTag = '<img class="img-natural" src="/media/b.png" alt="Erstes Bild" />';
-		const blocks = before.segments.map((_, i) => (i === imgIdx ? { keep: i, img: newTag } : { keep: i }));
+		const blocks = before.segments.map((_, i) =>
+			i === imgIdx ? { keep: i, img: newTag } : { keep: i }
+		);
 		const next = rebuild(IMGDOC, { blocks });
 		// Nur der src-Pfad ändert sich — alles andere byte-für-byte gleich.
 		expect(next).toBe(IMGDOC.replace('/media/a.png', '/media/b.png'));
@@ -765,7 +767,9 @@ Intro.
 	it('svelte:head und script sind EIGENE Segmente (P1.1)', () => {
 		expect(before.segments[headI].text.trim().startsWith('<script')).toBe(true);
 		expect(
-			before.segments.some((s) => s.text.trim().startsWith('<svelte:head') && !s.text.includes('<script'))
+			before.segments.some(
+				(s) => s.text.trim().startsWith('<svelte:head') && !s.text.includes('<script')
+			)
 		).toBe(true);
 	});
 

@@ -33,7 +33,12 @@ export type ManifestComponent = {
  * `wert` ist der LIGHT-Wert (kanonischer Default), `wertDark` der DARK-Wert; bei
  * theme-invarianten Tokens sind beide gleich. Additiv — apiVersion bleibt 1.
  */
-export type ManifestToken = { name: string; wert: string | null; wertDark: string | null; usage?: string };
+export type ManifestToken = {
+	name: string;
+	wert: string | null;
+	wertDark: string | null;
+	usage?: string;
+};
 
 /**
  * Reichert die tokens-Gruppen eines Specs um die aufgelösten Werte an (`wert` =

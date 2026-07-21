@@ -93,9 +93,9 @@ describe('Grid', () => {
 			expect(styleOf(render(Grid, { props: { children } }).container)).toContain(
 				'--grid-margin-block: 0'
 			);
-			expect(
-				styleOf(render(Grid, { props: { marginBlock: 'lg', children } }).container)
-			).toContain('--grid-margin-block: var(--z-ds-space-32)');
+			expect(styleOf(render(Grid, { props: { marginBlock: 'lg', children } }).container)).toContain(
+				'--grid-margin-block: var(--z-ds-space-32)'
+			);
 		});
 	});
 

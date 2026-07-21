@@ -267,7 +267,9 @@ async function fetchResolvedDocument(fileKey, nodeId, token) {
 
 	if (doc.type === 'COMPONENT') {
 		const setId =
-			entry.components?.[doc.id]?.componentSetId ?? doc.componentSetId ?? doc.componentPropertyReferences;
+			entry.components?.[doc.id]?.componentSetId ??
+			doc.componentSetId ??
+			doc.componentPropertyReferences;
 		if (typeof setId === 'string') {
 			const setEntry = await grab(setId);
 			return { doc: setEntry.document, note: `Component → Set ${setId} aufgelöst.` };

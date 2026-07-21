@@ -15,7 +15,12 @@
 	// ableiten (statt des früheren $state+afterNavigate-Spiegels). Nebenbei gefixt:
 	// `findIndex(...) || 0` fing -1 nicht ab (−1 ist truthy) → Math.max-Klammer.
 	const pathname = $derived(page.url.pathname);
-	const currentIndex = $derived(Math.max(0, items.findIndex((item) => item.href === pathname)));
+	const currentIndex = $derived(
+		Math.max(
+			0,
+			items.findIndex((item) => item.href === pathname)
+		)
+	);
 	const showNavigation = $derived(items.some((item) => item.href === pathname));
 
 	function getDisplayName(item: MenuItem | MenuSection) {

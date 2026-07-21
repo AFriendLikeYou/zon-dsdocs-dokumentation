@@ -5,7 +5,9 @@
 	import { CATALOG } from '$data/catalog';
 	import { CardGrid } from '$components/ui/card';
 
-	let { slugs = [] }: {
+	let {
+		slugs = []
+	}: {
 		/** Katalog-Slugs verwandter Komponenten; unbekannte werden still übersprungen. */
 		slugs?: string[];
 	} = $props();

@@ -162,8 +162,8 @@ describe('buildDraft', () => {
 		expect(report.unmapped.map((u) => u.figmaName)).toContain('Fancy/99');
 		expect(report.unbound).toHaveLength(1);
 		// Figma-Hex steht im Report (Herkunft), nicht im Modell.
-		expect(report.tokenHerkunft.find((h) => h.name === '--z-ds-color-background-10')?.figmaHex).toBe(
-			'#eeeeee'
-		);
+		expect(
+			report.tokenHerkunft.find((h) => h.name === '--z-ds-color-background-10')?.figmaHex
+		).toBe('#eeeeee');
 	});
 });

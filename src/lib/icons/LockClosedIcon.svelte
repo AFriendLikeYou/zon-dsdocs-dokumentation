@@ -4,7 +4,15 @@
 	let { width = 16, height = 16, ...rest }: SVGAttributes<SVGSVGElement> = $props();
 </script>
 
-<svg {width} {height} viewBox="0 0 16 16" fill="none" stroke-linejoin="round" aria-hidden="true" {...rest}>
+<svg
+	{width}
+	{height}
+	viewBox="0 0 16 16"
+	fill="none"
+	stroke-linejoin="round"
+	aria-hidden="true"
+	{...rest}
+>
 	<path
 		fill-rule="evenodd"
 		clip-rule="evenodd"

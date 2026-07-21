@@ -12,7 +12,9 @@
 	import { Swatch } from '$components/ui/swatch';
 	import { resolveCssVar } from '$lib/utils';
 
-	let { farbrollen = null }: {
+	let {
+		farbrollen = null
+	}: {
 		/** Farbrollen-Matrix (Elemente × Zustände → Token); null blendet die Tabelle aus. */
 		farbrollen?: ColorRoles | null;
 	} = $props();

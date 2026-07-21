@@ -282,9 +282,16 @@ export function cloneItem(
 /** Ein einzelner Block im Save-Payload (siehe `BlockOp` in segment.ts). */
 export type BlockPayload =
 	| { insertProse: string }
-	| { insertContainer: string | undefined; attrs?: Record<string, string | boolean>; children: unknown[] }
+	| {
+			insertContainer: string | undefined;
+			attrs?: Record<string, string | boolean>;
+			children: unknown[];
+	  }
 	| { insert: string | undefined; values?: Record<string, string | boolean> }
-	| { keep: number | undefined; container: { attrs?: Record<string, string | boolean>; children: unknown[] } }
+	| {
+			keep: number | undefined;
+			container: { attrs?: Record<string, string | boolean>; children: unknown[] };
+	  }
 	| { keep: number | undefined; component?: Record<string, string | boolean> }
 	| { keep: number | undefined; prose?: string }
 	| { keep: number | undefined; img?: string }
@@ -306,7 +313,8 @@ export function serializeBlocks(items: Item[]): BlockPayload[] {
 					: { insert: it.compName, values: it.compValues };
 		if (it.blockKind === 'container' && it.touched)
 			return { keep: it.index, container: { attrs: it.compValues, children: kids } };
-		if (it.blockKind === 'component' && it.touched) return { keep: it.index, component: it.compValues };
+		if (it.blockKind === 'component' && it.touched)
+			return { keep: it.index, component: it.compValues };
 		if (it.blockKind === 'prosa' && it.touched) return { keep: it.index, prose: it.prose };
 		if (it.blockKind === 'img' && it.touched) return { keep: it.index, img: it.content };
 		return { keep: it.index };

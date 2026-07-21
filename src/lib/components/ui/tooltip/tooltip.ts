@@ -100,8 +100,7 @@ export function tooltip(node: HTMLElement, opts: TooltipOptions) {
 		const gap = 8;
 		let left = r.left + r.width / 2 - tr.width / 2;
 		left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
-		const top =
-			current.position === 'bottom' ? r.bottom + gap : r.top - tr.height - gap;
+		const top = current.position === 'bottom' ? r.bottom + gap : r.top - tr.height - gap;
 		el.style.left = `${Math.round(left)}px`;
 		el.style.top = `${Math.round(top)}px`;
 	}

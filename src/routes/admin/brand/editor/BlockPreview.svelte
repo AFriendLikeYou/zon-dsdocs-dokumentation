@@ -103,7 +103,8 @@
 
 {#if childCount !== null}
 	<div class="block-preview block-preview--container">
-		<span class="block-preview__count">{childCount} {childCount === 1 ? 'Element' : 'Elemente'}</span
+		<span class="block-preview__count"
+			>{childCount} {childCount === 1 ? 'Element' : 'Elemente'}</span
 		>
 		{#each chips.slice(0, 2) as c (c.label)}
 			<span class="chip"><span class="chip__key">{c.label}</span>{c.val}</span>

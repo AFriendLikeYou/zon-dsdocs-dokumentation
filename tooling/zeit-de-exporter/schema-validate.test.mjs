@@ -19,7 +19,10 @@ describe('schema-validate · validateModelSchema', () => {
 	});
 
 	it('falscher Typ in verschachtelter Struktur → Pfad in der Meldung', () => {
-		const errors = validateModelSchema({ name: 'X', tokens: [{ kategorie: 'Farbe', items: 'nope' }] });
+		const errors = validateModelSchema({
+			name: 'X',
+			tokens: [{ kategorie: 'Farbe', items: 'nope' }]
+		});
 		expect(errors.some((e) => e.includes('/tokens/0/items'))).toBe(true);
 	});
 

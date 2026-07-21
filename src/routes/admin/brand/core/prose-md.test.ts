@@ -200,9 +200,7 @@ describe('renderPreview — Tabellen', () => {
 
 describe('renderPreview — Blöcke gemischt', () => {
 	it('hält Überschrift, ol, Zitat und Tabelle in Reihenfolge auseinander', () => {
-		const html = renderPreview(
-			'## Titel\n1. eins\n> Zitat\n| A |\n| --- |\n| 1 |\nAbsatz'
-		);
+		const html = renderPreview('## Titel\n1. eins\n> Zitat\n| A |\n| --- |\n| 1 |\nAbsatz');
 		expect(html).toBe(
 			'<h2>Titel</h2><ol><li>eins</li></ol><blockquote><p>Zitat</p></blockquote>' +
 				'<table><thead><tr><th>A</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>' +
@@ -267,17 +265,13 @@ describe('renderPreview — Kursiv per Unterstrich', () => {
 	});
 
 	it('escapet HTML auch innerhalb von `_…_`', () => {
-		expect(renderPreview('_<img src=x>_')).toBe(
-			'<p><em>&lt;img src=x&gt;</em></p>'
-		);
+		expect(renderPreview('_<img src=x>_')).toBe('<p><em>&lt;img src=x&gt;</em></p>');
 		expect(renderPreview('_<b>fett</b>_')).toBe('<p><em>&lt;b&gt;fett&lt;/b&gt;</em></p>');
 	});
 
 	it('rendert `_…_` auch in Listen, Zitaten und Tabellenzellen', () => {
 		expect(renderPreview('- _eins_')).toBe('<ul><li><em>eins</em></li></ul>');
-		expect(renderPreview('> _zitiert_')).toBe(
-			'<blockquote><p><em>zitiert</em></p></blockquote>'
-		);
+		expect(renderPreview('> _zitiert_')).toBe('<blockquote><p><em>zitiert</em></p></blockquote>');
 		expect(renderPreview('| _A_ |\n| --- |\n| _1_ |')).toBe(
 			'<table><thead><tr><th><em>A</em></th></tr></thead>' +
 				'<tbody><tr><td><em>1</em></td></tr></tbody></table>'

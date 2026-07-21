@@ -78,21 +78,25 @@ describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
 
 	// Timeout großzügig: jeder Fall startet einen echten export.mjs-Child-Prozess
 	// (~1,5 s), unter Vitest-Parallelität reicht der 5-s-Default nicht sicher.
-	it.each(slugs)('%s: +page.svx & spec.generated.ts byte-identisch', (slug) => {
-		const { res, srcDir, outDir } = exportToTemp(slug);
-		expect(res.status, res.stderr).toBe(0);
+	it.each(slugs)(
+		'%s: +page.svx & spec.generated.ts byte-identisch',
+		(slug) => {
+			const { res, srcDir, outDir } = exportToTemp(slug);
+			expect(res.status, res.stderr).toBe(0);
 
-		// Isolation: Stub landet im Temp-Ziel, nicht im echten Ordner.
-		expect(existsSync(path.join(outDir, 'content.json'))).toBe(true);
+			// Isolation: Stub landet im Temp-Ziel, nicht im echten Ordner.
+			expect(existsSync(path.join(outDir, 'content.json'))).toBe(true);
 
-		for (const file of ['+page.svx', 'spec.generated.ts']) {
-			const got = readFileSync(path.join(outDir, file));
-			const want = readFileSync(path.join(srcDir, file));
-			expect(got.equals(want), `${slug}/${file} weicht vom committeten Stand ab (Drift)`).toBe(
-				true
-			);
-		}
-	}, 20000);
+			for (const file of ['+page.svx', 'spec.generated.ts']) {
+				const got = readFileSync(path.join(outDir, file));
+				const want = readFileSync(path.join(srcDir, file));
+				expect(got.equals(want), `${slug}/${file} weicht vom committeten Stand ab (Drift)`).toBe(
+					true
+				);
+			}
+		},
+		20000
+	);
 });
 
 // ---------------------------------------------------------------------------
@@ -127,7 +131,9 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 	it('controls ohne template/specimen → Exit ≠ 0, Meldung nennt fehlendes Ziel', () => {
 		const res = runBroken({
 			name: 'X',
-			render: { controls: [{ key: 'v', label: 'V', type: 'select', options: [{ value: 'a', label: 'A' }] }] }
+			render: {
+				controls: [{ key: 'v', label: 'V', type: 'select', options: [{ value: 'a', label: 'A' }] }]
+			}
 		});
 		expect(res.status).not.toBe(0);
 		expect(res.stderr).toContain('weder template noch specimen');
@@ -161,7 +167,12 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 					template: '<b class="z{classes}"></b>',
 					cssFile: './pattern.css',
 					controls: [
-						{ key: 'v', label: 'V', type: 'select', options: [{ value: 'a', label: 'A', cssClass: 'z--a' }] }
+						{
+							key: 'v',
+							label: 'V',
+							type: 'select',
+							options: [{ value: 'a', label: 'A', cssClass: 'z--a' }]
+						}
 					]
 				}
 			},

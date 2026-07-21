@@ -71,7 +71,9 @@ let modelChecked = 0;
 const modelSlugs = fs.existsSync(componentsDir)
 	? fs
 			.readdirSync(componentsDir, { withFileTypes: true })
-			.filter((e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'model.json')))
+			.filter(
+				(e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'model.json'))
+			)
 			.map((e) => e.name)
 			.sort()
 	: [];

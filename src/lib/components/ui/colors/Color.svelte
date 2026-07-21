@@ -35,9 +35,7 @@
 	}: Props = $props();
 
 	// Leerer borderColor bedeutet „Rahmen = Füllfarbe" — abgeleitet statt Prop-Mutation.
-	const resolvedBorder = $derived(
-		borderColor === '' ? `var(${colorCustomProperty})` : borderColor
-	);
+	const resolvedBorder = $derived(borderColor === '' ? `var(${colorCustomProperty})` : borderColor);
 	const fontColor = $derived(
 		fontColorCustomProperty ? `var(${fontColorCustomProperty})` : undefined
 	);

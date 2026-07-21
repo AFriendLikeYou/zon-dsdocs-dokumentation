@@ -60,9 +60,13 @@ describe('CodeBlock — Zeilennummern', () => {
 
 describe('CodeBlock — Hervorhebung über Zeilengrenzen', () => {
 	it('färbt mehrzeilige CSS-Kommentare durchgehend ein (pattern.css)', () => {
-		const css = ['/* Kommentar', '   über zwei Zeilen */', '.z-button {', '\tcolor: red;', '}'].join(
-			'\n'
-		);
+		const css = [
+			'/* Kommentar',
+			'   über zwei Zeilen */',
+			'.z-button {',
+			'\tcolor: red;',
+			'}'
+		].join('\n');
 		const { container } = render(CodeBlock, { props: { code: css, lang: 'css' } });
 
 		const lines = container.querySelectorAll('.code-block__line');

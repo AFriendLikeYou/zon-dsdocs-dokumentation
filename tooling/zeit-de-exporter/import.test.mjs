@@ -5,7 +5,8 @@ import { isDegraded, statusForDirs, formatStatus } from './import.mjs';
 // weil die Token-Namen fehlen (REST ohne Enterprise liefert nur IDs)?
 describe('import.mjs · isDegraded (Gate 1)', () => {
 	it('TokenIds ohne Namen → degradiert (stoppt)', () => {
-		const raw = '{"variants":{"0":{"fills":[{"hex":"#fff","tokenId":"VariableID:1:2","token":""}]}}}';
+		const raw =
+			'{"variants":{"0":{"fills":[{"hex":"#fff","tokenId":"VariableID:1:2","token":""}]}}}';
 		expect(isDegraded(raw)).toBe(true);
 	});
 

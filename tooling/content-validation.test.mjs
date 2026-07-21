@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-	checkContentData,
-	validateContentRaw,
-	KNOWN_KEYS
-} from './content-validation.mjs';
+import { checkContentData, validateContentRaw, KNOWN_KEYS } from './content-validation.mjs';
 
 // Geteilter Validierungs-Kern der content.json — dieselbe Logik prüft im
 // check-content-Gate UND im Spec-Editor-Save. Hier fs-frei getestet.

@@ -47,7 +47,13 @@
 	<InfoIcon width={16} height={16} />
 </button>
 
-<PopoverSheet {open} label="Legende: Herkunft der Angaben" anchor={triggerEl} width="20rem" onclose={close}>
+<PopoverSheet
+	{open}
+	label="Legende: Herkunft der Angaben"
+	anchor={triggerEl}
+	width="20rem"
+	onclose={close}
+>
 	<div class="legend-pop">
 		<p class="legend-pop__row">
 			<ProvenanceChip variant="machine" /> read-only, aus dem Figma-Import

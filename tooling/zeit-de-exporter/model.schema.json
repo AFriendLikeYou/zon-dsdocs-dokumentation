@@ -222,7 +222,10 @@
 						"additionalProperties": false,
 						"required": ["name"],
 						"properties": {
-							"name": { "type": "string", "description": "Token-Name (--z-ds-*). Einzige Quelle des Werts — der wird zur Laufzeit/Buildzeit aus static/styles-zds.css aufgelöst, NICHT im Modell hinterlegt." },
+							"name": {
+								"type": "string",
+								"description": "Token-Name (--z-ds-*). Einzige Quelle des Werts — der wird zur Laufzeit/Buildzeit aus static/styles-zds.css aufgelöst, NICHT im Modell hinterlegt."
+							},
 							"hinweis": {
 								"type": "string",
 								"description": "Freier Beschreibungstext neben dem aufgelösten Wert, z. B. \"Fläche Default\". Optional. (Kein Wert — Werte kommen aus der einen Quelle.)"

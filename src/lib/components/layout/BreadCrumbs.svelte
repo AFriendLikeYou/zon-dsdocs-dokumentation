@@ -38,7 +38,9 @@
 			<ol>
 				{#each breadcrumbs as { label, href }, index}
 					<li>
-						<a {href} aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}>{label}</a>
+						<a {href} aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}
+							>{label}</a
+						>
 
 						{#if index < breadcrumbs.length - 1}
 							<span aria-hidden="true">/</span>

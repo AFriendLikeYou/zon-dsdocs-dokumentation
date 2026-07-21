@@ -15,7 +15,10 @@
 	import { Chip } from '$components/ui/chip';
 	import type { ComponentSpec, BadgeVariant } from '$types/spec';
 
-	let { spec, version = '' }: {
+	let {
+		spec,
+		version = ''
+	}: {
 		/** Component-Spec (Kategorie, Status, Zweck, Figma-Link, Stand). */
 		spec: ComponentSpec;
 		/** Versions-Label neben dem Status-Badge. */

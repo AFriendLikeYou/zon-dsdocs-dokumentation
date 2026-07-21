@@ -276,9 +276,7 @@ describe('getFoundations', () => {
 		// background-0 unterscheidet sich je Theme → beide Werte kompakt.
 		expect(text).toContain('--z-ds-color-background-0 = #ffffff · dark #121212');
 		// background-success ist theme-invariant → kein Dark-Suffix.
-		const successLine = text
-			.split('\n')
-			.find((l) => l.includes('--z-ds-color-background-success'));
+		const successLine = text.split('\n').find((l) => l.includes('--z-ds-color-background-success'));
 		expect(successLine).toBeTruthy();
 		expect(successLine).toContain('#09864d');
 		expect(successLine).not.toContain('dark');

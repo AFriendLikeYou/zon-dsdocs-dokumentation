@@ -58,7 +58,7 @@
 	// Aktive Tab robust bestimmen: gesetzte ID, sonst erste Tab (Fallback bei
 	// leerem/ungültigem `active`).
 	const activeId = $derived(
-		tabs.some((t, i) => idOf(t, i) === active) ? (active as string) : (tabs[0] && idOf(tabs[0], 0))
+		tabs.some((t, i) => idOf(t, i) === active) ? (active as string) : tabs[0] && idOf(tabs[0], 0)
 	);
 
 	function select(id: string) {

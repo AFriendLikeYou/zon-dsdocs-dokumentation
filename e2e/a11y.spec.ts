@@ -112,7 +112,7 @@ const KNOWN_ISSUES: KnownIssue[] = [
 		rule: 'color-contrast',
 		selector: '.sublist__label--',
 		reason:
-			'#09864d bzw. #f13638 auf #eee/#232323 = 3,38–3,99:1. Do/Don\'t-Marker in der CMS-Maske; Bedeutung steht zusätzlich als Text. Token-Entscheidung.'
+			"#09864d bzw. #f13638 auf #eee/#232323 = 3,38–3,99:1. Do/Don't-Marker in der CMS-Maske; Bedeutung steht zusätzlich als Text. Token-Entscheidung."
 	},
 	// ── (c) Markenfarbe ────────────────────────────────────────────────────────
 	{
@@ -136,9 +136,7 @@ const KNOWN_ISSUES: KnownIssue[] = [
 function isKnown(pageName: string, ruleId: string, target: string) {
 	return KNOWN_ISSUES.some(
 		(k) =>
-			(k.page === pageName || k.page === '*') &&
-			k.rule === ruleId &&
-			target.includes(k.selector)
+			(k.page === pageName || k.page === '*') && k.rule === ruleId && target.includes(k.selector)
 	);
 }
 
@@ -243,7 +241,9 @@ test.describe('A11y — Tastatur', () => {
 		const focusableInMedia = await page.evaluate(() => {
 			const sel = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 			return [...document.querySelectorAll('.card__media')].filter((m) =>
-				[...m.querySelectorAll(sel)].some((el) => (el as HTMLElement).tabIndex >= 0 && !(el as HTMLElement).closest('[inert]'))
+				[...m.querySelectorAll(sel)].some(
+					(el) => (el as HTMLElement).tabIndex >= 0 && !(el as HTMLElement).closest('[inert]')
+				)
 			).length;
 		});
 		expect(focusableInMedia).toBe(0);
@@ -265,10 +265,7 @@ test.describe('A11y — Tastatur', () => {
 				const el = document.activeElement as HTMLElement | null;
 				if (!el || el === document.body) return null;
 				const name =
-					el.getAttribute('aria-label') ??
-					el.getAttribute('title') ??
-					el.textContent?.trim() ??
-					'';
+					el.getAttribute('aria-label') ?? el.getAttribute('title') ?? el.textContent?.trim() ?? '';
 				return {
 					tag: el.tagName,
 					name,

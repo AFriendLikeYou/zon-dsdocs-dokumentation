@@ -54,5 +54,4 @@ describe('Anatomy — Abstände-Tabelle (Measurements)', () => {
 		expect(screen.queryByRole('button', { name: /Sonderabstand/ })).toBeNull();
 		expect(screen.getByText('Sonderabstand')).toBeInTheDocument();
 	});
-
 });

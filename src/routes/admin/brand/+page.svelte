@@ -187,10 +187,8 @@
 	<AdminPageHeader title="Brand-Seiten" crumb={{ href: '/admin', label: 'Admin' }}>
 		{#snippet actions()}
 			{#if data.writable}
-				<Button
-					variant="accent"
-					aria-expanded={showNew}
-					onclick={() => (showNew = !showNew)}>+ Neue Seite</Button
+				<Button variant="accent" aria-expanded={showNew} onclick={() => (showNew = !showNew)}
+					>+ Neue Seite</Button
 				>
 			{/if}
 		{/snippet}
@@ -227,10 +225,7 @@
 				</Field>
 			</label>
 			<div class="np-actions">
-				<Button
-					type="submit"
-					variant="accent"
-					disabled={creating || !newTitle.trim() || !effSlug}
+				<Button type="submit" variant="accent" disabled={creating || !newTitle.trim() || !effSlug}
 					>{creating ? 'Wird angelegt …' : 'Anlegen & bearbeiten'}</Button
 				>
 				<Button variant="quiet" onclick={() => (showNew = false)}>Abbrechen</Button>
@@ -295,7 +290,8 @@
 								indent
 								dragover={overKey === `c${i}.${ci}`}
 								draggable={data.writable}
-								ondragstart={(e: DragEvent) => onDragStart(e, { kind: 'child', group: i, index: ci })}
+								ondragstart={(e: DragEvent) =>
+									onDragStart(e, { kind: 'child', group: i, index: ci })}
 								ondragover={(e: DragEvent) => onDragOver(e, { kind: 'child', group: i, index: ci })}
 								ondrop={(e: DragEvent) => onDrop(e, { kind: 'child', group: i, index: ci })}
 								ondragend={onDragEnd}

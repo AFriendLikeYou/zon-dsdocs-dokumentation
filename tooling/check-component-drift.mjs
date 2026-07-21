@@ -148,7 +148,9 @@ let checked = 0;
 for (const s of allDirs) {
 	if (!slugs.includes(s)) {
 		if (planned.has(s)) {
-			console.log(`ℹ️  „${s}": geplanter Stub (PLANNED_COMPONENTS) — ok, kein model.json erwartet.`);
+			console.log(
+				`ℹ️  „${s}": geplanter Stub (PLANNED_COMPONENTS) — ok, kein model.json erwartet.`
+			);
 			continue;
 		}
 		drift++;

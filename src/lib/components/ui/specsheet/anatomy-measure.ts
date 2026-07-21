@@ -22,8 +22,7 @@ export type RectLike = {
 export type Drift = { soll: string; ist: string };
 
 // Artboard-Maße zeigen IMMER px (Blueprint-Konvention + wenig Platz in den Ecken).
-export const apx = (m?: MasseValue): string =>
-	m == null ? '' : typeof m === 'string' ? m : m.px;
+export const apx = (m?: MasseValue): string => (m == null ? '' : typeof m === 'string' ? m : m.px);
 
 // Padding-Kasten aus dem px-String parsen („10 · 16" = vertikal · horizontal,
 // „t r b l" oder Einzelwert). Gelingt der Parse, zeigt die Maß-Ansicht den

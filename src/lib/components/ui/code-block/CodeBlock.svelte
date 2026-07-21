@@ -87,7 +87,10 @@
 		js: [
 			['comment', /\/\/[^\n]*|\/\*[\s\S]*?\*\//],
 			['string', /"[^"]*"|'[^']*'|`[^`]*`/],
-			['tag', /\b(?:const|let|var|function|return|import|export|from|if|else|await|async|new|class)\b/],
+			[
+				'tag',
+				/\b(?:const|let|var|function|return|import|export|from|if|else|await|async|new|class)\b/
+			],
 			['number', /\b\d+(?:\.\d+)?\b/],
 			['punct', /[{}()[\];:,.=]/]
 		]

@@ -16,7 +16,10 @@
 -->
 <script lang="ts">
 	type SpecimenItem = { label: string; html: string; note?: string };
-	let { items = [], min = 200 }: {
+	let {
+		items = [],
+		min = 200
+	}: {
 		/** Kacheln mit gerendertem Specimen-HTML, Label und optionaler Kurz-Info (note). */
 		items?: SpecimenItem[];
 		/** Minimale Kachelbreite in px (Grid-Spaltenmaß). */

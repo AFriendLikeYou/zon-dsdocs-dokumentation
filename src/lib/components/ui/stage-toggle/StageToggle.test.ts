@@ -17,9 +17,9 @@ describe('StageToggle', () => {
 
 	it('isDark markiert das dunkle Segment', () => {
 		render(StageToggle, { props: { isDark: true, onlight: () => {}, ondark: () => {} } });
-		expect(screen.getByRole('radio', { name: 'Dunkler Hintergrund' }).getAttribute('aria-checked')).toBe(
-			'true'
-		);
+		expect(
+			screen.getByRole('radio', { name: 'Dunkler Hintergrund' }).getAttribute('aria-checked')
+		).toBe('true');
 	});
 
 	it('Klick ruft den passenden Callback', async () => {

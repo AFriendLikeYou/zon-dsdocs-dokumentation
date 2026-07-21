@@ -66,8 +66,8 @@
 
 <div class="media">
 	<AdminPageHeader title="Medien" crumb={{ href: '/admin', label: 'Übersicht' }}>
-		Bilder aus <code>static/media/</code>. Uploads landen unter <code>/media/uploads/</code> und sind
-		über ihren Pfad einbindbar (z.&nbsp;B. <code>src="/media/uploads/…"</code>).
+		Bilder aus <code>static/media/</code>. Uploads landen unter <code>/media/uploads/</code> und
+		sind über ihren Pfad einbindbar (z.&nbsp;B. <code>src="/media/uploads/…"</code>).
 	</AdminPageHeader>
 
 	{#if form?.uploaded}
@@ -84,8 +84,8 @@
 	{/if}
 	{#if !data.writable}
 		<Banner compact variant="warning">
-			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht persistent
-			→ Blob-Store/GitHub, Phase 3).
+			Nur-Lese-Vorschau: Upload/Löschen sind im Prod-Modus deaktiviert (serverless = nicht
+			persistent → Blob-Store/GitHub, Phase 3).
 		</Banner>
 	{/if}
 

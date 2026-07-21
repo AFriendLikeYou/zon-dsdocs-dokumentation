@@ -168,9 +168,7 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": [
-			"default"
-		],
+		"zustaende": ["default"],
 		"elemente": [
 			{
 				"teil": "Fläche (Cell-Hintergrund)",

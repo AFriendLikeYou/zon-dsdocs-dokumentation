@@ -148,9 +148,7 @@ describe('CMS-Save erzeugt minimale Diffs', () => {
 		expect(diff.removed).toEqual(before.split('\n'));
 		expect(diff.added).toEqual(['Komplett neuer Absatz.']);
 		// Zeilenzahl ändert sich nur um die Differenz des Blocks selbst.
-		expect(next.split('\n').length - raw.split('\n').length).toBe(
-			1 - before.split('\n').length
-		);
+		expect(next.split('\n').length - raw.split('\n').length).toBe(1 - before.split('\n').length);
 	});
 
 	it('ein neu eingefügter Block wird durch Leerzeilen getrennt (Segmentierung hält)', () => {
@@ -158,11 +156,7 @@ describe('CMS-Save erzeugt minimale Diffs', () => {
 		const raw = readFileSync(page.file, 'utf8');
 		const items = itemsOf(loadPage(page.root, page.path));
 		const uid = createUidGen(9000);
-		const fresh = newItem(
-			'Banner',
-			(n) => CMS_COMPONENTS.find((c) => c.name === n),
-			uid.next
-		)!;
+		const fresh = newItem('Banner', (n) => CMS_COMPONENTS.find((c) => c.name === n), uid.next)!;
 		fresh.compValues = { ...(fresh.compValues ?? {}), title: 'Neu', text: 'Hinweis' };
 		items.splice(2, 0, fresh);
 

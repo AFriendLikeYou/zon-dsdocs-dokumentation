@@ -466,7 +466,10 @@ const TOOLS = [
 				'Voller Manifest-Eintrag der Komponente — identisch zu GET /api/manifest.json?component=<slug>.',
 			properties: {
 				slug: { type: 'string' },
-				spec: { type: 'object', description: 'Gemergter Spec (model.json + content.json) inkl. render.' },
+				spec: {
+					type: 'object',
+					description: 'Gemergter Spec (model.json + content.json) inkl. render.'
+				},
 				patternCss: { type: ['string', 'null'], description: 'Rohes, unscoped pattern.css.' }
 			},
 			required: ['slug', 'spec']
@@ -491,11 +494,13 @@ const TOOLS = [
 			properties: {
 				farbRollen: {
 					type: 'array',
-					description: 'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + wert (Light) + wertDark (Dark) + Usage.'
+					description:
+						'Rollen-Gruppen: --ds-Rolle → --z-ds-Token + wert (Light) + wertDark (Dark) + Usage.'
 				},
 				tokens: {
 					type: 'array',
-					description: 'Foundation-Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark).'
+					description:
+						'Foundation-Token-Gruppen mit aufgelösten Werten (wert = Light, wertDark = Dark).'
 				}
 			},
 			required: ['farbRollen', 'tokens']

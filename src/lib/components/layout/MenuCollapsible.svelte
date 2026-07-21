@@ -79,7 +79,11 @@
 				{@render headerInner()}
 			</button>
 		{:else if href}
-			<a href={href} onclick={() => onclick?.()} class="collapsible-link {isActive(href) ? 'active' : ''}">
+			<a
+				{href}
+				onclick={() => onclick?.()}
+				class="collapsible-link {isActive(href) ? 'active' : ''}"
+			>
 				{@render headerInner()}
 			</a>
 		{:else}

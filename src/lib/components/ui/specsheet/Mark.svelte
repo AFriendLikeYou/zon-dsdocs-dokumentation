@@ -5,7 +5,10 @@
   über die durchgereichte `class` (per :global gestylt).
 -->
 <script lang="ts">
-	let { kind, class: className = '' }: {
+	let {
+		kind,
+		class: className = ''
+	}: {
 		/** Glyph + Statusfarbe: 'good' = ✓ (--ds-positive), 'bad' = ✕ (--ds-negative). */
 		kind: 'good' | 'bad';
 		class?: string;

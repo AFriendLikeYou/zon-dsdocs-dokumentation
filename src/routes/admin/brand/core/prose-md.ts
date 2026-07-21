@@ -256,7 +256,12 @@ export function renderPreview(md: string): string {
 		// Zeile 1 ist die Trennzeile — sie ist Syntax, kein Inhalt.
 		const body = table
 			.slice(2)
-			.map((r) => `<tr>${tableCells(r).map((c) => `<td>${cell(c)}</td>`).join('')}</tr>`)
+			.map(
+				(r) =>
+					`<tr>${tableCells(r)
+						.map((c) => `<td>${cell(c)}</td>`)
+						.join('')}</tr>`
+			)
 			.join('');
 		out.push(`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`);
 		table = [];

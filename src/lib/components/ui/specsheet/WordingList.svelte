@@ -2,7 +2,9 @@
 <script lang="ts">
 	import type { WordingRule } from '$types/spec';
 	import Mark from './Mark.svelte';
-	let { items = [] }: {
+	let {
+		items = []
+	}: {
 		/** Formulierungsregeln („statt schlecht → besser gut" + optionaler Hinweis). */
 		items?: WordingRule[];
 	} = $props();
@@ -13,9 +15,13 @@
 		{#each items as w}
 			<li class="wording-list__row">
 				<div class="wording-list__pair">
-					<span class="wording-list__bad"><Mark kind="bad" class="wording-list__mark" />{w.schlecht}</span>
+					<span class="wording-list__bad"
+						><Mark kind="bad" class="wording-list__mark" />{w.schlecht}</span
+					>
 					<span class="wording-list__arrow" aria-hidden="true">→</span>
-					<span class="wording-list__good"><Mark kind="good" class="wording-list__mark" />{w.gut}</span>
+					<span class="wording-list__good"
+						><Mark kind="good" class="wording-list__mark" />{w.gut}</span
+					>
 				</div>
 				{#if w.hinweis}<p class="wording-list__note">{w.hinweis}</p>{/if}
 			</li>

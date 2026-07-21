@@ -103,7 +103,8 @@ export function statusForDirs(entries) {
 	const rows = entries.map((e) => {
 		/** @type {string[]} */
 		const hinweise = [];
-		if (!e.raw) hinweise.push('raw fehlt'); // kein Drift-Fixture
+		if (!e.raw)
+			hinweise.push('raw fehlt'); // kein Drift-Fixture
 		else if (e.degraded) hinweise.push('Gate 1'); // raw da, aber Token-Namen fehlen
 		if (e.draftOpen) hinweise.push('draft offen'); // draft da, model.json neuer/fehlt
 		return {
