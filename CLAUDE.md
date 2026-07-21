@@ -399,7 +399,14 @@ Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
 - `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
 - `pattern.css`-Scoping: flache Regeln **plus die bedingten At-Rules** `@media`,
   `@supports`, `@container` (Rahmen bleibt, Rumpf wird gescopet — Zerlegung über
-  Klammerbilanz in `scopeCss`/`scopeToCanvas`). **`@keyframes` & Co. wirft der
+  Klammerbilanz in `scopeCss`/`scopeToCanvas`). **Größenbasiertes `@media` wird im
+  gescopten Ausgang zu `@container`** (`mediaZuContainer`, Zwilling in beiden
+  Scopern): die Bühne hat eine gesetzte Breite, `@media` fragt aber den Viewport ab.
+  Nur Größen-Features werden übersetzt — `prefers-reduced-motion`, `hover`,
+  `pointer`, `print`, gemischte Bedingungen und Komma-Listen bleiben `@media`, und
+  es wird nie beides ausgegeben. Die `pattern.css` selbst behält ihr `@media`
+  (originalgetreue Kopie + Code-Block). Query-Container sind `.spec-canvas`
+  (`static/global.css`) und `.playground__stage`/`.playground__frame`. **`@keyframes` & Co. wirft der
   Exporter**: Prozent-Selektoren dürfen nicht gescopet werden, und der Keyframe-Name
   wäre global (Svelte benennt ihn im `<style>` der `.svx` um, im Katalog-`<style>`
   kollidierte er zwischen Komponenten).

@@ -49,6 +49,139 @@ const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
 /** Bedingte Gruppierungsregeln — wie im Exporter: Rahmen erhalten, Rumpf rekursiv scopen. */
 const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
 
+// ── @media → @container (Zwilling von `mediaZuContainer` in export.mjs) ──────
+// Die Katalog-Vorschau ist eine ~300 px breite Karte in einem beliebig breiten
+// Fenster. Ein `@media (min-width: 48em)` aus dem Produktions-CSS träfe dort den
+// VIEWPORT und zeigte in der Mini-Vorschau Desktop-Typografie. Übersetzt wird
+// darum im gescopten Ausgang zu `@container` — `.spec-canvas` trägt dazu
+// `container-type: inline-size` (static/global.css).
+//
+// Ausgegeben wird ENTWEDER @container ODER @media, nie beides: zwei parallele
+// Rahmen mit gegenläufiger Aussage würden über die Emissionsreihenfolge
+// entschieden.
+
+/** Größen-Features, die eine Container-Query kennt (mit min-/max-Präfix). */
+const GROESSEN_FEATURES = new Set([
+	'width',
+	'min-width',
+	'max-width',
+	'height',
+	'min-height',
+	'max-height',
+	'inline-size',
+	'min-inline-size',
+	'max-inline-size',
+	'block-size',
+	'min-block-size',
+	'max-block-size',
+	'aspect-ratio',
+	'min-aspect-ratio',
+	'max-aspect-ratio',
+	'orientation'
+]);
+
+/** Bezeichner, die in einer Größen-Bedingung als WERT auftreten dürfen (Einheiten,
+    Schlüsselwörter) — sie sagen nichts über das abgefragte Feature aus. */
+const GROESSEN_WERTE = new Set([
+	'px',
+	'em',
+	'rem',
+	'ex',
+	'ch',
+	'cap',
+	'ic',
+	'lh',
+	'rlh',
+	'vw',
+	'vh',
+	'vi',
+	'vb',
+	'vmin',
+	'vmax',
+	'svw',
+	'svh',
+	'lvw',
+	'lvh',
+	'dvw',
+	'dvh',
+	'cm',
+	'mm',
+	'q',
+	'in',
+	'pt',
+	'pc',
+	'portrait',
+	'landscape',
+	'infinite',
+	'calc'
+]);
+
+/**
+ * Ist die Klammergruppe eine reine GRÖSSEN-Bedingung? Konservativ: mindestens ein
+ * bekanntes Größen-Feature, und kein Bezeichner, den wir nicht sicher als Feature
+ * oder Wert einordnen können. `prefers-reduced-motion`, `hover`, `pointer`,
+ * `prefers-color-scheme`, `resolution` … fallen so automatisch durch — sie
+ * beschreiben Nutzer bzw. Gerät, nicht die Bühnenbreite.
+ */
+function istGroessenBedingung(gruppe: string): boolean {
+	const namen = (gruppe.match(/[a-zA-Z][a-zA-Z-]*/g) ?? []).map((b) => b.toLowerCase());
+	let hatFeature = false;
+	for (const name of namen) {
+		if (GROESSEN_FEATURES.has(name)) hatFeature = true;
+		else if (!GROESSEN_WERTE.has(name)) return false;
+	}
+	return hatFeature;
+}
+
+/** Klammergruppen der obersten Ebene + die Wörter dazwischen (Medientyp/Operatoren). */
+function zerlegeBedingung(bedingung: string): { gruppen: string[]; woerter: string[] } | null {
+	const gruppen: string[] = [];
+	let tiefe = 0;
+	let start = 0;
+	let ausserhalb = '';
+	for (let i = 0; i < bedingung.length; i++) {
+		const c = bedingung[i];
+		if (c === '(') {
+			if (tiefe === 0) start = i;
+			tiefe++;
+		} else if (c === ')') {
+			tiefe--;
+			if (tiefe < 0) return null; // unbalanciert → nicht anfassen
+			if (tiefe === 0) gruppen.push(bedingung.slice(start, i + 1).replace(/\s+/g, ' ').trim());
+		} else if (tiefe === 0) {
+			ausserhalb += c;
+		}
+	}
+	if (tiefe !== 0) return null;
+	return { gruppen, woerter: ausserhalb.split(/\s+/).filter(Boolean).map((w) => w.toLowerCase()) };
+}
+
+/**
+ * `@media`-Prelude in `@container` übersetzen — oder unverändert zurückgeben.
+ *
+ * Übersetzt wird nur, wenn die Bedingung AUSSCHLIESSLICH aus Größen-Features
+ * besteht. Bewusst NICHT übersetzt (bleibt `@media`): Nicht-Größen-Features
+ * (`prefers-reduced-motion`, `hover`, `print` …), GEMISCHTE Bedingungen — sie
+ * ließen sich nur zerschneiden, und die beiden Hälften liefen dann gegeneinander —,
+ * Komma-Listen sowie `or`/`not` (`@container` kennt keine Query-Liste, und eine
+ * Negation über einen Medientyp ist nicht bedeutungsgleich abbildbar).
+ * `screen`/`only`/`all` ENTFALLEN beim Übersetzen: eine Container-Query kennt
+ * keinen Medientyp. `@supports`/`@container` bleiben unangetastet.
+ */
+export function mediaZuContainer(prelude: string): string {
+	if (!/^@media\b/i.test(prelude)) return prelude;
+	const bedingung = prelude.slice('@media'.length).trim();
+	if (bedingung.includes(',')) return prelude; // Query-Liste
+	const zerlegt = zerlegeBedingung(bedingung);
+	if (!zerlegt) return prelude;
+	const { gruppen, woerter } = zerlegt;
+	if (!gruppen.length) return prelude; // reiner Medientyp (`@media print`)
+	// Außerhalb der Klammern sind nur Medientyp-Rauschen und `and` zulässig.
+	if (woerter.some((w) => !['screen', 'all', 'only', 'and'].includes(w))) return prelude;
+	if (!gruppen.every(istGroessenBedingung)) return prelude;
+	return `@container ${gruppen.join(' and ')}`;
+}
+
 /**
  * CSS über die Klammerbilanz in Top-Level-Blöcke zerlegen (Zwilling von
  * `splitCssBloecke` in export.mjs). Ein simples `split('}')` würde einen
@@ -95,6 +228,8 @@ function splitCssBloecke(css: string): { prelude: string; rumpf: string }[] {
  * Bedingte At-Rules (`@media`/`@supports`/`@container`) bleiben als Rahmen erhalten,
  * ihr Rumpf wird rekursiv gescopet — sonst griffe die responsive Typografie einer
  * Komponente zwar auf der Doku-Seite, aber nicht in der Katalog-Mini-Vorschau.
+ * Größenbasierte `@media`-Rahmen werden dabei zu `@container` übersetzt
+ * (`mediaZuContainer`), damit die Vorschaukarte schaltet und nicht das Fenster.
  * Andere At-Rules (v. a. `@keyframes`, dessen Prozent-Selektoren NICHT gescopet
  * werden dürfen und dessen Name hier global kollidieren würde) werden still
  * übersprungen — der Exporter lehnt sie bereits mit klarer Meldung ab, hier ist
@@ -111,7 +246,9 @@ function scopeBloecke(clean: string): string {
 			if (prelude.startsWith('@')) {
 				if (!BEDINGTE_AT_REGELN.test(prelude)) return '';
 				const innen = scopeBloecke(rumpf);
-				return innen ? `${prelude} { ${innen} }` : '';
+				// Größenbasiertes @media wird hier zu @container — und NUR hier, im
+				// gescopten Ausgang (siehe mediaZuContainer).
+				return innen ? `${mediaZuContainer(prelude)} { ${innen} }` : '';
 			}
 			if (!prelude) return '';
 			const scoped = prelude

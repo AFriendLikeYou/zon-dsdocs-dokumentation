@@ -250,6 +250,161 @@ function renderContentStub(model) {
 /** Bedingte Gruppierungsregeln: Bedingung + Regelblock, Rumpf wird rekursiv gescopet. */
 const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
 
+// ---------------------------------------------------------------------------
+// @media → @container (nur im GESCOPTEN Ausgang)
+// ---------------------------------------------------------------------------
+// Die `pattern.css` selbst behält ihr `@media` — sie ist originalgetreue Kopie des
+// Produktions-CSS, und der Code-Block auf der Doku-Seite zeigt exakt diesen Inhalt.
+// Im Playground steht das Specimen aber in einem <div> mit gesetzter Preset-Breite;
+// `@media` fragt den VIEWPORT ab und ignoriert diesen Kasten (gemessen: Viewport
+// 1440, Preset „Mobil" 560 px → Titel blieb auf dem Desktop-Wert). Deshalb übersetzt
+// die Scoping-Schicht — die ohnehin Selektoren umschreibt — größenbasierte
+// `@media`-Blöcke zu `@container`. Die Bühnen deklarieren dazu `container-type:
+// inline-size` (Playground.svelte: .playground__stage/.playground__frame,
+// global.css: .spec-canvas).
+//
+// Ausgegeben wird ENTWEDER @container ODER @media, nie beides: zwei parallele
+// Rahmen mit gegenläufiger Aussage (Viewport 1440 sagt „Desktop", Bühne 560 sagt
+// „Mobil") würden über die Emissionsreihenfolge entschieden — eine Zeitbombe.
+
+/** Größen-Features, die eine Container-Query kennt (mit min-/max-Präfix). */
+const GROESSEN_FEATURES = new Set([
+	'width',
+	'min-width',
+	'max-width',
+	'height',
+	'min-height',
+	'max-height',
+	'inline-size',
+	'min-inline-size',
+	'max-inline-size',
+	'block-size',
+	'min-block-size',
+	'max-block-size',
+	'aspect-ratio',
+	'min-aspect-ratio',
+	'max-aspect-ratio',
+	'orientation'
+]);
+
+/** Bezeichner, die in einer Größen-Bedingung als WERT auftreten dürfen (Einheiten,
+ *  Schlüsselwörter) — sie sagen nichts über das abgefragte Feature aus. */
+const GROESSEN_WERTE = new Set([
+	'px',
+	'em',
+	'rem',
+	'ex',
+	'ch',
+	'cap',
+	'ic',
+	'lh',
+	'rlh',
+	'vw',
+	'vh',
+	'vi',
+	'vb',
+	'vmin',
+	'vmax',
+	'svw',
+	'svh',
+	'lvw',
+	'lvh',
+	'dvw',
+	'dvh',
+	'cm',
+	'mm',
+	'q',
+	'in',
+	'pt',
+	'pc',
+	'portrait',
+	'landscape',
+	'infinite',
+	'calc'
+]);
+
+/** Alle Bezeichner einer Klammergruppe — `(min-width: 48em)` → ['min-width','em']. */
+function bezeichner(gruppe) {
+	return (gruppe.match(/[a-zA-Z][a-zA-Z-]*/g) ?? []).map((b) => b.toLowerCase());
+}
+
+/**
+ * Ist die Klammergruppe eine reine GRÖSSEN-Bedingung? Konservativ: mindestens ein
+ * bekanntes Größen-Feature, und kein Bezeichner, den wir nicht sicher als Feature
+ * oder Wert einordnen können. Damit fallen `prefers-reduced-motion`, `hover`,
+ * `pointer`, `prefers-color-scheme`, `resolution` … automatisch durch — das sind
+ * Eigenschaften des Nutzers bzw. Geräts, nicht der Bühnenbreite. Eine
+ * `prefers-reduced-motion`-Regel, die auf die Bühnengröße reagierte, wäre schlicht
+ * falsch.
+ */
+function istGroessenBedingung(gruppe) {
+	const namen = bezeichner(gruppe);
+	let hatFeature = false;
+	for (const name of namen) {
+		if (GROESSEN_FEATURES.has(name)) hatFeature = true;
+		else if (!GROESSEN_WERTE.has(name)) return false;
+	}
+	return hatFeature;
+}
+
+/** Klammergruppen der obersten Ebene + die Wörter dazwischen (Medientyp/Operatoren). */
+function zerlegeBedingung(bedingung) {
+	const gruppen = [];
+	const woerter = [];
+	let tiefe = 0;
+	let start = 0;
+	let ausserhalb = '';
+	for (let i = 0; i < bedingung.length; i++) {
+		const c = bedingung[i];
+		if (c === '(') {
+			if (tiefe === 0) start = i;
+			tiefe++;
+		} else if (c === ')') {
+			tiefe--;
+			if (tiefe < 0) return null; // unbalanciert → nicht anfassen
+			if (tiefe === 0) gruppen.push(bedingung.slice(start, i + 1).replace(/\s+/g, ' ').trim());
+		} else if (tiefe === 0) {
+			ausserhalb += c;
+		}
+	}
+	if (tiefe !== 0) return null;
+	for (const w of ausserhalb.split(/\s+/)) if (w) woerter.push(w.toLowerCase());
+	return { gruppen, woerter };
+}
+
+/**
+ * `@media`-Prelude in `@container` übersetzen — oder unverändert zurückgeben.
+ *
+ * Übersetzt wird nur, wenn die Bedingung AUSSCHLIESSLICH aus Größen-Features
+ * besteht. Bewusst NICHT übersetzt (bleibt `@media`):
+ *   · `@supports`/`@container` im Quell-CSS — die sind schon richtig.
+ *   · Nicht-Größen-Features (`prefers-reduced-motion`, `hover`, `pointer`,
+ *     `prefers-color-scheme`, `resolution` …) — Nutzer/Gerät, nicht Bühne.
+ *   · GEMISCHTE Bedingungen (`screen and (min-width: 48em) and
+ *     (prefers-reduced-motion: reduce)`) — sie ließen sich nur zerschneiden, und ein
+ *     halb übersetzter Block hieße, dass die beiden Hälften wieder gegeneinander
+ *     laufen. Lieber ganz `@media` lassen (im Playground dann eben viewport-basiert)
+ *     als eine Regel erfinden, die es im Produktions-CSS nicht gibt.
+ *   · Komma-Listen und `or`/`not` — `@container` kennt keine Query-LISTE, und eine
+ *     Negation über einen Medientyp ist nicht bedeutungsgleich abbildbar.
+ *   · Andere Medientypen als `screen`/`all` (v. a. `print`).
+ * Das Schlüsselwort `screen` (und `only`/`all`) ENTFÄLLT beim Übersetzen — eine
+ * Container-Query kennt keinen Medientyp.
+ */
+function mediaZuContainer(prelude) {
+	if (!/^@media\b/i.test(prelude)) return prelude;
+	const bedingung = prelude.slice('@media'.length).trim();
+	if (bedingung.includes(',')) return prelude; // Query-Liste
+	const zerlegt = zerlegeBedingung(bedingung);
+	if (!zerlegt) return prelude;
+	const { gruppen, woerter } = zerlegt;
+	if (!gruppen.length) return prelude; // reiner Medientyp (`@media print`)
+	// Außerhalb der Klammern sind nur Medientyp-Rauschen und `and` zulässig.
+	if (woerter.some((w) => !['screen', 'all', 'only', 'and'].includes(w))) return prelude;
+	if (!gruppen.every(istGroessenBedingung)) return prelude;
+	return `@container ${gruppen.join(' and ')}`;
+}
+
 /**
  * CSS in Top-Level-Blöcke `{ prelude, rumpf }` zerlegen — über die Klammerbilanz,
  * damit verschachtelte Blöcke (At-Rules) am RICHTIGEN `}` enden. Anführungszeichen
@@ -300,7 +455,9 @@ function splitCssBloecke(css, quelle = 'pattern.css') {
  * jede Regel wird auf `.spec-canvas SEL` UND `.pg-preview SEL` präfixiert (als
  * :global, weil die Klassen auf Kind-Komponenten landen). Bedingte At-Rules
  * (`@media`/`@supports`/`@container`) bleiben als Rahmen erhalten, ihr Rumpf wird
- * rekursiv gescopet — siehe Block-Kommentar oben.
+ * rekursiv gescopet — siehe Block-Kommentar oben. Größenbasierte `@media`-Rahmen
+ * werden dabei zu `@container` übersetzt (`mediaZuContainer`), damit die Bühne
+ * schaltet und nicht das Browserfenster.
  */
 function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
 	const clean = String(css)
@@ -327,7 +484,9 @@ function scopeBloecke(clean, prefixes) {
 					.split('\n')
 					.map((zeile) => (zeile ? `  ${zeile}` : zeile))
 					.join('\n');
-				return `${prelude} {\n${eingerueckt}\n}`;
+				// Größenbasiertes @media wird hier zu @container — und NUR hier, im
+				// gescopten Ausgang (siehe mediaZuContainer).
+				return `${mediaZuContainer(prelude)} {\n${eingerueckt}\n}`;
 			}
 			if (!prelude) return '';
 			const scoped = prelude

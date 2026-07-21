@@ -494,7 +494,7 @@ kategorie: Inhalte
 	margin-inline: auto;
 	max-width: min(100% - 2 * var(--z-gap), 55.75rem);
 }
-@media screen and (min-width: 48em) {
+@container (min-width: 48em) {
   :global(.spec-canvas .zon-teaser--standard),
   :global(.pg-preview .zon-teaser--standard) {
     --z-gap: 2rem;
@@ -507,7 +507,7 @@ kategorie: Inhalte
 	width: 100%;
 	background-color: var(--z-ds-color-background-10);
 }
-@media screen and (max-width: 47.999em) {
+@container (max-width: 47.999em) {
   :global(.spec-canvas .zon-teaser__media--mobile-super),
   :global(.pg-preview .zon-teaser__media--mobile-super) {
     aspect-ratio: 3/2;
@@ -521,7 +521,7 @@ kategorie: Inhalte
     aspect-ratio: 2/3;
   }
 }
-@media screen and (min-width: 48em) {
+@container (min-width: 48em) {
   :global(.spec-canvas .zon-teaser__media--desktop-super),
   :global(.pg-preview .zon-teaser__media--desktop-super) {
     aspect-ratio: 3/2;
@@ -594,7 +594,7 @@ kategorie: Inhalte
 	font-size: var(--z-ds-fontsize-20);
 	line-height: var(--z-ds-lineheight-12);
 }
-@media screen and (min-width: 48em) {
+@container (min-width: 48em) {
   :global(.spec-canvas .zon-teaser__title),
   :global(.pg-preview .zon-teaser__title) {
     font-size: var(--z-ds-fontsize-22);

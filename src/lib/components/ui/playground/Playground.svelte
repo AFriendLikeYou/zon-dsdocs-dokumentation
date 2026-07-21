@@ -279,25 +279,33 @@
 		{/snippet}
 
 		{#if resizable}
-			<div
-				class="playground__frame"
-				bind:this={frameEl}
-				style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
-			>
-				<div class="pg-preview" style:zoom>
-					{@render previewBody()}
+			<!-- Scroll-Port um den Rahmen: Die Doku-Spalte ist auf 832px gedeckelt, die
+			     Bühne misst dort ~734px. Ohne diesen Port könnte der Rahmen die Presets
+			     Tablet (768) und Desktop (1280) NIE einnehmen — er hing an
+			     `max-width: 100%`. Genau bei 768px = 48em liegt aber der Schaltpunkt, den
+			     diese Seiten dokumentieren. Gescrollt wird nur der Rahmen; Toolbar,
+			     px-Anzeige und Zoom bleiben ortsfest auf der Bühne. -->
+			<div class="playground__scroll">
+				<div
+					class="playground__frame"
+					bind:this={frameEl}
+					style:width={frameWidth === null ? '100%' : `${frameWidth}px`}
+				>
+					<div class="pg-preview" style:zoom>
+						{@render previewBody()}
+					</div>
+					<ResizeHandle
+						direction="horizontal"
+						onresize={handleResize}
+						label="Vorschau-Breite ändern (ziehen oder Pfeiltasten)"
+						value={measuredWidth}
+						min={MIN_WIDTH}
+						max={Math.max(maxWidth, measuredWidth, MIN_WIDTH)}
+						valueText="{measuredWidth} Pixel{viewport === 'frei'
+							? ''
+							: `, ${VIEWPORT_PRESETS.find((p) => p.value === viewport)?.label}`}"
+					/>
 				</div>
-				<ResizeHandle
-					direction="horizontal"
-					onresize={handleResize}
-					label="Vorschau-Breite ändern (ziehen oder Pfeiltasten)"
-					value={measuredWidth}
-					min={MIN_WIDTH}
-					max={Math.max(maxWidth, measuredWidth, MIN_WIDTH)}
-					valueText="{measuredWidth} Pixel{viewport === 'frei'
-						? ''
-						: `, ${VIEWPORT_PRESETS.find((p) => p.value === viewport)?.label}`}"
-				/>
 			</div>
 			<!-- Sichtbare px-Anzeige bleibt aria-hidden: den Wert spricht der Griff selbst
 			     als role="slider" aus (aria-valuenow/-valuetext), bei jeder Änderung und
@@ -413,6 +421,13 @@
 		   ihren Platz ohne Clipping. */
 		min-height: 240px;
 		overflow: hidden;
+		/* Query-Container für das gescopte Pattern-CSS, wenn KEIN Resize-Rahmen da
+		   ist (nicht-resizable Playgrounds): der Exporter übersetzt größenbasiertes
+		   `@media` zu `@container`, das braucht einen Container über `.pg-preview`.
+		   Die Bühne ist block-level und damit ohnehin elternbreit — die Inline-Achse
+		   verliert nichts. Und `inline-size` contained NUR die Inline-Achse: die
+		   Bühne wächst weiter MIT dem Specimen in der Höhe (Boden 240px). */
+		container-type: inline-size;
 		/* RAW-Token, damit Fläche UND Punktraster mit den je Bühne gepinnten Werten
 		   flippen (.ds-stage.is-dark pinnt background-10 + border-70) — kein separater
 		   is-dark-Block nötig. Abgeleitete --ds-*-Token wären auf :root aufgelöst. */
@@ -455,15 +470,56 @@
 		max-width: 100%;
 	}
 
+	/* Scroll-Port: erlaubt dem Rahmen Breiten ÜBER der Bühnenbreite (Preset Desktop
+	   1280 in einer ~734px-Spalte) — sichtbar wird dann ein Ausschnitt, der Rest ist
+	   erscrollbar statt abgeschnitten. Die Bühne selbst bleibt `overflow: hidden`,
+	   damit Toolbar/Zoom ortsfest bleiben. */
+	.playground__scroll {
+		/* Der Zieh-Griff (ui/resize-handle) ragt bewusst über die rechte Rahmenkante
+		   hinaus. Im Scroll-Port erzeugte dieser Überstand sonst schon im Zustand
+		   „Frei" ein paar Pixel Scroll-Weite (und damit je nach System eine
+		   Scrollleiste). Ein Innenabstand in genau der Überstandsbreite fängt ihn auf:
+		   der Griff landet auf der Padding-Kante, die zur Scroll-Fläche gehört. */
+		--playground-handle-overhang: 10px;
+		display: flex;
+		align-items: stretch;
+		flex: 1;
+		min-width: 0;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding-right: var(--playground-handle-overhang);
+	}
 	/* Resize-Rahmen: gestrichelte Kante + Griff rechts, px-Anzeige unten links. */
 	.playground__frame {
 		position: relative;
 		display: flex;
 		align-items: center;
 		min-width: 200px;
-		max-width: 100%;
+		/* Kein max-width mehr: die Deckelung auf die Bühnenbreite ist genau das, was
+		   die Presets Tablet/Desktop unerreichbar machte. flex: none, damit der
+		   Rahmen im Scroll-Port nicht auf die Portbreite zurückschrumpft. */
+		flex: 0 0 auto;
+		/* DER Query-Container: Dieses Element trägt die Preset-/Ziehbreite (style:width
+		   = 100% oder Npx), also muss die Container-Query hier ansetzen — sonst
+		   antwortete das übersetzte `@container` mit der Breite der ganzen Bühne und
+		   das Preset „Mobil" bliebe wieder folgenlos. Der Rahmen ist NIE
+		   inhaltsbreit (width ist immer explizit gesetzt), das Größen-Containment
+		   der Inline-Achse kostet hier also nichts; die Block-Achse bleibt frei —
+		   hohe Specimens (Carousel, Cell) wachsen weiter ungekappt. */
+		container-type: inline-size;
+	}
+	/* Gestrichelte „Viewport-Kante" als Pseudo-Element statt als border/padding:
+	   Eine Container-Query misst den INHALTSKASTEN. Rahmen und Innenabstand zogen
+	   davon 17px ab — der Griff zeigte „768 px", die Query rechnete mit 751 und der
+	   48em-Schaltpunkt lag daneben. Als absolut positionierte Kante kostet die Linie
+	   keine Layoutbreite: angezeigter Wert, Rahmenbreite und Query stimmen überein. */
+	.playground__frame::after {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		right: 0;
 		border-right: 1px dashed var(--z-ds-color-border-70);
-		padding-right: var(--z-ds-space-16);
+		pointer-events: none;
 	}
 	.playground__width {
 		position: absolute;

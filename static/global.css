@@ -333,6 +333,20 @@ html.color-scheme-dark {
 	--ds-card-media-bg: color-mix(in srgb, var(--ds-accent) 8%, var(--ds-surface-raised));
 }
 
+/* ── Specimen-Bühne als Query-Container (.spec-canvas) ───────────────────────
+   `.spec-canvas` ist der Scoping-Anker, gegen den Exporter (`scopeCss`) und
+   Katalog (`scopeToCanvas`) das Pattern-CSS präfixen. Beide übersetzen dabei
+   größenbasiertes `@media` zu `@container` — sonst antwortete die responsive
+   Typografie einer Komponente auf die Breite des BROWSERFENSTERS statt auf die
+   der Bühne, auf der sie steht (eine 300px-Katalogkarte im 1440er Fenster zeigte
+   Desktop-Werte). Deshalb ist jede Specimen-Bühne ihr eigener Container.
+   `inline-size` contained bewusst NUR die Inline-Achse — alle Bühnen
+   (`.sgrid`, `.example-block__stage`, `.anatomy-artboard`, `.catalog-preview`)
+   sind ohnehin elternbreit, und in der Höhe wachsen sie weiter mit dem Inhalt. */
+.spec-canvas {
+	container-type: inline-size;
+}
+
 .ds-stage {
 	color-scheme: light;
 	--z-ds-color-background-0: #ffffff;

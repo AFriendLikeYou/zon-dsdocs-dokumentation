@@ -207,35 +207,35 @@ describe('export.mjs · scopeCss', () => {
 			expect(out).toContain(`:global(${sel})`);
 	});
 
-	it('@media: Rahmen bleibt erhalten, innere Regel wird gescopet', () => {
+	it('Größen-@media: Rahmen wird zu @container, innere Regel wird gescopet', () => {
 		const out = scopeCss('@media (min-width: 768px) { .z-demo { font-size: 22px } }');
-		expect(out).toContain('@media (min-width: 768px) {');
+		expect(out).toContain('@container (min-width: 768px) {');
 		expect(out).toContain(':global(.spec-canvas .z-demo)');
 		expect(out).toContain(':global(.pg-preview .z-demo)');
 		expect(out).toContain('font-size: 22px');
 		// Der Rahmen umschließt wirklich (öffnet vor, schließt nach der inneren Regel).
-		expect(out.indexOf('@media')).toBeLessThan(out.indexOf(':global('));
+		expect(out.indexOf('@container')).toBeLessThan(out.indexOf(':global('));
 		expect(out.trimEnd().endsWith('}')).toBe(true);
-		// Genau EIN @media-Rahmen, nicht pro Präfix einer.
-		expect(out.match(/@media/g)).toHaveLength(1);
+		// Genau EIN Rahmen, nicht pro Präfix einer.
+		expect(out.match(/@container/g)).toHaveLength(1);
 	});
 
-	it('@media mit mehreren Regeln darin: alle innen gescopet, ein Rahmen', () => {
+	it('Größen-@media mit mehreren Regeln darin: alle innen gescopet, ein Rahmen', () => {
 		const out = scopeCss('@media (max-width: 480px) { .a { color: red } .b { color: blue } }');
-		expect(out.match(/@media/g)).toHaveLength(1);
+		expect(out.match(/@container/g)).toHaveLength(1);
 		expect(out).toContain(':global(.spec-canvas .a)');
 		expect(out).toContain(':global(.spec-canvas .b)');
 		expect(out).toContain('color: blue');
 	});
 
-	it('mehrere @media-Blöcke plus flache Regeln bleiben in Reihenfolge getrennt', () => {
+	it('mehrere Größen-Blöcke plus flache Regeln bleiben in Reihenfolge getrennt', () => {
 		const out = scopeCss(
 			'.z { font-size: 20px }\n' +
 				'@media (min-width: 768px) { .z { font-size: 22px } }\n' +
 				'@media (min-width: 1200px) { .z { font-size: 26px } }\n' +
 				'.y { margin: 0 }'
 		);
-		expect(out.match(/@media/g)).toHaveLength(2);
+		expect(out.match(/@container/g)).toHaveLength(2);
 		expect(out.indexOf('font-size: 20px')).toBeLessThan(out.indexOf('font-size: 22px'));
 		expect(out.indexOf('font-size: 22px')).toBeLessThan(out.indexOf('font-size: 26px'));
 		expect(out.indexOf('font-size: 26px')).toBeLessThan(out.indexOf('margin: 0'));
@@ -243,10 +243,10 @@ describe('export.mjs · scopeCss', () => {
 
 	it('verschachtelte Bedingungen (@supports in @media) behalten beide Rahmen', () => {
 		const out = scopeCss('@media (min-width: 700px) { @supports (display: grid) { .z { display: grid } } }');
-		expect(out).toContain('@media (min-width: 700px) {');
+		expect(out).toContain('@container (min-width: 700px) {');
 		expect(out).toContain('@supports (display: grid) {');
 		expect(out).toContain(':global(.spec-canvas .z)');
-		expect(out.indexOf('@media')).toBeLessThan(out.indexOf('@supports'));
+		expect(out.indexOf('@container')).toBeLessThan(out.indexOf('@supports'));
 	});
 
 	it('@container wird wie @media behandelt', () => {
@@ -273,6 +273,92 @@ describe('export.mjs · scopeCss', () => {
 		const out = scopeCss('.z::after { content: "}" }');
 		expect(out).toContain(':global(.spec-canvas .z::after)');
 		expect(out).toContain('content: "}"');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// @media → @container im gescopten Ausgang
+// ---------------------------------------------------------------------------
+// Das Specimen steht auf einer Bühne mit gesetzter Breite; `@media` fragt aber den
+// VIEWPORT ab. Deshalb übersetzt die Scoping-Schicht GRÖSSENBASIERTE @media-Rahmen
+// zu @container. Nicht-Größen-Features beschreiben Nutzer/Gerät und müssen @media
+// bleiben — eine `prefers-reduced-motion`-Regel, die auf die Bühnenbreite reagiert,
+// wäre schlicht falsch. Und es wird IMMER nur EIN Rahmen ausgegeben.
+
+describe('export.mjs · scopeCss übersetzt @media zu @container', () => {
+	it('übersetzt ein Größen-Feature und lässt `screen` entfallen', () => {
+		const out = scopeCss('@media screen and (min-width: 48em) { .z { font-size: 22px } }');
+		expect(out).toContain('@container (min-width: 48em) {');
+		expect(out).not.toContain('screen');
+	});
+
+	it('gibt NUR @container aus, nie zusätzlich @media (sonst kämpfen die Regeln)', () => {
+		const out = scopeCss('@media screen and (max-width: 47.999em) { .z { font-size: 20px } }');
+		expect(out).not.toContain('@media');
+		expect(out.match(/@container/g)).toHaveLength(1);
+	});
+
+	it('lässt prefers-reduced-motion @media (Nutzer-Präferenz, nicht Bühnenbreite)', () => {
+		const out = scopeCss('@media (prefers-reduced-motion: reduce) { .z { transition: none } }');
+		expect(out).toContain('@media (prefers-reduced-motion: reduce) {');
+		expect(out).not.toContain('@container');
+	});
+
+	it.each([
+		['@media (hover: hover) { .z { color: red } }', '@media (hover: hover)'],
+		['@media (pointer: fine) { .z { color: red } }', '@media (pointer: fine)'],
+		['@media print { .z { color: red } }', '@media print'],
+		[
+			'@media (prefers-color-scheme: dark) { .z { color: red } }',
+			'@media (prefers-color-scheme: dark)'
+		]
+	])('lässt %s unangetastet', (css, erwartet) => {
+		const out = scopeCss(css);
+		expect(out).toContain(`${erwartet} {`);
+		expect(out).not.toContain('@container');
+	});
+
+	it('lässt GEMISCHTE Bedingungen ganz @media (nicht sauber teilbar)', () => {
+		const out = scopeCss(
+			'@media screen and (min-width: 48em) and (prefers-reduced-motion: reduce) { .z { transition: none } }'
+		);
+		expect(out).toContain('@media screen and (min-width: 48em) and (prefers-reduced-motion: reduce) {');
+		expect(out).not.toContain('@container');
+	});
+
+	it('lässt Komma-Listen @media (@container kennt keine Query-Liste)', () => {
+		const out = scopeCss('@media (max-width: 30em), (min-width: 60em) { .z { color: red } }');
+		expect(out).toContain('@media (max-width: 30em), (min-width: 60em) {');
+		expect(out).not.toContain('@container');
+	});
+
+	it('übersetzt weitere Größen-Features (height, orientation, aspect-ratio, Range)', () => {
+		expect(scopeCss('@media (min-height: 40em) { .z { color: red } }')).toContain(
+			'@container (min-height: 40em)'
+		);
+		expect(scopeCss('@media (orientation: landscape) { .z { color: red } }')).toContain(
+			'@container (orientation: landscape)'
+		);
+		expect(scopeCss('@media (min-aspect-ratio: 16/9) { .z { color: red } }')).toContain(
+			'@container (min-aspect-ratio: 16/9)'
+		);
+		expect(scopeCss('@media (400px <= width <= 700px) { .z { color: red } }')).toContain(
+			'@container (400px <= width <= 700px)'
+		);
+	});
+
+	it('verkettet mehrere Größen-Features mit `and`', () => {
+		const out = scopeCss('@media screen and (min-width: 30em) and (max-width: 60em) { .z { color: red } }');
+		expect(out).toContain('@container (min-width: 30em) and (max-width: 60em) {');
+	});
+
+	it('lässt @supports und @container im Quell-CSS unverändert', () => {
+		expect(scopeCss('@supports (display: grid) { .z { display: grid } }')).toContain(
+			'@supports (display: grid) {'
+		);
+		expect(scopeCss('@container (min-width: 20rem) { .z { padding: 0 } }')).toContain(
+			'@container (min-width: 20rem) {'
+		);
 	});
 });
 
