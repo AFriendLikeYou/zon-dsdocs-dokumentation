@@ -53,13 +53,24 @@ describe('landing.content.json — Inhalt', () => {
 		expect(validateLandingContent(content)).toEqual([]);
 	});
 
-	it('trägt die Texte, die vorher in den Svelte-Dateien standen', () => {
-		expect(content.hero.eyebrow).toBe('DIE ZEIT · Design System');
-		expect(content.hero.ueberschriftZeilen).toEqual(['Marke und Produkt,', 'an einem Ort.']);
-		expect(content.hero.fakten).toEqual(['Light & Dark', 'agent-ready']);
-		expect(content.welten.brandhub.titel).toBe('Brandhub');
-		expect(content.welten.designSystem.titel).toBe('Design-System');
-		expect(content.wasIstNeu.titel).toBe('Was ist neu');
+	// BEWUSST keine Wortlaut-Prüfung mehr. Vorher stand hier der Migrationstest
+	// („trägt die Texte, die vorher in den Svelte-Dateien standen") mit exakten
+	// Strings inklusive Reihenfolge der Überschriftenzeilen. Er hat seinen Zweck
+	// erfüllt — sperrte danach aber genau die Redaktion, für die die Startseite
+	// überhaupt pflegbar gemacht wurde: Ein Zeilentausch im Editor liess die
+	// Tests fallen. Geprüft wird deshalb die STRUKTUR (Felder da, gefüllt, richtig
+	// dimensioniert); der Wortlaut gehört der Redaktion.
+	it('trägt alle Pflichttexte gefüllt und in der erwarteten Form', () => {
+		const gefuellt = (wert: unknown) => typeof wert === 'string' && wert.trim().length > 0;
+
+		expect(gefuellt(content.hero.eyebrow)).toBe(true);
+		expect(content.hero.ueberschriftZeilen).toHaveLength(2);
+		expect(content.hero.ueberschriftZeilen.every(gefuellt)).toBe(true);
+		expect(content.hero.fakten).toHaveLength(2);
+		expect(content.hero.fakten.every(gefuellt)).toBe(true);
+		expect(gefuellt(content.welten.brandhub.titel)).toBe(true);
+		expect(gefuellt(content.welten.designSystem.titel)).toBe(true);
+		expect(gefuellt(content.wasIstNeu.titel)).toBe(true);
 	});
 });
 

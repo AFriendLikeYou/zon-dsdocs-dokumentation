@@ -142,7 +142,7 @@ zerquetscht wird.
 Dasselbe Raster mit zwei Spalten — jede Kachel bekommt mehr Raum für
 Beschreibungstext:
 
-<Grid columns={2} auto={true}>
+<Grid columns={4} auto={true}>
 	<Card
 		title="Breitere Kachel"
 		description="Blindtext. Bei zwei Spalten hat jede Kachel Platz für mehrere Zeilen, ohne dass die Zeilen zu lang werden."
@@ -160,7 +160,7 @@ Beschreibungstext:
 Farbfelder zeigen einen Farbwert samt Namen und lassen ihn in die Zwischenablage
 kopieren.
 
-<Grid columns={2} auto={true}>
+<Grid columns={4}>
 	<Color
 		title="Akzentfarbe"
 		description="Blindtext zur Beschreibung einer Farbrolle."

@@ -1,5 +1,5 @@
 <!--
-  Breakout.svelte — lässt einen Block BREITER werden als die 56rem-Lesespalte
+  Breakout.svelte — lässt einen Block BREITER werden als die 52rem-Lesespalte
   (`--ds-content-width` auf `<main>`). Bis hierher konnte nichts aus dem Textrahmen
   ausbrechen; dieser Container ist der einzige dafür vorgesehene Weg.
 
@@ -21,15 +21,24 @@
   Mittel und der Ausbruch hängt an ihnen.
 
   ── Woher die Schaltpunkte kommen (gemessen, nicht geraten) ────────────────
-  Neben `main` stehen Sidebar (300px) und „Auf dieser Seite" (300px, ab 1280px):
-  die Inhaltsspalte ist `Viewport − 600px`. `main` selbst ist auf
-  `--ds-content-width` gedeckelt und trägt `--z-ds-space-l` (24px) Innenabstand.
-  Ein Ziel T ragt je Seite `(T − 56rem)/2 − 24px` über `main` hinaus, Platz ist
-  `(Spalte − 56rem)/2` — die Bedingung kürzt sich zu **`Spalte ≥ T`**. Der Rest, der
-  dann links und rechts frei bleibt, ist genau der Innenabstand von `main`; der
-  Ausbruch klebt also nie am Rand.
-    • wide (64rem/1024px) → Spalte ≥ 1024px → Viewport ≥ 1624px  → Schaltpunkt 1640px
-    • full (76rem/1216px) → Spalte ≥ 1216px → Viewport ≥ 1816px  → Schaltpunkt 1840px
+  Neben `main` stehen ab 1280px zwei gleich breite Schienen: Sidebar (300px) und
+  „Auf dieser Seite" (300px). Beide reservieren ihre Breite unabhängig vom
+  Einklapp-Zustand, `main` ist dazwischen VIEWPORT-zentriert (+layout.svelte) —
+  die Inhaltsspalte ist also unverändert `Viewport − 600px`.
+
+  `main` ist auf `--ds-content-width` (52rem/832px, border-box) gedeckelt und trägt
+  je Seite `--z-ds-space-l` (24px) Innenabstand → Textspalte 784px.
+  Die gerenderte Ausbruchsbreite ist `(W − 48) − 2·(W − T)/2 = T − 48` und damit
+  UNABHÄNGIG von W: die 56 → 52rem-Umstellung ändert an der Optik der Stufen nichts
+  (nur der negative Rand wächst um 32px je Seite). Gemessen bei 1640px: 976px = 1024 − 48.
+
+  Weil der Ausbruch mit `main` viewport-zentriert ist, bleibt je Seite
+  `(Viewport − (T − 48))/2 − 300px` frei. Damit das mindestens dem Innenabstand von
+  `main` (24px) entspricht, muss gelten **`Viewport ≥ T + 600px`**:
+    • wide (64rem/1024px) → Viewport ≥ 1624px → Schaltpunkt 1640px (gemessen: 32px frei)
+    • full (76rem/1216px) → Viewport ≥ 1816px → Schaltpunkt 1840px (gemessen: 36px frei)
+  Beide Schaltpunkte liegen über 1432px (= 52rem + 600px); dort ist `main` sicher auf
+  seinen Deckel ausgewachsen, die Rechnung mit W = 52rem gilt also.
   Unterhalb des jeweiligen Schaltpunkts fällt die Stufe sauber zurück (`full` erst
   auf `wide`, dann auf Inhaltsbreite) — es entsteht zu KEINER Breite horizontaler
   Scroll. Das ist der Preis der 600px Chrome: auf Laptop-Breiten bleibt der Block
@@ -83,7 +92,7 @@
 		}
 	}
 
-	/* Die Landing (`main[data-area='root']`) hebt den 56rem-Deckel auf und ist bereits
+	/* Die Landing (`main[data-area='root']`) hebt den 52rem-Deckel auf und ist bereits
 	   vollflächig — dort würde derselbe negative Rand die Seite nach BEIDEN Seiten
 	   überlaufen lassen. Ausbruch dort also aus (die Rechnung oben gilt nur für die
 	   gedeckelte Lesespalte). */

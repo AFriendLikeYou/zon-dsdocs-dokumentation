@@ -107,6 +107,37 @@ const STATIC_HTML: Record<string, string> = {
 
 export type CatalogPreview = { html: string; css: string };
 
+/**
+ * Katalog-Vorschauen sind DEKORATIV und liegen in `ui/card` — und die Karte ist
+ * selbst ein `<a>`. Ein `<a>` in der Vorschau ergibt damit `<a>` in `<a>`: Der
+ * HTML-Parser hebt den inneren Link beim Parsen heraus, die Hydration findet
+ * eine andere Baumstruktur vor als das SSR-Markup und wirft `HierarchyRequestError`.
+ * Sichtbare Folge war, dass `/product/components` komplett OHNE Navbar und
+ * Sidebar rendert — der Katalog-Inhalt kam, das App-Chrome nicht.
+ * Aufgefallen ist es erst mit dem Standard-Teaser, dessen Template `<a
+ * class="zon-teaser__link">` als Wurzel hat.
+ *
+ * Neutralisiert wird zu `<span>` unter Beibehaltung der Klassen — die Vorschau
+ * sieht identisch aus (das Pattern-CSS greift über Klassen), verliert aber die
+ * Verschachtelung. `href`/`target`/`rel` fallen weg, weil sie an einem `<span>`
+ * bedeutungslos wären.
+ *
+ * `<button>` wird BEWUSST nicht angefasst: Der Parser hebt Buttons nicht heraus
+ * (der Absturz hängt spezifisch am verschachtelten `<a>`), und `button-group`
+ * hat mit `button.buttongroup-button` einen elementgebundenen Selektor, der
+ * beim Umschreiben seine Wirkung verlöre. Fokussierbar ist ohnehin nichts davon:
+ * die Vorschaufläche ist `inert` (durch einen e2e-Test abgesichert).
+ */
+function neutralisiereLinks(html: string): string {
+	return html
+		.replace(
+			/<a\b([^>]*)>/gi,
+			(_treffer, attribute: string) =>
+				`<span${attribute.replace(/\s(href|target|rel|download)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')}>`
+		)
+		.replace(/<\/a>/gi, '</span>');
+}
+
 function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | null {
 	const render = model.render ?? {};
 	// 1) Markup: preview > template-Instanziierung > statischer Override.
@@ -121,6 +152,7 @@ function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | nu
 	} else {
 		return null; // Keine Vorschau möglich → Karte bleibt textbasiert.
 	}
+	html = neutralisiereLinks(html);
 
 	// 2) CSS: inline render.css (bereits .spec-canvas-gescoped, :global entwrappen) +
 	//    frisch gescoptes pattern.css.

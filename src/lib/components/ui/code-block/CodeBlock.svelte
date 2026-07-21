@@ -234,11 +234,16 @@
 		--cb-text: var(--ds-text);
 		--cb-muted: var(--ds-text-muted);
 		--cb-accent: var(--ds-accent);
-		/* Syntax (Light) */
-		--cb-comment: #6b7280;
-		--cb-tag: #2563c9;
-		--cb-attr: #985e00;
-		--cb-string: #1a7f4b;
+		/* Syntax (Light) — gegen die Codefläche (--ds-surface-raised = #eeeeee)
+		   nachgerechnet; alle Werte erreichen WCAG AA (4,5 : 1). Zwei mussten dafür
+		   nachdunkeln: `comment` lag bei 4,17 und `string` bei 4,33 — beide knapp
+		   darunter und von axe (component-button, hell) angeschlagen. Der Farbton
+		   bleibt jeweils erhalten, nur die Helligkeit sinkt.
+		   Dark ist unauffällig (schlechtester Wert 5,14) und bleibt unverändert. */
+		--cb-comment: #616873; /* 4,84 : 1 (war #6b7280 = 4,17) */
+		--cb-tag: #2563c9; /* 4,88 : 1 */
+		--cb-attr: #985e00; /* 4,60 : 1 */
+		--cb-string: #177043; /* 5,27 : 1 (war #1a7f4b = 4,33) */
 		--cb-number: #c0392b;
 		--cb-selector: #7a3e9d;
 		--cb-brace: #b91109;

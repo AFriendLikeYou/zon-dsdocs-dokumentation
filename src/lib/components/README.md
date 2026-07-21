@@ -190,7 +190,7 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    Fliesstext. NICHT `ui/lightbox/` (Zoom-Overlay mit `<dialog>`), NICHT `ui/card/`
    (verlinkte Kachel). Heisst bewusst NICHT `Image` — den Namen belegt im CMS der
    Pseudo-Typ für rohe `<img class="img-natural">`-Inseln),
-   `ui/breakout/` (DER Ausbruch aus der 56rem-Lesespalte — `width:
+   `ui/breakout/` (DER Ausbruch aus der 52rem-Lesespalte — `width:
    content|wide|full`, sonst nichts. Rechnet symmetrische negative `margin-inline`
    aus `--ds-content-width` und `--ds-breakout-wide/-full`; kein `100vw` (Scrollbar)
    und kein `transform` (bräche `position: fixed`-Kinder). Greift per Media Query

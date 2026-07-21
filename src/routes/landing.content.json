@@ -3,8 +3,8 @@
 	"hero": {
 		"eyebrow": "DIE ZEIT · Design System",
 		"ueberschriftZeilen": [
-			"Marke und Produkt,",
-			"an einem Ort."
+			"an einem Ort.",
+			"Marke und Produkt,"
 		],
 		"lead": "Richtlinien, Tokens und dokumentierte Komponenten — live, konsistent und agent-ready.",
 		"primaerCta": "Zum Design-System",

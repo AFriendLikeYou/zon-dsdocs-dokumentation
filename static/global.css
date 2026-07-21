@@ -30,6 +30,17 @@
 	--sidebar-offset: 300px;
 	--sidebar-width: 300px;
 
+	/* SEITENSCHIENEN — die zwei gleich breiten Spalten links (Sidebar) und rechts
+	   („Auf dieser Seite"). `main` sitzt zwischen ihnen und ist dadurch am VIEWPORT
+	   zentriert, nicht im Restplatz: die linke Schiene reserviert ihre Breite auch
+	   im eingeklappten Zustand (Sidebar.svelte), die rechte reserviert `.layout`
+	   per padding-right (+layout.svelte) — das Verzeichnis selbst liegt AUSSERHALB
+	   des Flusses und kann deshalb auf-/zuklappen, ohne Layout zu bewegen.
+	   Schaltpunkt beider Schienen: 1280px (Media Queries können keine Variablen —
+	   der Wert steht als Literal in +layout.svelte, Sidebar.svelte und
+	   TableOfContents.svelte und ist dort jeweils kommentiert). */
+	--ds-layout-rail: var(--sidebar-width);
+
 	/* Seiten-Container: EINE Entscheidung für Lesebreite und seitlichen Rand der
 	   öffentlichen Seiten (vorher als max-width/clamp-Paar in Landing und Hero
 	   dupliziert). Wer eine Seite einfasst, nimmt beide zusammen. */
@@ -69,16 +80,21 @@
 	--ds-radius-lg: 12px;
 
 	/* Zentrierte, responsive Lesespalte/Content-Breite (auf <main> angewandt).
-	   (API-Reserve, wenig genutzt — vor Neubau prüfen.) */
-	--ds-content-width: 56rem;
+	   52rem = 832px AUSSENmaß (border-box) → 784px Textspalte, weil `main` je Seite
+	   24px Innenabstand trägt. Ab 1280px steht neben `main` je eine 300px-Schiene;
+	   unterhalb von 1432px (= 52rem + 600px) greift deshalb nicht dieser Deckel,
+	   sondern der Restplatz `Viewport − 600px`. */
+	--ds-content-width: 52rem;
 
 	/* Ausbruchs-Stufen für `ui/breakout` — die ZIEL-Aussenbreite eines Blocks, der
 	   breiter sein darf als die Lesespalte. Nur zwei Stufen über `--ds-content-width`,
 	   damit die Redaktion keine freien CSS-Längen wählt (Auswahl statt Eingabe).
 	   Die Werte sind an der real verfügbaren Inhaltsspalte gemessen, nicht geraten:
 	   neben `main` stehen Sidebar (300px) und „Auf dieser Seite" (300px), die Spalte
-	   ist also `Viewport − 600px` breit. Ein Ziel T passt genau dann, wenn
-	   `T ≤ Spalte` — daraus folgen die Schaltpunkte in Breakout.svelte. */
+	   ist also `Viewport − 600px` breit — seit der Viewport-Zentrierung reservieren
+	   BEIDE Schienen ihre Breite unabhängig vom Einklapp-Zustand, die Rechnung gilt
+	   also unverändert. Ein Ziel T passt genau dann, wenn `T ≤ Spalte` — daraus
+	   folgen die Schaltpunkte in Breakout.svelte. */
 	--ds-breakout-wide: 64rem; /* 1024px — braucht ≥ 1624px Viewport */
 	--ds-breakout-full: 76rem; /* 1216px — braucht ≥ 1816px Viewport */
 
@@ -471,6 +487,32 @@ h5 {
 	display: flex;
 	align-items: center;
 	hyphens: auto;
+}
+
+/* Specimen-Bühne: die Überschriften-Regel DIREKT darüber ist Doku-App-UI (das
+   `display: flex` trägt die Anker-Link-Buttons) — sie hat aber auch in jedes
+   Specimen durchgegriffen, weil Teaser-Markup echte <h2>/<h3> nutzt. Sichtbare
+   Folgen auf der Hero- und Standard-Teaser-Seite: die Spitzmarke stand NEBEN der
+   Headline statt darüber (Flex-Zeile), und `hyphens: auto` trennte sie mitten im
+   Wort („HafenCi-ty in Ham-burg"). Dazu unsichtbar `letter-spacing: -0.014em` —
+   Doku-Typografie, die es auf zeit.de nicht gibt, also eine stille Verfälschung
+   der dokumentierten Werte.
+
+   `revert` setzt auf die Browser-Vorgaben zurück — genau der Stand, auf dem auch
+   die echte Seite ihr eigenes CSS aufsetzt. Spezifität bewusst (0,0,1) über
+   `:where(.ds-stage)`: schlägt die Element-Regel oben (gleiche Spezifität, steht
+   später), verliert aber gegen JEDE Klassenregel aus einem `pattern.css` — das
+   Pattern behält also immer das letzte Wort.
+   Grundsatz dahinter: Doku-App-UI ≠ dokumentiertes ZEIT-DS. */
+:where(.ds-stage) :is(h1, h2, h3, h4, h5, h6) {
+	display: revert;
+	align-items: revert;
+	hyphens: revert;
+	letter-spacing: revert;
+	line-height: revert;
+	margin-block: revert;
+	font-size: revert;
+	font-weight: revert;
 }
 
 h1 {

@@ -284,8 +284,40 @@
 		}
 	}
 
+	/* ── Ab 1280px: die Schiene reserviert ihre Breite IMMER ──────────────────
+	   Darunter (768–1279px) bleibt es bei der Breiten-Animation oben: dort gibt es
+	   kein Inhaltsverzeichnis, und eine dauerhaft reservierte 300px-Schiene würde
+	   auf 768px nur noch ~168px Lesespalte übrig lassen.
+	   Ab 1280px trägt die Schiene dagegen die linke Hälfte der Viewport-Zentrierung
+	   (siehe +layout.svelte): ihre FLUSSBREITE muss konstant bleiben, sonst springt
+	   der Text beim Ein-/Ausklappen. Statt der Breite bewegt sich deshalb nur noch
+	   der Inhalt (Slide + Fade nach links, vom `overflow: hidden` der Schiene
+	   abgeschnitten). Der Zu-Zustand ist unverändert `inert`. */
+	@media (min-width: 1280px) {
+		.sidebar__content,
+		.sidebar__content.is-open {
+			width: var(--sidebar-width);
+			transition: none;
+		}
+
+		.sidebar__content .sidebar__navigation {
+			transform: translateX(-100%);
+			opacity: 0;
+			/* Panel-Bewegung → starke ease-out, Panel-Dauer (240ms). */
+			transition:
+				transform var(--ds-dur-slow) var(--ds-ease-out),
+				opacity var(--ds-dur-slow) var(--ds-ease-out);
+		}
+
+		.sidebar__content.is-open .sidebar__navigation {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.sidebar__content {
+		.sidebar__content,
+		.sidebar__content .sidebar__navigation {
 			transition: none;
 		}
 	}

@@ -95,13 +95,20 @@
 <Toaster />
 
 <style>
+	/* Bezugsrahmen für die rechte Schiene: `TableOfContents` liegt als
+	   position:absolute AUSSERHALB des Flusses (siehe unten) — dadurch zehrt es die
+	   Breite nicht mehr auf und kann auf-/zuklappen, ohne den Text zu bewegen. */
 	.layout {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
 		width: 100%;
-		max-width: 2000px;
-		margin-left: auto;
+		/* Bewusst KEIN 2000px-Deckel mehr (der stand hier zusammen mit
+		   `margin-left: auto`): mit Deckel wanderte die Spalte auf sehr breiten
+		   Schirmen nach rechts aus der Viewport-Mitte. `main` ist selbst gedeckelt,
+		   die Schienen sind es auch — der Deckel war nur noch schädlich. Für die
+		   Landing/Admin (`.flex--root`) bleibt er unten erhalten. */
 	}
 
 	.layout__inner {
@@ -120,6 +127,7 @@
 
 	/* Startseite: vollflächige Landing ohne Sidebar → Content-Spalte zentriert, kein Cap. */
 	.flex--root .layout {
+		max-width: 2000px;
 		margin-inline: auto;
 	}
 	main[data-area='root'] {
@@ -135,6 +143,23 @@
 
 		main {
 			padding: var(--z-ds-space-xs) var(--z-ds-space-l);
+		}
+	}
+
+	/* ── VIEWPORT-ZENTRIERUNG ab 1280px ───────────────────────────────────────
+	   Ab hier stehen links und rechts zwei GLEICH BREITE Schienen: die Sidebar
+	   (Flussbreite, in Sidebar.svelte ab 1280px auch im eingeklappten Zustand
+	   reserviert) und das Inhaltsverzeichnis (hier als padding-right reserviert,
+	   das Element selbst liegt absolut darüber). `main` mit `margin-inline: auto`
+	   sitzt damit exakt in der Viewport-Mitte — unabhängig davon, ob die Sidebar
+	   auf- oder zugeklappt ist und ob die Seite überhaupt Überschriften für ein
+	   Verzeichnis hat.
+	   Der Restplatz ist `Viewport − 600px`; unterhalb von 1432px ist er schmaler
+	   als 52rem, dann füllt `main` ihn aus (bei 1280px: 680px Außenmaß). Es gibt
+	   deshalb auf KEINER Breite eine Überlappung mit den Schienen. */
+	@media (min-width: 1280px) {
+		.flex:not(.flex--root) .layout {
+			padding-right: var(--ds-layout-rail);
 		}
 	}
 </style>

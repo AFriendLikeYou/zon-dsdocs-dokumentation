@@ -53,10 +53,15 @@
 			// verlinkten Karten. Dort wäre der Button interaktiver Inhalt in einem <a>
 			// (ungültiges HTML, mehrdeutig für Tastatur-Nutzer), und der kopierte Anker
 			// zeigte auf die Übersichtsseite, obwohl die Karte selbst schon verlinkt.
+			// … und NICHT in einem Specimen: Teaser-Markup nutzt echte <h2>/<h3>, dort
+			// wäre der Anker-Button Doku-Chrome mitten im dokumentierten Bauteil, und
+			// die zugewiesene `id` verändert das Specimen, das wir zeigen wollen.
+			// (Doku-App-UI ≠ dokumentiertes ZEIT-DS.)
 			if (
 				!header.closest('.accordion') &&
 				!header.closest('.dialog__content') &&
-				!header.closest('a')
+				!header.closest('a') &&
+				!header.closest('.ds-stage, .spec-canvas, .catalog-preview')
 			) {
 				createAnchorButton(header);
 			}
