@@ -1,0 +1,215 @@
+/*
+ * Hero („Aufmacher") — originalgetreue Kopie der auf zeit.de ausgelieferten
+ * `.zon-teaser`-Regeln. Quelle: live von https://www.zeit.de/index geladene
+ * Stylesheets (29 CSS-Dateien, abgerufen 2026-07-21). Klassennamen und
+ * Deklarationen sind NICHT erfunden — jede Regel unten steht so (bzw. als
+ * Breakpoint-Zweig, s. u.) im Produktions-CSS.
+ *
+ * ZWEI BEWUSSTE ABWEICHUNGEN ZUR PRODUKTION:
+ * 1) Keine At-Rules erlaubt (Exporter-Regel) — die Größen-Achse (Small/Wide) ist
+ *    in Produktion ein MEDIA QUERY auf derselben Klasse, kein Modifier. Hier
+ *    stehen deshalb die DESKTOP-Werte (Size=Wide) als Basis. Die Small-Werte
+ *    sind in model.json unter varianten/masse dokumentiert, nicht als Klasse.
+ * 2) `.zon-teaser__media` bekommt hier eine neutrale Platzhalter-Fläche
+ *    (background-color), weil die Doku kein Bild ausliefert. In Produktion
+ *    steckt dort ein <picture>.
+ */
+
+.zon-teaser {
+	color: var(--z-ds-color-text-100);
+}
+
+/* --- Size=Wide · Style=Standard (Basis des Aufmachers) --- */
+
+.zon-teaser--wide {
+	display: flex;
+	flex-direction: column;
+	gap: var(--z-ds-space-l);
+	margin-bottom: var(--z-ds-space-teaser);
+}
+
+.zon-teaser--wide .zon-teaser__media {
+	margin: 0 auto;
+	max-width: 55.75rem;
+}
+
+.zon-teaser--wide.zon-teaser--is-lead .zon-teaser__media {
+	max-width: 62.5rem;
+}
+
+.zon-teaser--wide .zon-teaser__container {
+	margin: 0 auto;
+	max-width: calc(55.75rem + 2 * 2rem);
+	padding: 0 2rem;
+	width: 100%;
+}
+
+.zon-teaser--wide .zon-teaser__container > * {
+	max-width: 46.25rem;
+}
+
+.zon-teaser--wide .zon-teaser__container > *:first-child {
+	margin-top: 0;
+}
+
+/* --- Bestandteile --- */
+
+.zon-teaser__media {
+	height: auto;
+	position: relative;
+	width: 100%;
+	background-color: var(--z-ds-color-background-10);
+}
+
+.zon-teaser__media--desktop-wide {
+	aspect-ratio: 16/9;
+}
+
+.zon-teaser__media-container {
+	width: 100%;
+}
+
+.zon-teaser__container {
+	display: flex;
+	flex-direction: column;
+	max-width: 46.25rem;
+}
+
+.zon-teaser__heading {
+	margin: 0;
+	text-wrap: pretty;
+}
+
+.zon-teaser__kicker {
+	align-items: center;
+	color: var(--z-ds-color-accent-100);
+	display: flex;
+	font-size: var(--z-ds-fontsize-14);
+	font-weight: normal;
+	gap: var(--z-ds-space-4);
+	line-height: normal;
+	margin-bottom: var(--z-ds-space-xxxs);
+}
+
+.zon-teaser__title {
+	color: var(--z-ds-color-text-100);
+	display: block;
+	font-size: var(--z-ds-fontsize-22);
+	line-height: var(--z-ds-lineheight-12);
+}
+
+.zon-teaser__title--extralarge {
+	font-size: var(--z-ds-fontsize-34);
+}
+
+.zon-teaser__summary {
+	color: var(--z-ds-color-text-70);
+	font-size: var(--z-ds-fontsize-16);
+	line-height: var(--z-ds-lineheight-15);
+	margin: var(--z-ds-space-xs) 0 0 0;
+}
+
+.zon-teaser__byline {
+	color: var(--z-ds-color-text-55);
+	display: flex;
+	flex-wrap: wrap;
+	font-size: var(--z-ds-fontsize-14);
+	gap: var(--z-ds-space-xxs) var(--z-ds-space-s);
+	line-height: var(--z-ds-lineheight-15);
+	margin: var(--z-ds-space-xxxs) 0 0 0;
+}
+
+.zon-teaser__actions {
+	color: var(--z-ds-color-text-55);
+	display: flex;
+	margin-top: auto;
+	padding-top: var(--z-ds-space-xs);
+	position: relative;
+	z-index: 3;
+}
+
+/* --- Style=Centered --- */
+
+.zon-teaser--is-centered .zon-teaser__container {
+	align-items: center;
+	margin: auto;
+	text-align: center;
+}
+
+.zon-teaser--is-centered .zon-teaser__container > * {
+	max-width: 46.25rem;
+	padding-right: 0;
+}
+
+.zon-teaser--is-centered .zon-teaser__container .zon-teaser__kicker {
+	justify-content: center;
+}
+
+.zon-teaser--is-centered .zon-teaser__actions {
+	justify-content: center;
+	width: 100%;
+}
+
+/* --- Style=Split --- */
+
+.zon-teaser--split {
+	background-color: var(--zon-teaser-split-background-color, var(--z-ds-color-general-black-100));
+	display: grid;
+	grid-template-columns: 1fr;
+	margin: 0 auto var(--z-ds-space-teaser) auto;
+	max-width: 55.75rem;
+	padding: 0;
+}
+
+.zon-teaser--split.zon-teaser--is-lead {
+	max-width: 62.5rem;
+}
+
+.zon-teaser--split .zon-teaser__container {
+	padding: var(--z-ds-space-l) var(--z-ds-space-xl);
+}
+
+.zon-teaser--split .zon-teaser__title {
+	color: var(--z-ds-color-general-white-100);
+}
+
+.zon-teaser--split .zon-teaser__summary {
+	color: var(--z-ds-color-general-white-100);
+}
+
+/* --- Style=Longform --- */
+
+.zon-teaser--tiemann .zon-teaser__title {
+	font-family: ZeitTiemannSchmal, Georgia, Palatino, 'Palatino Linotype', FreeSerif, serif;
+	font-size: var(--z-ds-fontsize-30);
+	font-weight: normal;
+	line-height: var(--z-ds-lineheight-11);
+}
+
+.zon-teaser--tiemann .zon-teaser__title--extralarge {
+	font-size: var(--z-ds-fontsize-36);
+}
+
+/*
+ * Style=Background Image ist in diesem Durchgang BEWUSST NICHT enthalten.
+ * Grund: die Klasse sitzt in Produktion nicht auf dem <article>, sondern auf dem
+ * Textcontainer (Modifier "on-image" auf zon-teaser__container, plus die Custom
+ * Property --overlay-background-color pro Artikel). Der Playground setzt
+ * Modifier ausschließlich auf das Wurzelelement — der Stil ließe sich hier also
+ * nicht ehrlich rendern, nur behaupten. Er ist im Bericht als offener Punkt
+ * benannt und braucht ein `render.specimen` (Specimen.svelte) statt `template`.
+ */
+
+/* --- Panorama=True (randlos, volle Breite) --- */
+
+.zon-teaser--is-panorama {
+	max-width: none;
+}
+
+.zon-teaser--wide.zon-teaser--is-panorama .zon-teaser__media {
+	max-width: none;
+}
+
+.zon-teaser--split.zon-teaser--is-panorama {
+	max-width: none;
+}

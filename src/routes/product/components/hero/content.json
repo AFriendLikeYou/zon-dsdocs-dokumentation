@@ -1,0 +1,185 @@
+{
+	"zweck": "Der Aufmacher ist das größte Teaser-Element des Systems und steht als erstes Inhaltselement auf der Startseite oder einer Landing Page. Er nutzt dieselben Bestandteile wie die kleineren Teaser (Bild · Spitzmarke · Überschrift · Zusammenfassung · Metadaten · Aktionszeile), bietet aber eine Bandbreite an Stil-Varianten, die andere Formate nicht haben.",
+	"status": "ready_for_dev",
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Teaser-Bild — 16:9 im Wide-Breakpoint (1000×562,5), 1:1 im Small-Breakpoint; Panorama zieht es randlos über die volle Breite."
+		},
+		{
+			"nr": 2,
+			"text": "Spitzmarke (Kicker) — redaktionelle Kategorie in Akzentrot, Tablet Gothic 14."
+		},
+		{
+			"nr": 3,
+			"text": "Artikel-Überschrift — Tablet Gothic Bold 34/1.2 (Wide), 26/1.2 (Small); Longform stattdessen ZeitTiemannSchmal 36/1.1."
+		},
+		{
+			"nr": 4,
+			"text": "Zusammenfassung — Fließtext in Text-70, 16/1.5, maximal 740 px breit."
+		},
+		{
+			"nr": 5,
+			"text": "Metadaten — Autor und Zeitstempel in Text-55, 14/1.5.",
+			"art": "text",
+			"optionalDurch": "author / datetime"
+		},
+		{
+			"nr": 6,
+			"text": "Aktionszeile — Vorlesen, Kommentare, Merken.",
+			"art": "container",
+			"optionalDurch": "actions"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Struktur",
+			"wert": "Ein <article> pro Aufmacher; die Überschrift steckt in einem <h2>/<h3> (zon-teaser__heading), nicht optisch gefälscht.",
+			"status": "pass"
+		},
+		{
+			"label": "Ein Linkziel",
+			"wert": "Produktion legt einen zusätzlichen zon-teaser__faux-link mit tabindex=\"-1\" und aria-hidden=\"true\" über die Fläche — die Tastatur erreicht nur den sichtbaren Titel-Link.",
+			"status": "pass"
+		},
+		{
+			"label": "Spitzmarke",
+			"wert": "Kicker ist redaktionelle Kategorie, keine Überschrift — als <span> innerhalb der Überschrift auszeichnen.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Überschrift",
+			"wert": "#252525 auf #ffffff ≈ 15:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Byline",
+			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
+			"status": "pass"
+		},
+		{
+			"label": "Text auf Bild",
+			"wert": "Split legt Text auf die Artikel-Themenfarbe. Der Kontrast hängt an der jeweiligen Farbe und ist nicht garantiert — je Geschichte prüfen.",
+			"status": "warn"
+		},
+		{
+			"label": "Bild",
+			"wert": "Das Teaser-Bild trägt Bedeutung und braucht alt-Text. In der Doku steht hier eine neutrale Platzhalter-Fläche mit aria-hidden.",
+			"status": "warn"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Pro Seite genau einen Aufmacher einsetzen — er markiert den Einstieg.",
+			"Die Zusammenfassung auf zwei bis drei Zeilen halten; die Textspalte bricht bei 740 px um.",
+			"Bei Split den Kontrast gegen die konkrete Themenfarbe prüfen."
+		],
+		"dont": [
+			"Den Aufmacher nicht mehrfach untereinander stapeln — dann ist keiner mehr der Aufmacher.",
+			"Panorama nicht in einem bereits eingerückten Layout verwenden — es ist auf randlose Ausspielung ausgelegt.",
+			"Die Überschrift nicht durch eine größere Schriftgröße ersetzen, sondern den passenden Stil wählen."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Als erstes Inhaltselement einer Startseite oder Landing Page.",
+			"Für die redaktionell wichtigste Geschichte eines Ressorts.",
+			"Longform für erzählende Stücke, die visuell tragen."
+		],
+		"nichtNutzen": [
+			"Nicht in Listen oder Feeds — dafür Cell (der kleine Teaser).",
+			"Nicht für Werbung oder Verlagsangebote — dafür die Anzeige-Variante von Cell.",
+			"Nicht als Navigationselement — der Aufmacher ist ein Inhalts-, kein Menüelement."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "Aufmacher",
+			"gut": "»KI ist mächtig wie eine Motorsäge«",
+			"hinweis": "Die Überschrift ist die echte Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "NEWS",
+			"gut": "KI und Kinder",
+			"hinweis": "Die Spitzmarke ist Ressort oder Thema — kurz, in normaler Schreibung, nicht in Versalien."
+		}
+	],
+	"beispiele": [
+		{
+			"titel": "Der Normalfall",
+			"beschreibung": "Bild oben, Text linksbündig darunter: So steht der Aufmacher auf zeit.de/index. Diese Fassung ist live nachgemessen — alle anderen Stile stammen bislang nur aus Figma.",
+			"instanzen": [
+				{
+					"stil": "standard"
+				}
+			],
+			"abdeckt": [
+				"Standard"
+			]
+		},
+		{
+			"titel": "Wenn das Bild die Geschichte trägt",
+			"beschreibung": "Centered rückt den Text in die Mitte und nimmt ihm Gewicht — passend, wenn das Motiv für sich spricht und die Überschrift kurz ist.",
+			"instanzen": [
+				{
+					"stil": "centered"
+				}
+			],
+			"abdeckt": [
+				"Centered"
+			]
+		},
+		{
+			"titel": "Erzählende Stücke",
+			"beschreibung": "Longform tauscht die Groteske gegen ZeitTiemannSchmal — das Signal für ein langes, lesendes Format statt einer Nachricht.",
+			"instanzen": [
+				{
+					"stil": "longform"
+				}
+			],
+			"abdeckt": [
+				"Longform"
+			]
+		},
+		{
+			"titel": "Volle Breite",
+			"beschreibung": "Panorama hebt die Breitenbegrenzung auf und zieht den Aufmacher randlos über die Seite. Nur in Layouts einsetzen, die randlos ausspielen können.",
+			"instanzen": [
+				{
+					"stil": "standard",
+					"panorama": true
+				}
+			],
+			"abdeckt": [
+				"An"
+			]
+		}
+	],
+	"faq": [
+		{
+			"frage": "Warum hat die Größe (Small/Wide) keine eigene CSS-Klasse?",
+			"antwort": "Weil Produktion sie nicht als Variante ausliefert. In Figma ist Size eine Varianten-Achse, im ausgelieferten CSS ist es ein Breakpoint auf derselben Klasse `.zon-teaser--wide` — dieselbe Instanz wird bei schmalem Viewport einfach kleiner (Überschrift 26 statt 34, Bild 1:1 statt 16:9, Abstand 16 statt 24). Es gibt also nichts umzuschalten."
+		},
+		{
+			"frage": "Warum fehlt der Stil „Background Image\"?",
+			"antwort": "Weil er sich hier noch nicht ehrlich zeigen ließe. Die Klasse sitzt in Produktion nicht auf dem <article>, sondern auf dem Textcontainer (`zon-teaser__container--on-image`) und braucht zusätzlich die Custom Property `--overlay-background-color` pro Artikel. Der datengetriebene Playground setzt Modifier ausschließlich auf das Wurzelelement — der Stil ist deshalb bewusst offen und kommt nach, sobald die Seite ein eigenes Specimen (Specimen.svelte) statt eines Templates nutzt."
+		},
+		{
+			"frage": "Woher kommt die Farbfläche bei Split?",
+			"antwort": "Aus dem Artikel, nicht aus dem Designsystem. `.zon-teaser--split` liest die Custom Property `--zon-teaser-split-background-color`; nur der Fallback ist ein DS-Token (Black-100). Die Farbe ist also redaktionell pro Geschichte gesetzt — und muss pro Geschichte auf Kontrast geprüft werden."
+		}
+	],
+	"verwandt": [
+		"cell",
+		"carousel"
+	],
+	"version": "Figma-Node 1075:1156 · zeit.de/index 2026-07-21",
+	"variantInfo": {
+		"Standard": "Bild oben, Text darunter linksbündig — der Normalfall auf der Startseite.",
+		"Centered": "Gleicher Aufbau, Textblock zentriert — für Geschichten, die ein ruhiges Bild tragen.",
+		"Split": "Bild und Text nebeneinander auf farbiger Fläche (Artikel-Themenfarbe).",
+		"Longform": "Überschrift in ZeitTiemannSchmal 36/1.1 — für erzählende, lange Stücke.",
+		"Aus": "Der Aufmacher bleibt in der Inhaltsspalte (max. 1000 px).",
+		"An": "Randlos über die volle Seitenbreite."
+	}
+}

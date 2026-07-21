@@ -71,8 +71,8 @@ function exportToTemp(slug) {
 }
 
 describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
-	it('deckt alle 11 dokumentierten Komponenten ab', () => {
-		expect(slugs.length).toBe(11);
+	it('deckt alle 12 dokumentierten Komponenten ab', () => {
+		expect(slugs.length).toBe(12);
 		expect(slugs).not.toContain('date-picker');
 	});
 

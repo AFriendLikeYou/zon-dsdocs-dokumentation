@@ -15,6 +15,8 @@
  *   Warnungen:
  *     A) Dokumentierte Variante ohne passende CSS-Klasse (und nicht `default`) → nicht gestylt.
  *     B) CSS-Modifier ohne dokumentierte Variante (und kein Interaktions-State) → undokumentiert.
+ *        Ausgenommen: Modifier, die das Specimen-HTML selbst schon trägt (Basis-Darstellung,
+ *        z. B. `.zon-teaser--wide` oder BEM-Element-Modifier wie `.zon-teaser__title--extralarge`).
  *
  *   node tooling/check-component-drift.mjs            # warnt, Exit 0 (im `npm run check`)
  *   node tooling/check-component-drift.mjs --strict   # Exit 1 bei Drift (für CI)
@@ -66,12 +68,25 @@ function checkComponent(slug, model, patternCss = '') {
 
 	// Basis-Klassen = Tokens ohne `--` aus Specimen-HTML UND Playground-Template
 	// (Platzhalter {classes}/{attrs} vorher entfernen).
-	const previewHtml = [render.preview ?? '', render.variant ?? '', render.template ?? '']
+	const previewHtml = [
+		render.preview ?? '',
+		render.variant ?? '',
+		render.template ?? '',
+		...(render.matrix ?? []).map((m) => m.html ?? '')
+	]
 		.join('\n')
 		.replaceAll('{classes}', '')
 		.replaceAll('{attrs}', '');
-	const bases = [...classesFromHtml(previewHtml)].filter((c) => !c.includes('--'));
+	const specimenClasses = classesFromHtml(previewHtml);
+	const bases = [...specimenClasses].filter((c) => !c.includes('--'));
 	if (bases.length === 0) return [];
+
+	// Modifier, die das Specimen selbst schon trägt, sind Teil der Basis-Darstellung
+	// (z. B. `.zon-teaser--wide`, `.zon-teaser__title--extralarge`) — keine Varianten-Achse
+	// und damit kein Drift. Sonst meldet jede BEM-Element-Modifier-Klasse einen Fehlalarm.
+	const specimenModifiers = new Set(
+		[...specimenClasses].filter((c) => c.includes('--')).map((c) => lower(c.split('--')[1]))
+	);
 
 	// Modifier aus CSS: `.<basis>--<mod>` (Basis je Modifier merken für korrekte Meldungen)
 	const cssModifiers = new Map(); // mod -> base
@@ -116,7 +131,7 @@ function checkComponent(slug, model, patternCss = '') {
 	}
 	// B) CSS-Klasse ohne dokumentierte Variante (State-Modifier ausgenommen)
 	for (const [mod, base] of cssModifiers) {
-		if (!documented.has(mod) && !STATE_MODIFIERS.has(mod)) {
+		if (!documented.has(mod) && !STATE_MODIFIERS.has(mod) && !specimenModifiers.has(mod)) {
 			issues.push(`CSS definiert .${base}--${mod}, aber keine dokumentierte Variante „${mod}"`);
 		}
 	}

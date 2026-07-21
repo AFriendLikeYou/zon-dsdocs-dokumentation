@@ -1,0 +1,519 @@
+{
+	"$schema": "../../../../../tooling/zeit-de-exporter/model.schema.json",
+	"name": "Hero",
+	"status": "ready_for_dev",
+	"kategorie": "Inhalte",
+	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=11741-46642&focus-id=1075-1156",
+	"aktualisiertAm": "2026-07-21",
+	"dokumentiertAm": "2026-07-21",
+	"zweck": "Der Aufmacher ist das größte Teaser-Element des Systems und steht als erstes Inhaltselement auf der Startseite oder einer Landing Page. Er nutzt dieselben Bestandteile wie die kleineren Teaser (Bild · Spitzmarke · Überschrift · Zusammenfassung · Metadaten · Aktionszeile), bietet aber eine Bandbreite an Stil-Varianten, die andere Formate nicht haben.",
+	"masse": {
+		"breite": {
+			"px": "1000",
+			"herkunft": "gemessen"
+		},
+		"padding": {
+			"px": "Container 0 32 (Wide) · Split 24 32",
+			"token": "--z-ds-space-xl",
+			"herkunft": "gemessen"
+		}
+	},
+	"spacing": [
+		{
+			"label": "Bild ↔ Textblock (Wide)",
+			"px": "24 px",
+			"token": "--z-ds-space-l",
+			"art": "gap",
+			"selector": ".zon-teaser--wide",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Spitzmarke ↔ Überschrift",
+			"px": "4 px",
+			"token": "--z-ds-space-xxxs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Überschrift ↔ Zusammenfassung",
+			"px": "8 px",
+			"token": "--z-ds-space-xs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Zusammenfassung ↔ Byline",
+			"px": "4 px",
+			"token": "--z-ds-space-xxxs",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Byline-Gap (Autor · Zeitstempel)",
+			"px": "12 px",
+			"token": "--z-ds-space-s",
+			"art": "gap",
+			"selector": ".zon-teaser__byline",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Byline ↔ Aktionszeile",
+			"px": "8 px",
+			"token": "--z-ds-space-xs",
+			"art": "padding",
+			"richtung": "vertikal",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Container-Seitenabstand (Wide)",
+			"px": "32 px",
+			"token": "--z-ds-space-xl",
+			"art": "padding",
+			"richtung": "horizontal",
+			"herkunft": "gemessen"
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Teaser-Bild — 16:9 im Wide-Breakpoint (1000×562,5), 1:1 im Small-Breakpoint; Panorama zieht es randlos über die volle Breite."
+		},
+		{
+			"nr": 2,
+			"text": "Spitzmarke (Kicker) — redaktionelle Kategorie in Akzentrot, Tablet Gothic 14."
+		},
+		{
+			"nr": 3,
+			"text": "Artikel-Überschrift — Tablet Gothic Bold 34/1.2 (Wide), 26/1.2 (Small); Longform stattdessen ZeitTiemannSchmal 36/1.1."
+		},
+		{
+			"nr": 4,
+			"text": "Zusammenfassung — Fließtext in Text-70, 16/1.5. Die Textspalte ist auf 740 px begrenzt, der Container auf 892 px (ohne is-lead) bzw. 1000 px (mit is-lead)."
+		},
+		{
+			"nr": 5,
+			"text": "Metadaten — Autor und Zeitstempel in Text-55, 14/1.5.",
+			"art": "text",
+			"optionalDurch": "author / datetime"
+		},
+		{
+			"nr": 6,
+			"text": "Aktionszeile — Vorlesen, Kommentare, Merken.",
+			"art": "container",
+			"optionalDurch": "actions"
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe",
+			"items": [
+				{
+					"name": "--z-ds-color-accent-100",
+					"hinweis": "Spitzmarke",
+					"swatch": "#b91109"
+				},
+				{
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Überschrift",
+					"swatch": "#252525"
+				},
+				{
+					"name": "--z-ds-color-text-70",
+					"hinweis": "Zusammenfassung",
+					"swatch": "#444444"
+				},
+				{
+					"name": "--z-ds-color-text-55",
+					"hinweis": "Byline · Aktionszeile",
+					"swatch": "#69696c"
+				},
+				{
+					"name": "--z-ds-color-background-0",
+					"hinweis": "Fläche",
+					"swatch": "#ffffff"
+				},
+				{
+					"name": "--z-ds-color-background-10",
+					"hinweis": "Bild-Platzhalter (nur Doku)",
+					"swatch": "#eeeeee"
+				},
+				{
+					"name": "--z-ds-color-general-black-100",
+					"hinweis": "Split-Fläche (Default, per --zon-teaser-split-background-color überschreibbar)",
+					"swatch": "#000000"
+				},
+				{
+					"name": "--z-ds-color-general-white-100",
+					"hinweis": "Text auf der Split-Fläche",
+					"swatch": "#ffffff"
+				}
+			]
+		},
+		{
+			"kategorie": "Typografie",
+			"items": [
+				{
+					"name": "--z-ds-fontsize-34",
+					"hinweis": "Überschrift Wide (title--extralarge)"
+				},
+				{
+					"name": "--z-ds-fontsize-26",
+					"hinweis": "Überschrift Small (title--extralarge)"
+				},
+				{
+					"name": "--z-ds-fontsize-36",
+					"hinweis": "Überschrift Longform (tiemann · extralarge)"
+				},
+				{
+					"name": "--z-ds-fontsize-16",
+					"hinweis": "Zusammenfassung"
+				},
+				{
+					"name": "--z-ds-fontsize-14",
+					"hinweis": "Spitzmarke · Byline"
+				},
+				{
+					"name": "--z-ds-lineheight-12",
+					"hinweis": "Überschrift (1.2)"
+				},
+				{
+					"name": "--z-ds-lineheight-15",
+					"hinweis": "Zusammenfassung · Byline (1.5)"
+				},
+				{
+					"name": "--z-ds-lineheight-11",
+					"hinweis": "Überschrift Longform (1.1)"
+				}
+			]
+		},
+		{
+			"kategorie": "Spacing",
+			"items": [
+				{
+					"name": "--z-ds-space-xl",
+					"hinweis": "32px · Container-Seitenabstand, Split-Innenabstand"
+				},
+				{
+					"name": "--z-ds-space-l",
+					"hinweis": "24px · Bild↔Text (Wide), Split vertikal"
+				},
+				{
+					"name": "--z-ds-space-m",
+					"hinweis": "16px · Bild↔Text (Small)"
+				},
+				{
+					"name": "--z-ds-space-s",
+					"hinweis": "12px · Byline-Gap"
+				},
+				{
+					"name": "--z-ds-space-xs",
+					"hinweis": "8px · Überschrift↔Zusammenfassung, Aktionszeile"
+				},
+				{
+					"name": "--z-ds-space-xxxs",
+					"hinweis": "4px · Spitzmarke↔Überschrift"
+				},
+				{
+					"name": "--z-ds-space-teaser",
+					"hinweis": "Abstand zum nächsten Inhaltselement"
+				}
+			]
+		}
+	],
+	"farbrollen": {
+		"zustaende": [
+			"default",
+			"auf Bild/Fläche"
+		],
+		"elemente": [
+			{
+				"teil": "Fläche",
+				"tokensProZustand": {
+					"default": "--z-ds-color-background-0",
+					"auf Bild/Fläche": "--z-ds-color-general-black-100"
+				},
+				"hinweis": "Split nutzt die Artikel-Themenfarbe über --zon-teaser-split-background-color; Black-100 ist nur der Fallback."
+			},
+			{
+				"teil": "Spitzmarke",
+				"tokensProZustand": {
+					"default": "--z-ds-color-accent-100",
+					"auf Bild/Fläche": "--z-ds-color-accent-100"
+				}
+			},
+			{
+				"teil": "Überschrift",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-100",
+					"auf Bild/Fläche": "--z-ds-color-general-white-100"
+				}
+			},
+			{
+				"teil": "Zusammenfassung",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-70",
+					"auf Bild/Fläche": "--z-ds-color-general-white-100"
+				}
+			},
+			{
+				"teil": "Byline / Aktionszeile",
+				"tokensProZustand": {
+					"default": "--z-ds-color-text-55",
+					"auf Bild/Fläche": "--z-ds-color-general-white-100"
+				}
+			}
+		]
+	},
+	"varianten": [
+		{
+			"prop": "Stil",
+			"werte": [
+				{
+					"label": "Standard",
+					"default": true
+				},
+				{
+					"label": "Centered",
+					"cssClass": "zon-teaser--is-centered"
+				},
+				{
+					"label": "Split",
+					"cssClass": "zon-teaser--split"
+				},
+				{
+					"label": "Longform",
+					"cssClass": "zon-teaser--tiemann"
+				}
+			]
+		},
+		{
+			"prop": "Panorama",
+			"werte": [
+				{
+					"label": "Aus",
+					"default": true
+				},
+				{
+					"label": "An",
+					"cssClass": "zon-teaser--is-panorama"
+				}
+			]
+		}
+	],
+	"zustaende": [
+		{
+			"label": "default",
+			"vorhanden": true
+		}
+	],
+	"a11y": [
+		{
+			"label": "Struktur",
+			"wert": "Ein <article> pro Aufmacher; die Überschrift steckt in einem <h2>/<h3> (zon-teaser__heading), nicht optisch gefälscht.",
+			"status": "pass"
+		},
+		{
+			"label": "Ein Linkziel",
+			"wert": "Produktion legt einen zusätzlichen zon-teaser__faux-link mit tabindex=\"-1\" und aria-hidden=\"true\" über die Fläche — die Tastatur erreicht nur den sichtbaren Titel-Link.",
+			"status": "pass"
+		},
+		{
+			"label": "Spitzmarke",
+			"wert": "Kicker ist redaktionelle Kategorie, keine Überschrift — als <span> innerhalb der Überschrift auszeichnen.",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Überschrift",
+			"wert": "#252525 auf #ffffff ≈ 15:1 · AAA",
+			"status": "pass"
+		},
+		{
+			"label": "Kontrast Byline",
+			"wert": "#69696c auf #ffffff ≈ 4.9:1 · AA",
+			"status": "pass"
+		},
+		{
+			"label": "Text auf Bild",
+			"wert": "Split legt Text auf die Artikel-Themenfarbe. Der Kontrast hängt an der jeweiligen Farbe und ist nicht garantiert — je Geschichte prüfen.",
+			"status": "warn"
+		},
+		{
+			"label": "Bild",
+			"wert": "Teaser-Bild braucht alt-Text; im Background-Image-Stil ist es dekorativ hinter dem Text und sollte aria-hidden sein.",
+			"status": "warn"
+		}
+	],
+	"doDont": {
+		"do": [
+			"Pro Seite genau einen Aufmacher einsetzen — er markiert den Einstieg.",
+			"Die Zusammenfassung auf zwei bis drei Zeilen halten; die Textspalte bricht bei 740 px um.",
+			"Bei Split den Kontrast gegen die konkrete Themenfarbe prüfen."
+		],
+		"dont": [
+			"Den Aufmacher nicht mehrfach untereinander stapeln — dann ist keiner mehr der Aufmacher.",
+			"Panorama nicht in einem bereits eingerückten Layout verwenden — es ist auf randlose Ausspielung ausgelegt.",
+			"Die Überschrift nicht durch eine größere Schriftgröße ersetzen, sondern den passenden Stil wählen."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Als erstes Inhaltselement einer Startseite oder Landing Page.",
+			"Für die redaktionell wichtigste Geschichte eines Ressorts.",
+			"Longform für erzählende Stücke, die visuell tragen."
+		],
+		"nichtNutzen": [
+			"Nicht in Listen oder Feeds — dafür Cell (der kleine Teaser).",
+			"Nicht für Werbung oder Verlagsangebote — dafür die Anzeige-Variante von Cell.",
+			"Nicht als Navigationselement — der Aufmacher ist ein Inhalts-, kein Menüelement."
+		]
+	},
+	"verwandt": [
+		"cell",
+		"carousel"
+	],
+	"wording": [
+		{
+			"schlecht": "Aufmacher",
+			"gut": "»KI ist mächtig wie eine Motorsäge«",
+			"hinweis": "Die Überschrift ist die echte Schlagzeile, kein Platzhalter."
+		},
+		{
+			"schlecht": "NEWS",
+			"gut": "KI und Kinder",
+			"hinweis": "Die Spitzmarke ist Ressort oder Thema — kurz, in normaler Schreibung, nicht in Versalien."
+		}
+	],
+	"produktion": {
+		"referenzen": [
+			{
+				"url": "https://www.zeit.de/index",
+				"selektor": ".zon-teaser--wide.zon-teaser--is-lead",
+				"beschreibung": "Aufmacher als erstes Inhaltselement der Startseite (Style=Standard, Wide)",
+				"pruefe": [
+					"breite"
+				]
+			}
+		]
+	},
+	"render": {
+		"controls": [
+			{
+				"key": "stil",
+				"label": "Stil",
+				"type": "select",
+				"default": "standard",
+				"options": [
+					{
+						"value": "standard",
+						"label": "Standard"
+					},
+					{
+						"value": "centered",
+						"label": "Centered",
+						"cssClass": "zon-teaser--is-centered"
+					},
+					{
+						"value": "split",
+						"label": "Split",
+						"cssClass": "zon-teaser--split"
+					},
+					{
+						"value": "longform",
+						"label": "Longform",
+						"cssClass": "zon-teaser--tiemann"
+					}
+				]
+			},
+			{
+				"key": "panorama",
+				"label": "Panorama",
+				"type": "toggle",
+				"cssClass": "zon-teaser--is-panorama"
+			}
+		],
+		"template": "<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}\"{attrs}>\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>",
+		"cssFile": "./pattern.css",
+		"align": "fill",
+		"resizable": true,
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "left",
+				"y": 25,
+				"selector": ".zon-teaser__media"
+			},
+			{
+				"nr": 2,
+				"side": "left",
+				"y": 68,
+				"selector": ".zon-teaser__kicker"
+			},
+			{
+				"nr": 3,
+				"side": "right",
+				"y": 76,
+				"selector": ".zon-teaser__title"
+			},
+			{
+				"nr": 4,
+				"side": "right",
+				"y": 88,
+				"selector": ".zon-teaser__summary"
+			},
+			{
+				"nr": 5,
+				"side": "bottom",
+				"x": 30,
+				"selector": ".zon-teaser__byline"
+			}
+		],
+		"props": [
+			{
+				"name": "style",
+				"typ": "\"Standard\" | \"Centered\" | \"Split\" | \"Longform\"",
+				"default": "\"Standard\"",
+				"beschreibung": "Stil-Achse — steuert Anordnung, Schrift und Farbgebung."
+			},
+			{
+				"name": "panorama",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Randlose Ausspielung über die volle Seitenbreite (zon-teaser--is-panorama)."
+			},
+			{
+				"name": "kicker",
+				"typ": "string",
+				"beschreibung": "Spitzmarke — Ressort oder Thema."
+			},
+			{
+				"name": "title",
+				"typ": "string",
+				"pflicht": true,
+				"beschreibung": "Artikel-Überschrift."
+			},
+			{
+				"name": "summary",
+				"typ": "string",
+				"beschreibung": "Zusammenfassung des Artikels."
+			},
+			{
+				"name": "author",
+				"typ": "string",
+				"beschreibung": "Autor:in in der Byline."
+			},
+			{
+				"name": "datetime",
+				"typ": "string",
+				"beschreibung": "Zeitstempel in der Byline."
+			}
+		],
+		"codeNote": "Teaser-Styles global einbinden; die Größen-Achse (Small/Wide) ist ein Breakpoint, keine Klasse.",
+		"repoNote": "Erst-Import: Struktur und Maße aus Figma (❖ ZDS, Component-Set 1075:1156, 48 Varianten), Klassennamen und CSS live von https://www.zeit.de/index abgenommen (2026-07-21). Das Bild ist hier eine neutrale Platzhalter-Fläche; in Produktion steckt dort ein <picture> mit srcset. Redaktionelle Beispieltexte vor Freigabe prüfen.",
+		"version": "Figma-Node 1075:1156 · zeit.de/index 2026-07-21",
+		"variantInfo": {
+			"Standard": "Bild oben, Text darunter linksbündig — der Normalfall auf der Startseite.",
+			"Centered": "Gleicher Aufbau, Textblock zentriert — für Geschichten, die ein ruhiges Bild tragen.",
+			"Split": "Bild und Text nebeneinander auf farbiger Fläche (Artikel-Themenfarbe).",
+			"Longform": "Überschrift in ZeitTiemannSchmal 36/1.1 — für erzählende, lange Stücke.",
+			"Aus": "Der Aufmacher bleibt in der Inhaltsspalte (max. 1000 px).",
+			"An": "Randlos über die volle Seitenbreite."
+		}
+	}
+}
