@@ -20,7 +20,7 @@ kategorie: Inhalte
 	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"left","y":45,"selector":".zon-teaser__media"},{"nr":2,"side":"top","x":70,"selector":".zon-teaser__kicker"},{"nr":3,"side":"right","y":30,"selector":".zon-teaser__title"},{"nr":4,"side":"right","y":58,"selector":".zon-teaser__summary"},{"nr":5,"side":"right","y":78,"selector":".zon-teaser__byline"},{"nr":6,"side":"bottom","x":70,"selector":".zon-teaser__actions"}];
-	const playgroundControls = [{"key":"bildformat","label":"Bildformat","type":"select","default":"super","options":[{"value":"super","label":"Super (3:2)","cssClass":"zon-teaser__media--desktop-super"},{"value":"wide","label":"Wide (16:9)","cssClass":"zon-teaser__media--desktop-wide"},{"value":"narrow","label":"Narrow (2:3)","cssClass":"zon-teaser__media--desktop-narrow"}]}] as PlaygroundControl[];
+	const playgroundControls = [{"key":"bildformat","label":"Bildformat","type":"select","default":"super","options":[{"value":"super","label":"Super (3:2)","cssClass":"zon-teaser__media--desktop-super zon-teaser__media--mobile-super"},{"value":"wide","label":"Wide (16:9)","cssClass":"zon-teaser__media--desktop-wide zon-teaser__media--mobile-wide"},{"value":"narrow","label":"Narrow (2:3)","cssClass":"zon-teaser__media--desktop-narrow zon-teaser__media--mobile-narrow"}]}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="zon-teaser zon-teaser--standard"{attrs}>
   <figure class="zon-teaser__media{classes}" aria-hidden="true"></figure>
   <div class="zon-teaser__container">
@@ -50,30 +50,51 @@ kategorie: Inhalte
  * 375x900). Klassennamen und Deklarationen sind NICHT erfunden — jede Regel unten
  * steht so (bzw. als Breakpoint-Zweig, s. u.) im Produktions-CSS.
  *
- * VIER BEWUSSTE ABWEICHUNGEN ZUR PRODUKTION:
+ * RESPONSIVE: EIN Schaltpunkt, mobile-first.
  *
- * 1) Keine At-Rules erlaubt (Exporter-Regel). Betroffen ist NUR die Schriftgröße
- *    der Überschrift: Produktion setzt \`--z-ds-fontsize-20\` als Basis und hebt sie
- *    per Media Query auf \`--z-ds-fontsize-22\`. Hier steht der DESKTOP-Wert (22) als
- *    Basis; die 20 px der schmalen Spalte sind in model.json dokumentiert.
- *    Das LAYOUT braucht dagegen keine At-Rule: die Spaltenzahl kommt aus
- *    \`repeat(auto-fit, minmax(...))\` und reflowt von allein — genau wie in
- *    Produktion. Der Resize-Griff im Playground zeigt also das echte Verhalten.
+ * Produktion kennt für diesen Teaser genau EINE Grenze: \`48em\` (= 768 px bei
+ * 16 px Wurzelschrift). Das ist nicht geraten, sondern aus dem ausgelieferten
+ * CSS gelesen (web.core/centerpage: alle zon-teaser-Regeln hängen an
+ * \`min-width: 48em\` bzw. \`max-width: 47.999em\`) UND an einer echten Instanz auf
+ * zeit.de/index nachgemessen — bei 375, 767, 768, 1024, 1280 und 1440 px. Bei
+ * 375 und 767 sind alle Werte identisch, bei 768 und darüber ebenso; der Sprung
+ * liegt exakt dazwischen.
  *
- * 2) \`--z-gap\` und die Inhaltsbreite sind in Produktion Seiten-Variablen, die
+ * Die Richtung ist MOBILE-FIRST, weil die Produktion es ist: der schmale Wert
+ * steht ohne Media Query da, \`min-width: 48em\` hebt ihn an (z. B. Titel
+ * fontsize-20 → fontsize-22). Wir kehren das bewusst NICHT um — eine
+ * Desktop-first-Kopie hätte dieselbe Optik, aber die umgekehrte Kaskade und
+ * damit eine andere Aussage darüber, was der Default ist.
+ *
+ * NICHT breakpoint-abhängig (auch ein Ergebnis, gemessen): Spitzmarke (14 px),
+ * Zusammenfassung (16/24), Byline-Schrift (14/21), Aktionszeile (padding-top
+ * 8 px), Zeilenhöhe des Titels (lineheight-12) sowie sämtliche Innenabstände
+ * der Textspalte. Der Spaltenumbruch selbst braucht ebenfalls keine At-Rule:
+ * er kommt aus \`repeat(auto-fit, minmax(...))\` und reflowt intrinsisch.
+ *
+ * Zwei Token schalten in der ZDS-Kopie (static/styles-zds.css) bereits SELBST
+ * bei 48em um und brauchen deshalb hier keine eigene Regel:
+ * \`--z-ds-space-teaser\` (1.5rem → 3.5rem) und \`--z-ds-space-xxs\`
+ * (0.25rem → 0.375rem). Gemessen: Abstand zum nächsten Teaser 24 → 56 px,
+ * Byline-Zeilenabstand 4 → 6 px.
+ *
+ * DREI BEWUSSTE ABWEICHUNGEN ZUR PRODUKTION:
+ *
+ * 1) \`--z-gap\` und die Inhaltsbreite sind in Produktion Seiten-Variablen, die
  *    nicht in der eingefrorenen ZDS-Kopie (static/styles-zds.css) stehen.
  *    Produktion schreibt dort \`max-width: min(100% - 2*--z-gap, --z-ds-content-width)\`
  *    (beide als var() gelesen; hier ohne var()-Schreibweise notiert, damit der
  *    Zero-Reference-Guard den Kommentar nicht als echte Token-Nutzung zählt).
- *    Hier ist \`--z-gap\` lokal auf den Desktop-Wert 2rem gepinnt und die
- *    Inhaltsbreite als Literal 55.75rem (= 892 px) notiert — ein nicht
- *    existierender --z-ds-*-Name würde still ins Leere zeigen.
+ *    Hier ist \`--z-gap\` lokal gesetzt — mit demselben 48em-Sprung wie in
+ *    Produktion (1rem → 2rem, gemessen) — und die Inhaltsbreite als Literal
+ *    55.75rem (= 892 px) notiert, weil es kein \`--z-ds-content-width\` in der
+ *    Kopie gibt und ein nicht existierender Name still ins Leere zeigen würde.
  *
- * 3) \`.zon-teaser__media\` bekommt hier eine neutrale Platzhalter-Fläche
+ * 2) \`.zon-teaser__media\` bekommt hier eine neutrale Platzhalter-Fläche
  *    (background-color), weil die Doku kein Bild ausliefert. In Produktion
  *    steckt dort ein <picture> mit srcset.
  *
- * 4) Die Aktionszeile besteht in Produktion aus \`.z-text-button\`-Instanzen
+ * 3) Die Aktionszeile besteht in Produktion aus \`.z-text-button\`-Instanzen
  *    (eigene Komponente, siehe /product/components/text-button). Unten stehen
  *    nur die Regeln, die der Teaser selbst beisteuert, plus ein Minimal-Reset
  *    fuer die Buttons — damit die Zeile ohne den Rest des Produktions-CSS
@@ -88,7 +109,7 @@ kategorie: Inhalte
 /* --- Wurzel: die Spaltenzahl reflowt intrinsisch, ohne Media Query --- */
 
 .zon-teaser--standard {
-	--z-gap: 2rem;
+	--z-gap: 1rem;
 	--teaser-column-auto-width: calc((48em - var(--z-gap) * 2 - var(--z-ds-space-xl)) / 2);
 	display: grid;
 	gap: var(--z-ds-space-m) var(--z-ds-space-xl);
@@ -96,6 +117,15 @@ kategorie: Inhalte
 	margin-block: 0 var(--z-ds-space-teaser);
 	margin-inline: auto;
 	max-width: min(100% - 2 * var(--z-gap), 55.75rem);
+}
+
+/* Der Seitenrand verdoppelt sich ab 48em (gemessen: 16 → 32 px je Seite). In
+   Produktion steckt der Sprung in \`:root { --z-gap }\`, hier lokal am Teaser —
+   dieselbe Grenze, damit die Inhaltsbreite identisch rechnet. */
+@media screen and (min-width: 48em) {
+	.zon-teaser--standard {
+		--z-gap: 2rem;
+	}
 }
 
 /* --- Bild --- */
@@ -107,16 +137,38 @@ kategorie: Inhalte
 	background-color: var(--z-ds-color-background-10);
 }
 
-.zon-teaser__media--desktop-super {
-	aspect-ratio: 3/2;
+/* Das Bildformat ist in Produktion ZWEIGETEILT: das Markup trägt IMMER beide
+   Klassen (gemessen an zeit.de/index: \`zon-teaser__media--desktop-super
+   zon-teaser__media--mobile-super\`), und je Seite der 48em-Grenze greift genau
+   eine davon. Ohne den Mobil-Zweig hätte die leere Platzhalter-Figur unterhalb
+   768 px gar kein Seitenverhältnis mehr und fiele auf Höhe 0 zusammen. */
+
+@media screen and (max-width: 47.999em) {
+	.zon-teaser__media--mobile-super {
+		aspect-ratio: 3/2;
+	}
+
+	.zon-teaser__media--mobile-wide {
+		aspect-ratio: 16/9;
+	}
+
+	.zon-teaser__media--mobile-narrow {
+		aspect-ratio: 2/3;
+	}
 }
 
-.zon-teaser__media--desktop-wide {
-	aspect-ratio: 16/9;
-}
+@media screen and (min-width: 48em) {
+	.zon-teaser__media--desktop-super {
+		aspect-ratio: 3/2;
+	}
 
-.zon-teaser__media--desktop-narrow {
-	aspect-ratio: 2/3;
+	.zon-teaser__media--desktop-wide {
+		aspect-ratio: 16/9;
+	}
+
+	.zon-teaser__media--desktop-narrow {
+		aspect-ratio: 2/3;
+	}
 }
 
 .zon-teaser__media-container {
@@ -179,11 +231,21 @@ kategorie: Inhalte
 	margin-bottom: var(--z-ds-space-xxxs);
 }
 
+/* Basis ist der SCHMALE Wert (20 px / 24 px gemessen bei 375 und 767) — genau so
+   steht es in Produktion. Die Zeilenhöhe bleibt über die Grenze hinweg gleich
+   (lineheight-12), es ändert sich allein der Schriftgrad. */
 .zon-teaser__title {
 	color: var(--z-ds-color-text-100);
 	display: block;
-	font-size: var(--z-ds-fontsize-22);
+	font-size: var(--z-ds-fontsize-20);
 	line-height: var(--z-ds-lineheight-12);
+}
+
+/* Ab 48em: 22 px / 26,4 px (gemessen bei 768, 1024, 1280 und 1440 — identisch). */
+@media screen and (min-width: 48em) {
+	.zon-teaser__title {
+		font-size: var(--z-ds-fontsize-22);
+	}
 }
 
 .zon-teaser__link .zon-teaser__title {
@@ -317,7 +379,7 @@ kategorie: Inhalte
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<article class="zon-teaser zon-teaser--standard">
-  <figure class="zon-teaser__media zon-teaser__media--desktop-super" aria-hidden="true"></figure>
+  <figure class="zon-teaser__media zon-teaser__media--desktop-super zon-teaser__media--mobile-super" aria-hidden="true"></figure>
   <div class="zon-teaser__container">
     <a class="zon-teaser__link" href="#0">
       <h3 class="zon-teaser__heading">
@@ -423,7 +485,7 @@ kategorie: Inhalte
 }
 :global(.spec-canvas .zon-teaser--standard),
 :global(.pg-preview .zon-teaser--standard) {
-  --z-gap: 2rem;
+  --z-gap: 1rem;
 	--teaser-column-auto-width: calc((48em - var(--z-gap) * 2 - var(--z-ds-space-xl)) / 2);
 	display: grid;
 	gap: var(--z-ds-space-m) var(--z-ds-space-xl);
@@ -432,6 +494,12 @@ kategorie: Inhalte
 	margin-inline: auto;
 	max-width: min(100% - 2 * var(--z-gap), 55.75rem);
 }
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser--standard),
+  :global(.pg-preview .zon-teaser--standard) {
+    --z-gap: 2rem;
+  }
+}
 :global(.spec-canvas .zon-teaser__media),
 :global(.pg-preview .zon-teaser__media) {
   height: auto;
@@ -439,17 +507,33 @@ kategorie: Inhalte
 	width: 100%;
 	background-color: var(--z-ds-color-background-10);
 }
-:global(.spec-canvas .zon-teaser__media--desktop-super),
-:global(.pg-preview .zon-teaser__media--desktop-super) {
-  aspect-ratio: 3/2;
+@media screen and (max-width: 47.999em) {
+  :global(.spec-canvas .zon-teaser__media--mobile-super),
+  :global(.pg-preview .zon-teaser__media--mobile-super) {
+    aspect-ratio: 3/2;
+  }
+  :global(.spec-canvas .zon-teaser__media--mobile-wide),
+  :global(.pg-preview .zon-teaser__media--mobile-wide) {
+    aspect-ratio: 16/9;
+  }
+  :global(.spec-canvas .zon-teaser__media--mobile-narrow),
+  :global(.pg-preview .zon-teaser__media--mobile-narrow) {
+    aspect-ratio: 2/3;
+  }
 }
-:global(.spec-canvas .zon-teaser__media--desktop-wide),
-:global(.pg-preview .zon-teaser__media--desktop-wide) {
-  aspect-ratio: 16/9;
-}
-:global(.spec-canvas .zon-teaser__media--desktop-narrow),
-:global(.pg-preview .zon-teaser__media--desktop-narrow) {
-  aspect-ratio: 2/3;
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser__media--desktop-super),
+  :global(.pg-preview .zon-teaser__media--desktop-super) {
+    aspect-ratio: 3/2;
+  }
+  :global(.spec-canvas .zon-teaser__media--desktop-wide),
+  :global(.pg-preview .zon-teaser__media--desktop-wide) {
+    aspect-ratio: 16/9;
+  }
+  :global(.spec-canvas .zon-teaser__media--desktop-narrow),
+  :global(.pg-preview .zon-teaser__media--desktop-narrow) {
+    aspect-ratio: 2/3;
+  }
 }
 :global(.spec-canvas .zon-teaser__media-container),
 :global(.pg-preview .zon-teaser__media-container) {
@@ -507,8 +591,14 @@ kategorie: Inhalte
 :global(.pg-preview .zon-teaser__title) {
   color: var(--z-ds-color-text-100);
 	display: block;
-	font-size: var(--z-ds-fontsize-22);
+	font-size: var(--z-ds-fontsize-20);
 	line-height: var(--z-ds-lineheight-12);
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser__title),
+  :global(.pg-preview .zon-teaser__title) {
+    font-size: var(--z-ds-fontsize-22);
+  }
 }
 :global(.spec-canvas .zon-teaser__link .zon-teaser__title),
 :global(.pg-preview .zon-teaser__link .zon-teaser__title) {

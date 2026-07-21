@@ -46,32 +46,81 @@ const patternCss = import.meta.glob('/src/routes/product/components/*/pattern.cs
 
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
 
+/** Bedingte Gruppierungsregeln — wie im Exporter: Rahmen erhalten, Rumpf rekursiv scopen. */
+const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
+
 /**
- * Flache Pattern-CSS-Regeln gegen `.spec-canvas` scopen (Vorbild: scopeCss im Exporter,
+ * CSS über die Klammerbilanz in Top-Level-Blöcke zerlegen (Zwilling von
+ * `splitCssBloecke` in export.mjs). Ein simples `split('}')` würde einen
+ * `@media`-Block am ersten inneren `}` zerreißen. Strings werden übersprungen,
+ * damit `content: "}"` die Bilanz nicht kippt. Kein CSS-Parser: der Zerleger kennt
+ * nur „Prelude { Rumpf }" und Verschachtelung.
+ */
+function splitCssBloecke(css: string): { prelude: string; rumpf: string }[] {
+	const bloecke: { prelude: string; rumpf: string }[] = [];
+	let tiefe = 0;
+	let start = 0;
+	let preludeEnde = -1;
+	for (let i = 0; i < css.length; i++) {
+		const c = css[i];
+		if (c === '"' || c === "'") {
+			for (i++; i < css.length && css[i] !== c; i++) if (css[i] === '\\') i++;
+			continue;
+		}
+		if (c === '{') {
+			if (tiefe === 0) preludeEnde = i;
+			tiefe++;
+		} else if (c === '}') {
+			tiefe--;
+			if (tiefe < 0) return []; // unbalanciert → defensiv nichts ausgeben
+			if (tiefe === 0) {
+				bloecke.push({
+					prelude: css.slice(start, preludeEnde).trim(),
+					rumpf: css.slice(preludeEnde + 1, i).trim()
+				});
+				start = i + 1;
+				preludeEnde = -1;
+			}
+		}
+	}
+	return tiefe === 0 ? bloecke : [];
+}
+
+/**
+ * Pattern-CSS-Regeln gegen `.spec-canvas` scopen (Vorbild: scopeCss im Exporter,
  * aber OHNE :global-Wrapper). Das CSS landet via {@html} in einem echten <style>-Tag der
  * Seite — dort ist `:global()` eine ungültige Selektor-Syntax (nur der Svelte-Compiler
  * kennt sie). Wir präfixen deshalb mit dem nackten `.spec-canvas `.
- * V1-Beschränkung wie im Exporter: keine At-Rules (die pattern.css-Dateien sind flach).
+ *
+ * Bedingte At-Rules (`@media`/`@supports`/`@container`) bleiben als Rahmen erhalten,
+ * ihr Rumpf wird rekursiv gescopet — sonst griffe die responsive Typografie einer
+ * Komponente zwar auf der Doku-Seite, aber nicht in der Katalog-Mini-Vorschau.
+ * Andere At-Rules (v. a. `@keyframes`, dessen Prozent-Selektoren NICHT gescopet
+ * werden dürfen und dessen Name hier global kollidieren würde) werden still
+ * übersprungen — der Exporter lehnt sie bereits mit klarer Meldung ab, hier ist
+ * Defensive statt Doppelmeldung angebracht.
  */
-function scopeToCanvas(css: string): string {
-	const clean = css.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-	if (/^\s*@/m.test(clean)) return ''; // At-Rules überspringen (defensiv; sollte nicht vorkommen).
-	return clean
-		.split('}')
-		.map((chunk) => chunk.trim())
-		.filter(Boolean)
-		.map((chunk) => {
-			const idx = chunk.indexOf('{');
-			if (idx === -1) return '';
-			const selectors = chunk.slice(0, idx).trim();
-			const body = chunk.slice(idx + 1).trim();
-			const scoped = selectors
+export function scopeToCanvas(css: string): string {
+	return scopeBloecke(css.replace(/\/\*[\s\S]*?\*\//g, '').trim());
+}
+
+/** Rekursiver Kern von scopeToCanvas. */
+function scopeBloecke(clean: string): string {
+	return splitCssBloecke(clean)
+		.map(({ prelude, rumpf }) => {
+			if (prelude.startsWith('@')) {
+				if (!BEDINGTE_AT_REGELN.test(prelude)) return '';
+				const innen = scopeBloecke(rumpf);
+				return innen ? `${prelude} { ${innen} }` : '';
+			}
+			if (!prelude) return '';
+			const scoped = prelude
 				.split(',')
 				.map((s) => s.trim())
 				.filter(Boolean)
 				.map((sel) => `.spec-canvas ${sel}`)
 				.join(', ');
-			return `${scoped} { ${body} }`;
+			return `${scoped} { ${rumpf} }`;
 		})
 		.filter(Boolean)
 		.join('\n');

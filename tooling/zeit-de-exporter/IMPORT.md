@@ -190,8 +190,10 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
 
 ## 3 · `pattern.css` (falls `render.cssFile`)
 
-Unscoped, co-located neben `model.json`. **Flache Regeln, keine At-Rules**
-(`@media`/`@keyframes` — der Exporter wirft sonst). Auf echten `--z-ds-*`-Tokens
+Unscoped, co-located neben `model.json`. Flache Regeln plus die **bedingten
+At-Rules `@media`, `@supports`, `@container`** (Rahmen bleibt erhalten, der Rumpf
+wird gescopet). **`@keyframes` & Co. wirft der Exporter** — Prozent-Selektoren
+dürfen nicht gescopet werden und der Keyframe-Name wäre global. Auf echten `--z-ds-*`-Tokens
 (originalgetreue DS-Kopie). Der Exporter scoped sie gegen `.spec-canvas` / `.pg-preview`.
 
 ### 3b · Registry-Artefakte (`code`-Block, optional)

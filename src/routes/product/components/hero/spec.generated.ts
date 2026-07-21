@@ -15,14 +15,14 @@ export const generated = {
 			"herkunft": "gemessen"
 		},
 		"padding": {
-			"px": "Container 0 32 (Wide) · Split 24 32",
+			"px": "Container 0 32 (Wide, ab 768 px; darunter 0 16) · Split 24 32",
 			"token": "--z-ds-space-xl",
 			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
 		{
-			"label": "Bild ↔ Textblock (Wide)",
+			"label": "Bild ↔ Textblock (Wide, ab 768 px; darunter 16 px)",
 			"px": "24 px",
 			"token": "--z-ds-space-l",
 			"art": "gap",
@@ -64,7 +64,7 @@ export const generated = {
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Container-Seitenabstand (Wide)",
+			"label": "Container-Seitenabstand (Wide, ab 768 px; darunter 16 px)",
 			"px": "32 px",
 			"token": "--z-ds-space-xl",
 			"art": "padding",

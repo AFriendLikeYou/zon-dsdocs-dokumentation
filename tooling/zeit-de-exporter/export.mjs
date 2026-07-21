@@ -220,37 +220,123 @@ function renderContentStub(model) {
 	return JSON.stringify(content, null, '\t') + '\n';
 }
 
+// ---------------------------------------------------------------------------
+// Pattern-CSS-Scoping (v2: bedingte At-Rules)
+// ---------------------------------------------------------------------------
+// V1 war ein `css.split('}')` — das genügte für flache Regeln, zerlegt einen
+// `@media`-Block aber an der ERSTEN inneren `}` und damit falsch. Deshalb jetzt
+// ein winziger Block-Parser über die Klammerbilanz (immer noch KEIN CSS-Parser:
+// er kennt nur „Prelude { Rumpf }" und Verschachtelung, sonst nichts).
+//
+// Erlaubt sind die BEDINGTEN Gruppierungsregeln `@media`, `@supports` und
+// `@container`: Sie haben alle dieselbe Form (Bedingung + Regelblock), ihr Rumpf
+// enthält wieder ganz normale Regeln. Wir scopen also rekursiv den Rumpf und
+// legen den At-Rahmen unverändert wieder darum.
+//
+// BEWUSST NICHT unterstützt (mit klarer Meldung abgelehnt):
+//   · `@keyframes` — der Rumpf besteht aus Prozent-/from-to-Selektoren, die NICHT
+//     gescopet werden dürfen. Ein reines Durchreichen wäre zwar strukturell
+//     machbar, aber der Name wäre global: In der generierten `.svx` läge er in
+//     einem Svelte-`<style>` (der Compiler benennt Keyframes komponentenlokal um
+//     und würde die `animation-name`-Referenz aus den `:global(...)`-Regeln nicht
+//     mehr treffen), im Katalog-`<style>` (catalog-previews.ts) kollidierten
+//     gleichnamige Keyframes verschiedener Komponenten. Das braucht eine eigene
+//     Namensraum-Entscheidung — bis dahin: ablehnen statt still danebenliegen.
+//   · `@font-face`, `@property` etc. — Rumpf sind Deklarationen, kein Regelblock;
+//     Scoping ist dort sinnlos, und global gehören sie nicht in eine Pattern-CSS.
+//   · Statement-At-Rules ohne Block (`@import`, `@charset`) — Seiteneffekte, die
+//     in einer co-locateten Pattern-CSS nichts zu suchen haben.
+
+/** Bedingte Gruppierungsregeln: Bedingung + Regelblock, Rumpf wird rekursiv gescopet. */
+const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
+
+/**
+ * CSS in Top-Level-Blöcke `{ prelude, rumpf }` zerlegen — über die Klammerbilanz,
+ * damit verschachtelte Blöcke (At-Rules) am RICHTIGEN `}` enden. Anführungszeichen
+ * werden übersprungen, damit ein `content: "}"` die Bilanz nicht kippt.
+ * Wirft bei unbalancierten Klammern und bei Resttext ohne Block (z. B. `@import …;`).
+ */
+function splitCssBloecke(css, quelle = 'pattern.css') {
+	const bloecke = [];
+	let tiefe = 0;
+	let start = 0;
+	let preludeEnde = -1;
+	for (let i = 0; i < css.length; i++) {
+		const c = css[i];
+		if (c === '"' || c === "'") {
+			// String überspringen (inkl. Backslash-Escapes) — Klammern darin zählen nicht.
+			for (i++; i < css.length && css[i] !== c; i++) if (css[i] === '\\') i++;
+			continue;
+		}
+		if (c === '{') {
+			if (tiefe === 0) preludeEnde = i;
+			tiefe++;
+		} else if (c === '}') {
+			tiefe--;
+			if (tiefe < 0) throw new Error(`${quelle}: schließende } ohne öffnende { — CSS unbalanciert.`);
+			if (tiefe === 0) {
+				bloecke.push({
+					prelude: css.slice(start, preludeEnde).trim(),
+					rumpf: css.slice(preludeEnde + 1, i).trim()
+				});
+				start = i + 1;
+				preludeEnde = -1;
+			}
+		}
+	}
+	if (tiefe !== 0) throw new Error(`${quelle}: nicht geschlossener Block { … — CSS unbalanciert.`);
+	const rest = css.slice(start).trim();
+	if (rest) {
+		throw new Error(
+			`${quelle}: Text außerhalb eines Regelblocks ("${rest.slice(0, 40)}…") — ` +
+				'block-lose At-Rules (@import, @charset) werden nicht unterstützt.'
+		);
+	}
+	return bloecke;
+}
+
 /**
  * Unscoped Pattern-CSS (pattern.css) gegen die Vorschau-Flächen scopen:
  * jede Regel wird auf `.spec-canvas SEL` UND `.pg-preview SEL` präfixiert (als
- * :global, weil die Klassen auf Kind-Komponenten landen). V1-Beschränkung:
- * flache Regeln ohne At-Rules — bewusst simpel statt CSS-Parser.
+ * :global, weil die Klassen auf Kind-Komponenten landen). Bedingte At-Rules
+ * (`@media`/`@supports`/`@container`) bleiben als Rahmen erhalten, ihr Rumpf wird
+ * rekursiv gescopet — siehe Block-Kommentar oben.
  */
 function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
 	const clean = String(css)
 		.replace(/\/\*[\s\S]*?\*\//g, '')
 		.trim();
-	if (/^\s*@/m.test(clean)) {
-		throw new Error(
-			'pattern.css: At-Rules (@media, @keyframes, …) werden im v1-Scoping nicht unterstützt — flache Regeln verwenden.'
-		);
-	}
-	return clean
-		.split('}')
-		.map((chunk) => chunk.trim())
-		.filter(Boolean)
-		.map((chunk) => {
-			const idx = chunk.indexOf('{');
-			if (idx === -1) return '';
-			const selectors = chunk.slice(0, idx).trim();
-			const body = chunk.slice(idx + 1).trim();
-			const scoped = selectors
+	return scopeBloecke(clean, prefixes);
+}
+
+/** Rekursiver Kern: kommentar-freies CSS → gescopte Regeln (At-Rahmen erhalten). */
+function scopeBloecke(clean, prefixes) {
+	return splitCssBloecke(clean)
+		.map(({ prelude, rumpf }) => {
+			if (prelude.startsWith('@')) {
+				if (!BEDINGTE_AT_REGELN.test(prelude)) {
+					throw new Error(
+						`pattern.css: At-Rule "${prelude.split(/\s/)[0]}" wird vom Scoping nicht unterstützt — ` +
+							'erlaubt sind @media, @supports und @container (@keyframes & Co. bewusst nicht).'
+					);
+				}
+				const innen = scopeBloecke(rumpf, prefixes);
+				if (!innen) return '';
+				// Rahmen wieder darum, Inhalt um zwei Leerzeichen eingerückt.
+				const eingerueckt = innen
+					.split('\n')
+					.map((zeile) => (zeile ? `  ${zeile}` : zeile))
+					.join('\n');
+				return `${prelude} {\n${eingerueckt}\n}`;
+			}
+			if (!prelude) return '';
+			const scoped = prelude
 				.split(',')
 				.map((s) => s.trim())
 				.filter(Boolean)
 				.flatMap((sel) => prefixes.map((p) => `:global(${p} ${sel})`))
 				.join(',\n');
-			return `${scoped} {\n  ${body}\n}`;
+			return `${scoped} {\n  ${rumpf}\n}`;
 		})
 		.filter(Boolean)
 		.join('\n');
@@ -1103,7 +1189,7 @@ function scaffold(name, root) {
 
 	const css =
 		`/* ${cls} — Pattern-CSS: originalgetreu aus Figma, echte --z-ds-*-Token.\n` +
-		`   Flache Regeln, keine @media/@keyframes (v1-Scoping). */\n` +
+		`   Flache Regeln; @media/@supports/@container erlaubt, @keyframes nicht. */\n` +
 		`.${cls} {\n  /* TODO: Basis-Styles */\n}\n` +
 		`.${cls}--beispiel {\n  /* TODO: Modifier-Styles */\n}\n`;
 
@@ -1223,4 +1309,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	}
 }
 
-export { kebabCase, camelCase, toFrontmatter, renderPage, renderGenerated, renderContentStub };
+export {
+	kebabCase,
+	camelCase,
+	toFrontmatter,
+	renderPage,
+	renderGenerated,
+	renderContentStub,
+	scopeCss
+};

@@ -85,7 +85,7 @@ export const generated = {
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Abstand zum nächsten Teaser",
+			"label": "Abstand zum nächsten Teaser (ab 768 px; darunter 24 px)",
 			"px": "56 px",
 			"token": "--z-ds-space-teaser",
 			"herkunft": "gemessen"

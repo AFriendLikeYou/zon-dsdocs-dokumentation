@@ -397,8 +397,12 @@ Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
   `git symbolic-ref HEAD refs/heads/main`.
 - `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
-- `pattern.css`-Scoping (v1): **flache Regeln**, keine At-Rules (`@media`/
-  `@keyframes`) — der Exporter wirft sonst.
+- `pattern.css`-Scoping: flache Regeln **plus die bedingten At-Rules** `@media`,
+  `@supports`, `@container` (Rahmen bleibt, Rumpf wird gescopet — Zerlegung über
+  Klammerbilanz in `scopeCss`/`scopeToCanvas`). **`@keyframes` & Co. wirft der
+  Exporter**: Prozent-Selektoren dürfen nicht gescopet werden, und der Keyframe-Name
+  wäre global (Svelte benennt ihn im `<style>` der `.svx` um, im Katalog-`<style>`
+  kollidierte er zwischen Komponenten).
 - **Brand-`.svx`: keine DOPPEL-Leerzeile INNERHALB eines mehrzeiligen Konstrukts**
   (`<Grid>`, `<DoDontGroup>` …). Der CMS-Segmenter trennt Inseln bei ≥2 Leerzeilen —
   eine Doppel-Leerzeile mitten im Block würde ihn (harmlos, aber unschön) in zwei

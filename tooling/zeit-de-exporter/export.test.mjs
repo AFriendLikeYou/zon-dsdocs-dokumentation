@@ -12,7 +12,7 @@ import {
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { kebabCase, renderPage, renderGenerated, renderContentStub } from './export.mjs';
+import { kebabCase, renderPage, renderGenerated, renderContentStub, scopeCss } from './export.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
@@ -159,7 +159,7 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 		expect(res.stderr).toMatch(/default "zzz" ist kein option-value/);
 	});
 
-	it('At-Rule in pattern.css → Exit ≠ 0, Meldung nennt At-Rules', () => {
+	it('@keyframes in pattern.css → Exit ≠ 0, Meldung nennt die At-Rule', () => {
 		const res = runBroken(
 			{
 				name: 'X',
@@ -176,10 +176,103 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 					]
 				}
 			},
-			'@media (min-width: 1px) { .z { color: red } }'
+			'@keyframes puls { from { opacity: 0 } to { opacity: 1 } }'
 		);
 		expect(res.status).not.toBe(0);
-		expect(res.stderr).toMatch(/At-Rules/);
+		expect(res.stderr).toMatch(/@keyframes/);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// scopeCss: Pattern-CSS gegen die Vorschau-Flächen scopen
+// ---------------------------------------------------------------------------
+// Der Zerleger arbeitet über die Klammerbilanz (nicht split('}')), damit ein
+// `@media`-Block nicht am ersten INNEREN `}` zerrissen wird. Unterstützt sind die
+// bedingten Gruppierungsregeln @media/@supports/@container (Rahmen bleibt, Rumpf
+// wird rekursiv gescopet); alles andere — allen voran @keyframes — wird bewusst
+// abgelehnt (Prozent-Selektoren dürfen nicht gescopet werden, der Keyframe-Name
+// wäre global). Siehe Block-Kommentar über scopeCss in export.mjs.
+
+describe('export.mjs · scopeCss', () => {
+	it('flache Regeln: jeder Selektor auf beide Vorschau-Flächen präfixiert', () => {
+		expect(scopeCss('.z-demo { color: red; }')).toBe(
+			':global(.spec-canvas .z-demo),\n:global(.pg-preview .z-demo) {\n  color: red;\n}'
+		);
+	});
+
+	it('Selektorlisten werden gliedweise gescopet, Kommentare fallen raus', () => {
+		const out = scopeCss('/* weg */ .a, .b > i { gap: 1px }');
+		expect(out).not.toContain('weg');
+		for (const sel of ['.spec-canvas .a', '.pg-preview .a', '.spec-canvas .b > i', '.pg-preview .b > i'])
+			expect(out).toContain(`:global(${sel})`);
+	});
+
+	it('@media: Rahmen bleibt erhalten, innere Regel wird gescopet', () => {
+		const out = scopeCss('@media (min-width: 768px) { .z-demo { font-size: 22px } }');
+		expect(out).toContain('@media (min-width: 768px) {');
+		expect(out).toContain(':global(.spec-canvas .z-demo)');
+		expect(out).toContain(':global(.pg-preview .z-demo)');
+		expect(out).toContain('font-size: 22px');
+		// Der Rahmen umschließt wirklich (öffnet vor, schließt nach der inneren Regel).
+		expect(out.indexOf('@media')).toBeLessThan(out.indexOf(':global('));
+		expect(out.trimEnd().endsWith('}')).toBe(true);
+		// Genau EIN @media-Rahmen, nicht pro Präfix einer.
+		expect(out.match(/@media/g)).toHaveLength(1);
+	});
+
+	it('@media mit mehreren Regeln darin: alle innen gescopet, ein Rahmen', () => {
+		const out = scopeCss('@media (max-width: 480px) { .a { color: red } .b { color: blue } }');
+		expect(out.match(/@media/g)).toHaveLength(1);
+		expect(out).toContain(':global(.spec-canvas .a)');
+		expect(out).toContain(':global(.spec-canvas .b)');
+		expect(out).toContain('color: blue');
+	});
+
+	it('mehrere @media-Blöcke plus flache Regeln bleiben in Reihenfolge getrennt', () => {
+		const out = scopeCss(
+			'.z { font-size: 20px }\n' +
+				'@media (min-width: 768px) { .z { font-size: 22px } }\n' +
+				'@media (min-width: 1200px) { .z { font-size: 26px } }\n' +
+				'.y { margin: 0 }'
+		);
+		expect(out.match(/@media/g)).toHaveLength(2);
+		expect(out.indexOf('font-size: 20px')).toBeLessThan(out.indexOf('font-size: 22px'));
+		expect(out.indexOf('font-size: 22px')).toBeLessThan(out.indexOf('font-size: 26px'));
+		expect(out.indexOf('font-size: 26px')).toBeLessThan(out.indexOf('margin: 0'));
+	});
+
+	it('verschachtelte Bedingungen (@supports in @media) behalten beide Rahmen', () => {
+		const out = scopeCss('@media (min-width: 700px) { @supports (display: grid) { .z { display: grid } } }');
+		expect(out).toContain('@media (min-width: 700px) {');
+		expect(out).toContain('@supports (display: grid) {');
+		expect(out).toContain(':global(.spec-canvas .z)');
+		expect(out.indexOf('@media')).toBeLessThan(out.indexOf('@supports'));
+	});
+
+	it('@container wird wie @media behandelt', () => {
+		const out = scopeCss('@container (min-width: 20rem) { .z { padding: 0 } }');
+		expect(out).toContain('@container (min-width: 20rem) {');
+		expect(out).toContain(':global(.pg-preview .z)');
+	});
+
+	it('@keyframes wird bewusst abgelehnt (Prozent-Selektoren, globaler Name)', () => {
+		expect(() => scopeCss('@keyframes puls { 0% { opacity: 0 } 100% { opacity: 1 } }')).toThrow(
+			/@keyframes/
+		);
+	});
+
+	it('block-lose At-Rules (@import) werden abgelehnt', () => {
+		expect(() => scopeCss('@import url("x.css");')).toThrow(/At-Rule|außerhalb/);
+	});
+
+	it('unbalanciertes CSS wirft statt still Falsches zu erzeugen', () => {
+		expect(() => scopeCss('.z { color: red')).toThrow(/unbalanciert/);
+	});
+
+	it('geschweifte Klammer in einem String kippt die Bilanz nicht', () => {
+		const out = scopeCss('.z::after { content: "}" }');
+		expect(out).toContain(':global(.spec-canvas .z::after)');
+		expect(out).toContain('content: "}"');
 	});
 });
 

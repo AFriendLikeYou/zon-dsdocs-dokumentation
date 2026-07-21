@@ -22,7 +22,7 @@ kategorie: Inhalte
 	const calloutAnchors = [{"nr":1,"side":"left","y":25,"selector":".zon-teaser__media"},{"nr":2,"side":"left","y":68,"selector":".zon-teaser__kicker"},{"nr":3,"side":"right","y":76,"selector":".zon-teaser__title"},{"nr":4,"side":"right","y":88,"selector":".zon-teaser__summary"},{"nr":5,"side":"bottom","x":30,"selector":".zon-teaser__byline"}];
 	const playgroundControls = [{"key":"stil","label":"Stil","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"centered","label":"Centered","cssClass":"zon-teaser--is-centered"},{"value":"split","label":"Split","cssClass":"zon-teaser--split"},{"value":"longform","label":"Longform","cssClass":"zon-teaser--tiemann"}]},{"key":"panorama","label":"Panorama","type":"toggle","cssClass":"zon-teaser--is-panorama"}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}"{attrs}>
-  <figure class="zon-teaser__media zon-teaser__media--desktop-wide" aria-hidden="true"></figure>
+  <figure class="zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square" aria-hidden="true"></figure>
   <div class="zon-teaser__container">
     <h2 class="zon-teaser__heading">
       <span class="zon-teaser__kicker"><span class="zon-teaser__kicker-text">KI und Kinder</span></span>
@@ -42,11 +42,37 @@ kategorie: Inhalte
  * Deklarationen sind NICHT erfunden — jede Regel unten steht so (bzw. als
  * Breakpoint-Zweig, s. u.) im Produktions-CSS.
  *
+ * RESPONSIVE: die Figma-Achse „Size" IST der Breakpoint.
+ *
+ * Was in Figma als zwei Varianten (Small/Wide) modelliert ist, ist in Produktion
+ * KEIN Modifier, sondern derselbe Klassensatz an einer einzigen Grenze: \`48em\`
+ * (= 768 px bei 16 px Wurzelschrift). Genau das steht jetzt als \`@media\` hier —
+ * vorher verbot die Exporter-Regel jede At-Rule, weshalb nur die Desktop-Werte
+ * dastanden und die Small-Stufe rein textlich im model.json behauptet wurde.
+ *
+ * Belegt aus dem ausgelieferten CSS (web.core/centerpage) UND nachgemessen an
+ * der echten Aufmacher-Instanz auf zeit.de/index bei 375, 767, 768, 1024, 1280
+ * und 1440 px. 375 und 767 liefern identische Werte, 768 und aufwärts ebenso.
+ *
+ * MOBILE-FIRST, weil die Produktion es ist: der schmale Wert steht ohne Media
+ * Query, \`min-width: 48em\` hebt ihn an. Gemessen schalten drei Dinge:
+ *   · Titel (--extralarge)      26 px / 31,2 px  →  34 px / 40,8 px
+ *   · Abstand Bild ↔ Textspalte 16 px (space-m)  →  24 px (space-l)
+ *   · Seitenrand der Textspalte 16 px            →  32 px  (--z-gap)
+ *   · Bild-Seitenverhältnis     1:1 (mobile)     →  16:9 (desktop)
+ *
+ * NICHT breakpoint-abhängig (auch ein Ergebnis, gemessen): Spitzmarke (14 px),
+ * Zusammenfassung (16/24), Byline-Schrift (14/21), die Maximalbreiten
+ * (Medium 62.5rem im Lead, Textspalte 46.25rem) und alle Farbrollen.
+ *
+ * \`--z-ds-space-teaser\` (Abstand zum nächsten Element, gemessen 24 → 56 px)
+ * schaltet in der ZDS-Kopie (static/styles-zds.css) bereits selbst bei 48em und
+ * braucht deshalb hier keine eigene Regel.
+ *
  * ZWEI BEWUSSTE ABWEICHUNGEN ZUR PRODUKTION:
- * 1) Keine At-Rules erlaubt (Exporter-Regel) — die Größen-Achse (Small/Wide) ist
- *    in Produktion ein MEDIA QUERY auf derselben Klasse, kein Modifier. Hier
- *    stehen deshalb die DESKTOP-Werte (Size=Wide) als Basis. Die Small-Werte
- *    sind in model.json unter varianten/masse dokumentiert, nicht als Klasse.
+ * 1) \`--z-gap\` ist in Produktion eine Seiten-Variable (\`:root\`), die nicht in der
+ *    eingefrorenen ZDS-Kopie steht. Hier ist sie lokal am Aufmacher gesetzt —
+ *    mit demselben 48em-Sprung (1rem → 2rem, gemessen).
  * 2) \`.zon-teaser__media\` bekommt hier eine neutrale Platzhalter-Fläche
  *    (background-color), weil die Doku kein Bild ausliefert. In Produktion
  *    steckt dort ein <picture>.
@@ -59,10 +85,20 @@ kategorie: Inhalte
 /* --- Size=Wide · Style=Standard (Basis des Aufmachers) --- */
 
 .zon-teaser--wide {
+	--z-gap: 1rem;
 	display: flex;
 	flex-direction: column;
-	gap: var(--z-ds-space-l);
+	gap: var(--z-ds-space-m);
 	margin-bottom: var(--z-ds-space-teaser);
+}
+
+/* Ab 48em rückt die Textspalte vom Bild ab (16 → 24 px) und der Seitenrand
+   verdoppelt sich (16 → 32 px) — beides gemessen. */
+@media screen and (min-width: 48em) {
+	.zon-teaser--wide {
+		--z-gap: 2rem;
+		gap: var(--z-ds-space-l);
+	}
 }
 
 .zon-teaser--wide .zon-teaser__media {
@@ -76,8 +112,8 @@ kategorie: Inhalte
 
 .zon-teaser--wide .zon-teaser__container {
 	margin: 0 auto;
-	max-width: calc(55.75rem + 2 * 2rem);
-	padding: 0 2rem;
+	max-width: calc(55.75rem + 2 * var(--z-gap));
+	padding: 0 var(--z-gap);
 	width: 100%;
 }
 
@@ -98,8 +134,20 @@ kategorie: Inhalte
 	background-color: var(--z-ds-color-background-10);
 }
 
-.zon-teaser__media--desktop-wide {
-	aspect-ratio: 16/9;
+/* Das Markup trägt in Produktion IMMER beide Formatklassen (am Aufmacher
+   gemessen: \`--desktop-wide --mobile-square\`), je Seite der 48em-Grenze greift
+   genau eine. Der Aufmacher wird also schmal QUADRATISCH, nicht nur kleiner. */
+
+@media screen and (max-width: 47.999em) {
+	.zon-teaser__media--mobile-square {
+		aspect-ratio: 1/1;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.zon-teaser__media--desktop-wide {
+		aspect-ratio: 16/9;
+	}
 }
 
 .zon-teaser__media-container {
@@ -128,15 +176,30 @@ kategorie: Inhalte
 	margin-bottom: var(--z-ds-space-xxxs);
 }
 
+/* Grundgröße des Titels (ohne --extralarge): 20 px schmal, 22 px ab 48em. */
 .zon-teaser__title {
 	color: var(--z-ds-color-text-100);
 	display: block;
-	font-size: var(--z-ds-fontsize-22);
+	font-size: var(--z-ds-fontsize-20);
 	line-height: var(--z-ds-lineheight-12);
 }
 
+@media screen and (min-width: 48em) {
+	.zon-teaser__title {
+		font-size: var(--z-ds-fontsize-22);
+	}
+}
+
+/* Die Aufmacher-Größe: 26 px / 31,2 px schmal, 34 px / 40,8 px ab 48em (gemessen).
+   Die Zeilenhöhe bleibt lineheight-12 — es ändert sich allein der Schriftgrad. */
 .zon-teaser__title--extralarge {
-	font-size: var(--z-ds-fontsize-34);
+	font-size: var(--z-ds-fontsize-26);
+}
+
+@media screen and (min-width: 48em) {
+	.zon-teaser__title--extralarge {
+		font-size: var(--z-ds-fontsize-34);
+	}
 }
 
 .zon-teaser__summary {
@@ -223,8 +286,15 @@ kategorie: Inhalte
 	line-height: var(--z-ds-lineheight-11);
 }
 
+/* Longform-Aufmacher: 36 px schmal, 46 px ab 48em (aus dem Produktions-CSS). */
 .zon-teaser--tiemann .zon-teaser__title--extralarge {
 	font-size: var(--z-ds-fontsize-36);
+}
+
+@media screen and (min-width: 48em) {
+	.zon-teaser--tiemann .zon-teaser__title--extralarge {
+		font-size: var(--z-ds-fontsize-46);
+	}
 }
 
 /*
@@ -251,7 +321,7 @@ kategorie: Inhalte
 	max-width: none;
 }
 `;
-	const variantItems = [{"label":"Standard","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Bild oben, Text darunter linksbündig — der Normalfall auf der Startseite."},{"label":"Centered","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--is-centered\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Gleicher Aufbau, Textblock zentriert — für Geschichten, die ein ruhiges Bild tragen."},{"label":"Split","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--split\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Bild und Text nebeneinander auf farbiger Fläche (Artikel-Themenfarbe)."},{"label":"Longform","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--tiemann\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Überschrift in ZeitTiemannSchmal 36/1.1 — für erzählende, lange Stücke."},{"label":"Aus","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Der Aufmacher bleibt in der Inhaltsspalte (max. 1000 px)."},{"label":"An","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--is-panorama\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Randlos über die volle Seitenbreite."}];
+	const variantItems = [{"label":"Standard","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Bild oben, Text darunter linksbündig — der Normalfall auf der Startseite."},{"label":"Centered","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--is-centered\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Gleicher Aufbau, Textblock zentriert — für Geschichten, die ein ruhiges Bild tragen."},{"label":"Split","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--split\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Bild und Text nebeneinander auf farbiger Fläche (Artikel-Themenfarbe)."},{"label":"Longform","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--tiemann\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Überschrift in ZeitTiemannSchmal 36/1.1 — für erzählende, lange Stücke."},{"label":"Aus","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Der Aufmacher bleibt in der Inhaltsspalte (max. 1000 px)."},{"label":"An","html":"<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead zon-teaser--is-panorama\">\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>","note":"Randlos über die volle Seitenbreite."}];
 	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
 	const propsData = [{"name":"style","typ":"\"Standard\" | \"Centered\" | \"Split\" | \"Longform\"","default":"\"Standard\"","beschreibung":"Stil-Achse — steuert Anordnung, Schrift und Farbgebung."},{"name":"panorama","typ":"boolean","default":"false","beschreibung":"Randlose Ausspielung über die volle Seitenbreite (zon-teaser--is-panorama)."},{"name":"kicker","typ":"string","beschreibung":"Spitzmarke — Ressort oder Thema."},{"name":"title","typ":"string","pflicht":true,"beschreibung":"Artikel-Überschrift."},{"name":"summary","typ":"string","beschreibung":"Zusammenfassung des Artikels."},{"name":"author","typ":"string","beschreibung":"Autor:in in der Byline."},{"name":"datetime","typ":"string","beschreibung":"Zeitstempel in der Byline."}];
 </script>
@@ -291,7 +361,7 @@ kategorie: Inhalte
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
 		{#snippet preview()}<article class="zon-teaser zon-teaser--wide zon-teaser--is-lead">
-  <figure class="zon-teaser__media zon-teaser__media--desktop-wide" aria-hidden="true"></figure>
+  <figure class="zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square" aria-hidden="true"></figure>
   <div class="zon-teaser__container">
     <h2 class="zon-teaser__heading">
       <span class="zon-teaser__kicker"><span class="zon-teaser__kicker-text">KI und Kinder</span></span>
@@ -388,10 +458,18 @@ kategorie: Inhalte
 }
 :global(.spec-canvas .zon-teaser--wide),
 :global(.pg-preview .zon-teaser--wide) {
-  display: flex;
+  --z-gap: 1rem;
+	display: flex;
 	flex-direction: column;
-	gap: var(--z-ds-space-l);
+	gap: var(--z-ds-space-m);
 	margin-bottom: var(--z-ds-space-teaser);
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser--wide),
+  :global(.pg-preview .zon-teaser--wide) {
+    --z-gap: 2rem;
+  		gap: var(--z-ds-space-l);
+  }
 }
 :global(.spec-canvas .zon-teaser--wide .zon-teaser__media),
 :global(.pg-preview .zon-teaser--wide .zon-teaser__media) {
@@ -405,8 +483,8 @@ kategorie: Inhalte
 :global(.spec-canvas .zon-teaser--wide .zon-teaser__container),
 :global(.pg-preview .zon-teaser--wide .zon-teaser__container) {
   margin: 0 auto;
-	max-width: calc(55.75rem + 2 * 2rem);
-	padding: 0 2rem;
+	max-width: calc(55.75rem + 2 * var(--z-gap));
+	padding: 0 var(--z-gap);
 	width: 100%;
 }
 :global(.spec-canvas .zon-teaser--wide .zon-teaser__container > *),
@@ -424,9 +502,17 @@ kategorie: Inhalte
 	width: 100%;
 	background-color: var(--z-ds-color-background-10);
 }
-:global(.spec-canvas .zon-teaser__media--desktop-wide),
-:global(.pg-preview .zon-teaser__media--desktop-wide) {
-  aspect-ratio: 16/9;
+@media screen and (max-width: 47.999em) {
+  :global(.spec-canvas .zon-teaser__media--mobile-square),
+  :global(.pg-preview .zon-teaser__media--mobile-square) {
+    aspect-ratio: 1/1;
+  }
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser__media--desktop-wide),
+  :global(.pg-preview .zon-teaser__media--desktop-wide) {
+    aspect-ratio: 16/9;
+  }
 }
 :global(.spec-canvas .zon-teaser__media-container),
 :global(.pg-preview .zon-teaser__media-container) {
@@ -458,12 +544,24 @@ kategorie: Inhalte
 :global(.pg-preview .zon-teaser__title) {
   color: var(--z-ds-color-text-100);
 	display: block;
-	font-size: var(--z-ds-fontsize-22);
+	font-size: var(--z-ds-fontsize-20);
 	line-height: var(--z-ds-lineheight-12);
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser__title),
+  :global(.pg-preview .zon-teaser__title) {
+    font-size: var(--z-ds-fontsize-22);
+  }
 }
 :global(.spec-canvas .zon-teaser__title--extralarge),
 :global(.pg-preview .zon-teaser__title--extralarge) {
-  font-size: var(--z-ds-fontsize-34);
+  font-size: var(--z-ds-fontsize-26);
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser__title--extralarge),
+  :global(.pg-preview .zon-teaser__title--extralarge) {
+    font-size: var(--z-ds-fontsize-34);
+  }
 }
 :global(.spec-canvas .zon-teaser__summary),
 :global(.pg-preview .zon-teaser__summary) {
@@ -546,6 +644,12 @@ kategorie: Inhalte
 :global(.spec-canvas .zon-teaser--tiemann .zon-teaser__title--extralarge),
 :global(.pg-preview .zon-teaser--tiemann .zon-teaser__title--extralarge) {
   font-size: var(--z-ds-fontsize-36);
+}
+@media screen and (min-width: 48em) {
+  :global(.spec-canvas .zon-teaser--tiemann .zon-teaser__title--extralarge),
+  :global(.pg-preview .zon-teaser--tiemann .zon-teaser__title--extralarge) {
+    font-size: var(--z-ds-fontsize-46);
+  }
 }
 :global(.spec-canvas .zon-teaser--is-panorama),
 :global(.pg-preview .zon-teaser--is-panorama) {

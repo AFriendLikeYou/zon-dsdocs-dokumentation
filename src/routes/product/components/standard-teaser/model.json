@@ -83,7 +83,7 @@
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Abstand zum nächsten Teaser",
+			"label": "Abstand zum nächsten Teaser (ab 768 px; darunter 24 px)",
 			"px": "56 px",
 			"token": "--z-ds-space-teaser",
 			"herkunft": "gemessen"
@@ -464,17 +464,17 @@
 					{
 						"value": "super",
 						"label": "Super (3:2)",
-						"cssClass": "zon-teaser__media--desktop-super"
+						"cssClass": "zon-teaser__media--desktop-super zon-teaser__media--mobile-super"
 					},
 					{
 						"value": "wide",
 						"label": "Wide (16:9)",
-						"cssClass": "zon-teaser__media--desktop-wide"
+						"cssClass": "zon-teaser__media--desktop-wide zon-teaser__media--mobile-wide"
 					},
 					{
 						"value": "narrow",
 						"label": "Narrow (2:3)",
-						"cssClass": "zon-teaser__media--desktop-narrow"
+						"cssClass": "zon-teaser__media--desktop-narrow zon-teaser__media--mobile-narrow"
 					}
 				]
 			}

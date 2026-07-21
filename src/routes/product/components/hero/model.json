@@ -13,14 +13,14 @@
 			"herkunft": "gemessen"
 		},
 		"padding": {
-			"px": "Container 0 32 (Wide) · Split 24 32",
+			"px": "Container 0 32 (Wide, ab 768 px; darunter 0 16) · Split 24 32",
 			"token": "--z-ds-space-xl",
 			"herkunft": "gemessen"
 		}
 	},
 	"spacing": [
 		{
-			"label": "Bild ↔ Textblock (Wide)",
+			"label": "Bild ↔ Textblock (Wide, ab 768 px; darunter 16 px)",
 			"px": "24 px",
 			"token": "--z-ds-space-l",
 			"art": "gap",
@@ -62,7 +62,7 @@
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Container-Seitenabstand (Wide)",
+			"label": "Container-Seitenabstand (Wide, ab 768 px; darunter 16 px)",
 			"px": "32 px",
 			"token": "--z-ds-space-xl",
 			"art": "padding",
@@ -428,7 +428,7 @@
 				"cssClass": "zon-teaser--is-panorama"
 			}
 		],
-		"template": "<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}\"{attrs}>\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>",
+		"template": "<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}\"{attrs}>\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>",
 		"cssFile": "./pattern.css",
 		"align": "fill",
 		"resizable": true,

@@ -92,7 +92,7 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
   ],
   "template": "<button class=\"z-button{classes}\"{attrs}>Click me</button>", // EINE Instanziierung → Preview UND Code
   "cssFile": "./pattern.css",     // UNSCOPED, co-located; wird gegen .spec-canvas / .pg-preview
-                                  // gescoped (v1: flache Regeln, keine At-Rules) und verbatim im Develop-Tab gezeigt
+                                  // gescoped (flache Regeln + @media/@supports/@container; kein @keyframes) und verbatim im Develop-Tab gezeigt
   "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion statt template; darf NUR Registry-Daten konsumieren
   "hint": "Keine Varianten.",      // Hinweiszeile statt Controls
   "stage": { "darkKey": "onImage" }, // Bühne startet dunkel, wenn dieser Toggle aktiv ist
