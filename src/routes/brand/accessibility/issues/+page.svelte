@@ -4,8 +4,8 @@
 </script>
 
 <svelte:head>
-	<title>Accessibility Issues &amp; Solutions - Die Zeit Design System</title>
+	<title>Barrierefreiheit — Probleme &amp; Lösungen - Die Zeit Design System</title>
 </svelte:head>
 
-<h1>Accessibility Issues & Solutions</h1>
+<h1>Barrierefreiheit — Probleme & Lösungen</h1>
 <IssuesList issues={A11Y_ITEMS} />

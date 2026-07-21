@@ -1,6 +1,7 @@
 <!--
-  IssuesList.svelte — durchsuchbare, nach Kategorie gruppierte A11y-Issue-Liste
-  (Akkordeon je Kategorie, Issue/Good-practice-Chips). Genau ein Consumer:
+  IssuesList.svelte — durchsuchbare, nach Kategorie gruppierte Liste von
+  Barrierefreiheits-Einträgen (Akkordeon je Kategorie, Chips für „Problem“ bzw.
+  „Gute Praxis“). Genau ein Consumer:
   /brand/accessibility/issues; Daten aus $data/a11y-issues.
 -->
 <script lang="ts">
@@ -53,18 +54,18 @@
 
 	/** Sichtbarer Text des Label-Chips (reiner Text, kein String-HTML). */
 	function getLabelText(label: A11yItem['label']): string {
-		return label === 'issue' ? 'Issue' : 'Good practice';
+		return label === 'problem' ? 'Problem' : 'Gute Praxis';
 	}
 
 	/** Modifier-Klasse des Label-Chips. */
 	function getLabelChipClass(label: A11yItem['label']): string {
-		return label === 'issue' ? 'chip--issue' : 'chip--good';
+		return label === 'problem' ? 'chip--problem' : 'chip--gute-praxis';
 	}
 
 	// Ein Icon je Kategorie — als Record über den Kategorie-Typ, damit TypeScript
 	// Drift meldet, sobald a11y-issues.ts eine Kategorie ergänzt/umbenennt.
 	const CATEGORY_ICONS: Record<Category, string> = {
-		'Status Messages': `
+		Statusmeldungen: `
 			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
 				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				stroke-linecap="round" stroke-linejoin="round">
@@ -72,7 +73,7 @@
 				<path d="M12 7v4"/><path d="M12 15h.01"/>
 			</svg>
 		`,
-		Forms: `
+		Formulare: `
 			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
 				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				stroke-linecap="round" stroke-linejoin="round">
@@ -81,14 +82,14 @@
 				<path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>
 			</svg>
 		`,
-		'Form Validation': `
+		Formularvalidierung: `
 			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
 				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				stroke-linecap="round" stroke-linejoin="round">
 				<path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/>
 			</svg>
 		`,
-		'Screen Reader': `
+		Screenreader: `
 			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
 				viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				stroke-linecap="round" stroke-linejoin="round">
@@ -177,7 +178,7 @@
 	<div class="faq__inner">
 		{#each Array.from(groupedIssues()) as [category, items]}
 			<div class="accordion">
-				<!-- Header -->
+				<!-- Kopf -->
 				<h2>
 					<button
 						class="accordion__header"
@@ -206,7 +207,7 @@
 					</button>
 				</h2>
 
-				<!-- Content -->
+				<!-- Inhalt -->
 				<div
 					id={`content-${category}`}
 					class="accordion__content faq__content"
@@ -232,7 +233,7 @@
 									>
 									<h3>{@html highlightHTML(issue.title)}</h3>
 
-									<!-- Label chip (ein einzelnes Span, reiner Text — kein String-HTML) -->
+									<!-- Label-Chip (ein einzelnes Span, reiner Text — kein String-HTML) -->
 									<span class="accordion__label chip {getLabelChipClass(issue.label)}">
 										{getLabelText(issue.label)}
 									</span>
@@ -463,7 +464,7 @@
 		margin-block: var(--z-ds-space-12);
 	}
 
-	/* Label chip styles */
+	/* Label-Chip */
 	.chip {
 		display: inline-flex;
 		align-items: center;
@@ -474,7 +475,7 @@
 		border: 1px solid currentColor;
 	}
 
-	.chip--issue {
+	.chip--problem {
 		background-color: var(--ds-surface-sunken);
 		color: var(--ds-text); /* vorher: nicht existentes --z-ds-color-text-0 */
 	}

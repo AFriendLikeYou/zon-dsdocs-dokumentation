@@ -215,3 +215,141 @@ describe('renderPreview — Blöcke gemischt', () => {
 		expect(html).toBe('<h2>Titel</h2><ul><li>eins</li></ul><p>Absatz</p>');
 	});
 });
+
+describe('renderPreview — Kursiv per Unterstrich', () => {
+	it('rendert `_kursiv_` als <em>', () => {
+		expect(renderPreview('_kursiv_')).toBe('<p><em>kursiv</em></p>');
+		expect(renderPreview('ganz _wichtig_ hier')).toBe('<p>ganz <em>wichtig</em> hier</p>');
+	});
+
+	it('rendert `_kursiv_` am Satzende und vor Satzzeichen', () => {
+		expect(renderPreview('das ist _wichtig_.')).toBe('<p>das ist <em>wichtig</em>.</p>');
+		expect(renderPreview('(_wichtig_)')).toBe('<p>(<em>wichtig</em>)</p>');
+	});
+
+	it('mischt sich mit `*kursiv*` und `**fett**`', () => {
+		expect(renderPreview('**fett**, *kursiv* und _auch kursiv_')).toBe(
+			'<p><strong>fett</strong>, <em>kursiv</em> und <em>auch kursiv</em></p>'
+		);
+	});
+
+	// Der eigentliche Grund für die Wortgrenzen-Regel: Bezeichner dürfen nicht
+	// zerlegt werden — sonst frisst die Vorschau Token- und Variablennamen.
+	it('lässt `snake_case` unangetastet', () => {
+		expect(renderPreview('ein snake_case Name')).toBe('<p>ein snake_case Name</p>');
+		expect(renderPreview('foo_bar_baz')).toBe('<p>foo_bar_baz</p>');
+	});
+
+	it('lässt Token-Namen wie `--z-ds-color-text_100` unangetastet', () => {
+		expect(renderPreview('--z-ds-color-text_100')).toBe('<p>--z-ds-color-text_100</p>');
+	});
+
+	it('spannt KEIN <em> über zwei Token mit Unterstrich hinweg', () => {
+		expect(renderPreview('--z-ds-space_4 und --z-ds-space_8')).toBe(
+			'<p>--z-ds-space_4 und --z-ds-space_8</p>'
+		);
+	});
+
+	it('trennt Token-Name und echtes Kursiv korrekt', () => {
+		expect(renderPreview('--z-ds-color-text_100 ist _kontrastarm_')).toBe(
+			'<p>--z-ds-color-text_100 ist <em>kontrastarm</em></p>'
+		);
+	});
+
+	it('greift NICHT innerhalb eines Wortes', () => {
+		expect(renderPreview('a_b_c')).toBe('<p>a_b_c</p>');
+		expect(renderPreview('_kursiv_s')).toBe('<p>_kursiv_s</p>');
+	});
+
+	it('lässt Unterstriche in Code-Spans in Ruhe', () => {
+		expect(renderPreview('`snake_case`')).toBe('<p><code>snake_case</code></p>');
+		expect(renderPreview('`_privat_`')).toBe('<p><code>_privat_</code></p>');
+	});
+
+	it('escapet HTML auch innerhalb von `_…_`', () => {
+		expect(renderPreview('_<img src=x>_')).toBe(
+			'<p><em>&lt;img src=x&gt;</em></p>'
+		);
+		expect(renderPreview('_<b>fett</b>_')).toBe('<p><em>&lt;b&gt;fett&lt;/b&gt;</em></p>');
+	});
+
+	it('rendert `_…_` auch in Listen, Zitaten und Tabellenzellen', () => {
+		expect(renderPreview('- _eins_')).toBe('<ul><li><em>eins</em></li></ul>');
+		expect(renderPreview('> _zitiert_')).toBe(
+			'<blockquote><p><em>zitiert</em></p></blockquote>'
+		);
+		expect(renderPreview('| _A_ |\n| --- |\n| _1_ |')).toBe(
+			'<table><thead><tr><th><em>A</em></th></tr></thead>' +
+				'<tbody><tr><td><em>1</em></td></tr></tbody></table>'
+		);
+	});
+});
+
+describe('renderPreview — verschachtelte Listen', () => {
+	it('verschachtelt zwei Ebenen ungeordnet', () => {
+		expect(renderPreview('- a\n  - b')).toBe('<ul><li>a<ul><li>b</li></ul></li></ul>');
+	});
+
+	it('verschachtelt zwei Ebenen geordnet', () => {
+		expect(renderPreview('1. a\n   1. b')).toBe('<ol><li>a<ol><li>b</li></ol></li></ol>');
+	});
+
+	it('mischt geordnet in ungeordnet', () => {
+		expect(renderPreview('- a\n  1. b')).toBe('<ul><li>a<ol><li>b</li></ol></li></ul>');
+	});
+
+	it('mischt ungeordnet in geordnet', () => {
+		expect(renderPreview('1. a\n   - b')).toBe('<ol><li>a<ul><li>b</li></ul></li></ol>');
+	});
+
+	it('kehrt auf die äußere Ebene zurück', () => {
+		expect(renderPreview('- a\n  - b\n- c')).toBe(
+			'<ul><li>a<ul><li>b</li></ul></li><li>c</li></ul>'
+		);
+	});
+
+	it('trägt drei Ebenen', () => {
+		expect(renderPreview('- a\n  - b\n    - c')).toBe(
+			'<ul><li>a<ul><li>b<ul><li>c</li></ul></li></ul></li></ul>'
+		);
+	});
+
+	it('kommt mit 4er-Einrückung genauso klar wie mit 2er', () => {
+		expect(renderPreview('- a\n    - b')).toBe('<ul><li>a<ul><li>b</li></ul></li></ul>');
+	});
+
+	it('behandelt einen Tab wie eine Einrückebene', () => {
+		expect(renderPreview('- a\n\t- b')).toBe('<ul><li>a<ul><li>b</li></ul></li></ul>');
+	});
+
+	it('trennt einen Typwechsel auf DERSELBEN Ebene in zwei Listen', () => {
+		expect(renderPreview('- a\n1. b')).toBe('<ul><li>a</li></ul><ol><li>b</li></ol>');
+	});
+
+	it('hängt eine markerlose eingerückte Zeile weiter an den letzten Punkt', () => {
+		expect(renderPreview('- a\n  - b\n    Fortsetzung')).toBe(
+			'<ul><li>a<ul><li>b Fortsetzung</li></ul></li></ul>'
+		);
+	});
+
+	it('escapet HTML auch in verschachtelten Punkten', () => {
+		expect(renderPreview('- a\n  - <b>x</b>')).toBe(
+			'<ul><li>a<ul><li>&lt;b&gt;x&lt;/b&gt;</li></ul></li></ul>'
+		);
+		expect(renderPreview('- <img src=x>\n  - <img src=y>')).toBe(
+			'<ul><li>&lt;img src=x&gt;<ul><li>&lt;img src=y&gt;</li></ul></li></ul>'
+		);
+	});
+
+	it('beendet die verschachtelte Liste bei einer Leerzeile', () => {
+		expect(renderPreview('- a\n  - b\n\nAbsatz')).toBe(
+			'<ul><li>a<ul><li>b</li></ul></li></ul><p>Absatz</p>'
+		);
+	});
+
+	it('rendert Inline-Auszeichnung in verschachtelten Punkten', () => {
+		expect(renderPreview('- a\n  - **fett** und _kursiv_')).toBe(
+			'<ul><li>a<ul><li><strong>fett</strong> und <em>kursiv</em></li></ul></li></ul>'
+		);
+	});
+});

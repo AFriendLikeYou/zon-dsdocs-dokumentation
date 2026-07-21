@@ -1,52 +1,52 @@
 /**
- * Accessibility catalog item.
+ * Eintrag im Barrierefreiheits-Katalog.
  */
 export interface A11yItem {
-	/** Short, scannable title */
+	/** Kurzer, scanbarer Titel */
 	title: string;
-	/** What’s happening / why it matters */
+	/** Was passiert / warum es relevant ist */
 	description: string;
-	/** Practical fix or mitigation (can include HTML/ARIA snippets) */
+	/** Praktische Lösung oder Abmilderung (darf HTML-/ARIA-Snippets enthalten) */
 	solution: string;
-	/** Classify whether this is an "issue" to fix or a "good-practice" to adopt */
-	label: 'issue' | 'good-practice';
-	/** Thematic area to help grouping & filtering */
-	category: 'Status Messages' | 'Forms' | 'Form Validation' | 'Screen Reader' | 'Meta';
-	/** Deep links for further reading and/or code refs */
+	/** Einordnung: zu behebendes „Problem“ oder zu übernehmende „gute Praxis“ */
+	label: 'problem' | 'gute-praxis';
+	/** Themenfeld für Gruppierung & Filterung */
+	category: 'Statusmeldungen' | 'Formulare' | 'Formularvalidierung' | 'Screenreader' | 'Meta';
+	/** Deep-Links zum Weiterlesen und/oder Code-Referenzen */
 	links: {
-		wcag?: string; // Prefer WCAG Understanding pages
-		github?: string; // Point to the relevant line/PR when known
+		wcag?: string; // Bevorzugt WCAG-Understanding-Seiten
+		github?: string; // Wenn bekannt, auf die konkrete Zeile/den PR verweisen
 	};
-	/** Optional preview image or diagram if you want to add later */
+	/** Optionales Vorschaubild oder Diagramm, falls später ergänzt */
 	img?: string;
 }
 
 /**
- * Curated list of A11Y issues & practices.
+ * Kuratierte Liste von Barrierefreiheits-Problemen & -Praktiken.
  */
 export const A11Y_ITEMS: A11yItem[] = [
 	{
-		title: 'Live region updates not announced on reload',
+		title: 'Aktualisierungen der Live-Region werden beim Neuladen nicht angesagt',
 		description:
-			'On page reload or immediate render, screen readers may miss aria-live changes if the update happens before assistive tech finishes initializing.',
+			'Beim Neuladen der Seite oder beim sofortigen Rendern können Screenreader aria-live-Änderungen verpassen, wenn die Aktualisierung erfolgt, bevor die assistive Technologie ihre Initialisierung abgeschlossen hat.',
 		solution:
-			'Render the live region empty first, then update its text after a short delay (~500ms). Prefer <code>role="status"</code> (polite) or <code>aria-live="polite"</code> for non-critical info; use <code>aria-live="assertive"</code> or <code>role="alert"</code> only for urgent messages.',
-		label: 'issue',
-		category: 'Status Messages',
+			'Die Live-Region zunächst leer rendern und ihren Text erst nach kurzer Verzögerung (~500 ms) aktualisieren. Für nicht kritische Informationen <code>role="status"</code> (polite) oder <code>aria-live="polite"</code> bevorzugen; <code>aria-live="assertive"</code> bzw. <code>role="alert"</code> nur für dringende Meldungen verwenden.',
+		label: 'problem',
+		category: 'Statusmeldungen',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html',
 			github:
-				'https://github.com/ZeitOnline/login/blob/main/src/zeit-online-theme/src/main/resources/themes/zeit-online-public/login/resources/js/script.js#L22' // add repo/line when available
+				'https://github.com/ZeitOnline/login/blob/main/src/zeit-online-theme/src/main/resources/themes/zeit-online-public/login/resources/js/script.js#L22' // Repo/Zeile ergänzen, sobald verfügbar
 		}
 	},
 	{
-		title: 'Error message not associated with its field',
+		title: 'Fehlermeldung ist ihrem Feld nicht zugeordnet',
 		description:
-			'Screen reader users do not hear which field an error belongs to because the error text is not programmatically tied to the input.',
+			'Screenreader-Nutzende erfahren nicht, zu welchem Feld ein Fehler gehört, weil der Fehlertext nicht programmatisch mit dem Eingabefeld verknüpft ist.',
 		solution:
-			'Give the error element an <code>id</code> and reference it from the input with <code>aria-describedby</code>. Optionally use <code>aria-errormessage</code> together with <code>aria-invalid="true"</code> for clearer semantics.',
-		label: 'issue',
-		category: 'Forms',
+			'Dem Fehler-Element eine <code>id</code> geben und sie am Eingabefeld über <code>aria-describedby</code> referenzieren. Optional <code>aria-errormessage</code> zusammen mit <code>aria-invalid="true"</code> für klarere Semantik einsetzen.',
+		label: 'problem',
+		category: 'Formulare',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html',
 			github:
@@ -54,13 +54,13 @@ export const A11Y_ITEMS: A11yItem[] = [
 		}
 	},
 	{
-		title: 'Error messages are not read immediately',
+		title: 'Fehlermeldungen werden nicht unmittelbar vorgelesen',
 		description:
-			'When validation fails, assistive tech does not announce the new error text right away.',
+			'Wenn die Validierung fehlschlägt, sagt die assistive Technologie den neuen Fehlertext nicht sofort an.',
 		solution:
-			'Place errors in a live region. For critical validation, use <code>role="alert"</code> or <code>aria-live="assertive"</code>. Initialize the region empty so that setting its text constitutes a detectable change.',
-		label: 'issue',
-		category: 'Status Messages',
+			'Fehler in einer Live-Region platzieren. Für kritische Validierungen <code>role="alert"</code> oder <code>aria-live="assertive"</code> verwenden. Die Region leer initialisieren, damit das Setzen des Textes eine erkennbare Änderung darstellt.',
+		label: 'problem',
+		category: 'Statusmeldungen',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html',
 			github:
@@ -68,13 +68,13 @@ export const A11Y_ITEMS: A11yItem[] = [
 		}
 	},
 	{
-		title: 'Invalid fields not marked programmatically',
+		title: 'Ungültige Felder werden nicht programmatisch ausgezeichnet',
 		description:
-			'Inputs that fail validation aren’t flagged for assistive tech, so users can’t quickly locate errors.',
+			'Eingabefelder, die die Validierung nicht bestehen, werden für assistive Technologien nicht gekennzeichnet — Nutzende können Fehler dadurch nicht schnell auffinden.',
 		solution:
-			'Set <code>aria-invalid="true"</code> on fields that fail validation. Optionally pair with <code>aria-errormessage</code> pointing to the error text.',
-		label: 'issue',
-		category: 'Forms',
+			'An Feldern, die die Validierung nicht bestehen, <code>aria-invalid="true"</code> setzen. Optional mit <code>aria-errormessage</code> kombinieren, das auf den Fehlertext verweist.',
+		label: 'problem',
+		category: 'Formulare',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html',
 			github:
@@ -82,25 +82,25 @@ export const A11Y_ITEMS: A11yItem[] = [
 		}
 	},
 	{
-		title: 'Provide an error summary for large forms',
+		title: 'Fehlerübersicht für große Formulare anbieten',
 		description:
-			'When multiple fields are invalid, users need a quick overview and a way to jump to each problem.',
+			'Wenn mehrere Felder ungültig sind, brauchen Nutzende einen schnellen Überblick und einen Weg, zu jedem Problem zu springen.',
 		solution:
-			'Render an error summary at the top (after the main heading), move focus to it after submit, list each error as a link that anchors to its field, and keep per-field errors in place.',
-		label: 'good-practice',
-		category: 'Form Validation',
+			'Eine Fehlerübersicht oben (nach der Hauptüberschrift) rendern, den Fokus nach dem Absenden dorthin verschieben, jeden Fehler als Link auf sein Feld auflisten und die Fehler am jeweiligen Feld zusätzlich bestehen lassen.',
+		label: 'gute-praxis',
+		category: 'Formularvalidierung',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion.html',
 			github: ''
 		}
 	},
 	{
-		title: 'Reflect errors in the document title',
+		title: 'Fehler im Dokumenttitel abbilden',
 		description:
-			'Users switching tabs (or using screen readers) benefit when the page title signals that validation failed.',
+			'Nutzende, die zwischen Tabs wechseln (oder einen Screenreader verwenden), profitieren davon, wenn der Seitentitel signalisiert, dass die Validierung fehlgeschlagen ist.',
 		solution:
-			'On validation failure, update <code>document.title</code> to include an error indicator and (optionally) the number of errors, e.g., <code>"(3) Errors — Checkout"</code>. Keep it concise.',
-		label: 'good-practice',
+			'Bei fehlgeschlagener Validierung <code>document.title</code> um einen Fehlerhinweis und (optional) die Anzahl der Fehler ergänzen, z. B. <code>"(3) Fehler — Kasse"</code>. Knapp halten.',
+		label: 'gute-praxis',
 		category: 'Meta',
 		links: {
 			wcag: 'https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html',

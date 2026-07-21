@@ -89,7 +89,7 @@
 		"isInFooter": true
 	},
 	{
-		"title": "Accessibility",
+		"title": "Barrierefreiheit",
 		"isInFooter": true,
 		"items": [
 			{
@@ -97,7 +97,7 @@
 				"href": "/brand/accessibility"
 			},
 			{
-				"label": "Issues & Solutions",
+				"label": "Probleme & Lösungen",
 				"href": "/brand/accessibility/issues"
 			}
 		]

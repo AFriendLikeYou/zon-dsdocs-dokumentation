@@ -9,8 +9,8 @@
 	<title>Icons - Die Zeit Design System</title>
 </svelte:head>
 
-<h1>Icons</h1>
+# Icons
 
-<p>Hier findest du ein paar Iconchen vom Design System.</p>
+Hier findest du ein paar Iconchen vom Design System.
 
 <IconGridWithSearch {icons} />

@@ -84,18 +84,73 @@ export function makeLink(text: string, selStart: number, selEnd: number): Edit {
 const escapeHtml = (s: string): string =>
 	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/**
+ * Kursiv per Unterstrich — NUR an Wortgrenzen (CommonMark-Regel für `_`).
+ *
+ * Der öffnende `_` darf nicht auf ein Wortzeichen folgen, der schließende nicht
+ * von einem Wortzeichen gefolgt werden. Sonst zerlegte die Vorschau genau die
+ * Bezeichner, die in dieser Doku ständig vorkommen: `snake_case` bliebe ganz,
+ * aber `--z-ds-color-text_100 … --z-ds-space_4` würde über zwei Token hinweg
+ * ein `<em>` aufspannen.
+ *
+ * Zusätzlich ist `>` als Vorzeichen ausgeschlossen: Wenn diese Regel läuft, sind
+ * alle Roh-Spitzklammern der Eingabe bereits durch `escapeHtml` zu Entities
+ * geworden — ein `>` kann also nur von einem Tag stammen, das `inline()` selbst
+ * erzeugt hat (`<code>`). So bleibt `` `_privat_` `` als Code-Span unangetastet.
+ */
+const UNDERSCORE_EM = /(^|[^\w>])_([^_\n]+)_(?!\w)/g;
+
 function inline(s: string): string {
 	return s
 		.replace(/`([^`]+)`/g, '<code>$1</code>')
 		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
 		.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+		.replace(UNDERSCORE_EM, '$1<em>$2</em>')
 		.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
 }
 
-/** Aufzählungspunkt `- Text`. */
+/** Aufzählungspunkt `- Text` (gegen die EINGERÜCKTE Zeile geprüft). */
 const UL_ITEM = /^-\s+/;
 /** Nummerierter Punkt `1. Text` — die Zahl selbst wird nicht mit ausgegeben. */
 const OL_ITEM = /^\d+\.\s+/;
+
+/** Ein Listenpunkt in der flachen Sammelphase — `depth` kommt aus der Einrückung. */
+interface ListItem {
+	depth: number;
+	ordered: boolean;
+	text: string;
+}
+
+/** Derselbe Punkt als Baum — `children` sind die tiefer eingerückten Folgepunkte. */
+interface ListNode {
+	ordered: boolean;
+	text: string;
+	children: ListNode[];
+}
+
+/** Einrücktiefe einer Zeile in Spalten (ein Tab zählt wie zwei Leerzeichen). */
+function indentWidth(line: string): number {
+	return (/^[ \t]*/.exec(line)?.[0] ?? '').replace(/\t/g, '  ').length;
+}
+
+/**
+ * Flache Punkte (mit `depth`) zu einem Baum falten. `depth` wird auf höchstens
+ * „eine Ebene tiefer als bisher offen" begrenzt: ein Sprung von Ebene 0 auf 3
+ * ist Redaktions-Tippfehler, kein Grund, leere Zwischenlisten zu erzeugen.
+ */
+function buildListTree(items: ListItem[]): ListNode[] {
+	const roots: ListNode[] = [];
+	// stack[i] ist die Kinderliste, in die ein Punkt der Ebene i gehört.
+	const stack: ListNode[][] = [roots];
+	for (const item of items) {
+		const level = Math.min(item.depth, stack.length - 1);
+		stack.length = level + 1;
+		const node: ListNode = { ordered: item.ordered, text: item.text, children: [] };
+		stack[level].push(node);
+		stack.push(node.children);
+	}
+	return roots;
+}
 /** Zitatzeile `> Text` (das Leerzeichen ist optional). */
 const QUOTE_LINE = /^>\s?/;
 /** Tabellenzeile — muss am Zeilenanfang mit `|` beginnen. */
@@ -115,7 +170,11 @@ function tableCells(line: string): string[] {
 /**
  * Kleine, sichere Markdown-Vorschau: Überschriften, Absätze, Aufzählungen (`-`),
  * nummerierte Listen (`1.`), Zitate (`> `), Tabellen (`| … |` mit Trennzeile) und
- * inline fett/kursiv/Code/Links.
+ * inline fett/kursiv (`*…*` UND `_…_`)/Code/Links.
+ *
+ * Listen dürfen verschachtelt sein: die Einrückung bestimmt die Ebene (Tab = zwei
+ * Spalten), geordnet und ungeordnet mischen sich frei. Eingerückte Zeilen OHNE
+ * eigenen Marker bleiben Lazy Continuation des letzten Punkts.
  *
  * SICHERHEIT: Jeder Textschnipsel läuft durch `inline(escapeHtml(…))` — erst
  * escapen, dann die wenigen Muster übersetzen. Eingegebenes HTML bleibt damit
@@ -131,24 +190,53 @@ function tableCells(line: string): string[] {
 export function renderPreview(md: string): string {
 	const out: string[] = [];
 	let para: string[] = [];
-	let ul: string[] = [];
-	let ol: string[] = [];
+	/** Alle Listenpunkte eines zusammenhängenden Listenblocks, flach mit `depth`. */
+	let list: ListItem[] = [];
+	/** Stack der bisher gesehenen Einrückbreiten — bildet Spalten auf Ebenen ab. */
+	let indents: number[] = [];
 	let quote: string[] = [];
 	let table: string[] = [];
 
 	const cell = (s: string) => inline(escapeHtml(s));
 
+	/**
+	 * Geschwister gleichen Typs kommen in EINE Liste; ein Wechsel `-` ↔ `1.` auf
+	 * derselben Ebene beginnt eine neue. Kinder landen INNERHALB ihres `<li>`,
+	 * damit die Verschachtelung valides HTML ist.
+	 */
+	const renderNodes = (nodes: ListNode[]): string => {
+		let html = '';
+		let i = 0;
+		while (i < nodes.length) {
+			const { ordered } = nodes[i];
+			const tag = ordered ? 'ol' : 'ul';
+			let items = '';
+			while (i < nodes.length && nodes[i].ordered === ordered) {
+				items += `<li>${cell(nodes[i].text)}${renderNodes(nodes[i].children)}</li>`;
+				i++;
+			}
+			html += `<${tag}>${items}</${tag}>`;
+		}
+		return html;
+	};
+
 	const flushPara = () => {
 		if (para.length) out.push(`<p>${para.map(cell).join(' ')}</p>`);
 		para = [];
 	};
-	const flushUl = () => {
-		if (ul.length) out.push(`<ul>${ul.map((l) => `<li>${cell(l)}</li>`).join('')}</ul>`);
-		ul = [];
+	const flushList = () => {
+		if (list.length) out.push(renderNodes(buildListTree(list)));
+		list = [];
+		indents = [];
 	};
-	const flushOl = () => {
-		if (ol.length) out.push(`<ol>${ol.map((l) => `<li>${cell(l)}</li>`).join('')}</ol>`);
-		ol = [];
+
+	/** Punkt einreihen: Einrückbreite → Ebene (Stack, robust gegen 2er/4er-Indent). */
+	const pushListItem = (line: string, ordered: boolean, text: string) => {
+		const width = indentWidth(line);
+		if (indents.length === 0) indents.push(width);
+		else if (width > indents[indents.length - 1]) indents.push(width);
+		else while (indents.length > 1 && width < indents[indents.length - 1]) indents.pop();
+		list.push({ depth: indents.length - 1, ordered, text });
 	};
 	const flushQuote = () => {
 		if (quote.length) out.push(`<blockquote><p>${quote.map(cell).join(' ')}</p></blockquote>`);
@@ -174,10 +262,9 @@ export function renderPreview(md: string): string {
 		table = [];
 	};
 	/** Alle Puffer außer dem gerade befüllten leeren — es ist immer höchstens einer offen. */
-	const flushAll = (keep?: 'para' | 'ul' | 'ol' | 'quote' | 'table') => {
+	const flushAll = (keep?: 'para' | 'list' | 'quote' | 'table') => {
 		if (keep !== 'para') flushPara();
-		if (keep !== 'ul') flushUl();
-		if (keep !== 'ol') flushOl();
+		if (keep !== 'list') flushList();
 		if (keep !== 'quote') flushQuote();
 		if (keep !== 'table') flushTable();
 	};
@@ -187,16 +274,20 @@ export function renderPreview(md: string): string {
 		const h = /^(#{1,6})\s+(.*)$/.exec(line);
 		const indented = /^\s+\S/.test(raw);
 
+		// Listenmarker werden gegen die EINGERÜCKTE Zeile geprüft — die Einrückung
+		// selbst ist die Ebenen-Information und darf darum nicht vorher wegfallen.
+		const bare = line.trimStart();
+
 		if (h) {
 			flushAll();
 			const level = Math.min(h[1].length, 6);
 			out.push(`<h${level}>${inline(escapeHtml(h[2]))}</h${level}>`);
-		} else if (UL_ITEM.test(line)) {
-			flushAll('ul');
-			ul.push(line.replace(UL_ITEM, ''));
-		} else if (OL_ITEM.test(line)) {
-			flushAll('ol');
-			ol.push(line.replace(OL_ITEM, ''));
+		} else if (UL_ITEM.test(bare)) {
+			flushAll('list');
+			pushListItem(line, false, bare.replace(UL_ITEM, ''));
+		} else if (OL_ITEM.test(bare)) {
+			flushAll('list');
+			pushListItem(line, true, bare.replace(OL_ITEM, ''));
 		} else if (QUOTE_LINE.test(line)) {
 			flushAll('quote');
 			quote.push(line.replace(QUOTE_LINE, ''));
@@ -205,10 +296,10 @@ export function renderPreview(md: string): string {
 			table.push(line);
 		} else if (line.trim() === '') {
 			flushAll();
-		} else if (indented && (ul.length || ol.length)) {
-			// Lazy Continuation: eingerückte Folgezeile gehört zum letzten Listenpunkt.
-			const buf = ol.length ? ol : ul;
-			buf[buf.length - 1] += ` ${line.trim()}`;
+		} else if (indented && list.length) {
+			// Lazy Continuation: eingerückte Folgezeile ohne eigenen Marker gehört zum
+			// letzten Listenpunkt — egal auf welcher Ebene der gerade steht.
+			list[list.length - 1].text += ` ${line.trim()}`;
 		} else {
 			flushAll('para');
 			para.push(line);

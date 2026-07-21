@@ -66,7 +66,7 @@ und alle Werte werden neu aufgelöst.
 
 - **Pro Komponente** ein eigener Tab **Barrierefreiheit** — Rolle, Tastatur, Fokus,
   Kontrast und Touch-Target mit Status (✓ erfüllt · ⚠ zu prüfen).
-- **Ein gepflegter [Issues-Katalog](/brand/accessibility/issues)** mit konkreten,
+- **Ein gepflegter [Katalog aus Problemen & Lösungen](/brand/accessibility/issues)** mit konkreten,
   belegten Befunden samt WCAG-Bezug und Code-Stellen.
 - **Die [Marken-Richtlinien zur Barrierefreiheit](/brand/accessibility)** beschreiben
   Haltung und Prinzipien für die ganze Marke.
