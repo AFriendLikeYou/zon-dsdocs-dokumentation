@@ -16,8 +16,13 @@ Import IST ein Reihenfolge-Gate, kein Freistil. Voller Guide + Schema: `tooling/
 ① Figma-Messung   → Maße, Token-Bindungen, Varianten-Achsen   (herkunft: "gemessen")
 ② Produktions-CSS → Klassen, echte Zustände (:hover/:disabled) (pattern.css, originalgetreu)
 ③ Produktions-HTML→ ARIA-Semantik, Rollen, Live-Regions, inert (nicht nur semantisch!)
-④ Mensch          → zweck, verwendung, doDont, a11y-Texte      (content.ts, gewinnt)
+④ Mensch          → zweck, verwendung, doDont, a11y-Texte      (Redaktionsdatei, gewinnt)
 ```
+
+Orte (Monorepo): Modell + `pattern.css` + `figma-raw.json` im Paket
+`packages/components/src/<slug>/`, die Redaktion in
+`apps/docs/content/components/<slug>.json`, das Generat (`+page.svx`,
+`spec.generated.ts`) unter `apps/docs/src/routes/product/components/<slug>/`.
 
 Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
@@ -31,9 +36,9 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
 4. **Ebene ③ ARIA aus echter Produktions-HTML.** `render.template` trägt die echten Rollen/Attribute (role/aria-\*/inert/aria-live), nicht nur semantisches HTML. Wenn keine Produktions-HTML vorliegt: Template als bewusst semantisch markieren, ARIA-Lücke in a11y notieren — nicht faken.
 
-5. **Exporter** `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>` (oder `npm run export:all`).
+5. **Exporter** `node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>` (oder `npm run export:all`). Eingabe ist der PAKET-Ordner, Ausgabe die Route. Danach den Slug im Paket-Barrel `packages/components/src/index.ts` ergänzen.
 
-6. **Ebene ④ content.ts** redaktionell: zweck, verwendung, doDont, a11y-Texte, variantInfo. Klar trennen „aus Figma/CSS belegt" vs. „Platzhalter". `variantInfo`-Namen MÜSSEN den echten `varianten[]`-Labels entsprechen (keine erfundenen Varianten — button-Fall).
+6. **Ebene ④ `apps/docs/content/components/<slug>.json`** redaktionell: zweck, verwendung, doDont, a11y-Texte, variantInfo. Klar trennen „aus Figma/CSS belegt" vs. „Platzhalter". `variantInfo`-Namen MÜSSEN den echten `varianten[]`-Labels entsprechen (keine erfundenen Varianten — button-Fall).
 
 ## Pflichtfelder-Gate (vor „fertig")
 
@@ -45,9 +50,9 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 - [ ] `zustaende[]` behauptet keinen State, den die CSS nicht rendert.
 - [ ] `render.template` trägt echte ARIA (oder Lücke bewusst in a11y notiert).
 - [ ] Kein `--sds-*`-Token; nur echte `--z-ds-*` oder Wert ohne Token (dann `unbound`).
-- [ ] `content.ts.variantInfo`-Labels == echte `varianten[]`-Labels.
-- [ ] Gate grün: `npm run check` · `vitest` · `check-component-drift`.
+- [ ] `variantInfo`-Labels der Redaktionsdatei == echte `varianten[]`-Labels.
+- [ ] Gate grün (aus dem Repo-Root): `npm run check` · `npm test` · `npm run build`.
 
 ## Bewusst NICHT
 
-Kein zweiter Doku-Renderer, keine zweite Wahrheitsquelle (ADR-013-Linie): der Skill ruft nur vorhandene Bausteine (figma-measure, analyze-component-set, check-design-parity, Exporter) in erzwungener Reihenfolge auf. `model.json` bleibt kanonisch, `content.ts` bleibt Mensch.
+Kein zweiter Doku-Renderer, keine zweite Wahrheitsquelle (ADR-013-Linie): der Skill ruft nur vorhandene Bausteine (figma-measure, analyze-component-set, check-design-parity, Exporter) in erzwungener Reihenfolge auf. `model.json` bleibt kanonisch, die Redaktionsdatei bleibt Mensch.

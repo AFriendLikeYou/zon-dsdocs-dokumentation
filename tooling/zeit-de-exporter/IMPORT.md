@@ -14,7 +14,8 @@ Figma-Node ──(Figma MCP)──▶ Fakten (Name, Varianten, Tokens, Maße, St
 model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
    │
    ▼
-Katalog-Order (optional) · Gate · redaktionelle Prüfung (content/components/<slug>.json)
+Katalog-Order (optional) · Gate · redaktionelle Prüfung
+                                  (apps/docs/content/components/<slug>.json)
 ```
 
 ## Schnellstart
@@ -125,7 +126,7 @@ node tooling/zeit-de-exporter/import.mjs '<figma-url>' <kebab> [--draft]
 
 Ohne `--draft`: Fetch läuft, dann TODO-Ausgabe (Namen ergänzen). Sind die Namen da
 (oder `--draft` gesetzt), läuft `draft` gleich mit → `model.draft.json`. Die zwei
-menschlichen Gates (Token-Namen, dann `pattern.css`/`content.ts`) bleiben bewusst.
+menschlichen Gates (Token-Namen, dann `pattern.css` + Redaktionsdatei) bleiben bewusst.
 
 ### 1e · Pipeline-Stufen im Blick (`import.mjs --status`)
 
@@ -138,7 +139,7 @@ node tooling/zeit-de-exporter/import.mjs --status
 
 Spalten (Reihenfolge = Pipeline): `raw` (`figma-raw.json`) · `draft`
 (`model.draft.json`) · `model` (`model.json`) · `pattern` (`pattern.css`) ·
-`content` (`content/components/<slug>.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
+`content` (`apps/docs/content/components/<slug>.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
 **Hinweis** meldet:
 
 - **`raw fehlt`** — kein Drift-Fixture (`figma-raw.json`) hinterlegt.
@@ -185,7 +186,8 @@ in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
   Wert als gemessen ausgeben.
 - **`dokumentiertAm`/`aktualisiertAm`:** Erstdokumentation bzw. letzter Sync — speisen
   die automatischen Nav-Badges („Neu" 14 Tage ab Erstdoku, danach „Update" 14 Tage ab
-  Aktualisierung; Logik `badgeFor` in `catalog.ts`, Override-Map pinnt bei Bedarf).
+  Aktualisierung; Logik `badgeFor` in `apps/docs/src/lib/data/catalog.ts`, ein
+  kuratiertes `katalog.badge` im `model.json` pinnt bei Bedarf dagegen).
 - **Platzhalter kennzeichnen:** fehlen Assets (Bild/Cover/Avatar), neutrale Flächen
   nutzen und im `repoNote`/Kommentar als Doku-Platzhalter markieren.
 
@@ -376,10 +378,13 @@ erscheint automatisch, **kein Eintrag in `navigation.ts` nötig**.
 
 ## 6 · Gate + redaktionelle Prüfung
 
+Aus dem **Repo-Root** (`npx vitest` findet dort keine Config mehr — sie liegt in
+`apps/docs`):
+
 ```bash
-npm run check   # 0 Fehler; Drift-Checks warnen (exit 0)
+npm run check   # 0 Fehler; 7 von 8 Drift-Checks laufen mit --strict
 npm run build   # EXIT 0
-npx vitest run  # grün
+npm test        # grün
 ```
 
 Danach in `apps/docs/content/components/<kebab>.json` klar trennen: **aus Figma übernommen** (verlässlich) vs.
@@ -446,6 +451,8 @@ ehrlichen Hinweis statt eines Befehls, der an der Registry scheitern würde.
 - [ ] `herkunft` je `masse`/`spacing` gesetzt (Figma = gemessen, berechnet = abgeleitet, Platzhalter = geschätzt)
 - [ ] `pattern.css` (flach, originalgetreu) — falls nötig
 - [ ] Exporter gelaufen
-- [ ] ggf. Katalog-Order/Badge in `catalog.ts` (Nav ist katalog-getrieben — kein Handeintrag)
-- [ ] Gate grün (check 0/0 · build · vitest)
+- [ ] ggf. Katalog-Order/Badge im `katalog`-Block des `model.json` (Nav ist
+      katalog-getrieben — kein Handeintrag)
+- [ ] Slug im Paket-Barrel `packages/components/src/index.ts`
+- [ ] Gate grün (`npm run check` 0/0 · `npm run build` · `npm test`)
 - [ ] Platzhalter/Beispieltexte in `apps/docs/content/components/<kebab>.json` geprüft

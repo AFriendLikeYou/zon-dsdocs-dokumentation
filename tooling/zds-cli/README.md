@@ -43,7 +43,7 @@ npm install -g ./tooling/zds-cli
 
 > **Warum kein `npx github:…`?** npm kann bei Git-Abhängigkeiten **kein
 > Unterverzeichnis** auflösen — `npx github:AFriendLikeYou/zon-dsdocs-dokumentation`
-> zieht das SvelteKit-Paket der Doku-App im Repo-Root, nicht diese CLI
+> zieht das Wurzel-Paket des Monorepos (`zon-dsdoc`), nicht diese CLI
 > (verifiziert mit npm 10.9.2: das `#path:/…`-Suffix wird ignoriert →
 > „could not determine executable to run"). Sobald es eine interne Registry gibt,
 > ist der Umstieg auf `npm i -g @zeit/zds-cli` ein Einzeiler: `private` raus,

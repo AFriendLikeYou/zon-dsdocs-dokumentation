@@ -22,7 +22,7 @@ import { SVG_LIST, type IconPre } from '@zeit/icons';
 
 Ein Eintrag trägt **keinen** SVG-Markup, nur Metadaten plus `path` — die URL, unter
 der die Datei ausgeliefert wird. Die Doku-App lädt den Markup daraus einmal pro
-Server-Instanz nach (`src/routes/+layout.server.ts`).
+Server-Instanz nach (`apps/docs/src/routes/+layout.server.ts`).
 
 Einzelne Dateien lassen sich über den Subpath-Export auflösen:
 
@@ -35,7 +35,7 @@ import url from '@zeit/icons/svg/arrow-down.svg';
 Der Download-Vertrag der Brand-Seite ist **unverändert** — die Dateien liegen im Web
 weiter unter `/downloads/icons/<name>.svg` (inkl. des 308-Redirects von `/svg/`).
 Dafür spiegelt `npm run sync:icons` (`tooling/sync-icons.mjs`) `svg/` nach
-`static/downloads/icons/` der Doku-App. Dieser Ordner ist ein **Build-Artefakt**
+`apps/docs/static/downloads/icons/`. Dieser Ordner ist ein **Build-Artefakt**
 (gitignored) und läuft automatisch in `prepare`, `predev` und `prebuild` mit.
 `tooling/check-assets.mjs` prüft den Spiegel mit.
 

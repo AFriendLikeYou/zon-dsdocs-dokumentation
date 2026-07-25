@@ -19,43 +19,52 @@ nicht über eine verpflichtende Komponenten-Library.
 
 ## Landkarte
 
+**npm-Workspace-Monorepo:** die App in `apps/docs`, der Inhalt, den wir besitzen, in
+`packages/*`; `tooling/` bleibt im Root (Pfad-Landkarte: `tooling/lib/paths.mjs`).
+
 ```
-src/
-├── lib/                        alles Importierbare (SvelteKit-Standard, $lib + Kurz-Aliase)
-│   ├── components/
-│   │   ├── layout/             Site-Chrome: Navbar, Sidebar, Footer, … (Direktimporte)
-│   │   └── ui/                 Doku-Bausteine: ein Ordner pro Modul, je index.ts-Barrel
-│   │                           (u. a. playground/, specsheet/, icons/, colors/, card/, …)
-│   ├── data/                   Registries: navigation, brand-assets*, changelog,
-│   │                           foundation-tokens + Override-Map  (* = generiert;
-│   │                           die Icon-Liste liegt im Paket @zeit/icons)
-│   ├── stores/  config/  types/  actions/  utils.ts …
-│   └── (Aliase: $components, $data, $stores, $config, $types, $content → svelte.config.js)
+apps/docs/                      die SvelteKit-App — npm-Workspace `docs`
+├── src/
+│   ├── lib/                    alles Importierbare (SvelteKit-Standard, $lib + Kurz-Aliase)
+│   │   ├── components/
+│   │   │   ├── layout/         Site-Chrome: Navbar, Sidebar, Footer, … (Direktimporte)
+│   │   │   └── ui/             Doku-Bausteine: ein Ordner pro Modul, je index.ts-Barrel
+│   │   │                       (u. a. playground/, specsheet/, icons/, colors/, card/, …)
+│   │   ├── data/               Registries: navigation, catalog, brand-assets*, changelog,
+│   │   │                       foundation-tokens  (* = generiert; die Icon-Liste
+│   │   │                       liegt im Paket @zeit/icons)
+│   │   ├── server/             NUR-Server: mcp.ts · registry.ts · agent-catalog.ts · manifest.ts
+│   │   ├── spec/  stores/  config/  types/  actions/  icons/  utils.ts …
+│   │   └── (Aliase: $components, $data, $stores, $config, $types, $content → svelte.config.js)
+│   │
+│   ├── routes/
+│   │   ├── brand/              Brandhub-Seiten (englische URLs, deutsche Inhalte)
+│   │   ├── product/            DS-Doku; components/<slug>/ = +page.svx ·
+│   │   │                       spec.generated.ts (Exporter-AUSGABE, nur Generat;
+│   │   │                       model.json + pattern.css in @zeit/components,
+│   │   │                       Redaktion in apps/docs/content/components/<slug>.json)
+│   │   ├── login/  admin/
+│   │   └── +layout.svelte      Chrome-Mount + Bereichslogik (brand/product)
+│   ├── hooks.server.ts         Basic Auth + 308-Redirects für Alt-URLs
+│   └── app.html
 │
-├── routes/
-│   ├── brand/                  Brandhub-Seiten (englische URLs, deutsche Inhalte)
-│   ├── product/                DS-Doku; components/<slug>/ = +page.svx ·
-│   │                           spec.generated.ts (Exporter-AUSGABE, nur Generat;
-│   │                           model.json + pattern.css in @zeit/components,
-│   │                           Redaktion in content/components/<slug>.json)
-│   ├── login/  admin/
-│   ├── +layout.svelte          Chrome-Mount + Bereichslogik (brand/product)
-│   └── hooks.server.ts (in src/): Basic Auth + 308-Redirects für Alt-URLs
-│
-static/
-├── media/brand/<seite>/        redaktionelle Seiten-Medien (Bilder, Videos)
-├── downloads/                  Download-Sammlungen: icons/ (Spiegel von @zeit/icons,
-│                               gitignored — npm run sync:icons), brand-logos/, docs/
-├── fonts/                      Webfonts (via global.css)
-└── *.css                       global.css, button.css · styles-zds.css = Spiegel von
-                                packages/tokens/vendor (npm run sync:zds, gitignored)
+├── content/components/<slug>.json   Redaktion je Komponente (MENSCH, nie überschrieben)
+├── static/
+│   ├── media/brand/<seite>/    redaktionelle Seiten-Medien (Bilder, Videos)
+│   ├── downloads/              Download-Sammlungen: icons/ (Spiegel von @zeit/icons,
+│   │                           gitignored — npm run sync:icons), brand-logos/, docs/
+│   ├── fonts/                  Webfonts (via global.css)
+│   └── *.css                   global.css, button.css · styles-zds.css = Spiegel von
+│                               packages/tokens/vendor (npm run sync:zds, gitignored)
+└── e2e/                        Playwright-Suiten + __screenshots__/ (npm run test:e2e)
 
 packages/                       Workspace-Pakete (@zeit/*) — der Inhalt, den wir besitzen
 ├── components/                 @zeit/components: je Komponente src/<slug>/ mit
 │                               pattern.css · model.json · figma-raw.json · index.ts
 ├── icons/                      @zeit/icons: svg/ + generierte Liste src/icons.ts
 │                               + icon-overrides.mjs (Kuratierung)
-└── tokens/                     @zeit/tokens
+└── tokens/                     @zeit/tokens: vendor/styles-zds.css (durchgereicht)
+                                + src/roles.ts (--ds-*-Rollen) + build.mjs
 
 tooling/                        Generatoren (gen-icons, gen-brand-assets), Spiegel-Skripte
                                 (sync-icons, sync-zds), Drift-Checks
@@ -63,33 +72,43 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Spieg
                                 check-zds-sync), check-prod-drift (Doku ↔ zeit.de) und
                                 check-figma-drift (Modell ↔ Figma) — beide nächtlich, nicht
                                 im Gate; zeit-de-exporter/ (model.json → Component-Seite,
-                                export:all, figma-measure.js)
+                                export:all, figma-measure.js); lib/paths.mjs (Pfad-Landkarte)
+
+.changeset/                     SemVer + Changelogs der @zeit/*-Pakete (`docs` ist ignoriert)
 ```
 
 ## Wo lege ich … an?
 
 - **Icon:** SVG nach `packages/icons/svg/` → `npm run gen:icons && npm run sync:icons`.
   Sonderfälle in `packages/icons/icon-overrides.mjs` (siehe `packages/icons/README.md`).
-- **Brand-Logo:** SVG nach `static/downloads/brand-logos/` → `npm run gen:brand-assets`.
-  Sonderfälle in `src/lib/data/brand-asset-overrides.mjs`.
-- **Seite:** `src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in `src/lib/data/navigation.ts`.
+- **Brand-Logo:** SVG nach `apps/docs/static/downloads/brand-logos/` → `npm run gen:brand-assets`.
+  Sonderfälle in `apps/docs/src/lib/data/brand-asset-overrides.mjs`.
+- **Seite:** `apps/docs/src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in
+  `apps/docs/src/lib/data/navigation.ts`.
 - **Dokumentierte Komponente:** `packages/components/src/<slug>/{model.json,pattern.css}` →
   `node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>` (redaktionelle
   Texte danach in `apps/docs/content/components/<slug>.json`).
-- **UI-Baustein der Doku:** `src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
+- **UI-Baustein der Doku:** `apps/docs/src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
 
 Ausführliche Rezepte: **[CONTRIBUTING.md](CONTRIBUTING.md)** · Konventionen:
-[src/lib/components/README.md](src/lib/components/README.md) · Entscheidungen: [DECISIONS.md](DECISIONS.md) ·
+[apps/docs/src/lib/components/README.md](apps/docs/src/lib/components/README.md) ·
+Entscheidungen: [DECISIONS.md](DECISIONS.md) ·
 Struktur-Historie: [STRUKTUR-PLAN.md](STRUKTUR-PLAN.md) · Backlog: [TODO.md](TODO.md)
 
 ## Setup & Befehle
 
+Alles wird **aus dem Repo-Root** gerufen; die Root-Skripte delegieren per `-w docs`
+in den App-Workspace. `npx vitest` / `npx playwright` gehen aus dem Root nicht mehr
+(die Configs liegen in `apps/docs`) — dafür sind `npm test` und `npm run test:e2e` da.
+
 ```bash
-nvm use && npm i           # Node (lts) + Pakete
+nvm use && npm i           # Node (lts) + alle Workspaces (packages/* + apps/*)
 npm run dev                # Dev-Server (localhost:5173; Basic Auth aus .env: USERS)
 npm run check              # svelte-check + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync)
 npm run build              # Produktions-Build (adapter-vercel)
-npm test                   # Vitest (Testing Library)
+npm test                   # Vitest (Testing Library)   ·  npm run test:unit = Watch-Modus
+npm run test:e2e           # Playwright (apps/docs/e2e)
+npm run tokens:build       # @zeit/tokens bauen         ·  npm run tokens:check = Drift-Wache
 npm run gen:assets         # Icon-/Brand-Logo-Registries neu generieren
 npm run copy:icons         # Icons aus @zeitonline/icons ziehen (+ Registry-Regen)
 npm run check:prod-drift   # Doku ↔ Produktion (zeit.de) — braucht Netz, NICHT im Gate
@@ -118,7 +137,7 @@ Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site li
 ## MCP-Endpoint (`/api/mcp`) — agent-ready
 
 > **Für Nutzer:innen** steht die Anleitung auf der Site selbst:
-> [`/product/agents`](src/routes/product/agents/+page.svx) („Agenten anbinden") — fertige
+> [`/product/agents`](apps/docs/src/routes/product/agents/+page.svx) („Agenten anbinden") — fertige
 > Client-Configs für Claude Code und generische MCP-Clients, Auth-Hinweis, Tool-Referenz mit
 > echten Beispiel-Antworten und die Querverweise auf Manifest, Registry/CLI und `llms.txt`.
 > Dieser Abschnitt bleibt die technische Kurzfassung fürs Repo.
@@ -126,11 +145,12 @@ Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site li
 Die Doku-Site ist selbst ein **MCP-Server**: KI-Agenten können die Komponenten-Registry
 abfragen und mit dem ZEIT-Designsystem UIs bauen (Vorbild: Astryx). Umgesetzt als
 minimaler, handgerollter Handler (MCP Streamable HTTP, **stateless**, JSON-RPC 2.0) — kein
-SDK, keine neue Abhängigkeit. Route: [`src/routes/api/mcp/+server.ts`](src/routes/api/mcp/+server.ts)
-(dünn), Logik in [`src/lib/server/mcp.ts`](src/lib/server/mcp.ts), Datenbasis
-[`src/lib/data/agent-catalog.ts`](src/lib/data/agent-catalog.ts) (Katalog inkl. `render`-Template
-
-- rohem `pattern.css`, nur serverseitig).
+SDK, keine neue Abhängigkeit. Route:
+[`apps/docs/src/routes/api/mcp/+server.ts`](apps/docs/src/routes/api/mcp/+server.ts)
+(dünn), Logik in [`apps/docs/src/lib/server/mcp.ts`](apps/docs/src/lib/server/mcp.ts),
+Datenbasis
+[`apps/docs/src/lib/server/agent-catalog.ts`](apps/docs/src/lib/server/agent-catalog.ts)
+(Katalog inkl. `render`-Template + rohem `pattern.css`, nur serverseitig).
 
 **Tools** (vier — `tools/list` ist die Wahrheit):
 
@@ -177,7 +197,7 @@ curl -u <user>:<pass> -X POST http://localhost:5173/api/mcp \
 
 Entwickler ziehen dokumentierte ZDS-Komponenten per CLI ins eigene Projekt: die
 Dateien werden **kopiert**, nicht als Paket installiert. Dünne Routen → pure Logik
-[`src/lib/server/registry.ts`](src/lib/server/registry.ts) (getestet), Datenbasis
+[`apps/docs/src/lib/server/registry.ts`](apps/docs/src/lib/server/registry.ts) (getestet), Datenbasis
 ist der `agent-catalog` (rohes `pattern.css`). Deckt den **gesamten Katalog
 automatisch** ab (Build-Zeit-Glob) — jede dokumentierte Komponente ist sofort
 verfügbar. Pro Komponente deklariert der `code`-Block im `model.json` die

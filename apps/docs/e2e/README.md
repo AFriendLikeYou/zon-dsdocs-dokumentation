@@ -1,6 +1,6 @@
 # E2E-Suiten (Playwright)
 
-Vier Suiten, ein Runner (`npx playwright test`, Config: `playwright.config.ts`):
+Vier Suiten, ein Runner (`npm run test:e2e`, Config: `apps/docs/playwright.config.ts`):
 
 | Datei               | Was es prüft                                                                 |
 | ------------------- | ---------------------------------------------------------------------------- |
@@ -17,10 +17,14 @@ Gemeinsame Bühne: `support/stabilize.ts`.
 Der Runner startet den Dev-Server selbst (oder nutzt einen laufenden nach).
 Der Port ist über `E2E_PORT` steuerbar — nötig, wenn auf `5173` schon etwas läuft:
 
+Gerufen wird **aus dem Repo-Root**; `npm run test:e2e` delegiert per `-w docs` und
+reicht alles nach `--` an Playwright durch. (`npx playwright test` funktioniert nur
+noch aus `apps/docs` heraus — dort liegt die Config.)
+
 ```bash
-npx playwright test                       # Default-Port 5173
-E2E_PORT=5199 npx playwright test         # eigener Server auf 5199
-E2E_PORT=5199 npx playwright test e2e/visual.spec.ts
+npm run test:e2e                              # Default-Port 5173
+E2E_PORT=5199 npm run test:e2e                # eigener Server auf 5199
+E2E_PORT=5199 npm run test:e2e -- e2e/visual.spec.ts
 ```
 
 Lokal greift der Dev-Auth-Bypass (`hooks.server.ts`), in CI die Basic-Auth über
@@ -28,14 +32,14 @@ Lokal greift der Dev-Auth-Bypass (`hooks.server.ts`), in CI die Basic-Auth über
 
 ## Snapshots aktualisieren
 
-Die Referenzbilder liegen **im Repo** unter `e2e/__screenshots__/<platform>/`
+Die Referenzbilder liegen **im Repo** unter `apps/docs/e2e/__screenshots__/<platform>/`
 (`darwin` = lokal macOS, `linux` = CI). Sie sind der Vergleichsstand — ein Diff
 bedeutet: _die Optik hat sich geändert_.
 
 Nach einer **beabsichtigten** Optik-Änderung:
 
 ```bash
-E2E_PORT=5199 npx playwright test e2e/visual.spec.ts --update-snapshots
+E2E_PORT=5199 npm run test:e2e -- e2e/visual.spec.ts --update-snapshots
 ```
 
 Danach die geänderten PNGs **ansehen** (`git diff --stat` zeigt nur „binary") und

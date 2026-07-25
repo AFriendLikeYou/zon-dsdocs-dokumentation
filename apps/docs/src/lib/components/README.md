@@ -1,4 +1,4 @@
-# `src/lib/components` — Ordner-Konvention
+# `apps/docs/src/lib/components` — Ordner-Konvention
 
 Kurzanleitung, wo eine Komponente hingehört und wie sie importiert wird. Grundsatz
 (siehe Root-README + DECISIONS.md): Diese Komponenten sind die **Doku-App-UI** — sie
@@ -45,7 +45,7 @@ Sonderfälle mit eigener Doku:
 ## Routen-Co-Location
 
 Komponenten mit genau **einem** Route-Consumer liegen bei ihrer Route, nicht hier —
-z. B. `src/routes/login/LoginForm.svelte`.
+z. B. `apps/docs/src/routes/login/LoginForm.svelte`.
 
 ## Styling
 
@@ -132,7 +132,7 @@ Ziel ist Vorhersagbarkeit (Astryx-Prinzip): Wer fünf Komponenten kennt, kann di
 ## Faustregel beim Anlegen
 
 1. Seitengerüst / einmal pro Seite? → `layout/` (Direktimport).
-2. Genau ein Route-Consumer? → neben die Route (`src/routes/…`).
+2. Genau ein Route-Consumer? → neben die Route (`apps/docs/src/routes/…`).
 3. Alles andere → `ui/<kebab>/` **mit** Barrel.
 
 ## Atom-first (Pflicht vor jedem Neubau)

@@ -16,7 +16,7 @@ den Upstream deshalb unverändert und ergänzt **nur** die Rollen
 **Nicht in `roles.ts`:** alles ohne `--z-ds-*`-Bezug — Layout (`--sidebar-width`,
 `--ds-container-max`), vertikaler Rhythmus, Motion, Schatten/Elevation, das
 Tint-Rezept, `--seg-*`. Das sind Werte der **Doku-App**, nicht des Designsystems,
-und bleiben in `static/global.css`.
+und bleiben in `apps/docs/static/global.css`.
 
 ## Bauen
 
@@ -44,18 +44,18 @@ abgeschaltet, statt Alarm zu schlagen.
 
 ## Anbindung — warum die Rollen (noch) in `global.css` stehen
 
-`src/roles.ts` ist ab jetzt die **Quelle**, aber `static/global.css` deklariert
-die Rollen in diesem PR weiterhin selbst. Die Alternativen und warum sie mehr
+`src/roles.ts` ist die **Quelle**, aber `apps/docs/static/global.css` deklariert
+die Rollen weiterhin selbst. Die Alternativen und warum sie mehr
 Risiko tragen:
 
 - **`@import 'roles.css'` in `global.css`** — `global.css` hängt als
-  render-blockierendes `<link>` im `<head>` (`src/app.html`). Ein `@import` darin
+  render-blockierendes `<link>` im `<head>` (`apps/docs/src/app.html`). Ein `@import` darin
   ist ein **serialisierter zweiter Round-Trip**: der Browser entdeckt die Datei
   erst, nachdem er `global.css` geladen und geparst hat. Da praktisch jede Fläche
   und jede Schriftfarbe der Doku-UI an einer `--ds-*`-Rolle hängt, ist das ein
   sichtbares FOUC-Risiko beim Kaltstart — für null funktionalen Gewinn.
 - **Zweites `<link>` in `app.html`** — vermeidet die Serialisierung, verlangt aber
-  ein weiteres ausgeliefertes Artefakt unter `static/` und damit dieselbe
+  ein weiteres ausgeliefertes Artefakt unter `apps/docs/static/` und damit dieselbe
   Kopier-Mechanik noch einmal. Mehr bewegliche Teile, gleiche Wirkung.
 - **Generat in `global.css` einspleißen** — machte eine handgepflegte Datei
   teilgeneriert. Genau die Vermischung, die das Repo sonst verbietet
@@ -63,19 +63,20 @@ Risiko tragen:
 
 Stattdessen hält `src/roles.test.ts` beide Seiten zusammen: er vergleicht die
 33 Rollen aus `roles.ts` mit den `--ds-*`-Deklarationen im ersten `:root`-Block
-von `static/global.css` — **Name, Wert und Reihenfolge**. Die Garantie ist damit
-nicht behauptet, sondern erzwungen. Der Austausch selbst gehört in PR 3, wenn die
-App ohnehin nach `apps/docs/` zieht und `global.css` neu geschnitten wird.
+von `apps/docs/static/global.css` — **Name, Wert und Reihenfolge**. Die Garantie ist
+damit nicht behauptet, sondern erzwungen. Der Austausch (Generat statt Handpflege)
+ist weiterhin offen; der Umzug der App nach `apps/docs/` hat daran nichts geändert.
 
 ## Ausgelieferte URL
 
 `vendor/styles-zds.css` wird weiterhin unter `/styles-zds.css` ausgeliefert. Die
-Datei liegt nicht mehr in `static/`, sondern wird von `npm run sync:zds`
-dorthin kopiert (gitignored, Build-Artefakt). Verdrahtet in `prepare`, `predev`
-und `prebuild` — also überall dort, wo `static/` gleich gebraucht wird. Alle
-_lesenden_ Zugriffe (Checks, Registry, MCP, Exporter) gehen direkt auf
-`packages/tokens/vendor/styles-zds.css`; die Kopie in `static/` hat exakt einen
-Zweck: das `<link>` in `src/app.html`.
+Datei liegt nicht mehr im `static/`-Ordner der App, sondern wird von
+`npm run sync:zds` nach `apps/docs/static/styles-zds.css` kopiert (gitignored,
+Build-Artefakt). Verdrahtet in `prepare`, `predev` und `prebuild` — also überall
+dort, wo `static/` gleich gebraucht wird. Alle _lesenden_ Zugriffe (Checks,
+Registry, MCP, Exporter) gehen direkt auf `packages/tokens/vendor/styles-zds.css`;
+die Kopie in `apps/docs/static/` hat exakt einen Zweck: das `<link>` in
+`apps/docs/src/app.html`.
 
 `GET /api/registry/foundations` liefert unverändert `styles-zds.css` mit Hash —
 `zds init` zieht die Datei über diesen Endpoint, nicht über die statische URL.

@@ -7,6 +7,12 @@ pflegst du von Hand. Vor dem Pushen immer der [Green-Gate](#vor-dem-pushen).
 
 Verwandte Hintergründe: `DECISIONS.md` (ADRs), `tooling/zeit-de-exporter/README.md` (Exporter).
 
+> **Monorepo-Orientierung:** Die App liegt in `apps/docs`, die Pakete in
+> `packages/{tokens,icons,components}`, `tooling/` im Root. Alle Pfade unten sind
+> **repo-relativ**, alle Befehle werden **aus dem Repo-Root** gerufen (die
+> Root-Skripte delegieren per `-w docs`). Wer ein `packages/*`-Paket ändert, legt im
+> selben PR einen Changeset an (`npx changeset`, siehe `.changeset/README.md`).
+
 ---
 
 ## 1. Ein Icon hinzufügen
@@ -14,8 +20,9 @@ Verwandte Hintergründe: `DECISIONS.md` (ADRs), `tooling/zeit-de-exporter/README
 Icons liegen im Paket **`@zeit/icons`** (`packages/icons/`): SVGs in `packages/icons/svg/`,
 daraus generiert `tooling/gen-icons.mjs` die Liste `packages/icons/src/icons.ts` (generiert,
 nicht von Hand editieren). Ausgeliefert werden die Dateien unverändert unter
-`/downloads/icons/…` — `npm run sync:icons` spiegelt sie dafür nach `static/downloads/icons/`
-(Build-Artefakt, gitignored; läuft in `prepare`/`predev`/`prebuild` automatisch mit).
+`/downloads/icons/…` — `npm run sync:icons` spiegelt sie dafür nach
+`apps/docs/static/downloads/icons/` (Build-Artefakt, gitignored; läuft in
+`prepare`/`predev`/`prebuild` automatisch mit).
 
 1. **SVG ablegen** — entweder aus dem Upstream-Paket ziehen (`npm run copy:icons`, kopiert
    `@zeitonline/icons` → `packages/icons/svg/`, regeneriert die Liste **und** spiegelt) oder eine
@@ -31,34 +38,38 @@ nicht von Hand editieren). Ausgeliefert werden die Dateien unverändert unter
 
 ## 2. Ein Brand-Asset hinzufügen
 
-Analog zu Icons: SVGs in `static/downloads/brand-logos/`, generiert nach
-`src/lib/data/brand-assets.ts` via `tooling/gen-brand-assets.mjs`.
+Analog zu Icons: SVGs in `apps/docs/static/downloads/brand-logos/`, generiert nach
+`apps/docs/src/lib/data/brand-assets.ts` via `tooling/gen-brand-assets.mjs`.
 
-1. **SVG ablegen** in `static/downloads/brand-logos/<name>.svg`.
+1. **SVG ablegen** in `apps/docs/static/downloads/brand-logos/<name>.svg`.
 2. **Generieren** — `npm run gen:brand-assets` (oder `npm run gen:assets` für Icons + Assets).
 3. **Kuratieren** — Standard ist „sichtbar". Soll ein Asset **nicht** im Brand-Hub erscheinen
-   (Altbestand), in `src/lib/data/brand-asset-overrides.mjs` `{ exclude: true }` setzen. Namens-
+   (Altbestand), in `apps/docs/src/lib/data/brand-asset-overrides.mjs` `{ exclude: true }`
+   setzen. Namens-
    Sonderfälle dort ebenfalls (`name`). Das Asset erscheint in `BrandAssetsGrid` (z. B. auf
    `/brand/logo`).
 
 ## 3. Eine Doku-/Foundation-Seite hinzufügen
 
-Seiten sind mdsvex-Routen (`+page.svx`) unter `src/routes/brand/…` oder `src/routes/product/…`.
+Seiten sind mdsvex-Routen (`+page.svx`) unter `apps/docs/src/routes/brand/…` oder
+`apps/docs/src/routes/product/…`.
 
-1. **Route anlegen** — `src/routes/<bereich>/<slug>/+page.svx` mit Frontmatter (`title`) und
+1. **Route anlegen** — `apps/docs/src/routes/<bereich>/<slug>/+page.svx` mit Frontmatter
+   (`title`) und
    `<svelte:head><title>{title} - Die Zeit Design System</title></svelte:head>` (kanonische
    Marken-Schreibweise).
-2. **Verlinken** — den Menüeintrag in `src/lib/data/navigation.ts` von Hand ergänzen
+2. **Verlinken** — den Menüeintrag in `apps/docs/src/lib/data/navigation.ts` von Hand ergänzen
    (Kategorie/Reihenfolge/Badge sind bewusst kuratiert, siehe ADR-007). `npm run check`
-   (→ `check-nav.mjs`) warnt, falls eine Route weder verlinkt noch in der Allowlist ist.
-3. **Sonderfall Foundation-Seite** — Sub-Seiten unter `src/routes/product/foundations/<slug>/`
+   (→ `check-nav.mjs`) bricht ab, falls eine Route weder verlinkt noch in der Allowlist ist.
+3. **Sonderfall Foundation-Seite** — Sub-Seiten unter
+   `apps/docs/src/routes/product/foundations/<slug>/`
    erscheinen automatisch als Karte auf `/product/foundations` (Discovery per
    `import.meta.glob`). Für Titel/Beschreibung/Badge/Reihenfolge einen Eintrag in der `META`-
-   Map in `src/routes/product/foundations/+page.svx` ergänzen; ohne Eintrag greift ein
+   Map in `apps/docs/src/routes/product/foundations/+page.svx` ergänzen; ohne Eintrag greift ein
    Fallback (Title-Case des Slugs, ans Ende sortiert).
 4. **Bilder (16:9-Konvention)** — Content-Bilder in Prosa (`![alt](/media/…)`) werden per
    Default im Verhältnis **16:9** gezeigt (`object-fit: cover`, Regel `main p > img` in
-   `static/global.css`) — passend für Fotos, Screenshots und Beispiel-Szenen. Soll ein Bild
+   `apps/docs/static/global.css`) — passend für Fotos, Screenshots und Beispiel-Szenen. Soll ein Bild
    im **natürlichen Verhältnis** ohne Beschnitt stehen (Logos/Wortmarken, Icon-Anatomie-
    Diagramme, Hochformat-Poster), es als HTML-`<img class="img-natural" src="…" alt="…" />`
    statt Markdown schreiben. Die Abweichung ist so im Markup sichtbar.
@@ -69,7 +80,9 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 `tooling/zeit-de-exporter/README.md`, der komplette Figma→Seite-Flow in
 `tooling/zeit-de-exporter/IMPORT.md`.
 
-1. **Modell anlegen** — aus Figma via Figma-MCP (siehe `IMPORT.md`) oder von Hand.
+1. **Modell anlegen** — Gerüst mit `npm run new-component -- "<Name>"` (legt Ordner,
+   gültiges Start-`model.json` und `pattern.css`-Stub an, überschreibt nichts), Werte
+   aus Figma via Figma-MCP (siehe `IMPORT.md`) oder von Hand.
    Ort: `packages/components/src/<kebab>/{model.json, pattern.css}`. Das Modell und das
    CSS gehören ins **Paket** (`@zeit/components`), weil sie beschreiben bzw. sind, was
    wir ausliefern; die Seite ist nur ihre Dokumentation. `code.artefakte` ist Pflicht.
@@ -85,6 +98,9 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
    `PLANNED_COMPONENTS` (`apps/docs/src/lib/data/navigation.ts`).
 4. **Barrel ergänzen** — neuen Slug in `packages/components/src/index.ts` eintragen
    (`index.test.ts` hält die Liste gegen die Ordner).
+5. **Changeset schreiben** — die Komponente ist Paket-Inhalt, also braucht der PR einen
+   Changeset für `@zeit/components` (`npx changeset`, minor für eine neue Komponente).
+   Reine Redaktionsänderungen an `apps/docs/content/…` brauchen keinen.
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 
@@ -124,11 +140,21 @@ einheitlich `label` — es ist der Bezeichner einer Tabellen-/Listenzeile.
 
 ## Vor dem Pushen
 
+Alles aus dem **Repo-Root** (`npx vitest` / `npx playwright` gehen dort nicht mehr —
+die Configs liegen in `apps/docs`):
+
 ```bash
-npm run check   # svelte-check 0/0 + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync — nur Warnungen)
+npm run check   # svelte-check 0/0 + Drift-Checks
 npm run build   # muss mit Exit 0 durchlaufen
+npm test        # Vitest — muss grün sein
+npm run lint    # 0 Fehler (Warnungen gegen die Ratsche --max-warnings)
 ```
 
-Die Drift-Checks sind **Warnungen, keine Blocker** („Never Block, Always Suggest"). Für CI
-lassen sie sich scharf schalten: `node tooling/check-nav.mjs --strict` (analog `check-tokens`,
-`check-assets`, `check-component-drift`, `check-zds-sync`) → Exit 1 bei Drift.
+Die Drift-Checks laufen im `npm run check` inzwischen **scharf**: 7 von 8 mit `--strict`
+(nav, tokens, assets, component-drift, content, zds-sync, token-refs) — ein Befund bricht
+mit Exit 1 ab. **Ausnahme:** `check-doc-coverage` bleibt im Warn-Modus, solange es Lücken
+meldet. Einzeln aufrufbar sind sie weiter über `npm run check:nav` & Co. bzw.
+`node tooling/check-nav.mjs [--strict]`.
+
+**Nicht im Gate:** `check-prod-drift` (braucht Netz) und `check-figma-drift` (braucht
+`FIGMA_TOKEN`) — beide laufen nächtlich als GitHub-Action.

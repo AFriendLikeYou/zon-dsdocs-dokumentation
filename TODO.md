@@ -2,8 +2,12 @@
 
 Offene Arbeit, priorisiert. Hintergrund/Begründung steht in `DECISIONS.md` (ADRs) —
 hier nur die umsetzbaren Punkte. Jede neue UI gemäß Coding-Standard: wiederverwendbare,
-props-getriebene Svelte-5-Komponente in `src/lib/components/ui/<kebab>/` (Runes, `lang="ts"`,
-Tokens).
+props-getriebene Svelte-5-Komponente in `apps/docs/src/lib/components/ui/<kebab>/` (Runes,
+`lang="ts"`, Tokens).
+
+> **Pfad-Hinweis:** Die abgehakten Abschnitte weiter unten protokollieren erledigte
+> Arbeit und nennen die Pfade von damals (`src/…`, `static/…`). Sie werden bewusst
+> nicht nachgezogen; die aktuelle Struktur steht in `CLAUDE.md`.
 
 ## Verbleibend offen (Stand 2026-07-08)
 

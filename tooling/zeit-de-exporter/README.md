@@ -24,11 +24,11 @@ Routenordner enthält damit ausschließlich Generat.
 
 **Ausgabe** in der Doku-App:
 
-| Datei                                                   | Inhalt                                                                              | Bearbeiten?                                    |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `src/routes/product/components/<kebab>/+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
-| `src/routes/product/components/<kebab>/spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
-| `content/components/<kebab>.json`                         | Redaktioneller Stub — überschreibt die Defaults                                     | **hier** (einmalig erzeugt, nie überschrieben) |
+| Datei                                                              | Inhalt                                                                              | Bearbeiten?                                    |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `apps/docs/src/routes/product/components/<kebab>/+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
+| `apps/docs/src/routes/product/components/<kebab>/spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
+| `apps/docs/content/components/<kebab>.json`                         | Redaktioneller Stub — überschreibt die Defaults                                     | **hier** (einmalig erzeugt, nie überschrieben) |
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
 holt die Redaktion über den Alias `$content` (`import content from '$content/components/<kebab>.json'`)
@@ -53,7 +53,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 
 - **Modell geändert** (Maße, Tokens, Varianten, Playground …) → `model.json` + Exporter
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
-  `content/components/<kebab>.json` bleibt unangetastet.
+  `apps/docs/content/components/<kebab>.json` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
   `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
   `variantInfo`) → **`apps/docs/content/components/<kebab>.json` von Hand** (oder über
@@ -264,8 +264,11 @@ REST-Route nicht rekonstruiert (`unbound: []`).
 
 ## Verifikation
 
+Alles aus dem **Repo-Root** — die Root-Skripte delegieren per `-w docs` in die App;
+`npx vitest` aus dem Root findet keine Config mehr.
+
 ```bash
 npm run check   # svelte-check + Drift-Checks (Nav, Tokens, Assets, Component-Drift, ZDS-Sync)
 npm run build   # baut die Doku inkl. generierter Seite (braucht .env mit USERS)
-npx vitest run  # Component-/Daten-Tests
+npm test        # Component-/Daten-Tests (vitest run)
 ```

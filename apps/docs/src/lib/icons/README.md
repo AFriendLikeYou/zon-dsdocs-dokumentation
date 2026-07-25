@@ -4,8 +4,10 @@ Zentraler Ort für **alle UI-Icons der Doku-App** — Navbar, Sidebar, Footer,
 Playground, Specsheet, CodeBlock, CMS-Editor. Eine Datei pro Icon.
 
 > **Wichtig:** Das sind die Icons der **Doku-App selbst**, NICHT das dokumentierte
-> ZEIT-Designsystem. Die dokumentierten ZEIT-DS-Icons unter `static/` bleiben
-> unangetastet (das ist Content, gerendert über `ui/icons/IconGridWithSearch`).
+> ZEIT-Designsystem. Die dokumentierten ZEIT-DS-Icons liegen im Paket `@zeit/icons`
+> (`packages/icons/svg/`, ausgeliefert über den Spiegel
+> `apps/docs/static/downloads/icons/`) und bleiben unangetastet — das ist Content,
+> gerendert über `ui/icons/IconGridWithSearch`.
 
 ## Konvention: flach + ein Barrel
 

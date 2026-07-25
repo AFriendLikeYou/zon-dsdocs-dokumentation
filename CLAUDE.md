@@ -7,9 +7,13 @@ in [`DECISIONS.md`](DECISIONS.md), der Struktur-Plan in [`STRUKTUR-PLAN.md`](STR
 
 **ZEIT Online — Brandhub _und_ Design-System-Doku** in einer SvelteKit-App
 (mdsvex `.svx`, `adapter-vercel`). Alle Routen sind per **Basic-Auth**
-(`src/hooks.server.ts`) geschützt. Inhalte/Labels **Deutsch**, **Routen Englisch**
-(nur URLs; Schema-Keys, Content, Labels bleiben deutsch — Alt-URLs via 308 in
-`hooks.server.ts`).
+(`apps/docs/src/hooks.server.ts`) geschützt. Inhalte/Labels **Deutsch**, **Routen
+Englisch** (nur URLs; Schema-Keys, Content, Labels bleiben deutsch — Alt-URLs via
+308 in `hooks.server.ts`).
+
+Das Repo ist ein **npm-Workspace-Monorepo**: die App liegt in `apps/docs`, der
+Inhalt, den wir besitzen, in `packages/{tokens,icons,components}`; `tooling/`
+bleibt im Root. Versionierung der Pakete über `.changeset/`.
 
 Zwei Produkte, ein Repo:
 
@@ -24,15 +28,22 @@ Zwei Produkte, ein Repo:
 
 ## Setup & Befehle
 
+**Alles wird aus dem Repo-Root gerufen.** Die Root-Skripte delegieren per
+`-w docs` in den App-Workspace — `npx vitest` / `npx playwright` funktionieren aus
+dem Root **nicht** mehr (dort liegt keine Vite-/Playwright-Config).
+
 ```bash
-nvm use && npm install
+nvm use && npm install     # installiert alle Workspaces (packages/* + apps/*)
 # .env anlegen (gitignored!) — Dev-Credentials beim Team erfragen:
 #   USERS=[{"username":"…","password":"…"}]
-npm run dev      # Dev-Server (Basic-Auth aktiv)
-npm run build    # Produktionsbuild (braucht USERS aus .env)
-npm run check    # svelte-check + Drift-Checks (nav/tokens/assets/component) → 0/0
-npm run lint     # eslint     ·     npm run format   # prettier
-npx vitest run   # Component-/Daten-Tests
+npm run dev        # Dev-Server (Basic-Auth aktiv)          → -w docs
+npm run build      # Produktionsbuild (braucht USERS aus .env) → -w docs
+npm run check      # svelte-check + Drift-Checks (nav/tokens/assets/component) → 0/0
+npm run lint       # eslint     ·     npm run format   # prettier
+npm test           # Component-/Daten-Tests (vitest run)   → -w docs
+npm run test:unit  # dieselben Tests im Watch-Modus
+npm run test:e2e   # Playwright (apps/docs/e2e)            → -w docs
+npm run tokens:build   # @zeit/tokens: roles.ts → dist/    ·  tokens:check
 ```
 
 > Ohne `USERS` in `.env` bricht der Build ab. Auth in `hooks.server.ts` **nie**
@@ -40,13 +51,13 @@ npx vitest run   # Component-/Daten-Tests
 > Absicherung über Tests + Gate; visuelle Abnahme macht der Mensch.
 >
 > **Gate vor „fertig":** `npm run check` 0/0 · `lint` 0 Fehler · `build` EXIT 0 ·
-> `vitest` grün.
+> `npm test` grün.
 >
 > Die Drift-Checks (`tooling/check-*.mjs`) laufen **scharf**: 7 von 8 mit
 > `--strict`, d. h. ein Befund bricht `npm run check` mit Exit 1 ab — nav, tokens,
 > assets, component-drift, content, zds-sync, token-refs. **Ausnahme:**
-> `check-doc-coverage` bleibt Warn-Modus, solange es Lücken meldet (aktuell 1:
-> `cell` hat nur 1 dokumentierten Zustand). Lücke füllen → dort `--strict`
+> `check-doc-coverage` bleibt Warn-Modus, solange es Lücken meldet (welche, sagt der
+> Lauf selbst — fehlende Zustände bzw. `beispiele`). Lücken füllen → dort `--strict`
 > ergänzen. Neue Checks starten im Warn-Modus und werden scharf geschaltet,
 > sobald ihr Befund 0 ist.
 >
@@ -73,40 +84,45 @@ npx vitest run   # Component-/Daten-Tests
 ## Dateistruktur (aktuell)
 
 ```
-src/
-├─ routes/
-│  ├─ brand/…                    # Brandhub-Seiten (.svx) · pride-communication = Komponenten-Prüfstand
-│  ├─ product/
-│  │  ├─ foundations/ tokens/ motion/
-│  │  └─ components/<slug>/       # Component-DOKU pro Ordner — NUR Generat ↓
-│  │     │                        #   (Modell+CSS im Paket, Redaktion in content/)
-│  │     ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
-│  │     └─ +page.svx             # MASCHINE — autogeneriert
-│  └─ admin/                      # Redaktionelles CMS (dev-only Writes, Prod → GitHub-PR) ↓
-│     ├─ [slug]/                  # Editor für die Component-Redaktion (Prop-Formulare)
-│     ├─ media/  media-fs.server.ts   # Bild-Upload + geteilte listMediaImages()
-│     └─ brand/                   # Brand-.svx-Editor (CMS) ↓
-│        ├─ +page.*               # Übersicht: Reihenfolge (Drag&Drop) + „Neue Seite"
-│        ├─ [...path]/+page.*     # Editor-Seite (Block-Liste, Undo/Entwurf, Save-Bar)
-│        ├─ editor/               # CMS-UI-Bausteine: PropField, FieldsPanel, Media-/
-│        │                        #   TokenPicker, ProseEditor, Slash-/InsertMenu, BlockPreview
-│        ├─ core/                 # pure Logik + Tests: segment, cms-components (Registry),
-│        │                        #   validation, slash, prose-md, new-page, brand-nav, *.server
-│        └─ icons/                # austauschbare 16×16-CMS-Icons (Registry + <Icon name>)
-├─ lib/                          # Aliases: $components $data $stores $config $types (+ $content → content/)
-│  ├─ components/
-│  │  ├─ layout/                  # App-Chrome (Sidebar, Navbar, Footer, …)
-│  │  └─ ui/                      # alles andere, je Ordner + Barrel (specsheet,
-│  │                             #   playground, card, tab, …)
-│  ├─ data/                       # navigation.ts · catalog.ts · foundation-tokens.ts …
-│  ├─ types/  actions/  stores/  config/  utils.ts
-└─ hooks.server.ts               # sequence(Basic-Auth, Redirects)
-content/components/<slug>.json   # MENSCH — Redaktion je Komponente, nie überschrieben
-                                 #   (neben src/, damit Text keine Paketversion auslöst;
-                                 #    Import in der Seite über den Alias $content)
-static/                          # global.css (Token-Layer) · media/ downloads/ fonts/
-                                 #   styles-zds.css = Spiegel (sync:zds, gitignored)
-                                 #   downloads/icons/ = Spiegel (sync:icons, gitignored)
+apps/docs/                       # die SvelteKit-App = npm-Workspace `docs`
+│                                #   (svelte.config.js · vite.config.ts · tsconfig.json hier!)
+├─ src/
+│  ├─ routes/
+│  │  ├─ brand/…                 # Brandhub-Seiten (.svx) · pride-communication = Komponenten-Prüfstand
+│  │  ├─ product/
+│  │  │  ├─ foundations/ tokens/ motion/
+│  │  │  └─ components/<slug>/    # Component-DOKU pro Ordner — NUR Generat ↓
+│  │  │     │                     #   (Modell+CSS im Paket, Redaktion in content/)
+│  │  │     ├─ spec.generated.ts  # MASCHINE — bei jedem Sync neu
+│  │  │     └─ +page.svx          # MASCHINE — autogeneriert
+│  │  └─ admin/                   # Redaktionelles CMS (dev-only Writes, Prod → GitHub-PR) ↓
+│  │     ├─ [slug]/               # Editor für die Component-Redaktion (Prop-Formulare)
+│  │     ├─ media/  media-fs.server.ts   # Bild-Upload + geteilte listMediaImages()
+│  │     └─ brand/                # Brand-.svx-Editor (CMS) ↓
+│  │        ├─ +page.*            # Übersicht: Reihenfolge (Drag&Drop) + „Neue Seite"
+│  │        ├─ [...path]/+page.*  # Editor-Seite (Block-Liste, Undo/Entwurf, Save-Bar)
+│  │        ├─ editor/            # CMS-UI-Bausteine: PropField, FieldsPanel, Media-/
+│  │        │                     #   TokenPicker, ProseEditor, Slash-/InsertMenu, BlockPreview
+│  │        ├─ core/              # pure Logik + Tests: segment, cms-components (Registry),
+│  │        │                     #   validation, slash, prose-md, new-page, brand-nav, *.server
+│  │        └─ icons/             # austauschbare 16×16-CMS-Icons (Registry + <Icon name>)
+│  ├─ lib/                       # Aliases: $components $data $stores $config $types (+ $content → content/)
+│  │  ├─ components/
+│  │  │  ├─ layout/               # App-Chrome (Sidebar, Navbar, Footer, …)
+│  │  │  └─ ui/                   # alles andere, je Ordner + Barrel (specsheet,
+│  │  │                          #   playground, card, tab, …)
+│  │  ├─ data/                    # navigation.ts · catalog.ts · foundation-tokens.ts …
+│  │  ├─ server/                  # NUR-Server: mcp.ts · registry.ts · agent-catalog.ts · manifest.ts
+│  │  ├─ spec/                    # Laufzeit-Merge generated ↔ Redaktion (mergeSpec)
+│  │  ├─ types/  actions/  stores/  config/  icons/  utils.ts
+│  └─ hooks.server.ts            # sequence(Basic-Auth, Redirects)
+├─ content/components/<slug>.json # MENSCH — Redaktion je Komponente, nie überschrieben
+│                                #   (neben src/, damit Text keine Paketversion auslöst;
+│                                #    Import in der Seite über den Alias $content)
+├─ static/                       # global.css (Token-Layer) · media/ downloads/ fonts/
+│                                #   styles-zds.css = Spiegel (sync:zds, gitignored)
+│                                #   downloads/icons/ = Spiegel (sync:icons, gitignored)
+└─ e2e/                          # Playwright-Suiten (npm run test:e2e) + __screenshots__/
 packages/                        # Workspace-Pakete (Monorepo-Umbau, MIGRATIONSPLAN.md)
 ├─ components/                   # @zeit/components — ein Ordner je Komponente ↓
 │  └─ src/<slug>/
@@ -123,13 +139,15 @@ packages/                        # Workspace-Pakete (Monorepo-Umbau, MIGRATIONSP
    ├─ src/roles.ts               # unsere --ds-*-Rollen-Schicht (TS-Quelle)
    └─ build.mjs                  # → dist/roles.css + dist/tokens.json
 tooling/                         # zeit-de-exporter/ + check-*.mjs (Drift-Gate)
+│                                #   Pfad-Landkarte: tooling/lib/paths.mjs (EINE Quelle)
+.changeset/                      # SemVer + Changelog der @zeit/*-Pakete (`docs` ist ignoriert)
 ```
 
 Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
 
 **Paket-Inhalt wird gespiegelt, nicht umverlinkt:** Was in `packages/*` liegt, aber unter
 einer bestehenden URL ausgeliefert werden muss (`/downloads/icons/…`, `/styles-zds.css`),
-kopiert ein `sync:*`-Skript nach `static/`. Die Ziele sind **Build-Artefakte** (gitignored)
+kopiert ein `sync:*`-Skript nach `apps/docs/static/`. Die Ziele sind **Build-Artefakte** (gitignored)
 und laufen in `prepare`/`predev`/`prebuild` automatisch mit; `check-assets`/`check-zds-sync`
 prüfen sie. So bleibt der öffentliche Vertrag stabil, ohne dass Paketinhalt doppelt im Git
 liegt.
@@ -176,7 +194,7 @@ liegt.
 | Klasse | Felder | Regel |
 | --- | --- | --- |
 | ① **Maschine** | `masse` `spacing` `tokens` `farbrollen` `varianten` `zustaende` `produktion` `render` `katalog` | Redaktion ändert sie **nie** direkt — nur über einen `overrides`-Eintrag |
-| ② **Mensch** | `zweck` `status` `beispiele` `callouts` `a11y` `tastatur` `doDont` `faq` `verwendung` `wording` `komposition` `verwandt` (+ `version` `variantInfo` `tokenHinweise` `playground` `codeBeispiele` `code*`/`repo*`) | content.json gewinnt feldweise, wie eh und je |
+| ② **Mensch** | `zweck` `status` `beispiele` `callouts` `a11y` `tastatur` `doDont` `faq` `verwendung` `wording` `komposition` `verwandt` (+ `version` `variantInfo` `tokenHinweise` `playground` `codeBeispiele` `code*`/`repo*`) | die Redaktionsdatei gewinnt feldweise, wie eh und je |
 | ③ **Stamm** | `name` `kategorie` `figma` `aktualisiertAm` `dokumentiertAm` `code` | Identität — weder redaktionell noch per Override änderbar |
 
 **Eine Quelle:** `tooling/zeit-de-exporter/feldklassen.mjs`. Sie speist den Exporter
@@ -231,7 +249,7 @@ ihn über den Alias `$content` und führt beides zusammen:
 begründetem Override** (s. o.). `render.cssFile` ist **relativ zum Modell**
 (`./pattern.css` im selben Paket-Ordner).
 
-**Registry-Index** `src/lib/data/catalog.ts` entsteht zur Build-Zeit per
+**Registry-Index** `apps/docs/src/lib/data/catalog.ts` entsteht zur Build-Zeit per
 `import.meta.glob` über alle `model.json` des Pakets — ein neues Pattern erscheint
 dort **automatisch**. Reihenfolge/Badge/Ausschluss stehen im `katalog`-Block
 desselben `model.json` (die frühere Override-Map ist entfallen).
@@ -260,7 +278,7 @@ ein `render.template`. Varianten-Werte, die ein `abdeckt` nennt, fallen aus dem
 Specimen-Raster — der Rest bleibt als **„Weitere Varianten"** stehen, sind alle
 abgedeckt, entfällt die Sektion. Redaktionell pflegbar im Spec-Editor.
 
-**Spec-UI-Kit** `src/lib/components/ui/specsheet/` — theme-adaptive Renderer, die
+**Spec-UI-Kit** `apps/docs/src/lib/components/ui/specsheet/` — theme-adaptive Renderer, die
 die Seiten-Styles erben (keine verschachtelten weißen Cards): `ComponentHero ·
 Anatomy · ExampleBlock · SpecimenGrid · StateList · TokenTable · MeasureTable ·
 A11yList · DoDontList · PropsTable · CodeBlock`. Live-Specimens sitzen auf heller
@@ -293,7 +311,7 @@ wording, verwandt`. Client-State → verstecktes JSON-Feld → Server merged
   der SSOT-Config; Position danach per Drag&Drop.
 - `admin/brand/` (Index) — **Seiten-Übersicht + Reihenfolge**: spiegelt die reale
   Sidebar-Hierarchie (Kategorie-Header · Themen-Gruppe mit Unterseiten · Blatt-Seite)
-  aus der **Config-SSOT `src/lib/data/brand-nav.json`** und ist per **Drag&Drop**
+  aus der **Config-SSOT `apps/docs/src/lib/data/brand-nav.json`** und ist per **Drag&Drop**
   (zwei Scopes: Top-Level + innerhalb einer Gruppe) und **↑/↓** umsortierbar →
   persistiert via `?/reorder` hinter dem validierenden Guard `admin/brand/core/brand-nav.ts`
   (Kind-Exklusivität + **Konservierung**: nur umsortieren, nichts erfinden/verlieren).
@@ -302,7 +320,7 @@ wording, verwandt`. Client-State → verstecktes JSON-Feld → Server merged
   - `$effect`-Resync (der Config-Write löst im Dev einen HMR-Remount aus). Siehe ADR-028.
 - `admin/media/` — Bild-Upload (MIME-autoritative Endung, Traversal-Riegel, 5 MB,
   dev-guard) + Galerie. Geteilte Medien-Liste: `admin/media-fs.server.ts`
-  (`listMediaImages()` läuft `static/media/` ab, genutzt von media **und** Brand-Editor).
+  (`listMediaImages()` läuft `apps/docs/static/media/` ab, genutzt von media **und** Brand-Editor).
 
 ### Brand-`.svx`-Editor-Engine — `admin/brand/core/segment.ts` (pure, getestet)
 
@@ -429,13 +447,13 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 5. Nav-Eintrag: **entfällt** für Komponenten mit `model.json` — die Components-Sektion
    wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen im
    `katalog`-Block des `model.json`; geplante Stubs ohne Paket-Gegenstück in
-   `PLANNED_COMPONENTS` (navigation.ts).
+   `PLANNED_COMPONENTS` (`apps/docs/src/lib/data/navigation.ts`).
 6. Gate ausführen; redaktionelle Texte in `apps/docs/content/components/<slug>.json` prüfen (klar trennen:
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
 ## Konventionen / Regeln
 
-- **Semantische Token-Ebene** (`--ds-*` in `static/global.css`, auf z-ds-Tokens
+- **Semantische Token-Ebene** (`--ds-*` in `apps/docs/static/global.css`, auf z-ds-Tokens
   gemappt) ist der Default für die **Doku-UI**; Komponenten nutzen nur Rollen-
   Tokens. Ausnahmen: `--z-ds-space-*`/`-lineheight-*`, **originalgetreue
   Pattern-CSS** (echte z-ds-Kopie) und generierte Seiten.
@@ -455,7 +473,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
   interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.
 - **Bild-Konvention 16:9:** Content-Prosabilder (`main p > img`, also mdsvex
   `![]()`) zeigen per Default 16:9 (`aspect-ratio` + `object-fit: cover`,
-  `static/global.css`). Ausnahme explizit auszeichnen: als HTML-`<img class="img-natural">`
+  `apps/docs/static/global.css`). Ausnahme explizit auszeichnen: als HTML-`<img class="img-natural">`
   statt `![]()` (natürliches Verhältnis, kein Crop) — für Logos/Wortmarken,
   Icon-Anatomie-Diagramme, Hochformat-Poster u. Ä. UI-Komponenten (DoDont, Lightbox,
   BrandHero, ExampleStage) bringen eigene, klassen-gescopte Bild-Regeln mit und sind
@@ -466,9 +484,13 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 - Neueste **Svelte-5-Syntax** (Runes/Snippets; kein `export let`/`$:`/`slot`/`on:`).
 - Wiederverwendbares immer als eigene `ui/`-Komponente bauen, nicht inline duplizieren.
 - **Atom-first:** Vor jedem UI-Neubau erst den Bestand prüfen (Reihenfolge + Liste in
-  `src/lib/components/README.md`, Abschnitt „Atom-first"): Felder nur über `ui/field/`
+  `apps/docs/src/lib/components/README.md`, Abschnitt „Atom-first"): Felder nur über `ui/field/`
   (einzige Feld-Optik), Buttons über `ui/button/` (`size`-Prop), Banner/Flash über
   `ui/banner/`, Leere-Zustände über `ui/empty-state/`, Fokus-Ringe via `.focus-ring`.
+- **Änderung an einem `packages/*`-Paket ⇒ Changeset im selben PR** (`npx changeset`,
+  legt eine Markdown-Datei in `.changeset/` an). Die Doku-App `docs` ist in
+  `.changeset/config.json` unter `ignore` — sie wird nie veröffentlicht. Details:
+  [`.changeset/README.md`](.changeset/README.md).
 - Commits/Pushes nur auf Aufruf; Message endet mit
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 
@@ -476,9 +498,9 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 
 Die Site ist selbst ein **MCP-Server** (agent-ready): Tools `search` + `get` über die
 Komponenten-Registry. Minimaler, handgerollter JSON-RPC-2.0-Handler (Streamable HTTP,
-stateless, **kein SDK**). Route `src/routes/api/mcp/+server.ts` (dünn) → Logik
-`src/lib/server/mcp.ts` (pure Funktionen, getestet) → Datenbasis
-`src/lib/server/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem `pattern.css`** —
+stateless, **kein SDK**). Route `apps/docs/src/routes/api/mcp/+server.ts` (dünn) → Logik
+`apps/docs/src/lib/server/mcp.ts` (pure Funktionen, getestet) → Datenbasis
+`apps/docs/src/lib/server/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem `pattern.css`** —
 liegt in `lib/server/`, damit SvelteKit Client-Importe **compiler-seitig verbietet**).
 Liegt hinter Basic Auth wie alles. Details/Client-Config:
 [`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
@@ -487,7 +509,7 @@ Liegt hinter Basic Auth wie alles. Details/Client-Config:
 
 Entwickler ziehen dokumentierte Komponenten per CLI ins eigene Projekt — Dateien
 werden **kopiert**, nicht installiert. Endpoints (dünne Routen → pure Logik
-`src/lib/server/registry.ts`, getestet): `GET /api/registry` (Index) ·
+`apps/docs/src/lib/server/registry.ts`, getestet): `GET /api/registry` (Index) ·
 `GET /api/registry/<slug>[?format=html-css]` (Metadaten + Artefakte inkl.
 Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
 (Build-Zeit-Glob wie Manifest/MCP). Pro Komponente deklariert der `code`-Block im
@@ -499,7 +521,10 @@ Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
 
 - Lokales **git ist v2.23** → kein `git init -b`; stattdessen `git init` +
   `git symbolic-ref HEAD refs/heads/main`.
-- `.env`, `node_modules`, `/.svelte-kit`, `/build`, `.DS_Store` sind gitignored.
+- `.env`, `node_modules`, `.svelte-kit/`, `build/`, `.DS_Store` sind gitignored — die
+  Build-Artefakte **nicht mehr wurzel-verankert**, seit die App in `apps/docs` liegt.
+  Ebenfalls gitignored: die Spiegel `apps/docs/static/downloads/icons/` +
+  `apps/docs/static/styles-zds.css` und `packages/*/dist/`.
 - `pattern.css`-Scoping: flache Regeln **plus die bedingten At-Rules** `@media`,
   `@supports`, `@container` (Rahmen bleibt, Rumpf wird gescopet — Zerlegung über
   Klammerbilanz in `scopeCss`/`scopeToCanvas`). **Größenbasiertes `@media` wird im
@@ -509,7 +534,7 @@ Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
   `pointer`, `print`, gemischte Bedingungen und Komma-Listen bleiben `@media`, und
   es wird nie beides ausgegeben. Die `pattern.css` selbst behält ihr `@media`
   (originalgetreue Kopie + Code-Block). Query-Container sind `.spec-canvas`
-  (`static/global.css`) und `.playground__stage`/`.playground__frame`. **`@keyframes` & Co. wirft der
+  (`apps/docs/static/global.css`) und `.playground__stage`/`.playground__frame`. **`@keyframes` & Co. wirft der
   Exporter**: Prozent-Selektoren dürfen nicht gescopet werden, und der Keyframe-Name
   wäre global (Svelte benennt ihn im `<style>` der `.svx` um, im Katalog-`<style>`
   kollidierte er zwischen Komponenten).

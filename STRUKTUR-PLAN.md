@@ -6,6 +6,16 @@ Status: **Stufen 0–3 umgesetzt. Die Zielstruktur wurde danach durch ADR-021 ve
 Landkarte. **Wo dieses Dokument von ADR-021 abweicht, gilt ADR-021** — dieses Dokument
 bleibt als Plan-/Entscheidungs-Historie stehen. Offen: Stufen 4–5.
 
+> **Pfad-Hinweis (Stand nach dem Monorepo-Umbau):** Alle `src/…`- und `static/…`-Pfade
+> in diesem Dokument beschreiben die Struktur **zum Zeitpunkt des Plans**. Seither ist
+> die App nach `apps/docs/` gezogen (`src/` → `apps/docs/src/`, `static/` →
+> `apps/docs/static/`), `model.json` + `pattern.css` liegen im Paket
+> `packages/components/src/<slug>/`, die Redaktion in
+> `apps/docs/content/components/<slug>.json`. Die Pfade werden hier bewusst **nicht**
+> nachgezogen — ein Plan, der rückwirkend anders lautet, ist als Beleg wertlos. Die
+> aktuelle Landkarte steht in `CLAUDE.md` und `README.md`; die zentrale Pfad-Quelle für
+> Tooling ist `tooling/lib/paths.mjs`.
+
 ## Getroffene Entscheidungen
 
 1. **Playground = Standard-Sektion jeder Component-Seite** (nicht eigene Seite): Design-Tab-
