@@ -219,6 +219,69 @@ rotem Check wüsste niemand, welche der drei Änderungen schuld war.
 
 ---
 
+## 5a. Zielbild — Agent-Konsum und Code Connect
+
+Nicht Teil des PR-Schnitts. Steht hier, damit die Zwischenschritte in die richtige
+Richtung zeigen — insbesondere PR 6, der so geschnitten sein sollte, dass sich
+Validierungsregeln daraus **ableiten** lassen statt sie später zu rekonstruieren.
+
+### Was bereits existiert
+
+Vier agentenzugewandte Oberflächen: `/api/mcp` (4 Tools, JSON-RPC 2.0, mit
+`structuredContent`), die REST-Registry, `zds-cli` (Copy-in), sowie `llms.txt` und
+`llms-full.txt` als eigene Routen. Entdecken, Suchen und Abrufen sind abgedeckt.
+
+### Was fehlt: Überprüfung, nicht Information
+
+Agenten schreiben Code — sie können aber nicht prüfen, ob sie das System **richtig**
+verwendet haben. Ein `validate`-Tool wäre der Unterschied zwischen Raten und Belegen:
+
+- `z-button--primary` **und** `--zplus` gleichzeitig → schließen sich aus
+- `color: #444444` hartcodiert → das ist `--z-ds-color-text-70`
+- Icon-Button ohne `aria-label` → für Screenreader unbedienbar
+- nicht existierende Modifier-Klasse → fällt heute **still** weg
+
+**Das Wissen dafür besitzen wir schon.** `check-component-drift` kennt die gültigen
+Modifier, `check-token-refs` die gültigen Tokens, `check-doc-coverage` die Pflichtteile.
+Ein `validate`-Tool ist keine neue Erkenntnis, sondern eine **neue Oberfläche auf
+vorhandene Prüflogik**.
+
+### Warum echte Komponenten das strukturell verbessern
+
+Eine CSS-Klasse scheitert **lautlos**: `z-button--fullwith` (Tippfehler) bewirkt nichts,
+ohne Rückmeldung. Für einen Agenten, der sein Ergebnis nicht *sehen* kann, ist stilles
+Scheitern die schlimmste Fehlerart. Ein Custom Element scheitert **laut** — seine
+Attribute *sind* die API, es kann bei unbekannten Werten warnen und ist zur Laufzeit
+selbstbeschreibend.
+
+### Drei Ergänzungen (nach PR 6, brechen keinen Vertrag)
+
+| | Was | Vertrag |
+| --- | --- | --- |
+| **Z1** | `validate`-Tool im MCP, gespeist aus der vorhandenen Prüflogik | neues Tool neben den vier vorhandenen |
+| **Z2** | `get` mit Ziel-Parameter — „Installation, Import, Verwendung" je Ziel (Web Component, Svelte, reines HTML) statt nur `pattern.css` + HTML-String | optionaler Parameter; `format` existiert in der Registry bereits, das Schema kennt die Enum-Werte |
+| **Z3** | Do/Don't als **maschinenlesbare Regeln** statt nur Prosa | zusätzliches Feld |
+
+### Code Connect — der Rückweg
+
+ANALYSE.md hielt fest, dass Code Connect heute **nicht herstellbar** ist: Figma deklariert
+Achsen, die es im Code nicht gibt (`Type` mit zehn Werten, kein einziger Wurzel-Modifier).
+Es fehlt eine Seite der Verbindung.
+
+Mit echten Komponenten ändert sich das. Der Figma-MCP hat `get_code_connect_map` und
+`send_code_connect_mappings` — hinterlegt man dort unsere Komponenten, sieht ein
+ZEIT-Entwickler **im Figma Dev Mode direkt `<z-accordion>`** statt eines Klassennamens,
+den er selbst zusammensetzen muss. Das ist zugleich das stärkste Adoptionsargument: Der
+Code steht im Design, nichts muss nachgeschlagen werden.
+
+**Vorbehalt zum Figma-Abgleich per MCP:** MCP-Server hängen an einer authentifizierten
+Sitzung; ein nächtlicher CI-Lauf hat die nicht. Deshalb **zwei Wege**: der REST-Fetch
+(`fetch.mjs`, existiert) trägt den automatisierten Check, der MCP den interaktiven
+(„was hat sich seit dem letzten Import geändert?"). Dieselbe Arbeitsteilung wie bei
+`check-prod-drift`: Playwright nachts, Browser-Tools beim Nachfragen.
+
+---
+
 ## 6. Risiken und Nicht-Ziele
 
 **Risiken:**
