@@ -15,7 +15,7 @@
  *   (e2) benannte `beispiele` vorhanden, wo sie überhaupt renderbar sind
  *        (render.template + Varianten-Achsen)? Ohne sie zeigt die Seite nur
  *        Optionen (Playground/Varianten-Raster), aber keine Absicht.
- *   (f) content.json mehr als ein Thin-Stub (nur status/zweck/verwandt)?
+ *   (f) Redaktionsdatei mehr als ein Thin-Stub (nur status/zweck/verwandt)?
  *   (g) `katalog.order` im model.json gesetzt? (sonst order 999 ans Ende —
  *       der carousel-Fall: fertig dokumentiert, aber unkuratiert gelandet)
  *
@@ -27,12 +27,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
+import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
 
 /** Quelle: model.json im Paket … */
 const pkgDir = PKG_COMPONENTS_DIR;
-/** … Redaktion: content.json in der Doku-Route. */
-const routesDir = COMPONENTS_DIR;
+/** … Redaktion: `<slug>.json` in der Doku-App (seit PR 5). */
+const contentDir = CONTENT_COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
 const readJson = (file) => {
@@ -48,10 +48,10 @@ const THIN_STUB_KEYS = new Set(['status', 'zweck', 'verwandt']);
 /**
  * Redaktionelle Felder (EDITORIAL in tooling/zeit-de-exporter/export.mjs). Sie werden
  * aus spec.generated.ts GESTRIPPT — zur Laufzeit liest die Seite sie also
- * ausschließlich aus content.json. Steht so ein Feld nur in model.json, ist der Text
- * zwar geschrieben, erscheint aber NIE (der content.json-Stub wird nur einmalig beim
- * ersten Export erzeugt und danach nie wieder angefasst — später im model.json
- * ergänzte Redaktion landet folglich nirgends).
+ * ausschließlich aus der Redaktionsdatei. Steht so ein Feld nur in model.json, ist
+ * der Text zwar geschrieben, erscheint aber NIE (der Redaktions-Stub wird nur
+ * einmalig beim ersten Export erzeugt und danach nie wieder angefasst — später im
+ * model.json ergänzte Redaktion landet folglich nirgends).
  */
 const EDITORIAL_KEYS = [
 	'zweck',
@@ -85,7 +85,7 @@ const slugs = fs
 
 for (const slug of slugs) {
 	const model = readJson(path.join(pkgDir, slug, 'model.json'));
-	const content = readJson(path.join(routesDir, slug, 'content.json')) ?? {};
+	const content = readJson(path.join(contentDir, `${slug}.json`)) ?? {};
 	if (!model) continue; // kaputtes JSON meldet check-content
 
 	const gaps = [];
@@ -137,12 +137,12 @@ for (const slug of slugs) {
 	);
 	if (verwaist.length)
 		gaps.push(
-			`nur in model.json, nicht in content.json → wird nie gerendert: ${verwaist.join(', ')}`
+			`nur in model.json, nicht in ${slug}.json → wird nie gerendert: ${verwaist.join(', ')}`
 		);
 
 	const contentKeys = Object.keys(content);
 	if (contentKeys.length > 0 && contentKeys.every((k) => THIN_STUB_KEYS.has(k)))
-		gaps.push(`content.json ist ein Thin-Stub (nur ${contentKeys.join(', ')})`);
+		gaps.push(`${slug}.json ist ein Thin-Stub (nur ${contentKeys.join(', ')})`);
 
 	if (typeof model.katalog?.order !== 'number')
 		gaps.push('kein `katalog.order` im model.json (läuft mit order 999 ans Ende)');

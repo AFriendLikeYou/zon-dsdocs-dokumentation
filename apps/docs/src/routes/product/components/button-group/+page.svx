@@ -15,9 +15,9 @@ kategorie: Aktionen
 	import { UsageBlock } from '$components/ui/usage-block';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
-	import content from './content.json';
+	import content from '$content/components/button-group.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const editorial = content as Partial<ComponentSpec>;
 	const htmlBody = `<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>`;

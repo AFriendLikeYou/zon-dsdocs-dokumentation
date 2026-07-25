@@ -15,9 +15,9 @@ kategorie: Aktionen
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import content from './content.json';
+	import content from '$content/components/page-shortcut.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-page-shortcut"},{"nr":2,"side":"bottom","x":50}];
 	const playgroundControls = [] as PlaygroundControl[];

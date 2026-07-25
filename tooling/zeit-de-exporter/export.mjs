@@ -12,7 +12,11 @@
  *   AUSGABE (Doku-App):
  *   - SvelteKit-Route (mdsvex):  apps/docs/src/routes/product/components/<kebab>/+page.svx   (immer neu)
  *   - Maschinen-Modell:          apps/docs/src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
- *   - Redaktioneller Stub:       apps/docs/src/routes/product/components/<kebab>/content.json (nur beim ersten Mal)
+ *   - Redaktioneller Stub:       apps/docs/content/components/<kebab>.json (nur beim ersten Mal)
+ *
+ * Die Redaktion liegt seit PR 5 NEBEN der Route statt in ihr: der Routenordner
+ * enthält damit ausschließlich Generat (nichts von Hand Gepflegtes), und Text
+ * löst keine Paketversion aus.
  *
  * Eingabe und Ausgabe liegen damit in verschiedenen Workspaces: das Paket ist das
  * Produkt, die Route seine Dokumentation. Das Modell selbst wird NICHT verändert —
@@ -33,7 +37,7 @@ import { resolve, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateModelSchema } from './schema-validate.mjs';
 import { resolveArtefakte } from '../artefakte.mjs';
-import { COMPONENTS_REL, PKG_COMPONENTS_REL } from '../lib/paths.mjs';
+import { COMPONENTS_REL, CONTENT_COMPONENTS_REL, PKG_COMPONENTS_REL } from '../lib/paths.mjs';
 
 const TARGET = 'zeit-de';
 // Repo-relativ (nicht absolut): der Exporter bekommt seinen Root per --root und
@@ -41,6 +45,14 @@ const TARGET = 'zeit-de';
 const ROUTE_BASE = COMPONENTS_REL;
 /** Die Eingabeseite: ein Ordner je Komponente im Paket (model.json + pattern.css). */
 const PKG_BASE = PKG_COMPONENTS_REL;
+/** Die Redaktionsseite: eine Datei je Komponente, ausserhalb der Route (PR 5). */
+const CONTENT_BASE = CONTENT_COMPONENTS_REL;
+/**
+ * Alias auf `apps/docs/content` (svelte.config.js). Die erzeugte Seite greift
+ * darüber auf ihre Redaktionsdatei zu — ein relativer Pfad müsste fünf Ebenen
+ * hochklettern und bräche bei jeder Routen-Umhängung still.
+ */
+const CONTENT_IMPORT_BASE = '$content/components';
 const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
 // CodeBlock lebt eigenständig unter ui/code-block (aus dem specsheet-Barrel gelöst) —
 // wird separat importiert, nicht mehr über das Spec-UI-Kit.
@@ -201,9 +213,10 @@ function renderGenerated(model) {
 }
 
 /**
- * content.json — redaktioneller Stub (reines JSON, VON HAND PFLEGBAR). Wird nur
- * erzeugt, wenn noch nicht vorhanden (nie überschrieben). Die Felder überschreiben
- * beim Merge die generierten Werte aus spec.generated.ts (content gewinnt).
+ * `content/components/<slug>.json` — redaktioneller Stub (reines JSON, VON HAND
+ * PFLEGBAR). Wird nur erzeugt, wenn noch nicht vorhanden (nie überschrieben). Die
+ * Felder überschreiben beim Merge die generierten Werte aus spec.generated.ts
+ * (content gewinnt).
  *
  * JSON statt TS (CMS Phase 0): ein /admin-Editor bearbeitet Content maschinell
  * (JSON.parse/stringify) — kein AST-Wrapper (`satisfies`), keine Kommentare im File.
@@ -897,11 +910,11 @@ function renderPage(model, { patternCss = null } = {}) {
 			: '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
-		`\timport content from './content.json';\n` +
+		`\timport content from '${CONTENT_IMPORT_BASE}/${kebabCase(model.name)}.json';\n` +
 		(hasEditorial ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
 
 	const decls =
-		`\t// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.\n` +
+		`\t// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.\n` +
 		`\tconst ${S} = { ...generated, ...content };\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
@@ -1419,7 +1432,8 @@ function main() {
 
 	const kebab = kebabCase(model.name);
 	const outDir = resolve(root, ROUTE_BASE, kebab);
-	const contentPath = resolve(outDir, 'content.json');
+	// Redaktion liegt NEBEN der Route (PR 5) — eine Datei je Slug, kein Ordner.
+	const contentPath = resolve(root, CONTENT_BASE, `${kebab}.json`);
 	const contentExists = existsSync(contentPath);
 
 	// Pattern-CSS (unscoped) lesen, falls das Modell es referenziert. `cssFile` ist
@@ -1462,6 +1476,7 @@ function main() {
 	if (contentExists) {
 		console.log(`  übersprungen (von Hand gepflegt): ${relative(root, contentPath)}`);
 	} else {
+		mkdirSync(dirname(contentPath), { recursive: true });
 		writeFileSync(contentPath, renderContentStub(model));
 		console.log(`  Stub erzeugt: ${relative(root, contentPath)}`);
 	}

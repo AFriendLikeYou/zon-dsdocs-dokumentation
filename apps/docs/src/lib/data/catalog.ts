@@ -3,10 +3,10 @@
  *
  * Discovery killt Drift (ADR-018/023): Der Index entsteht zur Build-Zeit per
  * import.meta.glob — eine neue Komponente erscheint hier automatisch, ohne
- * Handliste. Zwei Quellen, seit PR 4 in zwei Workspaces:
+ * Handliste. Zwei Quellen, seit PR 4/5 sauber getrennt:
  *
  *   packages/components/src/<slug>/model.json   ← Maschine (das Paket = das Produkt)
- *   src/routes/product/components/<slug>/content.json ← Mensch (Redaktion, zieht PR 5)
+ *   content/components/<slug>.json              ← Mensch (Redaktion, kein Release)
  *
  * Kuratierte, nicht ableitbare Felder (Reihenfolge, Badge, Ausschluss) stehen im
  * `katalog`-Block des jeweiligen model.json — die frühere Handliste
@@ -78,19 +78,28 @@ const models = import.meta.glob('../../../../../packages/components/src/*/model.
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec> & { render?: unknown }>;
 
-const contents = import.meta.glob('/src/routes/product/components/*/content.json', {
+// Die Redaktion liegt seit PR 5 in `apps/docs/content/` — INNERHALB der Vite-
+// Projektwurzel, also bleibt der Griff wurzel-relativ (führender `/`). Eine Datei
+// je Slug, kein Ordner: der Slug steckt im Dateinamen.
+const contents = import.meta.glob('/content/components/*.json', {
 	eager: true,
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
 
+/** `…/<slug>/model.json` → `<slug>` (Paket: Ordner trägt den Slug). */
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
+/** `…/<slug>.json` → `<slug>` (Redaktion: Dateiname trägt den Slug). */
+const slugOfFile = (path: string) => path.split('/').pop()!.replace(/\.json$/, '');
 
 /** Glob-Ergebnis nach Slug umschlüsseln — nie Glob-Keys von Hand zusammenbauen.
     Ein selbstgebauter Key würde bei jeder Pfadänderung still ins Leere greifen. */
-const bySlug = <T>(eintraege: Record<string, T>): Record<string, T> =>
-	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugOf(pfad), wert]));
+const bySlug = <T>(
+	eintraege: Record<string, T>,
+	slugAus: (pfad: string) => string
+): Record<string, T> =>
+	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugAus(pfad), wert]));
 
-const contentsBySlug = bySlug(contents);
+const contentsBySlug = bySlug(contents, slugOfFile);
 
 export const CATALOG: CatalogEntry[] = Object.entries(models)
 	.map(([path, model]) => {

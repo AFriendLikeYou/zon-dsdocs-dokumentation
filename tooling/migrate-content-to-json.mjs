@@ -2,6 +2,12 @@
 /**
  * migrate-content-to-json — EINMALIGE Format-Migration (CMS Phase 0).
  * ----------------------------------
+ *
+ * ⚠️  ABGESCHLOSSEN UND WIRKUNGSLOS: es gibt im Repo keine `content.ts` mehr, der
+ *     Lauf endet sofort mit „nichts zu migrieren". Die unten genannten Pfade sind
+ *     zudem der Stand VOR PR 5 — die Redaktion liegt jetzt in
+ *     `apps/docs/content/components/<slug>.json`. Kandidat zum Löschen.
+ * ----------------------------------
  * Wandelt die redaktionellen Mensch-Dateien
  *   apps/docs/src/routes/product/components/<slug>/content.ts
  * in reines JSON um:

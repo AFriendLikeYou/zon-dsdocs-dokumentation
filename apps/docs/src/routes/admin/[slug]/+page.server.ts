@@ -1,12 +1,12 @@
 import { CATALOG } from '$data/catalog';
 import { error, fail } from '@sveltejs/kit';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { dev } from '$app/environment';
+import { contentPath } from '$lib/server/component-paths';
 
 // Editierbare redaktionelle Felder (Teilmenge von EDITORIAL im Exporter). Nur
 // diese überschreibt das Formular — nicht gelistete Felder (z. B. version, masse)
-// bleiben unangetastet erhalten. Schema-Quelle: content.json / ComponentSpec.
+// bleiben unangetastet erhalten. Schema-Quelle: Redaktionsdatei / ComponentSpec.
 const EDITABLE = [
 	'zweck',
 	'status',
@@ -22,10 +22,9 @@ const EDITABLE = [
 	'playground'
 ] as const;
 
+// Slug gegen den Katalog validieren → kein Path-Traversal in den fs-Pfad
+// (contentPath selbst setzt nur zusammen, es prüft nicht).
 const isKnown = (slug: string) => CATALOG.some((c) => c.slug === slug);
-// Slug gegen den Katalog validieren → kein Path-Traversal in den fs-Pfad.
-const contentPath = (slug: string) =>
-	resolve(process.cwd(), `src/routes/product/components/${slug}/content.json`);
 
 export const load = ({ params }) => {
 	const { slug } = params;

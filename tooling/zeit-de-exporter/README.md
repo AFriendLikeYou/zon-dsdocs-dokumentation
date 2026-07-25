@@ -11,7 +11,9 @@ siehe [`IMPORT.md`](./IMPORT.md).
 ## Ein- und Ausgabe
 
 Seit PR 4 (Monorepo) liegen sie in **zwei Workspaces** — das Paket ist das Produkt,
-die Route seine Dokumentation.
+die Route seine Dokumentation. Seit PR 5 liegt die **Redaktion** an einem dritten Ort,
+`apps/docs/content/components/` — Text darf keine Paketversion auslösen, und der
+Routenordner enthält damit ausschließlich Generat.
 
 **Eingabe** im Paket `@zeit/components`, unter `packages/components/src/<kebab>/`:
 
@@ -20,16 +22,17 @@ die Route seine Dokumentation.
 | `model.json`  | das Doku-Modell (zentraler Typ `ComponentSpec` in [`apps/docs/src/lib/types/spec.ts`](../../apps/docs/src/lib/types/spec.ts)) |
 | `pattern.css` | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt — **relativ zum Modell** |
 
-**Ausgabe** in der Doku-App, unter `apps/docs/src/routes/product/components/<kebab>/`:
+**Ausgabe** in der Doku-App:
 
-| Datei               | Inhalt                                                                              | Bearbeiten?                                    |
-| ------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
-| `spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
-| `content.json`      | Redaktioneller Stub — überschreibt die Defaults                                     | **hier** (einmalig erzeugt, nie überschrieben) |
+| Datei                                                   | Inhalt                                                                              | Bearbeiten?                                    |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `src/routes/product/components/<kebab>/+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
+| `src/routes/product/components/<kebab>/spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
+| `content/components/<kebab>.json`                         | Redaktioneller Stub — überschreibt die Defaults                                     | **hier** (einmalig erzeugt, nie überschrieben) |
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
-führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json` gewinnt**.
+holt die Redaktion über den Alias `$content` (`import content from '$content/components/<kebab>.json'`)
+und führt zur Laufzeit `{ ...generated, ...content }` zusammen — **die Redaktion gewinnt**.
 
 Aufruf mit dem PAKET-Ordner (dort liegt das Modell):
 
@@ -41,10 +44,11 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 
 - **Modell geändert** (Maße, Tokens, Varianten, Playground …) → `model.json` + Exporter
   erneut laufen lassen. `spec.generated.ts` + `+page.svx` werden neu erzeugt,
-  `content.json` bleibt unangetastet.
+  `content/components/<kebab>.json` bleibt unangetastet.
 - **Redaktioneller Text** (`zweck`, `status`, `callouts`, `a11y`, `tastatur`, `doDont`,
   `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
-  `variantInfo`) → **`content.json` von Hand**.
+  `variantInfo`) → **`apps/docs/content/components/<kebab>.json` von Hand** (oder über
+  den Spec-Editor `/admin/product/components/<kebab>`).
 - **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
   Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Reihenfolge
   und Badge stehen im `katalog`-Block **desselben `model.json`** (`order`, `badge`,
@@ -81,7 +85,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 | `tokens`                  | `{ kategorie, items: { name, hinweis?, swatch?, translucent? }[] }[]`                                                   | `TokenTable` (Specs). **Kein `wert`** — der Wert ist die eine Quelle (`packages/tokens/vendor/styles-zds.css`) und wird über `name` aufgelöst (Client: `getComputedStyle`, folgt Light/Dark · Server/Manifest: `ZDS_VALUES`). `hinweis` = freier Beschreibungstext, `swatch` = Hex-SSR-Platzhalter/Flag (Live-Farbe kommt aus dem Token). |
 | `farbrollen`              | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }`                      | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill)                                                                                                                                                                                                   |
 | `varianten`               | `{ prop, werte: { label, cssClass?, default? }[] }[]`                                                                   | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. `pattern.css`.                                                                                                      |
-| `beispiele`               | `{ titel, beschreibung?, instanzen?, abdeckt? }[]`                                                                     | `ExampleBlock` — benannte Beispiele als ERSTE Sektion nach dem Playground. Je `instanzen`-Eintrag EIN Satz Control-Werte (Playground-State), instanziiert über dasselbe `instantiate()` wie der Playground (kein zweiter Render-Pfad; braucht `render.template`). `abdeckt` nennt Varianten-Labels, die das Beispiel dokumentiert — abgedeckte Werte fallen aus dem Varianten-Raster ("Weitere Varianten"), sind alle abgedeckt, entfällt die Sektion. **Redaktionell** (content.json).                                                    |
+| `beispiele`               | `{ titel, beschreibung?, instanzen?, abdeckt? }[]`                                                                     | `ExampleBlock` — benannte Beispiele als ERSTE Sektion nach dem Playground. Je `instanzen`-Eintrag EIN Satz Control-Werte (Playground-State), instanziiert über dasselbe `instantiate()` wie der Playground (kein zweiter Render-Pfad; braucht `render.template`). `abdeckt` nennt Varianten-Labels, die das Beispiel dokumentiert — abgedeckte Werte fallen aus dem Varianten-Raster ("Weitere Varianten"), sind alle abgedeckt, entfällt die Sektion. **Redaktionell** (Redaktionsdatei).                                                    |
 | `zustaende`               | `{ label, vorhanden? }[]`                                                                                               | Renderbare Zustände (Matrix-Zelle **oder** Control-Klasse/Attribut vorhanden) als `SpecimenGrid`; reine Pseudoklassen-Zustände (`:hover`/`:focus`/`:active` ohne eigene Klasse) bleiben beschreibend in `StateList` (nicht gefakt).                                                                                       |
 | `a11y`                    | `{ label, wert, status: pass\|warn\|todo }[]`                                                                           | `A11yList` (eigener Tab)                                                                                                                                                                                                                                                                                                  |
 | `tastatur`                | `{ taste, aktion }[]`                                                                                                   | `KeyboardList` (Barrierefreiheit-Tab, Abschnitt „Tastatur")                                                                                                                                                                                                                                                               |
@@ -90,7 +94,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 | `wording`                 | `{ schlecht, gut, hinweis? }[]`                                                                                         | `WordingList` (Texte & Wording)                                                                                                                                                                                                                                                                                           |
 | `komposition`             | `string[]` (je Eintrag ein Satz-Hinweis)                                                                                | Kompositions-Hinweise (wie mit anderen Komponenten kombinieren) — MCP `usage`-Sektion; wichtig für Agenten bei Formularen/Organismen                                                                                                                                                                                      |
 | `verwandt`                | `string[]` (Katalog-Slugs)                                                                                              | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen)                                                                                                                                                                                                                                           |
-| `faq`                     | `{ frage, antwort }[]`                                                                                                  | `FaqList` — **letzte** Sektion des Design-Tabs, je Eintrag ein auf-/zuklappbares Disclosure (`ui/accordion`). Für die RESTFRAGEN, die die Specs nicht beantworten („Kann ich den Button als Link verwenden?"), **nicht** für Maße/Tokens/Varianten. Laufzeit-gated: ohne Inhalt keine Sektion. **Redaktionell** (content.json).                                                              |
+| `faq`                     | `{ frage, antwort }[]`                                                                                                  | `FaqList` — **letzte** Sektion des Design-Tabs, je Eintrag ein auf-/zuklappbares Disclosure (`ui/accordion`). Für die RESTFRAGEN, die die Specs nicht beantworten („Kann ich den Button als Link verwenden?"), **nicht** für Maße/Tokens/Varianten. Laufzeit-gated: ohne Inhalt keine Sektion. **Redaktionell** (Redaktionsdatei).                                                              |
 | `code`                    | `{ artefakte: { format: html-css\|web-component\|svelte, dateien: string[], status: kanonisch\|portiert\|entwurf }[] }` | **Component-Registry** (`/api/registry` + `zds`-CLI, Copy-in): deklariert die Code-Artefakte je Format. Optional — ohne Block gilt implizit `html-css → pattern.css` (kanonisch). Die Regel steht in `tooling/artefakte.mjs`; der Exporter backt das AUFGELÖSTE Ergebnis als `code` in `spec.generated.ts` ein, damit die Bezugs-Sektion `GetComponent` („Komponente holen", erste Sektion des Develop-Tabs) dieselben Formate nennt, die `zds add` liefert. Details: [IMPORT.md § 3b](IMPORT.md). |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)
@@ -125,20 +129,20 @@ Weitere `render`-Felder:
 | `calloutAnchors`             | `{ nr, side, x?, y?, selector? }[]` → Position der Anatomie-Callouts. `selector` (CSS, relativ zum Specimen-Root) benennt die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur echte Klassen aus `template`/`pattern.css`; ohne eigene Klasse (reine Textknoten) weglassen. |
 | `props`                      | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen                                                                                                                          |
 | `css`                        | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas`                                                                                                                                                                                                                                     |
-| `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop) — **feldweise in `content.json` überschreibbar** (s. u.)                                                                                                                                                                                                               |
-| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) — **feldweise in `content.json` überschreibbar** (s. u.)                                                                                                                                                                                                    |
-| `version`, `variantInfo`     | **redaktionell** → landen im `content.json`-Stub                                                                                                                                                                                                                                                            |
+| `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop) — **feldweise in der Redaktionsdatei überschreibbar** (s. u.)                                                                                                                                                                                                               |
+| `repoNote`, `repoCodeSvelte` | Brücke zur echten Repo-Komponente (Name/Import) — **feldweise in der Redaktionsdatei überschreibbar** (s. u.)                                                                                                                                                                                                    |
+| `version`, `variantInfo`     | **redaktionell** → landen im Redaktions-Stub                                                                                                                                                                                                                                                            |
 
-**Redaktionelle Code-Snippets (`content.json`).** Snippets sind Dev-Redaktion (Wissen
+**Redaktionelle Code-Snippets (Redaktionsdatei).** Snippets sind Dev-Redaktion (Wissen
 übers zeit.de-Repo). Zwei Wege, sie ohne Re-Export zu pflegen:
 
 - **Feldweise Overrides:** `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` sind
-  erlaubte Top-Level-Keys in `content.json`. Ist einer gesetzt, gewinnt er auf der Seite
+  erlaubte Top-Level-Keys in der Redaktionsdatei. Ist einer gesetzt, gewinnt er auf der Seite
   **feldweise** über den gleichnamigen `render`-Wert (`editorial.X ?? Maschine` — dasselbe
   Auflösungsmuster wie `version` über `content.version`); leer/fehlend → der Maschinen-Wert
   bleibt. **Kein** Block-Merge von `render`; `template`/`controls`/`specimen`/`pattern.css`
   bleiben unantastbar Maschine.
-- **Zusätzliche Beispiele:** `codeBeispiele` (`content.json`-only) ist ein Array
+- **Zusätzliche Beispiele:** `codeBeispiele` (nur Redaktionsdatei) ist ein Array
   `{ label, code, sprache?, hinweis? }` (`label`+`code` Pflicht; `sprache` ∈
   `svelte`|`html`|`css`|`js`, Default `svelte`). Sie erscheinen im Develop-Tab als
   zusätzliche `CodeBlock`s **unter** den maschinellen Code-Sektionen (`label` als

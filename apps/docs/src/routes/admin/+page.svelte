@@ -114,7 +114,7 @@
 	<AdminPageHeader title="Inhalte bearbeiten">
 		Redaktionelle Inhalte ohne Git/Editor pflegen. Die Liste unten spiegelt die
 		<strong>echte Produkt-Sidebar</strong> in Live-Struktur und -Reihenfolge — editierbar sind die
-		redaktionellen <code>content.json</code>-Felder der Komponenten; Modell, Maße und Tokens kommen
+		redaktionellen Felder der Komponenten (<code>content/components/</code>); Modell, Maße und Tokens kommen
 		aus Figma und sind bewusst nicht editierbar.
 	</AdminPageHeader>
 

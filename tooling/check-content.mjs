@@ -3,7 +3,7 @@
  * Content-Check (Warnung, kein Blocker — „Never Block, Always Suggest").
  *
  * Seit CMS Phase 0 sind die redaktionellen Mensch-Dateien reines JSON
- * (apps/docs/src/routes/product/components/<slug>/content.json) statt TypeScript. Damit
+ * (apps/docs/content/components/<slug>.json, seit PR 5) statt TypeScript. Damit
  * entfällt der Compile-Zeit-Check `satisfies Partial<ComponentSpec>`. Dieser Check
  * ersetzt ihn pragmatisch (kein volles Zod-Mirror — Phase 0):
  *
@@ -24,19 +24,19 @@ import path from 'node:path';
 // Validierungs-Kern (EDITORIAL_FIELDS + Typ-/Struktur-Checks) liegt geteilt in
 // content-validation.mjs — derselbe Code prüft im Spec-Editor-Save. Kein Duplikat.
 import { validateContentRaw } from './content-validation.mjs';
-import { COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
+import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
 
-/** content.json liegt bei der Doku-Seite … */
-const routesDir = COMPONENTS_DIR;
+/** Die Redaktion liegt in der Doku-App (seit PR 5) … */
+const contentDir = CONTENT_COMPONENTS_DIR;
 /** … model.json im Paket (seit PR 4). */
 const pkgDir = PKG_COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
-const slugs = fs.existsSync(routesDir)
+const slugs = fs.existsSync(contentDir)
 	? fs
-			.readdirSync(routesDir, { withFileTypes: true })
-			.filter((e) => e.isDirectory() && fs.existsSync(path.join(routesDir, e.name, 'content.json')))
-			.map((e) => e.name)
+			.readdirSync(contentDir, { withFileTypes: true })
+			.filter((e) => e.isFile() && e.name.endsWith('.json'))
+			.map((e) => e.name.replace(/\.json$/, ''))
 			.sort()
 	: [];
 
@@ -44,21 +44,23 @@ let problems = 0;
 let checked = 0;
 
 for (const slug of slugs) {
-	const raw = fs.readFileSync(path.join(routesDir, slug, 'content.json'), 'utf8');
+	const raw = fs.readFileSync(path.join(contentDir, `${slug}.json`), 'utf8');
 	const issues = validateContentRaw(raw);
 	if (issues.length === 0) {
 		checked++;
 	} else {
 		problems += issues.length;
-		console.warn(`\n⚠️  content.json-Befund in „${slug}":`);
+		console.warn(`\n⚠️  Redaktions-Befund in „${slug}.json":`);
 		for (const i of issues) console.warn(`   • ${i}`);
 	}
 }
 
 if (problems === 0) {
-	console.log(`✓ Content-Check: ${checked} content.json, nur bekannte Editorial-Keys & Typen OK.`);
+	console.log(
+		`✓ Content-Check: ${checked} Redaktionsdatei(en), nur bekannte Editorial-Keys & Typen OK.`
+	);
 } else {
-	console.warn('\n   (content.json korrigieren — nur Editorial-Keys, korrekte Typen.)\n');
+	console.warn('\n   (Redaktionsdatei korrigieren — nur Editorial-Keys, korrekte Typen.)\n');
 }
 
 // ── model.json gegen model.schema.json (ajv) ────────────────────────────────

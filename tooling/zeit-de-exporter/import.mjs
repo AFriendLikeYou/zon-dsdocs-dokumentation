@@ -16,7 +16,7 @@
  *              Namen schon da (Enterprise) ODER wird --draft gesetzt, läuft es
  *              direkt weiter.
  *   Schritt 2  draft  → model.draft.json
- *   GATE 2     Handarbeit: model.json prüfen, pattern.css + content.json, export.
+ *   GATE 2     Handarbeit: model.json prüfen, pattern.css + Redaktion, export.
  *
  * Ruft die bestehenden CLIs als Child-Prozesse auf (nutzt ihr exaktes Verhalten,
  * kein Logik-Duplikat). fetch.mjs/draft.mjs bleiben unverändert einzeln nutzbar.
@@ -25,7 +25,12 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COMPONENTS_REL, PKG_COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
+import {
+	COMPONENTS_REL,
+	CONTENT_COMPONENTS_REL,
+	PKG_COMPONENTS_REL,
+	REPO_ROOT as REPO
+} from '../lib/paths.mjs';
 
 /**
  * GATE 1: Liefert der Fetch degradierte Tokens? Bei fehlendem Enterprise-Zugriff
@@ -88,7 +93,7 @@ export const STAGE_COLUMNS = [
 	['draft', 'model.draft.json'],
 	['model', 'model.json'],
 	['pattern', 'pattern.css'],
-	['content', 'content.json'],
+	['content', 'content/components/<slug>.json'],
 	['+page', '+page.svx']
 ];
 
@@ -186,11 +191,13 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
  * @returns {StageEntry[]}
  */
 function gatherStatus() {
-	// Zwei Fundorte seit PR 4: Quelle im Paket (raw/draft/model/pattern), Ausgabe in
-	// der Route (content/+page). Die Slug-Liste ist die VEREINIGUNG — so bleibt auch
-	// eine Route ohne Paket-Gegenstück (geplanter Stub) in der Übersicht sichtbar.
+	// Drei Fundorte seit PR 4/5: Quelle im Paket (raw/draft/model/pattern), Seite in
+	// der Route, Redaktion in content/components. Die Slug-Liste ist die VEREINIGUNG
+	// von Paket und Route — so bleibt auch eine Route ohne Paket-Gegenstück
+	// (geplanter Stub) in der Übersicht sichtbar.
 	const pkgBase = path.join(REPO, PKG_COMPONENTS_REL);
 	const routeBase = path.join(REPO, COMPONENTS_REL);
+	const contentBase = path.join(REPO, CONTENT_COMPONENTS_REL);
 	/** @param {string} base */
 	const dirsIn = (base) =>
 		existsSync(base)
@@ -226,7 +233,7 @@ function gatherStatus() {
 			draft,
 			model,
 			pattern: has('pattern.css'),
-			content: hasRoute('content.json'),
+			content: existsSync(path.join(contentBase, `${slug}.json`)),
 			page: hasRoute('+page.svx'),
 			degraded,
 			draftOpen
@@ -308,7 +315,7 @@ if (isCli) {
 ⛔ GATE 2 — Handarbeit (wird nie generiert):
    1. ${dir}/model.draft.json prüfen → zu model.json promoten
    2. ${dir}/pattern.css anlegen (originalgetreue z-*-Klassen)
-   3. content.json redaktionell füllen (kommt als Stub aus dem Export, in der Route)
+   3. ${CONTENT_COMPONENTS_REL}/${slug}.json redaktionell füllen (Stub kommt aus dem Export)
    Dann veröffentlichen:
      node tooling/zeit-de-exporter/export.mjs ${dir}
 `);

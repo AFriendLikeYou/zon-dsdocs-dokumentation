@@ -1,21 +1,22 @@
 // Spec-Editor je Komponente (Feature A) — Provenance-Editor: zeigt die Maschinen-
 // Quelle (model.json, aus Figma) READ-ONLY neben den redaktionellen Feldern
-// (content.json, editierbar). Diese Route ist SPEZIFISCHER als der SVX-Catch-all
+// (die Redaktionsdatei, editierbar). Diese Route ist SPEZIFISCHER als der SVX-Catch-all
 // /admin/product/[...path] — SvelteKit priorisiert sie automatisch.
 //
-// Schreiben trifft NUR content.json (dev-only, wie im Brand-Editor). model.json
-// wird ausschließlich GELESEN — Maße/Tokens/Varianten kommen aus dem Import.
+// Schreiben trifft NUR die Redaktionsdatei (dev-only, wie im Brand-Editor).
+// model.json wird ausschließlich GELESEN — Maße/Tokens/Varianten kommen aus dem
+// Import.
 //
-// Seit PR 4 liegen die beiden Dateien in verschiedenen Workspaces: model.json +
-// figma-raw.json im Paket (@zeit/components), content.json weiter in der Route.
-// Die Grenze steht in $lib/server/component-paths.
+// Die beiden Dateien liegen an getrennten Orten: model.json + figma-raw.json im
+// Paket (@zeit/components, PR 4), die Redaktion in content/components/<slug>.json
+// (PR 5). Die Grenze steht in $lib/server/component-paths.
 import { dev } from '$app/environment';
 import { error, fail } from '@sveltejs/kit';
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { isDegraded } from '../../../../../../../../tooling/zeit-de-exporter/import.mjs';
 import { validateContentRaw } from '$lib/server/content-validation';
-import { PKG_COMPONENTS_DIR, packageDir, routeDir } from '$lib/server/component-paths';
+import { PKG_COMPONENTS_DIR, contentPath, packageDir } from '$lib/server/component-paths';
 import { CATALOG } from '$data/catalog';
 
 // Redaktionelle Felder, die DIESER Editor schreiben darf. Teilmenge der
@@ -92,7 +93,7 @@ export const load = ({ params }) => {
 
 	const dir = packageDir(slug);
 	const model = readJson(resolve(dir, 'model.json'));
-	const content = readJson(resolve(routeDir(slug), 'content.json'));
+	const content = readJson(contentPath(slug));
 
 	// Maschinelle Snippet-Werte aus dem render-Block — als gedämpfte Platzhalter/
 	// Vorbelegung der Override-Felder im Editor („leer = Maschine gewinnt").
@@ -146,7 +147,7 @@ export const load = ({ params }) => {
 			// gemischten Barrierefreiheit-Liste; content.a11y bleibt editierbar.
 			a11y: Array.isArray(model.a11y) ? model.a11y : []
 		},
-		// ── Redaktionelle Rohdaten (content.json) ──
+		// ── Redaktionelle Rohdaten (content/components/<slug>.json) ──
 		content,
 		machineSnippets,
 		slugs,
@@ -180,8 +181,8 @@ export const actions = {
 			return fail(400, { message: 'Ungültige Daten.' });
 		}
 
-		const path = resolve(routeDir(slug), 'content.json');
-		const full = readJson(path);
+		const ziel = contentPath(slug);
+		const full = readJson(ziel);
 		// Nur die editierbaren Keys übernehmen — der Rest (v1-read-only Felder aus
 		// dem Code) bleibt byte-genau erhalten. Fehlt ein editierbarer Key im Patch,
 		// wird er entfernt: so lässt sich ein Feld leeren (bei den Snippet-Overrides
@@ -196,11 +197,11 @@ export const actions = {
 		// check-content-Gate) — BEVOR geschrieben wird.
 		const issues = validateContentRaw(JSON.stringify(full));
 		if (issues.length) {
-			return fail(400, { message: `content.json ungültig: ${issues.join('; ')}` });
+			return fail(400, { message: `${slug}.json ungültig: ${issues.join('; ')}` });
 		}
 
 		// Format wie die Exporter-Stubs: Tabs + Schluss-Newline (check-content bleibt grün).
-		writeFileSync(path, JSON.stringify(full, null, '\t') + '\n');
+		writeFileSync(ziel, JSON.stringify(full, null, '\t') + '\n');
 		return { saved: true };
 	}
 };

@@ -10,8 +10,9 @@ Komponente, drei Dateien** — und die Aufteilung ist der Punkt:
 | `figma-raw.json` | Roh-Antwort des Figma-Imports                                     | **Fixture** für den Design-Drift-Vergleich   |
 | `index.ts`       | Barrel des Subpaths `@zeit/components/<slug>`                     | re-exportiert den Spec, **nicht** das CSS    |
 
-Was hier **nicht** liegt: die Doku-Ausgabe (`+page.svx`, `spec.generated.ts`) und
-die Redaktion (`content.json`). Beides gehört zu `apps/docs` — eine
+Was hier **nicht** liegt: die Doku-Ausgabe (`+page.svx`, `spec.generated.ts` unter
+`apps/docs/src/routes/product/components/<slug>/`) und die Redaktion
+(`apps/docs/content/components/<slug>.json`). Beides gehört zu `apps/docs` — eine
 Tippfehlerkorrektur im Fließtext darf keine Paketversion auslösen
 (`MIGRATIONSPLAN.md` §1).
 

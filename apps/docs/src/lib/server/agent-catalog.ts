@@ -8,8 +8,8 @@
  * und lädt kein CSS; er bleibt die Quelle für die Site-UI.
  *
  * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die model.json des Pakets + die
- * content.json der Route (content gewinnt), `$schema`/`katalog` gestrippt.
- * Zusätzlich pattern.css als ?raw.
+ * Redaktionsdatei content/components/<slug>.json (content gewinnt),
+ * `$schema`/`katalog` gestrippt. Zusätzlich pattern.css als ?raw.
  */
 import type { ComponentSpec } from '$types/spec';
 
@@ -24,7 +24,7 @@ export type AgentRender = {
 
 export type AgentCatalogEntry = {
 	slug: string;
-	/** Gemergter Spec (Maschinen-Modell + content.json) INKLUSIVE render. */
+	/** Gemergter Spec (Maschinen-Modell + Redaktion) INKLUSIVE render. */
 	spec: Partial<ComponentSpec> & { render?: AgentRender };
 	/** Rohes, unscoped Pattern-CSS (echte --z-ds-*-Token), falls vorhanden. */
 	patternCss: string | null;
@@ -34,7 +34,8 @@ export type AgentCatalogEntry = {
 //
 // model.json und pattern.css liegen im Paket (@zeit/components), also AUSSERHALB
 // der Vite-Projektwurzel `apps/docs` → datei-relativ statt mit führendem `/`
-// (Begründung in data/catalog.ts). Die content.json bleibt vorerst in der Route.
+// (Begründung in data/catalog.ts). Die Redaktion liegt seit PR 5 in
+// `apps/docs/content/`, also INNERHALB der Wurzel → wurzel-relativ.
 const models = import.meta.glob('../../../../../packages/components/src/*/model.json', {
 	eager: true,
 	import: 'default'
@@ -43,7 +44,7 @@ const models = import.meta.glob('../../../../../packages/components/src/*/model.
 	Partial<ComponentSpec> & { render?: AgentRender; $schema?: unknown; katalog?: unknown }
 >;
 
-const contents = import.meta.glob('/src/routes/product/components/*/content.json', {
+const contents = import.meta.glob('/content/components/*.json', {
 	eager: true,
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
@@ -54,14 +55,20 @@ const patterns = import.meta.glob('../../../../../packages/components/src/*/patt
 	import: 'default'
 }) as Record<string, string>;
 
+/** `…/<slug>/model.json` → `<slug>` (Paket: Ordner trägt den Slug). */
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
+/** `…/<slug>.json` → `<slug>` (Redaktion: Dateiname trägt den Slug). */
+const slugOfFile = (path: string) => path.split('/').pop()!.replace(/\.json$/, '');
 
 /** Glob-Ergebnisse nach Slug umschlüsseln — Keys nie von Hand zusammenbauen. */
-const bySlug = <T>(eintraege: Record<string, T>): Record<string, T> =>
-	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugOf(pfad), wert]));
+const bySlug = <T>(
+	eintraege: Record<string, T>,
+	slugAus: (pfad: string) => string
+): Record<string, T> =>
+	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugAus(pfad), wert]));
 
-const contentsBySlug = bySlug(contents);
-const patternsBySlug = bySlug(patterns);
+const contentsBySlug = bySlug(contents, slugOfFile);
+const patternsBySlug = bySlug(patterns, slugOf);
 
 export const AGENT_CATALOG: AgentCatalogEntry[] = Object.entries(models)
 	.map(([path, model]) => {

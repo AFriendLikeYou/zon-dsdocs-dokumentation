@@ -15,9 +15,9 @@ kategorie: Formulare
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import content from './content.json';
+	import content from '$content/components/toggle.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (content.json) zusammenführen — content gewinnt.
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
 	const spec = { ...generated, ...content };
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50,"selector":".z-switch"},{"nr":2,"side":"top","x":70,"selector":".z-switch__thumb"}];
 	const playgroundControls = [{"key":"on","label":"An","type":"toggle","cssClass":"z-switch--on"}] as PlaygroundControl[];

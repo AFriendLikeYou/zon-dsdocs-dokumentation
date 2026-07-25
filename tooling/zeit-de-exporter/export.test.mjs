@@ -12,14 +12,20 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { kebabCase, renderPage, renderGenerated, renderContentStub, scopeCss } from './export.mjs';
-import { COMPONENTS_REL, PKG_COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
+import {
+	COMPONENTS_REL,
+	CONTENT_COMPONENTS_REL,
+	PKG_COMPONENTS_REL,
+	REPO_ROOT as REPO
+} from '../lib/paths.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const EXPORT = path.join(HERE, 'export.mjs');
-// Eingabe (Paket) und Ausgabe (Route) liegen seit PR 4 auseinander — die Tests
-// müssen beide Seiten kennen.
+// Eingabe (Paket), Ausgabe (Route) und Redaktion (content/) liegen seit PR 4/5
+// auseinander — die Tests müssen alle drei Seiten kennen.
 const ROUTE_BASE = COMPONENTS_REL;
 const PKG_BASE = PKG_COMPONENTS_REL;
+const CONTENT_BASE = CONTENT_COMPONENTS_REL;
 const PKG_DIR = path.join(REPO, PKG_BASE);
 const ROUTE_DIR = path.join(REPO, ROUTE_BASE);
 
@@ -54,8 +60,8 @@ const slugs = readdirSync(PKG_DIR, { withFileTypes: true })
 // Normalisierung nötig; ein echter Byte-Unterschied IST das Drift-Signal.
 //
 // Isolation: Es wird mit --root <temp> in ein Temp-Ziel geschrieben, NIE in den
-// echten Baum. Damit legt der Exporter auch seinen content.json-Stub im Temp an —
-// die redaktionelle echte content.json wird nie angefasst.
+// echten Baum. Damit legt der Exporter auch seinen Redaktions-Stub im Temp an —
+// die echte content/components/<slug>.json wird nie angefasst.
 
 /** model.json von <slug> in ein Temp-Ziel exportieren. Gibt Prozess + Pfade zurück. */
 function exportToTemp(slug) {
@@ -69,7 +75,7 @@ function exportToTemp(slug) {
 	// pattern.css (render.cssFile) löst der Exporter gegen das MODELL auf — die
 	// echte Paket-Datei liegt daneben, es wird also nichts kopiert.
 	const res = runExport([path.join(pkgSrcDir, 'model.json'), '--root', tmp, '--target', 'zeit-de']);
-	return { res, srcDir: routeSrcDir, outDir };
+	return { res, srcDir: routeSrcDir, outDir, contentPath: path.join(tmp, CONTENT_BASE, `${kebab}.json`) };
 }
 
 describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
@@ -83,11 +89,13 @@ describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
 	it.each(slugs)(
 		'%s: +page.svx & spec.generated.ts byte-identisch',
 		(slug) => {
-			const { res, srcDir, outDir } = exportToTemp(slug);
+			const { res, srcDir, outDir, contentPath } = exportToTemp(slug);
 			expect(res.status, res.stderr).toBe(0);
 
-			// Isolation: Stub landet im Temp-Ziel, nicht im echten Ordner.
-			expect(existsSync(path.join(outDir, 'content.json'))).toBe(true);
+			// Isolation: Stub landet im Temp-Ziel (content/), nicht im echten Baum —
+			// und AUSSERHALB des Routenordners, der nur noch Generat enthält.
+			expect(existsSync(contentPath)).toBe(true);
+			expect(existsSync(path.join(outDir, 'content.json'))).toBe(false);
 
 			for (const file of ['+page.svx', 'spec.generated.ts']) {
 				const got = readFileSync(path.join(outDir, file));

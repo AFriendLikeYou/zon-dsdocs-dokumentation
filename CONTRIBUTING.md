@@ -76,9 +76,9 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 2. **Exporter laufen lassen** —
    `node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>`. Erzeugt
    unter `apps/docs/src/routes/product/components/<kebab>/`: `+page.svx` +
-   `spec.generated.ts` (beide **nie** von Hand editieren) + `content.json`
-   (redaktioneller Stub, **hier** editieren). `npm run export:all` fährt alle
-   Komponenten auf einmal.
+   `spec.generated.ts` (beide **nie** von Hand editieren) und — nur beim ersten Mal —
+   den redaktionellen Stub `apps/docs/content/components/<kebab>.json` (**hier**
+   editieren). `npm run export:all` fährt alle Komponenten auf einmal.
 3. **Nav — kein Handeintrag.** Die Components-Sektion der Nav ist **katalog-getrieben**
    (ADR-025): ein neues `model.json` erscheint automatisch. Reihenfolge/Badge stehen
    im `katalog`-Block desselben `model.json`; geplante Stubs ohne Paket-Gegenstück in
@@ -88,7 +88,7 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 
-- **Nur** `content.json` im jeweiligen Component-Ordner editieren (`zweck`, `status`, `callouts`,
+- **Nur** `apps/docs/content/components/<slug>.json` editieren (`zweck`, `status`, `callouts`,
   `a11y`, `doDont`, `verwendung`, …). Diese Datei überschreibt die generierten Defaults und
   wird beim Re-Export **nie** überschrieben.
 - **Nie** `spec.generated.ts` oder `+page.svx` von Hand ändern — die erzeugt der Exporter neu.

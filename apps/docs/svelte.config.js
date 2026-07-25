@@ -24,12 +24,17 @@ const config = {
 		// `$env/static/private` liest von hier (siehe envDir oben).
 		env: { dir: envDir },
 		// Aliase = Kurzformen auf src/lib/* (SvelteKit-Standardort; $lib ist eingebaut).
+		// Ausnahme `$content`: die Redaktion liegt seit PR 5 NEBEN src/ (kein Code,
+		// kein Release-Artefakt). Die generierten Component-Seiten importieren ihre
+		// Texte darüber — relativ wären es fünf Ebenen aufwärts, und das bräche bei
+		// jeder Routen-Umhängung still.
 		alias: {
 			$components: './src/lib/components',
 			$stores: './src/lib/stores',
 			$data: './src/lib/data',
 			$config: './src/lib/config',
-			$types: './src/lib/types'
+			$types: './src/lib/types',
+			$content: './content'
 		}
 	},
 	extensions: ['.svelte', '.svx']

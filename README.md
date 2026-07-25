@@ -30,13 +30,14 @@ src/
 │   │                           foundation-tokens + Override-Map  (* = generiert;
 │   │                           die Icon-Liste liegt im Paket @zeit/icons)
 │   ├── stores/  config/  types/  actions/  utils.ts …
-│   └── (Aliase: $components, $data, $stores, $config, $types → svelte.config.js)
+│   └── (Aliase: $components, $data, $stores, $config, $types, $content → svelte.config.js)
 │
 ├── routes/
 │   ├── brand/                  Brandhub-Seiten (englische URLs, deutsche Inhalte)
 │   ├── product/                DS-Doku; components/<slug>/ = +page.svx ·
-│   │                           spec.generated.ts · content.json (Exporter-AUSGABE;
-│   │                           model.json + pattern.css liegen in @zeit/components)
+│   │                           spec.generated.ts (Exporter-AUSGABE, nur Generat;
+│   │                           model.json + pattern.css in @zeit/components,
+│   │                           Redaktion in content/components/<slug>.json)
 │   ├── login/  admin/
 │   ├── +layout.svelte          Chrome-Mount + Bereichslogik (brand/product)
 │   └── hooks.server.ts (in src/): Basic Auth + 308-Redirects für Alt-URLs
@@ -73,7 +74,7 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Spieg
 - **Seite:** `src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in `src/lib/data/navigation.ts`.
 - **Dokumentierte Komponente:** `packages/components/src/<slug>/{model.json,pattern.css}` →
   `node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>` (redaktionelle
-  Texte danach in der `content.json` neben der erzeugten Seite).
+  Texte danach in `apps/docs/content/components/<slug>.json`).
 - **UI-Baustein der Doku:** `src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
 
 Ausführliche Rezepte: **[CONTRIBUTING.md](CONTRIBUTING.md)** · Konventionen:

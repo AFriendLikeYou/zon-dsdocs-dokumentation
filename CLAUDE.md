@@ -68,13 +68,12 @@ src/
 │  ├─ brand/…                    # Brandhub-Seiten (.svx) · pride-communication = Komponenten-Prüfstand
 │  ├─ product/
 │  │  ├─ foundations/ tokens/ motion/
-│  │  └─ components/<slug>/       # eine Component-DOKU pro Ordner ↓
-│  │     │                        #   (Modell + CSS liegen im Paket, s. u.)
-│  │     ├─ content.json          # MENSCH — redaktionell, nie überschrieben
+│  │  └─ components/<slug>/       # Component-DOKU pro Ordner — NUR Generat ↓
+│  │     │                        #   (Modell+CSS im Paket, Redaktion in content/)
 │  │     ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
 │  │     └─ +page.svx             # MASCHINE — autogeneriert
 │  └─ admin/                      # Redaktionelles CMS (dev-only Writes, Prod → GitHub-PR) ↓
-│     ├─ [slug]/                  # Editor für Component-content.json (Prop-Formulare)
+│     ├─ [slug]/                  # Editor für die Component-Redaktion (Prop-Formulare)
 │     ├─ media/  media-fs.server.ts   # Bild-Upload + geteilte listMediaImages()
 │     └─ brand/                   # Brand-.svx-Editor (CMS) ↓
 │        ├─ +page.*               # Übersicht: Reihenfolge (Drag&Drop) + „Neue Seite"
@@ -84,7 +83,7 @@ src/
 │        ├─ core/                 # pure Logik + Tests: segment, cms-components (Registry),
 │        │                        #   validation, slash, prose-md, new-page, brand-nav, *.server
 │        └─ icons/                # austauschbare 16×16-CMS-Icons (Registry + <Icon name>)
-├─ lib/                          # Aliases: $components $data $stores $config $types
+├─ lib/                          # Aliases: $components $data $stores $config $types (+ $content → content/)
 │  ├─ components/
 │  │  ├─ layout/                  # App-Chrome (Sidebar, Navbar, Footer, …)
 │  │  └─ ui/                      # alles andere, je Ordner + Barrel (specsheet,
@@ -92,6 +91,9 @@ src/
 │  ├─ data/                       # navigation.ts · catalog.ts · foundation-tokens.ts …
 │  ├─ types/  actions/  stores/  config/  utils.ts
 └─ hooks.server.ts               # sequence(Basic-Auth, Redirects)
+content/components/<slug>.json   # MENSCH — Redaktion je Komponente, nie überschrieben
+                                 #   (neben src/, damit Text keine Paketversion auslöst;
+                                 #    Import in der Seite über den Alias $content)
 static/                          # global.css (Token-Layer) · media/ downloads/ fonts/
                                  #   styles-zds.css = Spiegel (sync:zds, gitignored)
                                  #   downloads/icons/ = Spiegel (sync:icons, gitignored)
@@ -138,8 +140,8 @@ liegt.
        figma-measure.js ─── Bindungen, unbound[] ──────┤        ┌──────────────┐   Exporter (export.mjs)
                             → herkunft: "gemessen"     ├──────► │  model.json  │ ──────────┬─► +page.svx
                                                        │        │  (im Paket,  │           ├─► spec.generated.ts
-  ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content.json (STUB,
-     pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               nur beim 1. Mal)
+  ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content/…/<slug>.json
+     pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               (STUB, nur beim 1. Mal)
        (kuratiert, flach)   (:hover/:disabled),        ├──────► └──────┬───────┘
                             Web-Varianten, Tokens      │               │ import.meta.glob (BUILD-Zeit)
                                                        │               ▼
@@ -149,8 +151,8 @@ liegt.
 
   MENSCH (redaktionell)                                         SEITE (Merge zur Laufzeit)
   ─────────────────────                                         ──────────────────────────
-  content.json ── zweck, verwendung, doDont, a11y-Texte,          spec = { ...generated, ...content }
-                variantInfo … (NIE überschrieben)      ───────►        └─ content GEWINNT
+  content/components/ ─ zweck, verwendung, doDont, a11y-Texte,    spec = { ...generated, ...content }
+    <slug>.json        variantInfo … (NIE überschrieben)   ───────►        └─ content GEWINNT
 
   Prinzipien: „Nicht Gemessenes wird nicht erfunden" (herkunft: gemessen/abgeleitet/geschätzt) ·
   Re-Import ohne Figma-Änderung ⇒ identischer Output (Drift-Signal) · Jede Quelle liefert die
@@ -166,9 +168,10 @@ Dokumentation:
 node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>
 ```
 
-Erzeugt `+page.svx` + `spec.generated.ts` (Maschine, immer neu) und einmalig den
-Stub `content.json` (Mensch, nie überschrieben) unter
-`apps/docs/src/routes/product/components/<slug>/`. Die Seite führt beides zusammen:
+Erzeugt unter `apps/docs/src/routes/product/components/<slug>/` die Maschinen-Dateien
+`+page.svx` + `spec.generated.ts` (immer neu) und — nur beim ersten Mal — den Stub
+`apps/docs/content/components/<slug>.json` (Mensch, nie überschrieben). Die Seite holt
+ihn über den Alias `$content` und führt beides zusammen:
 `const spec = { ...generated, ...content }` — **content gewinnt**. `render.cssFile`
 ist **relativ zum Modell** (`./pattern.css` im selben Paket-Ordner).
 
@@ -192,7 +195,7 @@ speist **Live-Vorschau und Code-Block** — kein Drift. Escape-Hatch für
 Loops/Interaktion: `render.specimen` (co-located `Specimen.svelte`, darf nur
 Registry-Daten konsumieren).
 
-**Benannte Beispiele** (`beispiele[]`, redaktionell in `content.json`): je Eintrag
+**Benannte Beispiele** (`beispiele[]`, redaktionell in `content/components/<slug>.json`): je Eintrag
 `titel` + `beschreibung` + `instanzen` (n Sätze Control-Werte) + optional
 `abdeckt` (Varianten-Labels). Ein Playground dokumentiert **Optionen**, ein
 Beispiel dokumentiert **Absicht**. Gerendert über **dasselbe** `instantiate()` wie
@@ -218,10 +221,10 @@ ein **GitHub-PR** (Phase 2b). Vor JEDEM Write läuft der Sicherheitsgurt (s. u.)
 
 **Editoren & Übersicht:**
 
-- `admin/[slug]/` — **Component-`content.json`-Editor** (DS-Doku). Editierbare Keys:
+- `admin/[slug]/` — **Editor der Component-Redaktion** (`content/components/<slug>.json`) (DS-Doku). Editierbare Keys:
   `zweck, status, verwendung, doDont, variantInfo, beispiele, a11y, callouts, tastatur,
 wording, verwandt`. Client-State → verstecktes JSON-Feld → Server merged
-  **nur** diese Keys zurück (Rest der `content.json` bleibt).
+  **nur** diese Keys zurück (der Rest der Redaktionsdatei bleibt).
 - `admin/brand/[...path]/` — **Brand-`.svx`-Editor** (Brandhub, ADR-029): Notion-artige
   Block-Karten (Figma-Vorlage 689:11503) mit Slash-Command, typ-bewusster Vorschau
   (`BlockPreview`), gestapelten Feldern (`PropField` + `TokenPicker`/`MediaPicker`/
@@ -371,7 +374,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
    wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen im
    `katalog`-Block des `model.json`; geplante Stubs ohne Paket-Gegenstück in
    `PLANNED_COMPONENTS` (navigation.ts).
-6. Gate ausführen; redaktionelle Texte in `content.json` prüfen (klar trennen:
+6. Gate ausführen; redaktionelle Texte in `apps/docs/content/components/<slug>.json` prüfen (klar trennen:
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
 ## Konventionen / Regeln
@@ -388,7 +391,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
   Upstream-Kopie, nie von Hand ändern; `npm run copy:zds` ist der einzige Schreibweg).
 - **Doku-Modell ist kanonisch** und render-unabhängig. Repo-Spezifisches gehört
   in die Exporter-Schicht bzw. den `render`-Block.
-- **Generierte Dateien nie von Hand editieren** — Redaktion in `content.json`
+- **Generierte Dateien nie von Hand editieren** — Redaktion in `content/components/<slug>.json`
   (der „Edit on GitHub"-Stift zeigt dorthin).
 - **Vanilla HTML/CSS ist der Default** für Beispiele; Svelte nur bei
   interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.

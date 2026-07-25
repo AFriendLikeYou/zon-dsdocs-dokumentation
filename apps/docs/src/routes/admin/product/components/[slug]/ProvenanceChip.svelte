@@ -25,7 +25,7 @@
 	const defaultTitle =
 		variant === 'machine'
 			? 'Wird vom Import gepflegt — Änderung in Figma, dann Re-Import'
-			: 'Redaktionell editierbar (content.json)';
+			: 'Redaktionell editierbar (content/components/<slug>.json)';
 </script>
 
 {#snippet icon()}

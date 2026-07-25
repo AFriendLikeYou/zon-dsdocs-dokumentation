@@ -3,7 +3,7 @@
 // SERVER-ONLY (liest das Dateisystem, nutzt tooling-Skripte) → nie in Client-Code
 // importieren. Zwei Schichten, bewusst getrennt:
 //   1. PURE Kernfunktionen (docAmpel, buildBoard) — datenmodell-rein, getestet.
-//   2. fs-Sammlung (gatherComponentStatus) — liest model.json/content.json + mtimes.
+//   2. fs-Sammlung (gatherComponentStatus) — liest model.json/Redaktion + mtimes.
 //
 // Wiederverwendung statt Duplikat: `isDegraded` (Gate 1) und `statusForDirs`
 // (Pipeline-Stufen-Hinweise) kommen aus dem Import-Orchestrator (tooling). Die
@@ -12,7 +12,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { isDegraded, statusForDirs } from '../../../../../tooling/zeit-de-exporter/import.mjs';
-import { PKG_COMPONENTS_DIR, packageDir, routeDir } from '$lib/server/component-paths';
+import { PKG_COMPONENTS_DIR, contentPath, packageDir, routeDir } from '$lib/server/component-paths';
 
 /** Ampel-Stufe der Doku-Vollständigkeit. */
 export type Ampel = 'vollstaendig' | 'teilweise' | 'leer';
@@ -179,8 +179,9 @@ export function gatherComponentStatus(): ComponentBoard {
 		.map((e) => e.name)
 		.sort();
 
-	// Pipeline-Stufen je Ordner (für statusForDirs + Drift/Gate-1-Rohwerte). Modell,
-	// Rohdaten und CSS liegen im Paket, Content und Seite in der Route.
+	// Pipeline-Stufen je Komponente (für statusForDirs + Drift/Gate-1-Rohwerte).
+	// Drei Fundorte: Modell/Rohdaten/CSS im Paket, die Seite in der Route, die
+	// Redaktion in content/components/<slug>.json.
 	const stageEntries = slugs.map((slug) => {
 		const pkg = packageDir(slug);
 		const route = routeDir(slug);
@@ -195,7 +196,7 @@ export function gatherComponentStatus(): ComponentBoard {
 			draft: hasPkg('model.draft.json'),
 			model,
 			pattern: hasPkg('pattern.css'),
-			content: hasRoute('content.json'),
+			content: existsSync(contentPath(slug)),
 			page: hasRoute('+page.svx'),
 			degraded,
 			draftOpen: false
@@ -208,7 +209,7 @@ export function gatherComponentStatus(): ComponentBoard {
 	const inputs: ComponentStatusInput[] = slugs.map((slug, i) => {
 		const pkg = packageDir(slug);
 		const model = readJson(resolve(pkg, 'model.json')) ?? {};
-		const content = readJson(resolve(routeDir(slug), 'content.json')) ?? {};
+		const content = readJson(contentPath(slug)) ?? {};
 		const stage = stageEntries[i];
 
 		// Drift: figma-raw.json neuer als model.json (fehlt raw → kein Drift).

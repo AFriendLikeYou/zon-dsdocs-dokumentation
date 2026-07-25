@@ -13,6 +13,19 @@ export default defineConfig(() => ({
 		conditions: ['browser']
 	},
 
+	server: {
+		fs: {
+			// Die Redaktion (`content/components/<slug>.json`, PR 5) liegt NEBEN `src/`.
+			// SvelteKit setzt `fs.allow` im Dev-Server eng — src/, static/, .svelte-kit/,
+			// node_modules — und `content/` fällt heraus. Ohne diesen Eintrag liefert der
+			// Dev-Server die JSON-Module mit „outside of Vite serving allow list" nicht
+			// aus: SSR zeigt die Texte noch (Node liest die Datei direkt), die Hydration
+			// scheitert aber still. Im Build ist nichts betroffen — dort inlined der
+			// eager Glob die Dateien.
+			allow: ['./content']
+		}
+	},
+
 	// vite-plugin-svelte erkennt „Framework-Pakete" (solche mit `svelte`-Export), indem
 	// es die package.json der PROJEKTWURZEL abkrabbelt — und die ist seit dem Umzug
 	// apps/docs/package.json. Die Abhängigkeiten des Monorepos stehen aber in der

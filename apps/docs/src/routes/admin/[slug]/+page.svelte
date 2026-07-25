@@ -288,7 +288,7 @@
 		crumb={{ href: '/admin', label: 'Alle Komponenten' }}
 		actions={data.writable ? undefined : readonlyChip}
 	>
-		Bearbeitet <code>content.json</code>. Andere Felder bleiben unverändert.
+		Bearbeitet <code>content/components/{data.slug}.json</code>. Andere Felder bleiben unverändert.
 	</AdminPageHeader>
 
 	{#if !data.writable}

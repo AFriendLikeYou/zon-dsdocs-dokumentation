@@ -14,7 +14,7 @@ Figma-Node ──(Figma MCP)──▶ Fakten (Name, Varianten, Tokens, Maße, St
 model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
    │
    ▼
-Katalog-Order (optional) · Gate · redaktionelle Prüfung (content.json)
+Katalog-Order (optional) · Gate · redaktionelle Prüfung (content/components/<slug>.json)
 ```
 
 ## Schnellstart
@@ -138,7 +138,7 @@ node tooling/zeit-de-exporter/import.mjs --status
 
 Spalten (Reihenfolge = Pipeline): `raw` (`figma-raw.json`) · `draft`
 (`model.draft.json`) · `model` (`model.json`) · `pattern` (`pattern.css`) ·
-`content` (`content.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
+`content` (`content/components/<slug>.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
 **Hinweis** meldet:
 
 - **`raw fehlt`** — kein Drift-Fixture (`figma-raw.json`) hinterlegt.
@@ -162,7 +162,7 @@ in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
   Modifier ein-/ausgeblendet) — deckt den Control-Raum ab; volle Achse in `render.matrix`.
   Optionale Bühnen-Optionen: `render.align` (`"center"` Default | `"fill"` = voller
   Seiten-Ausschnitt) und `render.resizable` (`true` blendet ein Resize-Handle ein).
-  Beide sind auch redaktionell in `content.json` (`playground`) überschreibbar.
+  Beide sind auch redaktionell in der Redaktionsdatei (`playground`) überschreibbar.
 - **`spacing`** für die internen Gaps (mit Token → Anatomie-Redlines + px↔Token-Toggle).
   Optional für die Bühnen-Streifen mit Zwei-Wege-Highlight: `art: 'padding' | 'gap'`.
   Bei `padding` zusätzlich `richtung: 'vertikal' | 'horizontal'` (welche Achse der Streifen
@@ -284,8 +284,8 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 ```
 
 Eingabe ist der **Paket**-Ordner, Ausgabe die Route: `+page.svx` +
-`spec.generated.ts` (+ `content.json`-Stub beim ersten Mal) unter
-`apps/docs/src/routes/product/components/<kebab>/`.
+`spec.generated.ts` unter `apps/docs/src/routes/product/components/<kebab>/`,
+plus — nur beim ersten Mal — der Redaktions-Stub `apps/docs/content/components/<kebab>.json`.
 
 ## 5 · Katalog (kein Nav-Handeintrag)
 
@@ -308,11 +308,11 @@ npm run build   # EXIT 0
 npx vitest run  # grün
 ```
 
-Danach in `content.json` klar trennen: **aus Figma übernommen** (verlässlich) vs.
+Danach in `apps/docs/content/components/<kebab>.json` klar trennen: **aus Figma übernommen** (verlässlich) vs.
 **Platzhalter/geschätzt** (Beispieltexte, gerechnete a11y-Kontraste). Visuell abnehmen
 (die Seite liegt hinter Basic Auth).
 
-Redaktionelle (Mensch-)Felder in `content.json`: `zweck`, `status`, `beispiele`,
+Redaktionelle (Mensch-)Felder in `apps/docs/content/components/<kebab>.json`: `zweck`, `status`, `beispiele`,
 `callouts`, `a11y`, `tastatur`, `doDont`, `faq`, `verwendung`, `wording`, `komposition`,
 `verwandt`, `version`, `variantInfo`, `codeBeispiele` sowie die feldweisen
 Snippet-Overrides `codeSvelte`, `repoCodeSvelte`, `codeNote`, `repoNote` (gewinnen
@@ -374,4 +374,4 @@ ehrlichen Hinweis statt eines Befehls, der an der Registry scheitern würde.
 - [ ] Exporter gelaufen
 - [ ] ggf. Katalog-Order/Badge in `catalog.ts` (Nav ist katalog-getrieben — kein Handeintrag)
 - [ ] Gate grün (check 0/0 · build · vitest)
-- [ ] Platzhalter/Beispieltexte in `content.json` geprüft
+- [ ] Platzhalter/Beispieltexte in `apps/docs/content/components/<kebab>.json` geprüft
