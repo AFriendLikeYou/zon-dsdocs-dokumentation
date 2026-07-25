@@ -123,6 +123,32 @@ Commit „z-accordion als erstes Custom Element".
 
 ---
 
+## ❓ Entscheidung nötig: Welches ist das kanonische Repository?
+
+**Befund (2026-07-26, bei der Reparatur des „Auf GitHub bearbeiten"-Stifts).**
+
+Der Code nennt zwei verschiedene Repositories:
+
+| Ort | Wert |
+| --- | --- |
+| `git remote get-url origin` | `AFriendLikeYou/zon-dsdocs-dokumentation` |
+| `apps/docs/src/lib/config/index.ts:5` | `ZeitOnline/zon-dsdocs` |
+| `admin/product/components/[slug]/+page.server.ts:88` | `ZeitOnline/zon-dsdocs` |
+
+**Folge:** Der Bearbeiten-Stift erzeugt seit jeher Links auf ein Repository, in dem
+der Code nicht liegt — die Pfade darin sind jetzt zwar korrekt, das Ziel ist es
+nicht. Dasselbe gilt für den IMPORT.md-Verweis im Spec-Editor.
+
+Ich habe den dokumentierten Wert **bewusst stehen lassen**, statt ihn auf das
+aktuelle Remote umzubiegen: Beides ist plausibel — entweder ist `ZeitOnline/…`
+das Ziel, wohin das Projekt noch wandert, oder es ist ein Altbestand. Das ist
+eine Entscheidung, keine Reparatur.
+
+**Sobald geklärt:** Es ist eine Zeile in `$config` (`GITHUB_REPO_URL`) plus die
+zweite hartkodierte Stelle oben.
+
+---
+
 ## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
 
 Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.

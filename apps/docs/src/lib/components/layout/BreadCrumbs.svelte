@@ -25,11 +25,10 @@
 
 	const showBreadcrumbs = $derived(breadcrumbs.length > 1);
 
-	// Component-Doku-Seiten werden generiert → der Stift bearbeitet die
-	// menschlich gepflegte content.ts statt der generierten +page.svx.
-	const editFile = (path: string) =>
-		/^\/product\/components\/[^/]+$/.test(path) ? 'content.ts' : '+page.svx';
-	const editTarget = $derived(editFile(page.url.pathname));
+	// Welche Datei der Stift öffnet, entscheidet GitHubEdit selbst (github-edit.ts):
+	// Die Zuordnung Route → Datei ist repo-absolut und glob-verifiziert, hier wurde
+	// sie früher aus dem Routenpfad geraten (und zeigte auf die längst entfallene
+	// content.ts).
 </script>
 
 {#if showBreadcrumbs}
@@ -50,7 +49,7 @@
 			</ol>
 		</nav>
 
-		<GitHubEdit file={editTarget} />
+		<GitHubEdit />
 	</div>
 {/if}
 

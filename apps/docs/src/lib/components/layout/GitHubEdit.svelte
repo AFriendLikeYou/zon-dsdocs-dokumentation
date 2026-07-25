@@ -2,35 +2,40 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { GithubIcon } from '$lib/icons';
+	import { editPathFor, editUrl } from './github-edit';
 
-	// Welche Datei der Stift öffnet. Default: die Seite selbst; Component-Doku-Seiten
-	// übergeben die menschlich gepflegte Inhalts-Datei (content.ts).
+	// Welche Datei der Stift öffnet, wird aus der Route abgeleitet (github-edit.ts) —
+	// REPO-ABSOLUT, denn die editierbare Datei liegt nicht immer bei der Route:
+	// Component-Seiten sind Generat, redigiert wird content/components/<slug>.json.
+	// `path` ist nur der Notausgang für Aufrufer, die ein anderes Ziel kennen.
 	let {
-		file = '+page.svx',
+		path = undefined,
 		label = ''
 	}: {
-		/** Zu bearbeitende Datei relativ zur Route (z. B. '+page.svx' oder 'content.ts'). */
-		file?: string;
+		/** Repo-absoluter Pfad ab Repo-Wurzel (z. B. 'apps/docs/content/components/button.json'). */
+		path?: string;
 		/** Optionales sichtbares Label neben dem Icon; leer = nur Icon. */
 		label?: string;
 	} = $props();
 
-	const startRoute = 'https://github.com/ZeitOnline/zon-dsdocs/edit/main/src/routes';
-
 	// `page` ist fein-granular reaktiv — direkt ableiten (statt afterNavigate-Spiegel).
-	const url = $derived(startRoute + page.url.pathname + '/' + file);
+	// Kein Ziel (404, dynamische Route) ⇒ kein Stift: ein Link ins Leere ist
+	// schlechter als keiner.
+	const ziel = $derived(path ?? editPathFor(page.url.pathname));
 </script>
 
-<a
-	title="Im GitHub die Seite bearbeiten"
-	class="app-button"
-	href={url}
-	target="_blank"
-	rel="noopener noreferrer"
->
-	{#if label}<span class="label">{label}</span>{/if}
-	<GithubIcon />
-</a>
+{#if ziel}
+	<a
+		title="Im GitHub die Seite bearbeiten"
+		class="app-button"
+		href={editUrl(ziel)}
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		{#if label}<span class="label">{label}</span>{/if}
+		<GithubIcon />
+	</a>
+{/if}
 
 <style>
 	a {
