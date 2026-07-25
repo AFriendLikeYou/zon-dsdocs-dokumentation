@@ -3,10 +3,10 @@
  * Nav-Drift-Check (Warnung, kein Blocker — „Never Block, Always Suggest").
  *
  * Hintergrund (DECISIONS.md ADR-007): Routen entstehen teils automatisch (Exporter unter
- * src/routes/product/components/<kebab>/), die Navigation wird aber bewusst von Hand
+ * apps/docs/src/routes/product/components/<kebab>/), die Navigation wird aber bewusst von Hand
  * kuratiert (Kategorie, Reihenfolge, Badge). Damit niemand vergisst, eine neue Seite im
  * Sidebar-Menü zu verlinken, prüft dieses Skript ALLE Routen: hat jede einen Eintrag in
- * src/lib/data/navigation.ts?
+ * apps/docs/src/lib/data/navigation.ts?
  *
  * Bewusst NICHT im Sidebar-Menü (Allowlist unten): Home, Auth/Utility und die
  * Foundation-Sub-Seiten (die sind über die Foundations-Übersichtskarten erreichbar).
@@ -17,11 +17,10 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { DATA_DIR, ROUTES_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const routesDir = path.join(root, 'src/routes');
-const navFile = path.join(root, 'src/lib/data/navigation.ts');
+const routesDir = ROUTES_DIR;
+const navFile = path.join(DATA_DIR, 'navigation.ts');
 const strict = process.argv.includes('--strict');
 
 // Bewusst ohne Sidebar-Menüeintrag — kein Drift, sondern Absicht.
@@ -68,15 +67,15 @@ const nav = fs.readFileSync(navFile, 'utf8');
 const navHrefs = new Set([...nav.matchAll(/href:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
 
 // Brand-Nav ist config-getrieben (ADR-028): Reihenfolge/Hierarchie stehen in
-// src/lib/data/brand-nav.json, nicht mehr als href-Literale in navigation.ts. Die
+// apps/docs/src/lib/data/brand-nav.json, nicht mehr als href-Literale in navigation.ts. Die
 // Hrefs von dort (Blatt-Links + Gruppen-Kinder) mit einlesen, sonst meldete der
 // Check alle Brand-Routen fälschlich als „nicht verlinkt".
 // Dasselbe gilt seit ADR-030 für die Product-Nav: die statischen Design-System-
-// Einträge stehen in src/lib/data/product-nav.json (umsortierbar über /admin), die
+// Einträge stehen in apps/docs/src/lib/data/product-nav.json (umsortierbar über /admin), die
 // Komponenten-Sektion bleibt katalog-getrieben (s. isComponentCovered unten).
-const configFiles = ['src/lib/data/brand-nav.json', 'src/lib/data/product-nav.json'];
+const configFiles = ['brand-nav.json', 'product-nav.json'];
 for (const rel of configFiles) {
-	for (const section of JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'))) {
+	for (const section of JSON.parse(fs.readFileSync(path.join(DATA_DIR, rel), 'utf8'))) {
 		if (section.href) navHrefs.add(section.href);
 		for (const child of section.items ?? []) if (child.href) navHrefs.add(child.href);
 	}
@@ -111,7 +110,7 @@ if (missing.length === 0) {
 }
 
 console.warn(
-	`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in src/lib/data/navigation.ts:`
+	`\n⚠️  Nav-Drift: ${missing.length} Route(n) ohne Eintrag in apps/docs/src/lib/data/navigation.ts:`
 );
 for (const route of missing) {
 	console.warn(`   • ${route}  → in MENU_ITEMS_BRAND/MENU_ITEMS_PRODUCT ergänzen`);

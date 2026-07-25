@@ -1,14 +1,14 @@
 # Generierte Dateien — Formatierung gehört dem Exporter/Generator, nicht Prettier.
-src/routes/product/components/*/+page.svx
-src/routes/product/components/*/spec.generated.ts
-src/routes/product/components/*/figma-raw.json
-src/routes/product/components/*/model.draft.json
+apps/docs/src/routes/product/components/*/+page.svx
+apps/docs/src/routes/product/components/*/spec.generated.ts
+apps/docs/src/routes/product/components/*/figma-raw.json
+apps/docs/src/routes/product/components/*/model.draft.json
 
 # Redaktionelle Startseiten-Texte: das Format gehört dem Editor (/admin/start).
 # Er schreibt kanonisch mit JSON.stringify(…, '\t'); Prettier würde kurze Arrays
 # einzeilig zusammenziehen und damit den byte-stabilen Roundtrip brechen
-# (src/routes/admin/start/landing-content.test.ts).
-src/routes/landing.content.json
+# (apps/docs/src/routes/admin/start/landing-content.test.ts).
+apps/docs/src/routes/landing.content.json
 
 # Build-/Paket-Artefakte
 .svelte-kit/
@@ -20,4 +20,4 @@ packages/*/dist/
 # Durchgereichte Upstream-Kopie (@zeitonline/design-system) und ihr ausgelieferter
 # Spiegel: byte-identisch zum npm-Paket, sonst schlägt check-zds-sync an.
 packages/tokens/vendor/styles-zds.css
-static/styles-zds.css
+apps/docs/static/styles-zds.css

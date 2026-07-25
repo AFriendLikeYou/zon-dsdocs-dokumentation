@@ -16,14 +16,12 @@
  * VERIFIZIERT — kein Treffer heißt: Wert behalten, Token weglassen, Fund im
  * Report (nie raten).
  *
- *   node tooling/zeit-de-exporter/draft.mjs src/routes/product/components/<slug> [--stdout]
+ *   node tooling/zeit-de-exporter/draft.mjs apps/docs/src/routes/product/components/<slug> [--stdout]
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, '../..');
+import { REPO_ROOT as repoRoot, TOKENS_VENDOR_DIR } from '../lib/paths.mjs';
 
 /* ── Token-Mapping (deterministische Namensregel, IMPORT.md) ──────────────── */
 
@@ -328,7 +326,7 @@ if (isCli) {
 	}
 	const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
 	const known = knownTokens(
-		fs.readFileSync(path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'), 'utf8')
+		fs.readFileSync(path.join(TOKENS_VENDOR_DIR, 'styles-zds.css'), 'utf8')
 	);
 	const { draft, report } = buildDraft(raw, known);
 	const json = JSON.stringify(draft, null, '\t') + '\n';

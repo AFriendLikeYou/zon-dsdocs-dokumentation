@@ -1,12 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { TOKENS_VENDOR_DIR } from '../lib/paths.mjs';
 import { knownTokens, mapVariableName, parseVariantName, buildDraft } from './draft.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const known = knownTokens(
-	fs.readFileSync(path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'), 'utf8')
+	fs.readFileSync(path.join(TOKENS_VENDOR_DIR, 'styles-zds.css'), 'utf8')
 );
 
 // Fixture im exakten figma-measure.js-Output-Format — Button-artig mit

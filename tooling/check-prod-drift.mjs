@@ -43,9 +43,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const componentsDir = path.join(root, 'src/routes/product/components');
+const componentsDir = COMPONENTS_DIR;
 
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');
@@ -533,7 +533,7 @@ async function main() {
 
 function schreibeJson(ziel, ergebnis, nichtPruefbar) {
 	const body = { zeitpunkt: new Date().toISOString(), ...ergebnis, nichtPruefbar };
-	fs.writeFileSync(path.resolve(root, ziel), JSON.stringify(body, null, '\t') + '\n');
+	fs.writeFileSync(path.resolve(REPO_ROOT, ziel), JSON.stringify(body, null, '\t') + '\n');
 }
 
 /** Markdown für `$GITHUB_STEP_SUMMARY` — der Job soll ohne Log-Graben lesbar sein. */
@@ -586,7 +586,7 @@ function schreibeSummary(ziel, ergebnis, nichtPruefbar) {
 			'</details>',
 			''
 		);
-	fs.writeFileSync(path.resolve(root, ziel), md.join('\n'));
+	fs.writeFileSync(path.resolve(REPO_ROOT, ziel), md.join('\n'));
 }
 
 // Nur als CLI ausführen — beim Import (Tests) bleiben Netz und fs außen vor.

@@ -3,7 +3,7 @@
  * Content-Check (Warnung, kein Blocker — „Never Block, Always Suggest").
  *
  * Seit CMS Phase 0 sind die redaktionellen Mensch-Dateien reines JSON
- * (src/routes/product/components/<slug>/content.json) statt TypeScript. Damit
+ * (apps/docs/src/routes/product/components/<slug>/content.json) statt TypeScript. Damit
  * entfällt der Compile-Zeit-Check `satisfies Partial<ComponentSpec>`. Dieser Check
  * ersetzt ihn pragmatisch (kein volles Zod-Mirror — Phase 0):
  *
@@ -21,13 +21,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 // Validierungs-Kern (EDITORIAL_FIELDS + Typ-/Struktur-Checks) liegt geteilt in
 // content-validation.mjs — derselbe Code prüft im Spec-Editor-Save. Kein Duplikat.
 import { validateContentRaw } from './content-validation.mjs';
+import { COMPONENTS_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const componentsDir = path.join(root, 'src/routes/product/components');
+const componentsDir = COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
 const slugs = fs.existsSync(componentsDir)

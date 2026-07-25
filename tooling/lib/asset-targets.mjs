@@ -15,13 +15,13 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { discoverAssets, renderIconPreFile } from './gen-asset-list.mjs';
+import { DATA_DIR, PACKAGES_DIR, REPO_ROOT, STATIC_DIR } from './paths.mjs';
 import { ICON_OVERRIDES } from '../../packages/icons/icon-overrides.mjs';
-import { BRAND_ASSET_OVERRIDES } from '../../src/lib/data/brand-asset-overrides.mjs';
+import { BRAND_ASSET_OVERRIDES } from '../../apps/docs/src/lib/data/brand-asset-overrides.mjs';
 
-/** Repo-Root (tooling/lib/../..). */
-export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+/** Repo-Root — re-exportiert, damit Aufrufer nur EINE Pfad-Quelle importieren müssen. */
+export const root = REPO_ROOT;
 
 /**
  * Icons — Quelle: Paket `@zeit/icons`. Der `pathPrefix` bleibt die HTTP-URL der
@@ -30,10 +30,10 @@ export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
  */
 export const ICON_TARGET = {
 	label: 'Icons',
-	svgDir: path.join(root, 'packages/icons/svg'),
+	svgDir: path.join(PACKAGES_DIR, 'icons/svg'),
 	pathPrefix: '/downloads/icons/',
 	overrides: ICON_OVERRIDES,
-	generated: path.join(root, 'packages/icons/src/icons.ts'),
+	generated: path.join(PACKAGES_DIR, 'icons/src/icons.ts'),
 	render: {
 		constName: 'SVG_LIST',
 		generatorName: 'tooling/gen-icons.mjs',
@@ -46,13 +46,16 @@ export const ICON_TARGET = {
 /** Brand-Logos — bleiben Doku-App-Inhalt (Brandhub-Downloads), kein Paket. */
 export const BRAND_ASSET_TARGET = {
 	label: 'Brand-Assets',
-	svgDir: path.join(root, 'static/downloads/brand-logos'),
+	svgDir: path.join(STATIC_DIR, 'downloads/brand-logos'),
 	pathPrefix: '/downloads/brand-logos/',
 	overrides: BRAND_ASSET_OVERRIDES,
-	generated: path.join(root, 'src/lib/data/brand-assets.ts'),
+	generated: path.join(DATA_DIR, 'brand-assets.ts'),
 	render: {
 		constName: 'BRAND_ASSETS_LIST',
 		generatorName: 'tooling/gen-brand-assets.mjs',
+		// ACHTUNG: Dieser String steht im KOPF der generierten brand-assets.ts und wird
+		// von check-assets per exaktem Vergleich geprüft. Ändern heißt: neu generieren.
+		// Bewusst beim alten Pfad belassen, damit PR 3 ein reiner Move bleibt.
 		overridesName: 'src/lib/data/brand-asset-overrides.mjs',
 		regenCmd: 'npm run gen:brand-assets'
 	}

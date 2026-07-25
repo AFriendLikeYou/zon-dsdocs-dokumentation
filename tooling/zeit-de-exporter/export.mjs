@@ -3,16 +3,16 @@
  * zeit-de exporter
  * ----------------------------------
  * Bildet das render-unabhängige Doku-Modell (Typ `ComponentSpec` in
- * src/lib/types/spec.ts; Schema-Referenz + Import-Flow in README.md / IMPORT.md)
+ * apps/docs/src/lib/types/spec.ts; Schema-Referenz + Import-Flow in README.md / IMPORT.md)
  * auf das konkrete Repo-Format ab:
  *
- *   - SvelteKit-Route (mdsvex):  src/routes/product/components/<kebab>/+page.svx   (immer neu)
- *   - Maschinen-Modell:          src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
- *   - Redaktioneller Stub:       src/routes/product/components/<kebab>/content.json (nur beim ersten Mal)
- *   - Eingabe-Modell co-locatet: src/routes/product/components/<kebab>/model.json  (neben dem Output)
+ *   - SvelteKit-Route (mdsvex):  apps/docs/src/routes/product/components/<kebab>/+page.svx   (immer neu)
+ *   - Maschinen-Modell:          apps/docs/src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
+ *   - Redaktioneller Stub:       apps/docs/src/routes/product/components/<kebab>/content.json (nur beim ersten Mal)
+ *   - Eingabe-Modell co-locatet: apps/docs/src/routes/product/components/<kebab>/model.json  (neben dem Output)
  *
  * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
- * Das Spec-UI-Kit (src/lib/components/ui/specsheet) und das Modell bleiben stabil; hier
+ * Das Spec-UI-Kit (apps/docs/src/lib/components/ui/specsheet) und das Modell bleiben stabil; hier
  * liegt die ganze Repo-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Snippet-Verdrahtung).
  *
  * Nutzung:
@@ -20,7 +20,7 @@
  *
  * Beispiele:
  *   node tooling/zeit-de-exporter/export.mjs tooling/zeit-de-exporter/examples/button.json
- *   node tooling/zeit-de-exporter/export.mjs src/routes/product/components/button   # liest <dir>/model.json
+ *   node tooling/zeit-de-exporter/export.mjs apps/docs/src/routes/product/components/button   # liest <dir>/model.json
  */
 
 import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSync } from 'node:fs';
@@ -28,9 +28,12 @@ import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateModelSchema } from './schema-validate.mjs';
 import { resolveArtefakte } from '../artefakte.mjs';
+import { COMPONENTS_REL } from '../lib/paths.mjs';
 
 const TARGET = 'zeit-de';
-const ROUTE_BASE = 'src/routes/product/components';
+// Repo-relativ (nicht absolut): der Exporter bekommt seinen Root per --root und
+// setzt den Teilpfad selbst zusammen — die Tests fahren ihn gegen ein Wegwerf-Repo.
+const ROUTE_BASE = COMPONENTS_REL;
 const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
 // CodeBlock lebt eigenständig unter ui/code-block (aus dem specsheet-Barrel gelöst) —
 // wird separat importiert, nicht mehr über das Spec-UI-Kit.
@@ -522,7 +525,7 @@ function tl(s) {
 // (:hover/:focus/:active ohne eigene Modifier-Klasse/Attribut) lassen sich statisch
 // NICHT erzwingen und werden NICHT gefakt — sie bleiben beschreibend in der StateList.
 
-/** Mirror von Playground.instantiate (src/lib/components/ui/playground): Template +
+/** Mirror von Playground.instantiate (apps/docs/src/lib/components/ui/playground): Template +
  *  Controls + State → fertiges Markup. Bewusst als eigenständige JS-Kopie, weil der
  *  Exporter kein Svelte importieren kann; Logik 1:1 identisch (kein Drift durch Daten). */
 function instantiate(template, controls, state) {
@@ -1366,7 +1369,7 @@ function scaffold(name, root) {
 		`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`
 	);
 	console.log('  4. Nav & Katalog sind katalog-getrieben (ADR-025) — kein Nav-Eintrag nötig.');
-	console.log('     Optional Reihenfolge/Badge in der Override-Map in src/lib/data/catalog.ts.');
+	console.log('     Optional Reihenfolge/Badge in der Override-Map in apps/docs/src/lib/data/catalog.ts.');
 }
 
 function main() {

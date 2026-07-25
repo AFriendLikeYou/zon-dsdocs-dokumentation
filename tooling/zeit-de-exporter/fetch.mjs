@@ -21,9 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, '../..');
+import { REPO_ROOT as repoRoot } from '../lib/paths.mjs';
 
 /* ── reine Mapping-Schicht (getestet, HTTP-frei) ──────────────────────────── */
 

@@ -28,14 +28,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { ZDS_SOURCE, ZDS_MIRROR, mirrorAktuell } from './sync-zds.mjs';
+import { REPO_ROOT, relToRoot as rel } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const strict = process.argv.includes('--strict');
-const rel = (p) => path.relative(root, p);
 
-const PKG_CSS = path.join(root, 'node_modules/@zeitonline/design-system/design-system.css');
+const PKG_CSS = path.join(REPO_ROOT, 'node_modules/@zeitonline/design-system/design-system.css');
 
 /** Alle --z-ds-*-Deklarationen als Map name→wert (whitespace-normalisiert). */
 function tokenMap(file) {
@@ -83,7 +81,7 @@ if (!fs.existsSync(PKG_CSS)) {
 	} else {
 		const version = JSON.parse(
 			fs.readFileSync(
-				path.join(root, 'node_modules/@zeitonline/design-system/package.json'),
+				path.join(REPO_ROOT, 'node_modules/@zeitonline/design-system/package.json'),
 				'utf8'
 			)
 		).version;
@@ -99,7 +97,7 @@ if (!mirrorAktuell()) {
 	console.warn(
 		`\n⚠️  Auslieferungs-Spiegel veraltet oder fehlt: ${rel(ZDS_MIRROR)}` +
 			`\n   ist nicht byte-gleich zu ${rel(ZDS_SOURCE)}.` +
-			'\n   Die Site verlinkt den Spiegel render-blockierend (src/app.html) —' +
+			'\n   Die Site verlinkt den Spiegel render-blockierend (apps/docs/src/app.html) —' +
 			'\n   ohne ihn rendert alles ungestylt.' +
 			'\n   → npm run sync:zds\n'
 	);

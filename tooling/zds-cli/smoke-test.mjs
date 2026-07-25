@@ -10,12 +10,13 @@
  */
 import { spawn } from 'node:child_process';
 import { readFileSync, rmSync, mkdtempSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
+import { COMPONENTS_DIR, REPO_ROOT as REPO } from '../lib/paths.mjs';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = resolve(HERE, '..', '..');
 const PORT = 5199;
 const BASE = `http://localhost:${PORT}`;
 const CLI = join(HERE, 'zds.mjs');
@@ -94,7 +95,7 @@ async function main() {
 		// 3) Datei-Diff: geschriebene pattern.css == Katalog-Quelle
 		const written = readFileSync(join(tmp, 'pattern.css'), 'utf8');
 		const source = readFileSync(
-			join(REPO, 'src/routes/product/components/button/pattern.css'),
+			join(COMPONENTS_DIR, 'button/pattern.css'),
 			'utf8'
 		);
 		if (written !== source) {

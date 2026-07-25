@@ -13,16 +13,16 @@
  *                     DEFINIERTEN --z-ds-* (Definitionen, nicht var()-Nutzungen).
  * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer dem
  *                     ausgelieferten Spiegel styles-zds.css,
- *                     alle pattern.css unter src/routes/, <style>-Blöcke in
- *                     src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
+ *                     alle pattern.css unter apps/docs/src/routes/, <style>-Blöcke in
+ *                     apps/docs/src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
  *                     derselben Dateien (z. B. `colorCustomProperty="--z-ds-…"`)
  *                     UND Token-NAMEN als Daten
  *                     (tokens[].items[].name / masse+spacing .token /
  *                     farbrollen tokensProZustand in model.json; String-Literale in
- *                     src/lib/data/foundation-tokens.ts + color-roles.ts).
+ *                     apps/docs/src/lib/data/foundation-tokens.ts + color-roles.ts).
  *
  * Sonderfälle:
- *   • static/global.css pinnt in .ds-stage/.ds-stage.is-dark bewusst eigene --z-ds-*-
+ *   • apps/docs/static/global.css pinnt in .ds-stage/.ds-stage.is-dark bewusst eigene --z-ds-*-
  *     WERTE (Bühnen-Paletten). Diese Property-Definitionen sind KEINE Referenzen —
  *     der Name sollte upstream trotzdem existieren (eigene Warnkategorie „gepinnt,
  *     aber upstream unbekannt").
@@ -37,16 +37,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+	COMPONENTS_DIR,
+	DATA_DIR,
+	REPO_ROOT,
+	ROUTES_DIR,
+	SRC_DIR,
+	STATIC_DIR,
+	TOKENS_VENDOR_DIR
+} from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const strict = process.argv.includes('--strict');
 
 // Dateiname des Spiegels in static/ — der fällt aus dem Nutzungs-Scan raus
 // (Definitionen sind keine Referenzen).
 const DEFINITION_FILE = 'styles-zds.css';
 // Kanonische Quelle: die durchgereichte Upstream-Kopie im Paket @zeit/tokens.
-const DEFINITION_PATH = path.join(root, 'packages/tokens/vendor', DEFINITION_FILE);
-const DEFINITION_REL = path.relative(root, DEFINITION_PATH);
+const DEFINITION_PATH = path.join(TOKENS_VENDOR_DIR, DEFINITION_FILE);
+const DEFINITION_REL = path.relative(REPO_ROOT, DEFINITION_PATH);
 
 // ── Pure Kernfunktionen (testbar, fs-frei) ───────────────────────────────────
 
@@ -173,7 +181,7 @@ function walkFiles(dir, pred, acc = []) {
 	return acc;
 }
 
-const rel = (p) => path.relative(root, p);
+const rel = (p) => path.relative(REPO_ROOT, p);
 
 function main() {
 	// 1) Kanonische Menge aus der durchgereichten Paket-Kopie (@zeit/tokens).
@@ -190,7 +198,7 @@ function main() {
 
 	// 2a) Authored CSS: static/*.css (außer Definitions-Datei). var() = Referenz,
 	//     Property-Def = gepinnte Bühnen-Palette (eigene Kategorie).
-	const staticDir = path.join(root, 'static');
+	const staticDir = STATIC_DIR;
 	for (const f of fs.readdirSync(staticDir)) {
 		if (!f.endsWith('.css') || f === DEFINITION_FILE) continue;
 		const css = fs.readFileSync(path.join(staticDir, f), 'utf8');
@@ -199,13 +207,13 @@ function main() {
 	}
 
 	// 2b) pattern.css unter src/routes/ — nur var()-Nutzungen.
-	const routesDir = path.join(root, 'src/routes');
+	const routesDir = ROUTES_DIR;
 	for (const f of walkFiles(routesDir, (name) => name === 'pattern.css'))
 		addRefs(collectVarRefs(fs.readFileSync(f, 'utf8')), f);
 
 	// 2c) <style>-Blöcke in src/**/*.{svelte,svx} — generierte Component-Docs
 	//     (dort liegt spec.generated.ts als Marker) überspringen.
-	const srcDir = path.join(root, 'src');
+	const srcDir = SRC_DIR;
 	const isGeneratedDoc = (full) =>
 		full.endsWith('+page.svx') && fs.existsSync(path.join(path.dirname(full), 'spec.generated.ts'));
 	for (const f of walkFiles(
@@ -219,13 +227,13 @@ function main() {
 	}
 
 	// 2d) Token-Namen als Daten: model.json der Komponenten.
-	const componentsDir = path.join(root, 'src/routes/product/components');
+	const componentsDir = COMPONENTS_DIR;
 	for (const f of walkFiles(componentsDir, (name) => name === 'model.json'))
 		addRefs(collectModelTokens(fs.readFileSync(f, 'utf8')), f);
 
 	// 2e) Kuratierte TS-Datenlisten.
-	for (const rp of ['src/lib/data/foundation-tokens.ts', 'src/lib/data/color-roles.ts']) {
-		const full = path.join(root, rp);
+	for (const rp of ['foundation-tokens.ts', 'color-roles.ts']) {
+		const full = path.join(DATA_DIR, rp);
 		if (fs.existsSync(full)) addRefs(collectTsTokens(fs.readFileSync(full, 'utf8')), full);
 	}
 

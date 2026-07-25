@@ -8,7 +8,7 @@
  * hier daher: stimmen die DOKUMENTIERTEN Varianten mit den im Specimen tatsächlich
  * DEFINIERTEN CSS-Klassen überein?
  *
- * Pro co-locatetem model.json (src/routes/product/components/<slug>/model.json):
+ * Pro co-locatetem model.json (apps/docs/src/routes/product/components/<slug>/model.json):
  *   - Basis-Klasse(n) aus render.preview/variant lesen (Token ohne `--`).
  *   - Modifier-Klassen aus render.css lesen (`.<basis>--<mod>`).
  *   - Dokumentierte Varianten aus `varianten[].werte[].label` (lowercase) lesen.
@@ -30,10 +30,9 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { COMPONENTS_DIR, DATA_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const componentsDir = path.join(root, 'src/routes/product/components');
+const componentsDir = COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
 // Interaktions-/Zustands-Modifier sind KEINE Varianten und werden nicht als Drift gewertet.
@@ -165,7 +164,7 @@ const slugs = allDirs.filter((s) => fs.existsSync(path.join(componentsDir, s, 'm
 
 // Geplante Stubs (PLANNED_COMPONENTS in navigation.ts) haben BEWUSST kein
 // model.json — die sollen hier nicht bei jedem Lauf als Drift rauschen.
-const navSrc = fs.readFileSync(path.join(root, 'src/lib/data/navigation.ts'), 'utf8');
+const navSrc = fs.readFileSync(path.join(DATA_DIR, 'navigation.ts'), 'utf8');
 const plannedBlock = navSrc.match(/PLANNED_COMPONENTS[^=]*=\s*\[([\s\S]*?)\n\];/);
 const planned = new Set(
 	plannedBlock ? [...plannedBlock[1].matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]) : []

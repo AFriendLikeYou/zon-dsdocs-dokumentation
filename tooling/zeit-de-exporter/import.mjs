@@ -9,7 +9,7 @@
  * EINEM Befehl und bleibt an den zwei menschlichen Kontrollpunkten bewusst
  * stehen — das System rät nie:
  *
- *   Schritt 1  fetch  → figma-raw.json in src/routes/product/components/<slug>/
+ *   Schritt 1  fetch  → figma-raw.json in apps/docs/src/routes/product/components/<slug>/
  *   GATE 1     Fehlen die Token-NAMEN (REST liefert ohne Enterprise nur IDs),
  *              stoppt der Lauf mit einer TODO-Ausgabe. Namen via Figma-MCP
  *              get_variable_defs ergänzen, dann Schritt 2 nachziehen. Sind die
@@ -25,6 +25,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
 
 /**
  * GATE 1: Liefert der Fetch degradierte Tokens? Bei fehlendem Enterprise-Zugriff
@@ -179,14 +180,13 @@ export function formatStatus({ rows, totals }) {
 }
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const REPO = path.resolve(HERE, '../..');
 
 /**
  * fs-Sammlung: Stufen-Artefakte je Komponentenordner → Statusmodell für statusForDirs().
  * @returns {StageEntry[]}
  */
 function gatherStatus() {
-	const base = path.join(REPO, 'src/routes/product/components');
+	const base = path.join(REPO, COMPONENTS_REL);
 	if (!existsSync(base)) return [];
 	const slugs = readdirSync(base, { withFileTypes: true })
 		.filter((e) => e.isDirectory())
@@ -255,7 +255,7 @@ if (isCli) {
 		process.exit(1);
 	}
 
-	const dir = path.join('src/routes/product/components', slug);
+	const dir = path.join(COMPONENTS_REL, slug);
 	const rawPath = path.join(REPO, dir, 'figma-raw.json');
 	mkdirSync(path.join(REPO, dir), { recursive: true });
 

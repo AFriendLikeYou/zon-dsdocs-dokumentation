@@ -5,8 +5,10 @@ node_modules
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
+# Nicht mehr wurzel-verankert: seit dem Umzug (PR 3) liegt die App in apps/docs
+# und erzeugt ihre Build-Artefakte dort.
+.svelte-kit/
+build/
 
 # OS
 .DS_Store
@@ -22,8 +24,8 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Test-Reports (Build-Artefakt, wird pro Run neu erzeugt)
-/reports/
+# Test-Reports (Build-Artefakt, wird pro Run neu erzeugt) — vitest läuft in apps/docs.
+reports/
 
 # Lokales Claude-Code-Tooling (z. B. Preview-Dev-Server-Config)
 /.claude/
@@ -37,11 +39,11 @@ playwright-report/
 
 # Icon-Auslieferung: reiner Spiegel von packages/icons/svg (npm run sync:icons,
 # läuft in prepare/predev/prebuild). Quelle ist das Paket @zeit/icons.
-/static/downloads/icons/
+/apps/docs/static/downloads/icons/
 
 # Token-Auslieferung: reiner Spiegel von packages/tokens/vendor (npm run sync:zds,
 # läuft in prepare/predev/prebuild). Quelle ist das Paket @zeit/tokens.
-/static/styles-zds.css
+/apps/docs/static/styles-zds.css
 
 # Paket-Build-Artefakte (npm run tokens:build)
 /packages/*/dist/

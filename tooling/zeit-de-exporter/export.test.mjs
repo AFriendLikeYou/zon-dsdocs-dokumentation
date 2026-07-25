@@ -13,11 +13,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { kebabCase, renderPage, renderGenerated, renderContentStub, scopeCss } from './export.mjs';
+import { COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const REPO = path.resolve(HERE, '../..');
 const EXPORT = path.join(HERE, 'export.mjs');
-const ROUTE_BASE = 'src/routes/product/components';
+const ROUTE_BASE = COMPONENTS_REL;
 const COMPONENT_DIR = path.join(REPO, ROUTE_BASE);
 
 /** export.mjs als Child-Prozess (wie import.mjs es vormacht). */

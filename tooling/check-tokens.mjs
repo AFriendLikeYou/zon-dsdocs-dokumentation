@@ -3,7 +3,7 @@
  * Token-Drift-Check (Warnung, kein Blocker — „Never Block, Always Suggest").
  *
  * Prüft, ob die im authored Site-CSS (static/*.css) via `var(--z-ds-*)` GENUTZTEN
- * Foundation-Tokens auch in src/lib/data/foundation-tokens.ts DOKUMENTIERT sind (Quelle der
+ * Foundation-Tokens auch in apps/docs/src/lib/data/foundation-tokens.ts DOKUMENTIERT sind (Quelle der
  * Referenz-Seite /product/foundations/tokens). Verhindert, dass ein Token unbemerkt im
  * Einsatz ist, ohne auf der Tokens-Seite aufzutauchen.
  *
@@ -18,9 +18,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { DATA_DIR, STATIC_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const strict = process.argv.includes('--strict');
 
 const TOKEN_RE = /--z-ds-[a-zA-Z0-9-]+/g;
@@ -33,12 +32,11 @@ const DEFINITION_FILE = 'styles-zds.css';
 
 // 1) Dokumentierte Tokens aus foundation-tokens.ts (Namen-Regex; die Datei ist eine Handliste).
 const documented = new Set(
-	fs.readFileSync(path.join(root, 'src/lib/data/foundation-tokens.ts'), 'utf8').match(TOKEN_RE) ??
-		[]
+	fs.readFileSync(path.join(DATA_DIR, 'foundation-tokens.ts'), 'utf8').match(TOKEN_RE) ?? []
 );
 
 // 2) Genutzte Tokens aus dem authored Site-CSS (static/*.css außer der Definitions-Datei).
-const cssDir = path.join(root, 'static');
+const cssDir = STATIC_DIR;
 const cssFiles = fs.readdirSync(cssDir).filter((f) => f.endsWith('.css') && f !== DEFINITION_FILE);
 
 /** token -> Set<datei> */
@@ -62,7 +60,7 @@ if (undocumented.length === 0) {
 	);
 } else {
 	console.warn(
-		`\n⚠️  Token-Drift: ${undocumented.length} genutzte(s) --z-ds-Token ohne Eintrag in src/lib/data/foundation-tokens.ts:`
+		`\n⚠️  Token-Drift: ${undocumented.length} genutzte(s) --z-ds-Token ohne Eintrag in apps/docs/src/lib/data/foundation-tokens.ts:`
 	);
 	for (const t of undocumented) {
 		console.warn(

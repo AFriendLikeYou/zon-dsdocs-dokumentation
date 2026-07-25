@@ -3,9 +3,9 @@
  * migrate-content-to-json — EINMALIGE Format-Migration (CMS Phase 0).
  * ----------------------------------
  * Wandelt die redaktionellen Mensch-Dateien
- *   src/routes/product/components/<slug>/content.ts
+ *   apps/docs/src/routes/product/components/<slug>/content.ts
  * in reines JSON um:
- *   src/routes/product/components/<slug>/content.json
+ *   apps/docs/src/routes/product/components/<slug>/content.json
  *
  * Warum: Ein späteres /admin-CMS bearbeitet Content maschinell (JSON.parse /
  * JSON.stringify) — TypeScript mit `satisfies`-Klausel wäre dafür der falsche
@@ -34,8 +34,9 @@ import {
 	unlinkSync
 } from 'node:fs';
 import { resolve } from 'node:path';
+import { COMPONENTS_REL } from './lib/paths.mjs';
 
-const ROUTE_BASE = 'src/routes/product/components';
+const ROUTE_BASE = COMPONENTS_REL;
 
 function parseArgs(argv) {
 	const args = { root: process.cwd(), dry: false, keepTs: false };

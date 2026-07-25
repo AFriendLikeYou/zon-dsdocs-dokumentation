@@ -2,7 +2,7 @@
 /**
  * export:all — Re-Export ALLER dokumentierten Komponenten.
  * ----------------------------------
- * Glob über alle src/routes/product/components/*\/model.json und ruft den
+ * Glob über alle apps/docs/src/routes/product/components/*\/model.json und ruft den
  * bestehenden Exporter (export.mjs) pro Ordner auf. Bewusst minimal: kein
  * Check-Modus, keine eigene Logik — nur ein Batch-Runner über export.mjs.
  *
@@ -14,10 +14,11 @@ import { readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { COMPONENTS_REL } from '../lib/paths.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXPORTER = resolve(__dirname, 'export.mjs');
-const ROUTE_BASE = 'src/routes/product/components';
+const ROUTE_BASE = COMPONENTS_REL;
 
 function parseArgs(argv) {
 	const args = { root: process.cwd(), dry: false };

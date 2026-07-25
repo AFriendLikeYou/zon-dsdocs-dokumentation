@@ -1,5 +1,5 @@
 /**
- * roles.test.ts — die Klammer zwischen `roles.ts` und `static/global.css`.
+ * roles.test.ts — die Klammer zwischen `roles.ts` und `apps/docs/static/global.css`.
  *
  * PR 1 verschiebt die Rollen NICHT aus `global.css` heraus (Begründung in
  * README.md, Abschnitt „Anbindung"). Damit `roles.ts` trotzdem schon die künftige
@@ -13,14 +13,13 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { ROLLEN, ROLLEN_GRUPPEN, rawToken, rollenCss, rollenJson } from './roles';
+import { STATIC_DIR, TOKENS_VENDOR_DIR } from '../../../tooling/lib/paths.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const globalCss = fs.readFileSync(path.join(repoRoot, 'static/global.css'), 'utf8');
+const globalCss = fs.readFileSync(path.join(STATIC_DIR, 'global.css'), 'utf8');
 const vendorCss = fs.readFileSync(
-	path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'),
+	path.join(TOKENS_VENDOR_DIR, 'styles-zds.css'),
 	'utf8'
 );
 

@@ -27,11 +27,10 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { COMPONENTS_DIR, DATA_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const componentsDir = path.join(root, 'src/routes/product/components');
-const catalogFile = path.join(root, 'src/lib/data/catalog.ts');
+const componentsDir = COMPONENTS_DIR;
+const catalogFile = path.join(DATA_DIR, 'catalog.ts');
 const strict = process.argv.includes('--strict');
 
 const readJson = (file) => {

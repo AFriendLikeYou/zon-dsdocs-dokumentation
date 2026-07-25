@@ -19,10 +19,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ICON_TARGET, root } from './lib/asset-targets.mjs';
+import { ICON_TARGET } from './lib/asset-targets.mjs';
+import { STATIC_DIR } from './lib/paths.mjs';
 
-/** `static/downloads/icons` — aus der ausgelieferten URL abgeleitet. */
-export const MIRROR_DIR = path.resolve(root, `static${ICON_TARGET.pathPrefix}`);
+/** `apps/docs/static/downloads/icons` — aus der ausgelieferten URL abgeleitet. */
+export const MIRROR_DIR = path.join(STATIC_DIR, ICON_TARGET.pathPrefix);
 
 const svgs = (dir) =>
 	fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.svg')) : [];

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * sync-zds.mjs — spiegelt `packages/tokens/vendor/styles-zds.css` nach
- * `static/styles-zds.css`, damit die Token-Basis weiter unter `/styles-zds.css`
+ * `apps/docs/static/styles-zds.css`, damit die Token-Basis weiter unter `/styles-zds.css`
  * ausgeliefert wird (`<link>` in `src/app.html`).
  *
  * Warum ein Spiegel statt eines Umzugs der URL: Die Datei hängt render-blockierend
@@ -21,13 +21,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STATIC_DIR, TOKENS_VENDOR_DIR } from './lib/paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** Kanonische Quelle: die durchgereichte Upstream-Kopie im Paket. */
-export const ZDS_SOURCE = path.join(root, 'packages/tokens/vendor/styles-zds.css');
+export const ZDS_SOURCE = path.join(TOKENS_VENDOR_DIR, 'styles-zds.css');
 /** Ausgelieferter Spiegel — der Dateiname IST der URL-Pfad (`/styles-zds.css`). */
-export const ZDS_MIRROR = path.join(root, 'static/styles-zds.css');
+export const ZDS_MIRROR = path.join(STATIC_DIR, 'styles-zds.css');
 
 /** Ist der Spiegel vorhanden und byte-gleich zur Quelle? */
 export function mirrorAktuell() {
@@ -45,5 +45,5 @@ export function syncZds() {
 // Nur beim direkten Aufruf ausführen — check-zds-sync.mjs importiert mirrorAktuell().
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 	syncZds();
-	console.log('✓ sync:zds — packages/tokens/vendor/styles-zds.css → static/styles-zds.css');
+	console.log('✓ sync:zds — packages/tokens/vendor/styles-zds.css → apps/docs/static/styles-zds.css');
 }
