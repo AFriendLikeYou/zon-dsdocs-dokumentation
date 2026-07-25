@@ -24,17 +24,18 @@ import path from 'node:path';
 // Validierungs-Kern (EDITORIAL_FIELDS + Typ-/Struktur-Checks) liegt geteilt in
 // content-validation.mjs — derselbe Code prüft im Spec-Editor-Save. Kein Duplikat.
 import { validateContentRaw } from './content-validation.mjs';
-import { COMPONENTS_DIR } from './lib/paths.mjs';
+import { COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
 
-const componentsDir = COMPONENTS_DIR;
+/** content.json liegt bei der Doku-Seite … */
+const routesDir = COMPONENTS_DIR;
+/** … model.json im Paket (seit PR 4). */
+const pkgDir = PKG_COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
-const slugs = fs.existsSync(componentsDir)
+const slugs = fs.existsSync(routesDir)
 	? fs
-			.readdirSync(componentsDir, { withFileTypes: true })
-			.filter(
-				(e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'content.json'))
-			)
+			.readdirSync(routesDir, { withFileTypes: true })
+			.filter((e) => e.isDirectory() && fs.existsSync(path.join(routesDir, e.name, 'content.json')))
 			.map((e) => e.name)
 			.sort()
 	: [];
@@ -43,7 +44,7 @@ let problems = 0;
 let checked = 0;
 
 for (const slug of slugs) {
-	const raw = fs.readFileSync(path.join(componentsDir, slug, 'content.json'), 'utf8');
+	const raw = fs.readFileSync(path.join(routesDir, slug, 'content.json'), 'utf8');
 	const issues = validateContentRaw(raw);
 	if (issues.length === 0) {
 		checked++;
@@ -67,12 +68,10 @@ const { validateModelSchema } = await import('./zeit-de-exporter/schema-validate
 
 let modelProblems = 0;
 let modelChecked = 0;
-const modelSlugs = fs.existsSync(componentsDir)
+const modelSlugs = fs.existsSync(pkgDir)
 	? fs
-			.readdirSync(componentsDir, { withFileTypes: true })
-			.filter(
-				(e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'model.json'))
-			)
+			.readdirSync(pkgDir, { withFileTypes: true })
+			.filter((e) => e.isDirectory() && fs.existsSync(path.join(pkgDir, e.name, 'model.json')))
 			.map((e) => e.name)
 			.sort()
 	: [];
@@ -80,7 +79,7 @@ const modelSlugs = fs.existsSync(componentsDir)
 for (const slug of modelSlugs) {
 	let issues;
 	try {
-		const model = JSON.parse(fs.readFileSync(path.join(componentsDir, slug, 'model.json'), 'utf8'));
+		const model = JSON.parse(fs.readFileSync(path.join(pkgDir, slug, 'model.json'), 'utf8'));
 		issues = validateModelSchema(model);
 	} catch (e) {
 		issues = [`kein valides JSON: ${e.message}`];

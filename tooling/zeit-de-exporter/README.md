@@ -10,21 +10,32 @@ siehe [`IMPORT.md`](./IMPORT.md).
 
 ## Ein- und Ausgabe
 
-**Eingabe:** eine `model.json` (zentraler Typ `ComponentSpec` in
-[`src/lib/types/spec.ts`](../../src/lib/types/spec.ts)).
+Seit PR 4 (Monorepo) liegen sie in **zwei Workspaces** — das Paket ist das Produkt,
+die Route seine Dokumentation.
 
-**Ausgabe** pro Component unter `src/routes/product/components/<kebab>/` — **vier Dateien**:
+**Eingabe** im Paket `@zeit/components`, unter `packages/components/src/<kebab>/`:
+
+| Datei         | Inhalt                                                                     |
+| ------------- | -------------------------------------------------------------------------- |
+| `model.json`  | das Doku-Modell (zentraler Typ `ComponentSpec` in [`apps/docs/src/lib/types/spec.ts`](../../apps/docs/src/lib/types/spec.ts)) |
+| `pattern.css` | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt — **relativ zum Modell** |
+
+**Ausgabe** in der Doku-App, unter `apps/docs/src/routes/product/components/<kebab>/`:
 
 | Datei               | Inhalt                                                                              | Bearbeiten?                                    |
 | ------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `+page.svx`         | mdsvex-Seite: Frontmatter + Tabs, Spec-UI-Kit, Specimen als Snippets                | **nie** (jeder Sync überschreibt)              |
 | `spec.generated.ts` | Maschinen-Modell: `export const generated = { … } satisfies Partial<ComponentSpec>` | **nie** (jeder Sync überschreibt)              |
-| `content.json`      | Redaktioneller Stub: `export const content = { … }` — überschreibt Defaults         | **hier** (einmalig erzeugt, nie überschrieben) |
-| `model.json`        | Eingabe, co-located neben dem Output (Re-Export via Ordner)                         | die Eingabe selbst                             |
-| `pattern.css`       | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt                   | die Eingabe selbst                             |
+| `content.json`      | Redaktioneller Stub — überschreibt die Defaults                                     | **hier** (einmalig erzeugt, nie überschrieben) |
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
 führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json` gewinnt**.
+
+Aufruf mit dem PAKET-Ordner (dort liegt das Modell):
+
+```bash
+node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
+```
 
 ## Nach dem Export — welche Datei?
 
@@ -35,9 +46,13 @@ führt zur Laufzeit `{ ...generated, ...content }` zusammen — **`content.json`
   `verwendung`, `wording`, `komposition`, `verwandt`, `version`,
   `variantInfo`) → **`content.json` von Hand**.
 - **Nav & Katalog** → **kein Handeintrag** nötig. Die Components-Nav-Sektion wird aus dem
-  Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Nur
-  Reihenfolge/Badge (optional) in der Override-Map in
-  [`src/lib/data/catalog.ts`](../../src/lib/data/catalog.ts).
+  Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Reihenfolge
+  und Badge stehen im `katalog`-Block **desselben `model.json`** (`order`, `badge`,
+  `badgeVariant`, `exclude`) — die frühere Override-Map in der Doku-App ist entfallen.
+- **Registry-Artefakte** → `code.artefakte` im `model.json` ist **Pflicht**; einen
+  stillen `pattern.css`-Fallback gibt es nicht mehr.
+- **Paket-Barrel** → neuen Slug in `packages/components/src/index.ts` eintragen
+  (`index.test.ts` prüft die Liste gegen die Ordner).
 
 ## Frontmatter-Mapping (Doku-Modell → zeit.de)
 
@@ -91,7 +106,7 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
     { "key": "disabled",  "label": "Disabled",  "type": "attr",   "attr": "disabled" }
   ],
   "template": "<button class=\"z-button{classes}\"{attrs}>Click me</button>", // EINE Instanziierung → Preview UND Code
-  "cssFile": "./pattern.css",     // UNSCOPED, co-located; wird gegen .spec-canvas / .pg-preview
+  "cssFile": "./pattern.css",     // UNSCOPED, neben dem Modell im Paket; wird gegen .spec-canvas / .pg-preview
                                   // gescoped (flache Regeln + @media/@supports/@container; kein @keyframes) und verbatim im Develop-Tab gezeigt
   "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion statt template; darf NUR Registry-Daten konsumieren
   "hint": "Keine Varianten.",      // Hinweiszeile statt Controls
@@ -153,11 +168,11 @@ in `zustaende` steht oder ein Token weder `--z-ds-*` noch `"none"` ist.
 # Neu anlegen — Gerüst (Ordner + gültiges Start-model.json mit $schema + pattern.css-Stub):
 node tooling/zeit-de-exporter/export.mjs --init "<Name>"      # oder: npm run new-component -- "<Name>"
 
-# (a) Modell als Datei — schreibt Output UND legt model.json im Component-Ordner ab:
+# (a) Modell als Datei — schreibt die Doku-Seite UND legt model.json im Paket-Ordner ab:
 node tooling/zeit-de-exporter/export.mjs <model.json> [--root <repoRoot>] [--dry]
 
-# (b) Re-Export eines bestehenden Components — Ordner übergeben (liest <dir>/model.json):
-node tooling/zeit-de-exporter/export.mjs src/routes/product/components/button
+# (b) Re-Export eines bestehenden Components — PAKET-Ordner übergeben (liest <dir>/model.json):
+node tooling/zeit-de-exporter/export.mjs packages/components/src/button
 
 # (c) Re-Export ALLER Komponenten (Batch über alle model.json) — z. B. nach Format-Änderung:
 npm run export:all        # oder: node tooling/zeit-de-exporter/export-all.mjs [--dry]
@@ -189,7 +204,7 @@ mutations`).
 # Node-URL ODER fileKey:nodeId; optionaler Zielordner (schreibt <ordner>/figma-raw.json):
 node tooling/zeit-de-exporter/fetch.mjs \
   "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/ZDS?node-id=215-16" \
-  src/routes/product/components/button
+  packages/components/src/button
 
 node tooling/zeit-de-exporter/fetch.mjs noSbKhOFRaqQh8eyCEqgim:215:16   # → stdout (Report auf stderr)
 ```

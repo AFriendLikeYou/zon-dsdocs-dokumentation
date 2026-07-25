@@ -1,7 +1,7 @@
 {
 	"json.schemas": [
 		{
-			"fileMatch": ["/src/routes/product/components/*/model.json"],
+			"fileMatch": ["/packages/components/src/*/model.json"],
 			"url": "./tooling/zeit-de-exporter/model.schema.json"
 		}
 	]

@@ -16,7 +16,7 @@
  *        (render.template + Varianten-Achsen)? Ohne sie zeigt die Seite nur
  *        Optionen (Playground/Varianten-Raster), aber keine Absicht.
  *   (f) content.json mehr als ein Thin-Stub (nur status/zweck/verwandt)?
- *   (g) Slug in CATALOG_OVERRIDES kuratiert? (sonst order 999 ans Ende —
+ *   (g) `katalog.order` im model.json gesetzt? (sonst order 999 ans Ende —
  *       der carousel-Fall: fertig dokumentiert, aber unkuratiert gelandet)
  *
  * Bewusst NICHT: Inhalte bewerten oder auto-befüllen — Lücken benennen reicht,
@@ -27,10 +27,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { COMPONENTS_DIR, DATA_DIR } from './lib/paths.mjs';
+import { COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
 
-const componentsDir = COMPONENTS_DIR;
-const catalogFile = path.join(DATA_DIR, 'catalog.ts');
+/** Quelle: model.json im Paket … */
+const pkgDir = PKG_COMPONENTS_DIR;
+/** … Redaktion: content.json in der Doku-Route. */
+const routesDir = COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
 const readJson = (file) => {
@@ -40,14 +42,6 @@ const readJson = (file) => {
 		return null;
 	}
 };
-
-/** Kuratierte Slugs aus CATALOG_OVERRIDES (Text-Parse reicht — nur Key-Namen). */
-function curatedSlugs() {
-	const src = fs.readFileSync(catalogFile, 'utf8');
-	const block = src.match(/CATALOG_OVERRIDES[^=]*=\s*\{([\s\S]*?)\n\};/);
-	if (!block) return new Set();
-	return new Set([...block[1].matchAll(/^\s*'?([\w-]+)'?\s*:/gm)].map((m) => m[1]));
-}
 
 const THIN_STUB_KEYS = new Set(['status', 'zweck', 'verwandt']);
 
@@ -81,19 +75,17 @@ function hasContent(value) {
 	if (typeof value === 'object') return Object.values(value).some(hasContent);
 	return String(value).trim().length > 0;
 }
-const curated = curatedSlugs();
 const findings = [];
 
 const slugs = fs
-	.readdirSync(componentsDir, { withFileTypes: true })
-	.filter((e) => e.isDirectory() && fs.existsSync(path.join(componentsDir, e.name, 'model.json')))
+	.readdirSync(pkgDir, { withFileTypes: true })
+	.filter((e) => e.isDirectory() && fs.existsSync(path.join(pkgDir, e.name, 'model.json')))
 	.map((e) => e.name)
 	.sort();
 
 for (const slug of slugs) {
-	const dir = path.join(componentsDir, slug);
-	const model = readJson(path.join(dir, 'model.json'));
-	const content = readJson(path.join(dir, 'content.json')) ?? {};
+	const model = readJson(path.join(pkgDir, slug, 'model.json'));
+	const content = readJson(path.join(routesDir, slug, 'content.json')) ?? {};
 	if (!model) continue; // kaputtes JSON meldet check-content
 
 	const gaps = [];
@@ -152,7 +144,8 @@ for (const slug of slugs) {
 	if (contentKeys.length > 0 && contentKeys.every((k) => THIN_STUB_KEYS.has(k)))
 		gaps.push(`content.json ist ein Thin-Stub (nur ${contentKeys.join(', ')})`);
 
-	if (!curated.has(slug)) gaps.push('nicht in CATALOG_OVERRIDES kuratiert (order 999, kein Badge)');
+	if (typeof model.katalog?.order !== 'number')
+		gaps.push('kein `katalog.order` im model.json (läuft mit order 999 ans Ende)');
 
 	if (gaps.length) findings.push({ slug, gaps });
 }

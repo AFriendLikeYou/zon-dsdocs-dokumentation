@@ -227,7 +227,8 @@ export type CodeFormat = 'html-css' | 'web-component' | 'svelte';
 /** Reifegrad eines Code-Artefakts. */
 export type CodeStatus = 'kanonisch' | 'portiert' | 'entwurf';
 
-/** Ein Code-Artefakt: ein Format + die dazugehörigen Dateien (ordner-relativ). */
+/** Ein Code-Artefakt: ein Format + die dazugehörigen Dateien (relativ zum
+    Paket-Ordner der Komponente, packages/components/src/<slug>/). */
 export type CodeArtefakt = {
 	format: CodeFormat;
 	dateien: string[];
@@ -237,9 +238,10 @@ export type CodeArtefakt = {
 /**
  * Deklariert die vorhandenen Code-Artefakte einer Komponente für die Registry
  * (shadcn-Modell: Dateien werden per CLI ins Zielprojekt KOPIERT, nicht
- * installiert). Optional/additiv — fehlt der Block, gilt implizit
- * `[{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]`,
- * sofern pattern.css existiert (siehe registry.ts).
+ * installiert). PFLICHT im model.json und immer explizit — den früheren stillen
+ * `pattern.css`-Fallback gibt es seit PR 4 nicht mehr (MIGRATIONSPLAN §4,
+ * Ausnahme 3). Auflösung: tooling/artefakte.mjs, genutzt von Exporter UND
+ * registry.ts.
  */
 export type CodeManifest = { artefakte: CodeArtefakt[] };
 
@@ -283,7 +285,7 @@ export type ComponentSpec = {
 	komposition?: string[];
 	/** Kuratierte Querverweise auf verwandte Komponenten (Katalog-Slugs). */
 	verwandt?: string[];
-	/** Code-Artefakte für die Registry (shadcn-Modell). Additiv; Fallback in registry.ts. */
+	/** Code-Artefakte für die Registry (shadcn-Modell) — im model.json Pflicht. */
 	code?: CodeManifest;
 	/**
 	 * Redaktioneller Hinweis-Text je Token (Token-Name → Freitext). Überschreibt

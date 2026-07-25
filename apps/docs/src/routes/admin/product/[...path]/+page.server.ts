@@ -1,7 +1,7 @@
 // Product-SVX-Editor — dieselbe Editor-Factory wie Brand, anderer Datei-Root.
 // Editierbar ist die PROSA der handgeschriebenen Product-Seiten (Foundations,
 // Patterns, Contribute …); die Figma-Specs bleiben außen vor: generierte
-// Component-Seiten (model.json daneben) listet brand-fs.server gar nicht erst,
+// Component-Seiten (spec.generated.ts daneben) listet brand-fs.server gar nicht erst,
 // und kuratierte Daten-Inseln (<script>-Blöcke, TypeSpecimen & Co.) sind im
 // Editor geschützte Blöcke — änderbar „nur bei Bedarf" über den Code.
 //

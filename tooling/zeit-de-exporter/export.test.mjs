@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 import {
 	mkdtempSync,
 	mkdirSync,
-	copyFileSync,
 	readFileSync,
 	writeFileSync,
 	readdirSync,
@@ -13,12 +12,16 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { kebabCase, renderPage, renderGenerated, renderContentStub, scopeCss } from './export.mjs';
-import { COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
+import { COMPONENTS_REL, PKG_COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const EXPORT = path.join(HERE, 'export.mjs');
+// Eingabe (Paket) und Ausgabe (Route) liegen seit PR 4 auseinander — die Tests
+// müssen beide Seiten kennen.
 const ROUTE_BASE = COMPONENTS_REL;
-const COMPONENT_DIR = path.join(REPO, ROUTE_BASE);
+const PKG_BASE = PKG_COMPONENTS_REL;
+const PKG_DIR = path.join(REPO, PKG_BASE);
+const ROUTE_DIR = path.join(REPO, ROUTE_BASE);
 
 /** export.mjs als Child-Prozess (wie import.mjs es vormacht). */
 function runExport(args) {
@@ -30,12 +33,13 @@ function tmpDir(prefix) {
 	return mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 
-// Alle real dokumentierten Komponenten (Ordner mit model.json). date-picker hat
-// keins und fällt darum automatisch raus — kein Hardcoding der Liste.
-const slugs = readdirSync(COMPONENT_DIR, { withFileTypes: true })
+// Alle real ausgelieferten Komponenten (Paket-Ordner mit model.json). date-picker
+// ist eine reine Doku-Seite ohne Paket-Gegenstück und fällt darum automatisch raus
+// — kein Hardcoding der Liste.
+const slugs = readdirSync(PKG_DIR, { withFileTypes: true })
 	.filter((e) => e.isDirectory())
 	.map((e) => e.name)
-	.filter((slug) => existsSync(path.join(COMPONENT_DIR, slug, 'model.json')))
+	.filter((slug) => existsSync(path.join(PKG_DIR, slug, 'model.json')))
 	.sort();
 
 // ---------------------------------------------------------------------------
@@ -55,19 +59,17 @@ const slugs = readdirSync(COMPONENT_DIR, { withFileTypes: true })
 
 /** model.json von <slug> in ein Temp-Ziel exportieren. Gibt Prozess + Pfade zurück. */
 function exportToTemp(slug) {
-	const srcDir = path.join(COMPONENT_DIR, slug);
-	const model = JSON.parse(readFileSync(path.join(srcDir, 'model.json'), 'utf8'));
+	const pkgSrcDir = path.join(PKG_DIR, slug);
+	const routeSrcDir = path.join(ROUTE_DIR, slug);
+	const model = JSON.parse(readFileSync(path.join(pkgSrcDir, 'model.json'), 'utf8'));
 	const kebab = kebabCase(model.name);
 	const tmp = tmpDir('export-idem-');
 	const outDir = path.join(tmp, ROUTE_BASE, kebab);
 	mkdirSync(outDir, { recursive: true });
-	// pattern.css (render.cssFile) löst der Exporter gegen das outDir auf — daneben
-	// den Output kopieren, damit gegen das Temp-Ziel gerendert wird.
-	if (typeof model.render?.cssFile === 'string') {
-		copyFileSync(path.join(srcDir, model.render.cssFile), path.join(outDir, model.render.cssFile));
-	}
-	const res = runExport([path.join(srcDir, 'model.json'), '--root', tmp, '--target', 'zeit-de']);
-	return { res, srcDir, outDir };
+	// pattern.css (render.cssFile) löst der Exporter gegen das MODELL auf — die
+	// echte Paket-Datei liegt daneben, es wird also nichts kopiert.
+	const res = runExport([path.join(pkgSrcDir, 'model.json'), '--root', tmp, '--target', 'zeit-de']);
+	return { res, srcDir: routeSrcDir, outDir };
 }
 
 describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
@@ -108,18 +110,23 @@ describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
 // Pflichtfeld name am verdrahteten Schema-Gate der CLI selbst (andere Ebene als der
 // reine validateModelSchema-Unit-Test).
 
-/** Kaputtes Modell (+ optional pattern.css) in Temp schreiben und exportieren. */
+/** Kaputtes Modell (+ optional pattern.css) in Temp schreiben und exportieren.
+    pattern.css landet NEBEN dem Modell — `render.cssFile` ist modell-relativ.
+    `code` wird ergänzt, wo es nicht selbst Gegenstand des Falls ist: das Schema
+    verlangt den Block, sonst schlüge das ajv-Gate zu, bevor der geprüfte
+    Semantik-Check überhaupt liefe. */
 function runBroken(model, css) {
 	const tmp = tmpDir('export-bad-');
 	const modelPath = path.join(tmp, 'model.json');
 	writeFileSync(modelPath, JSON.stringify(model));
-	if (css != null) {
-		const outDir = path.join(tmp, ROUTE_BASE, kebabCase(model.name));
-		mkdirSync(outDir, { recursive: true });
-		writeFileSync(path.join(outDir, 'pattern.css'), css);
-	}
+	if (css != null) writeFileSync(path.join(tmp, 'pattern.css'), css);
 	return runExport([modelPath, '--root', tmp]);
 }
+
+/** Minimaler, gültiger `code`-Block — Pflichtfeld seit PR 4 (kein Fallback mehr). */
+const CODE_STUB = {
+	artefakte: [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]
+};
 
 describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 	it('fehlender name → Exit ≠ 0, stderr nennt name', () => {
@@ -131,6 +138,7 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 	it('controls ohne template/specimen → Exit ≠ 0, Meldung nennt fehlendes Ziel', () => {
 		const res = runBroken({
 			name: 'X',
+			code: CODE_STUB,
 			render: {
 				controls: [{ key: 'v', label: 'V', type: 'select', options: [{ value: 'a', label: 'A' }] }]
 			}
@@ -142,6 +150,7 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 	it('select-default kein option-value → Exit ≠ 0, Meldung nennt default', () => {
 		const res = runBroken({
 			name: 'X',
+			code: CODE_STUB,
 			render: {
 				template: '<b class="z{classes}"></b>',
 				controls: [
@@ -163,6 +172,7 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 		const res = runBroken(
 			{
 				name: 'X',
+				code: CODE_STUB,
 				render: {
 					template: '<b class="z{classes}"></b>',
 					cssFile: './pattern.css',
@@ -372,7 +382,8 @@ describe('export.mjs · --init-Scaffold', () => {
 		const res = runExport(['--init', 'Test Widget', '--root', tmp]);
 		expect(res.status, res.stderr).toBe(0);
 
-		const dir = path.join(tmp, ROUTE_BASE, 'test-widget');
+		// Das Gerüst entsteht im PAKET — dort gehören Modell und CSS hin.
+		const dir = path.join(tmp, PKG_BASE, 'test-widget');
 		expect(existsSync(path.join(dir, 'model.json'))).toBe(true);
 		expect(existsSync(path.join(dir, 'pattern.css'))).toBe(true);
 
@@ -386,7 +397,7 @@ describe('export.mjs · --init-Scaffold', () => {
 		const first = runExport(['--init', 'Test Widget', '--root', tmp]);
 		expect(first.status).toBe(0);
 
-		const modelPath = path.join(tmp, ROUTE_BASE, 'test-widget', 'model.json');
+		const modelPath = path.join(tmp, PKG_BASE, 'test-widget', 'model.json');
 		const before = readFileSync(modelPath, 'utf8');
 
 		const second = runExport(['--init', 'Test Widget', '--root', tmp]);

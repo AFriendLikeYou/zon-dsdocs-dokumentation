@@ -70,17 +70,21 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 `tooling/zeit-de-exporter/IMPORT.md`.
 
 1. **Modell anlegen** — aus Figma via Figma-MCP (siehe `IMPORT.md`) oder von Hand.
+   Ort: `packages/components/src/<kebab>/{model.json, pattern.css}`. Das Modell und das
+   CSS gehören ins **Paket** (`@zeit/components`), weil sie beschreiben bzw. sind, was
+   wir ausliefern; die Seite ist nur ihre Dokumentation. `code.artefakte` ist Pflicht.
 2. **Exporter laufen lassen** —
-   `node tooling/zeit-de-exporter/export.mjs <model.json>`. Erzeugt unter
-   `src/routes/product/components/<kebab>/`: `+page.svx` + `spec.generated.ts` (beide **nie**
-   von Hand editieren) + `content.json` (redaktioneller Stub, **hier** editieren) und legt
-   `model.json` co-locatet daneben ab. Re-Export später:
-   `node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>`
-   (oder `npm run export:all` für alle Komponenten auf einmal).
+   `node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>`. Erzeugt
+   unter `apps/docs/src/routes/product/components/<kebab>/`: `+page.svx` +
+   `spec.generated.ts` (beide **nie** von Hand editieren) + `content.json`
+   (redaktioneller Stub, **hier** editieren). `npm run export:all` fährt alle
+   Komponenten auf einmal.
 3. **Nav — kein Handeintrag.** Die Components-Sektion der Nav ist **katalog-getrieben**
-   (ADR-025): ein neues `model.json` erscheint automatisch. Nur optional Reihenfolge/Badge
-   in der Override-Map in `src/lib/data/catalog.ts`; geplante Stubs in `PLANNED_COMPONENTS`
-   (`src/lib/data/navigation.ts`).
+   (ADR-025): ein neues `model.json` erscheint automatisch. Reihenfolge/Badge stehen
+   im `katalog`-Block desselben `model.json`; geplante Stubs ohne Paket-Gegenstück in
+   `PLANNED_COMPONENTS` (`apps/docs/src/lib/data/navigation.ts`).
+4. **Barrel ergänzen** — neuen Slug in `packages/components/src/index.ts` eintragen
+   (`index.test.ts` hält die Liste gegen die Ordner).
 
 ## 5. Redaktionellen Inhalt einer Komponente ändern
 

@@ -8,25 +8,39 @@
  * vorhandenen Format-Artefakte (Format · Status · Dateien).
  *
  * NUR SERVERSEITIG importieren: Datenbasis ist der server-only AGENT_CATALOG
- * (enthält das rohe pattern.css). Weitere Artefakt-Dateien (z. B. code/*.svelte)
- * werden zur BUILD-ZEIT per import.meta.glob ?raw eingesammelt — kein Laufzeit-
- * Dateisystem-Zugriff (Vercel!). Wie manifest.ts/mcp.ts: dünne Route → pure,
- * getestete Funktionen hier.
+ * (enthält das rohe pattern.css aus @zeit/components). Weitere Artefakt-Dateien
+ * (z. B. code/*.svelte) werden zur BUILD-ZEIT per import.meta.glob ?raw
+ * eingesammelt — kein Laufzeit-Dateisystem-Zugriff (Vercel!). Wie manifest.ts/mcp.ts:
+ * dünne Route → pure, getestete Funktionen hier.
  */
 import { createHash } from 'node:crypto';
 import { AGENT_CATALOG, type AgentCatalogEntry } from '$lib/server/agent-catalog';
 import { resolveArtefakte } from '../../../../../tooling/artefakte.mjs';
 import type { CodeArtefakt, CodeFormat, CodeStatus } from '$types/spec';
 
-/** Weitere Artefakt-Dateien aus co-locateten `code/`-Unterordnern (roh, Build-Zeit). */
-const codeFiles = import.meta.glob('/src/routes/product/components/*/code/**', {
+/**
+ * Weitere Artefakt-Dateien aus den `code/`-Unterordnern des Pakets (roh, Build-Zeit).
+ * DATEI-RELATIV wie die Katalog-Globs: `packages/` liegt außerhalb der Vite-
+ * Projektwurzel `apps/docs` (Begründung in data/catalog.ts).
+ */
+const codeFiles = import.meta.glob('../../../../../packages/components/src/*/code/**', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
 }) as Record<string, string>;
 
-/** Basis-Pfad eines Komponenten-Ordners im Repo (für die Glob-Keys). */
-const componentDir = (slug: string) => `/src/routes/product/components/${slug}`;
+/**
+ * Artefakt-Dateien nach `<slug>/<pfad im Ordner>` umschlüsseln. Der Glob-Key ist
+ * der volle relative Pfad; hier interessiert nur der Teil AB dem Slug, weil die
+ * `dateien`-Einträge des Modells ordner-relativ sind (`code/Button.svelte`).
+ */
+const codeFilesBySlugPfad: Record<string, string> = Object.fromEntries(
+	Object.entries(codeFiles).map(([pfad, inhalt]) => {
+		const segmente = pfad.split('/');
+		const codeIndex = segmente.lastIndexOf('code');
+		return [segmente.slice(codeIndex - 1).join('/'), inhalt];
+	})
+);
 
 /**
  * Löst eine ordner-relative Artefakt-Datei auf ihren rohen Inhalt auf:
@@ -35,14 +49,14 @@ const componentDir = (slug: string) => `/src/routes/product/components/${slug}`;
  */
 function fileContent(entry: AgentCatalogEntry, datei: string): string | null {
 	if (datei === 'pattern.css') return entry.patternCss;
-	return codeFiles[`${componentDir(entry.slug)}/${datei}`] ?? null;
+	return codeFilesBySlugPfad[`${entry.slug}/${datei}`] ?? null;
 }
 
 /**
- * Artefakt-Deklaration einer Komponente — aus dem `code`-Block des Specs ODER
- * (Fallback) implizit `html-css → pattern.css` (kanonisch), sofern pattern.css
- * existiert. So sind alle Bestandskomponenten sofort Registry-fähig, ohne dass
- * ihr model.json angefasst werden muss.
+ * Artefakt-Deklaration einer Komponente — ausschließlich aus dem `code`-Block des
+ * Specs. Seit PR 4 gibt es KEINEN stillen pattern.css-Fallback mehr: jede
+ * Komponente sagt selbst, was sie ausliefert (MIGRATIONSPLAN §4, Ausnahme 3);
+ * das Schema erzwingt den Block.
  *
  * Die Regel selbst liegt in tooling/artefakte.mjs — dieselbe Funktion benutzt der
  * Exporter, um den `code`-Block in spec.generated.ts zu schreiben. Die Bezugs-
@@ -50,7 +64,7 @@ function fileContent(entry: AgentCatalogEntry, datei: string): string | null {
  * wirklich liefert (eine Regel, kein Drift).
  */
 function artefakteOf(entry: AgentCatalogEntry): CodeArtefakt[] {
-	return resolveArtefakte(entry.spec.code, Boolean(entry.patternCss)) as CodeArtefakt[];
+	return resolveArtefakte(entry.spec.code) as CodeArtefakt[];
 }
 
 /** Länge des gekürzten Hex-Hashes — 16 Zeichen (64 Bit) reichen für Drift-Erkennung. */

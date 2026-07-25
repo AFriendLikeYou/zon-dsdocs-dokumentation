@@ -9,14 +9,14 @@
  * EINEM Befehl und bleibt an den zwei menschlichen Kontrollpunkten bewusst
  * stehen — das System rät nie:
  *
- *   Schritt 1  fetch  → figma-raw.json in apps/docs/src/routes/product/components/<slug>/
+ *   Schritt 1  fetch  → figma-raw.json in packages/components/src/<slug>/
  *   GATE 1     Fehlen die Token-NAMEN (REST liefert ohne Enterprise nur IDs),
  *              stoppt der Lauf mit einer TODO-Ausgabe. Namen via Figma-MCP
  *              get_variable_defs ergänzen, dann Schritt 2 nachziehen. Sind die
  *              Namen schon da (Enterprise) ODER wird --draft gesetzt, läuft es
  *              direkt weiter.
  *   Schritt 2  draft  → model.draft.json
- *   GATE 2     Handarbeit: model.json prüfen, pattern.css + content.ts, export.
+ *   GATE 2     Handarbeit: model.json prüfen, pattern.css + content.json, export.
  *
  * Ruft die bestehenden CLIs als Child-Prozesse auf (nutzt ihr exaktes Verhalten,
  * kein Logik-Duplikat). fetch.mjs/draft.mjs bleiben unverändert einzeln nutzbar.
@@ -25,7 +25,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
+import { COMPONENTS_REL, PKG_COMPONENTS_REL, REPO_ROOT as REPO } from '../lib/paths.mjs';
 
 /**
  * GATE 1: Liefert der Fetch degradierte Tokens? Bei fehlendem Enterprise-Zugriff
@@ -186,28 +186,39 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
  * @returns {StageEntry[]}
  */
 function gatherStatus() {
-	const base = path.join(REPO, COMPONENTS_REL);
-	if (!existsSync(base)) return [];
-	const slugs = readdirSync(base, { withFileTypes: true })
-		.filter((e) => e.isDirectory())
-		.map((e) => e.name)
-		.sort();
+	// Zwei Fundorte seit PR 4: Quelle im Paket (raw/draft/model/pattern), Ausgabe in
+	// der Route (content/+page). Die Slug-Liste ist die VEREINIGUNG — so bleibt auch
+	// eine Route ohne Paket-Gegenstück (geplanter Stub) in der Übersicht sichtbar.
+	const pkgBase = path.join(REPO, PKG_COMPONENTS_REL);
+	const routeBase = path.join(REPO, COMPONENTS_REL);
+	/** @param {string} base */
+	const dirsIn = (base) =>
+		existsSync(base)
+			? readdirSync(base, { withFileTypes: true })
+					.filter((e) => e.isDirectory())
+					.map((e) => e.name)
+			: [];
+	const slugs = [...new Set([...dirsIn(pkgBase), ...dirsIn(routeBase)])].sort();
+	if (!slugs.length) return [];
 	return slugs.map((slug) => {
-		const dir = path.join(base, slug);
+		const pkg = path.join(pkgBase, slug);
+		const route = path.join(routeBase, slug);
 		/** @param {string} f */
-		const has = (f) => existsSync(path.join(dir, f));
+		const has = (f) => existsSync(path.join(pkg, f));
+		/** @param {string} f */
+		const hasRoute = (f) => existsSync(path.join(route, f));
 		const raw = has('figma-raw.json');
 		const draft = has('model.draft.json');
 		const model = has('model.json');
-		const degraded = raw && isDegraded(readFileSync(path.join(dir, 'figma-raw.json'), 'utf8'));
+		const degraded = raw && isDegraded(readFileSync(path.join(pkg, 'figma-raw.json'), 'utf8'));
 		// draft offen: draft liegt vor, ist aber (noch) nicht als aktuelles model.json promotet
 		// — entweder model.json fehlt oder model.json ist neuer (draft = Altlast/offen).
 		let draftOpen = false;
 		if (draft) {
 			draftOpen = !model
 				? true
-				: statSync(path.join(dir, 'model.json')).mtimeMs >
-					statSync(path.join(dir, 'model.draft.json')).mtimeMs;
+				: statSync(path.join(pkg, 'model.json')).mtimeMs >
+					statSync(path.join(pkg, 'model.draft.json')).mtimeMs;
 		}
 		return {
 			slug,
@@ -215,8 +226,8 @@ function gatherStatus() {
 			draft,
 			model,
 			pattern: has('pattern.css'),
-			content: has('content.json'),
-			page: has('+page.svx'),
+			content: hasRoute('content.json'),
+			page: hasRoute('+page.svx'),
 			degraded,
 			draftOpen
 		};
@@ -255,7 +266,9 @@ if (isCli) {
 		process.exit(1);
 	}
 
-	const dir = path.join(COMPONENTS_REL, slug);
+	// Zielordner des Imports ist der PAKET-Ordner: figma-raw.json, model.draft.json,
+	// model.json und pattern.css sind die Quelle, nicht die Doku-Ausgabe.
+	const dir = path.join(PKG_COMPONENTS_REL, slug);
 	const rawPath = path.join(REPO, dir, 'figma-raw.json');
 	mkdirSync(path.join(REPO, dir), { recursive: true });
 
@@ -295,7 +308,7 @@ if (isCli) {
 ⛔ GATE 2 — Handarbeit (wird nie generiert):
    1. ${dir}/model.draft.json prüfen → zu model.json promoten
    2. ${dir}/pattern.css anlegen (originalgetreue z-*-Klassen)
-   3. content.ts redaktionell füllen (kommt als Stub aus dem Export)
+   3. content.json redaktionell füllen (kommt als Stub aus dem Export, in der Route)
    Dann veröffentlichen:
      node tooling/zeit-de-exporter/export.mjs ${dir}
 `);

@@ -12,17 +12,17 @@ title: Formular
 	// (der bleibt einzelnen Komponenten vorbehalten). Diese Seite ist von Hand
 	// geschrieben. Begründung: DECISIONS.md ADR-026.
 	//
-	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus den
-	// Component-Ordnern (Single Source of Truth). Nur das Layout-Glue (Stack-Abstände,
+	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus dem Paket
+	// @zeit/components (Single Source of Truth). Nur das Layout-Glue (Stack-Abstände,
 	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns.
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Card } from '$components/ui/card';
 	import { Grid } from '$components/ui/grid';
 
-	import inputCss from '../../components/input/pattern.css?raw';
-	import checkboxCss from '../../components/checkbox/pattern.css?raw';
-	import buttonCss from '../../components/button/pattern.css?raw';
+	import inputCss from '@zeit/components/input/pattern.css?raw';
+	import checkboxCss from '@zeit/components/checkbox/pattern.css?raw';
+	import buttonCss from '@zeit/components/button/pattern.css?raw';
 	import glueCss from './pattern.css?raw';
 
 	// Die z-Selektoren sind seitenweit eindeutig (nichts sonst nutzt sie) → wir binden

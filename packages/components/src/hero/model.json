@@ -515,5 +515,19 @@
 			"Aus": "Der Aufmacher bleibt in der Inhaltsspalte (max. 1000 px).",
 			"An": "Randlos über die volle Seitenbreite."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 8
 	}
 }

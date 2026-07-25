@@ -1,41 +1,29 @@
 /**
  * catalog.ts — generierter Index aller dokumentierten Patterns/Komponenten.
  *
- * Discovery killt Drift (ADR-018/023): Storage bleibt CO-LOCATED
- * (src/routes/product/components/<slug>/{model.json, content.json, pattern.css}),
- * dieser Index entsteht zur Build-Zeit per import.meta.glob — ein neues Pattern
- * (model.json + Export) erscheint hier automatisch, ohne Handliste.
+ * Discovery killt Drift (ADR-018/023): Der Index entsteht zur Build-Zeit per
+ * import.meta.glob — eine neue Komponente erscheint hier automatisch, ohne
+ * Handliste. Zwei Quellen, seit PR 4 in zwei Workspaces:
  *
- * Kuratierte, nicht ableitbare Felder (Reihenfolge, Ausschlüsse) leben in der
- * Override-Map. Redaktionelle Texte (content.json) überschreiben das Maschinen-
- * Modell per Shallow-Merge — wie auf den Component-Seiten selbst.
+ *   packages/components/src/<slug>/model.json   ← Maschine (das Paket = das Produkt)
+ *   src/routes/product/components/<slug>/content.json ← Mensch (Redaktion, zieht PR 5)
+ *
+ * Kuratierte, nicht ableitbare Felder (Reihenfolge, Badge, Ausschluss) stehen im
+ * `katalog`-Block des jeweiligen model.json — die frühere Handliste
+ * CATALOG_OVERRIDES ist entfallen (MIGRATIONSPLAN §4, Ausnahme 4): eine zweite
+ * Liste neben dem Spec veraltet zwangsläufig, und zwar still. Redaktionelle Texte
+ * (content.json) überschreiben das Maschinen-Modell per Shallow-Merge — wie auf
+ * den Component-Seiten selbst.
  */
 import type { BadgeVariant, ComponentSpec } from '$types/spec';
 
-type CatalogOverride = {
+/** Der `katalog`-Block des model.json — Katalog-Verdrahtung, kein Datenmodell. */
+type KatalogBlock = {
 	order?: number;
 	exclude?: boolean;
-	/** Kuratiertes Nav-/Übersichts-Badge (z. B. „Neu"). Bewusst redaktionell — keine Automatik. */
+	/** Kuratiertes Nav-/Übersichts-Badge (z. B. „Neu"). PINNT gegen die Zeit-Automatik. */
 	badge?: string;
 	badgeVariant?: BadgeVariant;
-};
-
-/** Nur Ausnahmen eintragen — Einträge ohne Override laufen ans Ende (order 999).
-    Ein hier gesetztes badge PINNT (überschreibt die Automatik unten). */
-const CATALOG_OVERRIDES: Record<string, CatalogOverride> = {
-	button: { order: 1 },
-	'text-button': { order: 2 },
-	'page-shortcut': { order: 3 },
-	'button-group': { order: 4 },
-	'icon-button': { order: 5 },
-	cell: { order: 6 },
-	'standard-teaser': { order: 7 },
-	hero: { order: 8 },
-	input: { order: 9 },
-	checkbox: { order: 10 },
-	toggle: { order: 11 },
-	stepper: { order: 12 },
-	carousel: { order: 13 }
 };
 
 /**
@@ -67,16 +55,25 @@ export function badgeFor(
 
 export type CatalogEntry = {
 	slug: string;
-	/** Maschinen-Modell (ohne render) + redaktionelle Overrides aus content.ts. */
+	/** Maschinen-Modell (ohne render/katalog) + redaktionelle Overrides aus content.json. */
 	spec: Partial<ComponentSpec>;
 	order: number;
-	/** Nav-Badge: Override pinnt, sonst Zeit-Automatik (badgeFor: Neu/Update). */
+	/** Nav-Badge: kuratiertes `katalog.badge` pinnt, sonst Zeit-Automatik (badgeFor). */
 	badge?: string;
 	badgeVariant?: BadgeVariant;
 };
 
 // Vite inlined beide Globs zur Build-Zeit (eager) — kein Laufzeit-Fetch.
-const models = import.meta.glob('/src/routes/product/components/*/model.json', {
+//
+// DATEI-RELATIV für das Paket, WURZEL-RELATIV für die App: Ein führender `/` meint
+// bei import.meta.glob die VITE-Projektwurzel — und die ist seit PR 3 `apps/docs`.
+// `/packages/…` zeigte also auf `apps/docs/packages/`, träfe nichts und ließe den
+// Katalog STILL leer (kein Fehler, nur eine leere Seite). Der Griff aus der App
+// heraus muss deshalb relativ sein; derselbe Grund wie beim Vendor-CSS in
+// server/registry.ts. Über den Paketnamen (`@zeit/components/…`) geht es nicht:
+// import.meta.glob löst bare Specifier per resolveId auf, und ein Pfad mit `*`
+// existiert nicht auf der Platte → „Invalid glob".
+const models = import.meta.glob('../../../../../packages/components/src/*/model.json', {
 	eager: true,
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec> & { render?: unknown }>;
@@ -88,31 +85,39 @@ const contents = import.meta.glob('/src/routes/product/components/*/content.json
 
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
 
+/** Glob-Ergebnis nach Slug umschlüsseln — nie Glob-Keys von Hand zusammenbauen.
+    Ein selbstgebauter Key würde bei jeder Pfadänderung still ins Leere greifen. */
+const bySlug = <T>(eintraege: Record<string, T>): Record<string, T> =>
+	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugOf(pfad), wert]));
+
+const contentsBySlug = bySlug(contents);
+
 export const CATALOG: CatalogEntry[] = Object.entries(models)
 	.map(([path, model]) => {
 		const slug = slugOf(path);
-		// `render` ist Repo-Verdrahtung (Template/CSS), `$schema` nur Editor-Komfort —
-		// beides gehört nicht in den Katalog.
+		// `render` ist Repo-Verdrahtung (Template/CSS), `katalog` Katalog-Verdrahtung
+		// (unten ausgewertet), `$schema` nur Editor-Komfort — nichts davon gehört in
+		// den Spec.
 		const {
 			render: _render,
 			$schema: _schema,
+			katalog,
 			...machine
 		} = model as Partial<ComponentSpec> & {
 			render?: unknown;
 			$schema?: unknown;
+			katalog?: KatalogBlock;
 		};
-		const content =
-			contents[`/src/routes/product/components/${slug}/content.json`] ??
-			({} as Partial<ComponentSpec>);
+		const content = contentsBySlug[slug] ?? ({} as Partial<ComponentSpec>);
 		const spec = { ...machine, ...content };
 		return {
 			slug,
 			spec,
-			order: CATALOG_OVERRIDES[slug]?.order ?? 999,
-			// Override pinnt; sonst entscheidet die Zeit-Automatik (Neu/Update/nichts).
-			badge: CATALOG_OVERRIDES[slug]?.badge ?? badgeFor(spec.dokumentiertAm, spec.aktualisiertAm),
-			badgeVariant: CATALOG_OVERRIDES[slug]?.badgeVariant,
-			exclude: CATALOG_OVERRIDES[slug]?.exclude ?? false
+			order: katalog?.order ?? 999,
+			// Kuratiertes Badge pinnt; sonst entscheidet die Zeit-Automatik (Neu/Update/nichts).
+			badge: katalog?.badge ?? badgeFor(spec.dokumentiertAm, spec.aktualisiertAm),
+			badgeVariant: katalog?.badgeVariant,
+			exclude: katalog?.exclude ?? false
 		};
 	})
 	.filter((e) => !e.exclude)

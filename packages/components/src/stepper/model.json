@@ -7,7 +7,9 @@
 	"aktualisiertAm": "2026-07-03",
 	"dokumentiertAm": "2026-07-03",
 	"zweck": "Zahl-Stepper zum feinen Erhöhen/Verringern eines Werts über − und +. Zustände Default, Hover, Focus und Disabled.",
-	"verwandt": ["input"],
+	"verwandt": [
+		"input"
+	],
 	"masse": {
 		"hoehe": {
 			"px": "38",
@@ -106,7 +108,12 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["default", "hover", "focus", "disabled"],
+		"zustaende": [
+			"default",
+			"hover",
+			"focus",
+			"disabled"
+		],
 		"elemente": [
 			{
 				"teil": "Container · Rahmen",
@@ -347,5 +354,19 @@
 			"Focus": "Tastaturfokus auf einem Button — 2px Focus-100.",
 			"Disabled": "Gesperrt — Wert und Icons in Text-40."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 12
 	}
 }

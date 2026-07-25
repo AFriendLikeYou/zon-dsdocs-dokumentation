@@ -12,8 +12,8 @@ title: Themenklammer
 	// (der bleibt einzelnen Komponenten vorbehalten). Diese Seite ist von Hand
 	// geschrieben. Begründung: DECISIONS.md ADR-026.
 	//
-	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus den
-	// Component-Ordnern (Single Source of Truth). Nur das Layout-Glue (Klammer-Linien,
+	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus dem Paket
+	// @zeit/components (Single Source of Truth). Nur das Layout-Glue (Klammer-Linien,
 	// Kopfzeile, Rhythmus) lebt co-located als pattern.css dieses Patterns.
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
@@ -22,9 +22,9 @@ title: Themenklammer
 	import { Card } from '$components/ui/card';
 	import { Grid } from '$components/ui/grid';
 
-	import heroCss from '../../components/hero/pattern.css?raw';
-	import cellCss from '../../components/cell/pattern.css?raw';
-	import textButtonCss from '../../components/text-button/pattern.css?raw';
+	import heroCss from '@zeit/components/hero/pattern.css?raw';
+	import cellCss from '@zeit/components/cell/pattern.css?raw';
+	import textButtonCss from '@zeit/components/text-button/pattern.css?raw';
 	import glueCss from './pattern.css?raw';
 
 	// Die z-Selektoren sind seitenweit eindeutig → pattern.css EINMAL UNSCOPED

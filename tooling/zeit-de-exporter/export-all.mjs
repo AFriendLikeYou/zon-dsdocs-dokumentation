@@ -2,9 +2,9 @@
 /**
  * export:all — Re-Export ALLER dokumentierten Komponenten.
  * ----------------------------------
- * Glob über alle apps/docs/src/routes/product/components/*\/model.json und ruft den
- * bestehenden Exporter (export.mjs) pro Ordner auf. Bewusst minimal: kein
- * Check-Modus, keine eigene Logik — nur ein Batch-Runner über export.mjs.
+ * Glob über alle packages/components/src/*\/model.json und ruft den bestehenden
+ * Exporter (export.mjs) pro Paket-Ordner auf. Bewusst minimal: kein Check-Modus,
+ * keine eigene Logik — nur ein Batch-Runner über export.mjs.
  *
  * Nutzung:
  *   node tooling/zeit-de-exporter/export-all.mjs [--root <repoRoot>] [--dry]
@@ -14,11 +14,11 @@ import { readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { COMPONENTS_REL } from '../lib/paths.mjs';
+import { PKG_COMPONENTS_REL } from '../lib/paths.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXPORTER = resolve(__dirname, 'export.mjs');
-const ROUTE_BASE = COMPONENTS_REL;
+const PKG_BASE = PKG_COMPONENTS_REL;
 
 function parseArgs(argv) {
 	const args = { root: process.cwd(), dry: false };
@@ -32,7 +32,7 @@ function parseArgs(argv) {
 
 function main() {
 	const { root, dry } = parseArgs(process.argv.slice(2));
-	const baseDir = resolve(root, ROUTE_BASE);
+	const baseDir = resolve(root, PKG_BASE);
 	if (!existsSync(baseDir)) throw new Error(`Ordner nicht gefunden: ${baseDir}`);
 
 	const dirs = readdirSync(baseDir)

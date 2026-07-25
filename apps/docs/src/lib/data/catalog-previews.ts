@@ -9,7 +9,7 @@
  * Pro Slug entsteht { html, css }:
  *   - html: render.preview ODER instantiate(template, controls, defaults) — genau die
  *           Funktion, die auch der Playground nutzt (DRY, kein zweiter Renderer).
- *   - css:  co-locatetes pattern.css (unscoped) → gegen `.spec-canvas` gescoped
+ *   - css:  pattern.css aus dem Paket (unscoped) → gegen `.spec-canvas` gescoped
  *           (Vorbild: scopeCss im Exporter) PLUS optionales inline render.css, das
  *           bereits `.spec-canvas`-gescoped ist (z. B. icon-button ohne pattern.css).
  *
@@ -32,19 +32,28 @@ type RenderBlock = {
 
 type ModelWithRender = { name?: string; render?: RenderBlock };
 
-// Build-Zeit-Globs: model.json (inkl. render) + pattern.css als Rohtext.
-const models = import.meta.glob('/src/routes/product/components/*/model.json', {
+// Build-Zeit-Globs: model.json (inkl. render) + pattern.css als Rohtext. Beide
+// liegen seit PR 4 im Paket (@zeit/components) und damit AUSSERHALB der Vite-
+// Projektwurzel `apps/docs` — deshalb datei-relativ statt mit führendem `/`
+// (Begründung in data/catalog.ts).
+const models = import.meta.glob('../../../../../packages/components/src/*/model.json', {
 	eager: true,
 	import: 'default'
 }) as Record<string, ModelWithRender>;
 
-const patternCss = import.meta.glob('/src/routes/product/components/*/pattern.css', {
+const patternCss = import.meta.glob('../../../../../packages/components/src/*/pattern.css', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
 }) as Record<string, string>;
 
+/** Slug = vorletztes Pfadsegment — unabhängig davon, wie tief der Glob greift. */
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
+
+/** Pattern-CSS nach Slug (Glob-Keys nie von Hand nachbauen — sie ändern sich mit dem Pfad). */
+const patternCssBySlug: Record<string, string> = Object.fromEntries(
+	Object.entries(patternCss).map(([pfad, css]) => [slugOf(pfad), css])
+);
 
 /** Bedingte Gruppierungsregeln — wie im Exporter: Rahmen erhalten, Rumpf rekursiv scopen. */
 const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
@@ -344,7 +353,7 @@ function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | nu
 	//    frisch gescoptes pattern.css.
 	const inlineRaw = Array.isArray(render.css) ? render.css.join('\n') : (render.css ?? '');
 	const inlineCss = inlineRaw ? unwrapGlobal(inlineRaw) : '';
-	const raw = patternCss[`/src/routes/product/components/${slug}/pattern.css`] ?? '';
+	const raw = patternCssBySlug[slug] ?? '';
 	const css = [inlineCss, raw ? scopeToCanvas(raw) : ''].filter(Boolean).join('\n');
 
 	return { html, css };

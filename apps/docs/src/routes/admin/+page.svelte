@@ -139,7 +139,7 @@
 				oder nutze die Pfeile — die Änderung wird sofort gespeichert und wirkt in der ganzen
 				Design-System-Sektion. Der <strong>Komponenten-Block</strong> ist katalog-getrieben: seine
 				Position lässt sich verschieben, seine Einträge kommen automatisch aus den
-				<code>model.json</code> (Reihenfolge via <code>CATALOG_OVERRIDES</code>).
+				<code>model.json</code> des Pakets (Reihenfolge via <code>katalog.order</code> ebendort).
 			</p>
 			<p class="totals">
 				raw {totals.raw}/{totals.total} · vollständig {totals.vollstaendig}/{totals.total}

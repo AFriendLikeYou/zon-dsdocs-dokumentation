@@ -5,23 +5,27 @@ import { AGENT_CATALOG } from './agent-catalog';
 
 // Die Registry ist — wie Manifest/MCP — aus dem Katalog ABGELEITET (Build-Zeit-
 // Glob). Diese Tests sichern: der Index deckt den GESAMTEN Katalog ab (keine
-// Allowlist), der pattern.css-Fallback greift, der Format-Filter wirkt und
-// unbekannte Slugs liefern null.
+// Allowlist), jede Komponente deklariert ihre Artefakte, der Format-Filter wirkt
+// und unbekannte Slugs liefern null.
 describe('registry · registryIndex', () => {
 	const index = registryIndex();
 
 	it('deckt den GESAMTEN Katalog ab — Länge == Katalog-Länge, gleiche Slugs', () => {
+		// Nicht-leer zuerst: seit PR 4 greift der Glob über die Paketgrenze, und ein
+		// verrutschter Pfad liefert still ein leeres Objekt — dann wären BEIDE Seiten
+		// 0 und der Vergleich unten wäre trügerisch grün.
+		expect(AGENT_CATALOG.length).toBeGreaterThan(0);
 		expect(index.length).toBe(AGENT_CATALOG.length);
 		expect(index.map((e) => e.slug)).toEqual(AGENT_CATALOG.map((e) => e.slug));
 	});
 
-	it('jeder Eintrag trägt mindestens ein Format (Fallback html-css greift)', () => {
+	it('jeder Eintrag trägt mindestens ein Format (code-Block ist Pflicht)', () => {
 		for (const e of index) {
 			expect(e.formate.length, e.slug).toBeGreaterThan(0);
 		}
 	});
 
-	it('button ist als html-css gelistet (Fallback aus pattern.css)', () => {
+	it('button ist als html-css gelistet (deklariert im code-Block)', () => {
 		const button = index.find((e) => e.slug === 'button');
 		expect(button?.formate).toContain('html-css');
 		expect(button?.name).toBeTruthy();
@@ -33,7 +37,7 @@ describe('registry · registryComponent', () => {
 		expect(registryComponent('gibt-es-nicht')).toBeNull();
 	});
 
-	it('Fallback-Artefakt trägt pattern.css mit rohem Inhalt', () => {
+	it('deklariertes Artefakt trägt pattern.css mit rohem Inhalt', () => {
 		const button = registryComponent('button');
 		const htmlCss = button?.artefakte.find((a) => a.format === 'html-css');
 		expect(htmlCss?.status).toBe('kanonisch');

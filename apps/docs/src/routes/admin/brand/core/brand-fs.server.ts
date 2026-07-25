@@ -28,10 +28,16 @@ export function listSvxPages(root: SvxRoot): BrandPage[] {
 			if (entry.isDirectory()) {
 				walk(full);
 			} else if (entry.name === '+page.svx' || entry.name === '+page.svelte') {
-				// GENERIERTE Component-Seiten (model.json daneben → der Exporter schreibt
-				// die +page.svx bei jedem Sync neu) sind KEINE CMS-Seiten — Redaktion
-				// läuft dort über content.json (/admin/[slug]), nie über den Prosa-Editor.
-				if (root === 'product' && existsSync(join(dir, 'model.json'))) continue;
+				// GENERIERTE Component-Seiten sind KEINE CMS-Seiten — der Exporter
+				// schreibt ihre +page.svx bei jedem Sync neu; Redaktion läuft dort über
+				// content.json (/admin/product/components/[slug]), nie über den Prosa-Editor.
+				//
+				// Marker ist die `spec.generated.ts` NEBEN der Seite, nicht mehr das
+				// model.json: das ist seit PR 4 ins Paket gezogen. Der Marker muss im
+				// AUSGABE-Ordner liegen, sonst hielte dieser Filter jede generierte Seite
+				// plötzlich für handgeschrieben und böte sie im Prosa-Editor an — wo ein
+				// Save beim nächsten Export spurlos verschwände.
+				if (root === 'product' && existsSync(join(dir, 'spec.generated.ts'))) continue;
 				const relDir = relative(base, dir).split(sep).join('/');
 				out.push({
 					path: relDir,

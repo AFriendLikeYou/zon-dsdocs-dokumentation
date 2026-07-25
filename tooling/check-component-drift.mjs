@@ -8,7 +8,7 @@
  * hier daher: stimmen die DOKUMENTIERTEN Varianten mit den im Specimen tatsächlich
  * DEFINIERTEN CSS-Klassen überein?
  *
- * Pro co-locatetem model.json (apps/docs/src/routes/product/components/<slug>/model.json):
+ * Pro model.json des Pakets (packages/components/src/<slug>/model.json):
  *   - Basis-Klasse(n) aus render.preview/variant lesen (Token ohne `--`).
  *   - Modifier-Klassen aus render.css lesen (`.<basis>--<mod>`).
  *   - Dokumentierte Varianten aus `varianten[].werte[].label` (lowercase) lesen.
@@ -30,9 +30,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { COMPONENTS_DIR, DATA_DIR } from './lib/paths.mjs';
+import { COMPONENTS_DIR, DATA_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
 
-const componentsDir = COMPONENTS_DIR;
+/** Wo die Doku-Seiten liegen (Routen) … */
+const routesDir = COMPONENTS_DIR;
+/** … und wo Modell + Pattern-CSS liegen (Paket, seit PR 4). */
+const pkgDir = PKG_COMPONENTS_DIR;
 const strict = process.argv.includes('--strict');
 
 // Interaktions-/Zustands-Modifier sind KEINE Varianten und werden nicht als Drift gewertet.
@@ -153,14 +156,18 @@ function checkComponent(slug, model, patternCss = '') {
 	return issues;
 }
 
-// Alle Component-Routen einsammeln (mit und ohne Registry-Entry).
-const allDirs = fs.existsSync(componentsDir)
-	? fs
-			.readdirSync(componentsDir, { withFileTypes: true })
-			.filter((e) => e.isDirectory())
-			.map((e) => e.name)
-	: [];
-const slugs = allDirs.filter((s) => fs.existsSync(path.join(componentsDir, s, 'model.json')));
+/** Unterordner eines Verzeichnisses (leer, wenn es nicht existiert). */
+const dirsIn = (base) =>
+	fs.existsSync(base)
+		? fs
+				.readdirSync(base, { withFileTypes: true })
+				.filter((e) => e.isDirectory())
+				.map((e) => e.name)
+		: [];
+
+// Zwei Seiten seit PR 4: Doku-Routen (Ausgabe) und Paket-Ordner (Quelle).
+const allDirs = dirsIn(routesDir);
+const slugs = dirsIn(pkgDir).filter((s) => fs.existsSync(path.join(pkgDir, s, 'model.json')));
 
 // Geplante Stubs (PLANNED_COMPONENTS in navigation.ts) haben BEWUSST kein
 // model.json — die sollen hier nicht bei jedem Lauf als Drift rauschen.
@@ -173,33 +180,51 @@ const planned = new Set(
 let drift = 0;
 let checked = 0;
 
-// Inverser Check: Component-Route ohne Registry-Entry (model.json) — die Seite
-// existiert dann nur handgeschrieben und ist für Katalog/Checks unsichtbar.
+// Inverser Check A: Doku-Route ohne Paket-Gegenstück. Das ist KEIN Sonderfall,
+// sondern der geplante Stub: eine ehrliche Seite („noch nicht dokumentiert") für
+// eine Komponente, die es im Paket noch nicht gibt (heute: date-picker). Die Regel
+// steht in PLANNED_COMPONENTS (navigation.ts) — steht sie dort nicht, ist die Seite
+// für Katalog, Registry und MCP unsichtbar, und genau das meldet der Check.
 for (const s of allDirs) {
 	if (!slugs.includes(s)) {
 		if (planned.has(s)) {
 			console.log(
-				`ℹ️  „${s}": geplanter Stub (PLANNED_COMPONENTS) — ok, kein model.json erwartet.`
+				`ℹ️  „${s}": geplanter Stub (PLANNED_COMPONENTS) — ok, kein Paket-Ordner erwartet.`
 			);
 			continue;
 		}
 		drift++;
-		console.warn(`\n⚠️  „${s}": Component-Route ohne model.json (Registry-Entry fehlt).`);
+		console.warn(
+			`\n⚠️  „${s}": Doku-Route ohne Paket-Gegenstück (packages/components/src/${s}/model.json fehlt).`
+		);
+	}
+}
+
+// Inverser Check B: Paket-Ordner ohne Doku-Seite. Ein ausgeliefertes Pattern, das
+// nirgends erklärt wird — der Export ist dann schlicht nicht gelaufen.
+for (const slug of slugs) {
+	if (!fs.existsSync(path.join(routesDir, slug, '+page.svx'))) {
+		drift++;
+		console.warn(
+			`\n⚠️  „${slug}": Paket-Ordner ohne Doku-Seite — ` +
+				`node tooling/zeit-de-exporter/export.mjs packages/components/src/${slug}`
+		);
 	}
 }
 
 for (const slug of slugs) {
 	let model;
 	try {
-		model = JSON.parse(fs.readFileSync(path.join(componentsDir, slug, 'model.json'), 'utf8'));
+		model = JSON.parse(fs.readFileSync(path.join(pkgDir, slug, 'model.json'), 'utf8'));
 	} catch {
 		console.warn(`   ⚠️  ${slug}: model.json nicht lesbar/parsebar — übersprungen.`);
 		continue;
 	}
-	// Co-locatetes pattern.css (Registry-Schema) in den Vergleichs-Korpus aufnehmen.
+	// pattern.css aus dem Paket (Registry-Schema) in den Vergleichs-Korpus aufnehmen.
+	// `render.cssFile` ist relativ zum MODELL — und das liegt im Paket.
 	let patternCss = '';
 	if (typeof model.render?.cssFile === 'string') {
-		const cssPath = path.join(componentsDir, slug, model.render.cssFile);
+		const cssPath = path.join(pkgDir, slug, model.render.cssFile);
 		if (fs.existsSync(cssPath)) patternCss = fs.readFileSync(cssPath, 'utf8');
 		else {
 			drift++;

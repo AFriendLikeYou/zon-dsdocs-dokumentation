@@ -27,6 +27,15 @@ export const APP_REL = 'apps/docs';
 /** `src/routes/product/components` unterhalb der App — repo-relativ. */
 export const COMPONENTS_REL = `${APP_REL}/src/routes/product/components`;
 
+/**
+ * Das Komponenten-PAKET (@zeit/components) — repo-relativ. Seit PR 4 liegt hier
+ * das, was wir wirklich ausliefern: `model.json` (Spec), `pattern.css` und die
+ * `figma-raw.json`-Fixture. In der Route (COMPONENTS_REL) bleibt nur die
+ * Doku-AUSGABE (`+page.svx`, `spec.generated.ts`) plus die redaktionelle
+ * `content.json` (die zieht PR 5 nach `apps/docs/content/`).
+ */
+export const PKG_COMPONENTS_REL = 'packages/components/src';
+
 export const TOOLING_DIR = path.join(REPO_ROOT, 'tooling');
 export const PACKAGES_DIR = path.join(REPO_ROOT, 'packages');
 
@@ -41,8 +50,15 @@ export const ROUTES_DIR = path.join(SRC_DIR, 'routes');
 export const LIB_DIR = path.join(SRC_DIR, 'lib');
 export const DATA_DIR = path.join(LIB_DIR, 'data');
 
-/** Ein Ordner je dokumentierter Komponente (model.json, pattern.css, content.json …). */
+/**
+ * Ein Ordner je dokumentierter Komponente — die DOKU-SEITE (`+page.svx`,
+ * `spec.generated.ts`, `content.json`). Modell und CSS liegen seit PR 4 im Paket
+ * (siehe {@link PKG_COMPONENTS_DIR}).
+ */
 export const COMPONENTS_DIR = path.join(ROUTES_DIR, 'product/components');
+
+/** Ein Ordner je ausgelieferter Komponente (model.json, pattern.css, figma-raw.json). */
+export const PKG_COMPONENTS_DIR = path.join(REPO_ROOT, PKG_COMPONENTS_REL);
 
 /** Durchgereichte ZDS-Token-Kopie (@zeit/tokens) — Quelle des `static/`-Spiegels. */
 export const TOKENS_VENDOR_DIR = path.join(PACKAGES_DIR, 'tokens/vendor');

@@ -6,7 +6,10 @@
 	"aktualisiertAm": "2026-07-11",
 	"dokumentiertAm": "2026-07-02",
 	"zweck": "Segmentierte Auswahl — eine Gruppe zusammenhängender Buttons, von denen genau einer aktiv ist (z. B. Ressort-Filter).",
-	"verwandt": ["button", "icon-button"],
+	"verwandt": [
+		"button",
+		"icon-button"
+	],
 	"masse": {
 		"hoehe": {
 			"px": "32",
@@ -125,7 +128,11 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["inaktiv", "inaktiv+hover", "aktiv"],
+		"zustaende": [
+			"inaktiv",
+			"inaktiv+hover",
+			"aktiv"
+		],
 		"elemente": [
 			{
 				"teil": "Segment · Hintergrund",
@@ -173,5 +180,19 @@
 		"specimen": "./Specimen.svelte",
 		"preview": "<ul class=\"buttongroup\"><li class=\"buttongroup-item buttongroup-item--active\"><button class=\"buttongroup-button\">Alle</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Politik</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Wirtschaft</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Kultur</button></li></ul>",
 		"cssFile": "./pattern.css"
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 4
 	}
 }

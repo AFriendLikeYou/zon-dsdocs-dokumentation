@@ -5,12 +5,17 @@
 //
 // Schreiben trifft NUR content.json (dev-only, wie im Brand-Editor). model.json
 // wird ausschließlich GELESEN — Maße/Tokens/Varianten kommen aus dem Import.
+//
+// Seit PR 4 liegen die beiden Dateien in verschiedenen Workspaces: model.json +
+// figma-raw.json im Paket (@zeit/components), content.json weiter in der Route.
+// Die Grenze steht in $lib/server/component-paths.
 import { dev } from '$app/environment';
 import { error, fail } from '@sveltejs/kit';
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { isDegraded } from '../../../../../../../../tooling/zeit-de-exporter/import.mjs';
 import { validateContentRaw } from '$lib/server/content-validation';
+import { PKG_COMPONENTS_DIR, packageDir, routeDir } from '$lib/server/component-paths';
 import { CATALOG } from '$data/catalog';
 
 // Redaktionelle Felder, die DIESER Editor schreiben darf. Teilmenge der
@@ -46,18 +51,11 @@ const EDITABLE = [
 	'repoNote'
 ] as const;
 
-const COMPONENTS_DIR = 'src/routes/product/components';
-
-/** Ordnerpfad einer Komponente (Slug gegen fs geprüft → kein Path-Traversal). */
-function componentDir(slug: string) {
-	return resolve(process.cwd(), COMPONENTS_DIR, slug);
-}
-
-/** Existiert der Ordner mit model.json? (Existenz-Check + Traversal-Schutz.) */
+/** Existiert der Paket-Ordner mit model.json? (Existenz-Check + Traversal-Schutz.) */
 function isComponent(slug: string) {
 	// Slug darf nur ein einfacher Ordnername sein (keine Separatoren/Traversal).
 	if (!/^[a-z0-9-]+$/.test(slug)) return false;
-	return existsSync(resolve(componentDir(slug), 'model.json'));
+	return existsSync(resolve(packageDir(slug), 'model.json'));
 }
 
 function readJson(file: string): Record<string, unknown> {
@@ -76,12 +74,11 @@ function nodeIdFromFigma(url: unknown): string | null {
 	return m[1].replace(/-/g, ':');
 }
 
-// Alle bekannten Slugs (für die verwandt-Validierung im Editor).
+// Alle bekannten Slugs (für die verwandt-Validierung im Editor) — aus dem Paket.
 function allSlugs(): string[] {
-	const base = resolve(process.cwd(), COMPONENTS_DIR);
-	if (!existsSync(base)) return [];
-	return readdirSync(base, { withFileTypes: true })
-		.filter((e) => e.isDirectory() && existsSync(resolve(base, e.name, 'model.json')))
+	if (!existsSync(PKG_COMPONENTS_DIR)) return [];
+	return readdirSync(PKG_COMPONENTS_DIR, { withFileTypes: true })
+		.filter((e) => e.isDirectory() && existsSync(resolve(packageDir(e.name), 'model.json')))
 		.map((e) => e.name)
 		.sort();
 }
@@ -93,9 +90,9 @@ export const load = ({ params }) => {
 	const { slug } = params;
 	if (!isComponent(slug)) throw error(404, 'Unbekannte Komponente');
 
-	const dir = componentDir(slug);
+	const dir = packageDir(slug);
 	const model = readJson(resolve(dir, 'model.json'));
-	const content = readJson(resolve(dir, 'content.json'));
+	const content = readJson(resolve(routeDir(slug), 'content.json'));
 
 	// Maschinelle Snippet-Werte aus dem render-Block — als gedämpfte Platzhalter/
 	// Vorbelegung der Override-Felder im Editor („leer = Maschine gewinnt").
@@ -183,7 +180,7 @@ export const actions = {
 			return fail(400, { message: 'Ungültige Daten.' });
 		}
 
-		const path = resolve(componentDir(slug), 'content.json');
+		const path = resolve(routeDir(slug), 'content.json');
 		const full = readJson(path);
 		// Nur die editierbaren Keys übernehmen — der Rest (v1-read-only Felder aus
 		// dem Code) bleibt byte-genau erhalten. Fehlt ein editierbarer Key im Patch,

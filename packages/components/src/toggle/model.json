@@ -7,7 +7,10 @@
 	"aktualisiertAm": "2026-07-03",
 	"dokumentiertAm": "2026-07-03",
 	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
-	"verwandt": ["checkbox", "input"],
+	"verwandt": [
+		"checkbox",
+		"input"
+	],
 	"masse": {
 		"hoehe": {
 			"px": "16",
@@ -70,7 +73,11 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["off", "on", "focus"],
+		"zustaende": [
+			"off",
+			"on",
+			"focus"
+		],
 		"elemente": [
 			{
 				"teil": "Track · Hintergrund",
@@ -260,5 +267,19 @@
 			"Off": "Ausgeschaltet — Track in Background-20, Thumb links.",
 			"On": "Eingeschaltet — Track in Text-100, Thumb rechts."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 11
 	}
 }

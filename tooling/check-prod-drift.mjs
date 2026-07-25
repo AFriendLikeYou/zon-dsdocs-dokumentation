@@ -43,9 +43,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
+import { PKG_COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
 
-const componentsDir = COMPONENTS_DIR;
+// Der `produktion`-Block steht im model.json — und das liegt seit PR 4 im Paket.
+const componentsDir = PKG_COMPONENTS_DIR;
 
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');

@@ -333,5 +333,19 @@
 		"stage": {
 			"darkKey": "onImage"
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 2
 	}
 }

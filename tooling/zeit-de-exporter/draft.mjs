@@ -16,7 +16,7 @@
  * VERIFIZIERT — kein Treffer heißt: Wert behalten, Token weglassen, Fund im
  * Report (nie raten).
  *
- *   node tooling/zeit-de-exporter/draft.mjs apps/docs/src/routes/product/components/<slug> [--stdout]
+ *   node tooling/zeit-de-exporter/draft.mjs packages/components/src/<slug> [--stdout]
  */
 import fs from 'node:fs';
 import path from 'node:path';

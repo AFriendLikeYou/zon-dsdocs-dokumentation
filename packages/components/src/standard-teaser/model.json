@@ -585,5 +585,19 @@
 			"Wide (16:9)": "Breiter Zuschnitt für Motive, die Panorama brauchen; derselbe Zuschnitt wie beim Aufmacher.",
 			"Narrow (2:3)": "Hochformat für Porträts. Figma nennt die Idee »Portrait« und zeichnet sie 1:1 — Produktion liefert 2:3."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 7
 	}
 }

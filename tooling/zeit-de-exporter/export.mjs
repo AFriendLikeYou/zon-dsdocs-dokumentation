@@ -6,34 +6,41 @@
  * apps/docs/src/lib/types/spec.ts; Schema-Referenz + Import-Flow in README.md / IMPORT.md)
  * auf das konkrete Repo-Format ab:
  *
+ *   EINGABE (Paket, @zeit/components — seit PR 4):
+ *   - Modell + CSS:              packages/components/src/<kebab>/{model.json, pattern.css}
+ *
+ *   AUSGABE (Doku-App):
  *   - SvelteKit-Route (mdsvex):  apps/docs/src/routes/product/components/<kebab>/+page.svx   (immer neu)
  *   - Maschinen-Modell:          apps/docs/src/routes/product/components/<kebab>/spec.generated.ts (immer neu)
  *   - Redaktioneller Stub:       apps/docs/src/routes/product/components/<kebab>/content.json (nur beim ersten Mal)
- *   - Eingabe-Modell co-locatet: apps/docs/src/routes/product/components/<kebab>/model.json  (neben dem Output)
  *
- * Das Modell selbst wird NICHT verändert — nur diese Exporter-Schicht ist repo-spezifisch.
- * Das Spec-UI-Kit (apps/docs/src/lib/components/ui/specsheet) und das Modell bleiben stabil; hier
+ * Eingabe und Ausgabe liegen damit in verschiedenen Workspaces: das Paket ist das
+ * Produkt, die Route seine Dokumentation. Das Modell selbst wird NICHT verändert —
+ * nur diese Exporter-Schicht ist repo-spezifisch. Das Spec-UI-Kit
+ * (apps/docs/src/lib/components/ui/specsheet) und das Modell bleiben stabil; hier
  * liegt die ganze Repo-Kenntnis (Frontmatter-Keys, Pfad-/Namensschema, Snippet-Verdrahtung).
  *
  * Nutzung:
- *   node tooling/zeit-de-exporter/export.mjs <model.json | component-dir> [--root <repoRoot>] [--dry]
+ *   node tooling/zeit-de-exporter/export.mjs <model.json | paket-dir> [--root <repoRoot>] [--dry]
  *
  * Beispiele:
  *   node tooling/zeit-de-exporter/export.mjs tooling/zeit-de-exporter/examples/button.json
- *   node tooling/zeit-de-exporter/export.mjs apps/docs/src/routes/product/components/button   # liest <dir>/model.json
+ *   node tooling/zeit-de-exporter/export.mjs packages/components/src/button   # liest <dir>/model.json
  */
 
 import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSync } from 'node:fs';
-import { resolve, relative } from 'node:path';
+import { resolve, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateModelSchema } from './schema-validate.mjs';
 import { resolveArtefakte } from '../artefakte.mjs';
-import { COMPONENTS_REL } from '../lib/paths.mjs';
+import { COMPONENTS_REL, PKG_COMPONENTS_REL } from '../lib/paths.mjs';
 
 const TARGET = 'zeit-de';
 // Repo-relativ (nicht absolut): der Exporter bekommt seinen Root per --root und
 // setzt den Teilpfad selbst zusammen — die Tests fahren ihn gegen ein Wegwerf-Repo.
 const ROUTE_BASE = COMPONENTS_REL;
+/** Die Eingabeseite: ein Ordner je Komponente im Paket (model.json + pattern.css). */
+const PKG_BASE = PKG_COMPONENTS_REL;
 const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
 // CodeBlock lebt eigenständig unter ui/code-block (aus dem specsheet-Barrel gelöst) —
 // wird separat importiert, nicht mehr über das Spec-UI-Kit.
@@ -154,10 +161,15 @@ const EDITORIAL = [
 ];
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
-function renderGenerated(model, { hatPatternCss = false } = {}) {
+function renderGenerated(model) {
 	// `render` ist Repo-Verdrahtung (Slot-Markup/CSS), gehört nicht ins Datenmodell.
 	// `$schema` ist nur Editor-Komfort (Autocomplete) und darf nicht ins Modell leaken.
-	const { render: _render, $schema: _schema, ...rest } = model;
+	// `katalog` ist Katalog-Verdrahtung (Reihenfolge/Badge der Übersicht) — die liest
+	// der Katalog direkt aus dem model.json; auf der Seite hätte sie nichts zu suchen.
+	// `code` wird hier ebenfalls abgezogen und WEITER UNTEN aufgelöst wieder gesetzt —
+	// so bleibt seine Position im Generat unabhängig davon, an welcher Stelle der Block
+	// im model.json steht (sonst hinge die Byte-Identität an der Schlüsselreihenfolge).
+	const { render: _render, $schema: _schema, katalog: _katalog, code: _code, ...rest } = model;
 	// EDITORIAL-Felder gehören dem Menschen (content.ts) und würden hier nur doppelt
 	// liegen — strippen (Maschine = Fakten, Mensch = Redaktion). Merge bleibt
 	// { ...generated, ...content }: content liefert diese Felder.
@@ -170,12 +182,12 @@ function renderGenerated(model, { hatPatternCss = false } = {}) {
 	if (render.align !== undefined) playground.align = render.align;
 	if (render.resizable !== undefined) playground.resizable = render.resizable;
 	if (Object.keys(playground).length) spec.playground = playground;
-	// Code-Artefakte AUFGELÖST einbacken (deklarierter `code`-Block ODER der
-	// pattern.css-Fallback) — dieselbe Funktion, mit der die Registry `zds add`
-	// beantwortet. Die Bezugs-Sektion der Seite liest `spec.code.artefakte` und nennt
-	// damit garantiert die Formate, die die CLI auch liefert. Leere Liste = kein
-	// Artefakt → der Key bleibt weg (die Seite zeigt dann den ehrlichen Hinweis).
-	const artefakte = resolveArtefakte(model.code, hatPatternCss);
+	// Code-Artefakte AUFGELÖST einbacken (der deklarierte `code`-Block, seit PR 4
+	// ohne Fallback) — dieselbe Funktion, mit der die Registry `zds add` beantwortet.
+	// Die Bezugs-Sektion der Seite liest `spec.code.artefakte` und nennt damit
+	// garantiert die Formate, die die CLI auch liefert. Leere Liste = kein Artefakt →
+	// der Key bleibt weg (die Seite zeigt dann den ehrlichen Hinweis).
+	const artefakte = resolveArtefakte(model.code);
 	if (artefakte.length) spec.code = { artefakte };
 	else delete spec.code;
 	const json = JSON.stringify(spec, null, '\t');
@@ -1158,12 +1170,20 @@ function parseArgs(argv) {
 
 /**
  * Löst die Eingabe zur model.json-Datei auf. Erlaubt ist eine Datei ODER ein
- * Component-Ordner, der ein co-locatetes model.json enthält (Re-Export).
+ * Ordner, der ein model.json enthält (Re-Export) — seit PR 4 ist das der
+ * PAKET-Ordner, nicht mehr der Routen-Ordner. Wer aus Gewohnheit die Route
+ * angibt, bekommt den neuen Ort genannt statt nur „nicht gefunden".
  */
 function resolveModelPath(input) {
 	if (existsSync(input) && statSync(input).isDirectory()) {
 		const co = resolve(input, 'model.json');
-		if (!existsSync(co)) throw new Error(`Kein model.json im Ordner: ${input}`);
+		if (!existsSync(co)) {
+			const slug = input.replace(/\/+$/, '').split('/').pop();
+			throw new Error(
+				`Kein model.json im Ordner: ${input}\n` +
+					`   Modell und pattern.css liegen im Paket: ${PKG_BASE}/${slug}/`
+			);
+		}
 		return co;
 	}
 	return input;
@@ -1274,13 +1294,13 @@ function validate(model, { root = process.cwd() } = {}) {
 		}
 	}
 
-	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Component-Ordner hat.
+	// verwandt: nur warnen (nicht abbrechen), wenn ein Slug keinen Paket-Ordner hat.
 	if (Array.isArray(model.verwandt))
 		for (const slug of model.verwandt) {
-			const target = resolve(root, ROUTE_BASE, String(slug), 'model.json');
+			const target = resolve(root, PKG_BASE, String(slug), 'model.json');
 			if (!existsSync(target))
 				warnings.push(
-					`verwandt: "${slug}" hat kein model.json (${ROUTE_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`
+					`verwandt: "${slug}" hat kein model.json (${PKG_BASE}/${slug}/) — wird zur Laufzeit still übersprungen`
 				);
 		}
 
@@ -1290,9 +1310,9 @@ function validate(model, { root = process.cwd() } = {}) {
 }
 
 /**
- * --init: legt ein neues Component-Gerüst an (Ordner + gültiges Start-model.json mit
- * $schema-Verweis für Editor-Hilfe + pattern.css-Stub). Überschreibt nichts, exportiert
- * NICHT (erst ausfüllen, dann exportieren).
+ * --init: legt ein neues Component-Gerüst an (PAKET-Ordner + gültiges Start-model.json
+ * mit $schema-Verweis für Editor-Hilfe + pattern.css-Stub). Überschreibt nichts,
+ * exportiert NICHT (erst ausfüllen, dann exportieren).
  */
 function scaffold(name, root) {
 	if (!name) throw new Error('Name fehlt. Nutzung: export.mjs --init "Text Button"');
@@ -1302,13 +1322,13 @@ function scaffold(name, root) {
 			`Name "${name}" ergibt einen leeren kebab-case-Slug — bitte alphanumerische Zeichen verwenden.`
 		);
 	const cls = `z-${kebab}`;
-	const outDir = resolve(root, ROUTE_BASE, kebab);
-	const modelPath = resolve(outDir, 'model.json');
-	const cssPath = resolve(outDir, 'pattern.css');
+	const pkgDir = resolve(root, PKG_BASE, kebab);
+	const modelPath = resolve(pkgDir, 'model.json');
+	const cssPath = resolve(pkgDir, 'pattern.css');
 	if (existsSync(modelPath))
 		throw new Error(`Existiert bereits: ${relative(root, modelPath)} — nichts überschrieben.`);
 
-	const schemaRel = relative(outDir, resolve(root, 'tooling/zeit-de-exporter/model.schema.json'));
+	const schemaRel = relative(pkgDir, resolve(root, 'tooling/zeit-de-exporter/model.schema.json'));
 	const today = new Date().toISOString().slice(0, 10);
 
 	const model = {
@@ -1346,6 +1366,13 @@ function scaffold(name, root) {
 			],
 			template: `<div class="${cls}{classes}">Beispiel</div>`,
 			cssFile: './pattern.css'
+		},
+		// Artefakte werden EXPLIZIT deklariert — es gibt keinen stillen Fallback mehr
+		// (MIGRATIONSPLAN §4, Ausnahme 3). Das Schema verlangt den Block.
+		// `katalog` bleibt bewusst weg: ohne Angabe läuft der Eintrag ans Ende (999),
+		// die Reihenfolge entscheidet ein Mensch (Schritt 4 unten).
+		code: {
+			artefakte: [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]
 		}
 	};
 
@@ -1355,21 +1382,21 @@ function scaffold(name, root) {
 		`.${cls} {\n  /* TODO: Basis-Styles */\n}\n` +
 		`.${cls}--beispiel {\n  /* TODO: Modifier-Styles */\n}\n`;
 
-	mkdirSync(outDir, { recursive: true });
+	mkdirSync(pkgDir, { recursive: true });
 	writeFileSync(modelPath, JSON.stringify(model, null, '\t') + '\n');
 	writeFileSync(cssPath, css);
 
-	console.log(`Gerüst erzeugt für "${name}" -> ${ROUTE_BASE}/${kebab}/`);
+	console.log(`Gerüst erzeugt für "${name}" -> ${PKG_BASE}/${kebab}/`);
 	console.log(`  ${relative(root, modelPath)}`);
 	console.log(`  ${relative(root, cssPath)}`);
 	console.log('\nNächste Schritte:');
 	console.log('  1. model.json ausfüllen — der Editor zeigt Feld-Hilfe dank $schema.');
 	console.log('  2. pattern.css mit den echten z-*-Styles füllen.');
 	console.log(
-		`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${ROUTE_BASE}/${kebab}`
+		`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${PKG_BASE}/${kebab}`
 	);
 	console.log('  4. Nav & Katalog sind katalog-getrieben (ADR-025) — kein Nav-Eintrag nötig.');
-	console.log('     Optional Reihenfolge/Badge in der Override-Map in apps/docs/src/lib/data/catalog.ts.');
+	console.log(`     Reihenfolge/Badge: \`katalog\`-Block im ${PKG_BASE}/${kebab}/model.json.`);
 }
 
 function main() {
@@ -1395,10 +1422,14 @@ function main() {
 	const contentPath = resolve(outDir, 'content.json');
 	const contentExists = existsSync(contentPath);
 
-	// Pattern-CSS (unscoped, co-located) lesen, falls das Modell es referenziert.
+	// Pattern-CSS (unscoped) lesen, falls das Modell es referenziert. `cssFile` ist
+	// RELATIV ZUM MODELL — beide liegen im Paket-Ordner nebeneinander. Vor PR 4 wurde
+	// gegen das Ausgabe-Verzeichnis aufgelöst; das ging nur, solange Eingabe und
+	// Ausgabe derselbe Ordner waren.
+	const modelDir = dirname(modelPath);
 	let patternCss = null;
 	if (typeof model.render?.cssFile === 'string') {
-		const cssPath = resolve(outDir, model.render.cssFile);
+		const cssPath = resolve(modelDir, model.render.cssFile);
 		if (!existsSync(cssPath)) {
 			throw new Error(
 				`render.cssFile nicht gefunden: ${relative(root, cssPath)} — pattern.css neben model.json anlegen.`
@@ -1407,15 +1438,10 @@ function main() {
 		patternCss = readFileSync(cssPath, 'utf8');
 	}
 
-	// Existiert eine pattern.css im Ordner? Genau DIESE Frage stellt auch die Registry
-	// (import.meta.glob über `*/pattern.css`) — deshalb wird die Datei geprüft und
-	// nicht die render.cssFile-Referenz, sonst könnten Seite und `zds add` auseinanderlaufen.
-	const hatPatternCss = existsSync(resolve(outDir, 'pattern.css'));
-
 	// Maschinen-Dateien werden immer geschrieben; content.json nur beim ersten Mal (Stub).
 	const machineFiles = [
-		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss, hatPatternCss }) },
-		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model, { hatPatternCss }) }
+		{ path: resolve(outDir, '+page.svx'), body: renderPage(model, { patternCss }) },
+		{ path: resolve(outDir, 'spec.generated.ts'), body: renderGenerated(model) }
 	];
 
 	console.log(`zeit-de-Exporter · "${model.name}" -> ${ROUTE_BASE}/${kebab}/`);
@@ -1455,10 +1481,15 @@ function main() {
 		console.log(`  entfernt (veraltet): ${relative(root, legacyContent)}`);
 	}
 
-	// Eingabe-Modell neben den Output legen (Co-Location) — Re-Export via Ordner möglich.
-	const coModelPath = resolve(outDir, 'model.json');
-	writeFileSync(coModelPath, JSON.stringify(model, null, '\t') + '\n');
-	console.log(`  Modell co-locatet: ${relative(root, coModelPath)}`);
+	// Eingabe-Modell an seinem kanonischen Ort ablegen: im PAKET, neben pattern.css.
+	// (Vor PR 4 lag es neben der Ausgabe.) Kommt die Eingabe von woanders — etwa
+	// tooling/zeit-de-exporter/examples/button.json —, wird sie damit ins Paket
+	// übernommen; ist sie das Paket-Modell selbst, schreibt der Lauf denselben Inhalt
+	// zurück (byte-identisch, die Idempotenz bleibt gewahrt).
+	const pkgModelPath = resolve(root, PKG_BASE, kebab, 'model.json');
+	mkdirSync(dirname(pkgModelPath), { recursive: true });
+	writeFileSync(pkgModelPath, JSON.stringify(model, null, '\t') + '\n');
+	console.log(`  Modell im Paket: ${relative(root, pkgModelPath)}`);
 }
 
 // Nur ausführen, wenn direkt aufgerufen (nicht beim Import).

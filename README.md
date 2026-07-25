@@ -34,8 +34,9 @@ src/
 │
 ├── routes/
 │   ├── brand/                  Brandhub-Seiten (englische URLs, deutsche Inhalte)
-│   ├── product/                DS-Doku; components/<slug>/ = +page.svx · model.json ·
-│   │                           spec.generated.ts · content.json  (co-located, Exporter)
+│   ├── product/                DS-Doku; components/<slug>/ = +page.svx ·
+│   │                           spec.generated.ts · content.json (Exporter-AUSGABE;
+│   │                           model.json + pattern.css liegen in @zeit/components)
 │   ├── login/  admin/
 │   ├── +layout.svelte          Chrome-Mount + Bereichslogik (brand/product)
 │   └── hooks.server.ts (in src/): Basic Auth + 308-Redirects für Alt-URLs
@@ -49,6 +50,8 @@ static/
                                 packages/tokens/vendor (npm run sync:zds, gitignored)
 
 packages/                       Workspace-Pakete (@zeit/*) — der Inhalt, den wir besitzen
+├── components/                 @zeit/components: je Komponente src/<slug>/ mit
+│                               pattern.css · model.json · figma-raw.json · index.ts
 ├── icons/                      @zeit/icons: svg/ + generierte Liste src/icons.ts
 │                               + icon-overrides.mjs (Kuratierung)
 └── tokens/                     @zeit/tokens
@@ -68,8 +71,9 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Spieg
 - **Brand-Logo:** SVG nach `static/downloads/brand-logos/` → `npm run gen:brand-assets`.
   Sonderfälle in `src/lib/data/brand-asset-overrides.mjs`.
 - **Seite:** `src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in `src/lib/data/navigation.ts`.
-- **Dokumentierte Komponente:** `model.json` → `node tooling/zeit-de-exporter/export.mjs …`
-  (redaktionelle Texte danach in `content.json`).
+- **Dokumentierte Komponente:** `packages/components/src/<slug>/{model.json,pattern.css}` →
+  `node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>` (redaktionelle
+  Texte danach in der `content.json` neben der erzeugten Seite).
 - **UI-Baustein der Doku:** `src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
 
 Ausführliche Rezepte: **[CONTRIBUTING.md](CONTRIBUTING.md)** · Konventionen:
@@ -162,9 +166,9 @@ Dateien werden **kopiert**, nicht als Paket installiert. Dünne Routen → pure 
 [`src/lib/server/registry.ts`](src/lib/server/registry.ts) (getestet), Datenbasis
 ist der `agent-catalog` (rohes `pattern.css`). Deckt den **gesamten Katalog
 automatisch** ab (Build-Zeit-Glob) — jede dokumentierte Komponente ist sofort
-verfügbar. Pro Komponente deklariert der optionale `code`-Block im `model.json`
-die Format-Artefakte (`html-css` | `web-component` | `svelte`); ohne Block gilt
-implizit `html-css → pattern.css`.
+verfügbar. Pro Komponente deklariert der `code`-Block im `model.json` die
+Format-Artefakte (`html-css` | `web-component` | `svelte`) — **Pflicht und
+explizit**, einen impliziten `pattern.css`-Fallback gibt es nicht.
 
 - `GET /api/registry` — Index (slug, name, formate, status)
 - `GET /api/registry/<slug>[?format=html-css]` — Metadaten + Artefakte inkl.

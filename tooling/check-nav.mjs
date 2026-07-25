@@ -17,7 +17,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { DATA_DIR, ROUTES_DIR } from './lib/paths.mjs';
+import { DATA_DIR, PKG_COMPONENTS_DIR, ROUTES_DIR } from './lib/paths.mjs';
 
 const routesDir = ROUTES_DIR;
 const navFile = path.join(DATA_DIR, 'navigation.ts');
@@ -84,14 +84,13 @@ for (const rel of configFiles) {
 // Components-Sektion ist katalog-getrieben (ADR-025): die Einträge stehen nicht mehr als
 // href-Literale in navigation.ts, sondern werden aus CATALOG generiert. Eine Component-
 // Route /product/components/<slug> gilt daher als verlinkt, wenn sie per Konstruktion
-// abgedeckt ist — entweder existiert ihr model.json (→ CATALOG → Nav) ODER der Slug steht
-// in der PLANNED-Liste (die bleibt als Literal in navigation.ts lesbar). Der inverse Fall
-// (Route ohne beides) schlägt weiterhin an; Routen ohne model.json fängt zusätzlich
-// check-component-drift.mjs ab.
+// abgedeckt ist — entweder existiert ihr model.json IM PAKET (→ CATALOG → Nav) ODER der
+// Slug steht in der PLANNED-Liste (die bleibt als Literal in navigation.ts lesbar). Der
+// inverse Fall (Route ohne beides) schlägt weiterhin an; Routen ohne Paket-Gegenstück
+// fängt zusätzlich check-component-drift.mjs ab.
 const COMPONENT_ROUTE = /^\/product\/components\/([^/]+)$/;
 const plannedSlugs = new Set([...nav.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]));
-const hasModelJson = (slug) =>
-	fs.existsSync(path.join(routesDir, 'product/components', slug, 'model.json'));
+const hasModelJson = (slug) => fs.existsSync(path.join(PKG_COMPONENTS_DIR, slug, 'model.json'));
 
 const isComponentCovered = (route) => {
 	const m = route.match(COMPONENT_ROUTE);

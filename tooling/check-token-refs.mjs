@@ -13,7 +13,8 @@
  *                     DEFINIERTEN --z-ds-* (Definitionen, nicht var()-Nutzungen).
  * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer dem
  *                     ausgelieferten Spiegel styles-zds.css,
- *                     alle pattern.css unter apps/docs/src/routes/, <style>-Blöcke in
+ *                     alle pattern.css (packages/components/src/ + apps/docs/src/routes/),
+ *                     <style>-Blöcke in
  *                     apps/docs/src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
  *                     derselben Dateien (z. B. `colorCustomProperty="--z-ds-…"`)
  *                     UND Token-NAMEN als Daten
@@ -38,11 +39,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-	COMPONENTS_DIR,
 	DATA_DIR,
 	REPO_ROOT,
 	ROUTES_DIR,
 	SRC_DIR,
+	PKG_COMPONENTS_DIR,
 	STATIC_DIR,
 	TOKENS_VENDOR_DIR
 } from './lib/paths.mjs';
@@ -206,10 +207,12 @@ function main() {
 		addPinned(collectDefinedTokens(css), path.join(staticDir, f));
 	}
 
-	// 2b) pattern.css unter src/routes/ — nur var()-Nutzungen.
-	const routesDir = ROUTES_DIR;
-	for (const f of walkFiles(routesDir, (name) => name === 'pattern.css'))
-		addRefs(collectVarRefs(fs.readFileSync(f, 'utf8')), f);
+	// 2b) pattern.css — nur var()-Nutzungen. Zwei Fundorte seit PR 4: die
+	//     Komponenten-CSS im Paket (@zeit/components) und die Layout-Glue-CSS der
+	//     handgeschriebenen Pattern-Seiten unter src/routes/product/patterns/.
+	for (const basis of [PKG_COMPONENTS_DIR, ROUTES_DIR])
+		for (const f of walkFiles(basis, (name) => name === 'pattern.css'))
+			addRefs(collectVarRefs(fs.readFileSync(f, 'utf8')), f);
 
 	// 2c) <style>-Blöcke in src/**/*.{svelte,svx} — generierte Component-Docs
 	//     (dort liegt spec.generated.ts als Marker) überspringen.
@@ -226,9 +229,8 @@ function main() {
 		addRefs(collectMarkupTokens(text), f);
 	}
 
-	// 2d) Token-Namen als Daten: model.json der Komponenten.
-	const componentsDir = COMPONENTS_DIR;
-	for (const f of walkFiles(componentsDir, (name) => name === 'model.json'))
+	// 2d) Token-Namen als Daten: model.json der Komponenten (im Paket).
+	for (const f of walkFiles(PKG_COMPONENTS_DIR, (name) => name === 'model.json'))
 		addRefs(collectModelTokens(fs.readFileSync(f, 'utf8')), f);
 
 	// 2e) Kuratierte TS-Datenlisten.

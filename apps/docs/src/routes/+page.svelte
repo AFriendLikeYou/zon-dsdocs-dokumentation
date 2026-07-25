@@ -3,7 +3,7 @@
 	// (LandingHero.svelte, Single-Route-Consumer). Hier bleiben die zwei
 	// „Welten"-Einstiege und „Was ist neu".
 	// Die kleine Produkt-Vorschau in der Welten-Karte nutzt echte z-Klassen;
-	// deren Pattern-CSS kommt via ?raw aus den Component-Ordnern.
+	// deren Pattern-CSS kommt via ?raw aus dem Paket @zeit/components.
 	// Alle Texte kommen aus `landing.content.json` (Formular-Editor /admin/start);
 	// Gestaltung/Logik — Pattern-CSS-Importe, Welten-Vorschau, Changelog-Zugriff,
 	// Link-Ziele — bleiben bewusst hier im Code.
@@ -12,9 +12,9 @@
 	import LandingHero from './LandingHero.svelte';
 	import type { LandingContent } from '$types/landing';
 	import contentJson from './landing.content.json';
-	import buttonCss from './product/components/button/pattern.css?raw';
-	import toggleCss from './product/components/toggle/pattern.css?raw';
-	import checkboxCss from './product/components/checkbox/pattern.css?raw';
+	import buttonCss from '@zeit/components/button/pattern.css?raw';
+	import toggleCss from '@zeit/components/toggle/pattern.css?raw';
+	import checkboxCss from '@zeit/components/checkbox/pattern.css?raw';
 
 	const worldCss = [buttonCss, toggleCss, checkboxCss].join('\n');
 

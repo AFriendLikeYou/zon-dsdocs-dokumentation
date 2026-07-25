@@ -68,9 +68,8 @@ src/
 │  ├─ brand/…                    # Brandhub-Seiten (.svx) · pride-communication = Komponenten-Prüfstand
 │  ├─ product/
 │  │  ├─ foundations/ tokens/ motion/
-│  │  └─ components/<slug>/       # eine Component-Doku pro Ordner ↓
-│  │     ├─ model.json            # Eingabe-Modell (co-located, kanonisch)
-│  │     ├─ pattern.css           # unscoped Pattern-CSS (echte z-ds-Tokens)
+│  │  └─ components/<slug>/       # eine Component-DOKU pro Ordner ↓
+│  │     │                        #   (Modell + CSS liegen im Paket, s. u.)
 │  │     ├─ content.json          # MENSCH — redaktionell, nie überschrieben
 │  │     ├─ spec.generated.ts     # MASCHINE — bei jedem Sync neu
 │  │     └─ +page.svx             # MASCHINE — autogeneriert
@@ -97,6 +96,12 @@ static/                          # global.css (Token-Layer) · media/ downloads/
                                  #   styles-zds.css = Spiegel (sync:zds, gitignored)
                                  #   downloads/icons/ = Spiegel (sync:icons, gitignored)
 packages/                        # Workspace-Pakete (Monorepo-Umbau, MIGRATIONSPLAN.md)
+├─ components/                   # @zeit/components — ein Ordner je Komponente ↓
+│  └─ src/<slug>/
+│     ├─ model.json              # KANONISCHER Spec (Eingabe des Exporters)
+│     ├─ pattern.css             # unscoped Pattern-CSS (echte z-ds-Tokens)
+│     ├─ figma-raw.json          # Import-Fixture (Design-Drift-Vergleich)
+│     └─ index.ts                # Barrel des Subpaths @zeit/components/<slug>
 ├─ icons/                        # @zeit/icons ↓
 │  ├─ svg/                       # die SVG-Dateien (Quelle; aus @zeitonline/icons)
 │  ├─ icon-overrides.mjs         # MENSCH — Name/Slug/Tags/Ausschlüsse
@@ -132,7 +137,7 @@ liegt.
      use_figma +            exakte Maße, Token-        │
        figma-measure.js ─── Bindungen, unbound[] ──────┤        ┌──────────────┐   Exporter (export.mjs)
                             → herkunft: "gemessen"     ├──────► │  model.json  │ ──────────┬─► +page.svx
-                                                       │        │ (co-located, │           ├─► spec.generated.ts
+                                                       │        │  (im Paket,  │           ├─► spec.generated.ts
   ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content.json (STUB,
      pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               nur beim 1. Mal)
        (kuratiert, flach)   (:hover/:disabled),        ├──────► └──────┬───────┘
@@ -153,20 +158,33 @@ liegt.
 ```
 
 **Exporter** `tooling/zeit-de-exporter/export.mjs` bildet das render-unabhängige
-**Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Das `model.json`
-liegt **co-located** neben der Ausgabe (Re-Export per Ordner):
+**Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Eingabe ist der
+PAKET-Ordner, Ausgabe die Route — das Paket ist das Produkt, die Seite seine
+Dokumentation:
 
 ```bash
-node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<slug>
+node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>
 ```
 
 Erzeugt `+page.svx` + `spec.generated.ts` (Maschine, immer neu) und einmalig den
-Stub `content.json` (Mensch, nie überschrieben). Die Seite führt beides zusammen:
-`const spec = { ...generated, ...content }` — **content gewinnt**.
+Stub `content.json` (Mensch, nie überschrieben) unter
+`apps/docs/src/routes/product/components/<slug>/`. Die Seite führt beides zusammen:
+`const spec = { ...generated, ...content }` — **content gewinnt**. `render.cssFile`
+ist **relativ zum Modell** (`./pattern.css` im selben Paket-Ordner).
 
 **Registry-Index** `src/lib/data/catalog.ts` entsteht zur Build-Zeit per
-`import.meta.glob` über alle `model.json` — ein neues Pattern erscheint dort
-**automatisch**. Nur Reihenfolge/Ausschlüsse stehen in der Override-Map.
+`import.meta.glob` über alle `model.json` des Pakets — ein neues Pattern erscheint
+dort **automatisch**. Reihenfolge/Badge/Ausschluss stehen im `katalog`-Block
+desselben `model.json` (die frühere Override-Map ist entfallen).
+
+> **Glob über die Paketgrenze:** Ein führender `/` meint bei `import.meta.glob` die
+> Vite-Projektwurzel — seit PR 3 ist das `apps/docs`. Für `packages/…` sind die Globs
+> deshalb DATEI-RELATIV (`../../../../../packages/components/src/*/…`); über den
+> Paketnamen geht es nicht, weil ein bare Specifier mit `*` nicht auflösbar ist.
+> Ein verrutschter Glob wirft KEINEN Fehler, sondern liefert ein leeres Objekt —
+> darum vergleicht `catalog.test.ts` gegen die Ordner auf der Platte. Für einzelne
+> Dateien (kein Glob) ist der Paketname der saubere Weg:
+> `import css from '@zeit/components/button/pattern.css?raw'`.
 
 **Datengetriebener Playground** (`render.controls` + `render.template` +
 `render.cssFile`): _eine_ Instanziierung (`instantiate()` in `Playground.svelte`)
@@ -344,15 +362,15 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 1. Figma-Node bestimmen. **Instanz immer zum Component-Set auflösen.**
 2. Figma-MCP: `get_design_context` / `get_context_for_code_connect` /
    `get_variable_defs` → Name, Varianten, Tokens, Maße.
-3. `model.json` + `pattern.css` im Ordner `src/routes/product/components/<slug>/`
+3. `model.json` + `pattern.css` im Ordner `packages/components/src/<slug>/`
    anlegen (an `button/` bzw. `cell/` orientieren). Tokens als echte `--z-ds-*`;
    `render`-Block = Playground (`controls`/`template`/`cssFile`) + optional
-   `matrix`/`props`/`calloutAnchors`/`variantInfo`.
-4. Exporter laufen lassen (s. o.).
+   `matrix`/`props`/`calloutAnchors`/`variantInfo`. `code.artefakte` ist **Pflicht**.
+4. Exporter laufen lassen (s. o.), Slug im Paket-Barrel `src/index.ts` ergänzen.
 5. Nav-Eintrag: **entfällt** für Komponenten mit `model.json` — die Components-Sektion
-   wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen in der
-   Override-Map in `catalog.ts`; geplante Stubs ohne model.json in `PLANNED_COMPONENTS`
-   (navigation.ts).
+   wird aus dem Katalog generiert (ADR-025). Reihenfolge + optionales Badge stehen im
+   `katalog`-Block des `model.json`; geplante Stubs ohne Paket-Gegenstück in
+   `PLANNED_COMPONENTS` (navigation.ts).
 6. Gate ausführen; redaktionelle Texte in `content.json` prüfen (klar trennen:
    **aus Figma** vs. **Platzhalter/geschätzt**).
 
@@ -411,9 +429,9 @@ werden **kopiert**, nicht installiert. Endpoints (dünne Routen → pure Logik
 `src/lib/server/registry.ts`, getestet): `GET /api/registry` (Index) ·
 `GET /api/registry/<slug>[?format=html-css]` (Metadaten + Artefakte inkl.
 Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
-(Build-Zeit-Glob wie Manifest/MCP). Pro Komponente deklariert der optionale
-`code`-Block im `model.json` die Format-Artefakte (`html-css` | `web-component` |
-`svelte`); ohne Block gilt implizit `html-css → pattern.css` (kanonisch). CLI:
+(Build-Zeit-Glob wie Manifest/MCP). Pro Komponente deklariert der `code`-Block im
+`model.json` die Format-Artefakte (`html-css` | `web-component` | `svelte`) —
+**Pflicht und explizit**, einen stillen `pattern.css`-Fallback gibt es nicht. CLI:
 `tooling/zds-cli/` (`zds list | info | add`, nur Node-Builtins).
 
 ## Stolperfallen

@@ -198,7 +198,13 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["default", "hover", "checked", "disabled", "focus"],
+		"zustaende": [
+			"default",
+			"hover",
+			"checked",
+			"disabled",
+			"focus"
+		],
 		"elemente": [
 			{
 				"teil": "Fläche",
@@ -520,14 +526,20 @@
 				"typ": "\"default\" | \"single\" | \"continuous\"",
 				"default": "\"default\"",
 				"beschreibung": "single = eine Slide je Ansicht (kein Gap/Padding); continuous = freies Scrollen ohne Snap.",
-				"erlaubteWerte": ["single", "continuous"]
+				"erlaubteWerte": [
+					"single",
+					"continuous"
+				]
 			},
 			{
 				"name": "variant",
 				"typ": "\"kiosk\" | \"shop\" | \"merkl\"",
 				"default": "—",
 				"beschreibung": "kiosk = feste schmale Slot-Breite (12.25rem); shop = breite Slots (20rem), getönter Fader.",
-				"erlaubteWerte": ["kiosk", "shop"]
+				"erlaubteWerte": [
+					"kiosk",
+					"shop"
+				]
 			},
 			{
 				"name": "overlay-controls",
@@ -563,5 +575,19 @@
 			"autoplay": "Automatischer Wechsel mit Fortschritts-Dot und Play/Pause-Steuerung.",
 			"no-controls": "Reine Scroll-Leiste ohne Pfeile/Dots (Figma-Prop Controls=false)."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 13
 	}
 }

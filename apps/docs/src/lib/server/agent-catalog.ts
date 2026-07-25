@@ -7,8 +7,9 @@
  * KI-Agenten aber der Kern. Der reguläre CATALOG ($data/catalog) strippt `render`
  * und lädt kein CSS; er bleibt die Quelle für die Site-UI.
  *
- * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die co-locateten model.json +
- * content.json (content gewinnt), `$schema` gestrippt. Zusätzlich pattern.css als ?raw.
+ * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die model.json des Pakets + die
+ * content.json der Route (content gewinnt), `$schema`/`katalog` gestrippt.
+ * Zusätzlich pattern.css als ?raw.
  */
 import type { ComponentSpec } from '$types/spec';
 
@@ -30,17 +31,24 @@ export type AgentCatalogEntry = {
 };
 
 // Vite inlined die Globs zur Build-Zeit (eager) — kein Laufzeit-Fetch.
-const models = import.meta.glob('/src/routes/product/components/*/model.json', {
+//
+// model.json und pattern.css liegen im Paket (@zeit/components), also AUSSERHALB
+// der Vite-Projektwurzel `apps/docs` → datei-relativ statt mit führendem `/`
+// (Begründung in data/catalog.ts). Die content.json bleibt vorerst in der Route.
+const models = import.meta.glob('../../../../../packages/components/src/*/model.json', {
 	eager: true,
 	import: 'default'
-}) as Record<string, Partial<ComponentSpec> & { render?: AgentRender; $schema?: unknown }>;
+}) as Record<
+	string,
+	Partial<ComponentSpec> & { render?: AgentRender; $schema?: unknown; katalog?: unknown }
+>;
 
 const contents = import.meta.glob('/src/routes/product/components/*/content.json', {
 	eager: true,
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
 
-const patterns = import.meta.glob('/src/routes/product/components/*/pattern.css', {
+const patterns = import.meta.glob('../../../../../packages/components/src/*/pattern.css', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
@@ -48,18 +56,25 @@ const patterns = import.meta.glob('/src/routes/product/components/*/pattern.css'
 
 const slugOf = (path: string) => path.split('/').slice(-2, -1)[0];
 
+/** Glob-Ergebnisse nach Slug umschlüsseln — Keys nie von Hand zusammenbauen. */
+const bySlug = <T>(eintraege: Record<string, T>): Record<string, T> =>
+	Object.fromEntries(Object.entries(eintraege).map(([pfad, wert]) => [slugOf(pfad), wert]));
+
+const contentsBySlug = bySlug(contents);
+const patternsBySlug = bySlug(patterns);
+
 export const AGENT_CATALOG: AgentCatalogEntry[] = Object.entries(models)
 	.map(([path, model]) => {
 		const slug = slugOf(path);
-		// `$schema` ist nur Editor-Komfort und darf nicht ins Modell leaken; render bleibt.
-		const { $schema: _schema, ...withRender } = model;
-		const content =
-			contents[`/src/routes/product/components/${slug}/content.json`] ??
-			({} as Partial<ComponentSpec>);
+		// `$schema` ist nur Editor-Komfort, `katalog` reine Katalog-Verdrahtung
+		// (Reihenfolge/Badge) — beides hat im Spec für Agenten nichts verloren.
+		// `render` bleibt bewusst drin: das Template ist das Markup-Rezept.
+		const { $schema: _schema, katalog: _katalog, ...withRender } = model;
+		const content = contentsBySlug[slug] ?? ({} as Partial<ComponentSpec>);
 		return {
 			slug,
 			spec: { ...withRender, ...content },
-			patternCss: patterns[`/src/routes/product/components/${slug}/pattern.css`] ?? null
+			patternCss: patternsBySlug[slug] ?? null
 		};
 	})
 	.sort((a, b) => a.slug.localeCompare(b.slug));

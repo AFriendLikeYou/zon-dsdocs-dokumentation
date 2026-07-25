@@ -22,7 +22,7 @@ Katalog-Order (optional) · Gate · redaktionelle Prüfung (content.json)
 ```bash
 npm run new-component -- "Input"          # Gerüst anlegen (Ordner + Start-model.json + pattern.css)
 # … model.json ausfüllen (der Editor zeigt dank $schema Feld-Hilfe & Validierung) …
-npm run export-component -- src/routes/product/components/input   # Seite erzeugen
+npm run export-component -- packages/components/src/input   # Seite erzeugen
 ```
 
 Das Start-`model.json` ist bereits gültig und exportierbar — einfach die `TODO`-Werte
@@ -58,8 +58,8 @@ Geschwister werden kollabiert (`count`).
 
 Regeln:
 
-- **Output SPEICHERN:** Das Mess-Ergebnis gehört als **`figma-raw.json`** co-located
-  in den Component-Ordner (committen!). Zwei Gründe: die Roh-Daten sind das
+- **Output SPEICHERN:** Das Mess-Ergebnis gehört als **`figma-raw.json`** in den
+  Paket-Ordner `packages/components/src/<kebab>/` (committen!). Zwei Gründe: die Roh-Daten sind das
   Test-Fixture des Draft-Generators, und jedes Re-Messen erzeugt ein **Diff im PR**
   — Design-Änderungen werden sichtbar statt still überschrieben.
 - **Read-only bleibt read-only.** Das Template mutiert nichts (keine Temp-Instanzen).
@@ -92,7 +92,7 @@ Aus der gespeicherten `figma-raw.json` erzeugt der **Draft-Generator** determini
 einen `model.draft.json` — alles Messbare vorbefüllt, alles Menschliche als TODO:
 
 ```bash
-npm run draft-component -- src/routes/product/components/<kebab>
+npm run draft-component -- packages/components/src/<kebab>
 ```
 
 Was er füllt: Varianten-Achsen (State-Achse → `zustaende` + `farbrollen`-Gerüst,
@@ -109,7 +109,7 @@ Statt die `figma-raw.json` aus MCP-Ausgaben zu bauen, zieht sie **`fetch.mjs`**
 headless über die Figma-REST-API (exakt, tokengünstig; `FIGMA_TOKEN` in `.env`):
 
 ```bash
-node tooling/zeit-de-exporter/fetch.mjs '<figma-url>' src/routes/product/components/<kebab>
+node tooling/zeit-de-exporter/fetch.mjs '<figma-url>' packages/components/src/<kebab>
 ```
 
 Grenze: Variablen-**Namen** braucht die REST-Route Enterprise. Ohne Enterprise
@@ -129,7 +129,7 @@ menschlichen Gates (Token-Namen, dann `pattern.css`/`content.ts`) bleiben bewuss
 
 ### 1e · Pipeline-Stufen im Blick (`import.mjs --status`)
 
-Wo steht welche Komponente? `--status` scannt `src/routes/product/components/*/`
+Wo steht welche Komponente? `--status` scannt Paket- und Routen-Ordner
 und zeigt je Komponente, welche Stufen-Artefakte vorliegen — ohne url/slug:
 
 ```bash
@@ -151,7 +151,8 @@ Die Fußzeile summiert die Stufen (`raw-Fixtures: 3/12 · model.json: 11/12 · �
 
 ## 2 · `model.json` bauen (originalgetreu)
 
-Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
+Anlegen unter `packages/components/src/<kebab>/model.json` — im **Paket**, nicht
+in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
 
 - **Faithful:** Werte 1:1 aus Figma. Tokens als **echte `--z-ds-*`** referenzieren
   (nicht abgeleitete `--ds-*` — die sind bereits auf `:root` aufgelöst und flippen
@@ -190,22 +191,25 @@ Anlegen unter `src/routes/product/components/<kebab>/model.json`. Prinzipien:
 
 ## 3 · `pattern.css` (falls `render.cssFile`)
 
-Unscoped, co-located neben `model.json`. Flache Regeln plus die **bedingten
+Unscoped, neben `model.json` im Paket-Ordner (`render.cssFile` ist **relativ zum
+Modell**). Flache Regeln plus die **bedingten
 At-Rules `@media`, `@supports`, `@container`** (Rahmen bleibt erhalten, der Rumpf
 wird gescopet). **`@keyframes` & Co. wirft der Exporter** — Prozent-Selektoren
 dürfen nicht gescopet werden und der Keyframe-Name wäre global. Auf echten `--z-ds-*`-Tokens
 (originalgetreue DS-Kopie). Der Exporter scoped sie gegen `.spec-canvas` / `.pg-preview`.
 
-### 3b · Registry-Artefakte (`code`-Block, optional)
+### 3b · Registry-Artefakte (`code`-Block, **Pflicht**)
 
 Die **Component-Registry** (`/api/registry` + `zds`-CLI, shadcn-Modell: Dateien
-werden ins Zielprojekt **kopiert**) deckt den gesamten Katalog **automatisch** ab
-— jede Komponente mit `model.json` ist ohne weiteren Handgriff Registry-fähig.
-Ohne `code`-Block gilt implizit `html-css → pattern.css` (Status `kanonisch`).
+werden ins Zielprojekt **kopiert**) deckt den gesamten Katalog **automatisch** ab.
+Was eine Komponente dabei ausliefert, sagt sie aber **selbst**: Der Top-Level-Block
+`code` ist Pflicht (Schema), einen impliziten `pattern.css`-Fallback gibt es seit
+PR 4 nicht mehr (MIGRATIONSPLAN §4, Ausnahme 3). Grund: Der Fallback war bequem und
+still — eine Komponente konnte ausgeliefert werden, ohne dass irgendwo stand, WAS,
+und eine gelöschte Datei fiel niemandem auf.
 
-Der optionale Top-Level-`code`-Block ist der **Standard-Weg**, weitere
-Code-Formate je Komponente nachzuliefern (z. B. eine nach Svelte 5 portierte
-Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
+Im selben Block liefert man weitere Code-Formate nach (z. B. eine nach Svelte 5
+portierte Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
 
 ```jsonc
 "code": {
@@ -217,8 +221,8 @@ Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
 ```
 
 `format`: `html-css` | `web-component` | `svelte` · `status`: `kanonisch` |
-`portiert` | `entwurf` · `dateien`: Pfade relativ zum Komponenten-Ordner
-(weitere Dateien in einem co-locateten `code/`-Unterordner ablegen).
+`portiert` | `entwurf` · `dateien`: Pfade relativ zum **Paket-Ordner** der
+Komponente (weitere Dateien in einem `code/`-Unterordner ebendort ablegen).
 
 ### 3c · Produktions-Referenz (`produktion`-Block, optional)
 
@@ -276,18 +280,25 @@ Details zu Kategorien, Toleranz und dem, was er bewusst **nicht** prüft
 ## 4 · Exporter laufen lassen
 
 ```bash
-node tooling/zeit-de-exporter/export.mjs src/routes/product/components/<kebab>
+node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 ```
 
-Erzeugt `+page.svx` + `spec.generated.ts` (+ `content.json`-Stub beim ersten Mal).
+Eingabe ist der **Paket**-Ordner, Ausgabe die Route: `+page.svx` +
+`spec.generated.ts` (+ `content.json`-Stub beim ersten Mal) unter
+`apps/docs/src/routes/product/components/<kebab>/`.
 
 ## 5 · Katalog (kein Nav-Handeintrag)
 
 Die Components-Nav-Sektion ist **katalog-getrieben** (ADR-025): ein neues `model.json`
 erscheint automatisch, **kein Eintrag in `navigation.ts` nötig**.
 
-- `src/lib/data/catalog.ts` → `CATALOG_OVERRIDES`: nur **optional** Reihenfolge/Badge/
-  Ausschluss. Ohne Override läuft der Eintrag ans Ende.
+- `katalog`-Block **im `model.json`**: `order` (Reihenfolge), `badge` +
+  `badgeVariant` (kuratiertes Badge, pinnt gegen die Zeit-Automatik), `exclude`.
+  Alles optional — ohne `order` läuft der Eintrag ans Ende (999). Die frühere
+  Handliste `CATALOG_OVERRIDES` in der Doku-App ist entfallen (MIGRATIONSPLAN §4,
+  Ausnahme 4): eine zweite Liste neben dem Spec veraltet still.
+- Neuen Slug in `packages/components/src/index.ts` (Paket-Barrel) eintragen —
+  `index.test.ts` hält die Liste gegen die Ordner.
 
 ## 6 · Gate + redaktionelle Prüfung
 

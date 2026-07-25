@@ -12,6 +12,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { isDegraded, statusForDirs } from '../../../../../tooling/zeit-de-exporter/import.mjs';
+import { PKG_COMPONENTS_DIR, packageDir, routeDir } from '$lib/server/component-paths';
 
 /** Ampel-Stufe der Doku-Vollständigkeit. */
 export type Ampel = 'vollstaendig' | 'teilweise' | 'leer';
@@ -152,8 +153,6 @@ export function buildBoard(inputs: ComponentStatusInput[]): ComponentBoard {
 	};
 }
 
-const COMPONENTS_DIR = resolve(process.cwd(), 'src/routes/product/components');
-
 /** JSON-Datei tolerant lesen (kaputt/fehlt → null). */
 function readJson(file: string): Record<string, unknown> | null {
 	try {
@@ -170,28 +169,34 @@ function readJson(file: string): Record<string, unknown> | null {
  * kein Neu-Erfinden der raw/Gate-1-Zählung.
  */
 export function gatherComponentStatus(): ComponentBoard {
-	if (!existsSync(COMPONENTS_DIR)) return { rows: [], bySlug: {}, totals: emptyTotals() };
+	if (!existsSync(PKG_COMPONENTS_DIR)) return { rows: [], bySlug: {}, totals: emptyTotals() };
 
-	const slugs = readdirSync(COMPONENTS_DIR, { withFileTypes: true })
-		.filter((e) => e.isDirectory() && existsSync(resolve(COMPONENTS_DIR, e.name, 'model.json')))
+	// Die Slug-Liste kommt aus dem PAKET — dort steht, was es an Komponenten gibt.
+	// Eine Route ohne Paket-Gegenstück ist ein geplanter Stub (z. B. date-picker)
+	// und taucht hier bewusst nicht auf.
+	const slugs = readdirSync(PKG_COMPONENTS_DIR, { withFileTypes: true })
+		.filter((e) => e.isDirectory() && existsSync(resolve(packageDir(e.name), 'model.json')))
 		.map((e) => e.name)
 		.sort();
 
-	// Pipeline-Stufen je Ordner (für statusForDirs + Drift/Gate-1-Rohwerte).
+	// Pipeline-Stufen je Ordner (für statusForDirs + Drift/Gate-1-Rohwerte). Modell,
+	// Rohdaten und CSS liegen im Paket, Content und Seite in der Route.
 	const stageEntries = slugs.map((slug) => {
-		const dir = resolve(COMPONENTS_DIR, slug);
-		const has = (f: string) => existsSync(resolve(dir, f));
-		const raw = has('figma-raw.json');
-		const model = has('model.json');
-		const degraded = raw && isDegraded(readFileSync(resolve(dir, 'figma-raw.json'), 'utf8'));
+		const pkg = packageDir(slug);
+		const route = routeDir(slug);
+		const hasPkg = (f: string) => existsSync(resolve(pkg, f));
+		const hasRoute = (f: string) => existsSync(resolve(route, f));
+		const raw = hasPkg('figma-raw.json');
+		const model = hasPkg('model.json');
+		const degraded = raw && isDegraded(readFileSync(resolve(pkg, 'figma-raw.json'), 'utf8'));
 		return {
 			slug,
 			raw,
-			draft: has('model.draft.json'),
+			draft: hasPkg('model.draft.json'),
 			model,
-			pattern: has('pattern.css'),
-			content: has('content.json'),
-			page: has('+page.svx'),
+			pattern: hasPkg('pattern.css'),
+			content: hasRoute('content.json'),
+			page: hasRoute('+page.svx'),
 			degraded,
 			draftOpen: false
 		};
@@ -201,17 +206,17 @@ export function gatherComponentStatus(): ComponentBoard {
 	statusForDirs(stageEntries);
 
 	const inputs: ComponentStatusInput[] = slugs.map((slug, i) => {
-		const dir = resolve(COMPONENTS_DIR, slug);
-		const model = readJson(resolve(dir, 'model.json')) ?? {};
-		const content = readJson(resolve(dir, 'content.json')) ?? {};
+		const pkg = packageDir(slug);
+		const model = readJson(resolve(pkg, 'model.json')) ?? {};
+		const content = readJson(resolve(routeDir(slug), 'content.json')) ?? {};
 		const stage = stageEntries[i];
 
 		// Drift: figma-raw.json neuer als model.json (fehlt raw → kein Drift).
 		let rawNewerThanModel = false;
 		if (stage.raw && stage.model) {
 			rawNewerThanModel =
-				statSync(resolve(dir, 'figma-raw.json')).mtimeMs >
-				statSync(resolve(dir, 'model.json')).mtimeMs;
+				statSync(resolve(pkg, 'figma-raw.json')).mtimeMs >
+				statSync(resolve(pkg, 'model.json')).mtimeMs;
 		}
 
 		const zustaende = Array.isArray(model.zustaende) ? model.zustaende : [];

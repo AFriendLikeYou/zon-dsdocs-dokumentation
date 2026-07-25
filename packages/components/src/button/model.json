@@ -521,5 +521,19 @@
 		],
 		"template": "<button type=\"submit\" class=\"z-button{classes}\"{attrs}>Click me</button>",
 		"cssFile": "./pattern.css"
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 1
 	}
 }

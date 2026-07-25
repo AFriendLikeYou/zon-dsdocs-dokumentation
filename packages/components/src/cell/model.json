@@ -168,7 +168,9 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["default"],
+		"zustaende": [
+			"default"
+		],
 		"elemente": [
 			{
 				"teil": "Fläche (Cell-Hintergrund)",
@@ -496,5 +498,19 @@
 			"Wide": "Standardbreite (343).",
 			"Small": "Kompakt — kleinerer Titel und kleinere Fläche."
 		}
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 6
 	}
 }

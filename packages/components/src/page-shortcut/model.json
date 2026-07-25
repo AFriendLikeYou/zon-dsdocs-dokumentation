@@ -6,7 +6,10 @@
 	"aktualisiertAm": "2026-07-11",
 	"dokumentiertAm": "2026-07-02",
 	"zweck": "Umrandeter Shortcut zu einem Seitenziel — ein einzelner Stil mit Hover- und Focus-State, bewusst ohne Varianten.",
-	"verwandt": ["button", "text-button"],
+	"verwandt": [
+		"button",
+		"text-button"
+	],
 	"masse": {
 		"hoehe": {
 			"px": "34",
@@ -99,7 +102,11 @@
 		}
 	],
 	"farbrollen": {
-		"zustaende": ["default", "hover", "focus-visible"],
+		"zustaende": [
+			"default",
+			"hover",
+			"focus-visible"
+		],
 		"elemente": [
 			{
 				"teil": "Hintergrund",
@@ -172,5 +179,19 @@
 				"x": 50
 			}
 		]
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 3
 	}
 }
