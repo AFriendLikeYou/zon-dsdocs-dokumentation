@@ -2,7 +2,46 @@
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$id": "https://zeit.de/ds-doku/model.schema.json",
 	"title": "Component-Doku-Modell (Steckbrief)",
-	"description": "Eingabe für den zeit-de-Exporter. Ein Steckbrief pro Komponente — der Exporter baut daraus die fertige Doku-Seite. Redaktionelle Texte kann content.ts überschreiben.",
+	"description": "Eingabe für den zeit-de-Exporter. Ein Steckbrief pro Komponente — der Exporter baut daraus die fertige Doku-Seite. Redaktionelle Texte (Klasse ②) kommen aus content.json; Maschinen-Werte (Klasse ①) sind dort nur über einen begründeten `overrides`-Eintrag zu bestreiten. Siehe x-feldklassen.",
+	"x-feldklassen": {
+		"beschreibung": "WER darf welches Feld ändern (MIGRATIONSPLAN §2.3). Ausführbare Quelle: tooling/zeit-de-exporter/feldklassen.mjs; `feldklassen.test.mjs` hält beide Seiten zusammen und prüft, dass JEDES Feld hier eine Klasse hat. Ein Feld ohne Klasse gäbe es sonst genau einmal — und niemand wüsste, wem es gehört.",
+		"maschine": {
+			"regel": "Aus Figma/Messung. Redaktion ändert diese Felder NIE direkt — nur über content.overrides mit `grund`, `belegt` und `maschinenwert`.",
+			"felder": [
+				"masse",
+				"spacing",
+				"tokens",
+				"farbrollen",
+				"varianten",
+				"zustaende",
+				"produktion",
+				"render",
+				"katalog"
+			]
+		},
+		"mensch": {
+			"regel": "Urteil, Text, Kuratierung. Figma hat dazu nichts zu sagen; content.json gewinnt feldweise. (`komposition` und die ergänzenden Felder tokenHinweise/playground/codeBeispiele/codeSvelte/repoCodeSvelte/codeNote/repoNote gibt es nur in content.json, nicht im Modell.)",
+			"felder": [
+				"zweck",
+				"status",
+				"beispiele",
+				"callouts",
+				"a11y",
+				"tastatur",
+				"doDont",
+				"faq",
+				"verwendung",
+				"wording",
+				"verwandt",
+				"version",
+				"variantInfo"
+			]
+		},
+		"stamm": {
+			"regel": "Identität und Verdrahtung. Weder redaktionell noch per Override änderbar: wer den Namen oder den Figma-Node ändert, ändert die Komponente, nicht ihre Beschreibung.",
+			"felder": ["name", "kategorie", "figma", "aktualisiertAm", "dokumentiertAm", "code"]
+		}
+	},
 	"type": "object",
 	"required": ["name", "code"],
 	"additionalProperties": false,

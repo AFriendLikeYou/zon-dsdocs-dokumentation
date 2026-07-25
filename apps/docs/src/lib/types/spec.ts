@@ -246,6 +246,37 @@ export type CodeArtefakt = {
 export type CodeManifest = { artefakte: CodeArtefakt[] };
 
 /**
+ * Womit ist ein Widerspruch gegen den Maschinenwert gedeckt?
+ *   produktion   – live auf zeit.de gemessen
+ *   figma        – in Figma belegt (der Export hat es nur nicht abgebildet)
+ *   entscheidung – bewusste Setzung des Teams (kein Messwert)
+ */
+export type OverrideBeleg = 'produktion' | 'figma' | 'entscheidung';
+
+/**
+ * Ein BEGRÜNDETER Widerspruch gegen einen Maschinenwert (Klasse ① des
+ * Drei-Klassen-Modells, MIGRATIONSPLAN §2.3). Steht in content.json unter
+ * `overrides`, adressiert über den Punkt-Pfad ins Modell (z. B. `masse.hoehe.px`).
+ *
+ * `maschinenwert` ist der Kern: Ohne den Wert, GEGEN den entschieden wurde, wäre
+ * ein Override eine stille Einbahnstraße — bewegt sich die Quelle später,
+ * maskierte der alte Widerspruch den neuen Wert lautlos. Mit ihm meldet
+ * `check-content`: „Override bezog sich auf 18, Quelle sagt jetzt 20".
+ */
+export type Override = {
+	/** Der Wert, der stattdessen gilt. */
+	wert: string | number | boolean;
+	/** PFLICHT: Warum widersprechen wir? */
+	grund: string;
+	belegt: OverrideBeleg;
+	/** PFLICHT: der Wert, gegen den entschieden wurde. */
+	maschinenwert: string | number | boolean;
+};
+
+/** Pfad ins Modell (`masse.hoehe.px`) → Widerspruch. */
+export type Overrides = Record<string, Override>;
+
+/**
  * Das gemergte Spec-Objekt (generated + content), das jede Component-Seite an die
  * Renderer reicht. Alle Felder optional: `content.ts` überschreibt partiell, die
  * Renderer guarden mit `if`/`length`.
@@ -306,4 +337,11 @@ export type ComponentSpec = {
 	repoCodeSvelte?: string;
 	codeNote?: string;
 	repoNote?: string;
+	/**
+	 * Begründete Widersprüche gegen Maschinenwerte (aus content.json). `mergeSpec`
+	 * hat sie beim Zusammenführen bereits ANGEWENDET — sie bleiben hier stehen,
+	 * damit die Seite einen bestrittenen Wert als solchen ausweisen kann statt ihn
+	 * stumm zu zeigen.
+	 */
+	overrides?: Overrides;
 };

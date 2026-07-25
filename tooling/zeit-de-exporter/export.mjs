@@ -36,6 +36,7 @@ import { readFileSync, mkdirSync, writeFileSync, existsSync, unlinkSync, statSyn
 import { resolve, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateModelSchema } from './schema-validate.mjs';
+import { MENSCH_FELDER } from './feldklassen.mjs';
 import { resolveArtefakte } from '../artefakte.mjs';
 import { COMPONENTS_REL, CONTENT_COMPONENTS_REL, PKG_COMPONENTS_REL } from '../lib/paths.mjs';
 
@@ -54,6 +55,9 @@ const CONTENT_BASE = CONTENT_COMPONENTS_REL;
  */
 const CONTENT_IMPORT_BASE = '$content/components';
 const SPEC_COMPONENT_IMPORT = '$components/ui/specsheet';
+// Laufzeit-Merge (Maschine + Redaktion + begründete Overrides) — die Regel steht
+// EINMAL in der App, nicht in vierzehn generierten Seiten.
+const SPEC_MERGE_IMPORT = '$lib/spec';
 // CodeBlock lebt eigenständig unter ui/code-block (aus dem specsheet-Barrel gelöst) —
 // wird separat importiert, nicht mehr über das Spec-UI-Kit.
 const CODE_BLOCK_IMPORT = '$components/ui/code-block';
@@ -152,25 +156,10 @@ function renderFrontmatter(model) {
 	return `---\n${lines.join('\n')}\n---`;
 }
 
-// Redaktionelle Felder — gehören dem Menschen (content.ts), überschreiben generated.
-const EDITORIAL = [
-	'zweck',
-	'status',
-	// Benannte Beispiele: redaktionell (Titel/Erklärsatz/Instanz-Auswahl sind eine
-	// Kuratierungs-Entscheidung, keine Figma-Tatsache) → content.json gewinnt.
-	'beispiele',
-	'callouts',
-	'a11y',
-	'tastatur',
-	'doDont',
-	// FAQs: Restfragen, die die Specs nicht beantworten — reine Redaktion, kein
-	// Figma-Fakt → content.json gewinnt (Muster wie `beispiele`).
-	'faq',
-	'verwendung',
-	'wording',
-	'komposition',
-	'verwandt'
-];
+// Redaktionelle Felder — gehören dem Menschen (content.json), überschreiben generated.
+// Die Liste selbst lebt seit PR 7 in feldklassen.mjs (Klasse ② des Drei-Klassen-
+// Modells), damit Exporter, Validierung, Merge und Checks EINE Quelle teilen.
+const EDITORIAL = MENSCH_FELDER;
 
 /** spec.generated.ts — Maschinen-Instanz (Figma-Export). Wird bei jedem Sync überschrieben. */
 function renderGenerated(model) {
@@ -938,12 +927,15 @@ function renderPage(model, { patternCss = null } = {}) {
 			: '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
+		`\timport { mergeSpec } from '${SPEC_MERGE_IMPORT}';\n` +
 		`\timport content from '${CONTENT_IMPORT_BASE}/${kebabCase(model.name)}.json';\n` +
 		(hasEditorial ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
 
 	const decls =
-		`\t// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.\n` +
-		`\tconst ${S} = { ...generated, ...content };\n` +
+		`\t// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder\n` +
+		`\t// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)\n` +
+		`\t// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.\n` +
+		`\tconst ${S} = mergeSpec(generated, content);\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
 			? `\tconst playgroundControls = ${JSON.stringify(pgControls)} as PlaygroundControl[];\n` +
@@ -1137,7 +1129,10 @@ function renderPage(model, { patternCss = null } = {}) {
 
 	// ---- Specs-Tab ----
 	let specs = '';
-	if (hasMasse) specs += `\t<h2>Maße</h2>\n\t<MeasureTable masse={${S}.masse} />\n`;
+	// `overrides` reicht die Widersprüche durch: die Tabelle markiert einen Wert,
+	// dem redaktionell widersprochen wurde, samt Begründung (statt ihn stumm zu zeigen).
+	if (hasMasse)
+		specs += `\t<h2>Maße</h2>\n\t<MeasureTable masse={${S}.masse} overrides={${S}.overrides} />\n`;
 	// Farbrollen-Matrix leitet die Token-Sektion ein (Teil × Zustand → Token),
 	// die volle Token-Liste folgt darunter.
 	if (hasColorRoles)

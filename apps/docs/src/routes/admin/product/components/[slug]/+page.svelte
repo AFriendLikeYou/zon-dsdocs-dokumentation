@@ -19,6 +19,7 @@
 	import ExamplesField, { blankBeispiel, type Control } from './ExamplesField.svelte';
 	import LegendPopover from './LegendPopover.svelte';
 	import EditorialCard from './EditorialCard.svelte';
+	import OverridesField, { BELEGE, type OverrideEntry } from './OverridesField.svelte';
 	import SpecTable from './SpecTable.svelte';
 	import StatusSegmentedControl from './StatusSegmentedControl.svelte';
 	import AnchorBar from './AnchorBar.svelte';
@@ -81,6 +82,12 @@
 		repoCodeSvelte: string;
 		codeNote: string;
 		repoNote: string;
+		/**
+		 * Begründete Widersprüche gegen Maschinenwerte (PR 7). Der einzige Weg, in
+		 * dieser Redaktions-Datei einen Figma-/Mess-Wert zu kippen — und zwar
+		 * sichtbar, mit Begründung und mit dem überstimmten Wert im Protokoll.
+		 */
+		overrides: OverrideEntry[];
 	};
 
 	const c = data.content as {
@@ -108,6 +115,10 @@
 		repoCodeSvelte?: string;
 		codeNote?: string;
 		repoNote?: string;
+		overrides?: Record<
+			string,
+			{ wert?: unknown; grund?: string; belegt?: string; maschinenwert?: unknown }
+		>;
 	};
 
 	// Alle Varianten-Labels der Maschinen-Achsen (dedupliziert) — sie sind die
@@ -191,7 +202,16 @@
 			codeSvelte: c.codeSvelte ?? '',
 			repoCodeSvelte: c.repoCodeSvelte ?? '',
 			codeNote: c.codeNote ?? '',
-			repoNote: c.repoNote ?? ''
+			repoNote: c.repoNote ?? '',
+			// Objekt (Pfad → Widerspruch) → Liste, damit sich die Einträge wie jede
+			// andere Editor-Liste anfassen lassen. Zurück wird beim payload gemappt.
+			overrides: Object.entries(c.overrides ?? {}).map(([pfad, o]) => ({
+				pfad,
+				wert: o?.wert === undefined ? '' : String(o.wert),
+				grund: o?.grund ?? '',
+				belegt: o?.belegt ?? 'produktion',
+				maschinenwert: o?.maschinenwert === undefined ? '' : String(o.maschinenwert)
+			}))
 		};
 	}
 	let model = $state<Editorial>(makeState());
@@ -455,12 +475,53 @@
 		if (codeNote) out.codeNote = codeNote;
 		const repoNote = model.repoNote.trim();
 		if (repoNote) out.repoNote = repoNote;
+		// Widersprüche: zurück ins Objekt (Pfad → Eintrag). Ein Eintrag ohne Wert ODER
+		// ohne Begründung fällt raus — er wäre genau der stille Override, den PR 7
+		// abschafft. Das Speichern ist in dem Fall ohnehin gesperrt (s. overrideFehler);
+		// hier steht der zweite Riegel, damit nie eine halbe Aussage in die Datei kommt.
+		const overrides: Record<string, unknown> = {};
+		for (const o of model.overrides) {
+			if (!o.pfad || !o.wert.trim() || !o.grund.trim()) continue;
+			overrides[o.pfad] = {
+				wert: o.wert.trim(),
+				grund: o.grund.trim(),
+				belegt: o.belegt,
+				maschinenwert: o.maschinenwert
+			};
+		}
+		if (Object.keys(overrides).length) out.overrides = overrides;
 		return JSON.stringify(out);
 	});
 
+	// ── Widersprüche: anlegen, zählen, sperren ───────────────────────────────────
+	/**
+	 * Einem Maschinenwert widersprechen. Der überstimmte Wert wird SOFORT als
+	 * `maschinenwert` mitgeschrieben — ohne ihn könnte später niemand feststellen,
+	 * ob sich die Quelle inzwischen bewegt hat (genau die Einbahnstraße, die das
+	 * Drei-Klassen-Modell beendet).
+	 */
+	function widersprechen(pfad: string, maschinenwert: string) {
+		const vorhanden = model.overrides.find((o) => o.pfad === pfad);
+		if (!vorhanden) {
+			model.overrides.push({ pfad, wert: maschinenwert, grund: '', belegt: 'produktion', maschinenwert });
+		}
+		// Zum Formular springen — die Karte sitzt direkt unter der Maschinen-Zone.
+		tick().then(() => {
+			document.getElementById('sec-overrides')?.scrollIntoView({ block: 'nearest' });
+			document
+				.querySelector<HTMLTextAreaElement>('#sec-overrides textarea')
+				?.focus({ preventScroll: true });
+		});
+	}
+	const hatWiderspruch = (pfad: string) => model.overrides.some((o) => o.pfad === pfad);
+	/** Unfertige Widersprüche — sie sperren das Speichern (Begründung ist Pflicht). */
+	const overrideFehler = $derived(
+		model.overrides.filter((o) => !o.grund.trim() || !o.wert.trim()).length
+	);
+
 	// ── Maschinen-Zonen: Maße normalisieren ──────────────────────────────────────
 	type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
-	type MasseRow = { label: string; px: string; token?: string; herkunft: Herkunft };
+	type MasseRow = { label: string; px: string; token?: string; herkunft: Herkunft; pfad?: string };
 	const MASSE_LABELS: Record<string, string> = {
 		hoehe: 'Höhe',
 		breite: 'Breite',
@@ -474,15 +535,19 @@
 		for (const [key, label] of Object.entries(MASSE_LABELS)) {
 			const v = m[key];
 			if (v === undefined || v === null) continue;
+			// Der Pfad ist die ADRESSE des Widerspruchs — derselbe Punkt-Pfad, den
+			// content.overrides und check-content benutzen (`masse.hoehe.px`).
+			const pfad = `masse.${key}.px`;
 			if (typeof v === 'string') {
-				rows.push({ label, px: v, herkunft: 'gemessen' });
+				rows.push({ label, px: v, herkunft: 'gemessen', pfad });
 			} else if (typeof v === 'object') {
 				const o = v as { px?: string; token?: string; herkunft?: Herkunft };
 				rows.push({
 					label,
 					px: o.px ?? '',
 					token: o.token,
-					herkunft: o.herkunft ?? 'gemessen'
+					herkunft: o.herkunft ?? 'gemessen',
+					pfad
 				});
 			}
 		}
@@ -659,6 +724,26 @@
 
 {#snippet clusterEyebrow(id: string, label: string)}
 	<div class="cluster-eyebrow" {id}>{label}</div>
+{/snippet}
+
+<!-- „Widersprechen" sitzt in der Maschinen-Zeile selbst: Wer einen Wert bestreitet,
+     tut das AM Wert — nicht in einem Formular, das man erst suchen muss. Der Klick
+     legt den Widerspruch an (mit dem überstimmten Maschinenwert im Protokoll) und
+     springt in die Begründung. -->
+{#snippet widersprechenAktion(row: { label: string; px: string; pfad?: string })}
+	{#if row.pfad}
+		{#if hatWiderspruch(row.pfad)}
+			<span class="widerspruch-hinweis">widersprochen</span>
+		{:else}
+			<Button
+				variant="quiet"
+				onclick={() => widersprechen(row.pfad!, row.px)}
+				title="Diesem Maschinenwert mit Begründung widersprechen"
+			>
+				Widersprechen
+			</Button>
+		{/if}
+	{/if}
 {/snippet}
 
 <!-- Zeilen-Snippets für den gemeinsamen RowListField (Wording · Barrierefreiheit).
@@ -896,12 +981,31 @@
 						subline="Werte aus dem Figma-Import — Änderung in Figma, dann Re-Import."
 					>
 						{#if masseRows.length}
-							<SpecTable variant="measure" rows={masseRows} />
+							<SpecTable variant="measure" rows={masseRows} aktion={widersprechenAktion} />
 						{/if}
 						{#if spacingRows.length}
 							<SpecTable variant="measure" rows={spacingRows} subhead="Abstände" />
 						{/if}
 					</MachineZone>
+				{/if}
+
+				<!-- Widersprüche DIREKT unter den Maßen (wie „Hinweis je Token" unter den
+				     Tokens): die Entscheidung steht beim Wert, gegen den sie sich richtet. -->
+				{#if model.overrides.length}
+					<EditorialCard
+						title="Widersprüche zu Maschinenwerten"
+						subline="Gilt auf der Seite statt des Figma-Werts — mit Begründung und Protokoll"
+						id="sec-overrides"
+						attached
+					>
+						<p class="ed-hint">
+							Ein Widerspruch überschreibt einen einzelnen Maschinenwert auf der öffentlichen
+							Seite. Der überstimmte Wert bleibt als <code>maschinenwert</code> stehen: Bewegt
+							sich Figma später, meldet der Content-Check, dass die Entscheidung neu zu prüfen
+							ist.
+						</p>
+						<OverridesField list={model.overrides} belege={BELEGE} />
+					</EditorialCard>
 				{/if}
 
 				<!-- ③ Tokens (eingeklappt) — EINE Tabelle mit Gruppen-Eyebrow-Zeilen (V2). -->
@@ -1296,11 +1400,23 @@
 				<Dialog
 					open={dirty}
 					message="Ungespeicherte Änderungen"
-					primaryDisabled={!data.writable}
+					primaryDisabled={!data.writable || overrideFehler > 0}
+					primaryTitle={overrideFehler > 0
+						? 'Jeder Widerspruch braucht Wert und Begründung'
+						: undefined}
 					onprimary={() => formEl?.requestSubmit()}
 					onsecondary={discard}
 					shortcut="cmd+s"
-				/>
+				>
+					{#snippet extra()}
+						{#if overrideFehler > 0}
+							<Badge tone="warn"
+								>{overrideFehler}
+								{overrideFehler === 1 ? 'Widerspruch' : 'Widersprüche'} ohne Begründung</Badge
+							>
+						{/if}
+					{/snippet}
+				</Dialog>
 			</form>
 		</div>
 	</article>
@@ -1469,6 +1585,13 @@
 		font-size: var(--ds-text-xs);
 		color: var(--ds-text-muted);
 		margin: 0;
+	}
+	/* Steht in der Maschinen-Zeile anstelle des „Widersprechen"-Buttons, sobald es
+	   für diesen Wert bereits einen Widerspruch gibt (er steht in der Karte darunter). */
+	.widerspruch-hinweis {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-faint);
+		font-style: italic;
 	}
 	.hint code {
 		font-family: var(--ds-font-mono);

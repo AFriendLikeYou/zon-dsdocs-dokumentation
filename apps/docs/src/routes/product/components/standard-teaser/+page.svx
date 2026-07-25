@@ -15,10 +15,13 @@ kategorie: Inhalte
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
+	import { mergeSpec } from '$lib/spec';
 	import content from '$content/components/standard-teaser.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
-	const spec = { ...generated, ...content };
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
+	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
+	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
+	const spec = mergeSpec(generated, content);
 	const calloutAnchors = [{"nr":1,"side":"left","y":45,"selector":".zon-teaser__media"},{"nr":2,"side":"top","x":70,"selector":".zon-teaser__kicker"},{"nr":3,"side":"right","y":30,"selector":".zon-teaser__title"},{"nr":4,"side":"right","y":58,"selector":".zon-teaser__summary"},{"nr":5,"side":"right","y":78,"selector":".zon-teaser__byline"},{"nr":6,"side":"bottom","x":70,"selector":".zon-teaser__actions"}];
 	const playgroundControls = [{"key":"bildformat","label":"Bildformat","type":"select","default":"super","options":[{"value":"super","label":"Super (3:2)","cssClass":"zon-teaser__media--desktop-super zon-teaser__media--mobile-super"},{"value":"wide","label":"Wide (16:9)","cssClass":"zon-teaser__media--desktop-wide zon-teaser__media--mobile-wide"},{"value":"narrow","label":"Narrow (2:3)","cssClass":"zon-teaser__media--desktop-narrow zon-teaser__media--mobile-narrow"}]}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="zon-teaser zon-teaser--standard"{attrs}>
@@ -468,7 +471,7 @@ kategorie: Inhalte
 
 {#snippet specsTab()}
 	<h2>Maße</h2>
-	<MeasureTable masse={spec.masse} />
+	<MeasureTable masse={spec.masse} overrides={spec.overrides} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />

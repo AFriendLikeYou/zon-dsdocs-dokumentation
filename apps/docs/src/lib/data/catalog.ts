@@ -11,11 +11,13 @@
  * Kuratierte, nicht ableitbare Felder (Reihenfolge, Badge, Ausschluss) stehen im
  * `katalog`-Block des jeweiligen model.json — die frühere Handliste
  * CATALOG_OVERRIDES ist entfallen (MIGRATIONSPLAN §4, Ausnahme 4): eine zweite
- * Liste neben dem Spec veraltet zwangsläufig, und zwar still. Redaktionelle Texte
- * (content.json) überschreiben das Maschinen-Modell per Shallow-Merge — wie auf
- * den Component-Seiten selbst.
+ * Liste neben dem Spec veraltet zwangsläufig, und zwar still. Zusammengeführt wird
+ * mit derselben Regel wie auf den Component-Seiten (`mergeSpec`, $lib/spec):
+ * redaktionelle Felder gewinnen, Maschinen-Werte nur über einen begründeten
+ * `overrides`-Eintrag.
  */
 import type { BadgeVariant, ComponentSpec } from '$types/spec';
+import { mergeSpec } from '$lib/spec';
 
 /** Der `katalog`-Block des model.json — Katalog-Verdrahtung, kein Datenmodell. */
 type KatalogBlock = {
@@ -118,7 +120,11 @@ export const CATALOG: CatalogEntry[] = Object.entries(models)
 			katalog?: KatalogBlock;
 		};
 		const content = contentsBySlug[slug] ?? ({} as Partial<ComponentSpec>);
-		const spec = { ...machine, ...content };
+		// Dieselbe Merge-Regel wie auf der Component-Seite ($lib/spec): Redaktion
+		// gewinnt bei ihren Feldern, Maschinen-Werte nur über einen begründeten
+		// `overrides`-Eintrag. Ein Shallow-Spread hätte hier eine zweite,
+		// großzügigere Wahrheit erzeugt — Katalog und Seite müssen dasselbe zeigen.
+		const spec = mergeSpec(machine, content);
 		return {
 			slug,
 			spec,

@@ -22,15 +22,26 @@
   - rows?:    Zeilen der measure-Variante ({ label, px, token?, herkunft }).
   - subhead?: Zwischenüberschrift über der measure-Tabelle.
   - groups?:  Gruppen der tokens-Variante ({ kategorie, items:[{ name, wert, … }] }).
+  - aktion?:  Snippet für eine ZUSÄTZLICHE Spalte ganz rechts (measure) — der Ort
+              für „Widersprechen": die Entscheidung gehört neben den Wert, gegen den
+              sie sich richtet, nicht in ein Formular weiter unten.
 -->
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { Swatch } from '$components/ui/swatch';
 	import { Chip } from '$components/ui/chip';
 	import { Badge } from '$components/ui/badge';
 	import { Table } from '$components/ui/table';
 
 	type Herkunft = 'gemessen' | 'abgeleitet' | 'geschätzt';
-	type MeasureRow = { label: string; px: string; token?: string; herkunft: Herkunft };
+	type MeasureRow = {
+		label: string;
+		px: string;
+		token?: string;
+		herkunft: Herkunft;
+		/** Punkt-Pfad ins Modell (z. B. „masse.hoehe.px") — Adresse eines Widerspruchs. */
+		pfad?: string;
+	};
 	type TokenItem = {
 		name: string;
 		wert: string;
@@ -44,12 +55,14 @@
 		variant,
 		rows = [],
 		subhead,
-		groups = []
+		groups = [],
+		aktion
 	}: {
 		variant: 'measure' | 'tokens';
 		rows?: MeasureRow[];
 		subhead?: string;
 		groups?: TokenGroup[];
+		aktion?: Snippet<[MeasureRow]>;
 	} = $props();
 
 	/** Maß-Wert fürs Auge: „10 · 16" → „10 / 16", nackte Zahlen bekommen „ px". */
@@ -58,11 +71,12 @@
 		return /[a-z%]/i.test(s) ? s : `${s} px`;
 	};
 
-	const measureColumns = [
+	const measureColumns = $derived([
 		{ key: 'label', render: mLabel },
 		{ key: 'value', render: mValue },
-		{ key: 'herkunft', align: 'right' as const, render: mHerkunft }
-	];
+		{ key: 'herkunft', align: 'right' as const, render: mHerkunft },
+		...(aktion ? [{ key: 'aktion', align: 'right' as const, render: aktion }] : [])
+	]);
 
 	const tokenColumns = [
 		{ key: 'swatch', width: '24px', render: tSwatch },
@@ -147,8 +161,13 @@
 		width: 100%;
 		color: var(--ds-text);
 	}
-	.mz-skin--measure :global(.ds-table__cell:last-child) {
+	/* Herkunft (3.) und die optionale Aktions-Spalte (4.) bleiben einzeilig. */
+	.mz-skin--measure :global(.ds-table__cell:nth-child(n + 3)) {
 		white-space: nowrap;
+	}
+	/* Die Aktion sitzt dicht am Zeilenende und drängelt sich nicht in die Werte. */
+	.mz-skin--measure :global(.ds-table__cell:nth-child(4)) {
+		padding-left: var(--z-ds-space-8);
 	}
 	.herkunft-text {
 		font-size: var(--ds-text-xs);

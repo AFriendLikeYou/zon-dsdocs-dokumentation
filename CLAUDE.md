@@ -50,11 +50,21 @@ npx vitest run   # Component-/Daten-Tests
 > ergänzen. Neue Checks starten im Warn-Modus und werden scharf geschaltet,
 > sobald ihr Befund 0 ist.
 >
-> **Nicht im Gate:** `check-prod-drift` vergleicht die Doku mit der **Produktion**
-> (zeit.de) — Playwright misst gerenderte Werte gegen `masse`. Er braucht Netz und
-> hängt an einer fremden Seite, deshalb eigener nächtlicher Job
-> (`.github/workflows/prod-drift.yml`), nicht `npm run check`. Fundstellen: der
-> optionale `produktion`-Block im `model.json` (Anleitung in IMPORT.md).
+> **Nicht im Gate — die beiden Drift-Checks nach außen.** Sie stehen an den beiden
+> Enden der Kette `Figma → Komponente → Produktion` (MIGRATIONSPLAN §2.1), brauchen
+> Netz bzw. ein Token und laufen darum nächtlich statt im PR:
+>
+> - `check-prod-drift` — Doku vs. **Produktion** (zeit.de): Playwright misst
+>   gerenderte Werte gegen `masse` (nach Anwendung der Overrides — verglichen wird,
+>   was die Seite zeigt). Fundstellen: der optionale `produktion`-Block im
+>   `model.json`. Job: `.github/workflows/prod-drift.yml`, mit `--strict`.
+> - `check-figma-drift` — Modell vs. **Figma**: holt den Node über
+>   `zeit-de-exporter/fetch.mjs` (Token aus `FIGMA_TOKEN`) und hält `masse` gegen
+>   dieselbe deterministische Ableitung, die auch ein Re-Import nähme (`draft.mjs`).
+>   Schreibt nichts — Figma schlägt vor, ein Mensch nimmt an. Ohne Token wird
+>   übersprungen **mit Meldung** (nie still). `--fixture` vergleicht offline gegen
+>   die committete `figma-raw.json`. Job: `.github/workflows/figma-drift.yml`,
+>   noch **ohne** `--strict` (3 offene Alt-Befunde, s. dort).
 >
 > `npm run lint` läuft mit `--max-warnings 27` (Ratsche gegen Warnungs-Wildwuchs):
 > Fehler sind immer 0, und die Warnungszahl darf nur sinken. Wer Warnungen abbaut,
@@ -151,13 +161,58 @@ liegt.
 
   MENSCH (redaktionell)                                         SEITE (Merge zur Laufzeit)
   ─────────────────────                                         ──────────────────────────
-  content/components/ ─ zweck, verwendung, doDont, a11y-Texte,    spec = { ...generated, ...content }
-    <slug>.json        variantInfo … (NIE überschrieben)   ───────►        └─ content GEWINNT
+  content/components/ ─ zweck, verwendung, doDont, a11y-Texte,    spec = mergeSpec(generated, content)
+    <slug>.json        variantInfo … (NIE überschrieben)   ───────►    ② Redaktion gewinnt
+                     ─ overrides: begründete Widersprüche  ───────►    ① nur per Override
+                       gegen EINZELNE Maschinenwerte                   ③ Stammdaten: nie
 
   Prinzipien: „Nicht Gemessenes wird nicht erfunden" (herkunft: gemessen/abgeleitet/geschätzt) ·
   Re-Import ohne Figma-Änderung ⇒ identischer Output (Drift-Signal) · Jede Quelle liefert die
   Ebene, die die anderen nicht können: Figma=Maße/Tokens · CSS=Zustände · HTML=ARIA · Mensch=Urteil.
 ```
+
+### Drei Feldklassen — wer darf was ändern? (MIGRATIONSPLAN §2.3)
+
+| Klasse | Felder | Regel |
+| --- | --- | --- |
+| ① **Maschine** | `masse` `spacing` `tokens` `farbrollen` `varianten` `zustaende` `produktion` `render` `katalog` | Redaktion ändert sie **nie** direkt — nur über einen `overrides`-Eintrag |
+| ② **Mensch** | `zweck` `status` `beispiele` `callouts` `a11y` `tastatur` `doDont` `faq` `verwendung` `wording` `komposition` `verwandt` (+ `version` `variantInfo` `tokenHinweise` `playground` `codeBeispiele` `code*`/`repo*`) | content.json gewinnt feldweise, wie eh und je |
+| ③ **Stamm** | `name` `kategorie` `figma` `aktualisiertAm` `dokumentiertAm` `code` | Identität — weder redaktionell noch per Override änderbar |
+
+**Eine Quelle:** `tooling/zeit-de-exporter/feldklassen.mjs`. Sie speist den Exporter
+(`EDITORIAL`), die Validierung (`content-validation.mjs`), die Checks und — als von
+einem Test zusammengehaltener TS-Zwilling — den Laufzeit-Merge in
+`apps/docs/src/lib/spec/`. Das Schema hält dieselben Listen unter `x-feldklassen`;
+`feldklassen.test.mjs` prüft, dass **jedes** Modell-Feld genau eine Klasse hat.
+
+**Warum das nötig war:** Der alte Merge `{ ...generated, ...content }` machte jedes
+Feld stillschweigend überschreibbar. Ändert Figma einen überschriebenen Wert,
+maskiert der alte Eintrag den neuen **lautlos** — real passiert beim `text-button`
+(`hoehe: 18` in Figma, 34 in der Auslieferung).
+
+### Einem Maschinenwert widersprechen (`overrides`)
+
+```jsonc
+// apps/docs/content/components/text-button.json
+"overrides": {
+  "masse.hoehe.px": {                 // Punkt-Pfad ins Modell
+    "wert": "34",                     // was stattdessen gilt
+    "grund": "Der Figma-Node hat Padding 0 …",   // PFLICHT
+    "belegt": "produktion",           // produktion | figma | entscheidung
+    "maschinenwert": "18"             // PFLICHT: wogegen entschieden wurde
+  }
+}
+```
+
+`maschinenwert` ist der Kern: `check-content` meldet, sobald das `model.json` einen
+anderen Wert trägt („Override bezog sich auf 18, Quelle sagt jetzt 20 — bitte erneut
+prüfen"). Ohne diesen Vermerk wäre ein Override eine stille Einbahnstraße. Im CMS
+legt „Widersprechen" in der Maschinen-Zone den Eintrag an (Begründung ist Pflichtfeld,
+sonst bleibt Speichern gesperrt); auf der öffentlichen Seite weist die `MeasureTable`
+den Wert als bestritten aus statt ihn wie einen Messwert zu zeigen.
+
+Denselben Merge nutzen **alle** Konsumenten — Seite, `catalog.ts`, `agent-catalog.ts`
+(MCP/Registry): Was ein Agent liest, ist exakt das, was ein Mensch sieht.
 
 **Exporter** `tooling/zeit-de-exporter/export.mjs` bildet das render-unabhängige
 **Doku-Modell (`model.json`)** auf das zeit.de-Repo-Format ab. Eingabe ist der
@@ -172,8 +227,9 @@ Erzeugt unter `apps/docs/src/routes/product/components/<slug>/` die Maschinen-Da
 `+page.svx` + `spec.generated.ts` (immer neu) und — nur beim ersten Mal — den Stub
 `apps/docs/content/components/<slug>.json` (Mensch, nie überschrieben). Die Seite holt
 ihn über den Alias `$content` und führt beides zusammen:
-`const spec = { ...generated, ...content }` — **content gewinnt**. `render.cssFile`
-ist **relativ zum Modell** (`./pattern.css` im selben Paket-Ordner).
+`const spec = mergeSpec(generated, content)` — **Klasse ② gewinnt, Klasse ① nur per
+begründetem Override** (s. o.). `render.cssFile` ist **relativ zum Modell**
+(`./pattern.css` im selben Paket-Ordner).
 
 **Registry-Index** `src/lib/data/catalog.ts` entsteht zur Build-Zeit per
 `import.meta.glob` über alle `model.json` des Pakets — ein neues Pattern erscheint
@@ -392,7 +448,9 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 - **Doku-Modell ist kanonisch** und render-unabhängig. Repo-Spezifisches gehört
   in die Exporter-Schicht bzw. den `render`-Block.
 - **Generierte Dateien nie von Hand editieren** — Redaktion in `content/components/<slug>.json`
-  (der „Edit on GitHub"-Stift zeigt dorthin).
+  (der „Edit on GitHub"-Stift zeigt dorthin). Dort gehören **nur Klasse-②-Felder**
+  hinein; ein Maschinenwert wird nicht einredigiert, sondern im `overrides`-Block
+  **begründet bestritten** (Schema: `tooling/zeit-de-exporter/content.schema.json`).
 - **Vanilla HTML/CSS ist der Default** für Beispiele; Svelte nur bei
   interaktiven Teilen. `</script>`/`</style>` in Strings escapet der Exporter.
 - **Bild-Konvention 16:9:** Content-Prosabilder (`main p > img`, also mdsvex

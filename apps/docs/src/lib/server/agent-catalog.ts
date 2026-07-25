@@ -8,10 +8,12 @@
  * und lädt kein CSS; er bleibt die Quelle für die Site-UI.
  *
  * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die model.json des Pakets + die
- * Redaktionsdatei content/components/<slug>.json (content gewinnt),
+ * Redaktionsdatei content/components/<slug>.json, zusammengeführt mit `mergeSpec`
+ * ($lib/spec — Redaktion gewinnt, Maschinen-Werte nur per begründetem Override),
  * `$schema`/`katalog` gestrippt. Zusätzlich pattern.css als ?raw.
  */
 import type { ComponentSpec } from '$types/spec';
+import { mergeSpec } from '$lib/spec';
 
 /** Repo-Verdrahtung aus dem model.json (Playground/Code) — für Agenten relevant. */
 export type AgentRender = {
@@ -80,7 +82,11 @@ export const AGENT_CATALOG: AgentCatalogEntry[] = Object.entries(models)
 		const content = contentsBySlug[slug] ?? ({} as Partial<ComponentSpec>);
 		return {
 			slug,
-			spec: { ...withRender, ...content },
+			// Dieselbe Merge-Regel wie Seite und Katalog ($lib/spec): Agenten sollen
+			// exakt das lesen, was ein Mensch auf der Doku-Seite sieht — inklusive der
+			// begründeten Widersprüche (die als `overrides` mitfahren und damit
+			// SELBST auslesbar sind: „dieser Wert ist bestritten, und zwar deshalb").
+			spec: mergeSpec(withRender, content),
 			patternCss: patternsBySlug[slug] ?? null
 		};
 	})

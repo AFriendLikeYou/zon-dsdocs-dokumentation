@@ -277,6 +277,80 @@ Details zu Kategorien, Toleranz und dem, was er bewusst **nicht** prüft
 (CSS-Quelltext-Gleichheit), stehen im Kopfkommentar von
 `tooling/check-prod-drift.mjs`.
 
+### 3d · Figma-Referenz (`figma`-Feld) und der Gegen-Check
+
+Der Zwilling des Produktions-Checks steht am anderen Ende der Kette:
+
+```
+Figma  ──►  Komponente  ──►  Produktion
+       ▲                ▲
+check-figma-drift   check-prod-drift
+```
+
+Grundlage ist das ohnehin vorhandene `figma`-Feld (node-genauer Link).
+`tooling/check-figma-drift.mjs` holt den Node live über `fetch.mjs`, leitet mit
+**derselben** deterministischen Funktion wie ein Re-Import (`draft.mjs`) die Maße
+ab und hält sie gegen `masse`. Er **schreibt nichts**: Figma schlägt vor, ein
+Mensch nimmt an.
+
+```bash
+npm run check:figma-drift                            # live (braucht FIGMA_TOKEN)
+node tooling/check-figma-drift.mjs --only button
+node tooling/check-figma-drift.mjs --fixture         # offline gegen figma-raw.json
+```
+
+- Ohne `FIGMA_TOKEN` wird **mit Meldung** übersprungen, nie still.
+- Komponenten ohne `figma`-Feld (z. B. `accordion`, das es in Figma nicht gibt)
+  sind „nicht prüfbar" — kein Fehler.
+- Maße mit `herkunft: abgeleitet | geschätzt` werden **nicht** verglichen: sie
+  sagen selbst, dass sie nicht aus Figma stammen. Wer einen Wert aus der
+  `pattern.css` statt aus Figma nimmt, markiert ihn also korrekt — und der Check
+  hört auf, ihn zu bemängeln. Das ist Absicht, kein Schlupfloch.
+- Varianten-Achsen, Tokens und Namen prüft er bewusst nicht (Begründung im
+  Kopfkommentar des Checks).
+
+Nicht im PR-Gate; nächtlich in `.github/workflows/figma-drift.yml`.
+
+### 3e · Wenn Figma und Auslieferung sich widersprechen (`overrides`)
+
+Der häufigste Fall, den beide Checks gemeinsam sichtbar machen: Figma sagt X, die
+Produktion liefert Y — und Y ist richtig. Dann wird **nicht** ins `model.json`
+hineinkorrigiert (das ist die Figma-Ebene und soll sie bleiben), sondern in der
+Redaktionsdatei begründet widersprochen:
+
+```jsonc
+// apps/docs/content/components/text-button.json
+"overrides": {
+  "masse.hoehe.px": {
+    "wert": "34",
+    "grund": "Der Figma-Node hat Padding 0 und misst nur die Zeilenhöhe des Labels (18). Die ausgelieferte Komponente trägt Padding 8 aus der pattern.css — auf zeit.de messen alle Basis-Instanzen 34.",
+    "belegt": "produktion",
+    "maschinenwert": "18"
+  }
+}
+```
+
+Danach stimmt beides: `check-figma-drift` vergleicht das **Modell** (18) mit Figma
+(18) → grün. `check-prod-drift` vergleicht den **angezeigten** Wert (34, nach
+Override) mit der Produktion (34) → grün. Und `check-content` bewacht den
+`maschinenwert`: ändert Figma die 18 auf 20, meldet das Gate, dass die Entscheidung
+neu zu prüfen ist.
+
+Regeln (erzwungen von `content.schema.json` + `content-validation.mjs`):
+
+- Der Schlüssel ist ein **Punkt-Pfad auf einen Einzelwert** eines Klasse-①-Felds
+  (`masse.hoehe.px`, nicht `masse`).
+- `grund` ist **Pflicht** — ohne Begründung ist es ein stiller Override mit
+  Extraschritt.
+- `maschinenwert` ist **Pflicht** — ohne ihn ist der Override eine Einbahnstraße.
+- `belegt` ∈ `produktion` | `figma` | `entscheidung`.
+- Ein Override kann **keine Struktur erfinden**: zeigt der Pfad ins Leere, meldet
+  das der Check, und der Merge lässt den Wert unangetastet.
+
+Im CMS (`/admin/product/components/<kebab>`) legt „Widersprechen" neben dem Maß den
+Eintrag an, schreibt `maschinenwert` selbst mit und sperrt das Speichern, solange
+die Begründung fehlt.
+
 ## 4 · Exporter laufen lassen
 
 ```bash

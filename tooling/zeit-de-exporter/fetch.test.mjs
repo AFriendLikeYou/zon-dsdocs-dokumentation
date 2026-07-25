@@ -160,6 +160,16 @@ describe('parseTarget', () => {
 			nodeId: '215:16'
 		});
 	});
+	it('bevorzugt focus-id — sie meint das Component-Set, node-id die Seite drumherum', () => {
+		// Realer Link aus text-button/model.json: node-id=215-16 ist die Section
+		// „Buttons & Links", 1429-3708 das Set. Wer node-id nimmt, misst einen Frame
+		// ohne Varianten (und bekommt NaN statt Maßen).
+		expect(
+			parseTarget(
+				'https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/ZDS?node-id=215-16&focus-id=1429-3708'
+			)
+		).toEqual({ fileKey: 'noSbKhOFRaqQh8eyCEqgim', nodeId: '1429:3708' });
+	});
 });
 
 describe('rgbaToHex', () => {

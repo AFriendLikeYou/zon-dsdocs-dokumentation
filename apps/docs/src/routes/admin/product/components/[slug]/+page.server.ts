@@ -49,7 +49,12 @@ const EDITABLE = [
 	'codeSvelte',
 	'repoCodeSvelte',
 	'codeNote',
-	'repoNote'
+	'repoNote',
+	// Begründete Widersprüche gegen Maschinenwerte (PR 7, MIGRATIONSPLAN §2.3).
+	// Kein Spec-Feld, sondern eine Aussage ÜBER eines: Pfad → { wert, grund,
+	// belegt, maschinenwert }. Die Pflichtfelder erzwingt validateContentRaw
+	// unten — derselbe Kern wie im check-content-Gate.
+	'overrides'
 ] as const;
 
 /** Existiert der Paket-Ordner mit model.json? (Existenz-Check + Traversal-Schutz.) */

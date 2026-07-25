@@ -1,0 +1,86 @@
+# Figma-Drift — „Modell vs. Figma"
+#
+# Der Zwilling von prod-drift.yml, auf der anderen Seite der Kette:
+#
+#     Figma  ──►  Komponente  ──►  Produktion
+#            ▲                ▲
+#     dieser Job          prod-drift.yml
+#
+# BEWUSST NICHT IM PR-GATE (.github/workflows/ci.yml). Der Job hängt an der
+# Figma-API und einem Token: eine Figma-Störung, ein abgelaufenes Token oder ein
+# Rate-Limit darf niemals einen Merge blockieren. Deshalb ein eigener,
+# nächtlicher `schedule`-Job — `npm run check` bleibt offline und tokenfrei.
+#
+# Exit-Semantik von tooling/check-figma-drift.mjs (mit --strict):
+#   A) Abweichung        → Exit 1  (Modell und Figma sind auseinandergelaufen)
+#   B) Referenz veraltet → Exit 1  (der `figma`-Link zeigt ins Leere)
+#   ·) Übersprungen      → Exit 0  (kein Token, HTTP 401/403/429/5xx, Netzfehler)
+#
+# WARN-MODUS (kein --strict), bis die Alt-Befunde bereinigt sind — dieselbe
+# Ratsche wie bei check-doc-coverage (CLAUDE.md: „Neue Checks starten im
+# Warn-Modus und werden scharf geschaltet, sobald ihr Befund 0 ist"). Stand
+# PR 7 meldet der Check drei echte Abweichungen, die eine menschliche
+# Entscheidung brauchen (model.json nachziehen ODER begründeten Override
+# eintragen), keine Automatik:
+#   · button          · masse.padding — Modell 10 · 16, Figma 0 · 16
+#   · hero            · masse.breite  — Modell 1000, Figma 375 (Mobil-Variante)
+#   · standard-teaser · masse.breite  — Modell 892, Figma 343 (dito)
+# Sind sie entschieden, hier `--strict` ergänzen.
+#
+# OHNE SECRET überspringt der Check sauber MIT MELDUNG (nicht still) und bleibt
+# grün — der Job meldet dann ausdrücklich, dass er nichts geprüft hat.
+name: Figma-Drift (ZDS)
+
+on:
+  schedule:
+    # 04:23 UTC — nach dem Prod-Drift-Lauf (03:17) und wieder auf einer krummen
+    # Minute: die vollen Stunden sind bei GitHub am stärksten belegt.
+    - cron: '23 4 * * *'
+  # Für manuelles Nachprüfen nach einer Figma-Änderung.
+  workflow_dispatch:
+
+concurrency:
+  group: figma-drift
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    # Fremde API — ein Hänger soll nicht eine Stunde Runner verbrennen.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Figma-Drift prüfen
+        env:
+          # Persönliches Access-Token mit Scope „File content: read".
+          # Fehlt das Secret, überspringt der Check mit Meldung (Exit 0).
+          FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+        run: |
+          node tooling/check-figma-drift.mjs \
+            --json figma-drift.json \
+            --summary figma-drift.md
+
+      # `always()`: Gerade der Lauf MIT Befunden ist der, dessen Bericht man sehen will.
+      - name: Job-Summary schreiben
+        if: always()
+        run: cat figma-drift.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Bericht als Artefakt sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: figma-drift
+          path: |
+            figma-drift.json
+            figma-drift.md
+          retention-days: 30
+          if-no-files-found: warn

@@ -15,10 +15,13 @@ kategorie: Aktionen
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
+	import { mergeSpec } from '$lib/spec';
 	import content from '$content/components/button.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
-	const spec = { ...generated, ...content };
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
+	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
+	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
+	const spec = mergeSpec(generated, content);
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-button"},{"nr":2,"side":"top","x":50}];
 	const playgroundControls = [{"key":"variant","label":"Variant","type":"select","default":"primary","options":[{"value":"default","label":"Default"},{"value":"primary","label":"Primary","cssClass":"z-button--primary"},{"value":"zplus","label":"Z+","cssClass":"z-button--zplus"}]},{"key":"fullwidth","label":"Fullwidth","type":"toggle","cssClass":"z-button--fullwidth"},{"key":"disabled","label":"Disabled","type":"attr","attr":"disabled"}] as PlaygroundControl[];
 	const playgroundTemplate = `<button type="submit" class="z-button{classes}"{attrs}>Click me</button>`;
@@ -220,7 +223,7 @@ kategorie: Aktionen
 
 {#snippet specsTab()}
 	<h2>Maße</h2>
-	<MeasureTable masse={spec.masse} />
+	<MeasureTable masse={spec.masse} overrides={spec.overrides} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />

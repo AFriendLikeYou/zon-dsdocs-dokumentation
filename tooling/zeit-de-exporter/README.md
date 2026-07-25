@@ -32,7 +32,16 @@ Routenordner enthält damit ausschließlich Generat.
 
 `<kebab>` = kebab-case von `name` (z. B. `Date Picker` → `date-picker`). Die `.svx`
 holt die Redaktion über den Alias `$content` (`import content from '$content/components/<kebab>.json'`)
-und führt zur Laufzeit `{ ...generated, ...content }` zusammen — **die Redaktion gewinnt**.
+und führt zur Laufzeit `mergeSpec(generated, content)` zusammen (`$lib/spec`):
+
+- **Klasse ② (Mensch)** — `zweck`, `doDont`, `a11y`, `beispiele` … : Redaktion gewinnt.
+- **Klasse ① (Maschine)** — `masse`, `tokens`, `varianten` … : gewinnt IMMER, außer es
+  gibt einen begründeten `overrides`-Eintrag (s. u.).
+- **Klasse ③ (Stamm)** — `name`, `figma`, `code` … : gar nicht überschreibbar.
+
+Die Klassen stehen in [`feldklassen.mjs`](feldklassen.mjs) und im Schema unter
+`x-feldklassen`; was in der Redaktionsdatei stehen darf, erzwingt
+[`content.schema.json`](content.schema.json).
 
 Aufruf mit dem PAKET-Ordner (dort liegt das Modell):
 
@@ -53,6 +62,27 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
   Katalog generiert (ADR-025); ein neues `model.json` erscheint automatisch. Reihenfolge
   und Badge stehen im `katalog`-Block **desselben `model.json`** (`order`, `badge`,
   `badgeVariant`, `exclude`) — die frühere Override-Map in der Doku-App ist entfallen.
+- **Ein Maschinenwert stimmt nicht** (Figma misst etwas anderes als die Auslieferung)
+  → **nicht** ins `model.json` hineinkorrigieren, sondern in der Redaktionsdatei
+  **begründet bestreiten**:
+
+  ```jsonc
+  "overrides": {
+    "masse.hoehe.px": {
+      "wert": "34",                                  // was stattdessen gilt
+      "grund": "Figma misst die Zeilenhöhe ohne Padding; live gemessen 34.",
+      "belegt": "produktion",                        // produktion | figma | entscheidung
+      "maschinenwert": "18"                          // wogegen entschieden wurde
+    }
+  }
+  ```
+
+  Der Schlüssel ist der Punkt-Pfad ins Modell und muss auf einen EINZELWERT eines
+  Klasse-①-Felds zeigen. `grund` und `maschinenwert` sind Pflicht: Ohne Begründung
+  wäre es ein stiller Override mit Extraschritt, ohne `maschinenwert` eine
+  Einbahnstraße — `check-content` meldet sonst nie, dass sich die Quelle bewegt hat
+  („Override bezog sich auf 18, Quelle sagt jetzt 20"). Im CMS legt „Widersprechen"
+  in der Maschinen-Zone den Eintrag an und schreibt `maschinenwert` selbst mit.
 - **Registry-Artefakte** → `code.artefakte` im `model.json` ist **Pflicht**; einen
   stillen `pattern.css`-Fallback gibt es nicht mehr.
 - **Paket-Barrel** → neuen Slug in `packages/components/src/index.ts` eintragen

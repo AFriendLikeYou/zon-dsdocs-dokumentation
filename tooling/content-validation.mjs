@@ -9,12 +9,25 @@
  * Prüft (Phase 0, kein volles Zod-Mirror):
  *   (b) nur bekannte Editorial-Top-Level-Keys (EDITORIAL_FIELDS),
  *   (c) grobe Typprüfung je Feld (Arrays sind Arrays, Objekte sind Objekte …),
- *   (d) feinere Struktur-Checks für verschachtelte Felder (checkNested).
+ *   (d) feinere Struktur-Checks für verschachtelte Felder (checkNested),
+ *   (e) den `overrides`-Block: Pfad zeigt auf ein MASCHINEN-Feld, `grund` und
+ *       `maschinenwert` sind Pflicht, `belegt` ist eins der drei Belege.
  *
  * Fängt Tippfehler (falscher Key), Fremd-Keys (z. B. versehentlich `render` oder
  * `masse` einredigiert → würde die Maschinen-Werte überschreiben) und grobe
  * Typfehler ab, die ein /admin-CMS oder eine Handänderung einschleusen könnte.
+ *
+ * Der DEKLARATIVE Zwilling ist `zeit-de-exporter/content.schema.json` (ajv, im
+ * Gate über check-content.mjs). Hier bleibt es bewusst handgerollt und
+ * dependency-frei: dieses Modul läuft AUCH im SvelteKit-Serverbundle des
+ * Spec-Editors, und dort wollen wir keinen Schema-Compiler mitschleppen.
+ * `content-validation.test.mjs` hält beide Seiten Key für Key zusammen.
  */
+import {
+	CONTENT_FELDER,
+	OVERRIDE_BELEGE,
+	pfadIstMaschinenfeld
+} from './zeit-de-exporter/feldklassen.mjs';
 
 /** @param {unknown} v @returns {v is string} */
 const isString = (v) => typeof v === 'string';
@@ -24,12 +37,13 @@ const isArray = (v) => Array.isArray(v);
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 /**
- * Bekannte Editorial-Top-Level-Keys + grober Erwartungstyp. Spiegelt EDITORIAL
- * (export.mjs) + version/variantInfo (render-Block) — die einzigen Felder, die der
- * Exporter in den content-Stub schreibt bzw. content beitragen darf.
+ * Grober Erwartungstyp je Klasse-2-Feld. WELCHE Felder das sind, entscheidet
+ * ausschließlich `feldklassen.mjs` (CONTENT_FELDER) — diese Tabelle sagt nur, wie
+ * sie aussehen. Fehlt hier ein Feld (oder steht eines zu viel drin), wirft der
+ * Modul-Load unten laut; still auseinanderlaufen können die beiden nicht.
  * @type {Record<string, { check: (v: unknown) => boolean, typ: string }>}
  */
-export const EDITORIAL_FIELDS = {
+const FELD_TYPEN = {
 	zweck: { check: isString, typ: 'string' },
 	status: { check: isString, typ: 'string' },
 	version: { check: isString, typ: 'string' },
@@ -65,8 +79,36 @@ export const EDITORIAL_FIELDS = {
 	repoNote: { check: isString, typ: 'string' }
 };
 
-/** @type {string[]} */
-export const KNOWN_KEYS = Object.keys(EDITORIAL_FIELDS);
+/**
+ * Bekannte Editorial-Top-Level-Keys + Erwartungstyp — ABGELEITET aus den
+ * Feldklassen, nicht danebengeschrieben. Wer in feldklassen.mjs ein Klasse-2-Feld
+ * ergänzt und hier den Typ vergisst, bekommt sofort einen Fehler statt eines
+ * stillschweigend durchgewinkten Felds.
+ * @type {Record<string, { check: (v: unknown) => boolean, typ: string }>}
+ */
+export const EDITORIAL_FIELDS = Object.fromEntries(
+	CONTENT_FELDER.map((key) => {
+		const typ = FELD_TYPEN[key];
+		if (!typ)
+			throw new Error(
+				`content-validation: Klasse-2-Feld „${key}" (feldklassen.mjs) hat hier keinen Erwartungstyp.`
+			);
+		return [key, typ];
+	})
+);
+for (const key of Object.keys(FELD_TYPEN))
+	if (!CONTENT_FELDER.includes(key))
+		throw new Error(
+			`content-validation: Typ für „${key}" definiert, aber das Feld steht in keiner Feldklasse (feldklassen.mjs).`
+		);
+
+/**
+ * Alle in content.json erlaubten Top-Level-Keys: die Klasse-2-Felder plus den
+ * `overrides`-Block. `overrides` ist KEIN Spec-Feld (es beschreibt Widersprüche
+ * gegen Maschinen-Felder) und steht deshalb neben EDITORIAL_FIELDS, nicht darin.
+ * @type {string[]}
+ */
+export const KNOWN_KEYS = [...Object.keys(EDITORIAL_FIELDS), 'overrides'];
 
 /**
  * Feinere Prüfungen für verschachtelte Strukturen (nur grob — Phase 0).
@@ -215,6 +257,59 @@ export function checkNested(key, value) {
 }
 
 /**
+ * Der `overrides`-Block: begründeter Widerspruch gegen einen MASCHINEN-Wert.
+ *
+ * Warum so streng: ein Override ist die einzige Stelle, an der ein Mensch einen
+ * Figma-/Mess-Wert kippen darf. Ohne `grund` wäre das ein stiller Override mit
+ * Extraschritt, ohne `maschinenwert` eine Einbahnstraße — niemand könnte später
+ * feststellen, ob sich die Quelle inzwischen bewegt hat.
+ *
+ * @param {Record<string, unknown>} overrides
+ * @returns {string[]}
+ */
+export function checkOverrides(overrides) {
+	/** @type {string[]} */
+	const issues = [];
+	const erlaubteKeys = new Set(['wert', 'grund', 'belegt', 'maschinenwert']);
+	/** @param {unknown} v */
+	const istSkalar = (v) => isString(v) || typeof v === 'number' || typeof v === 'boolean';
+
+	for (const [pfad, eintrag] of Object.entries(overrides)) {
+		const wo = `overrides["${pfad}"]`;
+		if (!isObject(eintrag)) {
+			issues.push(`${wo} muss ein Objekt { wert, grund, belegt, maschinenwert } sein`);
+			continue;
+		}
+		if (!pfadIstMaschinenfeld(pfad))
+			issues.push(
+				`${wo}: „${pfad}" zeigt auf kein Maschinen-Feld — nur Klasse-①-Felder brauchen einen ` +
+					`Override (redaktionelle Felder gewinnen ohnehin direkt)`
+			);
+		else if (!pfad.includes('.'))
+			issues.push(
+				`${wo}: der Pfad muss auf einen EINZELWERT zeigen (z. B. „masse.hoehe.px"), nicht auf ein ganzes Feld`
+			);
+		if (!istSkalar(eintrag.wert))
+			issues.push(`${wo}.wert muss ein String, eine Zahl oder ein Boolean sein`);
+		if (!isString(eintrag.grund) || !eintrag.grund.trim())
+			issues.push(`${wo}.grund fehlt — ein Override ohne Begründung ist ein stiller Override`);
+		if (!isString(eintrag.belegt) || !OVERRIDE_BELEGE.includes(eintrag.belegt))
+			issues.push(`${wo}.belegt muss eines von ${OVERRIDE_BELEGE.join(' | ')} sein`);
+		if (eintrag.maschinenwert === undefined)
+			issues.push(
+				`${wo}.maschinenwert fehlt — ohne den Wert, GEGEN den entschieden wurde, kann kein ` +
+					`Check melden, dass die Quelle sich bewegt hat`
+			);
+		else if (!istSkalar(eintrag.maschinenwert))
+			issues.push(`${wo}.maschinenwert muss ein String, eine Zahl oder ein Boolean sein`);
+		for (const k of Object.keys(eintrag))
+			if (!erlaubteKeys.has(k))
+				issues.push(`${wo}: unbekannter Key „${k}" (erlaubt: ${[...erlaubteKeys].join(', ')})`);
+	}
+	return issues;
+}
+
+/**
  * Reine Validierung eines bereits geparsten content.json-Objekts.
  * @param {unknown} data — geparste content.json.
  * @returns {string[]} Befunde (leer = OK).
@@ -225,7 +320,22 @@ export function checkContentData(data) {
 	const issues = [];
 	for (const [key, value] of Object.entries(data)) {
 		if (!KNOWN_KEYS.includes(key)) {
-			issues.push(`unbekannter Top-Level-Key „${key}" (erlaubt: ${KNOWN_KEYS.join(', ')})`);
+			// Der häufigste echte Fall ist kein Tippfehler, sondern ein einredigiertes
+			// MASCHINEN-Feld — das braucht einen anderen Rat als „Key unbekannt".
+			const rat = pfadIstMaschinenfeld(key)
+				? `„${key}" ist ein Maschinen-Feld (aus Figma/Messung) und gehört ins model.json. ` +
+					`Willst du einem einzelnen Wert widersprechen, nimm den overrides-Block: ` +
+					`"overrides": { "${key}.…": { wert, grund, belegt, maschinenwert } }`
+				: `erlaubt: ${KNOWN_KEYS.join(', ')}`;
+			issues.push(`unbekannter Top-Level-Key „${key}" — ${rat}`);
+			continue;
+		}
+		if (key === 'overrides') {
+			if (!isObject(value)) {
+				issues.push('Feld „overrides" hat falschen Typ (erwartet: objekt (Pfad → Widerspruch))');
+				continue;
+			}
+			issues.push(...checkOverrides(value));
 			continue;
 		}
 		const { check, typ } = EDITORIAL_FIELDS[key];

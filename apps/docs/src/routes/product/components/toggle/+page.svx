@@ -15,10 +15,13 @@ kategorie: Formulare
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
+	import { mergeSpec } from '$lib/spec';
 	import content from '$content/components/toggle.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
-	const spec = { ...generated, ...content };
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
+	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
+	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
+	const spec = mergeSpec(generated, content);
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50,"selector":".z-switch"},{"nr":2,"side":"top","x":70,"selector":".z-switch__thumb"}];
 	const playgroundControls = [{"key":"on","label":"An","type":"toggle","cssClass":"z-switch--on"}] as PlaygroundControl[];
 	const playgroundTemplate = `<button class="z-switch{classes}" type="button" role="switch" aria-checked="false" aria-label="Beispiel-Schalter"><span class="z-switch__thumb"></span></button>`;
@@ -181,7 +184,7 @@ kategorie: Formulare
 
 {#snippet specsTab()}
 	<h2>Maße</h2>
-	<MeasureTable masse={spec.masse} />
+	<MeasureTable masse={spec.masse} overrides={spec.overrides} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />

@@ -15,10 +15,13 @@ kategorie: Medien
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
+	import { mergeSpec } from '$lib/spec';
 	import content from '$content/components/carousel.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
-	const spec = { ...generated, ...content };
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
+	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
+	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
+	const spec = mergeSpec(generated, content);
 	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-carousel__scroll-container"},{"nr":2,"side":"left","y":40,"selector":".z-carousel__slide"},{"nr":3,"side":"bottom","x":40,"selector":".z-carousel__dots-wrapper"},{"nr":4,"side":"right","y":60}];
 	const playgroundControls = [{"key":"viewMode","label":"View Mode","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"variant","label":"Variant","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Overlay-Pfeile","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"noControls","label":"Ohne Controls","type":"toggle","cssClass":"z-carousel--no-controls"}] as PlaygroundControl[];
 	const playgroundTemplate = `<div class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
@@ -417,7 +420,7 @@ kategorie: Medien
 
 {#snippet specsTab()}
 	<h2>Maße</h2>
-	<MeasureTable masse={spec.masse} />
+	<MeasureTable masse={spec.masse} overrides={spec.overrides} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />

@@ -51,8 +51,14 @@ export const ART_LABEL: Record<string, string> = {
 	container: 'Container',
 	structural: 'Struktur'
 };
-// Provenance-Badge: nur Abweichungen markieren (gemessen = Normalfall, kein Badge).
+/**
+ * Provenance-Label eines Werts. Seit PR 7 wird AUCH der Normalfall („gemessen")
+ * ausgeschrieben: vorher hieß „kein Label" implizit „gemessen" — das musste man
+ * wissen. Eine Doku, die zwischen abgelesenem, gerechnetem und geschätztem Wert
+ * unterscheidet, sollte diese Unterscheidung auch zeigen, nicht nur speichern.
+ */
 export const HERKUNFT_LABEL: Record<string, string> = {
+	gemessen: 'gemessen',
 	abgeleitet: '≈ abgeleitet',
 	geschätzt: '≈ geschätzt'
 };

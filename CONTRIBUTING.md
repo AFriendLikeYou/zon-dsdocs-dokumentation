@@ -92,6 +92,12 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
   `a11y`, `doDont`, `verwendung`, …). Diese Datei überschreibt die generierten Defaults und
   wird beim Re-Export **nie** überschrieben.
 - **Nie** `spec.generated.ts` oder `+page.svx` von Hand ändern — die erzeugt der Exporter neu.
+- **Kein Maschinen-Feld einredigieren** (`masse`, `tokens`, `varianten`, `spacing`, …). Das
+  Schema weist es ab. Stimmt ein Maschinenwert nicht, wird ihm im `overrides`-Block
+  **begründet widersprochen** — mit `wert`, `grund` (Pflicht), `belegt` und
+  `maschinenwert` (Pflicht: der Wert, gegen den entschieden wurde). Bewegt sich die Quelle
+  später, meldet `npm run check`, dass die Entscheidung neu zu prüfen ist. Anleitung:
+  `tooling/zeit-de-exporter/IMPORT.md` §3e; im CMS über „Widersprechen" neben dem Wert.
 
 ---
 

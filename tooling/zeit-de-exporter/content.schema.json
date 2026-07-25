@@ -1,0 +1,191 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://zeit.de/ds-doku/content.schema.json",
+	"title": "Component-Redaktion (content.json)",
+	"description": "Die MENSCH-Datei einer Komponente (apps/docs/content/components/<slug>.json). Sie darf ausschließlich Felder der Klasse ② (Mensch allein) tragen — plus den `overrides`-Block, über den ein Maschinenwert BEGRÜNDET bestritten wird. Maschinen-Felder (masse, tokens, varianten …) sind hier verboten: sie stehen im model.json und würden sonst still maskiert. Feldklassen: tooling/zeit-de-exporter/feldklassen.mjs.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"zweck": {
+			"type": "string",
+			"description": "Ein bis zwei Sätze: Wofür ist die Komponente? Erscheint im Hero."
+		},
+		"status": {
+			"type": "string",
+			"description": "Reifegrad — steuert das Badge im Hero (ready_for_dev | completed | changed)."
+		},
+		"version": {
+			"type": "string",
+			"description": "Versions-/Snapshot-Label im Hero, z. B. \"Figma-Node 213:12\"."
+		},
+		"variantInfo": {
+			"type": "object",
+			"description": "Wann welche Variante nutzen (Varianten-Label → Erklärsatz).",
+			"additionalProperties": { "type": "string" }
+		},
+		"callouts": {
+			"type": "array",
+			"description": "Nummerierte Beschriftungen der Anatomie.",
+			"items": {
+				"type": "object",
+				"required": ["nr", "text"],
+				"properties": {
+					"nr": { "type": "number" },
+					"text": { "type": "string" },
+					"art": { "type": "string" },
+					"optionalDurch": { "type": "string" }
+				},
+				"additionalProperties": false
+			}
+		},
+		"a11y": {
+			"type": "array",
+			"description": "Barrierefreiheit-Befunde (Label · Wert · Status).",
+			"items": { "type": "object" }
+		},
+		"tastatur": {
+			"type": "array",
+			"description": "Tastatur-Bedienung: welche Taste löst welche Aktion aus.",
+			"items": {
+				"type": "object",
+				"required": ["taste", "aktion"],
+				"properties": {
+					"taste": { "type": "string" },
+					"aktion": { "type": "string" }
+				},
+				"additionalProperties": false
+			}
+		},
+		"doDont": {
+			"type": "object",
+			"description": "Do & Don't — je eine Liste kurzer Sätze.",
+			"properties": {
+				"do": { "type": "array", "items": { "type": "string" } },
+				"dont": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
+		"faq": {
+			"type": "array",
+			"description": "Restfragen, die die Specs nicht beantworten.",
+			"items": {
+				"type": "object",
+				"required": ["frage", "antwort"],
+				"properties": {
+					"frage": { "type": "string" },
+					"antwort": { "type": "string" }
+				},
+				"additionalProperties": false
+			}
+		},
+		"verwendung": {
+			"type": "object",
+			"description": "Wann verwenden / wann nicht.",
+			"properties": {
+				"nutzen": { "type": "array", "items": { "type": "string" } },
+				"nichtNutzen": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
+		"wording": {
+			"type": "array",
+			"description": "UX-Writing-Regeln (statt `schlecht` besser `gut`).",
+			"items": { "type": "object" }
+		},
+		"komposition": {
+			"type": "array",
+			"description": "Kompositions-Hinweise, je Eintrag ein Satz.",
+			"items": { "type": "string" }
+		},
+		"beispiele": {
+			"type": "array",
+			"description": "Benannte Beispiele (Titel, Erklärsatz, Instanzen, abgedeckte Varianten).",
+			"items": {
+				"type": "object",
+				"required": ["titel"],
+				"properties": {
+					"titel": { "type": "string" },
+					"beschreibung": { "type": "string" },
+					"instanzen": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"additionalProperties": { "type": ["string", "boolean"] }
+						}
+					},
+					"abdeckt": { "type": "array", "items": { "type": "string" } }
+				},
+				"additionalProperties": false
+			}
+		},
+		"verwandt": {
+			"type": "array",
+			"description": "Kuratierte Querverweise (Katalog-Slugs).",
+			"items": { "type": "string" }
+		},
+		"tokenHinweise": {
+			"type": "object",
+			"description": "Redaktioneller Hinweis je Token (Token-Name → Freitext).",
+			"additionalProperties": { "type": "string" }
+		},
+		"playground": {
+			"type": "object",
+			"description": "Bühnen-Optionen des Playgrounds.",
+			"properties": {
+				"align": { "enum": ["center", "fill"] },
+				"resizable": { "type": "boolean" }
+			},
+			"additionalProperties": false
+		},
+		"codeBeispiele": {
+			"type": "array",
+			"description": "Redaktionelle Code-Beispiele (Develop-Tab).",
+			"items": {
+				"type": "object",
+				"required": ["label", "code"],
+				"properties": {
+					"label": { "type": "string" },
+					"code": { "type": "string" },
+					"sprache": { "enum": ["svelte", "html", "css", "js"] },
+					"hinweis": { "type": "string" }
+				},
+				"additionalProperties": false
+			}
+		},
+		"codeSvelte": { "type": "string", "description": "Override des maschinellen Svelte-Snippets." },
+		"repoCodeSvelte": { "type": "string", "description": "Override des maschinellen Repo-Snippets." },
+		"codeNote": { "type": "string", "description": "Override der maschinellen Code-Notiz." },
+		"repoNote": { "type": "string", "description": "Override der maschinellen Repo-Notiz." },
+		"overrides": {
+			"type": "object",
+			"description": "BEGRÜNDETE Widersprüche gegen Maschinenwerte (Klasse ①). Schlüssel ist der Punkt-Pfad ins Modell, z. B. \"masse.hoehe.px\". Ohne Eintrag hier ist ein Maschinen-Feld redaktionell unantastbar — genau das verhindert den stillen Override.",
+			"propertyNames": {
+				"pattern": "^(masse|spacing|tokens|farbrollen|varianten|zustaende|produktion|render|katalog)(\\.[A-Za-z0-9_-]+)+$"
+			},
+			"additionalProperties": {
+				"type": "object",
+				"required": ["wert", "grund", "belegt", "maschinenwert"],
+				"additionalProperties": false,
+				"properties": {
+					"wert": {
+						"type": ["string", "number", "boolean"],
+						"description": "Der Wert, der stattdessen gilt."
+					},
+					"grund": {
+						"type": "string",
+						"minLength": 1,
+						"description": "PFLICHT. Warum widersprechen wir? Ein Override ohne Begründung ist ein stiller Override mit Extraschritt."
+					},
+					"belegt": {
+						"enum": ["produktion", "figma", "entscheidung"],
+						"description": "Womit ist der abweichende Wert gedeckt: gemessen in der Produktion, in Figma belegt, oder eine bewusste Entscheidung."
+					},
+					"maschinenwert": {
+						"type": ["string", "number", "boolean"],
+						"description": "PFLICHT: der Wert, GEGEN den entschieden wurde. Ändert die Quelle ihn später, meldet check-content „Override bezog sich auf X, Quelle sagt jetzt Y\" — ohne diesen Vermerk wäre ein Override eine stille Einbahnstraße."
+					}
+				}
+			}
+		}
+	}
+}

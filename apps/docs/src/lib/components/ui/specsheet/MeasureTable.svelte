@@ -5,44 +5,63 @@
   Struktur + Semantik, die öffentliche Maß-Optik (durchgezogene Trenner, Label links
   gedämpft, Mono-Wert rechts mit Token-/Herkunfts-Zeile) bringt die Skin-Klasse hier
   ein. Name + API unverändert — die generierten .svx importieren `MeasureTable` weiter.
+
+  HERKUNFT & WIDERSPRUCH (PR 7): Jede Zeile sagt jetzt, WOHER ihr Wert kommt.
+  Vorher stand das nur im Modell (`herkunft`) bzw. gar nirgends, und „kein Label"
+  hieß stillschweigend „gemessen" — das musste man wissen. Trägt content.json einen
+  begründeten `overrides`-Eintrag für dieses Maß, ersetzt der Widerspruch die
+  Herkunfts-Zeile: der angezeigte Wert stammt dann NICHT aus Figma, und ihn weiter
+  als Messwert auszugeben wäre falsch. Begründung und überstimmter Maschinenwert
+  hängen am `title`.
 -->
 <script lang="ts">
-	import type { Masse, MasseValue } from '$types/spec';
+	import type { Masse, MasseValue, Overrides } from '$types/spec';
 	import { Chip } from '$components/ui/chip';
+	import { Badge } from '$components/ui/badge';
 	import { Table } from '$components/ui/table';
+	import { HERKUNFT_LABEL } from './anatomy-measure';
 	let {
-		masse = null
+		masse = null,
+		overrides
 	}: {
 		/** Maße (Höhe/Breite/Padding/Radius) als Spec-Zeilen; null blendet die Tabelle aus. */
 		masse?: Masse | null;
+		/** Begründete Widersprüche aus content.json (Pfad → Override), bereits angewendet. */
+		overrides?: Overrides;
 	} = $props();
 
 	// Werte können string (nur px) ODER { px, token, herkunft } sein → beides unterstützen.
 	const px = (m?: MasseValue) => (m == null ? '' : typeof m === 'string' ? m : m.px);
 	const tok = (m?: MasseValue) => (m && typeof m !== 'string' ? m.token : undefined);
-	// Provenance-Badge nur bei Abweichung (gemessen = Normalfall, kein Badge).
-	const HERKUNFT_LABEL: Record<string, string> = {
-		abgeleitet: '≈ abgeleitet',
-		geschätzt: '≈ geschätzt'
-	};
+	// Fehlt `herkunft`, gilt laut Modell-Konvention der Normalfall „gemessen"
+	// (siehe $types/spec) — dieselbe Annahme wie im Spec-Editor.
 	const herk = (m?: MasseValue) =>
-		m && typeof m !== 'string' && m.herkunft ? HERKUNFT_LABEL[m.herkunft] : undefined;
+		HERKUNFT_LABEL[(m && typeof m !== 'string' && m.herkunft) || 'gemessen'];
+
+	const BELEG_LABEL: Record<string, string> = {
+		produktion: 'in der Produktion belegt',
+		figma: 'in Figma belegt',
+		entscheidung: 'bewusst gesetzt'
+	};
 
 	// Eine Zeile je vorhandenem Maß — Padding trägt seine Einheit selbst im Wert.
 	const rows = $derived(
 		masse
 			? (
 					[
-						{ label: 'Höhe', value: masse.hoehe, unit: ' px' },
-						{ label: 'Breite', value: masse.breite, unit: ' px' },
-						{ label: 'Padding', value: masse.padding, unit: '' },
-						{ label: 'Radius', value: masse.radius, unit: ' px' }
+						{ label: 'Höhe', key: 'hoehe', value: masse.hoehe, unit: ' px' },
+						{ label: 'Breite', key: 'breite', value: masse.breite, unit: ' px' },
+						{ label: 'Padding', key: 'padding', value: masse.padding, unit: '' },
+						{ label: 'Radius', key: 'radius', value: masse.radius, unit: ' px' }
 					] as const
 				).filter((r) => r.value)
 			: []
 	);
 
 	type MeasureRow = (typeof rows)[number];
+
+	/** Der Widerspruch zu diesem Maß — adressiert wie im Modell: `masse.<key>.px`. */
+	const ov = (row: MeasureRow) => overrides?.[`masse.${row.key}.px`];
 
 	const columns = [
 		{ key: 'label', render: labelCell },
@@ -51,9 +70,14 @@
 </script>
 
 {#snippet labelCell(row: MeasureRow)}{row.label}{/snippet}
-{#snippet valueCell(row: MeasureRow)}{px(row.value)}{row.unit}{#if herk(row.value)}<span
-			class="measure-table__provenance">{herk(row.value)}</span
-		>{/if}{#if tok(row.value)}<span class="measure-table__token"
+{#snippet valueCell(row: MeasureRow)}{@const widerspruch = ov(row)}{px(row.value)}{row.unit}<span
+		class="measure-table__provenance"
+		>{#if widerspruch}<Badge
+				tone="editorial"
+				title="{widerspruch.grund} (Figma/Modell sagt: {widerspruch.maschinenwert})"
+				>{BELEG_LABEL[widerspruch.belegt] ?? 'redaktionell belegt'}</Badge
+			>{:else}{herk(row.value)}{/if}</span
+	>{#if tok(row.value)}<span class="measure-table__token"
 			><Chip value={tok(row.value)!} /></span
 		>{/if}{/snippet}
 
@@ -87,7 +111,8 @@
 		color: var(--ds-text-muted);
 		font-size: var(--ds-text-xs);
 	}
-	/* Provenance-Badge (nur bei Abweichung: ≈ abgeleitet / ≈ geschätzt). */
+	/* Herkunfts-Zeile (gemessen / ≈ abgeleitet / ≈ geschätzt) bzw. — bei einem
+	   begründeten Widerspruch — das Beleg-Badge an seiner Stelle. */
 	.measure-table-skin :global(.measure-table__provenance) {
 		display: block;
 		color: var(--ds-text-faint);

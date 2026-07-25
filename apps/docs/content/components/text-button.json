@@ -91,5 +91,13 @@
 			"text": "Label — Tablet Gothic 14 (Large 16), Regular oder Bold; optionale Icon-Slots links (Leading) und rechts (Trailing), Gap 4.",
 			"art": "text"
 		}
-	]
+	],
+	"overrides": {
+		"masse.hoehe.px": {
+			"wert": "34",
+			"grund": "Der Figma-Node hat Padding 0 und misst damit nur die Zeilenhöhe des Labels (18). Die ausgelieferte Komponente trägt Padding 8 aus der pattern.css — auf zeit.de/index messen alle Basis-Instanzen 34 (siehe produktion.referenzen).",
+			"belegt": "produktion",
+			"maschinenwert": "18"
+		}
+	}
 }

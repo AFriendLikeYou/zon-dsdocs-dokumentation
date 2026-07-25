@@ -15,10 +15,13 @@ kategorie: Formulare
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
+	import { mergeSpec } from '$lib/spec';
 	import content from '$content/components/input.json';
 	import type { ComponentSpec } from '$types/spec';
-	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
-	const spec = { ...generated, ...content };
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
+	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
+	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
+	const spec = mergeSpec(generated, content);
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-input"},{"nr":2,"side":"top","x":40,"selector":".z-input__field"},{"nr":3,"side":"right","y":50}];
 	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"active","label":"Active","cssClass":"z-input--active"},{"value":"filled","label":"Filled","cssClass":"z-input--filled"},{"value":"error","label":"Error","cssClass":"z-input--error"},{"value":"disabled","label":"Disabled","cssClass":"z-input--disabled"}]},{"key":"lead","label":"Leading Icon","type":"toggle","cssClass":"z-input--lead"},{"key":"dropdown","label":"Dropdown","type":"toggle","cssClass":"z-input--dropdown"}] as PlaygroundControl[];
 	const playgroundTemplate = `<div class="z-input{classes}">
@@ -227,7 +230,7 @@ kategorie: Formulare
 
 {#snippet specsTab()}
 	<h2>Maße</h2>
-	<MeasureTable masse={spec.masse} />
+	<MeasureTable masse={spec.masse} overrides={spec.overrides} />
 
 	<h2>Farbrollen</h2>
 	<ColorRoleTable farbrollen={spec.farbrollen} />

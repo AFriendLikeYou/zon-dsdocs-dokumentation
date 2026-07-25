@@ -185,12 +185,21 @@ const round = (n) => Math.round(Number(n) * 100) / 100;
 
 /* ── Ziel-Parsing (URL oder fileKey:nodeId) ───────────────────────────────── */
 
-/** '…figma.com/design/<key>/…?node-id=215-16' | '<key>:215:16' → { fileKey, nodeId }. */
+/**
+ * '…figma.com/design/<key>/…?node-id=215-16' | '<key>:215:16' → { fileKey, nodeId }.
+ *
+ * **`focus-id` schlägt `node-id`.** Die Doku-Links tragen oft beides — und dann meint
+ * `node-id` die umgebende SEITE/Section („Buttons & Links"), `focus-id` das gemeinte
+ * Component-Set. Wer nur `node-id` liest, holt sich einen Frame ohne Varianten und
+ * bekommt Maße wie `NaN`; belegt an allen acht Modellen mit beiden Parametern, deren
+ * committete `figma-raw.json` durchweg die `focus-id` als `set.id` führt.
+ */
 export function parseTarget(input) {
 	if (!input) throw new Error('Kein Ziel angegeben.');
 	if (/figma\.com/.test(input)) {
 		const key = input.match(/\/(?:design|file)\/([A-Za-z0-9]+)/)?.[1];
-		const nodeRaw = input.match(/[?&]node-id=([^&]+)/)?.[1];
+		const nodeRaw =
+			input.match(/[?&]focus-id=([^&]+)/)?.[1] ?? input.match(/[?&]node-id=([^&]+)/)?.[1];
 		if (!key || !nodeRaw) throw new Error(`Figma-URL ohne fileKey/node-id: ${input}`);
 		return { fileKey: key, nodeId: decodeURIComponent(nodeRaw).replace(/-/g, ':') };
 	}
@@ -220,7 +229,7 @@ async function figmaGet(url, token) {
 }
 
 /** Variablen id→name laden; degradiert bei fehlendem Enterprise-Zugriff auf null. */
-async function fetchVariableNames(fileKey, token) {
+export async function fetchVariableNames(fileKey, token) {
 	const { ok, status, json } = await figmaGet(
 		`https://api.figma.com/v1/files/${fileKey}/variables/local`,
 		token
@@ -235,16 +244,29 @@ async function fetchVariableNames(fileKey, token) {
  * Ziel-Node holen und ggf. zum Component-Set auflösen: eine INSTANCE folgt
  * componentId → componentSetId; eine COMPONENT ihrem componentSetId; ein
  * COMPONENT_SET wird direkt genutzt. Rückgabe: das aufgelöste Dokument.
+ *
+ * Geworfene Fehler tragen `.status` (HTTP-Code bzw. 404, wenn der Node fehlt).
+ * `check-figma-drift` unterscheidet daran „der Zeiger ist veraltet" (404) von
+ * „Umweltproblem" (401/403/429/5xx, Netzfehler) — das eine ist ein Befund über
+ * unsere Doku, das andere nicht.
  */
-async function fetchResolvedDocument(fileKey, nodeId, token) {
+export async function fetchResolvedDocument(fileKey, nodeId, token) {
 	const grab = async (id) => {
 		const { ok, status, json } = await figmaGet(
 			`https://api.figma.com/v1/files/${fileKey}/nodes?ids=${encodeURIComponent(id)}`,
 			token
 		);
-		if (!ok) throw new Error(`Figma /nodes HTTP ${status} für ${id}`);
+		if (!ok) {
+			const err = new Error(`Figma /nodes HTTP ${status} für ${id}`);
+			err.status = status;
+			throw err;
+		}
 		const entry = json.nodes?.[id];
-		if (!entry) throw new Error(`Node ${id} nicht in der Antwort (falsche fileKey/nodeId?).`);
+		if (!entry) {
+			const err = new Error(`Node ${id} nicht in der Antwort (falsche fileKey/nodeId?).`);
+			err.status = 404;
+			throw err;
+		}
 		return entry;
 	};
 

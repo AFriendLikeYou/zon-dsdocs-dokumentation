@@ -60,8 +60,9 @@ packages/                       Workspace-Pakete (@zeit/*) — der Inhalt, den w
 tooling/                        Generatoren (gen-icons, gen-brand-assets), Spiegel-Skripte
                                 (sync-icons, sync-zds), Drift-Checks
                                 (check-nav, check-tokens, check-assets, check-component-drift,
-                                check-zds-sync), check-prod-drift (Doku ↔ zeit.de, nächtlich,
-                                nicht im Gate), zeit-de-exporter/ (model.json → Component-Seite,
+                                check-zds-sync), check-prod-drift (Doku ↔ zeit.de) und
+                                check-figma-drift (Modell ↔ Figma) — beide nächtlich, nicht
+                                im Gate; zeit-de-exporter/ (model.json → Component-Seite,
                                 export:all, figma-measure.js)
 ```
 
@@ -92,13 +93,25 @@ npm test                   # Vitest (Testing Library)
 npm run gen:assets         # Icon-/Brand-Logo-Registries neu generieren
 npm run copy:icons         # Icons aus @zeitonline/icons ziehen (+ Registry-Regen)
 npm run check:prod-drift   # Doku ↔ Produktion (zeit.de) — braucht Netz, NICHT im Gate
+npm run check:figma-drift  # Modell ↔ Figma — braucht FIGMA_TOKEN, NICHT im Gate
 ```
 
-`check:prod-drift` misst mit Playwright die gerenderten Maße echter
-zeit.de-Instanzen gegen die `masse`-Angaben der Doku. Er läuft bewusst **nicht**
-in `npm run check` (fremde Seite, Netz) sondern nächtlich in
-`.github/workflows/prod-drift.yml`. Fundstellen pflegt der optionale
-`produktion`-Block im `model.json` — siehe `tooling/zeit-de-exporter/IMPORT.md`.
+Die beiden Drift-Checks nach außen stehen an den Enden der Kette
+`Figma → Komponente → Produktion` und laufen bewusst **nicht** in `npm run check`
+(fremde Quellen, Netz), sondern nächtlich:
+
+- `check:prod-drift` misst mit Playwright die gerenderten Maße echter
+  zeit.de-Instanzen gegen die `masse`-Angaben der Doku (nach Anwendung der
+  Overrides — verglichen wird, was die Seite zeigt). Fundstellen pflegt der
+  optionale `produktion`-Block im `model.json`. Job:
+  `.github/workflows/prod-drift.yml`.
+- `check:figma-drift` holt den Figma-Node (Token aus `FIGMA_TOKEN`) und hält
+  `masse` gegen dieselbe Ableitung, die auch ein Re-Import nähme. **Schreibt
+  nichts** — Figma schlägt vor, ein Mensch nimmt an. Ohne Token: sauberer Skip
+  **mit Meldung**; `--fixture` vergleicht offline gegen die committete
+  `figma-raw.json`. Job: `.github/workflows/figma-drift.yml`.
+
+Details zu beiden: `tooling/zeit-de-exporter/IMPORT.md`.
 
 Voraussetzung: `.env` mit `USERS` (JSON-Array, gitignored) — die ganze Site liegt hinter Basic Auth.
 

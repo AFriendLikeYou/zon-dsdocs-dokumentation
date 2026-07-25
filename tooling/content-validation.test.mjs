@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { checkContentData, validateContentRaw, KNOWN_KEYS } from './content-validation.mjs';
+import {
+	validateContentSchema,
+	CONTENT_SCHEMA_KEYS
+} from './zeit-de-exporter/schema-validate.mjs';
+import { CONTENT_FELDER } from './zeit-de-exporter/feldklassen.mjs';
 
 // Geteilter Validierungs-Kern der content.json — dieselbe Logik prüft im
 // check-content-Gate UND im Spec-Editor-Save. Hier fs-frei getestet.
@@ -198,5 +203,84 @@ describe('content-validation · validateContentRaw', () => {
 	it('kaputtes JSON → Befund', () => {
 		const issues = validateContentRaw('{ nicht valid ');
 		expect(issues[0]).toContain('kein valides JSON');
+	});
+});
+
+// ── overrides: der einzige erlaubte Weg, einem Maschinenwert zu widersprechen ──
+describe('content-validation · overrides', () => {
+	const gueltig = {
+		wert: '34',
+		grund: 'Figma misst die Zeilenhöhe ohne Padding; live gemessen 34.',
+		belegt: 'produktion',
+		maschinenwert: '18'
+	};
+
+	it('vollständiger Widerspruch → keine Befunde', () => {
+		expect(checkContentData({ overrides: { 'masse.hoehe.px': gueltig } })).toEqual([]);
+	});
+
+	it('ohne Begründung → Befund (ein stiller Override mit Extraschritt)', () => {
+		const { grund: _weg, ...ohne } = gueltig;
+		const issues = checkContentData({ overrides: { 'masse.hoehe.px': ohne } });
+		expect(issues.some((i) => i.includes('.grund fehlt'))).toBe(true);
+	});
+
+	it('ohne maschinenwert → Befund (sonst ist der Override eine Einbahnstraße)', () => {
+		const { maschinenwert: _weg, ...ohne } = gueltig;
+		const issues = checkContentData({ overrides: { 'masse.hoehe.px': ohne } });
+		expect(issues.some((i) => i.includes('.maschinenwert fehlt'))).toBe(true);
+	});
+
+	it('unbekannter Beleg → Befund', () => {
+		const issues = checkContentData({
+			overrides: { 'masse.hoehe.px': { ...gueltig, belegt: 'bauchgefühl' } }
+		});
+		expect(issues.some((i) => i.includes('.belegt'))).toBe(true);
+	});
+
+	it('Pfad auf ein redaktionelles Feld → Befund (dort gewinnt content ohnehin)', () => {
+		const issues = checkContentData({ overrides: { 'doDont.do': gueltig } });
+		expect(issues.some((i) => i.includes('kein Maschinen-Feld'))).toBe(true);
+	});
+
+	it('Pfad auf ein ganzes Maschinen-Feld → Befund (Overrides gelten Einzelwerten)', () => {
+		const issues = checkContentData({ overrides: { masse: gueltig } });
+		expect(issues.some((i) => i.includes('EINZELWERT'))).toBe(true);
+	});
+
+	it('Fremdkey im Widerspruch → Befund', () => {
+		const issues = checkContentData({
+			overrides: { 'masse.hoehe.px': { ...gueltig, quelle: 'x' } }
+		});
+		expect(issues.some((i) => i.includes('unbekannter Key'))).toBe(true);
+	});
+
+	it('einredigiertes Maschinen-Feld nennt den overrides-Weg beim Namen', () => {
+		const issues = checkContentData({ masse: { hoehe: { px: '34' } } });
+		expect(issues[0]).toContain('overrides');
+	});
+});
+
+// ── Zwilling: handgerollter Kern ↔ deklaratives content.schema.json ────────────
+// Zwei Fassungen derselben Regel (die eine läuft im App-Bundle ohne ajv, die
+// andere im Gate). Ein Test hält sie zusammen — sonst driften sie still.
+describe('content.schema.json ↔ content-validation.mjs', () => {
+	it('erlaubt exakt dieselben Top-Level-Keys', () => {
+		expect([...CONTENT_SCHEMA_KEYS].sort()).toEqual([...KNOWN_KEYS].sort());
+	});
+
+	it('deckt sich mit den Feldklassen (plus overrides)', () => {
+		expect([...KNOWN_KEYS].sort()).toEqual([...CONTENT_FELDER, 'overrides'].sort());
+	});
+
+	it('weist ein Maschinen-Feld ab — wie der Kern', () => {
+		expect(validateContentSchema({ masse: {} }).length).toBeGreaterThan(0);
+		expect(checkContentData({ masse: {} }).length).toBeGreaterThan(0);
+	});
+
+	it('verlangt grund und maschinenwert — wie der Kern', () => {
+		const ohne = { overrides: { 'masse.hoehe.px': { wert: '34', belegt: 'produktion' } } };
+		expect(validateContentSchema(ohne).length).toBeGreaterThan(0);
+		expect(checkContentData(ohne).length).toBeGreaterThan(0);
 	});
 });

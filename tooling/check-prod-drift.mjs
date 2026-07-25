@@ -11,6 +11,8 @@
  * WAS ER PRÜFT: gerenderte Werte. Playwright lädt eine echte zeit.de-Seite, sucht
  * das Element per Selektor und liest die BERECHNETEN Maße (getBoundingClientRect +
  * getComputedStyle) genau der Eigenschaften, die wir unter `masse` behaupten.
+ * Verglichen wird der ANGEZEIGTE Wert, also `masse` NACH Anwendung der begründeten
+ * content.json-Overrides (PR 7) — die Doku behauptet, was auf der Seite steht.
  *
  * WAS ER BEWUSST NICHT PRÜFT: CSS-Quelltext-Gleichheit. Produktions-CSS ist
  * minifiziert, gebündelt, umsortiert und teils tree-shaken — ein Text-Diff gegen
@@ -43,10 +45,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PKG_COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
+import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
+import { setzePfadWert } from './zeit-de-exporter/feldklassen.mjs';
 
 // Der `produktion`-Block steht im model.json — und das liegt seit PR 4 im Paket.
 const componentsDir = PKG_COMPONENTS_DIR;
+// Die Redaktion (mit den begründeten Overrides) liegt seit PR 5 in der App.
+const contentDir = CONTENT_COMPONENTS_DIR;
 
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');
@@ -192,6 +197,32 @@ const kurz = (n) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2
 
 // ── Modelle einlesen ─────────────────────────────────────────────────────────
 
+/**
+ * Begründete Widersprüche aus content.json auf das Modell legen — dieselbe Regel
+ * wie im Laufzeit-Merge der Seite ($lib/spec).
+ *
+ * Warum das hier sein MUSS: Dieser Check fragt „stimmt, was die Doku behauptet?".
+ * Behauptet wird der ANGEZEIGTE Wert, also der gemergte. Beim `text-button` steht
+ * im Modell die Figma-Zeilenhöhe 18, auf der Seite (und in der Produktion) stehen
+ * 34. Ohne die Overrides meldete der Check hier eine Abweichung, die es gar nicht
+ * gibt — und ein Check, der falsch anschlägt, wird ignoriert.
+ */
+function mitOverrides(slug, model) {
+	const datei = path.join(contentDir, `${slug}.json`);
+	if (!model || !fs.existsSync(datei)) return model;
+	let overrides;
+	try {
+		overrides = JSON.parse(fs.readFileSync(datei, 'utf8'))?.overrides;
+	} catch {
+		return model; // kaputte Redaktionsdatei meldet check-content, nicht dieser Check
+	}
+	if (!overrides || typeof overrides !== 'object') return model;
+	const kopie = { ...model };
+	for (const [pfad, ov] of Object.entries(overrides))
+		if (ov && typeof ov === 'object') setzePfadWert(kopie, pfad, ov.wert);
+	return kopie;
+}
+
 function ladeKomponenten() {
 	if (!fs.existsSync(componentsDir)) return [];
 	const slugs = fs
@@ -205,7 +236,7 @@ function ladeKomponenten() {
 		const datei = path.join(componentsDir, slug, 'model.json');
 		if (!fs.existsSync(datei)) continue;
 		try {
-			out.push({ slug, model: JSON.parse(fs.readFileSync(datei, 'utf8')) });
+			out.push({ slug, model: mitOverrides(slug, JSON.parse(fs.readFileSync(datei, 'utf8'))) });
 		} catch {
 			out.push({ slug, model: null });
 		}

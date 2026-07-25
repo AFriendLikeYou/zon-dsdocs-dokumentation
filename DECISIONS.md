@@ -779,6 +779,114 @@ Product-Hrefs zusätzlich aus der neuen JSON.
 
 ---
 
+## ADR-031 — Drei Feldklassen und explizite Overrides statt Shallow-Merge
+
+**Kontext:** Der Merge einer Component-Seite war `{ ...generated, ...content }` —
+**jedes** Feld also stillschweigend überschreibbar. Das ist bequem und genau
+deshalb gefährlich: Ändert Figma einen Wert, den ein Mensch überschrieben hat,
+maskiert der alte Eintrag den neuen **lautlos**. Real passiert beim `text-button`:
+Der Figma-Node hat Padding 0 und misst nur die Zeilenhöhe des Labels (18); jemand
+trug die gemessenen 34 ein — ohne jede Spur, dass hier widersprochen wurde. Zwei
+Jahre später hätte niemand mehr sagen können, ob die 34 ein Messwert, ein Tippfehler
+oder eine Entscheidung sind. `check-content` prüfte nur, ob die Keys BEKANNT sind,
+nicht ob sie dort stehen DÜRFEN.
+
+**Entscheidung:** Jedes Feld des Doku-Modells gehört genau einer Klasse an
+(MIGRATIONSPLAN §2.3), festgeschrieben in `tooling/zeit-de-exporter/feldklassen.mjs`
+und im Schema unter `x-feldklassen`:
+
+- ① **Maschine** (`masse`, `spacing`, `tokens`, `farbrollen`, `varianten`,
+  `zustaende`, `produktion`, `render`, `katalog`) — Redaktion ändert sie nie direkt.
+- ② **Mensch** (`zweck`, `doDont`, `a11y`, `beispiele` … plus die ergänzenden
+  content-Felder) — content.json gewinnt feldweise wie bisher.
+- ③ **Stamm** (`name`, `kategorie`, `figma`, `code`, Daten) — gar nicht
+  überschreibbar: wer den Namen ändert, ändert die Komponente, nicht ihre
+  Beschreibung.
+
+Ein Klasse-①-Wert lässt sich nur noch über einen **expliziten `overrides`-Eintrag**
+kippen, adressiert per Punkt-Pfad (`masse.hoehe.px`) und mit vier Pflichtangaben:
+`wert`, `grund`, `belegt` (`produktion` | `figma` | `entscheidung`) und
+`maschinenwert`.
+
+**`maschinenwert` ist der eigentliche Beschluss.** Er hält fest, GEGEN welchen Wert
+entschieden wurde. Ändert die Quelle ihn später (18 → 20), meldet `check-content`
+im Gate „Override bezog sich auf 18, Quelle sagt jetzt 20 — bitte erneut prüfen".
+Ohne diesen Vermerk wäre ein Override eine Einbahnstraße: Er überschriebe still
+weiter, auch wenn sein Anlass längst entfallen ist. Genau das war der Zustand vorher,
+nur ohne das Wort dafür.
+
+**Eine Regel, alle Konsumenten:** `mergeSpec` ($lib/spec) wird von der generierten
+Seite, `catalog.ts` und `agent-catalog.ts` (MCP + Registry) benutzt. Was ein Agent
+liest, ist exakt das, was ein Mensch sieht — inklusive des `overrides`-Blocks, der
+mitfährt und damit selbst auslesbar ist („dieser Wert ist bestritten, und zwar
+deshalb"). Auch `check-prod-drift` vergleicht seit PR 7 den gemergten Wert: Er fragt
+„stimmt, was die Doku BEHAUPTET?", und behauptet wird der angezeigte Wert.
+
+**Verworfen:** (a) ein Zod-Mirror für content.json — der Validierungs-Kern läuft
+auch im SvelteKit-Serverbundle des Spec-Editors, und dort soll kein Schema-Compiler
+mitfahren; stattdessen zwei Fassungen (handgerollt + `content.schema.json` für das
+Gate), die ein Test Key für Key zusammenhält. (b) Overrides im `model.json` selbst —
+dann läge die Entscheidung wieder in der Datei, die der Exporter überschreibt.
+
+**Sichtbarkeit:** Die `MeasureTable` zeigt jetzt bei JEDEM Maß die Herkunft (auch den
+Normalfall „gemessen" — vorher hieß „kein Label" implizit gemessen, das musste man
+wissen) und ersetzt sie bei einem Widerspruch durch den Beleg samt Begründung im
+`title`. Im CMS legt „Widersprechen" neben dem Wert den Eintrag an und sperrt das
+Speichern, solange die Begründung fehlt.
+
+**Status:** Aktiv (PR 7). Angewendet auf `text-button`.
+
+---
+
+## ADR-032 — `check-figma-drift` als Zwilling des Produktions-Checks
+
+**Kontext:** Zwischen Figma und Produktion steht seit dem Monorepo-Umbau die
+Komponente (MIGRATIONSPLAN §2.1). Für die eine Seite gab es einen Wächter
+(`check-prod-drift`), für die andere nur den einmaligen Import: `figma-raw.json`
+wurde beim Import geschrieben und danach von niemandem mehr gelesen.
+
+**Entscheidung:** `tooling/check-figma-drift.mjs` holt den Figma-Node über den
+bestehenden REST-Fetch (`fetch.mjs`, Token aus `FIGMA_TOKEN`), leitet mit **derselben**
+deterministischen Funktion wie ein Re-Import (`draft.mjs`) die Maße ab und hält sie
+gegen `model.json`. Er **schreibt nichts** — Figma schlägt vor, ein Mensch nimmt an.
+Kategorien wie beim Prod-Check: A) Abweichung · B) Referenz veraltet (der `figma`-Link
+zeigt ins Leere) · C) nicht prüfbar · ·) übersprungen (nie Exit 1).
+
+**Was er bewusst NICHT prüft**, ist die eigentliche Entwurfsarbeit: Varianten-Achsen,
+Tokens und den Namen. Figmas Achsen und die dokumentierten Web-Varianten sind
+nachweislich verschiedene Systeme (FIGMA-AUDIT §8; der Text Button führt in Figma
+„Size/Weight", im Web „Größe/Betonung"), und `model.name` ist der Anzeigename der
+Doku, nicht der Node-Name — beide Vergleiche produzierten in der Erprobung mehr
+Fehlalarme als Befunde. Ein Check, der ständig falsch anschlägt, wird ignoriert;
+dann ist er schlechter als keiner. Ebenfalls übersprungen: Maße mit
+`herkunft: abgeleitet | geschätzt` — sie sagen selbst, dass sie nicht aus Figma
+stammen. Das macht ehrliche Herkunftsangaben zur Voraussetzung dafür, in Ruhe
+gelassen zu werden.
+
+**Fehlender Token ist ein lauter Skip, kein grünes Häkchen** — Lehre aus
+`check-zds-sync`, das jahrelang still Exit 0 lieferte, wenn seine Datenquelle fehlte.
+Für die Arbeit ohne Netz gibt es `--fixture` (Vergleich gegen die committete
+`figma-raw.json`: „hat sich das MODELL vom letzten Import entfernt?").
+
+**Nebenbefund, gleich mitrepariert:** Der erste Live-Lauf holte für die meisten
+Komponenten einen Frame statt des Component-Sets — `parseTarget` las `node-id`, und
+in unseren Doku-Links meint `node-id` die umgebende Section („Buttons & Links"),
+`focus-id` das gemeinte Set. Belegt an allen acht Modellen mit beiden Parametern:
+ihre committete `figma-raw.json` führt durchweg die `focus-id` als `set.id`.
+`parseTarget` bevorzugt jetzt `focus-id` — das galt vorher auch schon für `fetch.mjs`
+und `import.mjs`, nur hatte es dort niemand bemerkt, weil der Import interaktiv läuft
+und ein leeres Ergebnis auffällt. Seither liefern Live-Lauf und `--fixture` identische
+Befunde: Figma hat sich seit dem letzten Import nicht bewegt.
+
+**Status:** Aktiv, nächtlich (`.github/workflows/figma-drift.yml`), **noch im
+Warn-Modus**: der Check meldet drei echte Alt-Befunde (`button` masse.padding,
+`hero`/`standard-teaser` masse.breite — Figmas Default-Variante ist die
+Mobil-Breite), die eine menschliche Entscheidung brauchen. Scharf schalten
+(`--strict`), sobald sie entschieden sind — dieselbe Ratsche wie bei
+`check-doc-coverage`.
+
+---
+
 ## Workflow-Plan (beschlossen, in Umsetzung)
 
 Ziel: Designer, Entwickler und PMs arbeiten möglichst reibungslos und können
