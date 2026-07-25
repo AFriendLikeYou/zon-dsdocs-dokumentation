@@ -289,17 +289,6 @@ function defaultState(controls: PlaygroundControl[]): PlaygroundState {
 	return s;
 }
 
-/** Handkuratierte statische Previews für Komponenten ohne preview/template
-    (z. B. button-group nutzt eine Specimen.svelte mit Loop/Interaktion). */
-const STATIC_HTML: Record<string, string> = {
-	'button-group':
-		'<ul class="buttongroup">' +
-		'<li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li>' +
-		'<li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li>' +
-		'<li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li>' +
-		'</ul>'
-};
-
 export type CatalogPreview = { html: string; css: string };
 
 /**
@@ -335,15 +324,20 @@ function neutralisiereLinks(html: string): string {
 
 function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | null {
 	const render = model.render ?? {};
-	// 1) Markup: preview > template-Instanziierung > statischer Override.
+	// 1) Markup — ZWEI Wege, beide im Spec der Komponente (MIGRATIONSPLAN §4,
+	//    Ausnahme 1): `render.preview` ist die ausdrücklich kuratierte Standbild-
+	//    Fassung, sonst wird `render.template` mit den Control-Defaults
+	//    instanziiert. Ein dritter Weg — die Handliste STATIC_HTML in dieser Datei —
+	//    ist entfallen: Ihr einziger Eintrag (button-group) war seit dem Einzug von
+	//    `render.preview` unerreichbar und driftete dabei still auseinander (drei
+	//    Segmente hier, vier im Spec). Genau die Divergenz, gegen die der Umbau
+	//    antritt — eine zweite Liste neben dem Spec veraltet, und niemand merkt es.
 	let html = '';
 	if (render.preview) {
 		html = render.preview;
 	} else if (render.template) {
 		const controls = Array.isArray(render.controls) ? render.controls : [];
 		html = instantiate(render.template, controls, defaultState(controls));
-	} else if (STATIC_HTML[slug]) {
-		html = STATIC_HTML[slug];
 	} else {
 		return null; // Keine Vorschau möglich → Karte bleibt textbasiert.
 	}

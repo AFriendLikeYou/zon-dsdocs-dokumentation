@@ -1,0 +1,356 @@
+---
+title: Accordion
+status: ready_for_dev
+aktualisiert_am: 2026-07-25
+kategorie: Inhalte
+---
+
+<!-- AUTOGENERIERT vom zeit-de-Exporter (tooling/zeit-de-exporter) — nicht von Hand editieren. -->
+
+<script lang="ts">
+	import { Tabs } from '$components/ui/tab';
+	import '@zeit/components/accordion/accordion';
+	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, FaqList, WordingList, RelatedComponents, A11yList, KeyboardList, GetComponent, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
+	import { CodeBlock } from '$components/ui/code-block';
+	import { UsageBlock } from '$components/ui/usage-block';
+	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
+	import { generated } from './spec.generated';
+	import content from '$content/components/accordion.json';
+	import type { ComponentSpec } from '$types/spec';
+	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen — content gewinnt.
+	const spec = { ...generated, ...content };
+	const calloutAnchors = [{"nr":1,"side":"left","y":18,"selector":".z-accordion__button"},{"nr":2,"side":"top","x":20,"selector":".z-accordion__title"},{"nr":3,"side":"right","y":18,"selector":".z-accordion__arrow"},{"nr":4,"side":"bottom","x":30,"selector":".z-accordion__content"}];
+	const playgroundControls = [{"key":"offen","label":"Beim Laden geöffnet","type":"attr","attr":"open"}] as PlaygroundControl[];
+	const playgroundTemplate = `<z-accordion>
+	<details class="z-accordion"{attrs}>
+		<summary class="z-accordion__button">
+			<span class="z-accordion__title">Wie kündige ich mein Abo?</span>
+			<svg class="z-accordion__arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m13 4-6 6-6-6"></path></svg>
+		</summary>
+		<div class="z-accordion__content">
+			<p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto. Die Kündigung wird zum Ende des laufenden Bezugszeitraums wirksam.</p>
+		</div>
+	</details>
+</z-accordion>`;
+	const editorial = content as Partial<ComponentSpec>;
+	const beispiele = editorial.beispiele ?? [];
+	const patternCssCode = `/* z-accordion — Aufklapper. Rekonstruiert aus der laufenden Produktion
+   (zeit.de/index, Bundle web.core/base/base.*.css, gemessen 2026-07-25). Alle
+   Deklarationen unten stehen so im ausgelieferten CSS; echte --z-ds-Tokens.
+
+   ZWEI bewusste Abweichungen vom Produktions-CSS — beide dokumentiert:
+
+   1) ZUSTANDS-WEICHE. Produktion kollabiert über eine Wurzelklasse
+      (\`.js .z-accordion\` / \`.no-js …\`), die ein Inline-Skript im <head> setzt.
+      Wir liefern statt dessen <details>/<summary>: der Zuklapp-Zustand gehört
+      dann dem Browser, nicht unserem CSS. Folge — und der eigentliche Grund:
+      OHNE JavaScript ist der Aufklapper nicht bloß lesbar (Produktion klappt
+      dann alles auf), sondern voll BEDIENBAR. Und weil vor und nach dem
+      Laden des Skripts derselbe Zustand gerendert wird, springt beim
+      Hydrieren nichts.
+
+   2) FOKUS-RING. Produktion färbt den Auslöser bei :focus-visible nur um
+      (text-55) und zeichnet KEINE Outline — für Tastaturnutzung zu wenig.
+      Ergänzt wird darum genau die Outline, die dasselbe Bundle für
+      .z-button/.z-text-button schon führt: 2px in --z-ds-color-focus-100.
+      Also keine Erfindung, sondern die ZDS-Konvention dort angewandt, wo sie
+      in der Produktion fehlt.
+
+   Die Bewegung (Auf/Zu) steht NICHT hier, sondern in accordion.ts: <details>
+   lässt sich nicht deklarativ animieren, weil der Inhalt im zugeklappten
+   Zustand gar nicht layoutet wird. Das Element hält Dauer (200 ms) und Kurve
+   (starkes ease-out) der Produktion ein und respektiert
+   prefers-reduced-motion. Alles ÜBRIGE Aussehen steht hier — das CSS ist
+   allein benutzbar. */
+
+/* Der Wrapper trägt kein eigenes Aussehen; er ist nur der Anker fürs Element.
+   Ohne JavaScript bleibt <z-accordion> ein unbekanntes Inline-Element — ohne
+   diese Zeile stünde der Aufklapper dann im Textfluss statt als Block.
+
+   \`width: 100%\` ist im normalen Fluss redundant, in einem Flex- oder
+   Grid-Elternteil aber der Unterschied zwischen „so breit wie der Titel" und
+   „so breit wie die Spalte". Die Produktion setzt den Aufklapper immer über die
+   volle Breite der Inhaltsspalte, und ihr Auslöser deklariert selbst
+   \`width: 100%\` — das hier ist dieselbe Aussage eine Ebene höher. */
+z-accordion {
+	display: block;
+	width: 100%;
+}
+
+/* Auslöser. Deklarationen 1:1 aus der Produktion; \`list-style: none\` kommt
+   hinzu, weil <summary> sonst zusätzlich das native Dreieck des Browsers
+   zeigt — wir bringen mit .z-accordion__arrow einen eigenen Pfeil mit. */
+.z-accordion__button {
+	background-color: rgba(0, 0, 0, 0);
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	margin: 0;
+	align-items: baseline;
+	display: flex;
+	gap: var(--z-ds-space-s);
+	justify-content: space-between;
+	padding: var(--z-ds-space-m) 0;
+	text-align: left;
+	transition: color 200ms ease-out;
+	width: 100%;
+	list-style: none;
+}
+
+/* Zwilling zu \`list-style: none\` für ältere WebKit-Stände. */
+.z-accordion__button::-webkit-details-marker {
+	display: none;
+}
+
+.z-accordion__button:hover,
+.z-accordion__button:active,
+.z-accordion__button:focus-visible {
+	color: var(--z-ds-color-text-55);
+}
+
+/* Ergänzung (2): Der Auslöser läuft über die volle Breite, deshalb liegt die
+   Outline mit negativem Offset INNEN — außen läge sie unter Umständen hinter
+   der Kante eines beschneidenden Elternelements. */
+.z-accordion__button:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
+}
+
+/* Titel-Typografie. In der Produktion sitzt sie auf dem <h2>, das den Button
+   umschließt; bei <details> muss der Auslöser selbst das <summary> sein, die
+   Typografie wandert deshalb auf ein Kind darin. Die Werte sind unverändert. */
+.z-accordion__title {
+	color: var(--z-ds-color-text-100);
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: bold;
+	line-height: var(--z-ds-lineheight-12);
+	margin: 0;
+}
+
+.z-accordion__arrow {
+	color: var(--z-ds-color-text-70);
+	flex-shrink: 0;
+}
+
+/* Pfeil zeigt nach oben, sobald offen — zwei Quellen, damit BEIDE Betriebsarten
+   stimmen: \`aria-expanded\` setzt das Element (und es ist zugleich der Selektor,
+   den die Produktion schon benutzt), \`[open]\` ist ohne JavaScript die einzige
+   Wahrheit. Die zweite Regel greift per :not([aria-expanded]) nur dort, wo kein
+   Element mitläuft — so kippt der Pfeil beim animierten Zuklappen sofort zurück,
+   obwohl \`open\` technisch noch gesetzt ist. */
+.z-accordion__button[aria-expanded='true'] .z-accordion__arrow,
+.z-accordion[open] > .z-accordion__button:not([aria-expanded]) .z-accordion__arrow {
+	transform: rotate(180deg);
+}
+
+/* Inhaltsfläche. \`overflow: hidden\` ist die Voraussetzung dafür, dass das
+   Element die Höhe animieren kann, ohne dass der Inhalt überläuft. */
+.z-accordion__content {
+	overflow: hidden;
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.z-accordion__button {
+		transition: none;
+	}
+}
+`;
+	const stateItems = [{"label":"zu","html":"<z-accordion><details class=\"z-accordion\"><summary class=\"z-accordion__button\"><span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span><svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg></summary><div class=\"z-accordion__content\"><p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto.</p></div></details></z-accordion>"},{"label":"auf","html":"<z-accordion><details class=\"z-accordion\" open><summary class=\"z-accordion__button\"><span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span><svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg></summary><div class=\"z-accordion__content\"><p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto.</p></div></details></z-accordion>"}];
+	const propsData = [{"name":"open","typ":"boolean","default":"false","beschreibung":"Attribut am <details>: Startet der Aufklapper geöffnet? Danach führt der Browser den Zustand."},{"name":"offen","typ":"boolean (Property)","default":"false","beschreibung":"Property am Element: liest bzw. setzt den Zustand aus Skript — mit Animation."}];
+</script>
+
+<svelte:head>
+	<title>{title} - Die Zeit Design System</title>
+</svelte:head>
+
+# {title}
+
+<ComponentHero spec={spec} version={content.version} />
+
+<Tabs tabs={[
+		{ id: 'designTab', label: 'Design', component: designTab },
+		{ id: 'developTab', label: 'Develop', component: developTab },
+		...((spec.a11y?.length || spec.tastatur?.length) ? [{ id: 'a11yTab', label: 'Barrierefreiheit', component: a11yTab }] : []),
+		{ id: 'specsTab', label: 'Specs', component: specsTab }
+]} sticky />
+
+{#snippet designTab()}
+	<h2 id="playground" class="section-anchor">Playground</h2>
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+
+	{#if beispiele.length}
+		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
+		{#each beispiele as beispiel, i (i)}
+			<ExampleBlock
+				titel={beispiel.titel}
+				beschreibung={beispiel.beschreibung}
+				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
+					instantiate(playgroundTemplate, playgroundControls, werte)
+				)}
+			/>
+		{/each}
+	{/if}
+
+	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+		{#snippet preview()}<z-accordion>
+	<details class="z-accordion">
+		<summary class="z-accordion__button">
+			<span class="z-accordion__title">Wie kündige ich mein Abo?</span>
+			<svg class="z-accordion__arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m13 4-6 6-6-6"></path></svg>
+		</summary>
+		<div class="z-accordion__content">
+			<p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto. Die Kündigung wird zum Ende des laufenden Bezugszeitraums wirksam.</p>
+		</div>
+	</details>
+</z-accordion>{/snippet}
+	</Anatomy>
+
+	{#if spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length}
+		<h2 id="verwendung" class="section-anchor">Verwendung</h2>
+		<UsageBlock verwendung={spec.verwendung} />
+	{/if}
+
+	{#if spec.wording?.length}
+		<h2 id="wording" class="section-anchor">Texte &amp; Wording</h2>
+		<WordingList items={spec.wording} />
+	{/if}
+
+	<h2 id="zustaende" class="section-anchor">Zustände</h2>
+	<SpecimenGrid items={stateItems} />
+	<StateList states={[{"label":"hover","vorhanden":true},{"label":"focus","vorhanden":true}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
+
+	{#if spec.doDont?.do?.length || spec.doDont?.dont?.length}
+		<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
+		<DoDontList doDont={spec.doDont} />
+	{/if}
+
+	{#if spec.verwandt?.length}
+		<h2 id="verwandte" class="section-anchor">Verwandte Komponenten</h2>
+		<RelatedComponents slugs={spec.verwandt} />
+	{/if}
+
+	{#if spec.faq?.length}
+		<h2 id="faq" class="section-anchor">FAQ</h2>
+		<FaqList items={spec.faq} />
+	{/if}
+{/snippet}
+
+{#snippet developTab()}
+	<h2>Komponente holen</h2>
+	<GetComponent artefakte={spec.code?.artefakte} />
+
+	<h2>Properties</h2>
+	<PropsTable props={propsData} />
+
+	<h2>Code</h2>
+	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+
+	{#if (editorial.codeBeispiele ?? []).length}
+		<h2>Redaktionelle Code-Beispiele</h2>
+		{#each editorial.codeBeispiele ?? [] as beispiel, i (i)}
+			<h3>{beispiel.label}</h3>
+			{#if beispiel.hinweis}<p>{beispiel.hinweis}</p>{/if}
+			<CodeBlock lang={beispiel.sprache ?? 'svelte'} code={beispiel.code} />
+		{/each}
+	{/if}
+{/snippet}
+
+{#snippet a11yTab()}
+	{#if spec.a11y?.length}
+		<A11yList items={spec.a11y} />
+	{/if}
+
+	{#if spec.tastatur?.length}
+		<h2>Tastatur</h2>
+		<KeyboardList items={spec.tastatur} />
+	{/if}
+{/snippet}
+
+{#snippet specsTab()}
+	<h2>Maße</h2>
+	<MeasureTable masse={spec.masse} />
+
+	<h2>Farbrollen</h2>
+	<ColorRoleTable farbrollen={spec.farbrollen} />
+
+	<h2>Tokens</h2>
+	<TokenTable tokens={spec.tokens} />
+{/snippet}
+
+<style>
+:global(.spec-canvas z-accordion),
+:global(.pg-preview z-accordion) {
+  display: block;
+	width: 100%;
+}
+:global(.spec-canvas .z-accordion__button),
+:global(.pg-preview .z-accordion__button) {
+  background-color: rgba(0, 0, 0, 0);
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	margin: 0;
+	align-items: baseline;
+	display: flex;
+	gap: var(--z-ds-space-s);
+	justify-content: space-between;
+	padding: var(--z-ds-space-m) 0;
+	text-align: left;
+	transition: color 200ms ease-out;
+	width: 100%;
+	list-style: none;
+}
+:global(.spec-canvas .z-accordion__button::-webkit-details-marker),
+:global(.pg-preview .z-accordion__button::-webkit-details-marker) {
+  display: none;
+}
+:global(.spec-canvas .z-accordion__button:hover),
+:global(.pg-preview .z-accordion__button:hover),
+:global(.spec-canvas .z-accordion__button:active),
+:global(.pg-preview .z-accordion__button:active),
+:global(.spec-canvas .z-accordion__button:focus-visible),
+:global(.pg-preview .z-accordion__button:focus-visible) {
+  color: var(--z-ds-color-text-55);
+}
+:global(.spec-canvas .z-accordion__button:focus-visible),
+:global(.pg-preview .z-accordion__button:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
+}
+:global(.spec-canvas .z-accordion__title),
+:global(.pg-preview .z-accordion__title) {
+  color: var(--z-ds-color-text-100);
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: bold;
+	line-height: var(--z-ds-lineheight-12);
+	margin: 0;
+}
+:global(.spec-canvas .z-accordion__arrow),
+:global(.pg-preview .z-accordion__arrow) {
+  color: var(--z-ds-color-text-70);
+	flex-shrink: 0;
+}
+:global(.spec-canvas .z-accordion__button[aria-expanded='true'] .z-accordion__arrow),
+:global(.pg-preview .z-accordion__button[aria-expanded='true'] .z-accordion__arrow),
+:global(.spec-canvas .z-accordion[open] > .z-accordion__button:not([aria-expanded]) .z-accordion__arrow),
+:global(.pg-preview .z-accordion[open] > .z-accordion__button:not([aria-expanded]) .z-accordion__arrow) {
+  transform: rotate(180deg);
+}
+:global(.spec-canvas .z-accordion__content),
+:global(.pg-preview .z-accordion__content) {
+  overflow: hidden;
+}
+@media screen and (prefers-reduced-motion: reduce) {
+  :global(.spec-canvas .z-accordion__button),
+  :global(.pg-preview .z-accordion__button) {
+    transition: none;
+  }
+}
+</style>

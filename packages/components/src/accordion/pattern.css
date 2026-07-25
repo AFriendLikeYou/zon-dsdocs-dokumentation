@@ -1,0 +1,123 @@
+/* z-accordion — Aufklapper. Rekonstruiert aus der laufenden Produktion
+   (zeit.de/index, Bundle web.core/base/base.*.css, gemessen 2026-07-25). Alle
+   Deklarationen unten stehen so im ausgelieferten CSS; echte --z-ds-Tokens.
+
+   ZWEI bewusste Abweichungen vom Produktions-CSS — beide dokumentiert:
+
+   1) ZUSTANDS-WEICHE. Produktion kollabiert über eine Wurzelklasse
+      (`.js .z-accordion` / `.no-js …`), die ein Inline-Skript im <head> setzt.
+      Wir liefern statt dessen <details>/<summary>: der Zuklapp-Zustand gehört
+      dann dem Browser, nicht unserem CSS. Folge — und der eigentliche Grund:
+      OHNE JavaScript ist der Aufklapper nicht bloß lesbar (Produktion klappt
+      dann alles auf), sondern voll BEDIENBAR. Und weil vor und nach dem
+      Laden des Skripts derselbe Zustand gerendert wird, springt beim
+      Hydrieren nichts.
+
+   2) FOKUS-RING. Produktion färbt den Auslöser bei :focus-visible nur um
+      (text-55) und zeichnet KEINE Outline — für Tastaturnutzung zu wenig.
+      Ergänzt wird darum genau die Outline, die dasselbe Bundle für
+      .z-button/.z-text-button schon führt: 2px in --z-ds-color-focus-100.
+      Also keine Erfindung, sondern die ZDS-Konvention dort angewandt, wo sie
+      in der Produktion fehlt.
+
+   Die Bewegung (Auf/Zu) steht NICHT hier, sondern in accordion.ts: <details>
+   lässt sich nicht deklarativ animieren, weil der Inhalt im zugeklappten
+   Zustand gar nicht layoutet wird. Das Element hält Dauer (200 ms) und Kurve
+   (starkes ease-out) der Produktion ein und respektiert
+   prefers-reduced-motion. Alles ÜBRIGE Aussehen steht hier — das CSS ist
+   allein benutzbar. */
+
+/* Der Wrapper trägt kein eigenes Aussehen; er ist nur der Anker fürs Element.
+   Ohne JavaScript bleibt <z-accordion> ein unbekanntes Inline-Element — ohne
+   diese Zeile stünde der Aufklapper dann im Textfluss statt als Block.
+
+   `width: 100%` ist im normalen Fluss redundant, in einem Flex- oder
+   Grid-Elternteil aber der Unterschied zwischen „so breit wie der Titel" und
+   „so breit wie die Spalte". Die Produktion setzt den Aufklapper immer über die
+   volle Breite der Inhaltsspalte, und ihr Auslöser deklariert selbst
+   `width: 100%` — das hier ist dieselbe Aussage eine Ebene höher. */
+z-accordion {
+	display: block;
+	width: 100%;
+}
+
+/* Auslöser. Deklarationen 1:1 aus der Produktion; `list-style: none` kommt
+   hinzu, weil <summary> sonst zusätzlich das native Dreieck des Browsers
+   zeigt — wir bringen mit .z-accordion__arrow einen eigenen Pfeil mit. */
+.z-accordion__button {
+	background-color: rgba(0, 0, 0, 0);
+	border-width: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	margin: 0;
+	align-items: baseline;
+	display: flex;
+	gap: var(--z-ds-space-s);
+	justify-content: space-between;
+	padding: var(--z-ds-space-m) 0;
+	text-align: left;
+	transition: color 200ms ease-out;
+	width: 100%;
+	list-style: none;
+}
+
+/* Zwilling zu `list-style: none` für ältere WebKit-Stände. */
+.z-accordion__button::-webkit-details-marker {
+	display: none;
+}
+
+.z-accordion__button:hover,
+.z-accordion__button:active,
+.z-accordion__button:focus-visible {
+	color: var(--z-ds-color-text-55);
+}
+
+/* Ergänzung (2): Der Auslöser läuft über die volle Breite, deshalb liegt die
+   Outline mit negativem Offset INNEN — außen läge sie unter Umständen hinter
+   der Kante eines beschneidenden Elternelements. */
+.z-accordion__button:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
+}
+
+/* Titel-Typografie. In der Produktion sitzt sie auf dem <h2>, das den Button
+   umschließt; bei <details> muss der Auslöser selbst das <summary> sein, die
+   Typografie wandert deshalb auf ein Kind darin. Die Werte sind unverändert. */
+.z-accordion__title {
+	color: var(--z-ds-color-text-100);
+	font-size: var(--z-ds-fontsize-20);
+	font-weight: bold;
+	line-height: var(--z-ds-lineheight-12);
+	margin: 0;
+}
+
+.z-accordion__arrow {
+	color: var(--z-ds-color-text-70);
+	flex-shrink: 0;
+}
+
+/* Pfeil zeigt nach oben, sobald offen — zwei Quellen, damit BEIDE Betriebsarten
+   stimmen: `aria-expanded` setzt das Element (und es ist zugleich der Selektor,
+   den die Produktion schon benutzt), `[open]` ist ohne JavaScript die einzige
+   Wahrheit. Die zweite Regel greift per :not([aria-expanded]) nur dort, wo kein
+   Element mitläuft — so kippt der Pfeil beim animierten Zuklappen sofort zurück,
+   obwohl `open` technisch noch gesetzt ist. */
+.z-accordion__button[aria-expanded='true'] .z-accordion__arrow,
+.z-accordion[open] > .z-accordion__button:not([aria-expanded]) .z-accordion__arrow {
+	transform: rotate(180deg);
+}
+
+/* Inhaltsfläche. `overflow: hidden` ist die Voraussetzung dafür, dass das
+   Element die Höhe animieren kann, ohne dass der Inhalt überläuft. */
+.z-accordion__content {
+	overflow: hidden;
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.z-accordion__button {
+		transition: none;
+	}
+}

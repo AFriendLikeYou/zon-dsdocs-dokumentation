@@ -30,17 +30,41 @@ const codeFiles = import.meta.glob('../../../../../packages/components/src/*/cod
 }) as Record<string, string>;
 
 /**
+ * Custom Elements (PR 6) liegen NICHT unter `code/`, sondern als `<slug>.ts`
+ * direkt im Komponenten-Ordner — gleichrangig neben `pattern.css`, weil sie
+ * gleichrangige Auslieferungen sind (Aussehen bzw. Verhalten). Ohne diesen
+ * zweiten Glob deklarierte das Modell ein Artefakt, das `zds add` dann nicht
+ * liefern könnte.
+ */
+const wurzelFiles = import.meta.glob('../../../../../packages/components/src/*/*.ts', {
+	eager: true,
+	query: '?raw',
+	import: 'default'
+}) as Record<string, string>;
+
+/** Slug = vorletztes Pfadsegment, Datei = letztes. */
+const slugUndDatei = (pfad: string) => pfad.split('/').slice(-2);
+
+/**
  * Artefakt-Dateien nach `<slug>/<pfad im Ordner>` umschlüsseln. Der Glob-Key ist
  * der volle relative Pfad; hier interessiert nur der Teil AB dem Slug, weil die
- * `dateien`-Einträge des Modells ordner-relativ sind (`code/Button.svelte`).
+ * `dateien`-Einträge des Modells ordner-relativ sind (`code/Button.svelte`,
+ * `accordion.ts`). Barrel und Tests fallen raus — sie sind Paket-Innenleben, kein
+ * Artefakt, und hätten in einer `zds add`-Antwort nichts zu suchen.
  */
-const codeFilesBySlugPfad: Record<string, string> = Object.fromEntries(
-	Object.entries(codeFiles).map(([pfad, inhalt]) => {
+const codeFilesBySlugPfad: Record<string, string> = Object.fromEntries([
+	...Object.entries(codeFiles).map(([pfad, inhalt]) => {
 		const segmente = pfad.split('/');
 		const codeIndex = segmente.lastIndexOf('code');
-		return [segmente.slice(codeIndex - 1).join('/'), inhalt];
-	})
-);
+		return [segmente.slice(codeIndex - 1).join('/'), inhalt] as const;
+	}),
+	...Object.entries(wurzelFiles)
+		.filter(([pfad]) => {
+			const datei = slugUndDatei(pfad)[1];
+			return datei !== 'index.ts' && !datei.includes('.test.');
+		})
+		.map(([pfad, inhalt]) => [slugUndDatei(pfad).join('/'), inhalt] as const)
+]);
 
 /**
  * Löst eine ordner-relative Artefakt-Datei auf ihren rohen Inhalt auf:

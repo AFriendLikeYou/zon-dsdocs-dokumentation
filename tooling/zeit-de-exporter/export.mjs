@@ -898,8 +898,36 @@ function renderPage(model, { patternCss = null } = {}) {
 
 	// CodeBlock aus dem Spec-UI-Kit-Import lösen — es hat einen eigenen Barrel.
 	const usedSpec = [...used].filter((c) => c !== 'CodeBlock');
+
+	// Custom Element (PR 6): Deklariert das Modell ein `web-component`-Artefakt,
+	// importiert die Seite das Element als SEITENEFFEKT. Erst dadurch rendert der
+	// Playground die echte Komponente statt eines toten HTML-Strings — der Grund,
+	// warum `render.specimen` für interaktive Patterns nicht mehr nötig ist
+	// (MIGRATIONSPLAN §4, Ausnahmen 1–2).
+	//
+	// Der Subpfad spiegelt bewusst den des CSS — Aussehen und Verhalten kommen
+	// beide über einen eigenen Pfad, nicht über den Spec-Barrel. ACHTUNG: Er muss
+	// in `packages/components/package.json` unter `exports` stehen. Ein Muster
+	// deckt ihn nicht ab, weil Node in einem Subpath-Muster nur EIN `*` erlaubt,
+	// der Slug in `./src/<slug>/<slug>.ts` aber zweimal vorkommt — jedes neue
+	// Element braucht dort also eine Zeile.
+	//
+	// SSR: Die Seite wird serverseitig gerendert, dieser Import läuft also auch in
+	// Node. Das Element-Modul muss das aushalten — und zwar nicht erst bei der
+	// Registrierung: `class X extends HTMLElement` auf Modulebene wertet
+	// HTMLElement schon beim Import aus und reißt die Seite herunter. Die Klasse
+	// gehört deshalb in eine Funktion (Muster: packages/components/src/accordion/).
+	const elementDateien = resolveArtefakte(model.code)
+		.filter((a) => a.format === 'web-component')
+		.flatMap((a) => a.dateien)
+		.map((datei) => datei.replace(/\.ts$/, ''));
+	const elementImports = elementDateien
+		.map((pfad) => `\timport '@zeit/components/${kebabCase(model.name)}/${pfad}';\n`)
+		.join('');
+
 	const imports =
 		`\timport { Tabs } from '$components/ui/tab';\n` +
+		elementImports +
 		`\timport { ${usedSpec.join(', ')} } from '${SPEC_COMPONENT_IMPORT}';\n` +
 		(used.has('CodeBlock') ? `\timport { CodeBlock } from '${CODE_BLOCK_IMPORT}';\n` : '') +
 		// Redaktioneller Renderer wie DoDontList & Co. — immer importiert, laufzeit-gated.

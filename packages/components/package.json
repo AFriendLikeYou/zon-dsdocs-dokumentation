@@ -1,7 +1,7 @@
 {
 	"name": "@zeit/components",
 	"version": "0.0.0",
-	"description": "ZEIT-Designsystem-Komponenten: unscoped Pattern-CSS plus der kanonische Spec (model.json) je Komponente.",
+	"description": "ZEIT-Designsystem-Komponenten: unscoped Pattern-CSS plus der kanonische Spec (model.json) je Komponente — und, wo vorhanden, das Custom Element.",
 	"type": "module",
 	"license": "UNLICENSED",
 	"publishConfig": {
@@ -16,10 +16,12 @@
 		"./*": "./src/*/index.ts",
 		"./*/pattern.css": "./src/*/pattern.css",
 		"./*/model.json": "./src/*/model.json",
+		"./accordion/accordion": "./src/accordion/accordion.ts",
 		"./package.json": "./package.json"
 	},
 	"types": "./src/index.ts",
 	"sideEffects": [
-		"*.css"
+		"*.css",
+		"./src/accordion/accordion.ts"
 	]
 }

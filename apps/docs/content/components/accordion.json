@@ -1,0 +1,125 @@
+{
+	"zweck": "Aufklapper für sekundäre Inhalte: Eine Überschrift bleibt sichtbar, der Inhalt darunter erscheint erst auf Wunsch. Wir liefern ihn als Custom Element <z-accordion> über <details>/<summary> aus — ohne JavaScript bleibt er voll bedienbar.",
+	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Zugeklappt starten",
+			"beschreibung": "Der Normalfall. Der Titel muss allein tragen — er ist zugeklappt das Einzige, was zu sehen ist. Mehrere Aufklapper untereinander bleiben unabhängig; es gibt bewusst keine „nur einer offen\"-Automatik.",
+			"instanzen": [{}, {}]
+		},
+		{
+			"titel": "Geöffnet ausliefern",
+			"beschreibung": "Ein `open` am <details> öffnet den Aufklapper schon im HTML — ohne JavaScript und ohne Sprung beim Laden. zeit.de nutzt dafür heute eine eigene Regel, die auf Desktop den ersten Eintrag aufklappt.",
+			"instanzen": [{ "offen": true }]
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Auslöser — das <summary>. Volle Breite, Innenabstand 16px oben/unten, Titel links und Pfeil rechts (justify-content: space-between).",
+			"art": "container"
+		},
+		{
+			"nr": 2,
+			"text": "Titel — Tablet Gothic Bold in fontsize-20 (20px) auf lineheight-12 (1,2). In der Produktion trägt ihn ein <h2>; hier ein Kind des <summary>, weil <summary> selbst der Auslöser sein muss.",
+			"art": "text"
+		},
+		{
+			"nr": 3,
+			"text": "Pfeil — 14×14, Strichstärke 1,5 in text-70. Dreht sich beim Öffnen um 180°; aria-hidden, weil den Zustand aria-expanded trägt.",
+			"art": "instance"
+		},
+		{
+			"nr": 4,
+			"text": "Inhaltsfläche — role=region und aria-labelledby auf den Auslöser. Höhe und Deckkraft animiert das Element in 200 ms.",
+			"art": "container"
+		}
+	],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "<details>/<summary> bringt Rolle und Auf/Zu-Zustand nativ mit — kein role=button, kein Nachbauen.",
+			"status": "pass"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter und Leertaste schalten um; Tab erreicht den Auslöser. Beides nativ, das Element fängt nur den Klick ab.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": "2px-Outline in Focus-100 bei :focus-visible. Ergänzung — die Produktion färbt nur um.",
+			"status": "pass"
+		},
+		{
+			"label": "Verknüpfung",
+			"wert": "Das Element setzt aria-controls, aria-expanded sowie role=region und aria-labelledby auf der Inhaltsfläche.",
+			"status": "pass"
+		},
+		{
+			"label": "Ohne JavaScript",
+			"wert": "Voll bedienbar — der Browser führt den Auf/Zu-Zustand. Es entfällt nur die Animation.",
+			"status": "pass"
+		},
+		{
+			"label": "Seiten-Suche",
+			"wert": "Strg+F klappt zugeklappte Inhalte in aktuellen Browsern automatisch auf (nativer <details>-Vorteil).",
+			"status": "pass"
+		},
+		{
+			"label": "Bewegung",
+			"wert": "prefers-reduced-motion: reduce schaltet die Animation ab, der Zustand wechselt sofort.",
+			"status": "pass"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Auslöser."
+		},
+		{
+			"taste": "Enter",
+			"aktion": "Klappt auf bzw. zu."
+		},
+		{
+			"taste": "Leertaste",
+			"aktion": "Klappt auf bzw. zu."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Für Zusatzinformationen, die nicht jede:r braucht — FAQ, Details, Filter.",
+			"Titel so schreiben, dass er den Inhalt verrät, auch wenn zugeklappt.",
+			"Mehrere Aufklapper unabhängig voneinander bedienbar lassen."
+		],
+		"dont": [
+			"Nicht für Inhalte, die alle lesen müssen — Wichtiges gehört nicht hinter einen Klick.",
+			"Kein Aufklapper für einen einzigen kurzen Satz; der Klick kostet mehr als er spart.",
+			"Nicht in Suchergebnisse oder Fließtext schachteln, wo Leser:innen ihn nicht vermuten."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Lange Listen gleichartiger Abschnitte kürzen (FAQ, Hilfe, Rechtliches).",
+			"Sekundäre Details neben einer Hauptaussage unterbringen.",
+			"Auf schmalen Bildschirmen Platz sparen, ohne Inhalt zu streichen."
+		],
+		"nichtNutzen": [
+			"Primäre Inhalte einer Seite — die stehen offen.",
+			"Navigation zwischen gleichrangigen Ansichten — dafür Tabs.",
+			"Formular-Schritte mit Reihenfolge — dafür ein Stepper."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "Mehr",
+			"gut": "Wie kündige ich mein Abo?",
+			"hinweis": "Der Titel muss den Inhalt verraten — er ist im zugeklappten Zustand das Einzige, was man sieht."
+		}
+	],
+	"verwandt": [
+		"cell",
+		"text-button"
+	],
+	"version": "Produktion zeit.de, gemessen 2026-07-25"
+}

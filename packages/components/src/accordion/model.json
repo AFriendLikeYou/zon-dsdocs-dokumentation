@@ -1,0 +1,336 @@
+{
+	"$schema": "../../../../../../../tooling/zeit-de-exporter/model.schema.json",
+	"name": "Accordion",
+	"status": "ready_for_dev",
+	"kategorie": "Inhalte",
+	"aktualisiertAm": "2026-07-25",
+	"dokumentiertAm": "2026-07-25",
+	"zweck": "Aufklapper für sekundäre Inhalte: Eine Überschrift bleibt sichtbar, der Inhalt darunter erscheint erst auf Wunsch. Wir liefern ihn als Custom Element <z-accordion> über <details>/<summary> aus — ohne JavaScript bleibt er voll bedienbar.",
+	"verwandt": [
+		"cell",
+		"text-button"
+	],
+	"masse": {
+		"hoehe": {
+			"px": "56",
+			"herkunft": "abgeleitet"
+		},
+		"padding": {
+			"px": "16 · 0",
+			"token": "--z-ds-space-m",
+			"herkunft": "abgeleitet"
+		}
+	},
+	"spacing": [
+		{
+			"label": "Abstand Titel ↔ Pfeil (mindestens)",
+			"px": "12 px"
+		},
+		{
+			"label": "Innenabstand des Auslösers, oben und unten",
+			"px": "16 px"
+		}
+	],
+	"callouts": [
+		{
+			"nr": 1,
+			"text": "Auslöser — das <summary>. Volle Breite, Innenabstand 16px oben/unten, Titel links und Pfeil rechts (justify-content: space-between).",
+			"art": "container"
+		},
+		{
+			"nr": 2,
+			"text": "Titel — Tablet Gothic Bold in fontsize-20 (20px) auf lineheight-12 (1,2). In der Produktion trägt ihn ein <h2>; hier ein Kind des <summary>, weil <summary> selbst der Auslöser sein muss.",
+			"art": "text"
+		},
+		{
+			"nr": 3,
+			"text": "Pfeil — 14×14, Strichstärke 1,5 in text-70. Dreht sich beim Öffnen um 180°; aria-hidden, weil den Zustand aria-expanded trägt.",
+			"art": "instance"
+		},
+		{
+			"nr": 4,
+			"text": "Inhaltsfläche — role=region und aria-labelledby auf den Auslöser. Höhe und Deckkraft animiert das Element in 200 ms.",
+			"art": "container"
+		}
+	],
+	"tokens": [
+		{
+			"kategorie": "Farbe",
+			"items": [
+				{
+					"name": "--z-ds-color-text-100",
+					"hinweis": "Titel",
+					"swatch": "#252525"
+				},
+				{
+					"name": "--z-ds-color-text-70",
+					"hinweis": "Pfeil",
+					"swatch": "#444444"
+				},
+				{
+					"name": "--z-ds-color-text-55",
+					"hinweis": "Auslöser bei Hover, Active und Fokus",
+					"swatch": "#69696c"
+				},
+				{
+					"name": "--z-ds-color-focus-100",
+					"hinweis": "Fokus-Ring (unsere Ergänzung — die Produktion zeichnet keinen)",
+					"swatch": "#005fcc"
+				}
+			]
+		},
+		{
+			"kategorie": "Typografie",
+			"items": [
+				{
+					"name": "--z-ds-fontsize-20",
+					"hinweis": "Titel — 1.25rem"
+				},
+				{
+					"name": "--z-ds-lineheight-12",
+					"hinweis": "Titel — 1.2"
+				}
+			]
+		},
+		{
+			"kategorie": "Abstand",
+			"items": [
+				{
+					"name": "--z-ds-space-m",
+					"hinweis": "Innenabstand des Auslösers (1rem)"
+				},
+				{
+					"name": "--z-ds-space-s",
+					"hinweis": "Mindestabstand Titel ↔ Pfeil (0.75rem)"
+				}
+			]
+		}
+	],
+	"farbrollen": {
+		"zustaende": [
+			"zu",
+			"auf",
+			"hover",
+			"focus"
+		],
+		"elemente": [
+			{
+				"teil": "Titel",
+				"tokensProZustand": {
+					"zu": "--z-ds-color-text-100",
+					"auf": "--z-ds-color-text-100",
+					"hover": "--z-ds-color-text-55",
+					"focus": "--z-ds-color-text-55"
+				},
+				"hinweis": "Der Auslöser färbt sich als Ganzes um; der Titel erbt (color: inherit)."
+			},
+			{
+				"teil": "Pfeil",
+				"tokensProZustand": {
+					"zu": "--z-ds-color-text-70",
+					"auf": "--z-ds-color-text-70",
+					"hover": "--z-ds-color-text-70",
+					"focus": "--z-ds-color-text-70"
+				},
+				"hinweis": "Farbe bleibt konstant; den Zustand zeigt die 180°-Drehung."
+			},
+			{
+				"teil": "Fokus-Ring",
+				"tokensProZustand": {
+					"zu": "none",
+					"auf": "none",
+					"hover": "none",
+					"focus": "--z-ds-color-focus-100"
+				},
+				"hinweis": "2px-Outline bei :focus-visible, nach innen versetzt. Ergänzung gegenüber der Produktion — dort fehlt der Ring."
+			}
+		]
+	},
+	"zustaende": [
+		{
+			"label": "zu",
+			"vorhanden": true
+		},
+		{
+			"label": "auf",
+			"vorhanden": true
+		},
+		{
+			"label": "hover",
+			"vorhanden": true
+		},
+		{
+			"label": "focus",
+			"vorhanden": true
+		}
+	],
+	"a11y": [
+		{
+			"label": "Rolle",
+			"wert": "<details>/<summary> bringt Rolle und Auf/Zu-Zustand nativ mit — kein role=button, kein Nachbauen.",
+			"status": "pass"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Enter und Leertaste schalten um; Tab erreicht den Auslöser. Beides nativ, das Element fängt nur den Klick ab.",
+			"status": "pass"
+		},
+		{
+			"label": "Fokus",
+			"wert": "2px-Outline in Focus-100 bei :focus-visible. Ergänzung — die Produktion färbt nur um.",
+			"status": "pass"
+		},
+		{
+			"label": "Verknüpfung",
+			"wert": "Das Element setzt aria-controls, aria-expanded sowie role=region und aria-labelledby auf der Inhaltsfläche.",
+			"status": "pass"
+		},
+		{
+			"label": "Ohne JavaScript",
+			"wert": "Voll bedienbar — der Browser führt den Auf/Zu-Zustand. Es entfällt nur die Animation.",
+			"status": "pass"
+		},
+		{
+			"label": "Seiten-Suche",
+			"wert": "Strg+F klappt zugeklappte Inhalte in aktuellen Browsern automatisch auf (nativer <details>-Vorteil).",
+			"status": "pass"
+		},
+		{
+			"label": "Bewegung",
+			"wert": "prefers-reduced-motion: reduce schaltet die Animation ab, der Zustand wechselt sofort.",
+			"status": "pass"
+		}
+	],
+	"tastatur": [
+		{
+			"taste": "Tab",
+			"aktion": "Setzt den Fokus auf den Auslöser."
+		},
+		{
+			"taste": "Enter",
+			"aktion": "Klappt auf bzw. zu."
+		},
+		{
+			"taste": "Leertaste",
+			"aktion": "Klappt auf bzw. zu."
+		}
+	],
+	"doDont": {
+		"do": [
+			"Für Zusatzinformationen, die nicht jede:r braucht — FAQ, Details, Filter.",
+			"Titel so schreiben, dass er den Inhalt verrät, auch wenn zugeklappt.",
+			"Mehrere Aufklapper unabhängig voneinander bedienbar lassen."
+		],
+		"dont": [
+			"Nicht für Inhalte, die alle lesen müssen — Wichtiges gehört nicht hinter einen Klick.",
+			"Kein Aufklapper für einen einzigen kurzen Satz; der Klick kostet mehr als er spart.",
+			"Nicht in Suchergebnisse oder Fließtext schachteln, wo Leser:innen ihn nicht vermuten."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Lange Listen gleichartiger Abschnitte kürzen (FAQ, Hilfe, Rechtliches).",
+			"Sekundäre Details neben einer Hauptaussage unterbringen.",
+			"Auf schmalen Bildschirmen Platz sparen, ohne Inhalt zu streichen."
+		],
+		"nichtNutzen": [
+			"Primäre Inhalte einer Seite — die stehen offen.",
+			"Navigation zwischen gleichrangigen Ansichten — dafür Tabs.",
+			"Formular-Schritte mit Reihenfolge — dafür ein Stepper."
+		]
+	},
+	"wording": [
+		{
+			"schlecht": "Mehr",
+			"gut": "Wie kündige ich mein Abo?",
+			"hinweis": "Der Titel muss den Inhalt verraten — er ist im zugeklappten Zustand das Einzige, was man sieht."
+		}
+	],
+	"render": {
+		"controls": [
+			{
+				"key": "offen",
+				"label": "Beim Laden geöffnet",
+				"type": "attr",
+				"attr": "open"
+			}
+		],
+		"template": "<z-accordion>\n\t<details class=\"z-accordion\"{attrs}>\n\t\t<summary class=\"z-accordion__button\">\n\t\t\t<span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span>\n\t\t\t<svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg>\n\t\t</summary>\n\t\t<div class=\"z-accordion__content\">\n\t\t\t<p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto. Die Kündigung wird zum Ende des laufenden Bezugszeitraums wirksam.</p>\n\t\t</div>\n\t</details>\n</z-accordion>",
+		"cssFile": "./pattern.css",
+		"align": "fill",
+		"calloutAnchors": [
+			{
+				"nr": 1,
+				"side": "left",
+				"y": 18,
+				"selector": ".z-accordion__button"
+			},
+			{
+				"nr": 2,
+				"side": "top",
+				"x": 20,
+				"selector": ".z-accordion__title"
+			},
+			{
+				"nr": 3,
+				"side": "right",
+				"y": 18,
+				"selector": ".z-accordion__arrow"
+			},
+			{
+				"nr": 4,
+				"side": "bottom",
+				"x": 30,
+				"selector": ".z-accordion__content"
+			}
+		],
+		"matrix": [
+			{
+				"label": "Zu",
+				"html": "<z-accordion><details class=\"z-accordion\"><summary class=\"z-accordion__button\"><span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span><svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg></summary><div class=\"z-accordion__content\"><p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto.</p></div></details></z-accordion>"
+			},
+			{
+				"label": "Auf",
+				"html": "<z-accordion><details class=\"z-accordion\" open><summary class=\"z-accordion__button\"><span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span><svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg></summary><div class=\"z-accordion__content\"><p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto.</p></div></details></z-accordion>"
+			}
+		],
+		"props": [
+			{
+				"name": "open",
+				"typ": "boolean",
+				"default": "false",
+				"beschreibung": "Attribut am <details>: Startet der Aufklapper geöffnet? Danach führt der Browser den Zustand."
+			},
+			{
+				"name": "offen",
+				"typ": "boolean (Property)",
+				"default": "false",
+				"beschreibung": "Property am Element: liest bzw. setzt den Zustand aus Skript — mit Animation."
+			}
+		],
+		"codeNote": "Ausgeliefertes Markup. Ohne <z-accordion> und ohne JavaScript funktioniert derselbe Baum weiter — dann übernimmt der Browser das Auf und Zu.",
+		"repoNote": "Kein Figma-Gegenstück: Im ❖ ZDS existiert kein Accordion (Suche über die Bibliothek, 2026-07-25). Quelle ist ausschließlich die Produktion — zeit.de liefert z-accordion auf allen Ressort-Startseiten aus (Bereich „Beliebt bei Abonnenten\"), dort allerdings zusätzlich mit kpi-area__*-Klassen überschrieben (Innenabstand 20 statt 16, Schriftgröße 22 statt 20). Dokumentiert sind die ZDS-Werte, nicht die überschriebenen. Das Bestands-Markup ist <section class=\"z-accordion\"><h2 class=\"z-accordion__title\"><button aria-expanded>…; wir liefern statt dessen <details>/<summary> aus (Begründung im Kopf von pattern.css).",
+		"version": "Produktion zeit.de, gemessen 2026-07-25"
+	},
+	"code": {
+		"artefakte": [
+			{
+				"format": "html-css",
+				"dateien": [
+					"pattern.css"
+				],
+				"status": "kanonisch"
+			},
+			{
+				"format": "web-component",
+				"dateien": [
+					"accordion.ts"
+				],
+				"status": "kanonisch"
+			}
+		]
+	},
+	"katalog": {
+		"order": 9
+	}
+}
