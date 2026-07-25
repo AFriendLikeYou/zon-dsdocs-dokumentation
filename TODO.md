@@ -72,6 +72,57 @@ Beleg: `node tooling/check-prod-drift.mjs` (Kategorie C), Details im Commit
 
 ---
 
+## ⚠️ Mit den Devs abklären: `kpi-area__*` überschreibt das ZDS-Accordion
+
+**Befund (2026-07-25, beim Import von `z-accordion` als Custom Element).**
+
+Auf allen Ressort-Startseiten (`/index`, `/politik/index`, `/kultur/index`,
+`/wirtschaft/index`, `/zeit-magazin/index` — je 15 Instanzen) läuft `z-accordion`
+im Bereich **„Beliebt bei Abonnenten"**. Das Quell-CSS in
+`web.core/base/base.278e350f….css` nutzt saubere `--z-ds-*`-Token:
+
+| | ZDS-Wert |
+| --- | --- |
+| Auslöser-Padding | `--z-ds-space-m` = 16 |
+| Titel | `--z-ds-fontsize-20` / `--z-ds-lineheight-12`, bold, `text-100` |
+| Auslöser-Höhe | **56 px** (24 Zeilenhöhe + 2 × 16) |
+
+**Das Problem: Es gibt keine einzige unverfälschte Instanz im Web.** Jede
+ausgelieferte trägt zusätzlich `kpi-area__*` und überschreibt damit
+Innenabstand (20 statt 16) und Schriftgrad (22 statt 20) — live gemessen
+**66,4 px statt 56**.
+
+**Konsequenz für uns:** Die Komponente hat bewusst **keinen
+`produktion`-Referenzblock** bekommen. Der nächtliche Drift-Check würde sonst
+dauerhaft ZONs Skin gegen die dokumentierten ZDS-Werte melden — ein Alarm, der
+nie verstummt und deshalb nach kurzer Zeit ignoriert wird. Dokumentiert sind
+die ZDS-Werte mit `herkunft: abgeleitet`.
+
+**Zweiter Befund am selben Ort:** Produktion zeichnet für das Accordion
+**keinen Fokus-Ring** — nur Umfärben auf `text-55`, dazu explizit
+`outline-style: none`. Dasselbe CSS-Bundle führt für `.z-button` und
+`.z-text-button` sehr wohl `outline: 2px solid var(--z-ds-color-focus-100)`.
+Für Tastaturnutzer:innen ist der Aufklapper damit unsichtbar fokussiert.
+
+**Zu klären:**
+
+1. Ist die `kpi-area`-Überschreibung Absicht (ein Kontext-Skin) oder
+   historisch gewachsen? Falls Absicht: gehört sie als **dokumentierte
+   Variante** ins DS, statt als stille Übersteuerung zu leben.
+2. Gibt es irgendwo eine ZDS-treue Instanz, gegen die wir prüfen könnten?
+   Ohne eine solche bleibt das Accordion vom Prod-Drift-Check ausgenommen.
+3. Ist das fehlende `outline: none` beim Accordion beabsichtigt? Aus unserer
+   Sicht ist es ein A11y-Fehler — Buttons im selben Bundle machen es richtig.
+4. Wäre das Accordion ein Kandidat für die erste Übernahme des
+   `<z-accordion>`-Custom-Elements? Es ist bedienbar ohne JavaScript
+   (`<details>`), bringt die ARIA-Verdrahtung und den Fokus-Ring mit und
+   ersetzt die heutige Eigenimplementierung eins zu eins.
+
+Beleg: `packages/components/src/accordion/` (Modell, `pattern.css`, Element),
+Commit „z-accordion als erstes Custom Element".
+
+---
+
 ## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
 
 Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.
