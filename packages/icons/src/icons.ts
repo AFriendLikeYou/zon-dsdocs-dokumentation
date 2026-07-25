@@ -1,7 +1,7 @@
 // AUTOGENERIERT von tooling/gen-icons.mjs — NICHT von Hand editieren.
 // Neue SVGs erscheinen automatisch; kuratierte Felder (Name-Sonderfälle, slug, tags,
-// Ausschlüsse) in src/lib/data/icon-overrides.mjs pflegen. Neu erzeugen: npm run gen:icons
-import type { IconPre } from '$types/global';
+// Ausschlüsse) in packages/icons/icon-overrides.mjs pflegen. Neu erzeugen: npm run gen:icons
+import type { IconPre } from './types';
 
 export const SVG_LIST: IconPre[] = [
 	{

@@ -327,7 +327,9 @@ if (isCli) {
 		process.exit(1);
 	}
 	const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
-	const known = knownTokens(fs.readFileSync(path.join(repoRoot, 'static/styles-zds.css'), 'utf8'));
+	const known = knownTokens(
+		fs.readFileSync(path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'), 'utf8')
+	);
 	const { draft, report } = buildDraft(raw, known);
 	const json = JSON.stringify(draft, null, '\t') + '\n';
 	if (stdout) console.log(json);

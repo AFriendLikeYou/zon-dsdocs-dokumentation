@@ -49,9 +49,20 @@ export function discoverAssets({ svgDir, pathPrefix, overrides }) {
 const q = (s) => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
 /**
- * @param {{ constName: string, entries: object[], generatorName: string, overridesName: string, regenCmd: string }} opts
+ * `typeImport` ist die Import-Zeile für den Zieltyp: die Liste im Paket `@zeit/icons`
+ * kennt die `$`-Aliase der Doku-App nicht und importiert relativ, die Brand-Assets in
+ * der App bleiben beim Alias (= Default).
+ *
+ * @param {{ constName: string, entries: object[], generatorName: string, overridesName: string, regenCmd: string, typeImport?: string }} opts
  */
-export function renderIconPreFile({ constName, entries, generatorName, overridesName, regenCmd }) {
+export function renderIconPreFile({
+	constName,
+	entries,
+	generatorName,
+	overridesName,
+	regenCmd,
+	typeImport = "import type { IconPre } from '$types/global';"
+}) {
 	const rows = entries.map((e) => {
 		const parts = [`\t\tname: ${q(e.name)}`, `\t\tslug: ${q(e.slug)}`, `\t\tpath: ${q(e.path)}`];
 		if (e.tags) parts.push(`\t\ttags: [${e.tags.map(q).join(', ')}]`);
@@ -61,7 +72,7 @@ export function renderIconPreFile({ constName, entries, generatorName, overrides
 		`// AUTOGENERIERT von ${generatorName} — NICHT von Hand editieren.\n` +
 		`// Neue SVGs erscheinen automatisch; kuratierte Felder (Name-Sonderfälle, slug, tags,\n` +
 		`// Ausschlüsse) in ${overridesName} pflegen. Neu erzeugen: ${regenCmd}\n` +
-		`import type { IconPre } from '$types/global';\n\n` +
+		`${typeImport}\n\n` +
 		`export const ${constName}: IconPre[] = [\n${rows.join(',\n')}\n];\n`
 	);
 }

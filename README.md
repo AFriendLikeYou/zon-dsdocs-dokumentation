@@ -26,8 +26,9 @@ src/
 │   │   ├── layout/             Site-Chrome: Navbar, Sidebar, Footer, … (Direktimporte)
 │   │   └── ui/                 Doku-Bausteine: ein Ordner pro Modul, je index.ts-Barrel
 │   │                           (u. a. playground/, specsheet/, icons/, colors/, card/, …)
-│   ├── data/                   Registries: navigation, icons*, brand-assets*, changelog,
-│   │                           foundation-tokens + Override-Maps  (* = generiert)
+│   ├── data/                   Registries: navigation, brand-assets*, changelog,
+│   │                           foundation-tokens + Override-Map  (* = generiert;
+│   │                           die Icon-Liste liegt im Paket @zeit/icons)
 │   ├── stores/  config/  types/  actions/  utils.ts …
 │   └── (Aliase: $components, $data, $stores, $config, $types → svelte.config.js)
 │
@@ -41,11 +42,19 @@ src/
 │
 static/
 ├── media/brand/<seite>/        redaktionelle Seiten-Medien (Bilder, Videos)
-├── downloads/                  Download-Sammlungen: icons/, brand-logos/, docs/
+├── downloads/                  Download-Sammlungen: icons/ (Spiegel von @zeit/icons,
+│                               gitignored — npm run sync:icons), brand-logos/, docs/
 ├── fonts/                      Webfonts (via global.css)
-└── *.css                       global.css, styles-zds.css (Tokens, generiert), button.css
+└── *.css                       global.css, button.css · styles-zds.css = Spiegel von
+                                packages/tokens/vendor (npm run sync:zds, gitignored)
 
-tooling/                        Generatoren (gen-icons, gen-brand-assets), Drift-Checks
+packages/                       Workspace-Pakete (@zeit/*) — der Inhalt, den wir besitzen
+├── icons/                      @zeit/icons: svg/ + generierte Liste src/icons.ts
+│                               + icon-overrides.mjs (Kuratierung)
+└── tokens/                     @zeit/tokens
+
+tooling/                        Generatoren (gen-icons, gen-brand-assets), Spiegel-Skripte
+                                (sync-icons, sync-zds), Drift-Checks
                                 (check-nav, check-tokens, check-assets, check-component-drift,
                                 check-zds-sync), check-prod-drift (Doku ↔ zeit.de, nächtlich,
                                 nicht im Gate), zeit-de-exporter/ (model.json → Component-Seite,
@@ -54,8 +63,10 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Drift
 
 ## Wo lege ich … an?
 
-- **Icon / Brand-Logo:** SVG nach `static/downloads/icons/` bzw. `static/downloads/brand-logos/`
-  → `npm run gen:assets`. Sonderfälle in `src/lib/data/*-overrides.mjs`.
+- **Icon:** SVG nach `packages/icons/svg/` → `npm run gen:icons && npm run sync:icons`.
+  Sonderfälle in `packages/icons/icon-overrides.mjs` (siehe `packages/icons/README.md`).
+- **Brand-Logo:** SVG nach `static/downloads/brand-logos/` → `npm run gen:brand-assets`.
+  Sonderfälle in `src/lib/data/brand-asset-overrides.mjs`.
 - **Seite:** `src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in `src/lib/data/navigation.ts`.
 - **Dokumentierte Komponente:** `model.json` → `node tooling/zeit-de-exporter/export.mjs …`
   (redaktionelle Texte danach in `content.json`).
@@ -159,7 +170,7 @@ implizit `html-css → pattern.css`.
 - `GET /api/registry/<slug>[?format=html-css]` — Metadaten + Artefakte inkl.
   Datei-Inhalten **und Inhalts-Hash je Datei** (`sha256-<16 hex>`, gekürzter
   SHA-256); 404 als JSON bei unbekanntem Slug
-- `GET /api/registry/foundations` — Token-Basis `static/styles-zds.css` (Inhalt +
+- `GET /api/registry/foundations` — Token-Basis `packages/tokens/vendor/styles-zds.css` (Inhalt +
   Hash + Einbau-Hinweis) für `zds init`. Statische Route, gewinnt gegen `[slug]`
 
 CLI: [`tooling/zds-cli/`](tooling/zds-cli/README.md) — `zds init | list | info |

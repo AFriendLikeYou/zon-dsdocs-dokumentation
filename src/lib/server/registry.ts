@@ -160,12 +160,14 @@ export function registryComponent(slug: string, format?: string): RegistryCompon
 // ---------------------------------------------------------------------------
 
 /**
- * Rohe Token-Basis (`static/styles-zds.css`) zur Build-Zeit — dieselbe Datei,
- * die die Doku-Site ausliefert. Eine kopierte Komponente rendert ohne diese
- * `--z-ds-*`-Deklarationen ungestylt; `zds init` legt sie im Zielprojekt ab.
+ * Rohe Token-Basis (`packages/tokens/vendor/styles-zds.css`) zur Build-Zeit —
+ * dieselbe Datei, die die Doku-Site unter `/styles-zds.css` ausliefert (der
+ * `static/`-Spiegel entsteht per `npm run sync:zds` aus genau dieser Quelle).
+ * Eine kopierte Komponente rendert ohne diese `--z-ds-*`-Deklarationen ungestylt;
+ * `zds init` legt sie im Zielprojekt ab.
  */
 const foundationsCss = Object.values(
-	import.meta.glob('/static/styles-zds.css', {
+	import.meta.glob('/packages/tokens/vendor/styles-zds.css', {
 		eager: true,
 		query: '?raw',
 		import: 'default'

@@ -9,7 +9,8 @@
  *
  * Bewusst NICHT: foundation-tokens.ts aus dem CSS auto-befüllen — die Kuratierung
  * (kategorie, isColor, welche Tokens „offiziell" sind) bleibt Handarbeit.
- * styles-zds.css (generierte Upstream-Definitionen) wird nicht als „Nutzung" gewertet.
+ * styles-zds.css (Upstream-Definitionen, ausgeliefert als Spiegel von
+ * packages/tokens/vendor/) wird nicht als „Nutzung" gewertet.
  * .svelte-`<style>`-Blöcke sind v2 (verrauscht) — hier zählt das authored Site-CSS.
  *
  *   node tooling/check-tokens.mjs            # warnt, Exit 0 (läuft im `npm run check`)
@@ -26,6 +27,8 @@ const TOKEN_RE = /--z-ds-[a-zA-Z0-9-]+/g;
 const VAR_RE = /var\(\s*(--z-ds-[a-zA-Z0-9-]+)/g;
 
 // styles-zds.css ist die Definitions-Quelle (kein „Verbrauch") → aus dem Nutzungs-Scan raus.
+// In static/ liegt nur noch der ausgelieferte Spiegel (npm run sync:zds); die Datei
+// selbst gehört zu @zeit/tokens.
 const DEFINITION_FILE = 'styles-zds.css';
 
 // 1) Dokumentierte Tokens aus foundation-tokens.ts (Namen-Regex; die Datei ist eine Handliste).

@@ -286,7 +286,7 @@
 						"properties": {
 							"name": {
 								"type": "string",
-								"description": "Token-Name (--z-ds-*). Einzige Quelle des Werts — der wird zur Laufzeit/Buildzeit aus static/styles-zds.css aufgelöst, NICHT im Modell hinterlegt."
+								"description": "Token-Name (--z-ds-*). Einzige Quelle des Werts — der wird zur Laufzeit/Buildzeit aus packages/tokens/vendor/styles-zds.css aufgelöst, NICHT im Modell hinterlegt."
 							},
 							"hinweis": {
 								"type": "string",

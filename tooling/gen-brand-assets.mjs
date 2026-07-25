@@ -7,31 +7,15 @@
  * Ausschlüsse) kommen aus src/lib/data/brand-asset-overrides.mjs. Neue Brand-SVGs erscheinen
  * automatisch, statt wie früher „unsichtbar" auf der Disk zu liegen.
  *
+ * Quelle und Ziel stehen in tooling/lib/asset-targets.mjs (geteilt mit check-assets).
+ * Anders als die Icons bleiben die Brand-Logos Doku-App-Inhalt — kein eigenes Paket.
+ *
  *   node tooling/gen-brand-assets.mjs
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { discoverAssets, renderIconPreFile } from './lib/gen-asset-list.mjs';
-import { BRAND_ASSET_OVERRIDES } from '../src/lib/data/brand-asset-overrides.mjs';
+import { BRAND_ASSET_TARGET, writeAssetList } from './lib/asset-targets.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const { entries, excluded, unknownOverrides } = writeAssetList(BRAND_ASSET_TARGET);
 
-const { entries, excluded, unknownOverrides } = discoverAssets({
-	svgDir: path.join(root, 'static/downloads/brand-logos'),
-	pathPrefix: '/downloads/brand-logos/',
-	overrides: BRAND_ASSET_OVERRIDES
-});
-
-const body = renderIconPreFile({
-	constName: 'BRAND_ASSETS_LIST',
-	entries,
-	generatorName: 'tooling/gen-brand-assets.mjs',
-	overridesName: 'src/lib/data/brand-asset-overrides.mjs',
-	regenCmd: 'npm run gen:brand-assets'
-});
-
-fs.writeFileSync(path.join(root, 'src/lib/data/brand-assets.ts'), body);
 console.log(
 	`✓ gen:brand-assets — ${entries.length} Assets → src/lib/data/brand-assets.ts` +
 		(excluded.length ? ` (ausgeschlossen: ${excluded.join(', ')})` : '')

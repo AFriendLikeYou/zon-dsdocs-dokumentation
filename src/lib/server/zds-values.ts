@@ -1,7 +1,7 @@
 /**
  * zds-values.ts — Token-Name → Wert aus dem Upstream-CSS (server-only).
  *
- * Bettet static/styles-zds.css zur BUILD-Zeit ein (?raw, serverless-sicher:
+ * Bettet packages/tokens/vendor/styles-zds.css zur BUILD-Zeit ein (?raw, serverless-sicher:
  * kein fs-Zugriff zur Laufzeit) und parst daraus die kanonische Wertemenge
  * aller --z-ds-*-Tokens — GETRENNT nach Light und Dark. Eine Quelle für MCP
  * (mcp.ts) UND Manifest (manifest.ts) — die Werte ändern sich nur mit dem
@@ -25,7 +25,7 @@
  * Space), stehen in beiden Maps mit demselben Wert. ZDS_VALUES bleibt als Alias
  * auf LIGHT (kanonischer Default) für Abwärtskompatibilität bestehen.
  */
-import zdsCss from '../../../static/styles-zds.css?raw';
+import zdsCss from '../../../packages/tokens/vendor/styles-zds.css?raw';
 
 /** Ein geparster Regel-Block mit seiner Scope-Kette (At-Rules + Selektor). */
 type Scope = { chain: string[]; decls: Record<string, string> };

@@ -1,0 +1,101 @@
+# ZDS-Upstream — „Ist unsere Token-Kopie noch die des zeit.de-Pakets?"
+#
+# BEWUSST NICHT IM PR-GATE (.github/workflows/ci.yml), aus zwei Gründen:
+#
+#   1. `npm run copy:zds` SCHREIBT. Ein Schreibschritt vor `check-zds-sync` würde
+#      die Drift, die der Check finden soll, vorher wegkopieren — der Wächter wäre
+#      Dekoration. Aus demselben Grund ist `copy:zds` KEIN `postinstall`: es würde
+#      die durchgereichte Kopie bei jedem `npm install` still nachziehen und damit
+#      genau die Verifizierbarkeit zerstören, wegen der sie committet ist.
+#   2. Der Job installiert bewusst die NEUESTE veröffentlichte Version, nicht die
+#      im Lockfile gepinnte. Damit hängt sein Ergebnis an einer fremden Registry;
+#      ein Upstream-Release darf keinen Merge blockieren.
+#
+# Was er beantwortet, das sonst niemand fragt: `check-zds-sync` vergleicht gegen die
+# INSTALLIERTE Version (Lockfile-Pin, aktuell 0.3.4 bei einer `"*"`-Range, die
+# Renovate nichts zu bumpen gibt). Solange niemand aktualisiert, bleibt der Check
+# ewig grün — auch wenn upstream längst weitergezogen ist. Dieser Job schließt
+# genau diese Lücke, nächtlich und laut.
+#
+# Semantik: Exit 1 = die eingefrorene Kopie weicht vom neuesten Paket ab. Das ist
+# keine Panne, sondern eine Aufgabe: Version bumpen, `npm run copy:zds`, Folge-
+# Effekte prüfen (pattern.css, foundation-tokens.ts, packages/tokens/src/roles.ts).
+name: ZDS-Upstream (@zeitonline/design-system)
+
+on:
+  schedule:
+    # 04:23 UTC — nach dem Prod-Drift-Job (03:17), krumme Minute aus demselben Grund.
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: zds-upstream
+  cancel-in-progress: true
+
+jobs:
+  upstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # `--no-save`: der Lockfile-Pin bleibt unangetastet. Der Job SCHLÄGT VOR,
+      # er entscheidet nicht — Version-Bumps macht ein Mensch im PR.
+      - name: Neuestes Upstream-Paket holen
+        run: npm install --no-save @zeitonline/design-system@latest
+
+      - name: Version festhalten
+        id: version
+        run: |
+          V=$(node -p "require('./node_modules/@zeitonline/design-system/package.json').version")
+          echo "latest=$V" >> "$GITHUB_OUTPUT"
+          echo "Neueste veröffentlichte Version: $V"
+
+      # Der eigentliche Vergleich. `copy:zds` schreibt die Paket-Datei in den
+      # vendor-Ordner; ein Diff bedeutet: unsere Kopie ist veraltet.
+      - name: copy:zds und Abweichung ermitteln
+        id: diff
+        run: |
+          npm run copy:zds
+          if git diff --quiet -- packages/tokens/vendor/styles-zds.css; then
+            echo "✓ vendor/styles-zds.css deckt sich mit @zeitonline/design-system@${{ steps.version.outputs.latest }}."
+            {
+              echo "## ZDS-Upstream"
+              echo ""
+              echo "✓ Die eingefrorene Kopie deckt sich mit \`@zeitonline/design-system@${{ steps.version.outputs.latest }}\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## ZDS-Upstream — Kopie veraltet"
+              echo ""
+              echo "\`packages/tokens/vendor/styles-zds.css\` weicht von"
+              echo "\`@zeitonline/design-system@${{ steps.version.outputs.latest }}\` ab."
+              echo ""
+              echo "**Nächster Schritt:** Version bumpen, \`npm run copy:zds\`, Folge-Effekte prüfen"
+              echo "(\`pattern.css\`, \`foundation-tokens.ts\`, \`packages/tokens/src/roles.ts\`)."
+              echo ""
+              echo '```diff'
+              git diff -- packages/tokens/vendor/styles-zds.css
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            git diff -- packages/tokens/vendor/styles-zds.css
+            exit 1
+          fi
+
+      # Die frisch kopierte Datei als Artefakt — so lässt sich der Bump vorbereiten,
+      # ohne die Registry lokal erreichen zu müssen.
+      - name: Neue Token-Datei sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: styles-zds-latest
+          path: packages/tokens/vendor/styles-zds.css
+          retention-days: 30

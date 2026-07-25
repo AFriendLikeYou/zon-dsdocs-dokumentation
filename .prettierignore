@@ -15,4 +15,9 @@ src/routes/landing.content.json
 build/
 node_modules/
 package-lock.json
+packages/*/dist/
+
+# Durchgereichte Upstream-Kopie (@zeitonline/design-system) und ihr ausgelieferter
+# Spiegel: byte-identisch zum npm-Paket, sonst schlägt check-zds-sync an.
+packages/tokens/vendor/styles-zds.css
 static/styles-zds.css

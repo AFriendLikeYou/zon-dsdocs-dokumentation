@@ -1,5 +1,7 @@
 import { BRAND_ASSETS_LIST } from '$data/brand-assets';
-import { SVG_LIST } from '$data/icons';
+// Icons kommen aus dem Workspace-Paket; die Dateien liefert der Spiegel unter
+// /downloads/icons/ aus (tooling/sync-icons.mjs).
+import { SVG_LIST } from '@zeit/icons';
 import type { LayoutServerLoad } from './$types';
 import type { Theme } from '$types/global';
 import { LOGIN_COOKIE_NAME } from '$config';

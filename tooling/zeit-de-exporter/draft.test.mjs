@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { knownTokens, mapVariableName, parseVariantName, buildDraft } from './draft.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const known = knownTokens(fs.readFileSync(path.join(repoRoot, 'static/styles-zds.css'), 'utf8'));
+const known = knownTokens(
+	fs.readFileSync(path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'), 'utf8')
+);
 
 // Fixture im exakten figma-measure.js-Output-Format — Button-artig mit
 // State-Achse, echten ZDS-Variablennamen und einer bewusst unbekannten Variable.

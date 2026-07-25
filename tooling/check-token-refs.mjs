@@ -3,14 +3,16 @@
  * Zero-Reference-Guard für --z-ds-*-Tokens (Warnung, kein Blocker — „Never Block,
  * Always Suggest").
  *
- * Prüft, ob jede im Repo REFERENZIERTE --z-ds-*-Rolle upstream (static/styles-zds.css,
- * die eingefrorene Kopie von @zeitonline/design-system) auch DEFINIERT ist. Wird ein
- * Token upstream entfernt oder umbenannt, bleibt eine kaputte `var()` bzw. ein toter
- * Token-Name in den Daten sonst still — dieser Check macht die Lücke sichtbar.
+ * Prüft, ob jede im Repo REFERENZIERTE --z-ds-*-Rolle upstream
+ * (packages/tokens/vendor/styles-zds.css, die durchgereichte Kopie von
+ * @zeitonline/design-system) auch DEFINIERT ist. Wird ein Token upstream entfernt oder
+ * umbenannt, bleibt eine kaputte `var()` bzw. ein toter Token-Name in den Daten sonst
+ * still — dieser Check macht die Lücke sichtbar.
  *
- * Kanonische Menge  = alle in static/styles-zds.css per Property DEFINIERTEN --z-ds-*
- *                     (Definitionen, nicht var()-Nutzungen).
- * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer styles-zds.css,
+ * Kanonische Menge  = alle in packages/tokens/vendor/styles-zds.css per Property
+ *                     DEFINIERTEN --z-ds-* (Definitionen, nicht var()-Nutzungen).
+ * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer dem
+ *                     ausgelieferten Spiegel styles-zds.css,
  *                     alle pattern.css unter src/routes/, <style>-Blöcke in
  *                     src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
  *                     derselben Dateien (z. B. `colorCustomProperty="--z-ds-…"`)
@@ -39,7 +41,12 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const strict = process.argv.includes('--strict');
 
+// Dateiname des Spiegels in static/ — der fällt aus dem Nutzungs-Scan raus
+// (Definitionen sind keine Referenzen).
 const DEFINITION_FILE = 'styles-zds.css';
+// Kanonische Quelle: die durchgereichte Upstream-Kopie im Paket @zeit/tokens.
+const DEFINITION_PATH = path.join(root, 'packages/tokens/vendor', DEFINITION_FILE);
+const DEFINITION_REL = path.relative(root, DEFINITION_PATH);
 
 // ── Pure Kernfunktionen (testbar, fs-frei) ───────────────────────────────────
 
@@ -169,10 +176,8 @@ function walkFiles(dir, pred, acc = []) {
 const rel = (p) => path.relative(root, p);
 
 function main() {
-	// 1) Kanonische Menge aus styles-zds.css.
-	const canonical = new Set(
-		collectDefinedTokens(fs.readFileSync(path.join(root, 'static', DEFINITION_FILE), 'utf8'))
-	);
+	// 1) Kanonische Menge aus der durchgereichten Paket-Kopie (@zeit/tokens).
+	const canonical = new Set(collectDefinedTokens(fs.readFileSync(DEFINITION_PATH, 'utf8')));
 
 	/** @type {{token:string,file:string}[]} */
 	const refs = [];
@@ -233,19 +238,19 @@ function main() {
 	if (unknownRefs.size) {
 		problems += unknownRefs.size;
 		console.warn(
-			`\n⚠️  Zero-Reference: ${unknownRefs.size} referenzierte(s) --z-ds-Token ohne Definition in static/${DEFINITION_FILE}:`
+			`\n⚠️  Zero-Reference: ${unknownRefs.size} referenzierte(s) --z-ds-Token ohne Definition in ${DEFINITION_REL}:`
 		);
 		for (const token of [...unknownRefs.keys()].sort())
 			console.warn(`   • ${token}  (in ${[...unknownRefs.get(token)].sort().join(', ')})`);
 		console.warn(
-			'   → upstream entfernt/umbenannt? Referenz anpassen oder styles-zds.css re-syncen (npm run copy:zds).'
+			`   → upstream entfernt/umbenannt? Referenz anpassen oder ${DEFINITION_REL} re-syncen (npm run copy:zds).`
 		);
 	}
 
 	if (unknownPinned.size) {
 		problems += unknownPinned.size;
 		console.warn(
-			`\n⚠️  Gepinnt, aber upstream unbekannt: ${unknownPinned.size} in .ds-stage gepinnte(s) --z-ds-Token fehlt in static/${DEFINITION_FILE}:`
+			`\n⚠️  Gepinnt, aber upstream unbekannt: ${unknownPinned.size} in .ds-stage gepinnte(s) --z-ds-Token fehlt in ${DEFINITION_REL}:`
 		);
 		for (const token of [...unknownPinned.keys()].sort())
 			console.warn(
@@ -256,7 +261,7 @@ function main() {
 
 	if (problems === 0) {
 		console.log(
-			`✓ Token-Refs: alle referenzierten & gepinnten --z-ds-Tokens sind in static/${DEFINITION_FILE} definiert (${canonical.size} kanonische Tokens).`
+			`✓ Token-Refs: alle referenzierten & gepinnten --z-ds-Tokens sind in ${DEFINITION_REL} definiert (${canonical.size} kanonische Tokens).`
 		);
 	} else {
 		console.warn('');

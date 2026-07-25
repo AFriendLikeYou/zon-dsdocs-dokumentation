@@ -1,7 +1,7 @@
 /**
  * /api/registry/foundations — Token-Basis der Registry (GET).
  *
- * Liefert `static/styles-zds.css` (rohe `--z-ds-*`-Deklarationen) inkl. Hash und
+ * Liefert `packages/tokens/vendor/styles-zds.css` (rohe `--z-ds-*`-Deklarationen) inkl. Hash und
  * Einbau-Hinweis; `zds init` legt die Datei als ersten Schritt im Zielprojekt ab,
  * sonst rendern kopierte Komponenten ungestylt. Statische Route — gewinnt in
  * SvelteKit gegen `[slug]`, "foundations" ist damit kein Komponenten-Slug mehr.

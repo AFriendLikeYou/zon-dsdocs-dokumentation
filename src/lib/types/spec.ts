@@ -109,7 +109,7 @@ export type SpecState = { label: string; vorhanden?: boolean };
 
 /**
  * Ein Token-Eintrag der Specs-Tabelle. Kein `wert`-Feld mehr — der Wert ist die
- * eine Quelle (static/styles-zds.css) und wird zur Laufzeit/Buildzeit über den
+ * eine Quelle (packages/tokens/vendor/styles-zds.css) und wird zur Laufzeit/Buildzeit über den
  * `name` aufgelöst (Client: getComputedStyle · Server: ZDS_VALUES).
  *   hinweis  – freier Beschreibungstext neben dem aufgelösten Wert
  *   swatch   – Hex als SSR-Platzhalter + Flag „zeige Swatch"; Live-Farbe kommt

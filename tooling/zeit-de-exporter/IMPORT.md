@@ -68,7 +68,7 @@ Regeln:
 - **Figma-Variablennamen → z-ds-Namen** deterministisch mappen, nicht raten:
   `Background/10` → `--z-ds-color-background-10`, `Text/55` → `--z-ds-color-text-55`,
   `M`/`S`/`XXS` (Spacing-Collection) → `--z-ds-space-m/-s/-xxs`. Existenz des Ziel-
-  Tokens in `static/styles-zds.css` prüfen — kein Treffer heißt: Wert übernehmen,
+  Tokens in `packages/tokens/vendor/styles-zds.css` prüfen — kein Treffer heißt: Wert übernehmen,
   Token weglassen, `herkunft: "gemessen"` bleibt trotzdem korrekt.
 - **Determinismus:** Gleicher Figma-Stand ⇒ identischer Mess-Output. Weicht ein
   Re-Messen ab, hat sich das Design geändert — das ist ein Feature (Drift-Signal),

@@ -35,6 +35,17 @@ vite.config.ts.timestamp-*
 test-results/
 playwright-report/
 
+# Icon-Auslieferung: reiner Spiegel von packages/icons/svg (npm run sync:icons,
+# läuft in prepare/predev/prebuild). Quelle ist das Paket @zeit/icons.
+/static/downloads/icons/
+
+# Token-Auslieferung: reiner Spiegel von packages/tokens/vendor (npm run sync:zds,
+# läuft in prepare/predev/prebuild). Quelle ist das Paket @zeit/tokens.
+/static/styles-zds.css
+
+# Paket-Build-Artefakte (npm run tokens:build)
+/packages/*/dist/
+
 # Prod-Drift-Bericht (tooling/check-prod-drift.mjs --json/--summary, CI-Artefakt)
 /prod-drift.json
 /prod-drift.md

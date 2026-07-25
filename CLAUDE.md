@@ -94,10 +94,28 @@ src/
 │  ├─ types/  actions/  stores/  config/  utils.ts
 └─ hooks.server.ts               # sequence(Basic-Auth, Redirects)
 static/                          # global.css (Token-Layer) · media/ downloads/ fonts/
+                                 #   styles-zds.css = Spiegel (sync:zds, gitignored)
+                                 #   downloads/icons/ = Spiegel (sync:icons, gitignored)
+packages/                        # Workspace-Pakete (Monorepo-Umbau, MIGRATIONSPLAN.md)
+├─ icons/                        # @zeit/icons ↓
+│  ├─ svg/                       # die SVG-Dateien (Quelle; aus @zeitonline/icons)
+│  ├─ icon-overrides.mjs         # MENSCH — Name/Slug/Tags/Ausschlüsse
+│  └─ src/icons.ts               # MASCHINE — SVG_LIST (gen:icons), nie von Hand
+└─ tokens/                       # @zeit/tokens ↓
+   ├─ vendor/styles-zds.css      # Upstream-Kopie, DURCHGEREICHT — nie von Hand ändern
+   ├─ src/roles.ts               # unsere --ds-*-Rollen-Schicht (TS-Quelle)
+   └─ build.mjs                  # → dist/roles.css + dist/tokens.json
 tooling/                         # zeit-de-exporter/ + check-*.mjs (Drift-Gate)
 ```
 
 Faustregel Komponenten: **App-Chrome → `layout/`, alles andere → `ui/`.**
+
+**Paket-Inhalt wird gespiegelt, nicht umverlinkt:** Was in `packages/*` liegt, aber unter
+einer bestehenden URL ausgeliefert werden muss (`/downloads/icons/…`, `/styles-zds.css`),
+kopiert ein `sync:*`-Skript nach `static/`. Die Ziele sind **Build-Artefakte** (gitignored)
+und laufen in `prepare`/`predev`/`prebuild` automatisch mit; `check-assets`/`check-zds-sync`
+prüfen sie. So bleibt der öffentliche Vertrag stabil, ohne dass Paketinhalt doppelt im Git
+liegt.
 
 ## Component-Doku-System
 
@@ -344,6 +362,12 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
   gemappt) ist der Default für die **Doku-UI**; Komponenten nutzen nur Rollen-
   Tokens. Ausnahmen: `--z-ds-space-*`/`-lineheight-*`, **originalgetreue
   Pattern-CSS** (echte z-ds-Kopie) und generierte Seiten.
+  **Quelle der Rollen ist seit PR 1 `packages/tokens/src/roles.ts`** (@zeit/tokens).
+  Deklariert werden sie vorerst weiter in `global.css`; `packages/tokens/src/roles.test.ts`
+  hält beide Seiten Deklaration für Deklaration zusammen. Wer eine `--ds-*`-Rolle mit
+  `--z-ds-*`-Bezug ändert, ändert BEIDE Dateien — sonst wird der Gate rot.
+  Die ZDS-Primitiven liegen in `packages/tokens/vendor/styles-zds.css` (durchgereichte
+  Upstream-Kopie, nie von Hand ändern; `npm run copy:zds` ist der einzige Schreibweg).
 - **Doku-Modell ist kanonisch** und render-unabhängig. Repo-Spezifisches gehört
   in die Exporter-Schicht bzw. den `render`-Block.
 - **Generierte Dateien nie von Hand editieren** — Redaktion in `content.json`

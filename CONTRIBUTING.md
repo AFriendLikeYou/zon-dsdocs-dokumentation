@@ -11,19 +11,23 @@ Verwandte Hintergründe: `DECISIONS.md` (ADRs), `tooling/zeit-de-exporter/README
 
 ## 1. Ein Icon hinzufügen
 
-Icons liegen als SVG in `static/downloads/icons/` und werden von `tooling/gen-icons.mjs` automatisch in
-`src/lib/data/icons.ts` (generiert, nicht von Hand editieren) eingetragen.
+Icons liegen im Paket **`@zeit/icons`** (`packages/icons/`): SVGs in `packages/icons/svg/`,
+daraus generiert `tooling/gen-icons.mjs` die Liste `packages/icons/src/icons.ts` (generiert,
+nicht von Hand editieren). Ausgeliefert werden die Dateien unverändert unter
+`/downloads/icons/…` — `npm run sync:icons` spiegelt sie dafür nach `static/downloads/icons/`
+(Build-Artefakt, gitignored; läuft in `prepare`/`predev`/`prebuild` automatisch mit).
 
 1. **SVG ablegen** — entweder aus dem Upstream-Paket ziehen (`npm run copy:icons`, kopiert
-   `@zeitonline/icons` → `static/downloads/icons/` **und** regeneriert `icons.ts`) oder eine Datei direkt
-   nach `static/downloads/icons/<name>.svg` legen und dann `npm run gen:icons` laufen lassen.
+   `@zeitonline/icons` → `packages/icons/svg/`, regeneriert die Liste **und** spiegelt) oder eine
+   Datei direkt nach `packages/icons/svg/<name>.svg` legen und dann
+   `npm run gen:icons && npm run sync:icons` laufen lassen.
 2. **Optional kuratieren** — nur falls der Anzeigename nicht dem Title-Case des Dateinamens
    entspricht (`kpi-mostread.svg` → „KPI") oder du Such-`tags` willst: einen Eintrag in
-   `src/lib/data/icon-overrides.mjs` ergänzen (`name`, `slug`, `tags`, `exclude`). Dateien ohne
+   `packages/icons/icon-overrides.mjs` ergänzen (`name`, `slug`, `tags`, `exclude`). Dateien ohne
    Eintrag brauchen keinen — Name/Slug/Pfad werden abgeleitet.
 3. **Prüfen** — `npm run gen:icons` erneut ausführen; `npm run check` (→ `check-assets.mjs`)
-   warnt, falls Liste und Verzeichnis auseinanderlaufen. Das Icon erscheint automatisch auf
-   `/product/foundations/icons`.
+   bricht ab, falls Liste, Verzeichnis oder Spiegel auseinanderlaufen. Das Icon erscheint
+   automatisch auf `/product/foundations/icons`.
 
 ## 2. Ein Brand-Asset hinzufügen
 

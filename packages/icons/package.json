@@ -1,0 +1,21 @@
+{
+	"name": "@zeit/icons",
+	"version": "0.0.0",
+	"description": "ZEIT-Online-Icon-Set: die SVG-Dateien plus die generierte, kuratierte Liste (Name, Slug, Tags).",
+	"type": "module",
+	"license": "UNLICENSED",
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
+	},
+	"files": [
+		"svg",
+		"src"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./svg/*": "./svg/*",
+		"./package.json": "./package.json"
+	},
+	"types": "./src/index.ts",
+	"sideEffects": false
+}

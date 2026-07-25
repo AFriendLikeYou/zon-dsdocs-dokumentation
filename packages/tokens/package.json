@@ -1,0 +1,28 @@
+{
+	"name": "@zeit/tokens",
+	"version": "0.0.0",
+	"description": "ZEIT Design Tokens — durchgereichte ZDS-Primitiven (--z-ds-*) plus die Rollen-Schicht (--ds-*) der Doku-UI.",
+	"type": "module",
+	"license": "UNLICENSED",
+	"files": [
+		"vendor",
+		"src",
+		"dist",
+		"README.md"
+	],
+	"exports": {
+		".": "./src/roles.ts",
+		"./roles.css": "./dist/roles.css",
+		"./tokens.json": "./dist/tokens.json",
+		"./styles-zds.css": "./vendor/styles-zds.css",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "node build.mjs",
+		"check": "node build.mjs --check"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com",
+		"access": "restricted"
+	}
+}

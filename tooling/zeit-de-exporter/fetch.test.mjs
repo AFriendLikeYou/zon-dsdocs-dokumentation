@@ -6,7 +6,9 @@ import { rgbaToHex, mapProps, mapNode, mapDocumentToRaw, parseTarget } from './f
 import { knownTokens, buildDraft } from './draft.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const known = knownTokens(fs.readFileSync(path.join(repoRoot, 'static/styles-zds.css'), 'utf8'));
+const known = knownTokens(
+	fs.readFileSync(path.join(repoRoot, 'packages/tokens/vendor/styles-zds.css'), 'utf8')
+);
 
 // Eingebettete, realistische Figma-REST-Antwort (GET /v1/files/:key/nodes) für ein
 // kleines Button-Set: State-Achse, echte ZDS-Variablennamen (über varNames), eine

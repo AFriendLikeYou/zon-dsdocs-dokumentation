@@ -1,8 +1,9 @@
 /**
  * icon-overrides — kuratierte Metadaten, die sich NICHT aus dem Dateinamen ableiten lassen.
  *
- * `tooling/gen-icons.mjs` entdeckt alle `static/svg/*.svg` automatisch (Drift-frei) und leitet
- * Standard-Werte ab: `slug` = Dateiname, `path` = `/svg/<datei>`, `name` = Title-Case des Slugs.
+ * `tooling/gen-icons.mjs` entdeckt alle `packages/icons/svg/*.svg` automatisch (Drift-frei) und
+ * leitet Standard-Werte ab: `slug` = Dateiname, `path` = `/downloads/icons/<datei>` (die
+ * ausgelieferte URL), `name` = Title-Case des Slugs.
  * Nur Ausnahmen davon stehen hier — pro Datei (Key = Dateiname ohne `.svg`):
  *
  *   name    – Anzeigename, wenn Title-Case nicht passt ('KPI' statt 'Kpi Mostread')

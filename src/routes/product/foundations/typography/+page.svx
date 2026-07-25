@@ -11,7 +11,7 @@ title: Typography
 	import { DoDontList } from '$components/ui/specsheet';
 	import { TypeSpecimen, type TypeRole } from '$components/ui/type-specimen';
 
-	// Nur fontsize-Tokens, die in static/styles-zds.css existieren. Gruppiert nach Rolle.
+	// Nur fontsize-Tokens, die in packages/tokens/vendor/styles-zds.css existieren. Gruppiert nach Rolle.
 	const ueberschriften: TypeRole[] = [
 		{
 			token: '--z-ds-fontsize-34',

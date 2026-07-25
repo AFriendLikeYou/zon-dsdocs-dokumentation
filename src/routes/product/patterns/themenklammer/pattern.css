@@ -7,7 +7,7 @@
 
    Alle Werte stehen auf echten --z-ds-*-Tokens. Der vertikale Rhythmus nutzt
    --z-ds-space-teaser — derselbe Token, mit dem .zon-teaser--wide in der
-   Component-CSS arbeitet (1.5rem, ab 48em 3.5rem, siehe static/styles-zds.css). */
+   Component-CSS arbeitet (1.5rem, ab 48em 3.5rem, siehe packages/tokens/vendor/styles-zds.css). */
 
 .themenklammer {
 	max-width: 892px;
