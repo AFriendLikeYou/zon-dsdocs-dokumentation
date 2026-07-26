@@ -328,7 +328,7 @@
 			}
 		],
 		"template": "<div class=\"z-input{classes}\">\n  <span class=\"z-input__lead\" aria-hidden=\"true\"></span>\n  <input class=\"z-input__field\" type=\"text\" placeholder=\"Platzhalter\" aria-label=\"Beispiel-Eingabe\" />\n  <span class=\"z-input__chevron\" aria-hidden=\"true\"></span>\n</div>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./input.css",
 		"preview": "<div class=\"z-input z-input--filled\"><span class=\"z-input__lead\" aria-hidden=\"true\"></span><input class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" aria-label=\"E-Mail\" /></div>",
 		"variant": "<div class=\"z-input z-input--error\"><input class=\"z-input__field\" type=\"text\" placeholder=\"name@beispiel.de\" aria-label=\"E-Mail\" /></div>",
 		"calloutAnchors": [
@@ -442,7 +442,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"input.css"
 				],
 				"status": "kanonisch"
 			}

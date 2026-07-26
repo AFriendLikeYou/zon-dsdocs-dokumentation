@@ -8,7 +8,7 @@
  * vorhandenen Format-Artefakte (Format · Status · Dateien).
  *
  * NUR SERVERSEITIG importieren: Datenbasis ist der server-only AGENT_CATALOG
- * (enthält das rohe pattern.css aus @zeit/components). Weitere Artefakt-Dateien
+ * (enthält das rohe Pattern-CSS aus @zeit/components). Weitere Artefakt-Dateien
  * (z. B. code/*.svelte) werden zur BUILD-ZEIT per import.meta.glob ?raw
  * eingesammelt — kein Laufzeit-Dateisystem-Zugriff (Vercel!). Wie manifest.ts/mcp.ts:
  * dünne Route → pure, getestete Funktionen hier.
@@ -31,7 +31,7 @@ const codeFiles = import.meta.glob('../../../../../packages/components/src/*/cod
 
 /**
  * Custom Elements (PR 6) liegen NICHT unter `code/`, sondern als `<slug>.ts`
- * direkt im Komponenten-Ordner — gleichrangig neben `pattern.css`, weil sie
+ * direkt im Komponenten-Ordner — gleichrangig neben `<slug>.css`, weil sie
  * gleichrangige Auslieferungen sind (Aussehen bzw. Verhalten). Ohne diesen
  * zweiten Glob deklarierte das Modell ein Artefakt, das `zds add` dann nicht
  * liefern könnte.
@@ -68,17 +68,17 @@ const codeFilesBySlugPfad: Record<string, string> = Object.fromEntries([
 
 /**
  * Löst eine ordner-relative Artefakt-Datei auf ihren rohen Inhalt auf:
- * `pattern.css` kommt aus dem Katalog (schon roh vorhanden), alles andere aus
- * dem code/-Glob. null = Datei deklariert, aber Inhalt nicht auffindbar.
+ * Das Pattern-CSS `<slug>.css` kommt aus dem Katalog (schon roh vorhanden), alles
+ * andere aus dem code/-Glob. null = Datei deklariert, aber Inhalt nicht auffindbar.
  */
 function fileContent(entry: AgentCatalogEntry, datei: string): string | null {
-	if (datei === 'pattern.css') return entry.patternCss;
+	if (datei === `${entry.slug}.css`) return entry.patternCss;
 	return codeFilesBySlugPfad[`${entry.slug}/${datei}`] ?? null;
 }
 
 /**
  * Artefakt-Deklaration einer Komponente — ausschließlich aus dem `code`-Block des
- * Specs. Seit PR 4 gibt es KEINEN stillen pattern.css-Fallback mehr: jede
+ * Specs. Seit PR 4 gibt es KEINEN stillen CSS-Fallback mehr: jede
  * Komponente sagt selbst, was sie ausliefert (MIGRATIONSPLAN §4, Ausnahme 3);
  * das Schema erzwingt den Block.
  *

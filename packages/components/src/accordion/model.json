@@ -24,11 +24,15 @@
 	"spacing": [
 		{
 			"label": "Abstand Titel ↔ Pfeil (mindestens)",
-			"px": "12 px"
+			"px": "12 px",
+			"art": "gap"
 		},
 		{
 			"label": "Innenabstand des Auslösers, oben und unten",
-			"px": "16 px"
+			"px": "16 px",
+			"art": "padding",
+			"richtung": "vertikal",
+			"selector": ".z-accordion__button"
 		}
 	],
 	"callouts": [
@@ -256,7 +260,7 @@
 			}
 		],
 		"template": "<z-accordion>\n\t<details class=\"z-accordion\"{attrs}>\n\t\t<summary class=\"z-accordion__button\">\n\t\t\t<span class=\"z-accordion__title\">Wie kündige ich mein Abo?</span>\n\t\t\t<svg class=\"z-accordion__arrow\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m13 4-6 6-6-6\"></path></svg>\n\t\t</summary>\n\t\t<div class=\"z-accordion__content\">\n\t\t\t<p>Schreiben Sie an abo@zeit.de oder nutzen Sie das Kündigungsformular in Ihrem Kundenkonto. Die Kündigung wird zum Ende des laufenden Bezugszeitraums wirksam.</p>\n\t\t</div>\n\t</details>\n</z-accordion>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./accordion.css",
 		"align": "fill",
 		"calloutAnchors": [
 			{
@@ -309,7 +313,7 @@
 			}
 		],
 		"codeNote": "Ausgeliefertes Markup. Ohne <z-accordion> und ohne JavaScript funktioniert derselbe Baum weiter — dann übernimmt der Browser das Auf und Zu.",
-		"repoNote": "Kein Figma-Gegenstück: Im ❖ ZDS existiert kein Accordion (Suche über die Bibliothek, 2026-07-25). Quelle ist ausschließlich die Produktion — zeit.de liefert z-accordion auf allen Ressort-Startseiten aus (Bereich „Beliebt bei Abonnenten\"), dort allerdings zusätzlich mit kpi-area__*-Klassen überschrieben (Innenabstand 20 statt 16, Schriftgröße 22 statt 20). Dokumentiert sind die ZDS-Werte, nicht die überschriebenen. Das Bestands-Markup ist <section class=\"z-accordion\"><h2 class=\"z-accordion__title\"><button aria-expanded>…; wir liefern statt dessen <details>/<summary> aus (Begründung im Kopf von pattern.css).",
+		"repoNote": "Kein Figma-Gegenstück: Im ❖ ZDS existiert kein Accordion (Suche über die Bibliothek, 2026-07-25). Quelle ist ausschließlich die Produktion — zeit.de liefert z-accordion auf allen Ressort-Startseiten aus (Bereich „Beliebt bei Abonnenten\"), dort allerdings zusätzlich mit kpi-area__*-Klassen überschrieben (Innenabstand 20 statt 16, Schriftgröße 22 statt 20). Dokumentiert sind die ZDS-Werte, nicht die überschriebenen. Das Bestands-Markup ist <section class=\"z-accordion\"><h2 class=\"z-accordion__title\"><button aria-expanded>…; wir liefern statt dessen <details>/<summary> aus (Begründung im Kopf von accordion.css).",
 		"version": "Produktion zeit.de, gemessen 2026-07-25"
 	},
 	"code": {
@@ -317,7 +321,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"accordion.css"
 				],
 				"status": "kanonisch"
 			},

@@ -23,7 +23,7 @@
  *   · Varianten-Achsen, Tokens, Zustände. Figmas Achsen und die dokumentierten
  *     Web-Varianten sind nachweislich VERSCHIEDENE Systeme — der Text Button
  *     führt in Figma „Size/Weight", im Web „Größe/Betonung" mit anderen Werten,
- *     und `cssClass` kommt grundsätzlich aus der pattern.css, nie aus Figma
+ *     und `cssClass` kommt grundsätzlich aus dem Pattern-CSS, nie aus Figma
  *     (ANALYSE.md §3). Ein Diff darüber schlüge bei JEDER Komponente an und wäre
  *     binnen einer Woche stummgeschaltet. Dasselbe gilt für die kuratierten
  *     Token-Kategorien.

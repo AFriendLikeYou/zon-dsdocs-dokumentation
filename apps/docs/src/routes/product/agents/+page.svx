@@ -160,7 +160,7 @@ Zustände: default, hover, disabled, focus, active, loading`;
 
 Diese Doku ist nicht nur zum Lesen gebaut — sie ist selbst ein **MCP-Server**. Wer einen
 KI-Assistenten anbindet, gibt ihm damit direkten Zugriff auf den Komponenten-Katalog: Er
-kann live nach Komponenten suchen, das echte Markup samt `pattern.css` abrufen und die
+kann live nach Komponenten suchen, das echte Markup samt Pattern-CSS abrufen und die
 Token-Werte nachschlagen, statt sich Klassennamen und Farben auszudenken.
 
 Der Unterschied ist praktisch spürbar: Ohne Anbindung rät ein Assistent, wie ein ZEIT-Button
@@ -286,7 +286,7 @@ MCP ist der bequemste, aber nicht der einzige Zugang. Alle vier Wege speisen sic
 derselben Registry:
 
 - **`GET /api/manifest.json`** — der gesamte Katalog als JSON: Komponenten inklusive
-  `render`-Template und rohem `pattern.css`, Foundations mit Live-Werten, dazu die
+  `render`-Template und rohem Pattern-CSS, Foundations mit Live-Werten, dazu die
   Konventionen. Einzeln mit `?component=<slug>`. Ideal, wenn ein Werkzeug kein MCP spricht.
 - **`GET /api/registry`** und die **`zds`-CLI** — der Copy-in-Weg nach dem shadcn-Modell:
   Komponenten werden in ein Projekt **kopiert**, nicht als Paket installiert. Ablauf im

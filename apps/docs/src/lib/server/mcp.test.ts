@@ -11,7 +11,7 @@ import {
 } from './mcp';
 
 // Deckt die MCP-Datenschicht + Tool-Handler ab (ohne Browser/Basic Auth):
-// angereicherter Katalog (render + pattern.css), Suche, get je Sektion, Budget-Kappung
+// angereicherter Katalog (render + Pattern-CSS), Suche, get je Sektion, Budget-Kappung
 // und der JSON-RPC-Dispatch.
 
 describe('AGENT_CATALOG (angereicherter Index)', () => {
@@ -22,10 +22,10 @@ describe('AGENT_CATALOG (angereicherter Index)', () => {
 		}
 	});
 
-	it('behält render (Template) und referenziert pattern.css', () => {
+	it('behält render (Template) und referenziert das Pattern-CSS', () => {
 		const input = AGENT_CATALOG.find((e) => e.slug === 'input')!;
 		expect(input.spec.render?.template).toContain('z-input');
-		// pattern.css wird per ?raw-Glob geladen; css:true in vite.config.ts sorgt
+		// Das Pattern-CSS wird per ?raw-Glob geladen; css:true in vite.config.ts sorgt
 		// dafür, dass Vitest den echten Rohtext liefert (statt leerer Strings).
 		expect(input.patternCss).toContain('.z-input');
 	});
@@ -94,7 +94,7 @@ describe('getComponent', () => {
 	});
 
 	it('kappt lange Antworten auf das Budget', () => {
-		// cell hat das größte pattern.css → markup überschreitet das Budget.
+		// cell hat das größte Pattern-CSS → markup überschreitet das Budget.
 		const out = getComponent('cell', 'markup');
 		expect(out.length).toBeLessThanOrEqual(GET_CHAR_BUDGET);
 	});

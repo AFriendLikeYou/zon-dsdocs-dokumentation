@@ -173,7 +173,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"checkbox.css"
 				],
 				"status": "kanonisch"
 			}

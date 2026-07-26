@@ -31,7 +31,7 @@ describe('@zeit/components · Barrel', () => {
 
 	it('jede Komponente bringt ihr Pattern-CSS mit', () => {
 		for (const slug of ordnerSlugs) {
-			expect(existsSync(join(HIER, slug, 'pattern.css')), slug).toBe(true);
+			expect(existsSync(join(HIER, slug, `${slug}.css`)), slug).toBe(true);
 		}
 	});
 });

@@ -10,7 +10,7 @@ vi.mock('$app/state', () => ({
 const { default: GetComponent } = await import('./GetComponent.svelte');
 
 const HTML_CSS = [
-	{ format: 'html-css' as const, dateien: ['pattern.css'], status: 'kanonisch' as const }
+	{ format: 'html-css' as const, dateien: ['button.css'], status: 'kanonisch' as const }
 ];
 
 describe('GetComponent — Bezugs-Sektion „Komponente holen"', () => {
@@ -27,7 +27,7 @@ describe('GetComponent — Bezugs-Sektion „Komponente holen"', () => {
 
 		expect(screen.getByText('html-css')).toBeInTheDocument();
 		expect(screen.getByText('kanonisch')).toBeInTheDocument();
-		expect(screen.getByText('pattern.css')).toBeInTheDocument();
+		expect(screen.getByText('button.css')).toBeInTheDocument();
 		// Singular/Plural folgt der Anzahl.
 		expect(screen.getByText('Verfügbares Format')).toBeInTheDocument();
 	});

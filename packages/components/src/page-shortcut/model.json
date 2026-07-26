@@ -165,7 +165,7 @@
 	"render": {
 		"template": "<button type=\"button\" class=\"z-page-shortcut{classes}\"{attrs}>\n  <span>Zur Startseite</span>\n</button>",
 		"hint": "Keine Varianten — ein Stil mit Hover-/Focus-State.",
-		"cssFile": "./pattern.css",
+		"cssFile": "./page-shortcut.css",
 		"calloutAnchors": [
 			{
 				"nr": 1,
@@ -185,7 +185,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"page-shortcut.css"
 				],
 				"status": "kanonisch"
 			}

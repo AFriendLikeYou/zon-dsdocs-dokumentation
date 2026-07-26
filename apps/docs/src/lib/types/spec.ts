@@ -141,7 +141,7 @@ export type TokenGroup = { kategorie: string; beschreibung?: string; items: Toke
 export type VariantGroup = {
 	prop: string;
 	/** cssClass = explizite Modifier-Klasse der Variante (Registry-Schema; Drift-Check
-	    prüft sie 1:1 gegen pattern.css statt der Label-Heuristik). */
+	    prüft sie 1:1 gegen das Pattern-CSS statt der Label-Heuristik). */
 	werte: { label: string; cssClass?: string; default?: boolean }[];
 };
 
@@ -238,7 +238,7 @@ export type PlaygroundOptions = { align?: 'center' | 'fill'; resizable?: boolean
 
 /**
  * Format eines Code-Artefakts einer Komponente (Registry, shadcn-Modell).
- *   html-css      – kanonisches, unscoped Pattern (pattern.css) auf --z-ds-Tokens
+ *   html-css      – kanonisches, unscoped Pattern (<slug>.css) auf --z-ds-Tokens
  *   web-component  – gekapseltes Custom-Element
  *   svelte        – nach Svelte 5 portierte Fassung
  */
@@ -259,7 +259,7 @@ export type CodeArtefakt = {
  * Deklariert die vorhandenen Code-Artefakte einer Komponente für die Registry
  * (shadcn-Modell: Dateien werden per CLI ins Zielprojekt KOPIERT, nicht
  * installiert). PFLICHT im model.json und immer explizit — den früheren stillen
- * `pattern.css`-Fallback gibt es seit PR 4 nicht mehr (MIGRATIONSPLAN §4,
+ * CSS-Fallback gibt es seit PR 4 nicht mehr (MIGRATIONSPLAN §4,
  * Ausnahme 3). Auflösung: tooling/artefakte.mjs, genutzt von Exporter UND
  * registry.ts.
  */

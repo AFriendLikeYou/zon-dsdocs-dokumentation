@@ -9,9 +9,9 @@
  * Pro Slug entsteht { html, css }:
  *   - html: render.preview ODER instantiate(template, controls, defaults) — genau die
  *           Funktion, die auch der Playground nutzt (DRY, kein zweiter Renderer).
- *   - css:  pattern.css aus dem Paket (unscoped) → gegen `.spec-canvas` gescoped
+ *   - css:  das Pattern-CSS aus dem Paket (unscoped) → gegen `.spec-canvas` gescoped
  *           (Vorbild: scopeCss im Exporter) PLUS optionales inline render.css, das
- *           bereits `.spec-canvas`-gescoped ist (z. B. icon-button ohne pattern.css).
+ *           bereits `.spec-canvas`-gescoped ist (z. B. icon-button ohne Pattern-CSS).
  *
  * Bühnen-Klasse ist `spec-canvas ds-stage` (wie die Component-Seiten): so greifen die
  * gescopten Regeln, und die gepinnten Light-Token machen die Fläche theme-stabil hell.
@@ -32,7 +32,7 @@ type RenderBlock = {
 
 type ModelWithRender = { name?: string; render?: RenderBlock };
 
-// Build-Zeit-Globs: model.json (inkl. render) + pattern.css als Rohtext. Beide
+// Build-Zeit-Globs: model.json (inkl. render) + das Pattern-CSS als Rohtext. Beide
 // liegen seit PR 4 im Paket (@zeit/components) und damit AUSSERHALB der Vite-
 // Projektwurzel `apps/docs` — deshalb datei-relativ statt mit führendem `/`
 // (Begründung in data/catalog.ts).
@@ -41,7 +41,9 @@ const models = import.meta.glob('../../../../../packages/components/src/*/model.
 	import: 'default'
 }) as Record<string, ModelWithRender>;
 
-const patternCss = import.meta.glob('../../../../../packages/components/src/*/pattern.css', {
+// `*/*.css`: Die Datei heißt wie die Komponente (`button/button.css`), pro Ordner
+// genau eine. Der Slug kommt aus dem ORDNER, nicht aus dem Dateinamen.
+const patternCss = import.meta.glob('../../../../../packages/components/src/*/*.css', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
@@ -366,7 +368,7 @@ function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | nu
 	html = neutralisiereLinks(html);
 
 	// 2) CSS: inline render.css (bereits .spec-canvas-gescoped, :global entwrappen) +
-	//    frisch gescoptes pattern.css.
+	//    frisch gescoptes Pattern-CSS.
 	const inlineRaw = Array.isArray(render.css) ? render.css.join('\n') : (render.css ?? '');
 	const inlineCss = inlineRaw ? unwrapGlobal(inlineRaw) : '';
 	const raw = patternCssBySlug[slug] ?? '';

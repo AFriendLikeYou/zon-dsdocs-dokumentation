@@ -31,14 +31,16 @@ export const generated = {
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
 			"art": "padding",
-			"richtung": "vertikal"
+			"richtung": "vertikal",
+			"selector": ".buttongroup-button"
 		},
 		{
 			"label": "Segment-Padding horizontal",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
 			"art": "padding",
-			"richtung": "horizontal"
+			"richtung": "horizontal",
+			"selector": ".buttongroup-button"
 		}
 	],
 	"tokens": [
@@ -163,7 +165,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"button-group.css"
 				],
 				"status": "kanonisch"
 			}

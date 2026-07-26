@@ -71,7 +71,7 @@ function checkComponent(slug, model, patternCss = '') {
 	const render = model.render ?? {};
 	const varianten = model.varianten ?? [];
 
-	// CSS-Korpus: legacy render.css (vor-gescopte Strings) + co-locatetes pattern.css.
+	// CSS-Korpus: legacy render.css (vor-gescopte Strings) + co-locatetes Pattern-CSS.
 	const legacyCss = Array.isArray(render.css) ? render.css.join('\n') : (render.css ?? '');
 	const css = `${legacyCss}\n${patternCss}`;
 	if (!css.trim() || varianten.length === 0) return []; // nichts zu vergleichen
@@ -243,7 +243,7 @@ for (const slug of slugs) {
 		);
 		continue;
 	}
-	// pattern.css aus dem Paket (Registry-Schema) in den Vergleichs-Korpus aufnehmen.
+	// Pattern-CSS aus dem Paket (Registry-Schema) in den Vergleichs-Korpus aufnehmen.
 	// `render.cssFile` ist relativ zum MODELL — und das liegt im Paket.
 	let patternCss = '';
 	if (typeof model.render?.cssFile === 'string') {

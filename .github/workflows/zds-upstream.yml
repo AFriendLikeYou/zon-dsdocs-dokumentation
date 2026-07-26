@@ -19,7 +19,7 @@
 #
 # Semantik: Exit 1 = die eingefrorene Kopie weicht vom neuesten Paket ab. Das ist
 # keine Panne, sondern eine Aufgabe: Version bumpen, `npm run copy:zds`, Folge-
-# Effekte prüfen (pattern.css, foundation-tokens.ts, packages/tokens/src/roles.ts).
+# Effekte prüfen (Pattern-CSS, foundation-tokens.ts, packages/tokens/src/roles.ts).
 name: ZDS-Upstream (@zeitonline/design-system)
 
 on:
@@ -80,7 +80,7 @@ jobs:
               echo "\`@zeitonline/design-system@${{ steps.version.outputs.latest }}\` ab."
               echo ""
               echo "**Nächster Schritt:** Version bumpen, \`npm run copy:zds\`, Folge-Effekte prüfen"
-              echo "(\`pattern.css\`, \`foundation-tokens.ts\`, \`packages/tokens/src/roles.ts\`)."
+              echo "(Pattern-CSS, \`foundation-tokens.ts\`, \`packages/tokens/src/roles.ts\`)."
               echo ""
               echo '```diff'
               git diff -- packages/tokens/vendor/styles-zds.css

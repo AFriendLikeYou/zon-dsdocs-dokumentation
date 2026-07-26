@@ -28,7 +28,7 @@
  * Befehl versprechen.
  *
  * **Kein Fallback mehr** (MIGRATIONSPLAN §4, Ausnahme 3): Früher galt implizit
- * „pattern.css vorhanden ⇒ html-css/kanonisch". Bequem, aber still — eine
+ * „Pattern-CSS vorhanden ⇒ html-css/kanonisch". Bequem, aber still — eine
  * Komponente konnte ausgeliefert werden, ohne dass irgendwo stünde, WAS sie
  * ausliefert, und eine gelöschte/umbenannte Datei fiel niemandem auf. Seit PR 4
  * deklariert jede Komponente ihre Artefakte selbst; `code` ist im

@@ -81,9 +81,9 @@ Component-Doku wird aus einem Doku-Modell (`model.json`) generiert — Schema-Re
 `tooling/zeit-de-exporter/IMPORT.md`.
 
 1. **Modell anlegen** — Gerüst mit `npm run new-component -- "<Name>"` (legt Ordner,
-   gültiges Start-`model.json` und `pattern.css`-Stub an, überschreibt nichts), Werte
+   gültiges Start-`model.json` und `<slug>.css`-Stub an, überschreibt nichts), Werte
    aus Figma via Figma-MCP (siehe `IMPORT.md`) oder von Hand.
-   Ort: `packages/components/src/<kebab>/{model.json, pattern.css}`. Das Modell und das
+   Ort: `packages/components/src/<kebab>/{model.json, <kebab>.css}`. Das Modell und das
    CSS gehören ins **Paket** (`@zeit/components`), weil sie beschreiben bzw. sind, was
    wir ausliefern; die Seite ist nur ihre Dokumentation. `code.artefakte` ist Pflicht.
 2. **Exporter laufen lassen** —

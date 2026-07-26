@@ -157,7 +157,7 @@ function sectionMarkup(e: AgentCatalogEntry): string {
 			out += `  - ${c.key} (${c.type})${c.cssClass ? ` → .${c.cssClass}` : ''}${c.attr ? ` → [${c.attr}]` : ''}\n`;
 		}
 	}
-	if (e.patternCss) out += `\npattern.css:\n${e.patternCss}\n`;
+	if (e.patternCss) out += `\n${e.slug}.css:\n${e.patternCss}\n`;
 	return out;
 }
 
@@ -470,7 +470,10 @@ const TOOLS = [
 					type: 'object',
 					description: 'Gemergter Spec (model.json + content.json) inkl. render.'
 				},
-				patternCss: { type: ['string', 'null'], description: 'Rohes, unscoped pattern.css.' }
+				patternCss: {
+					type: ['string', 'null'],
+					description: 'Rohes, unscoped Pattern-CSS der Komponente (<slug>.css).'
+				}
 			},
 			required: ['slug', 'spec']
 		}
@@ -564,7 +567,7 @@ export function handleRpc(msg: JsonRpcRequest): JsonRpcResponse | null {
 					'ZEIT-Designsystem-Doku. Alle Patterns folgen derselben Klassen-Grammatik: ' +
 					'.z-<komponente> (Block) · .z-<komponente>__<teil> · .z-<komponente>--<variante> (Modifier, kombinierbar). ' +
 					'Zustände über native Attribute/Pseudoklassen (disabled, :hover, :focus-visible), keine State-Klassen. ' +
-					'Farben/Maße ausschließlich über --z-ds-*-Tokens. Markup ist Vanilla HTML/CSS mit eigenem pattern.css je Komponente. ' +
+					'Farben/Maße ausschließlich über --z-ds-*-Tokens. Markup ist Vanilla HTML/CSS mit eigenem <slug>.css je Komponente. ' +
 					'Einstieg: list → get(slug) · Foundations: foundations(section). ' +
 					'Tool-Ergebnisse enthalten structuredContent (voller JSON-Vertrag); Gesamt-Manifest: GET /api/manifest.json.'
 			});

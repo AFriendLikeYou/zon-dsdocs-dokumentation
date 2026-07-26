@@ -133,7 +133,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"toggle.css"
 				],
 				"status": "kanonisch"
 			}

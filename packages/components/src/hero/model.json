@@ -459,7 +459,7 @@
 			}
 		],
 		"template": "<article class=\"zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}\"{attrs}>\n  <figure class=\"zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <h2 class=\"zon-teaser__heading\">\n      <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">KI und Kinder</span></span>\n      <span class=\"zon-teaser__title zon-teaser__title--extralarge\">»KI ist mächtig wie eine Motorsäge«</span>\n    </h2>\n    <p class=\"zon-teaser__summary\">Der Zukunftsforscher Brian David Johnson erklärt, warum Kinder den Umgang mit künstlicher Intelligenz früh lernen sollten.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Vorname Nachname</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n  </div>\n</article>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./hero.css",
 		"align": "fill",
 		"resizable": true,
 		"calloutAnchors": [
@@ -551,7 +551,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"hero.css"
 				],
 				"status": "kanonisch"
 			}

@@ -13,7 +13,8 @@
  *                     DEFINIERTEN --z-ds-* (Definitionen, nicht var()-Nutzungen).
  * Referenz-Stellen  = var(--z-ds-*) in authored CSS (static/*.css außer dem
  *                     ausgelieferten Spiegel styles-zds.css,
- *                     alle pattern.css (packages/components/src/ + apps/docs/src/routes/),
+ *                     alles Pattern-CSS (packages/components/src/<slug>/<slug>.css +
+ *                     apps/docs/src/routes/**\/pattern.css),
  *                     <style>-Blöcke in
  *                     apps/docs/src/**\/*.{svelte,svx}), Token-NAMEN als Prop-Werte im Markup
  *                     derselben Dateien (z. B. `colorCustomProperty="--z-ds-…"`)
@@ -235,11 +236,17 @@ function main() {
 		addPinned(collectDefinedTokens(css), path.join(staticDir, f));
 	}
 
-	// 2b) pattern.css — nur var()-Nutzungen. Zwei Fundorte seit PR 4: die
-	//     Komponenten-CSS im Paket (@zeit/components) und die Layout-Glue-CSS der
-	//     handgeschriebenen Pattern-Seiten unter src/routes/product/patterns/.
-	for (const basis of [PKG_COMPONENTS_DIR, ROUTES_DIR])
-		for (const f of walkFiles(basis, (name) => name === 'pattern.css'))
+	// 2b) Pattern-CSS — nur var()-Nutzungen. Zwei Fundorte mit ZWEI Namensregeln:
+	//     im Paket heißt die Datei seit der Umbenennung wie die Komponente
+	//     (`button/button.css`, ein CSS je Ordner), bei den handgeschriebenen
+	//     Pattern-Seiten unter src/routes/product/patterns/ ist es weiterhin die
+	//     Layout-Glue-CSS `pattern.css` (sie gehört keinem Slug).
+	const cssFundorte = [
+		[PKG_COMPONENTS_DIR, (name) => name.endsWith('.css')],
+		[ROUTES_DIR, (name) => name === 'pattern.css']
+	];
+	for (const [basis, passt] of cssFundorte)
+		for (const f of walkFiles(basis, passt))
 			addRefs(collectVarRefs(fs.readFileSync(f, 'utf8')), f);
 
 	// 2c) <style>-Blöcke in src/**/*.{svelte,svx} — generierte Component-Docs

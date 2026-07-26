@@ -11,7 +11,7 @@ liefert Struktur/Tokens/Maße, daraus wird ein `model.json` gebaut, der
 Figma-Node ──(Figma MCP)──▶ Fakten (Name, Varianten, Tokens, Maße, Struktur)
    │
    ▼  (von Hand, originalgetreu)
-model.json  +  pattern.css        ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
+model.json  +  <slug>.css         ──▶  node …/export.mjs <dir>  ──▶  +page.svx …
    │
    ▼
 Katalog-Order (optional) · Gate · redaktionelle Prüfung
@@ -21,7 +21,7 @@ Katalog-Order (optional) · Gate · redaktionelle Prüfung
 ## Schnellstart
 
 ```bash
-npm run new-component -- "Input"          # Gerüst anlegen (Ordner + Start-model.json + pattern.css)
+npm run new-component -- "Input"          # Gerüst anlegen (Ordner + Start-model.json + input.css)
 # … model.json ausfüllen (der Editor zeigt dank $schema Feld-Hilfe & Validierung) …
 npm run export-component -- packages/components/src/input   # Seite erzeugen
 ```
@@ -100,7 +100,7 @@ Was er füllt: Varianten-Achsen (State-Achse → `zustaende` + `farbrollen`-Ger�
 Rest → `varianten`), `masse`/`spacing` (gemessen), `tokens` gruppiert (Namensregel
 gegen `styles-zds.css` **verifiziert** — kein Treffer = Wert ohne Token + Report,
 nie raten), Playground-Rumpf. Was bewusst TODO bleibt: `cssClass` (kommt aus der
-pattern.css, Ebene ②), Template-ARIA (Ebene ③), alle Mensch-Felder (Ebene ④).
+Pattern-CSS, Ebene ②), Template-ARIA (Ebene ③), alle Mensch-Felder (Ebene ④).
 Gleiche `figma-raw.json` ⇒ identischer Entwurf. Nach Prüfung/Ergänzung den Entwurf
 zu `model.json` promoten (umbenennen bzw. mergen) — erst dann exportieren.
 
@@ -126,7 +126,7 @@ node tooling/zeit-de-exporter/import.mjs '<figma-url>' <kebab> [--draft]
 
 Ohne `--draft`: Fetch läuft, dann TODO-Ausgabe (Namen ergänzen). Sind die Namen da
 (oder `--draft` gesetzt), läuft `draft` gleich mit → `model.draft.json`. Die zwei
-menschlichen Gates (Token-Namen, dann `pattern.css` + Redaktionsdatei) bleiben bewusst.
+menschlichen Gates (Token-Namen, dann `<slug>.css` + Redaktionsdatei) bleiben bewusst.
 
 ### 1e · Pipeline-Stufen im Blick (`import.mjs --status`)
 
@@ -138,7 +138,7 @@ node tooling/zeit-de-exporter/import.mjs --status
 ```
 
 Spalten (Reihenfolge = Pipeline): `raw` (`figma-raw.json`) · `draft`
-(`model.draft.json`) · `model` (`model.json`) · `pattern` (`pattern.css`) ·
+(`model.draft.json`) · `model` (`model.json`) · `pattern` (`<slug>.css`) ·
 `content` (`apps/docs/content/components/<slug>.json`) · `+page` (`+page.svx`), je `✓`/`–`. Die Spalte
 **Hinweis** meldet:
 
@@ -158,7 +158,7 @@ in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
 - **Faithful:** Werte 1:1 aus Figma. Tokens als **echte `--z-ds-*`** referenzieren
   (nicht abgeleitete `--ds-*` — die sind bereits auf `:root` aufgelöst und flippen
   auf der Bühne nicht mit, siehe Memory `ds-stage-raw-token-rule`).
-- **Varianten** mit explizitem `cssClass` (Drift-Check prüft gegen `pattern.css`).
+- **Varianten** mit explizitem `cssClass` (Drift-Check prüft gegen das Pattern-CSS).
 - **Playground**: `render.controls` + `render.template` (ein gemeinsames Markup, per
   Modifier ein-/ausgeblendet) — deckt den Control-Raum ab; volle Achse in `render.matrix`.
   Optionale Bühnen-Optionen: `render.align` (`"center"` Default | `"fill"` = voller
@@ -168,12 +168,12 @@ in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
   Optional für die Bühnen-Streifen mit Zwei-Wege-Highlight: `art: 'padding' | 'gap'`.
   Bei `padding` zusätzlich `richtung: 'vertikal' | 'horizontal'` (welche Achse der Streifen
   zeigt); bei `gap` zusätzlich `selector` = der Flex-/Grid-Container (CSS, relativ zum
-  Specimen-Root), dessen `gap` visualisiert wird. Nur klassifizieren, wenn im `pattern.css`
+  Specimen-Root), dessen `gap` visualisiert wird. Nur klassifizieren, wenn im Pattern-CSS
   wirklich ein `gap`/`padding` auf dem Element existiert **und** der px-Wert übereinstimmt —
   im Zweifel unklassifiziert lassen (Fallback = reine Redline).
 - **`render.calloutAnchors[].selector`** (optional): CSS-Selektor relativ zum Specimen-Root
   für die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur
-  echte Klassen aus `template`/`pattern.css` eintragen, die im gerenderten Anatomie-Specimen
+  echte Klassen aus `template`/Pattern-CSS eintragen, die im gerenderten Anatomie-Specimen
   vorkommen; Bestandteile ohne eigene Klasse (reine Textknoten) lassen `selector` weg.
 - **`farbrollen`** (Farbrollen-Matrix): aus den Figma-**States** (default/hover/disabled …)
   ableiten — je Teil (Hintergrund, Text, Rahmen …) das `--z-ds-*`-Token pro Zustand.
@@ -191,7 +191,7 @@ in der Route: das Modell beschreibt, was ausgeliefert wird. Prinzipien:
 - **Platzhalter kennzeichnen:** fehlen Assets (Bild/Cover/Avatar), neutrale Flächen
   nutzen und im `repoNote`/Kommentar als Doku-Platzhalter markieren.
 
-## 3 · `pattern.css` (falls `render.cssFile`)
+## 3 · `<slug>.css` (falls `render.cssFile`)
 
 Unscoped, neben `model.json` im Paket-Ordner (`render.cssFile` ist **relativ zum
 Modell**). Flache Regeln plus die **bedingten
@@ -205,7 +205,7 @@ dürfen nicht gescopet werden und der Keyframe-Name wäre global. Auf echten `--
 Die **Component-Registry** (`/api/registry` + `zds`-CLI, shadcn-Modell: Dateien
 werden ins Zielprojekt **kopiert**) deckt den gesamten Katalog **automatisch** ab.
 Was eine Komponente dabei ausliefert, sagt sie aber **selbst**: Der Top-Level-Block
-`code` ist Pflicht (Schema), einen impliziten `pattern.css`-Fallback gibt es seit
+`code` ist Pflicht (Schema), einen impliziten CSS-Fallback gibt es seit
 PR 4 nicht mehr (MIGRATIONSPLAN §4, Ausnahme 3). Grund: Der Fallback war bequem und
 still — eine Komponente konnte ausgeliefert werden, ohne dass irgendwo stand, WAS,
 und eine gelöschte Datei fiel niemandem auf.
@@ -216,7 +216,7 @@ portierte Fassung). Registry + CLI greifen die neuen Artefakte automatisch auf:
 ```jsonc
 "code": {
   "artefakte": [
-    { "format": "html-css", "dateien": ["pattern.css"], "status": "kanonisch" },
+    { "format": "html-css", "dateien": ["button.css"], "status": "kanonisch" },
     { "format": "svelte", "dateien": ["code/Button.svelte"], "status": "portiert" }
   ]
 }
@@ -306,7 +306,7 @@ node tooling/check-figma-drift.mjs --fixture         # offline gegen figma-raw.j
   sind „nicht prüfbar" — kein Fehler.
 - Maße mit `herkunft: abgeleitet | geschätzt` werden **nicht** verglichen: sie
   sagen selbst, dass sie nicht aus Figma stammen. Wer einen Wert aus der
-  `pattern.css` statt aus Figma nimmt, markiert ihn also korrekt — und der Check
+  `<slug>.css` statt aus Figma nimmt, markiert ihn also korrekt — und der Check
   hört auf, ihn zu bemängeln. Das ist Absicht, kein Schlupfloch.
 - Varianten-Achsen, Tokens und Namen prüft er bewusst nicht (Begründung im
   Kopfkommentar des Checks).
@@ -325,7 +325,7 @@ Redaktionsdatei begründet widersprochen:
 "overrides": {
   "masse.hoehe.px": {
     "wert": "34",
-    "grund": "Der Figma-Node hat Padding 0 und misst nur die Zeilenhöhe des Labels (18). Die ausgelieferte Komponente trägt Padding 8 aus der pattern.css — auf zeit.de messen alle Basis-Instanzen 34.",
+    "grund": "Der Figma-Node hat Padding 0 und misst nur die Zeilenhöhe des Labels (18). Die ausgelieferte Komponente trägt Padding 8 aus der text-button.css — auf zeit.de messen alle Basis-Instanzen 34.",
     "belegt": "produktion",
     "maschinenwert": "18"
   }
@@ -438,7 +438,7 @@ Label nicht um?".
 Jede generierte Seite bekommt als **erste Sektion des Develop-Tabs** den Weg ins
 eigene Projekt: `zds init` (einmalig, holt die Token-Basis — ohne sie rendert die
 Kopie ungestylt), `zds add <slug>` und die verfügbaren Formate. Dafür ist **nichts zu
-pflegen**: die Formate kommen aus `code.artefakte` bzw. dem `pattern.css`-Fallback,
+pflegen**: die Formate kommen aus `code.artefakte`,
 aufgelöst über `tooling/artefakte.mjs` — dieselbe Funktion, mit der `/api/registry`
 die CLI beantwortet. Hat eine Komponente kein Artefakt, zeigt die Sektion einen
 ehrlichen Hinweis statt eines Befehls, der an der Registry scheitern würde.
@@ -449,7 +449,7 @@ ehrlichen Hinweis statt eines Befehls, der an der Registry scheitern würde.
 - [ ] `model.json` (Tokens = `--z-ds-*`, `varianten[].cssClass`, `spacing`)
 - [ ] `farbrollen` aus den Figma-States gebaut (Teil × Zustand → Token; `"none"` = kein Fill)
 - [ ] `herkunft` je `masse`/`spacing` gesetzt (Figma = gemessen, berechnet = abgeleitet, Platzhalter = geschätzt)
-- [ ] `pattern.css` (flach, originalgetreu) — falls nötig
+- [ ] `<slug>.css` (flach, originalgetreu) — falls nötig
 - [ ] Exporter gelaufen
 - [ ] ggf. Katalog-Order/Badge im `katalog`-Block des `model.json` (Nav ist
       katalog-getrieben — kein Handeintrag)

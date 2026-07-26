@@ -5,7 +5,7 @@
  * anderen Artefakte kommen über eigene Subpfade, damit jedes im richtigen Graph
  * landet und niemand sie ungewollt mitzieht:
  *
- *   import '@zeit/components/accordion/pattern.css';  // Aussehen → Stylesheet-Graph
+ *   import '@zeit/components/accordion/accordion.css';  // Aussehen → Stylesheet-Graph
  *   import '@zeit/components/accordion/accordion';    // Verhalten → registriert <z-accordion>
  *   import { spec } from '@zeit/components/accordion'; // Beschreibung
  *

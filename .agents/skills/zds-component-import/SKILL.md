@@ -14,12 +14,12 @@ Import IST ein Reihenfolge-Gate, kein Freistil. Voller Guide + Schema: `tooling/
 
 ```
 ① Figma-Messung   → Maße, Token-Bindungen, Varianten-Achsen   (herkunft: "gemessen")
-② Produktions-CSS → Klassen, echte Zustände (:hover/:disabled) (pattern.css, originalgetreu)
+② Produktions-CSS → Klassen, echte Zustände (:hover/:disabled) (<slug>.css, originalgetreu)
 ③ Produktions-HTML→ ARIA-Semantik, Rollen, Live-Regions, inert (nicht nur semantisch!)
 ④ Mensch          → zweck, verwendung, doDont, a11y-Texte      (Redaktionsdatei, gewinnt)
 ```
 
-Orte (Monorepo): Modell + `pattern.css` + `figma-raw.json` im Paket
+Orte (Monorepo): Modell + `<slug>.css` + `figma-raw.json` im Paket
 `packages/components/src/<slug>/`, die Redaktion in
 `apps/docs/content/components/<slug>.json`, das Generat (`+page.svx`,
 `spec.generated.ts`) unter `apps/docs/src/routes/product/components/<slug>/`.
@@ -32,7 +32,7 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 
 2. **Ebene ① messen — NICHT abschreiben.** `get_context_for_code_connect` (Varianten-Achsen, Props, Baum) + `tooling/zeit-de-exporter/figma-measure.js` via `use_figma` (read-only: Maße, Auto-Layout mit Variablen-Bindung, `unbound[]`-Report). **Output als `figma-raw.json` co-located speichern (committen)**, dann `npm run draft-component -- <dir>`: der Draft-Generator baut daraus deterministisch `model.draft.json` — Achsen, masse/spacing (gemessen), Tokens gegen styles-zds.css verifiziert, farbrollen-Gerüst; Mensch-Felder + `cssClass` bleiben TODO. Ergänzend `figma-analyze-component-set` für State-Machine/`diffFromDefault`, `figma-deep-component` für tiefe Nested-Bäume. Jeder Maß-Wert bekommt `herkunft`: aus Messung = `"gemessen"`, aus CSS abgeleitet = `"abgeleitet"`, Platzhalter = `"geschätzt"`. **hoehe/breite NICHT einfach `"abgeleitet"` lassen — messen.**
 
-3. **Ebene ② pattern.css** aus dem echten zeit.de-CSS kuratieren (flach, keine At-Rules). Die States, die die CSS wirklich hat (`:hover`/`:focus-visible`/`:disabled`/…), bestimmen `farbrollen.zustaende` und `zustaende[]`. **Pflicht-Konsistenz: `farbrollen.zustaende` ⊇ alle State-Pseudoklassen der pattern.css.** Kein State in der Doku, den die CSS nicht hat (sonst lügt die Doku — cell-Fall).
+3. **Ebene ② `<slug>.css`** aus dem echten zeit.de-CSS kuratieren (flach, keine At-Rules). Die States, die die CSS wirklich hat (`:hover`/`:focus-visible`/`:disabled`/…), bestimmen `farbrollen.zustaende` und `zustaende[]`. **Pflicht-Konsistenz: `farbrollen.zustaende` ⊇ alle State-Pseudoklassen des Pattern-CSS.** Kein State in der Doku, den die CSS nicht hat (sonst lügt die Doku — cell-Fall).
 
 4. **Ebene ③ ARIA aus echter Produktions-HTML.** `render.template` trägt die echten Rollen/Attribute (role/aria-\*/inert/aria-live), nicht nur semantisches HTML. Wenn keine Produktions-HTML vorliegt: Template als bewusst semantisch markieren, ARIA-Lücke in a11y notieren — nicht faken.
 
@@ -46,7 +46,7 @@ Referenz-Vorlage (Goldstandard, alle vier Ebenen komplett): `carousel/`.
 - [ ] Kein `TODO`-Marker mehr im promoteten `model.json` (Draft-Reste: cssClass/figma/kategorie/zweck).
 - [ ] `figma`-Link auf ZDS-Node (nicht Demofile, nicht leer).
 - [ ] `masse` je Wert mit `herkunft`; hoehe/breite gemessen (nicht pauschal abgeleitet).
-- [ ] `farbrollen.zustaende` deckt alle pattern.css-State-Pseudoklassen (inkl. `focus-visible`).
+- [ ] `farbrollen.zustaende` deckt alle State-Pseudoklassen des Pattern-CSS (inkl. `focus-visible`).
 - [ ] `zustaende[]` behauptet keinen State, den die CSS nicht rendert.
 - [ ] `render.template` trägt echte ARIA (oder Lücke bewusst in a11y notiert).
 - [ ] Kein `--sds-*`-Token; nur echte `--z-ds-*` oder Wert ohne Token (dann `unbound`).

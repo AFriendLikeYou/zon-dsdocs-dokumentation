@@ -59,7 +59,7 @@ describe('CodeBlock — Zeilennummern', () => {
 });
 
 describe('CodeBlock — Hervorhebung über Zeilengrenzen', () => {
-	it('färbt mehrzeilige CSS-Kommentare durchgehend ein (pattern.css)', () => {
+	it('färbt mehrzeilige CSS-Kommentare durchgehend ein (Pattern-CSS)', () => {
 		const css = [
 			'/* Kommentar',
 			'   über zwei Zeilen */',

@@ -14,19 +14,20 @@ title: Formular
 	//
 	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus dem Paket
 	// @zeit/components (Single Source of Truth). Nur das Layout-Glue (Stack-Abstände,
-	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns.
+	// Label-/Fehlertext) lebt co-located als pattern.css dieses Patterns
+	// (die Pattern-SEITE behält den generischen Namen — sie gehört keinem Slug).
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Card } from '$components/ui/card';
 	import { Grid } from '$components/ui/grid';
 
-	import inputCss from '@zeit/components/input/pattern.css?raw';
-	import checkboxCss from '@zeit/components/checkbox/pattern.css?raw';
-	import buttonCss from '@zeit/components/button/pattern.css?raw';
+	import inputCss from '@zeit/components/input/input.css?raw';
+	import checkboxCss from '@zeit/components/checkbox/checkbox.css?raw';
+	import buttonCss from '@zeit/components/button/button.css?raw';
 	import glueCss from './pattern.css?raw';
 
 	// Die z-Selektoren sind seitenweit eindeutig (nichts sonst nutzt sie) → wir binden
-	// die pattern.css EINMAL UNSCOPED ein. Bewusste, dokumentierte Entscheidung (ADR-026):
+	// das Pattern-CSS EINMAL UNSCOPED ein. Bewusste, dokumentierte Entscheidung (ADR-026):
 	// spart eine Scope-Schicht; die Live-Vorschau sitzt zusätzlich auf .ds-stage, damit
 	// die --z-ds-*-Token dort auf helle Artboard-Werte gepinnt sind.
 	const patternCss = [inputCss, checkboxCss, buttonCss, glueCss].join('\n');

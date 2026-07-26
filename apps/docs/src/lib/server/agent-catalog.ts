@@ -3,14 +3,14 @@
  *
  * NUR SERVERSEITIG importieren (Route +server.ts / src/lib/server/*): dieser Index
  * enthält bewusst den `render`-Block (Playground-Template = fertiges Markup-Rezept
- * für Agenten) UND das rohe pattern.css — beides ist für die Doku-UI unnötig, für
+ * für Agenten) UND das rohe Pattern-CSS — beides ist für die Doku-UI unnötig, für
  * KI-Agenten aber der Kern. Der reguläre CATALOG ($data/catalog) strippt `render`
  * und lädt kein CSS; er bleibt die Quelle für die Site-UI.
  *
  * Wie der CATALOG (ADR-024): Build-Zeit-Glob über die model.json des Pakets + die
  * Redaktionsdatei content/components/<slug>.json, zusammengeführt mit `mergeSpec`
  * ($lib/spec — Redaktion gewinnt, Maschinen-Werte nur per begründetem Override),
- * `$schema`/`katalog` gestrippt. Zusätzlich pattern.css als ?raw.
+ * `$schema`/`katalog` gestrippt. Zusätzlich das Pattern-CSS als ?raw.
  */
 import type { ComponentSpec } from '$types/spec';
 import { mergeSpec } from '$lib/spec';
@@ -34,7 +34,7 @@ export type AgentCatalogEntry = {
 
 // Vite inlined die Globs zur Build-Zeit (eager) — kein Laufzeit-Fetch.
 //
-// model.json und pattern.css liegen im Paket (@zeit/components), also AUSSERHALB
+// model.json und das Pattern-CSS liegen im Paket (@zeit/components), also AUSSERHALB
 // der Vite-Projektwurzel `apps/docs` → datei-relativ statt mit führendem `/`
 // (Begründung in data/catalog.ts). Die Redaktion liegt seit PR 5 in
 // `apps/docs/content/`, also INNERHALB der Wurzel → wurzel-relativ.
@@ -51,7 +51,10 @@ const contents = import.meta.glob('/content/components/*.json', {
 	import: 'default'
 }) as Record<string, Partial<ComponentSpec>>;
 
-const patterns = import.meta.glob('../../../../../packages/components/src/*/pattern.css', {
+// Das CSS heißt seit der Umbenennung wie die Komponente (`button/button.css`) —
+// der Glob greift deshalb über `*/*.css`. Pro Ordner gibt es genau ein CSS; der
+// Slug kommt weiterhin aus dem ORDNER (slugOf), nicht aus dem Dateinamen.
+const patterns = import.meta.glob('../../../../../packages/components/src/*/*.css', {
 	eager: true,
 	query: '?raw',
 	import: 'default'

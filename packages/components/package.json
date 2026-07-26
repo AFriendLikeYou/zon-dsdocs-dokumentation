@@ -14,7 +14,7 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./*": "./src/*/index.ts",
-		"./*/pattern.css": "./src/*/pattern.css",
+		"./*.css": "./src/*.css",
 		"./*/model.json": "./src/*/model.json",
 		"./accordion/accordion": "./src/accordion/accordion.ts",
 		"./carousel/carousel": "./src/carousel/carousel.ts",

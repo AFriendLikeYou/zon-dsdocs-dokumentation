@@ -12,9 +12,9 @@
 	import LandingHero from './LandingHero.svelte';
 	import type { LandingContent } from '$types/landing';
 	import contentJson from './landing.content.json';
-	import buttonCss from '@zeit/components/button/pattern.css?raw';
-	import toggleCss from '@zeit/components/toggle/pattern.css?raw';
-	import checkboxCss from '@zeit/components/checkbox/pattern.css?raw';
+	import buttonCss from '@zeit/components/button/button.css?raw';
+	import toggleCss from '@zeit/components/toggle/toggle.css?raw';
+	import checkboxCss from '@zeit/components/checkbox/checkbox.css?raw';
 
 	const worldCss = [buttonCss, toggleCss, checkboxCss].join('\n');
 

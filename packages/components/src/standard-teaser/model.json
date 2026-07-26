@@ -32,6 +32,7 @@
 			"token": "--z-ds-space-xl",
 			"art": "gap",
 			"selector": ".zon-teaser--standard",
+			"achse": "horizontal",
 			"herkunft": "gemessen"
 		},
 		{
@@ -40,25 +41,32 @@
 			"token": "--z-ds-space-m",
 			"art": "gap",
 			"selector": ".zon-teaser--standard",
+			"achse": "vertikal",
 			"herkunft": "gemessen"
 		},
 		{
 			"label": "Spitzmarke ↔ Überschrift",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__kicker",
+			"bis": ".zon-teaser__title"
 		},
 		{
 			"label": "Überschrift ↔ Zusammenfassung",
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__title",
+			"bis": ".zon-teaser__summary"
 		},
 		{
 			"label": "Zusammenfassung ↔ Byline",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__summary",
+			"bis": ".zon-teaser__byline"
 		},
 		{
 			"label": "Byline-Gap (Autor · Zeitstempel)",
@@ -74,13 +82,16 @@
 			"token": "--z-ds-space-xs",
 			"art": "padding",
 			"richtung": "vertikal",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser__actions"
 		},
 		{
 			"label": "Innenabstand der Aktions-Buttons",
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
-			"herkunft": "gemessen"
+			"art": "padding",
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser__actions .z-text-button"
 		},
 		{
 			"label": "Abstand zum nächsten Teaser (ab 768 px; darunter 24 px)",
@@ -480,7 +491,7 @@
 			}
 		],
 		"template": "<article class=\"zon-teaser zon-teaser--standard\"{attrs}>\n  <figure class=\"zon-teaser__media{classes}\" aria-hidden=\"true\"></figure>\n  <div class=\"zon-teaser__container\">\n    <a class=\"zon-teaser__link\" href=\"#0\">\n      <h3 class=\"zon-teaser__heading\">\n        <span class=\"zon-teaser__kicker\"><span class=\"zon-teaser__kicker-text\">HafenCity in Hamburg</span></span>\n        <span class=\"visually-hidden\">: </span>\n        <span class=\"zon-teaser__title\">»Einmal hörte ich die Durchsage: ›Jetzt ärgern wir die reichen Säcke‹«</span>\n      </h3>\n    </a>\n    <p class=\"zon-teaser__summary\">Sie wohnen in einem der spektakulärsten Luxushochhäuser Hamburgs: Elbblick, sechs Balkone, Dampfsauna. Aber Macken gibt es sogar hier.</p>\n    <div class=\"zon-teaser__byline\"><span class=\"zon-teaser__author\">Von Viola Diem, Hamburg</span><span class=\"zon-teaser__datetime\">Vor 2 Stunden</span></div>\n    <div class=\"zon-teaser__actions\">\n      <button type=\"button\" class=\"z-text-button\">Vorlesen</button>\n      <a class=\"z-text-button zon-teaser__commentcount\" href=\"#0\">323 Kommentare</a>\n      <button type=\"button\" class=\"z-text-button\">Merken</button>\n    </div>\n  </div>\n</article>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./standard-teaser.css",
 		"align": "fill",
 		"resizable": true,
 		"calloutAnchors": [
@@ -591,7 +602,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"standard-teaser.css"
 				],
 				"status": "kanonisch"
 			}

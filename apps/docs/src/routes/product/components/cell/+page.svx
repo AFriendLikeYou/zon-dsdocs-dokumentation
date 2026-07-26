@@ -382,7 +382,7 @@ kategorie: Inhalte
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
 	<CodeBlock title="Svelte" lang="svelte" code={svelteCode} />
-	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+	<CodeBlock title="CSS · Pattern (cell.css)" lang="css" code={patternCssCode} />
 
 	{#if (editorial.codeBeispiele ?? []).length}
 		<h2>Redaktionelle Code-Beispiele</h2>

@@ -252,7 +252,7 @@ z-accordion {
 	<PropsTable props={propsData} />
 
 	<h2>Code</h2>
-	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+	<CodeBlock title="CSS · Pattern (accordion.css)" lang="css" code={patternCssCode} />
 
 	{#if (editorial.codeBeispiele ?? []).length}
 		<h2>Redaktionelle Code-Beispiele</h2>

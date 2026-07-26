@@ -32,14 +32,16 @@
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
 			"art": "padding",
-			"richtung": "vertikal"
+			"richtung": "vertikal",
+			"selector": ".buttongroup-button"
 		},
 		{
 			"label": "Segment-Padding horizontal",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
 			"art": "padding",
-			"richtung": "horizontal"
+			"richtung": "horizontal",
+			"selector": ".buttongroup-button"
 		}
 	],
 	"callouts": [
@@ -179,14 +181,14 @@
 	"render": {
 		"specimen": "./Specimen.svelte",
 		"preview": "<ul class=\"buttongroup\"><li class=\"buttongroup-item buttongroup-item--active\"><button class=\"buttongroup-button\">Alle</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Politik</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Wirtschaft</button></li><li class=\"buttongroup-item\"><button class=\"buttongroup-button\">Kultur</button></li></ul>",
-		"cssFile": "./pattern.css"
+		"cssFile": "./button-group.css"
 	},
 	"code": {
 		"artefakte": [
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"button-group.css"
 				],
 				"status": "kanonisch"
 			}

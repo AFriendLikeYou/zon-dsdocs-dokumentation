@@ -515,7 +515,7 @@ h5 {
    `revert` setzt auf die Browser-Vorgaben zurück — genau der Stand, auf dem auch
    die echte Seite ihr eigenes CSS aufsetzt. Spezifität bewusst (0,0,1) über
    `:where(.ds-stage)`: schlägt die Element-Regel oben (gleiche Spezifität, steht
-   später), verliert aber gegen JEDE Klassenregel aus einem `pattern.css` — das
+   später), verliert aber gegen JEDE Klassenregel aus einem Pattern-CSS — das
    Pattern behält also immer das letzte Wort.
    Grundsatz dahinter: Doku-App-UI ≠ dokumentiertes ZEIT-DS. */
 :where(.ds-stage) :is(h1, h2, h3, h4, h5, h6) {

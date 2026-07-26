@@ -5,7 +5,7 @@
  * Fährt einen Vite-Dev-Server auf Port 5199 hoch (im Dev-Modus ist Basic Auth
  * bewusst gebypassed, siehe hooks.server.ts → CLI ohne Credentials), ruft die
  * CLI `list` und `add button --format html-css` gegen ihn, difft die
- * geschriebene pattern.css gegen die Katalog-Quelle und stoppt den Server. Nutzt
+ * geschriebene button.css gegen die Katalog-Quelle und stoppt den Server. Nutzt
  * NIE Port 5173. Exit 0 nur, wenn alles passt.
  */
 import { spawn } from 'node:child_process';
@@ -92,17 +92,14 @@ async function main() {
 			log('add OK.');
 		}
 
-		// 3) Datei-Diff: geschriebene pattern.css == Katalog-Quelle
-		const written = readFileSync(join(tmp, 'pattern.css'), 'utf8');
-		const source = readFileSync(
-			join(PKG_COMPONENTS_DIR, 'button/pattern.css'),
-			'utf8'
-		);
+		// 3) Datei-Diff: geschriebene button.css == Katalog-Quelle
+		const written = readFileSync(join(tmp, 'button.css'), 'utf8');
+		const source = readFileSync(join(PKG_COMPONENTS_DIR, 'button/button.css'), 'utf8');
 		if (written !== source) {
-			die('geschriebene pattern.css unterscheidet sich von der Quelle!');
+			die('geschriebene button.css unterscheidet sich von der Quelle!');
 			failed = true;
 		} else {
-			log(`Datei-Diff OK — pattern.css identisch (${written.length} Zeichen).`);
+			log(`Datei-Diff OK — button.css identisch (${written.length} Zeichen).`);
 		}
 	} finally {
 		server.kill('SIGTERM');

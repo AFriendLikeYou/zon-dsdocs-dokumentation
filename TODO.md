@@ -16,22 +16,26 @@ offen sind nur noch: **Stufe 5b** (echte Patterns zon-teaser/cp-region/headed-me
 warten auf zeit.de-Originalquellen) und die **`date-picker`**-Doku (einziger „Geplant"-Stub,
 braucht ein `model.json` unter `packages/components/src/date-picker/`).
 
-## Aus PR 4 (`@zeit/components`) offen — zwei Umbenennungen, bewusst vertagt
+## Aus PR 4 (`@zeit/components`) offen — eine Umbenennung, bewusst vertagt
 
-Beide sind **kosmetisch** und beide fassen dieselben acht Stellen an (Schema, Exporter,
-Drift-Checks, Registry-Antwort, CMS, Tests). Einzeln gebündelt mit dem Umzug hätten sie
-aus „ein PR = eine logische Änderung" zwei gemacht.
+Kosmetisch, fasst aber dieselben acht Stellen an (Schema, Exporter, Drift-Checks,
+Registry-Antwort, CMS, Tests). Einzeln gebündelt mit dem Umzug hätte das aus
+„ein PR = eine logische Änderung" zwei gemacht.
 
 - **`model.json` → `<slug>.spec.json`.** Die Zielarchitektur (`MIGRATIONSPLAN.md` §1)
   nennt diesen Namen. Er ist im Paket sprechender, ändert aber sonst nichts.
-- **`pattern.css` → `<slug>.css`.** Sinnvoll erst zusammen mit PR 6: Dann liegt ein
-  `<slug>.ts` (Custom Element) daneben, und *dann* wirkt `pattern.css` schief. Heute
-  hält der Name eine echte Unterscheidung fest („originalgetreue Produktions-Kopie",
-  nicht „unsere Komponente"). Zu beachten: `render.cssFile` zeigt darauf, und die
-  Registry-Antwort (`dateien: ["pattern.css"]`) ist ein **Konsumenten-Vertrag** — die
-  `.zds-manifest.json` in Zielprojekten schlüsselt darüber. Umbenennen heißt also:
-  Freigabe einholen (`MIGRATIONSPLAN.md` §6, Nicht-Ziele) und einen Migrationshinweis
-  in den Changeset schreiben.
+
+- [x] **`pattern.css` → `<slug>.css`** ✅ 2026-07-26. Seit PR 6 liegt ein `<slug>.ts`
+      (Custom Element) daneben, und der alte Name trug die Unterscheidung
+      „originalgetreue Produktions-Kopie" nicht mehr. Ausschlaggebend war das
+      Zeitfenster: `dateien: ["pattern.css"]` ist ein **Konsumenten-Vertrag** (die
+      `.zds-manifest.json` in Zielprojekten schlüsselt darüber), und **publiziert ist
+      noch nichts** — nach dem ersten Publish wäre es ein Breaking Change gewesen.
+      Der Subpath-Export heißt jetzt `"./*.css": "./src/*.css"` (ein Stern schluckt
+      `<slug>/<slug>` am Stück). Migrationshinweis steht im Changeset
+      `.changeset/pattern-css-nach-slug-css.md`. Die Layout-Glue-CSS der
+      handgeschriebenen Pattern-Seiten (`routes/product/patterns/*/pattern.css`)
+      behält ihren Namen — sie gehört keinem Slug.
 
 Ebenfalls offen: ein **ADR in `DECISIONS.md`** zum Paketschnitt (Grenze Paket ↔ Doku,
 Glob über die Paketgrenze, Wegfall von Fallback und Override-Map).

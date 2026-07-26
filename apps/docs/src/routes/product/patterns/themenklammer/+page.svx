@@ -14,7 +14,8 @@ title: Themenklammer
 	//
 	// KEIN CSS dupliziert: die Komponenten-Styles kommen als ?raw direkt aus dem Paket
 	// @zeit/components (Single Source of Truth). Nur das Layout-Glue (Klammer-Linien,
-	// Kopfzeile, Rhythmus) lebt co-located als pattern.css dieses Patterns.
+	// Kopfzeile, Rhythmus) lebt co-located als pattern.css dieses Patterns
+	// (die Pattern-SEITE behält den generischen Namen — sie gehört keinem Slug).
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Banner } from '$components/ui/banner';
@@ -22,12 +23,12 @@ title: Themenklammer
 	import { Card } from '$components/ui/card';
 	import { Grid } from '$components/ui/grid';
 
-	import heroCss from '@zeit/components/hero/pattern.css?raw';
-	import cellCss from '@zeit/components/cell/pattern.css?raw';
-	import textButtonCss from '@zeit/components/text-button/pattern.css?raw';
+	import heroCss from '@zeit/components/hero/hero.css?raw';
+	import cellCss from '@zeit/components/cell/cell.css?raw';
+	import textButtonCss from '@zeit/components/text-button/text-button.css?raw';
 	import glueCss from './pattern.css?raw';
 
-	// Die z-Selektoren sind seitenweit eindeutig → pattern.css EINMAL UNSCOPED
+	// Die z-Selektoren sind seitenweit eindeutig → Pattern-CSS EINMAL UNSCOPED
 	// einbinden (dokumentierte Entscheidung, ADR-026). Die Live-Vorschau sitzt
 	// zusätzlich auf .ds-stage, damit die --z-ds-*-Token dort auf helle
 	// Artboard-Werte gepinnt sind und der Light/Dark-Schalter unabhängig greift.

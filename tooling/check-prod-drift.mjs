@@ -16,7 +16,7 @@
  *
  * WAS ER BEWUSST NICHT PRÜFT: CSS-Quelltext-Gleichheit. Produktions-CSS ist
  * minifiziert, gebündelt, umsortiert und teils tree-shaken — ein Text-Diff gegen
- * unser pattern.css erzeugt Rauschen statt Signal, und ein Check, der ständig
+ * unser Pattern-CSS erzeugt Rauschen statt Signal, und ein Check, der ständig
  * falsch anschlägt, wird ignoriert. Ebenfalls nicht geprüft: Farben (Theme-/
  * Kampagnen-abhängig), Schrift-Rendering, Verhalten. Es geht um Geometrie.
  *

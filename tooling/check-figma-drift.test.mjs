@@ -79,7 +79,7 @@ describe('vergleicheModell', () => {
 	});
 
 	it('meldet „Figma liefert nichts" als nicht prüfbar, nicht als Abweichung', () => {
-		// Der Radius kommt bei vielen Komponenten aus der pattern.css, weil der
+		// Der Radius kommt bei vielen Komponenten aus dem Pattern-CSS, weil der
 		// Figma-Node schlicht keinen cornerRadius trägt.
 		const res = vergleicheModell({ masse: { radius: { px: '4' } } }, draft({}), 'text-button');
 		expect(res.abweichungen).toEqual([]);

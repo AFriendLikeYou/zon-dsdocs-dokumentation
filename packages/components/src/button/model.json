@@ -520,14 +520,14 @@
 			}
 		],
 		"template": "<button type=\"submit\" class=\"z-button{classes}\"{attrs}>Click me</button>",
-		"cssFile": "./pattern.css"
+		"cssFile": "./button.css"
 	},
 	"code": {
 		"artefakte": [
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"button.css"
 				],
 				"status": "kanonisch"
 			}

@@ -142,7 +142,7 @@ Projekt-Wurzel (dem Verzeichnis, aus dem du `zds` aufrufst):
 			"version": "Figma-Node 4185:3778",
 			"verzeichnis": "zds/button",
 			"bezogen": "2026-07-21T02:12:35.974Z",
-			"dateien": { "pattern.css": "sha256-f5013b057398948e" }
+			"dateien": { "button.css": "sha256-f5013b057398948e" }
 		}
 	}
 }
@@ -173,7 +173,7 @@ Registry:
 
 ```text
 button (html-css) → zds/button   bezogen: 2026-07-21
-  lokal geändert                pattern.css
+  lokal geändert                button.css
 
 1 Abweichung(en). zds MELDET nur — aktualisieren mit: zds add <slug> --force
 ```
@@ -184,7 +184,7 @@ button (html-css) → zds/button   bezogen: 2026-07-21
 ## Smoke-Test
 
 `smoke-test.mjs` fährt einen lokalen Dev-Server (Port 5199) hoch, ruft `list`
-und `add` gegen ihn, difft die geschriebene `pattern.css` gegen die Quelle und
+und `add` gegen ihn, difft die geschriebene `button.css` gegen die Quelle und
 stoppt den Server wieder:
 
 ```bash

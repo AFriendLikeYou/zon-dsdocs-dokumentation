@@ -3,7 +3,7 @@
  *
  * Astryx-Prinzip „JSON-Contract wie OpenAPI fürs Frontend": EIN strukturierter
  * Vertrag über alles, was das System kennt — Komponenten (voller Spec inkl.
- * render-Template + pattern.css), Foundations (Token-Namen MIT live aufgelösten
+ * render-Template + Pattern-CSS), Foundations (Token-Namen MIT live aufgelösten
  * Upstream-Werten) und die Klassen-Grammatik als strukturierte Regeln.
  *
  * Bewusst KEIN statisches File im Repo: Das Manifest wird aus denselben
@@ -21,7 +21,7 @@ import { COLOR_ROLE_GROUPS } from '$data/color-roles';
 /** Version des Manifest-Vertrags — bei Breaking Changes am Shape erhöhen. */
 export const MANIFEST_API_VERSION = '1';
 
-/** Ein Komponenten-Eintrag: Slug + voller gemergter Spec + rohes pattern.css. */
+/** Ein Komponenten-Eintrag: Slug + voller gemergter Spec + rohes Pattern-CSS. */
 export type ManifestComponent = {
 	slug: string;
 	spec: AgentCatalogEntry['spec'];
@@ -115,7 +115,7 @@ export const CLASS_GRAMMAR = {
 	zustaende:
 		'native Attribute/Pseudoklassen (disabled, :hover, :focus-visible) — keine State-Klassen',
 	tokens: 'Farben/Maße ausschließlich über --z-ds-*-Tokens, nie Rohwerte',
-	markup: 'Vanilla HTML/CSS; jede Komponente liefert ihr eigenes pattern.css'
+	markup: 'Vanilla HTML/CSS; jede Komponente liefert ihr eigenes <slug>.css'
 } as const;
 
 /**

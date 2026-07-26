@@ -127,7 +127,7 @@ packages/                        # Workspace-Pakete (Monorepo-Umbau, MIGRATIONSP
 ├─ components/                   # @zeit/components — ein Ordner je Komponente ↓
 │  └─ src/<slug>/
 │     ├─ model.json              # KANONISCHER Spec (Eingabe des Exporters)
-│     ├─ pattern.css             # unscoped Pattern-CSS (echte z-ds-Tokens)
+│     ├─ <slug>.css              # unscoped Pattern-CSS (echte z-ds-Tokens)
 │     ├─ figma-raw.json          # Import-Fixture (Design-Drift-Vergleich)
 │     └─ index.ts                # Barrel des Subpaths @zeit/components/<slug>
 ├─ icons/                        # @zeit/icons ↓
@@ -169,7 +169,7 @@ liegt.
                             → herkunft: "gemessen"     ├──────► │  model.json  │ ──────────┬─► +page.svx
                                                        │        │  (im Paket,  │           ├─► spec.generated.ts
   ② PRODUKTIONS-CSS (zeit.de)                          │        │  render-un-  │           └─► content/…/<slug>.json
-     pattern.css ────────── Klassen, Zustände          │        │  abhängig)   │               (STUB, nur beim 1. Mal)
+     <slug>.css ─────────── Klassen, Zustände          │        │  abhängig)   │               (STUB, nur beim 1. Mal)
        (kuratiert, flach)   (:hover/:disabled),        ├──────► └──────┬───────┘
                             Web-Varianten, Tokens      │               │ import.meta.glob (BUILD-Zeit)
                                                        │               ▼
@@ -247,7 +247,7 @@ Erzeugt unter `apps/docs/src/routes/product/components/<slug>/` die Maschinen-Da
 ihn über den Alias `$content` und führt beides zusammen:
 `const spec = mergeSpec(generated, content)` — **Klasse ② gewinnt, Klasse ① nur per
 begründetem Override** (s. o.). `render.cssFile` ist **relativ zum Modell**
-(`./pattern.css` im selben Paket-Ordner).
+(`./<slug>.css` im selben Paket-Ordner).
 
 **Registry-Index** `apps/docs/src/lib/data/catalog.ts` entsteht zur Build-Zeit per
 `import.meta.glob` über alle `model.json` des Pakets — ein neues Pattern erscheint
@@ -261,7 +261,7 @@ desselben `model.json` (die frühere Override-Map ist entfallen).
 > Ein verrutschter Glob wirft KEINEN Fehler, sondern liefert ein leeres Objekt —
 > darum vergleicht `catalog.test.ts` gegen die Ordner auf der Platte. Für einzelne
 > Dateien (kein Glob) ist der Paketname der saubere Weg:
-> `import css from '@zeit/components/button/pattern.css?raw'`.
+> `import css from '@zeit/components/button/button.css?raw'`.
 
 **Datengetriebener Playground** (`render.controls` + `render.template` +
 `render.cssFile`): _eine_ Instanziierung (`instantiate()` in `Playground.svelte`)
@@ -439,7 +439,7 @@ sicher + round-trip-fähig (`&#10;` → `\n` beim Parsen).
 1. Figma-Node bestimmen. **Instanz immer zum Component-Set auflösen.**
 2. Figma-MCP: `get_design_context` / `get_context_for_code_connect` /
    `get_variable_defs` → Name, Varianten, Tokens, Maße.
-3. `model.json` + `pattern.css` im Ordner `packages/components/src/<slug>/`
+3. `model.json` + `<slug>.css` im Ordner `packages/components/src/<slug>/`
    anlegen (an `button/` bzw. `cell/` orientieren). Tokens als echte `--z-ds-*`;
    `render`-Block = Playground (`controls`/`template`/`cssFile`) + optional
    `matrix`/`props`/`calloutAnchors`/`variantInfo`. `code.artefakte` ist **Pflicht**.
@@ -500,7 +500,7 @@ Die Site ist selbst ein **MCP-Server** (agent-ready): Tools `search` + `get` üb
 Komponenten-Registry. Minimaler, handgerollter JSON-RPC-2.0-Handler (Streamable HTTP,
 stateless, **kein SDK**). Route `apps/docs/src/routes/api/mcp/+server.ts` (dünn) → Logik
 `apps/docs/src/lib/server/mcp.ts` (pure Funktionen, getestet) → Datenbasis
-`apps/docs/src/lib/server/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem `pattern.css`** —
+`apps/docs/src/lib/server/agent-catalog.ts` (Katalog **inkl. `render`-Template + rohem Pattern-CSS** —
 liegt in `lib/server/`, damit SvelteKit Client-Importe **compiler-seitig verbietet**).
 Liegt hinter Basic Auth wie alles. Details/Client-Config:
 [`README.md`](README.md#mcp-endpoint-apimcp--agent-ready).
@@ -514,7 +514,7 @@ werden **kopiert**, nicht installiert. Endpoints (dünne Routen → pure Logik
 Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
 (Build-Zeit-Glob wie Manifest/MCP). Pro Komponente deklariert der `code`-Block im
 `model.json` die Format-Artefakte (`html-css` | `web-component` | `svelte`) —
-**Pflicht und explizit**, einen stillen `pattern.css`-Fallback gibt es nicht. CLI:
+**Pflicht und explizit**, einen stillen CSS-Fallback gibt es nicht. CLI:
 `tooling/zds-cli/` (`zds list | info | add`, nur Node-Builtins).
 
 ## Stolperfallen
@@ -525,14 +525,14 @@ Datei-Inhalte; 404 als JSON). Deckt den **gesamten Katalog automatisch** ab
   Build-Artefakte **nicht mehr wurzel-verankert**, seit die App in `apps/docs` liegt.
   Ebenfalls gitignored: die Spiegel `apps/docs/static/downloads/icons/` +
   `apps/docs/static/styles-zds.css` und `packages/*/dist/`.
-- `pattern.css`-Scoping: flache Regeln **plus die bedingten At-Rules** `@media`,
+- Pattern-CSS-Scoping: flache Regeln **plus die bedingten At-Rules** `@media`,
   `@supports`, `@container` (Rahmen bleibt, Rumpf wird gescopet — Zerlegung über
   Klammerbilanz in `scopeCss`/`scopeToCanvas`). **Größenbasiertes `@media` wird im
   gescopten Ausgang zu `@container`** (`mediaZuContainer`, Zwilling in beiden
   Scopern): die Bühne hat eine gesetzte Breite, `@media` fragt aber den Viewport ab.
   Nur Größen-Features werden übersetzt — `prefers-reduced-motion`, `hover`,
   `pointer`, `print`, gemischte Bedingungen und Komma-Listen bleiben `@media`, und
-  es wird nie beides ausgegeben. Die `pattern.css` selbst behält ihr `@media`
+  es wird nie beides ausgegeben. Das Pattern-CSS im Paket behält sein `@media`
   (originalgetreue Kopie + Code-Block). Query-Container sind `.spec-canvas`
   (`apps/docs/static/global.css`) und `.playground__stage`/`.playground__frame`. **`@keyframes` & Co. wirft der
   Exporter**: Prozent-Selektoren dürfen nicht gescopet werden, und der Keyframe-Name

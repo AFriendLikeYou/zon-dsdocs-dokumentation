@@ -45,27 +45,37 @@
 			"selector": ".z-carousel__scroll-container"
 		},
 		{
-			"label": "Seitenrand — schmal (< 48 em)",
+			"label": "Seitenrand der Spur (ab 768 px 32 px; ab 980 px clamp bis 54 px)",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
-			"herkunft": "gemessen"
-		},
-		{
-			"label": "Seitenrand — mittel (≥ 48 em)",
-			"px": "32 px",
-			"token": "--z-ds-space-xl",
-			"herkunft": "gemessen"
-		},
-		{
-			"label": "Seitenrand — Maximum (≥ 61,25 em)",
-			"px": "54 px",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "padding",
+			"richtung": "horizontal",
+			"selector": ".z-carousel__scroll-container",
+			"stufen": [
+				{
+					"abBreite": 0,
+					"px": "16 px",
+					"token": "--z-ds-space-m"
+				},
+				{
+					"abBreite": 768,
+					"px": "32 px",
+					"token": "--z-ds-space-xl"
+				},
+				{
+					"abBreite": 1000,
+					"px": "54 px"
+				}
+			]
 		},
 		{
 			"label": "Abstand Zurück-Pfeil ↔ Weiter-Pfeil",
 			"px": "12 px",
 			"token": "--z-ds-space-s",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".z-carousel__direction-button--previous",
+			"bis": ".z-carousel__direction-button--next"
 		},
 		{
 			"label": "Abstand zwischen den Fortschritts-Punkten",
@@ -467,7 +477,7 @@
 			}
 		],
 		"template": "<z-carousel class=\"z-carousel{classes}\"{attrs} role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./carousel.css",
 		"preview": "<div class=\"z-carousel\" style=\"--_z-carousel-slide-width: calc(320 / 892 * 100%)\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div><div class=\"z-carousel__tabpanel-control-wrapper\"><fieldset class=\"z-carousel__dots-wrapper\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 1\" checked><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 2\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 3\"></fieldset></div></div>",
 		"calloutAnchors": [
 			{
@@ -552,7 +562,7 @@
 			}
 		],
 		"codeNote": "Ausgeliefertes Markup. Ohne <z-carousel> und ohne JavaScript bleibt derselbe Baum eine scrollbare Liste mit Scroll-Snap — nur die beiden Steuerungszeilen bleiben dann verborgen (hidden), weil sie ohne Skript nichts täten.",
-		"repoNote": "Quellen: Figma ❖ ZDS, Component-Set 630:630 (6 Varianten, gemessen) UND das ausgelieferte CSS zon-carousel.56f111d6….css, live nachgemessen an zeit.de/index bei 375, 800 und 1280 px (2026-07-26). ZWEI Befunde prägen diese Doku: (1) Figmas Achse „Size“ (Small/Wide) ist KEIN Modifier, sondern der Breakpoint — 375/Rand 16/Spur 343 und 1000/Rand 54/Spur 892 sind exakt die gemessenen Enden derselben Kette; sie steht deshalb als @media in der pattern.css. (2) Figmas Achse „Slot Size“ (Large 320 / Middle 236 / Small 184) hat KEINE Entsprechung im Code: 236 und 184 kommen im ausgelieferten CSS nirgends vor. Beide Achsen sind darum keine Varianten mehr. Im Web heißt die Komponente zon-carousel (nicht z-carousel) — die Klassenfamilie steht damit außerhalb des z-*-Namensraums, den die Prod-Drift-Inventur zählt. Slots sind hier neutrale Doku-Platzhalter; im Produkt steht dort Inhalt. Die Katalog-Vorschau (render.preview) pinnt die Slot-Breite auf den ≥48em-Wert: Eine Karte ist rund 150 px breit, dort greift sonst die schmale Stufe und man sähe genau EINEN Slot — kein erkennbares Karussell. Der Wert ist der echte aus dem ausgelieferten CSS, nur nicht aus der Kartenbreite abgeleitet.",
+		"repoNote": "Quellen: Figma ❖ ZDS, Component-Set 630:630 (6 Varianten, gemessen) UND das ausgelieferte CSS zon-carousel.56f111d6….css, live nachgemessen an zeit.de/index bei 375, 800 und 1280 px (2026-07-26). ZWEI Befunde prägen diese Doku: (1) Figmas Achse „Size“ (Small/Wide) ist KEIN Modifier, sondern der Breakpoint — 375/Rand 16/Spur 343 und 1000/Rand 54/Spur 892 sind exakt die gemessenen Enden derselben Kette; sie steht deshalb als @media in der carousel.css. (2) Figmas Achse „Slot Size“ (Large 320 / Middle 236 / Small 184) hat KEINE Entsprechung im Code: 236 und 184 kommen im ausgelieferten CSS nirgends vor. Beide Achsen sind darum keine Varianten mehr. Im Web heißt die Komponente zon-carousel (nicht z-carousel) — die Klassenfamilie steht damit außerhalb des z-*-Namensraums, den die Prod-Drift-Inventur zählt. Slots sind hier neutrale Doku-Platzhalter; im Produkt steht dort Inhalt. Die Katalog-Vorschau (render.preview) pinnt die Slot-Breite auf den ≥48em-Wert: Eine Karte ist rund 150 px breit, dort greift sonst die schmale Stufe und man sähe genau EINEN Slot — kein erkennbares Karussell. Der Wert ist der echte aus dem ausgelieferten CSS, nur nicht aus der Kartenbreite abgeleitet.",
 		"version": "Figma-Node 630:630 · CSS zon-carousel (gemessen 2026-07-26)",
 		"variantInfo": {
 			"Mehrspaltig": "Der Normalfall: mehrere Slots je Ansicht, Einrasten an ihrem Anfang.",
@@ -572,7 +582,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"carousel.css"
 				],
 				"status": "kanonisch"
 			},

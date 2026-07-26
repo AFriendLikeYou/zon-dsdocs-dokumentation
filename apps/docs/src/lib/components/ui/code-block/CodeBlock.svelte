@@ -146,7 +146,7 @@
 	/**
 	 * Zeilenweises Markup — für Flash-Highlighting und Zeilennummern.
 	 * Tokenisiert wird der GANZE Quelltext (nicht Zeile für Zeile), damit
-	 * mehrzeilige Tokens — allen voran CSS-Blockkommentare in pattern.css —
+	 * mehrzeilige Tokens — allen voran CSS-Blockkommentare im Pattern-CSS —
 	 * durchgehend eingefärbt bleiben; erst danach werden sie an den Zeilenumbrüchen
 	 * aufgeteilt und je Zeile neu umschlossen.
 	 */

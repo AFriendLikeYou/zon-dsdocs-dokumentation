@@ -3,7 +3,7 @@
  * (MIGRATIONSPLAN.md §3, nach dem Piloten `accordion`).
  *
  * ARBEITSTEILUNG. Das Element erfindet die Optik NICHT neu: Raster, Rand-Zonen,
- * Fader, Pfeil- und Punkt-Aussehen stehen vollständig in `pattern.css`. Hier
+ * Fader, Pfeil- und Punkt-Aussehen stehen vollständig in `carousel.css`. Hier
  * steht ausschließlich, was CSS nicht kann — welche Seite gerade dran ist, wann
  * ein Pfeil ans Ende stößt, und die Tastatur.
  *
@@ -22,7 +22,7 @@
  * ausgelieferten HTML. Deklarativ mit `hidden` bleibt es sichtbar, prüfbar und
  * serverseitig identisch vor und nach dem Upgrade.)
  *
- * KEIN SHADOW DOM. Das Aussehen kommt von außen (`pattern.css` plus die
+ * KEIN SHADOW DOM. Das Aussehen kommt von außen (`carousel.css` plus die
  * `--z-ds-*`-Token der Seite). Ein Shadow Root würde beides aussperren.
  *
  * SSR-SICHER — an der Stelle, die man leicht übersieht: Die Klasse wird ERST IN
@@ -35,7 +35,7 @@
  *
  * WAS DAS ELEMENT BEWUSST NICHT TUT:
  *   · **Autoplay.** Die Auslieferung kennt es (`[autoplay]` mit Fortschritts-
- *     Animation und Play/Pause), und die `pattern.css` bildet den Zustand ab.
+ *     Animation und Play/Pause), und die `carousel.css` bildet den Zustand ab.
  *     Ein automatisch weiterlaufendes Karussell ist aber eine
  *     Produkt-Entscheidung mit erheblichen A11y-Auflagen (Pause-Pflicht,
  *     Fokus-/Hover-Stopp, `prefers-reduced-motion`). Halb gebaut wäre es
@@ -206,7 +206,7 @@ export function carouselKlasse(): (new () => ZCarouselElement) | null {
 		// --- innere Mechanik -------------------------------------------------------
 
 		/** Die Seiten sind die direkten Kinder der Spur — dieselbe Definition, die
-		    auch die `pattern.css` benutzt (`.z-carousel__scroll-container > *`). */
+		    auch die `carousel.css` benutzt (`.z-carousel__scroll-container > *`). */
 		get #slots(): HTMLElement[] {
 			return this.#spur ? ([...this.#spur.children] as HTMLElement[]) : [];
 		}
@@ -243,7 +243,7 @@ export function carouselKlasse(): (new () => ZCarouselElement) | null {
 		 * scrollbarer Bereich damit für die Tastatur GESCHLOSSEN: Man kommt nicht
 		 * hin, also kann man nicht scrollen, und die Pfeile sind der einzige Weg.
 		 * Hier wird daraus `tabindex="0"` — mit sichtbarem Fokus-Ring in der
-		 * `pattern.css` und einem Namen, damit die Fokus-Station nicht namenlos
+		 * `carousel.css` und einem Namen, damit die Fokus-Station nicht namenlos
 		 * angesagt wird. Bewusste Abweichung, wie beim Fokus-Ring des Accordions.
 		 */
 		#verdrahteAria() {

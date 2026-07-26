@@ -75,7 +75,7 @@ test.describe('<z-accordion> — Verhalten im Browser', () => {
 		await summary.focus();
 
 		await expect(summary).toBeFocused();
-		// Der Ring ist unsere Ergänzung gegenüber der Produktion (siehe pattern.css).
+		// Der Ring ist unsere Ergänzung gegenüber der Produktion (siehe accordion.css).
 		const ring = await summary.evaluate((el) => {
 			const c = getComputedStyle(el);
 			return { stil: c.outlineStyle, breite: c.outlineWidth, farbe: c.outlineColor };

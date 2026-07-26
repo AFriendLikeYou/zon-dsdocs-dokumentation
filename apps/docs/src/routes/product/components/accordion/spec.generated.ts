@@ -22,11 +22,15 @@ export const generated = {
 	"spacing": [
 		{
 			"label": "Abstand Titel ↔ Pfeil (mindestens)",
-			"px": "12 px"
+			"px": "12 px",
+			"art": "gap"
 		},
 		{
 			"label": "Innenabstand des Auslösers, oben und unten",
-			"px": "16 px"
+			"px": "16 px",
+			"art": "padding",
+			"richtung": "vertikal",
+			"selector": ".z-accordion__button"
 		}
 	],
 	"tokens": [
@@ -148,7 +152,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"accordion.css"
 				],
 				"status": "kanonisch"
 			},

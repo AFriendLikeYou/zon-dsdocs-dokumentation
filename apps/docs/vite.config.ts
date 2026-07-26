@@ -39,7 +39,7 @@ export default defineConfig(() => ({
 	test: {
 		globals: true,
 		restoreMocks: true,
-		// ?raw-Importe von .css (styles-zds.css in mcp.ts, pattern.css im Katalog)
+		// ?raw-Importe von .css (styles-zds.css in mcp.ts, das Pattern-CSS im Katalog)
 		// liefern sonst leere Strings — mit css:true kommt der echte Rohtext.
 		css: true,
 		// Die Suite ist REPO-WEIT, nicht app-weit: `tooling/` (Exporter, Drift-Checks)

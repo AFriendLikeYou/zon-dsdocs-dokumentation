@@ -2,7 +2,7 @@
   Specimen.svelte — Escape-Hatch des Registry-Schemas (render.specimen):
   die Button-Group braucht Loop + Interaktion (aktives Segment per Klick), das ein
   logikfreies Template nicht abbildet. Regel: NUR Registry-Daten konsumieren —
-  das Pattern-CSS kommt aus pattern.css (vom Exporter in die Seite gescoped).
+  das Pattern-CSS kommt aus button-group.css (vom Exporter in die Seite gescoped).
 -->
 <script lang="ts">
 	import { Playground, type PlaygroundState } from '$components/ui/playground';

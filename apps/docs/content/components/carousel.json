@@ -152,7 +152,7 @@
 	"faq": [
 		{
 			"frage": "Wo sind die Figma-Varianten „Wide“ und „Middle“ geblieben?",
-			"antwort": "„Size = Small/Wide“ ist kein Modifier, sondern der Breakpoint: Gemessen misst dieselbe Komponente bei 375 px Fläche einen Rand von 16 px und eine Spur von 343 px, bei 1280 px einen Rand von 54 px und eine Spur von 892 px — exakt die beiden Figma-Varianten. Sie steht deshalb als @media in der pattern.css; im Playground sieht man sie, indem man die Bühne breiter zieht. „Slot Size = Large/Middle/Small“ dagegen hat gar keine Entsprechung im Code: Die Werte 236 und 184 kommen im ausgelieferten CSS nicht vor. Diese Achse ist eine reine Figma-Angelegenheit und wird hier als Divergenz dokumentiert, nicht als Variante erfunden."
+			"antwort": "„Size = Small/Wide“ ist kein Modifier, sondern der Breakpoint: Gemessen misst dieselbe Komponente bei 375 px Fläche einen Rand von 16 px und eine Spur von 343 px, bei 1280 px einen Rand von 54 px und eine Spur von 892 px — exakt die beiden Figma-Varianten. Sie steht deshalb als @media in der carousel.css; im Playground sieht man sie, indem man die Bühne breiter zieht. „Slot Size = Large/Middle/Small“ dagegen hat gar keine Entsprechung im Code: Die Werte 236 und 184 kommen im ausgelieferten CSS nicht vor. Diese Achse ist eine reine Figma-Angelegenheit und wird hier als Divergenz dokumentiert, nicht als Variante erfunden."
 		},
 		{
 			"frage": "Warum sehe ich ohne JavaScript keine Pfeile?",

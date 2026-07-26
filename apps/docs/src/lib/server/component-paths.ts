@@ -4,7 +4,7 @@
 // Grenze soll an EINER Stelle stehen statt in fünf Server-Modulen. PR 5 hat die
 // Redaktion als dritten Ort dazugenommen:
 //
-//   packages/components/src/<slug>/   model.json · pattern.css · figma-raw.json
+//   packages/components/src/<slug>/   model.json · <slug>.css · figma-raw.json
 //   src/routes/product/components/<slug>/   +page.svx · spec.generated.ts
 //   content/components/<slug>.json    die redaktionellen Felder (Mensch)
 //
@@ -18,7 +18,7 @@ import { resolve } from 'node:path';
 /** Doku-Ausgabe je Komponente (+page.svx, spec.generated.ts). */
 export const ROUTE_COMPONENTS_DIR = resolve(process.cwd(), 'src/routes/product/components');
 
-/** Paket-Quelle je Komponente (model.json, pattern.css, figma-raw.json). */
+/** Paket-Quelle je Komponente (model.json, <slug>.css, figma-raw.json). */
 export const PKG_COMPONENTS_DIR = resolve(process.cwd(), '../../packages/components/src');
 
 /** Redaktion je Komponente — eine Datei `<slug>.json` (seit PR 5). */

@@ -5,7 +5,7 @@
  * anderen Artefakte kommen über eigene Subpfade, damit jedes im richtigen Graph
  * landet und niemand sie ungewollt mitzieht:
  *
- *   import '@zeit/components/carousel/pattern.css';  // Aussehen → Stylesheet-Graph
+ *   import '@zeit/components/carousel/carousel.css';  // Aussehen → Stylesheet-Graph
  *   import '@zeit/components/carousel/carousel';     // Verhalten → registriert <z-carousel>
  *   import { spec } from '@zeit/components/carousel'; // Beschreibung
  *

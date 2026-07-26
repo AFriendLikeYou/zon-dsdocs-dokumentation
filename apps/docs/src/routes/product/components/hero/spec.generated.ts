@@ -326,7 +326,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"hero.css"
 				],
 				"status": "kanonisch"
 			}

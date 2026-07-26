@@ -284,7 +284,7 @@
 			}
 		],
 		"template": "<span class=\"z-checkbox{classes}\"><span class=\"z-checkbox__check\"></span></span>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./checkbox.css",
 		"preview": "<span class=\"z-checkbox z-checkbox--checked\"><span class=\"z-checkbox__check\"></span></span>",
 		"variant": "<span class=\"z-checkbox z-checkbox--focus\"><span class=\"z-checkbox__check\"></span></span>",
 		"calloutAnchors": [
@@ -371,7 +371,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"checkbox.css"
 				],
 				"status": "kanonisch"
 			}

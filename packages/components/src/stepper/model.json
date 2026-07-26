@@ -273,7 +273,7 @@
 			}
 		],
 		"template": "<div class=\"z-stepper{classes}\">\n  <button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button>\n  <span class=\"z-stepper__val\">2</span>\n  <button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button>\n</div>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./stepper.css",
 		"preview": "<div class=\"z-stepper\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\"></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\"></button></div>",
 		"variant": "<div class=\"z-stepper z-stepper--disabled\"><button class=\"z-stepper__minus\" type=\"button\" aria-label=\"Weniger\" disabled></button><span class=\"z-stepper__val\">2</span><button class=\"z-stepper__plus\" type=\"button\" aria-label=\"Mehr\" disabled></button></div>",
 		"calloutAnchors": [
@@ -360,7 +360,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"stepper.css"
 				],
 				"status": "kanonisch"
 			}

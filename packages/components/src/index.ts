@@ -2,11 +2,11 @@
  * `@zeit/components` — Paket-Barrel.
  *
  * Je Komponente liegt ein Ordner unter `src/<slug>/` mit dem kanonischen Spec
- * (`model.json`), dem unscoped Pattern-CSS (`pattern.css`) und der Figma-Rohdaten-
+ * (`model.json`), dem unscoped Pattern-CSS (`<slug>.css`) und der Figma-Rohdaten-
  * Fixture (`figma-raw.json`). Wer nur EINE Komponente braucht, nimmt ihren
  * Subpath (`@zeit/components/button`) — dieser Barrel ist der Sammelzugang.
  *
- * Das CSS läuft NICHT über JS: `@zeit/components/<slug>/pattern.css` ist ein
+ * Das CSS läuft NICHT über JS: `@zeit/components/<slug>/<slug>.css` ist ein
  * eigener Export-Subpath, damit Styles im Stylesheet-Graph des Konsumenten
  * landen. Dasselbe gilt seit PR 6 für das VERHALTEN: Wo eine Komponente ein
  * Custom Element mitbringt, liegt es unter `@zeit/components/<slug>/<slug>` und

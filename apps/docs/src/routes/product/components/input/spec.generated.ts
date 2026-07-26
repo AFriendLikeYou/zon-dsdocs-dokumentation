@@ -196,7 +196,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"input.css"
 				],
 				"status": "kanonisch"
 			}

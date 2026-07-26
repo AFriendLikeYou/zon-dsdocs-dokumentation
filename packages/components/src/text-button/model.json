@@ -329,7 +329,7 @@
 			}
 		],
 		"template": "<button type=\"button\" class=\"z-text-button{classes}\"{attrs}>Mehr anzeigen</button>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./text-button.css",
 		"stage": {
 			"darkKey": "onImage"
 		}
@@ -339,7 +339,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"text-button.css"
 				],
 				"status": "kanonisch"
 			}

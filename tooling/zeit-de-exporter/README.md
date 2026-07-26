@@ -20,7 +20,7 @@ Routenordner enthält damit ausschließlich Generat.
 | Datei         | Inhalt                                                                     |
 | ------------- | -------------------------------------------------------------------------- |
 | `model.json`  | das Doku-Modell (zentraler Typ `ComponentSpec` in [`apps/docs/src/lib/types/spec.ts`](../../apps/docs/src/lib/types/spec.ts)) |
-| `pattern.css` | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt — **relativ zum Modell** |
+| `<kebab>.css` | _(optional)_ unscoped Pattern-CSS, falls `render.cssFile` gesetzt — **relativ zum Modell** |
 
 **Ausgabe** in der Doku-App:
 
@@ -84,7 +84,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
   („Override bezog sich auf 18, Quelle sagt jetzt 20"). Im CMS legt „Widersprechen"
   in der Maschinen-Zone den Eintrag an und schreibt `maschinenwert` selbst mit.
 - **Registry-Artefakte** → `code.artefakte` im `model.json` ist **Pflicht**; einen
-  stillen `pattern.css`-Fallback gibt es nicht mehr.
+  stillen „das CSS ist ja da"-Fallback gibt es nicht mehr.
 - **Paket-Barrel** → neuen Slug in `packages/components/src/index.ts` eintragen
   (`index.test.ts` prüft die Liste gegen die Ordner).
 
@@ -114,7 +114,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 | `callouts`                | `{ nr, text, art?, optionalDurch? }[]`                                                                                  | Anatomie-Legende (Lead vor `—` fett; `art` → dezentes Typ-Badge, `optionalDurch` → „optional — gesteuert über X")                                                                                                                                                                                                         |
 | `tokens`                  | `{ kategorie, items: { name, hinweis?, swatch?, translucent? }[] }[]`                                                   | `TokenTable` (Specs). **Kein `wert`** — der Wert ist die eine Quelle (`packages/tokens/vendor/styles-zds.css`) und wird über `name` aufgelöst (Client: `getComputedStyle`, folgt Light/Dark · Server/Manifest: `ZDS_VALUES`). `hinweis` = freier Beschreibungstext, `swatch` = Hex-SSR-Platzhalter/Flag (Live-Farbe kommt aus dem Token). |
 | `farbrollen`              | `{ zustaende: string[], elemente: { teil, tokensProZustand: Record<Zustand,Token>, hinweis? }[] }`                      | `ColorRoleTable` (Specs, **vor** der TokenTable): Teil × Zustand → `--z-ds-*`-Token (Wert `"none"` = bewusst kein Fill)                                                                                                                                                                                                   |
-| `varianten`               | `{ prop, werte: { label, cssClass?, default? }[] }[]`                                                                   | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. `pattern.css`.                                                                                                      |
+| `varianten`               | `{ prop, werte: { label, cssClass?, default? }[] }[]`                                                                   | `SpecimenGrid` — je Varianten-Wert ein gerendertes, beschriftetes Live-Specimen (aus `render.template` + `cssClass` instanziiert; `render.variantInfo` → Kurz-Info). Drift-Check prüft `cssClass` vs. Pattern-CSS.                                                                                                      |
 | `beispiele`               | `{ titel, beschreibung?, instanzen?, abdeckt? }[]`                                                                     | `ExampleBlock` — benannte Beispiele als ERSTE Sektion nach dem Playground. Je `instanzen`-Eintrag EIN Satz Control-Werte (Playground-State), instanziiert über dasselbe `instantiate()` wie der Playground (kein zweiter Render-Pfad; braucht `render.template`). `abdeckt` nennt Varianten-Labels, die das Beispiel dokumentiert — abgedeckte Werte fallen aus dem Varianten-Raster ("Weitere Varianten"), sind alle abgedeckt, entfällt die Sektion. **Redaktionell** (Redaktionsdatei).                                                    |
 | `zustaende`               | `{ label, vorhanden? }[]`                                                                                               | Renderbare Zustände (Matrix-Zelle **oder** Control-Klasse/Attribut vorhanden) als `SpecimenGrid`; reine Pseudoklassen-Zustände (`:hover`/`:focus`/`:active` ohne eigene Klasse) bleiben beschreibend in `StateList` (nicht gefakt).                                                                                       |
 | `a11y`                    | `{ label, wert, status: pass\|warn\|todo }[]`                                                                           | `A11yList` (eigener Tab)                                                                                                                                                                                                                                                                                                  |
@@ -125,7 +125,7 @@ node tooling/zeit-de-exporter/export.mjs packages/components/src/<kebab>
 | `komposition`             | `string[]` (je Eintrag ein Satz-Hinweis)                                                                                | Kompositions-Hinweise (wie mit anderen Komponenten kombinieren) — MCP `usage`-Sektion; wichtig für Agenten bei Formularen/Organismen                                                                                                                                                                                      |
 | `verwandt`                | `string[]` (Katalog-Slugs)                                                                                              | `RelatedComponents` (Ende des Design-Tabs; unbekannte Slugs still übersprungen)                                                                                                                                                                                                                                           |
 | `faq`                     | `{ frage, antwort }[]`                                                                                                  | `FaqList` — **letzte** Sektion des Design-Tabs, je Eintrag ein auf-/zuklappbares Disclosure (`ui/accordion`). Für die RESTFRAGEN, die die Specs nicht beantworten („Kann ich den Button als Link verwenden?"), **nicht** für Maße/Tokens/Varianten. Laufzeit-gated: ohne Inhalt keine Sektion. **Redaktionell** (Redaktionsdatei).                                                              |
-| `code`                    | `{ artefakte: { format: html-css\|web-component\|svelte, dateien: string[], status: kanonisch\|portiert\|entwurf }[] }` | **Component-Registry** (`/api/registry` + `zds`-CLI, Copy-in): deklariert die Code-Artefakte je Format. Optional — ohne Block gilt implizit `html-css → pattern.css` (kanonisch). Die Regel steht in `tooling/artefakte.mjs`; der Exporter backt das AUFGELÖSTE Ergebnis als `code` in `spec.generated.ts` ein, damit die Bezugs-Sektion `GetComponent` („Komponente holen", erste Sektion des Develop-Tabs) dieselben Formate nennt, die `zds add` liefert. Details: [IMPORT.md § 3b](IMPORT.md). |
+| `code`                    | `{ artefakte: { format: html-css\|web-component\|svelte, dateien: string[], status: kanonisch\|portiert\|entwurf }[] }` | **Component-Registry** (`/api/registry` + `zds`-CLI, Copy-in): deklariert die Code-Artefakte je Format. Optional — ohne Block gilt implizit `html-css → <slug>.css` (kanonisch). Die Regel steht in `tooling/artefakte.mjs`; der Exporter backt das AUFGELÖSTE Ergebnis als `code` in `spec.generated.ts` ein, damit die Bezugs-Sektion `GetComponent` („Komponente holen", erste Sektion des Develop-Tabs) dieselben Formate nennt, die `zds add` liefert. Details: [IMPORT.md § 3b](IMPORT.md). |
 
 ### `render` — Repo-Verdrahtung (beim Export vom Modell abgezogen, **nur** in die `.svx`)
 
@@ -140,7 +140,7 @@ Datengetriebener **Playground** (erste Design-Sektion, Registry-Schema):
     { "key": "disabled",  "label": "Disabled",  "type": "attr",   "attr": "disabled" }
   ],
   "template": "<button class=\"z-button{classes}\"{attrs}>Click me</button>", // EINE Instanziierung → Preview UND Code
-  "cssFile": "./pattern.css",     // UNSCOPED, neben dem Modell im Paket; wird gegen .spec-canvas / .pg-preview
+  "cssFile": "./button.css",      // UNSCOPED, neben dem Modell im Paket; wird gegen .spec-canvas / .pg-preview
                                   // gescoped (flache Regeln + @media/@supports/@container; kein @keyframes) und verbatim im Develop-Tab gezeigt
   "specimen": "./Specimen.svelte", // Escape-Hatch für Loops/Interaktion statt template; darf NUR Registry-Daten konsumieren
   "hint": "Keine Varianten.",      // Hinweiszeile statt Controls
@@ -156,7 +156,7 @@ Weitere `render`-Felder:
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `preview`, `variant`         | Specimen-Markup für die **Anatomie** (`{#snippet preview()}` / `variant()`). Fehlt `preview`, aber es gibt ein `template`, nutzt die Anatomie das mit den Control-Defaults instanziierte Template.                                                                                                          |
 | `matrix`                     | `{ label, html }[]` → beschriftete Specimen-Kacheln. Zellen, deren Label ein einzelner Zustands-Name ist (z. B. „Active"), speisen das **Zustände**-`SpecimenGrid`; Nicht-Zustands-Zellen dienen als **Varianten**-Fallback, falls kein `render.template` existiert.                                        |
-| `calloutAnchors`             | `{ nr, side, x?, y?, selector? }[]` → Position der Anatomie-Callouts. `selector` (CSS, relativ zum Specimen-Root) benennt die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur echte Klassen aus `template`/`pattern.css`; ohne eigene Klasse (reine Textknoten) weglassen. |
+| `calloutAnchors`             | `{ nr, side, x?, y?, selector? }[]` → Position der Anatomie-Callouts. `selector` (CSS, relativ zum Specimen-Root) benennt die echte Fläche des Bestandteils → Live-Outline beim Hover/Tap auf die Legende. Nur echte Klassen aus `template`/Pattern-CSS; ohne eigene Klasse (reine Textknoten) weglassen. |
 | `props`                      | `{ name, typ, default?, beschreibung?, erlaubteWerte?, pflicht? }[]` → `PropsTable` (Develop). `erlaubteWerte` (aus select-Options) → Code-Chip-Spalte; `pflicht` → Badge am Namen                                                                                                                          |
 | `css`                        | Vanilla-CSS des Specimens (String/Array), gescoped gegen `.spec-canvas`                                                                                                                                                                                                                                     |
 | `codeNote`, `codeSvelte`     | HTML/Svelte-Code-Beispiele (Develop) — **feldweise in der Redaktionsdatei überschreibbar** (s. u.)                                                                                                                                                                                                               |
@@ -170,7 +170,7 @@ Weitere `render`-Felder:
   erlaubte Top-Level-Keys in der Redaktionsdatei. Ist einer gesetzt, gewinnt er auf der Seite
   **feldweise** über den gleichnamigen `render`-Wert (`editorial.X ?? Maschine` — dasselbe
   Auflösungsmuster wie `version` über `content.version`); leer/fehlend → der Maschinen-Wert
-  bleibt. **Kein** Block-Merge von `render`; `template`/`controls`/`specimen`/`pattern.css`
+  bleibt. **Kein** Block-Merge von `render`; `template`/`controls`/`specimen`/`cssFile`
   bleiben unantastbar Maschine.
 - **Zusätzliche Beispiele:** `codeBeispiele` (nur Redaktionsdatei) ist ein Array
   `{ label, code, sprache?, hinweis? }` (`label`+`code` Pflicht; `sprache` ∈
@@ -180,7 +180,7 @@ Weitere `render`-Felder:
   nie ausgeführt).
 
 > `varianten[].werte[].cssClass` deklariert die Modifier-Klasse explizit —
-> `check-component-drift.mjs` prüft sie 1:1 gegen `pattern.css` (plus inverser Check:
+> `check-component-drift.mjs` prüft sie 1:1 gegen das Pattern-CSS (plus inverser Check:
 > Component-Route ohne `model.json` wird geflaggt).
 
 **Provenance (`herkunft`)** — `masse`-Werte (als `{ px, token?, herkunft }`) und
@@ -199,7 +199,7 @@ in `zustaende` steht oder ein Token weder `--z-ds-*` noch `"none"` ist.
 ## Benutzung
 
 ```bash
-# Neu anlegen — Gerüst (Ordner + gültiges Start-model.json mit $schema + pattern.css-Stub):
+# Neu anlegen — Gerüst (Ordner + gültiges Start-model.json mit $schema + <slug>.css-Stub):
 node tooling/zeit-de-exporter/export.mjs --init "<Name>"      # oder: npm run new-component -- "<Name>"
 
 # (a) Modell als Datei — schreibt die Doku-Seite UND legt model.json im Paket-Ordner ab:

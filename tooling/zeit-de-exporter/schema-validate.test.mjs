@@ -6,7 +6,7 @@ import { validateModelSchema } from './schema-validate.mjs';
 /** Kleinstes Modell, das der Vertrag zulässt: Name UND Artefakt-Deklaration. */
 const MINIMAL = {
 	name: 'Button',
-	code: { artefakte: [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }] }
+	code: { artefakte: [{ format: 'html-css', dateien: ['button.css'], status: 'kanonisch' }] }
 };
 
 describe('schema-validate · validateModelSchema', () => {
@@ -19,7 +19,7 @@ describe('schema-validate · validateModelSchema', () => {
 		expect(errors.some((e) => e.includes('name'))).toBe(true);
 	});
 
-	// Ausnahme 3 (MIGRATIONSPLAN §4): früher galt implizit „pattern.css da ⇒
+	// Ausnahme 3 (MIGRATIONSPLAN §4): früher galt implizit „CSS da ⇒
 	// html-css/kanonisch". Der stille Fallback ist weg — wer nichts deklariert,
 	// liefert auch nichts aus, und das Schema sagt es laut.
 	it('fehlender code-Block → Fehler an der Wurzel (kein stiller Fallback)', () => {
@@ -45,7 +45,7 @@ describe('schema-validate · validateModelSchema', () => {
 			name: 'Button',
 			code: {
 				artefakte: [
-					{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' },
+					{ format: 'html-css', dateien: ['button.css'], status: 'kanonisch' },
 					{ format: 'svelte', dateien: ['code/Button.svelte'], status: 'portiert' }
 				]
 			}

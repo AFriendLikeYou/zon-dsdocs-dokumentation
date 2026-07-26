@@ -74,20 +74,20 @@ const AUSNAHMEN = {
 	// deckte die zwei Figma-Größenachsen „Wide" (Size) und „Middle" (Slot Size), die
 	// als Modifier-Klassen nichts taten. Die Nachmessung an der Auslieferung hat
 	// beide aufgelöst: „Size" ist der BREAKPOINT (Rand 16 → 32 → 54 px, gemessen bei
-	// 375/800/1280) und steht jetzt als @media in der pattern.css; „Slot Size" hat
+	// 375/800/1280) und steht jetzt als @media in der carousel.css; „Slot Size" hat
 	// im Code gar keine Entsprechung (236 und 184 kommen im ausgelieferten CSS nicht
 	// vor) und ist als Divergenz dokumentiert statt als erfundene Klasse. Damit sind
 	// alle verbliebenen Varianten-Werte durch Beispiele gedeckt.
 	cell: {
 		'zustaende-duenn':
-			'Weder das importierte Figma-Set noch die portierte pattern.css kennt für die Zelle ' +
+			'Weder das importierte Figma-Set noch die portierte cell.css kennt für die Zelle ' +
 			'einen Interaktionszustand — kein :hover, kein :focus. Ein zweiter Zustand wäre ' +
 			'geraten, nicht dokumentiert. Schließt sich, sobald ein Import (Figma) oder eine ' +
 			'Messung an der Produktion (check-prod-drift) einen echten Zustand liefert.'
 	},
 	hero: {
 		'zustaende-duenn':
-			'Wie bei cell: Der Aufmacher ist im Modell und in der pattern.css ohne ' +
+			'Wie bei cell: Der Aufmacher ist im Modell und in der hero.css ohne ' +
 			'Interaktionszustand beschrieben. „default" ist hier keine Lücke in der Redaktion, ' +
 			'sondern der volle bekannte Stand der Quelle.'
 	},

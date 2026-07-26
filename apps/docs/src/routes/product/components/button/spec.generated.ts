@@ -264,7 +264,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"button.css"
 				],
 				"status": "kanonisch"
 			}

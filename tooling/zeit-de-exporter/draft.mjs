@@ -248,7 +248,7 @@ export function buildDraft(raw, known) {
 			farbrollen = { zustaende: stateAxis.options.map((o) => o.toLowerCase()), elemente };
 	} else {
 		report.hinweise.push(
-			'Keine State-Achse im Set — zustaende/farbrollen aus der pattern.css ableiten (Ebene ②).'
+			'Keine State-Achse im Set — zustaende/farbrollen aus dem Pattern-CSS ableiten (Ebene ②).'
 		);
 	}
 
@@ -354,7 +354,7 @@ if (isCli) {
 		);
 	for (const h of report.hinweise) console.log(`\nℹ️  ${h}`);
 	console.log(
-		'\nNächste Schritte: pattern.css kuratieren (cssClass-TODOs), ARIA-Template (Ebene ③),' +
+		'\nNächste Schritte: <slug>.css kuratieren (cssClass-TODOs), ARIA-Template (Ebene ③),' +
 			'\nMensch-Felder in content.json — dann model.draft.json → model.json promoten und exportieren.'
 	);
 }

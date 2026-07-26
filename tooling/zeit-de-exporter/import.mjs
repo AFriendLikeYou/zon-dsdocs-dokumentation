@@ -16,7 +16,7 @@
  *              Namen schon da (Enterprise) ODER wird --draft gesetzt, läuft es
  *              direkt weiter.
  *   Schritt 2  draft  → model.draft.json
- *   GATE 2     Handarbeit: model.json prüfen, pattern.css + Redaktion, export.
+ *   GATE 2     Handarbeit: model.json prüfen, Pattern-CSS + Redaktion, export.
  *
  * Ruft die bestehenden CLIs als Child-Prozesse auf (nutzt ihr exaktes Verhalten,
  * kein Logik-Duplikat). fetch.mjs/draft.mjs bleiben unverändert einzeln nutzbar.
@@ -92,7 +92,7 @@ export const STAGE_COLUMNS = [
 	['raw', 'figma-raw.json'],
 	['draft', 'model.draft.json'],
 	['model', 'model.json'],
-	['pattern', 'pattern.css'],
+	['pattern', '<slug>.css'],
 	['content', 'content/components/<slug>.json'],
 	['+page', '+page.svx']
 ];
@@ -232,7 +232,7 @@ function gatherStatus() {
 			raw,
 			draft,
 			model,
-			pattern: has('pattern.css'),
+			pattern: has(`${slug}.css`),
 			content: existsSync(path.join(contentBase, `${slug}.json`)),
 			page: hasRoute('+page.svx'),
 			degraded,
@@ -274,7 +274,7 @@ if (isCli) {
 	}
 
 	// Zielordner des Imports ist der PAKET-Ordner: figma-raw.json, model.draft.json,
-	// model.json und pattern.css sind die Quelle, nicht die Doku-Ausgabe.
+	// model.json und das Pattern-CSS sind die Quelle, nicht die Doku-Ausgabe.
 	const dir = path.join(PKG_COMPONENTS_REL, slug);
 	const rawPath = path.join(REPO, dir, 'figma-raw.json');
 	mkdirSync(path.join(REPO, dir), { recursive: true });
@@ -314,7 +314,7 @@ if (isCli) {
 
 ⛔ GATE 2 — Handarbeit (wird nie generiert):
    1. ${dir}/model.draft.json prüfen → zu model.json promoten
-   2. ${dir}/pattern.css anlegen (originalgetreue z-*-Klassen)
+   2. ${dir}/${slug}.css anlegen (originalgetreue z-*-Klassen)
    3. ${CONTENT_COMPONENTS_REL}/${slug}.json redaktionell füllen (Stub kommt aus dem Export)
    Dann veröffentlichen:
      node tooling/zeit-de-exporter/export.mjs ${dir}

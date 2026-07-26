@@ -47,27 +47,37 @@ export const generated = {
 			"selector": ".z-carousel__scroll-container"
 		},
 		{
-			"label": "Seitenrand — schmal (< 48 em)",
+			"label": "Seitenrand der Spur (ab 768 px 32 px; ab 980 px clamp bis 54 px)",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
-			"herkunft": "gemessen"
-		},
-		{
-			"label": "Seitenrand — mittel (≥ 48 em)",
-			"px": "32 px",
-			"token": "--z-ds-space-xl",
-			"herkunft": "gemessen"
-		},
-		{
-			"label": "Seitenrand — Maximum (≥ 61,25 em)",
-			"px": "54 px",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"art": "padding",
+			"richtung": "horizontal",
+			"selector": ".z-carousel__scroll-container",
+			"stufen": [
+				{
+					"abBreite": 0,
+					"px": "16 px",
+					"token": "--z-ds-space-m"
+				},
+				{
+					"abBreite": 768,
+					"px": "32 px",
+					"token": "--z-ds-space-xl"
+				},
+				{
+					"abBreite": 1000,
+					"px": "54 px"
+				}
+			]
 		},
 		{
 			"label": "Abstand Zurück-Pfeil ↔ Weiter-Pfeil",
 			"px": "12 px",
 			"token": "--z-ds-space-s",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".z-carousel__direction-button--previous",
+			"bis": ".z-carousel__direction-button--next"
 		},
 		{
 			"label": "Abstand zwischen den Fortschritts-Punkten",
@@ -321,7 +331,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"carousel.css"
 				],
 				"status": "kanonisch"
 			},

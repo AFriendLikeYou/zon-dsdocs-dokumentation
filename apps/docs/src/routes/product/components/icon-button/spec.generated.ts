@@ -146,7 +146,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"icon-button.css"
 				],
 				"status": "kanonisch"
 			}

@@ -23,7 +23,8 @@ test.describe('llms.txt-Endpunkte', () => {
 		const body = await res.text();
 		expect(body).toContain('Farb-Rollen');
 		expect(body).toContain('z-button');
-		expect(body).toContain('pattern.css');
+		// Das Pattern-CSS heißt seit der Umbenennung wie die Komponente.
+		expect(body).toContain('button.css');
 		// Volltext ist UNGEKAPPT — deutlich größer als das MCP-get-Budget (4000).
 		expect(body.length).toBeGreaterThan(20000);
 	});

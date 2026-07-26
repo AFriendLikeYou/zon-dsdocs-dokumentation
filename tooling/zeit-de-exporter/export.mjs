@@ -7,7 +7,7 @@
  * auf das konkrete Repo-Format ab:
  *
  *   EINGABE (Paket, @zeit/components — seit PR 4):
- *   - Modell + CSS:              packages/components/src/<kebab>/{model.json, pattern.css}
+ *   - Modell + CSS:              packages/components/src/<kebab>/{model.json, <kebab>.css}
  *
  *   AUSGABE (Doku-App):
  *   - SvelteKit-Route (mdsvex):  apps/docs/src/routes/product/components/<kebab>/+page.svx   (immer neu)
@@ -44,7 +44,7 @@ const TARGET = 'zeit-de';
 // Repo-relativ (nicht absolut): der Exporter bekommt seinen Root per --root und
 // setzt den Teilpfad selbst zusammen — die Tests fahren ihn gegen ein Wegwerf-Repo.
 const ROUTE_BASE = COMPONENTS_REL;
-/** Die Eingabeseite: ein Ordner je Komponente im Paket (model.json + pattern.css). */
+/** Die Eingabeseite: ein Ordner je Komponente im Paket (model.json + <slug>.css). */
 const PKG_BASE = PKG_COMPONENTS_REL;
 /** Die Redaktionsseite: eine Datei je Komponente, ausserhalb der Route (PR 5). */
 const CONTENT_BASE = CONTENT_COMPONENTS_REL;
@@ -270,7 +270,7 @@ const BEDINGTE_AT_REGELN = /^@(media|supports|container)\b/i;
 // ---------------------------------------------------------------------------
 // @media → @container (nur im GESCOPTEN Ausgang)
 // ---------------------------------------------------------------------------
-// Die `pattern.css` selbst behält ihr `@media` — sie ist originalgetreue Kopie des
+// Das Pattern-CSS im Paket (`<slug>.css`) behält sein `@media` — es ist originalgetreue Kopie des
 // Produktions-CSS, und der Code-Block auf der Doku-Seite zeigt exakt diesen Inhalt.
 // Im Playground steht das Specimen aber in einem <div> mit gesetzter Preset-Breite;
 // `@media` fragt den VIEWPORT ab und ignoriert diesen Kasten (gemessen: Viewport
@@ -428,7 +428,7 @@ function mediaZuContainer(prelude) {
  * werden übersprungen, damit ein `content: "}"` die Bilanz nicht kippt.
  * Wirft bei unbalancierten Klammern und bei Resttext ohne Block (z. B. `@import …;`).
  */
-function splitCssBloecke(css, quelle = 'pattern.css') {
+function splitCssBloecke(css, quelle = 'Pattern-CSS') {
 	const bloecke = [];
 	let tiefe = 0;
 	let start = 0;
@@ -468,33 +468,37 @@ function splitCssBloecke(css, quelle = 'pattern.css') {
 }
 
 /**
- * Unscoped Pattern-CSS (pattern.css) gegen die Vorschau-Flächen scopen:
+ * Unscoped Pattern-CSS (`<slug>.css`) gegen die Vorschau-Flächen scopen:
  * jede Regel wird auf `.spec-canvas SEL` UND `.pg-preview SEL` präfixiert (als
  * :global, weil die Klassen auf Kind-Komponenten landen). Bedingte At-Rules
  * (`@media`/`@supports`/`@container`) bleiben als Rahmen erhalten, ihr Rumpf wird
  * rekursiv gescopet — siehe Block-Kommentar oben. Größenbasierte `@media`-Rahmen
  * werden dabei zu `@container` übersetzt (`mediaZuContainer`), damit die Bühne
  * schaltet und nicht das Browserfenster.
+ *
+ * `quelle` ist nur die Beschriftung für Fehlermeldungen — seit der Umbenennung
+ * heißt die Datei je Komponente anders (`button.css`, `hero.css` …), und eine
+ * Meldung, die pauschal „pattern.css" sagt, benennt keine existierende Datei mehr.
  */
-function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview']) {
+function scopeCss(css, prefixes = ['.spec-canvas', '.pg-preview'], quelle = 'Pattern-CSS') {
 	const clean = String(css)
 		.replace(/\/\*[\s\S]*?\*\//g, '')
 		.trim();
-	return scopeBloecke(clean, prefixes);
+	return scopeBloecke(clean, prefixes, quelle);
 }
 
 /** Rekursiver Kern: kommentar-freies CSS → gescopte Regeln (At-Rahmen erhalten). */
-function scopeBloecke(clean, prefixes) {
-	return splitCssBloecke(clean)
+function scopeBloecke(clean, prefixes, quelle = 'Pattern-CSS') {
+	return splitCssBloecke(clean, quelle)
 		.map(({ prelude, rumpf }) => {
 			if (prelude.startsWith('@')) {
 				if (!BEDINGTE_AT_REGELN.test(prelude)) {
 					throw new Error(
-						`pattern.css: At-Rule "${prelude.split(/\s/)[0]}" wird vom Scoping nicht unterstützt — ` +
+						`${quelle}: At-Rule "${prelude.split(/\s/)[0]}" wird vom Scoping nicht unterstützt — ` +
 							'erlaubt sind @media, @supports und @container (@keyframes & Co. bewusst nicht).'
 					);
 				}
-				const innen = scopeBloecke(rumpf, prefixes);
+				const innen = scopeBloecke(rumpf, prefixes, quelle);
 				if (!innen) return '';
 				// Rahmen wieder darum, Inhalt um zwei Leerzeichen eingerückt.
 				const eingerueckt = innen
@@ -748,7 +752,12 @@ function renderPage(model, { patternCss = null } = {}) {
 
 	// CSS für die Live-Specimens (gegen .spec-canvas gescopt).
 	const css = Array.isArray(render.css) ? render.css.join('\n') : (render.css ?? '');
-	const scopedPattern = patternCss ? scopeCss(patternCss) : '';
+	// Dateiname des Pattern-CSS (`button.css`) — er beschriftet den Code-Block auf
+	// der Doku-Seite und die Scoping-Fehlermeldungen. Er steht im Modell, nicht in
+	// einer Konvention: `render.cssFile` ist die einzige Stelle, die ihn kennt.
+	const cssDateiname =
+		typeof render.cssFile === 'string' ? render.cssFile.split('/').pop() : 'Pattern-CSS';
+	const scopedPattern = patternCss ? scopeCss(patternCss, undefined, cssDateiname) : '';
 	const allCss = [css, scopedPattern].filter(Boolean).join('\n\n');
 	const styleBlock = allCss ? `\n<style>\n${allCss}\n</style>\n` : '';
 
@@ -787,7 +796,7 @@ function renderPage(model, { patternCss = null } = {}) {
 	//   "render": {
 	//     "controls":  [ { key, label, type: "select"|"toggle"|"attr", … } ],
 	//     "template":  "<button class=\"z-button{classes}\"{attrs}>Click me</button>",
-	//     "cssFile":   "./pattern.css",      // UNSCOPED, co-located → wird gescoped eingebettet
+	//     "cssFile":   "./button.css",       // UNSCOPED, co-located → wird gescoped eingebettet
 	//     "specimen":  "./Specimen.svelte",  // Escape-Hatch (Loops/Interaktion)
 	//     "hint":      "…",                  // Hinweiszeile statt Controls
 	//     "stage":     { "darkKey": "onImage" }
@@ -1115,7 +1124,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		if (cssForCode)
 			develop += `\t<CodeBlock title="CSS · Tokens als Custom Properties" lang="css" code={cssCode} />\n`;
 		if (patternCss)
-			develop += `\t<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />\n`;
+			develop += `\t<CodeBlock title="CSS · Pattern (${cssDateiname})" lang="css" code={patternCssCode} />\n`;
 	}
 	// Redaktionelle Code-Beispiele (content.json → editorial) UNTER den maschinellen
 	// Code-Sektionen. Reiner Text durch den CodeBlock (escaped, nie ausgeführt).
@@ -1232,7 +1241,7 @@ function resolveModelPath(input) {
 			const slug = input.replace(/\/+$/, '').split('/').pop();
 			throw new Error(
 				`Kein model.json im Ordner: ${input}\n` +
-					`   Modell und pattern.css liegen im Paket: ${PKG_BASE}/${slug}/`
+					`   Modell und Pattern-CSS liegen im Paket: ${PKG_BASE}/${slug}/`
 			);
 		}
 		return co;
@@ -1362,7 +1371,7 @@ function validate(model, { root = process.cwd() } = {}) {
 
 /**
  * --init: legt ein neues Component-Gerüst an (PAKET-Ordner + gültiges Start-model.json
- * mit $schema-Verweis für Editor-Hilfe + pattern.css-Stub). Überschreibt nichts,
+ * mit $schema-Verweis für Editor-Hilfe + <slug>.css-Stub). Überschreibt nichts,
  * exportiert NICHT (erst ausfüllen, dann exportieren).
  */
 function scaffold(name, root) {
@@ -1375,7 +1384,7 @@ function scaffold(name, root) {
 	const cls = `z-${kebab}`;
 	const pkgDir = resolve(root, PKG_BASE, kebab);
 	const modelPath = resolve(pkgDir, 'model.json');
-	const cssPath = resolve(pkgDir, 'pattern.css');
+	const cssPath = resolve(pkgDir, `${kebab}.css`);
 	if (existsSync(modelPath))
 		throw new Error(`Existiert bereits: ${relative(root, modelPath)} — nichts überschrieben.`);
 
@@ -1416,14 +1425,14 @@ function scaffold(name, root) {
 				}
 			],
 			template: `<div class="${cls}{classes}">Beispiel</div>`,
-			cssFile: './pattern.css'
+			cssFile: `./${kebab}.css`
 		},
 		// Artefakte werden EXPLIZIT deklariert — es gibt keinen stillen Fallback mehr
 		// (MIGRATIONSPLAN §4, Ausnahme 3). Das Schema verlangt den Block.
 		// `katalog` bleibt bewusst weg: ohne Angabe läuft der Eintrag ans Ende (999),
 		// die Reihenfolge entscheidet ein Mensch (Schritt 4 unten).
 		code: {
-			artefakte: [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]
+			artefakte: [{ format: 'html-css', dateien: [`${kebab}.css`], status: 'kanonisch' }]
 		}
 	};
 
@@ -1442,7 +1451,7 @@ function scaffold(name, root) {
 	console.log(`  ${relative(root, cssPath)}`);
 	console.log('\nNächste Schritte:');
 	console.log('  1. model.json ausfüllen — der Editor zeigt Feld-Hilfe dank $schema.');
-	console.log('  2. pattern.css mit den echten z-*-Styles füllen.');
+	console.log(`  2. ${kebab}.css mit den echten z-*-Styles füllen.`);
 	console.log(
 		`  3. Seite erzeugen:  node tooling/zeit-de-exporter/export.mjs ${PKG_BASE}/${kebab}`
 	);
@@ -1484,7 +1493,8 @@ function main() {
 		const cssPath = resolve(modelDir, model.render.cssFile);
 		if (!existsSync(cssPath)) {
 			throw new Error(
-				`render.cssFile nicht gefunden: ${relative(root, cssPath)} — pattern.css neben model.json anlegen.`
+				`render.cssFile nicht gefunden: ${relative(root, cssPath)} — ` +
+					`${model.render.cssFile.split('/').pop()} neben model.json anlegen.`
 			);
 		}
 		patternCss = readFileSync(cssPath, 'utf8');
@@ -1534,7 +1544,7 @@ function main() {
 		console.log(`  entfernt (veraltet): ${relative(root, legacyContent)}`);
 	}
 
-	// Eingabe-Modell an seinem kanonischen Ort ablegen: im PAKET, neben pattern.css.
+	// Eingabe-Modell an seinem kanonischen Ort ablegen: im PAKET, neben dem Pattern-CSS.
 	// (Vor PR 4 lag es neben der Ausgabe.) Kommt die Eingabe von woanders — etwa
 	// tooling/zeit-de-exporter/examples/button.json —, wird sie damit ins Paket
 	// übernommen; ist sie das Paket-Modell selbst, schreibt der Lauf denselben Inhalt

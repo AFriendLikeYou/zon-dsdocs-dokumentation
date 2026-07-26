@@ -41,7 +41,10 @@ export const generated = {
 		{
 			"label": "Meta-Gap (Zeitstempel · Autor)",
 			"px": "12 px",
-			"token": "--z-ds-space-s"
+			"token": "--z-ds-space-s",
+			"art": "gap",
+			"achse": "horizontal",
+			"selector": ".z-cell__meta"
 		},
 		{
 			"label": "Fläche ↔ Body",
@@ -258,7 +261,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"cell.css"
 				],
 				"status": "kanonisch"
 			}

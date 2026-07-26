@@ -185,7 +185,7 @@
 			}
 		],
 		"template": "<button class=\"z-icon-button{classes}\" type=\"button\" aria-label=\"Favorit\"{attrs}><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2\"></polygon></svg></button>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./icon-button.css",
 		"calloutAnchors": [
 			{
 				"nr": 1,

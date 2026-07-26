@@ -63,14 +63,14 @@ test.describe('MCP-Endpoint /api/mcp', () => {
 		expect(text).toContain('button-group');
 	});
 
-	test('get markup liefert Template + pattern.css der Komponente', async ({ request }) => {
+	test('get markup liefert Template + Pattern-CSS der Komponente', async ({ request }) => {
 		const res = await request.post('/api/mcp', {
 			data: rpc('tools/call', { name: 'get', arguments: { slug: 'button', section: 'markup' } }, 4)
 		});
 		const { result } = await res.json();
 		const text = result.content[0].text as string;
 		expect(text).toContain('class="z-button');
-		expect(text).toContain('pattern.css');
+		expect(text).toContain('button.css');
 	});
 
 	test('Fehlerpfade: -32601, -32700 und GET → 405', async ({ request }) => {

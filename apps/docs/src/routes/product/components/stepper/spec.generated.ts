@@ -164,7 +164,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"stepper.css"
 				],
 				"status": "kanonisch"
 			}

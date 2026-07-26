@@ -76,7 +76,7 @@ if (!fs.existsSync(PKG_CSS)) {
 			console.warn(`   • Wert geändert: ${t}: „${copy.get(t)}" → „${pkg.get(t)}"`);
 		console.warn(
 			'   → npm run copy:zds (Paket-CSS übernehmen) und Folge-Effekte prüfen' +
-				' (pattern.css, foundation-tokens.ts, packages/tokens/src/roles.ts).\n'
+				' (Pattern-CSS, foundation-tokens.ts, packages/tokens/src/roles.ts).\n'
 		);
 	} else {
 		const version = JSON.parse(

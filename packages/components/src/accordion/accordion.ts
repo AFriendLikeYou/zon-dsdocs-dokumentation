@@ -3,10 +3,10 @@
  * (MIGRATIONSPLAN.md §3, Pilot).
  *
  * ARBEITSTEILUNG. Das Element erfindet die Optik NICHT neu: Typografie,
- * Abstände, Farben, Pfeil und Fokus-Ring stehen vollständig in `pattern.css`.
+ * Abstände, Farben, Pfeil und Fokus-Ring stehen vollständig in `accordion.css`.
  * Hier steht ausschließlich, was CSS nicht kann — Zustand, ARIA-Verdrahtung und
  * die Auf/Zu-Bewegung. Konsequenz, und zugleich die Adoptionsstrategie: Ein
- * Konsument kann `pattern.css` ALLEIN benutzen und hat einen vollständig
+ * Konsument kann `accordion.css` ALLEIN benutzen und hat einen vollständig
  * funktionierenden Aufklapper; das Element legt Politur und ARIA obendrauf.
  *
  * WARUM <details>/<summary> UND NICHT ANREICHERUNG DES BESTANDS-MARKUPS.
@@ -22,7 +22,7 @@
  *      <details> gehört der zugeklappte Zustand dem Browser; vor und nach dem
  *      Upgrade steht dasselbe da.
  *
- * KEIN SHADOW DOM. Das Aussehen kommt von außen (`pattern.css` plus die
+ * KEIN SHADOW DOM. Das Aussehen kommt von außen (`accordion.css` plus die
  * `--z-ds-*`-Token der Seite). Ein Shadow Root würde beides aussperren und aus
  * der progressiven Übernahme ein Alles-oder-nichts machen.
  *
@@ -173,7 +173,7 @@ export function accordionKlasse(): (new () => ZAccordionElement) | null {
 			if (!this.#details || !this.#content) return;
 			// `open` bleibt zunächst gesetzt — sonst nähme der Browser den Inhalt sofort
 			// aus dem Layout und es gäbe nichts mehr zu animieren. Der Pfeil kippt
-			// trotzdem sofort zurück, weil er an `aria-expanded` hängt (pattern.css).
+			// trotzdem sofort zurück, weil er an `aria-expanded` hängt (accordion.css).
 			const vonHoehe = this.#content.getBoundingClientRect().height;
 			this.#summary?.setAttribute('aria-expanded', 'false');
 			this.#animiere(vonHoehe, 0, () => this.#setzeOffen(false));

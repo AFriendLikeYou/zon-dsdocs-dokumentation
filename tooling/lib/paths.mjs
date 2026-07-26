@@ -29,7 +29,7 @@ export const COMPONENTS_REL = `${APP_REL}/src/routes/product/components`;
 
 /**
  * Das Komponenten-PAKET (@zeit/components) — repo-relativ. Seit PR 4 liegt hier
- * das, was wir wirklich ausliefern: `model.json` (Spec), `pattern.css` und die
+ * das, was wir wirklich ausliefern: `model.json` (Spec), `<slug>.css` und die
  * `figma-raw.json`-Fixture. In der Route (COMPONENTS_REL) bleibt seit PR 5 nur
  * noch die Doku-AUSGABE (`+page.svx`, `spec.generated.ts`); die Redaktion liegt
  * in CONTENT_COMPONENTS_REL.
@@ -71,7 +71,7 @@ export const DATA_DIR = path.join(LIB_DIR, 'data');
  */
 export const COMPONENTS_DIR = path.join(ROUTES_DIR, 'product/components');
 
-/** Ein Ordner je ausgelieferter Komponente (model.json, pattern.css, figma-raw.json). */
+/** Ein Ordner je ausgelieferter Komponente (model.json, <slug>.css, figma-raw.json). */
 export const PKG_COMPONENTS_DIR = path.join(REPO_ROOT, PKG_COMPONENTS_REL);
 
 /** Eine JSON-Datei je Komponente mit den redaktionellen Feldern (`<slug>.json`). */

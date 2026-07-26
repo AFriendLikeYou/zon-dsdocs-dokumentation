@@ -154,7 +154,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"page-shortcut.css"
 				],
 				"status": "kanonisch"
 			}

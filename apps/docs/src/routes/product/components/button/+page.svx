@@ -200,7 +200,7 @@ kategorie: Aktionen
 		<p>{repoNote}</p>
 	{/if}
 	<CodeBlock title="Svelte · Repo-Komponente" lang="svelte" code={repoCode} />
-	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+	<CodeBlock title="CSS · Pattern (button.css)" lang="css" code={patternCssCode} />
 
 	{#if (editorial.codeBeispiele ?? []).length}
 		<h2>Redaktionelle Code-Beispiele</h2>

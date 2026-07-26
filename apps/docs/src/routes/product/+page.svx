@@ -26,7 +26,7 @@ Strecke aus — beide brauchen kein Vorwissen.
 	/>
 	<Card
 		title="Für Entwickler:innen"
-		description="DS-CSS einbinden, z-Klassen und pattern.css verstehen, Props, Tokens und der MCP-Endpoint."
+		description="DS-CSS einbinden, z-Klassen und Pattern-CSS verstehen, Props, Tokens und der MCP-Endpoint."
 		url="#fuer-entwicklerinnen"
 	/>
 </Grid>
@@ -68,9 +68,10 @@ und die Doku als Nachschlagewerk nutzt.
 1. **DS-CSS einbinden.** Die Styles liegen im Paket `@zeitonline/design-system`. Einmal
    eingebunden, stehen dir alle `z-`-Klassen zur Verfügung — du schreibst Markup, das Paket
    liefert die Optik.
-2. **z-Klassen und pattern.css verstehen.** Jede Komponente hat einen Basis-Selektor
+2. **z-Klassen und Pattern-CSS verstehen.** Jede Komponente hat einen Basis-Selektor
    (z. B. `.z-button`) plus Modifier (`.z-button--primary`). Die Doku zeigt pro Komponente
-   die **originalgetreue `pattern.css`** — genau das CSS, das die Klasse rendert. Kein Rätselraten,
+   das **originalgetreue Pattern-CSS** (`<slug>.css`, z. B. `button.css`) — genau das CSS,
+   das die Klasse rendert. Kein Rätselraten,
    welche Klasse was tut.
 3. **Develop-Tab für Props und Code.** Neben dem Design-Tab hat jede Component-Seite einen
    **Develop-Tab**: fertige HTML/Svelte-Snippets zum Kopieren und — wo vorhanden — eine

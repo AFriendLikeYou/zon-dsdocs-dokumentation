@@ -82,7 +82,7 @@ kategorie: Medien
       1280 misst sie \`54px 892px 54px\` — beides live abgelesen. Figma modelliert
       also zwei Bildschirmbreiten, nicht zwei Varianten. Deshalb steht das jetzt
       als \`@media\` hier (mobile-first, wie die Produktion) und nicht als Klasse.
-      Dasselbe Muster wie beim \`hero\` (siehe dessen pattern.css).
+      Dasselbe Muster wie beim \`hero\` (siehe dessen \`hero.css\`).
 
    2) DIE ACHSE „Slot Size" (Large/Middle/Small) HAT KEINE CODE-ENTSPRECHUNG.
       Figma zeichnet Slots zu 320², 236² und 184². Im ausgelieferten CSS kommen
@@ -111,7 +111,7 @@ kategorie: Medien
       Außerhalb von zeit.de wäre die Variable leer und die Deklaration ungültig;
       hier stünde also nur der Name eines Tokens, das es nicht gibt.
    b) Die Autoplay-Fortschrittsanimation (\`@keyframes fill-dot\` + \`::after\`)
-      fehlt: Der Exporter lehnt \`@keyframes\` in pattern.css bewusst ab (der Name
+      fehlt: Der Exporter lehnt \`@keyframes\` im Pattern-CSS bewusst ab (der Name
       wäre global). Der aktive Dot zeigt hier den Endzustand, nicht den Lauf.
    c) \`.z-carousel__slide\` bekommt eine sichtbare Platzhalterfläche, quadratisch
       und bei 20rem gedeckelt. Im Original ist der Slot ein reiner Wrapper ohne
@@ -633,7 +633,7 @@ z-carousel {
 
 	<h2>Code</h2>
 	<CodeBlock title="HTML" lang="html" code={htmlCode} />
-	<CodeBlock title="CSS · Pattern (pattern.css)" lang="css" code={patternCssCode} />
+	<CodeBlock title="CSS · Pattern (carousel.css)" lang="css" code={patternCssCode} />
 
 	{#if (editorial.codeBeispiele ?? []).length}
 		<h2>Redaktionelle Code-Beispiele</h2>

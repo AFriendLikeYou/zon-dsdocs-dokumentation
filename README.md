@@ -41,7 +41,7 @@ apps/docs/                      die SvelteKit-App — npm-Workspace `docs`
 │   │   ├── brand/              Brandhub-Seiten (englische URLs, deutsche Inhalte)
 │   │   ├── product/            DS-Doku; components/<slug>/ = +page.svx ·
 │   │   │                       spec.generated.ts (Exporter-AUSGABE, nur Generat;
-│   │   │                       model.json + pattern.css in @zeit/components,
+│   │   │                       model.json + <slug>.css in @zeit/components,
 │   │   │                       Redaktion in apps/docs/content/components/<slug>.json)
 │   │   ├── login/  admin/
 │   │   └── +layout.svelte      Chrome-Mount + Bereichslogik (brand/product)
@@ -60,7 +60,7 @@ apps/docs/                      die SvelteKit-App — npm-Workspace `docs`
 
 packages/                       Workspace-Pakete (@zeit/*) — der Inhalt, den wir besitzen
 ├── components/                 @zeit/components: je Komponente src/<slug>/ mit
-│                               pattern.css · model.json · figma-raw.json · index.ts
+│                               <slug>.css · model.json · figma-raw.json · index.ts
 ├── icons/                      @zeit/icons: svg/ + generierte Liste src/icons.ts
 │                               + icon-overrides.mjs (Kuratierung)
 └── tokens/                     @zeit/tokens: vendor/styles-zds.css (durchgereicht)
@@ -85,7 +85,7 @@ tooling/                        Generatoren (gen-icons, gen-brand-assets), Spieg
   Sonderfälle in `apps/docs/src/lib/data/brand-asset-overrides.mjs`.
 - **Seite:** `apps/docs/src/routes/<bereich>/<slug>/+page.svx` + Menüeintrag in
   `apps/docs/src/lib/data/navigation.ts`.
-- **Dokumentierte Komponente:** `packages/components/src/<slug>/{model.json,pattern.css}` →
+- **Dokumentierte Komponente:** `packages/components/src/<slug>/{model.json,<slug>.css}` →
   `node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>` (redaktionelle
   Texte danach in `apps/docs/content/components/<slug>.json`).
 - **UI-Baustein der Doku:** `apps/docs/src/lib/components/ui/<kebab>/` mit `index.ts`-Barrel.
@@ -150,7 +150,7 @@ SDK, keine neue Abhängigkeit. Route:
 (dünn), Logik in [`apps/docs/src/lib/server/mcp.ts`](apps/docs/src/lib/server/mcp.ts),
 Datenbasis
 [`apps/docs/src/lib/server/agent-catalog.ts`](apps/docs/src/lib/server/agent-catalog.ts)
-(Katalog inkl. `render`-Template + rohem `pattern.css`, nur serverseitig).
+(Katalog inkl. `render`-Template + rohem Pattern-CSS, nur serverseitig).
 
 **Tools** (vier — `tools/list` ist die Wahrheit):
 
@@ -198,11 +198,11 @@ curl -u <user>:<pass> -X POST http://localhost:5173/api/mcp \
 Entwickler ziehen dokumentierte ZDS-Komponenten per CLI ins eigene Projekt: die
 Dateien werden **kopiert**, nicht als Paket installiert. Dünne Routen → pure Logik
 [`apps/docs/src/lib/server/registry.ts`](apps/docs/src/lib/server/registry.ts) (getestet), Datenbasis
-ist der `agent-catalog` (rohes `pattern.css`). Deckt den **gesamten Katalog
+ist der `agent-catalog` (rohes Pattern-CSS). Deckt den **gesamten Katalog
 automatisch** ab (Build-Zeit-Glob) — jede dokumentierte Komponente ist sofort
 verfügbar. Pro Komponente deklariert der `code`-Block im `model.json` die
 Format-Artefakte (`html-css` | `web-component` | `svelte`) — **Pflicht und
-explizit**, einen impliziten `pattern.css`-Fallback gibt es nicht.
+explizit**, einen impliziten CSS-Fallback gibt es nicht.
 
 - `GET /api/registry` — Index (slug, name, formate, status)
 - `GET /api/registry/<slug>[?format=html-css]` — Metadaten + Artefakte inkl.

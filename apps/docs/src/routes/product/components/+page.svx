@@ -8,7 +8,7 @@ title: Components
 	// Zentraler, generierter Katalog-Index (Stufe 5, ADR-023/024) — Discovery über
 	// die co-locateten model.json, redaktionelle Overrides bereits eingemerged.
 	import { CATALOG } from '$data/catalog';
-	// Mini-Specimen je Komponente (render + gescoptes pattern.css, Build-Zeit-Daten).
+	// Mini-Specimen je Komponente (render + gescoptes Pattern-CSS, Build-Zeit-Daten).
 	import { CATALOG_PREVIEWS } from '$data/catalog-previews';
 
 	const STATUS_LABEL: Record<string, string> = {

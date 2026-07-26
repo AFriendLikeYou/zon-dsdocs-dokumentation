@@ -5,7 +5,7 @@ Komponente** — und die Aufteilung ist der Punkt:
 
 | Datei             | Was                                                               | Regel                                        |
 | ----------------- | ----------------------------------------------------------------- | -------------------------------------------- |
-| `pattern.css`     | unscoped Produktions-CSS auf echten `--z-ds-*`-Tokens             | das **Aussehen**                             |
+| `<slug>.css`      | unscoped Produktions-CSS auf echten `--z-ds-*`-Tokens             | das **Aussehen**                             |
 | `<slug>.ts`       | Custom Element — Zustand, ARIA, Bewegung (optional, seit PR 6)    | das **Verhalten**                            |
 | `model.json`      | kanonischer Spec: Maße, Tokens, Varianten, Zustände, a11y, `code` | die **Beschreibung** (Eingabe des Exporters) |
 | `figma-raw.json`  | Roh-Antwort des Figma-Imports (fehlt, wo es kein Figma gibt)      | **Fixture** für den Design-Drift-Vergleich   |
@@ -22,7 +22,7 @@ Tippfehlerkorrektur im Fließtext darf keine Paketversion auslösen
 ```js
 // CSS über den eigenen Subpath — Styles gehören in den Stylesheet-Graph,
 // nicht in einen JS-Import.
-import '@zeit/components/button/pattern.css';
+import '@zeit/components/button/button.css';
 
 // Verhalten, wo es eines gibt: registriert das Custom Element (Seiteneffekt).
 import '@zeit/components/accordion/accordion';
@@ -36,7 +36,7 @@ Das CSS setzt die `--z-ds-*`-Token voraus: `@zeit/tokens/styles-zds.css` einmal
 global einbinden, davor.
 
 **Aussehen und Verhalten sind getrennt beziehbar, und das ist die
-Adoptionsstrategie:** Wer nur `pattern.css` einbindet, bekommt eine funktionierende
+Adoptionsstrategie:** Wer nur `<slug>.css` einbindet, bekommt eine funktionierende
 Komponente — beim Accordion einen voll bedienbaren Aufklapper, weil der Zustand
 über `<details>` beim Browser liegt. Das Element legt nur darauf, was CSS nicht
 kann. Es gibt keinen Alles-oder-nichts-Schritt.
@@ -48,7 +48,7 @@ die Registry: `zds add button` (`tooling/zds-cli/`, Endpunkt `/api/registry`).
 
 ```bash
 node tooling/zeit-de-exporter/export.mjs --init "Neue Komponente"   # Gerüst hier im Paket
-# model.json + pattern.css füllen …
+# model.json + <slug>.css füllen …
 node tooling/zeit-de-exporter/export.mjs packages/components/src/<slug>   # Doku-Seite erzeugen
 ```
 
@@ -60,12 +60,12 @@ darauf. Katalog, Navigation, Registry und MCP füllen sich von selbst
 
 ## Zwei Regeln, die leicht verletzt werden
 
-- **`pattern.css` ist eine originalgetreue Kopie der Produktion**, keine
+- **Das Pattern-CSS ist eine originalgetreue Kopie der Produktion**, keine
   Neuschöpfung. Flache Regeln plus `@media`/`@supports`/`@container`;
   `@keyframes` lehnt der Exporter ab (Prozent-Selektoren lassen sich nicht
   scopen, der Name kollidierte global).
 - **`code.artefakte` im `model.json` ist Pflicht.** Es gibt keinen impliziten
-  „pattern.css ist schon da"-Fallback mehr: Was eine Komponente ausliefert, sagt
+  „das CSS ist ja schon da"-Fallback mehr: Was eine Komponente ausliefert, sagt
   sie selbst (`MIGRATIONSPLAN.md` §4, Ausnahme 3).
 
 ## Custom Elements (seit PR 6)
@@ -78,7 +78,7 @@ Bisher genau eines: `accordion.ts` → `<z-accordion>`
   dem Server reißt das die ganze SSR-Seite herunter, und zwar bevor ein
   `typeof customElements`-Riegel je greift. Deshalb: Klasse in einer Funktion
   bauen, Registrierung idempotent. `accordion.ssr.test.ts` hält das fest.
-- **Kein Shadow DOM.** Aussehen kommt von außen (`pattern.css` + Token). Ein
+- **Kein Shadow DOM.** Aussehen kommt von außen (`<slug>.css` + Token). Ein
   Shadow Root sperrt beides aus und macht die progressive Übernahme unmöglich.
 - **Das Element erfindet keine Optik.** Es fügt hinzu, was CSS nicht kann:
   Zustand, ARIA, Tastatur, Bewegung. Alles Sichtbare bleibt im CSS.
@@ -86,7 +86,10 @@ Bisher genau eines: `accordion.ts` → `<z-accordion>`
 Der Export-Pfad ist eine **Handliste** in der `package.json`
 (`"./accordion/accordion"`), weil Node in einem Subpath-Muster nur EIN `*`
 erlaubt — bei `./src/<slug>/<slug>.ts` käme der Slug zweimal vor. Ein neues
-Element braucht dort also eine Zeile. Der Exporter erkennt es dagegen von selbst:
+Element braucht dort also eine Zeile. (Das CSS kommt trotz gleicher Doppelung
+ohne Handliste aus: `"./*.css": "./src/*.css"` lässt den einen Stern
+`<slug>/<slug>` **am Stück** schlucken — das geht nur, weil die Endung `.css`
+den Musterschwanz bildet.) Der Exporter erkennt es dagegen von selbst:
 Wer im `code`-Block ein `web-component`-Artefakt deklariert, bekommt den Import
 automatisch in die generierte Doku-Seite — und der Playground rendert damit die
 echte Komponente statt eines HTML-Strings.

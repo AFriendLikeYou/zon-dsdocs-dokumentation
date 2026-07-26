@@ -37,11 +37,11 @@ describe('registry · registryComponent', () => {
 		expect(registryComponent('gibt-es-nicht')).toBeNull();
 	});
 
-	it('deklariertes Artefakt trägt pattern.css mit rohem Inhalt', () => {
+	it('deklariertes Artefakt trägt button.css mit rohem Inhalt', () => {
 		const button = registryComponent('button');
 		const htmlCss = button?.artefakte.find((a) => a.format === 'html-css');
 		expect(htmlCss?.status).toBe('kanonisch');
-		const patternDatei = htmlCss?.dateien.find((d) => d.pfad === 'pattern.css');
+		const patternDatei = htmlCss?.dateien.find((d) => d.pfad === 'button.css');
 		expect(patternDatei?.inhalt).toContain('.z-button');
 	});
 
@@ -97,9 +97,9 @@ describe('registry · Hashes in der Antwort', () => {
 		}
 	});
 
-	it('button/pattern.css trägt einen konkreten Hash', () => {
+	it('button/button.css trägt einen konkreten Hash', () => {
 		const datei = registryComponent('button', 'html-css')?.artefakte[0]?.dateien.find(
-			(d) => d.pfad === 'pattern.css'
+			(d) => d.pfad === 'button.css'
 		);
 		expect(datei?.hash).toMatch(/^sha256-[0-9a-f]{16}$/);
 	});

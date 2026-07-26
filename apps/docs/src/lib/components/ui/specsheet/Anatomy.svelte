@@ -328,7 +328,7 @@
 		const ro = new ResizeObserver(measureOverlays);
 		ro.observe(slotEl);
 		// AUCH das Specimen-Root beobachten: der Slot behält bei internen Reflows
-		// (Hydration, spät angewandtes pattern.css) oft seine Box — die Kinder
+		// (Hydration, spät angewandtes Pattern-CSS) oft seine Box — die Kinder
 		// ändern sich trotzdem. Ohne das blieben Mount-Messungen mit 0-Breiten
 		// stehen und die Gap-Kopplung fiel stumm aus (live beobachteter Bug).
 		if (slotEl.firstElementChild) ro.observe(slotEl.firstElementChild);

@@ -16,7 +16,7 @@
  *
  * Usage-Sätze speisen sich aus: den Gruppen-`beschreibung`en, den Rollen-Mappings in
  * static/global.css (welches --ds-* konsumiert welches --z-ds-*?) und der tatsächlichen
- * Verwendung in den pattern.css der Komponenten. Wo keine belastbare Quelle existiert,
+ * Verwendung im Pattern-CSS der Komponenten. Wo keine belastbare Quelle existiert,
  * steht „—".
  */
 

@@ -20,7 +20,7 @@ export const GET: RequestHandler = () => {
 > /llms-full.txt, maschinenlesbar per MCP unter POST /api/mcp (Tools: list, search,
 > get, foundations — JSON-RPC 2.0, Streamable HTTP, Basic Auth, Ergebnisse mit
 > structuredContent) sowie als JSON-Manifest unter GET /api/manifest.json
-> (Komponenten inkl. render-Template + pattern.css, Foundations mit Live-Werten,
+> (Komponenten inkl. render-Template + Pattern-CSS, Foundations mit Live-Werten,
 > Konventionen; einzeln: ?component=<slug>).
 
 ## Komponenten
@@ -43,7 +43,7 @@ Patterns lässt sich daraus ableiten:
 - Modifier: \`.z-<komponente>--<variante>\` (z. B. \`.z-button--primary\`), kombinierbar
 - Zustände: native Attribute/Pseudoklassen (\`disabled\`, \`:hover\`, \`:focus-visible\`) — keine State-Klassen
 - Farben/Maße: ausschließlich \`--z-ds-*\`-Tokens, nie Rohwerte
-- Markup ist Vanilla HTML/CSS; jede Komponente liefert ihr eigenes pattern.css
+- Markup ist Vanilla HTML/CSS; jede Komponente liefert ihr eigenes \`<slug>.css\`
 
 ## Optional
 - [Brandhub](/brand): Markenrichtlinien (Strategie, Logo, Farbe, Bildsprache)

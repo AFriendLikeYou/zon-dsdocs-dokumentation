@@ -72,7 +72,7 @@ function exportToTemp(slug) {
 	const tmp = tmpDir('export-idem-');
 	const outDir = path.join(tmp, ROUTE_BASE, kebab);
 	mkdirSync(outDir, { recursive: true });
-	// pattern.css (render.cssFile) löst der Exporter gegen das MODELL auf — die
+	// Das Pattern-CSS (render.cssFile) löst der Exporter gegen das MODELL auf — die
 	// echte Paket-Datei liegt daneben, es wird also nichts kopiert.
 	const res = runExport([path.join(pkgSrcDir, 'model.json'), '--root', tmp, '--target', 'zeit-de']);
 	return { res, srcDir: routeSrcDir, outDir, contentPath: path.join(tmp, CONTENT_BASE, `${kebab}.json`) };
@@ -118,8 +118,8 @@ describe('export.mjs · Regenerier-Idempotenz (committetes Generat)', () => {
 // Pflichtfeld name am verdrahteten Schema-Gate der CLI selbst (andere Ebene als der
 // reine validateModelSchema-Unit-Test).
 
-/** Kaputtes Modell (+ optional pattern.css) in Temp schreiben und exportieren.
-    pattern.css landet NEBEN dem Modell — `render.cssFile` ist modell-relativ.
+/** Kaputtes Modell (+ optional Pattern-CSS) in Temp schreiben und exportieren.
+    Das CSS landet NEBEN dem Modell — `render.cssFile` ist modell-relativ.
     `code` wird ergänzt, wo es nicht selbst Gegenstand des Falls ist: das Schema
     verlangt den Block, sonst schlüge das ajv-Gate zu, bevor der geprüfte
     Semantik-Check überhaupt liefe. */
@@ -127,13 +127,13 @@ function runBroken(model, css) {
 	const tmp = tmpDir('export-bad-');
 	const modelPath = path.join(tmp, 'model.json');
 	writeFileSync(modelPath, JSON.stringify(model));
-	if (css != null) writeFileSync(path.join(tmp, 'pattern.css'), css);
+	if (css != null) writeFileSync(path.join(tmp, 'x.css'), css);
 	return runExport([modelPath, '--root', tmp]);
 }
 
 /** Minimaler, gültiger `code`-Block — Pflichtfeld seit PR 4 (kein Fallback mehr). */
 const CODE_STUB = {
-	artefakte: [{ format: 'html-css', dateien: ['pattern.css'], status: 'kanonisch' }]
+	artefakte: [{ format: 'html-css', dateien: ['x.css'], status: 'kanonisch' }]
 };
 
 describe('export.mjs · CLI weist kaputte model.json zurück', () => {
@@ -176,14 +176,14 @@ describe('export.mjs · CLI weist kaputte model.json zurück', () => {
 		expect(res.stderr).toMatch(/default "zzz" ist kein option-value/);
 	});
 
-	it('@keyframes in pattern.css → Exit ≠ 0, Meldung nennt die At-Rule', () => {
+	it('@keyframes im Pattern-CSS → Exit ≠ 0, Meldung nennt die At-Rule', () => {
 		const res = runBroken(
 			{
 				name: 'X',
 				code: CODE_STUB,
 				render: {
 					template: '<b class="z{classes}"></b>',
-					cssFile: './pattern.css',
+					cssFile: './x.css',
 					controls: [
 						{
 							key: 'v',
@@ -385,7 +385,7 @@ describe('export.mjs · scopeCss übersetzt @media zu @container', () => {
 // ---------------------------------------------------------------------------
 
 describe('export.mjs · --init-Scaffold', () => {
-	it('legt model.json (mit $schema) + pattern.css-Stub an', () => {
+	it('legt model.json (mit $schema) + <slug>.css-Stub an', () => {
 		const tmp = tmpDir('export-init-');
 		const res = runExport(['--init', 'Test Widget', '--root', tmp]);
 		expect(res.status, res.stderr).toBe(0);
@@ -393,7 +393,7 @@ describe('export.mjs · --init-Scaffold', () => {
 		// Das Gerüst entsteht im PAKET — dort gehören Modell und CSS hin.
 		const dir = path.join(tmp, PKG_BASE, 'test-widget');
 		expect(existsSync(path.join(dir, 'model.json'))).toBe(true);
-		expect(existsSync(path.join(dir, 'pattern.css'))).toBe(true);
+		expect(existsSync(path.join(dir, 'test-widget.css'))).toBe(true);
 
 		const model = JSON.parse(readFileSync(path.join(dir, 'model.json'), 'utf8'));
 		expect(model.$schema).toMatch(/model\.schema\.json$/);

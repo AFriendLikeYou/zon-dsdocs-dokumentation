@@ -34,6 +34,7 @@ export const generated = {
 			"token": "--z-ds-space-xl",
 			"art": "gap",
 			"selector": ".zon-teaser--standard",
+			"achse": "horizontal",
 			"herkunft": "gemessen"
 		},
 		{
@@ -42,25 +43,32 @@ export const generated = {
 			"token": "--z-ds-space-m",
 			"art": "gap",
 			"selector": ".zon-teaser--standard",
+			"achse": "vertikal",
 			"herkunft": "gemessen"
 		},
 		{
 			"label": "Spitzmarke ↔ Überschrift",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__kicker",
+			"bis": ".zon-teaser__title"
 		},
 		{
 			"label": "Überschrift ↔ Zusammenfassung",
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__title",
+			"bis": ".zon-teaser__summary"
 		},
 		{
 			"label": "Zusammenfassung ↔ Byline",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__summary",
+			"bis": ".zon-teaser__byline"
 		},
 		{
 			"label": "Byline-Gap (Autor · Zeitstempel)",
@@ -76,13 +84,16 @@ export const generated = {
 			"token": "--z-ds-space-xs",
 			"art": "padding",
 			"richtung": "vertikal",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser__actions"
 		},
 		{
 			"label": "Innenabstand der Aktions-Buttons",
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
-			"herkunft": "gemessen"
+			"art": "padding",
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser__actions .z-text-button"
 		},
 		{
 			"label": "Abstand zum nächsten Teaser (ab 768 px; darunter 24 px)",
@@ -332,7 +343,7 @@ export const generated = {
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"standard-teaser.css"
 				],
 				"status": "kanonisch"
 			}

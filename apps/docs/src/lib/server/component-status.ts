@@ -195,7 +195,7 @@ export function gatherComponentStatus(): ComponentBoard {
 			raw,
 			draft: hasPkg('model.draft.json'),
 			model,
-			pattern: hasPkg('pattern.css'),
+			pattern: hasPkg(`${slug}.css`),
 			content: existsSync(contentPath(slug)),
 			page: hasRoute('+page.svx'),
 			degraded,

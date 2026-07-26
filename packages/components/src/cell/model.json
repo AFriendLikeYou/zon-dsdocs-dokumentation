@@ -38,7 +38,10 @@
 		{
 			"label": "Meta-Gap (Zeitstempel · Autor)",
 			"px": "12 px",
-			"token": "--z-ds-space-s"
+			"token": "--z-ds-space-s",
+			"art": "gap",
+			"achse": "horizontal",
+			"selector": ".z-cell__meta"
 		},
 		{
 			"label": "Fläche ↔ Body",
@@ -390,7 +393,7 @@
 			}
 		],
 		"template": "<article class=\"z-cell{classes}\">\n  <div class=\"z-cell__media\" aria-hidden=\"true\"></div>\n  <div class=\"z-cell__body\">\n    <p class=\"z-cell__kicker\">Politik</p>\n    <h3 class=\"z-cell__title\">Artikel Überschrift</h3>\n    <p class=\"z-cell__byline\">Von Vorname Nachname</p>\n    <div class=\"z-cell__meta\"><span>Vor 2 Stunden</span><span>Von Vorname Nachname</span></div>\n  </div>\n</article>",
-		"cssFile": "./pattern.css",
+		"cssFile": "./cell.css",
 		"preview": "<article class=\"z-cell z-cell--artikel\"><div class=\"z-cell__media\" aria-hidden=\"true\"></div><div class=\"z-cell__body\"><p class=\"z-cell__kicker\">Politik</p><h3 class=\"z-cell__title\">Artikel Überschrift</h3><p class=\"z-cell__byline\">Von Vorname Nachname</p></div></article>",
 		"variant": "<article class=\"z-cell z-cell--author\"><div class=\"z-cell__media\" aria-hidden=\"true\"></div><div class=\"z-cell__body\"><h3 class=\"z-cell__title\">Vorname Nachname</h3><p class=\"z-cell__byline\">Redakteurin im Ressort Politik</p></div></article>",
 		"calloutAnchors": [
@@ -524,7 +527,7 @@
 			{
 				"format": "html-css",
 				"dateien": [
-					"pattern.css"
+					"cell.css"
 				],
 				"status": "kanonisch"
 			}
