@@ -27,25 +27,43 @@ export const generated = {
 			"token": "--z-ds-space-l",
 			"art": "gap",
 			"selector": ".zon-teaser--wide",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"stufen": [
+				{
+					"abBreite": 0,
+					"px": "16 px",
+					"token": "--z-ds-space-m"
+				},
+				{
+					"abBreite": 768,
+					"px": "24 px",
+					"token": "--z-ds-space-l"
+				}
+			]
 		},
 		{
 			"label": "Spitzmarke ↔ Überschrift",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__kicker",
+			"bis": ".zon-teaser__title"
 		},
 		{
 			"label": "Überschrift ↔ Zusammenfassung",
 			"px": "8 px",
 			"token": "--z-ds-space-xs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__title",
+			"bis": ".zon-teaser__summary"
 		},
 		{
 			"label": "Zusammenfassung ↔ Byline",
 			"px": "4 px",
 			"token": "--z-ds-space-xxxs",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"von": ".zon-teaser__summary",
+			"bis": ".zon-teaser__byline"
 		},
 		{
 			"label": "Byline-Gap (Autor · Zeitstempel)",
@@ -61,7 +79,8 @@ export const generated = {
 			"token": "--z-ds-space-xs",
 			"art": "padding",
 			"richtung": "vertikal",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser__actions"
 		},
 		{
 			"label": "Container-Seitenabstand (Wide, ab 768 px; darunter 16 px)",
@@ -69,7 +88,18 @@ export const generated = {
 			"token": "--z-ds-space-xl",
 			"art": "padding",
 			"richtung": "horizontal",
-			"herkunft": "gemessen"
+			"herkunft": "gemessen",
+			"selector": ".zon-teaser--wide .zon-teaser__container",
+			"stufen": [
+				{
+					"abBreite": 0,
+					"px": "16 px"
+				},
+				{
+					"abBreite": 768,
+					"px": "32 px"
+				}
+			]
 		}
 	],
 	"tokens": [
