@@ -36,7 +36,14 @@ const ALLOW_EXACT = new Set([
 	// Header-Link — die Gruppe klappt nur auf). Der Index /brand/identity fasst die
 	// fünf Unterseiten als Kachel-Übersicht zusammen und ist bewusst nicht separat
 	// im Sidebar-Menü verlinkt (analog zu den Foundations-Übersichten).
-	'/brand/identity'
+	'/brand/identity',
+	// Inventar der DOKU-APP-UI (alle Bausteine aus src/lib/components/ui/ als lebende
+	// Instanz). Werkzeug für Design/Entwicklung, kein Seiteninhalt: weder Marke
+	// (/brand) noch Design-System (/product) — ein Nav-Eintrag würde es zu einem
+	// Angebot an die Leserschaft machen und genau die Verwechslung stiften, die das
+	// Projekt vermeidet („Doku-App-UI ≠ dokumentiertes ZEIT-DS"). Verlinkt ist die
+	// Seite dort, wo Entwickler nachschlagen: apps/docs/src/lib/components/README.md.
+	'/internal/ui-inventory'
 ]);
 const ALLOW_PREFIX = [
 	'/product/foundations/', // Sub-Seiten sind über die Foundations-Übersichtskarten erreichbar (nicht via Sidebar)

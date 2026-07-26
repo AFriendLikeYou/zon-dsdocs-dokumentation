@@ -4,6 +4,12 @@ Kurzanleitung, wo eine Komponente hingehört und wie sie importiert wird. Grunds
 (siehe Root-README + DECISIONS.md): Diese Komponenten sind die **Doku-App-UI** — sie
 sind NICHT Teil des dokumentierten ZEIT-Designsystems.
 
+> **Alle Bausteine auf einen Blick:** `/internal/ui-inventory` zeigt jeden Ordner
+> aus `ui/` als lebende Instanz, nach Sinn gruppiert — die Fläche zum Vergleichen
+> und Nacharbeiten. Bewusst ohne Sidebar-Eintrag (internes Werkzeug, Allowlist in
+> `tooling/check-nav.mjs`). Registry + Vollständigkeits-Prüfung:
+> `apps/docs/src/routes/internal/ui-inventory/inventar.ts`.
+
 ## Zwei Buckets — eine einfache Regel
 
 > **Chrome → `layout/` · alles andere → `ui/`.**
