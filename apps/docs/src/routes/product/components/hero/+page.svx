@@ -364,7 +364,7 @@ kategorie: Inhalte
 	{/if}
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
-	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} align={buehne} {calloutAnchors}>
 		{#snippet preview()}<article class="zon-teaser zon-teaser--wide zon-teaser--is-lead">
   <figure class="zon-teaser__media zon-teaser__media--desktop-wide zon-teaser__media--mobile-square" aria-hidden="true"></figure>
   <div class="zon-teaser__container">

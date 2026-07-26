@@ -956,6 +956,65 @@ der einzige Unterschied zwischen einer Entscheidung und einem vergessenen Zustan
 
 ---
 
+## ADR-034 — `masse` bei `align: "fill"` nachmessen statt das Schema erweitern
+
+**Kontext:** Die Anatomie-Bühne ignorierte `render.align: "fill"` als Einzige — ihr
+`.specimen` stand auf `width: max-content`. Das Karussell schrumpfte damit auf 221px
+(Accordion: 269px), während die Container-Query weiter gegen die 784px breite Bühne
+auswertete: **Desktop-Regeln auf Mobil-Breite**, „Slot 3" abgeschnitten.
+
+Die Zusage einfach nachzureichen hätte den Fehler nur verschoben. Drei der vier
+fill-Komponenten deklarieren ein `masse.breite` (Carousel 375, Hero 1000, Teaser 892),
+aus dem die Anatomie eine Maßlinie zeichnet. Über die volle Breite gespannt trüge sie
+die Beschriftung „375" — eine neue Unstimmigkeit statt der alten. Genau daran ist die
+Reparatur beim letzten Mal bewusst gescheitert.
+
+**Verworfen — `masse` um Breakpoint-Varianten erweitern** (`masse.breite.beiBreakpoint:
+{ "0": "375", "768": "1000" }`). Der naheliegende Weg, aber der teuerste: `masse` ist
+ein Klasse-①-Feld, steht in der MCP-Antwort (`mcp.ts`, `sectionTokens`) und wird von
+`check-prod-drift` und `check-figma-drift` gelesen. Eine neue Achse dort zieht Schema,
+Exporter, `draft.mjs`, beide Drift-Checks, das CMS und den Agenten-Vertrag mit sich —
+und trüge dieselbe Wette wie vorher: dass die eingetragene Zahl stimmt.
+
+**Entscheidung:** Nicht das Schema erweitern, sondern das AUSLEGEN, was schon
+dasteht. `render.align: "fill"` sagt bereits (Definition in `$lib/spec/buehne.ts`):
+_das Specimen hat keine eigene Breite, es nimmt die seines Containers._ Damit ist
+`masse.breite` dort per Definition kein Merkmal des Elements, sondern die Breite des
+Rahmens, IN dem gemessen wurde. Also:
+
+1. **Nachmessen vor dem Beschriften.** Eine Kastenmaß-Linie erscheint nur, wenn die
+   live gemessene Specimen-Box dieses Maß gerade wirklich hat (±1px, dieselbe Toleranz
+   wie `checkDrift`). Sonst steht unter der Bühne ein Satz statt einer Linie:
+   „Für diese Bühnenbreite nicht dokumentiert: Breite (375 px) · Höhe (366 px)."
+2. **Die Referenzbreite ist einstellbar.** Die Breiten-Leiste (`ui/viewport-select`,
+   geteilt mit dem Playground) bekommt die dokumentierte Breite als zusätzliche Stufe.
+   Ein Maß, das man nirgends nachsehen kann, wäre nur versteckt statt eingeordnet.
+3. **Die Overlays hängen am Specimen, nicht am Rahmen.** Der Standard-Teaser bringt
+   mit `max-width: 55.75rem` seine eigene Rinne mit: im 1280er Rahmen misst er 892 px —
+   exakt den Modellwert. Am Rahmen gemessen wäre die Zusage 1280 und die 892 nirgends
+   nachweisbar; am Specimen gemessen erscheinen bei „Desktop" **beide** Linien (B 892,
+   H 287) und der Hinweis entfällt.
+
+**Warum das die bessere Antwort ist:** Bei `center` bleibt alles unverändert — dort
+darf `masse` sich legitim auf ein KIND beziehen (Cell: 84 = Media), und Nachmessen
+würde Richtiges wegwerfen. Bei `fill` gibt es diesen Fall nicht. Die Unterscheidung
+kostet keine Zeile Schema, weil sie schon im Modell steht; sie wurde nur nie gelesen.
+Das ist dieselbe Bewegung wie `buehne.ts` selbst: eine Zusage, EINE Auslegung.
+
+**Der Preis, offen benannt:** Was nicht nachmessbar ist, wird nicht gezeichnet. Die
+Höhe des Karussells (366 px, Figma bei 375 px Slot-Breite) erscheint auf keiner
+Bühnenbreite als Linie, weil die Doku-Vorschau die Wide-Slot-Breite pinnt. Vorher
+stand „H 366" an einem 100px hohen Element — die Zahl ist nicht verloren gegangen,
+sie war nur nie wahr.
+
+**Gemessen wird das** in `e2e/stage-geometry.spec.ts`: R5a/R5b laufen jetzt über
+Beispiel-Bühne UND Anatomie (`pruefeFuellung`). Gegenprobe — Zusage wieder ignoriert:
+`carousel · Anatomie: Specimen ist nur 221px auf 654px Bühne`, `accordion: 269px`.
+Hero und Teaser blieben dabei grün: Ihr Pattern-CSS füllte die Bühne von sich aus.
+Genau deshalb ist der Fehler zwei Komponenten lang unbemerkt geblieben.
+
+---
+
 ## Offene Punkte / nächste Schritte
 
 - [ ] Schritt 2–4 des Workflows (CONTRIBUTING, sync-Action, Webhook).

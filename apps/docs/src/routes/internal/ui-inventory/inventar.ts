@@ -143,6 +143,13 @@ export const INVENTAR: InventarGruppe[] = [
 				zweck: 'Zieh-Griff für Breite oder Höhe, mit Tastatur-Schritten und Slider-Semantik — Grenzen hält der Aufrufer.'
 			},
 			{
+				ordner: 'viewport-select',
+				exporte: ['ViewportSelect'],
+				zweck: 'Die Breiten-Stufen einer Specimen-Bühne (Frei · Mobil 560 · Tablet 768 · Desktop 1280) — die real im Repo genutzten @media-Grenzen, nicht gegriffene Zahlen.',
+				einschraenkung:
+					'Zeigt hier nur die geteilten Stufen. Aufrufer dürfen über `extra` eine eigene ergänzen — die Anatomie reicht so die im Modell dokumentierte Referenzbreite herein.'
+			},
+			{
 				ordner: 'stage-toggle',
 				exporte: ['StageToggle'],
 				zweck: 'Hell/Dunkel-Umschalter einer Specimen-Bühne — dünner Wrapper um SegmentedControl, folgt der Bühne statt dem Seiten-Theme.',

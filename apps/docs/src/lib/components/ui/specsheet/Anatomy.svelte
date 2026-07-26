@@ -3,16 +3,43 @@
   Helle, fixe Artboard-Fläche (Komponentenfarben sind fix). Legende adaptiv (z-ds).
   Slots: preview (Haupt-Specimen), variant (optionales zweites Specimen).
 
-  Orchestrator: hält State (hover/pin, view, theme) und die Live-Vermessung.
-  Die reine Rechen-Logik liegt in ./anatomy-measure, die Legende in
-  ./AnatomyLegend und die Abstände-Tabelle in ./AnatomySpacingTable (interne
+  Orchestrator: hält State (hover/pin, view, theme, Bühnenbreite) und die
+  Live-Vermessung. Die reine Rechen-Logik liegt in ./anatomy-measure, die Legende
+  in ./AnatomyLegend und die Abstände-Tabelle in ./AnatomySpacingTable (interne
   Nachbarn, nicht im Barrel exportiert).
+
+  BÜHNENBREITE (align: 'fill'). Ein „fill"-Specimen hat keine eigene Breite, es
+  nimmt die seines Containers (Definition in $lib/spec/buehne.ts). Die Bühne muss
+  ihm die also GEBEN — sonst schrumpft es auf Inhaltsbreite, während die
+  Container-Query weiter gegen die volle Bühne auswertet: Desktop-Regeln auf
+  Mobil-Breite (das Karussell stand mit 221px da und schnitt „Slot 3" ab). Der
+  Rahmen (.specimen) trägt deshalb die Breite UND ist der Query-Container, und
+  eine Leiste (ui/viewport-select, dieselbe wie im Playground) stellt sie ein.
+
+  UND DIE MASSE SCHALTEN MIT. Genau daran ist die Reparatur beim letzten Mal
+  gescheitert: `masse.breite` ist bei einem fill-Pattern kein Merkmal des
+  Elements, sondern die Breite des Rahmens, IN dem gemessen wurde (Carousel 375,
+  Hero 1000, Teaser 892). Über die volle Bühne gespannt und mit „375" beschriftet
+  wäre die Maßlinie eine neue Unstimmigkeit statt der alten. Deshalb wird jedes
+  Kastenmaß vor dem Zeichnen NACHGEMESSEN — am SPECIMEN, nicht am Rahmen: Die
+  Linie erscheint nur, wenn das Specimen dieses Maß gerade wirklich hat. Sonst
+  steht unter der Bühne ein Satz statt einer Linie, und die Referenzbreite ist
+  als eigene Stufe in der Leiste einstellbar, sodass sich der Wert nachsehen
+  lässt. Lieber „für diese Breite nicht dokumentiert" als eine falsche Maßlinie.
+
+  Dass am Specimen gemessen wird und nicht am Rahmen, ist der Unterschied
+  zwischen „nie nachweisbar" und „an der richtigen Stelle sichtbar": Der
+  Standard-Teaser bringt mit `max-width: 55.75rem` seine eigene Rinne mit und
+  misst im 1280er Rahmen exakt die dokumentierten 892 px — bei „Desktop"
+  erscheinen deshalb beide Linien (B 892, H 287) und der Hinweis entfällt.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { Masse, MasseValue, SpacingSpec, Callout, CalloutAnchor } from '$types/spec';
+	import type { BuehnenAlign } from '$lib/spec';
 	import { StageToggle } from '$components/ui/stage-toggle';
 	import { SegmentedControl } from '$components/ui/segmented-control';
+	import { ViewportSelect, viewportWidth, type ViewportPreset } from '$components/ui/viewport-select';
 	import AnatomyLegend from './AnatomyLegend.svelte';
 	import AnatomySpacingTable from './AnatomySpacingTable.svelte';
 	import {
@@ -20,8 +47,10 @@
 		parsePad,
 		splitLabel,
 		num,
+		reineZahl,
 		checkDrift,
 		computeGapStrips,
+		TOL,
 		type Rect,
 		type Drift
 	} from './anatomy-measure';
@@ -31,6 +60,7 @@
 		spacing = [],
 		callouts = [],
 		calloutAnchors = [],
+		align = 'center',
 		preview
 	}: {
 		/** Maße (Höhe/Breite/Padding/Radius) für Maßlinien und Drift-Check; null = keine Measurements-Sicht. */
@@ -41,6 +71,13 @@
 		callouts?: Callout[];
 		/** Verankerung der Callouts am Specimen (Position bzw. selector für die Live-Vermessung). */
 		calloutAnchors?: CalloutAnchor[];
+		/**
+		 * Wie die Bühne das Specimen hinstellt — ausgelegt aus `render.align` durch
+		 * `buehnenAlign()` in $lib/spec, derselben Stelle, aus der Playground und
+		 * Beispiel-Block ihre Bühne nehmen. `fill` schaltet Rahmenbreite,
+		 * Breiten-Leiste und die Nachmessung der Kastenmaße frei.
+		 */
+		align?: BuehnenAlign;
 		/** Haupt-Specimen, das auf der Bühne gerendert und vermessen wird. */
 		preview?: Snippet;
 	} = $props();
@@ -95,14 +132,53 @@
 		hovered = null;
 	}
 
+	// ——— Bühnenbreite (nur bei align: 'fill') ———
+	// Bei `center` bleibt alles wie bisher: Das Specimen bringt seine Breite mit,
+	// die Bühne stellt es hin. Bei `fill` hat es keine — dann gibt der Rahmen sie
+	// vor, und diese Leiste stellt sie ein.
+	const istFill = $derived(align === 'fill');
+
+	// Die im Modell dokumentierte Breite als ZUSÄTZLICHE Stufe. Ohne sie wäre der
+	// Wert unerreichbar: Der Rahmen stünde nie genau auf ihm, die Maßlinie käme nie
+	// — und ein Maß, das man nirgends nachsehen kann, ist so gut wie keins.
+	const referenzPreset = $derived.by<ViewportPreset | null>(() => {
+		const px = reineZahl(apxRaw(masse?.breite ?? undefined));
+		return px == null
+			? null
+			: {
+					value: 'referenz',
+					label: String(px),
+					width: px,
+					title: `Referenzbreite des Modells — ${px} px`
+				};
+	});
+	let viewport = $state('frei');
+	const rahmenBreite = $derived(viewportWidth(viewport, referenzPreset));
+
 	// ——— Live-Vermessung (Part-Outlines + Gap-Streifen) ———
 	// Anker mit `selector` und Gap-Einträge mit `selector` werden zur Laufzeit im
 	// Specimen gemessen (querySelector + getBoundingClientRect relativ zum Slot).
 	// Kein Raten, keine handgepflegten Prozentwerte — ResizeObserver hält die
 	// Overlays bei Reflows (Fonts, Fenster) aktuell.
 	let slotEl = $state<HTMLDivElement>();
+	let rahmenEl = $state<HTMLDivElement>();
 	let partRects = $state<Record<number, Rect>>({});
 	let gapRects = $state<Record<number, Rect[]>>({});
+
+	// Die Ist-Box des SPECIMENS, relativ zum Rahmen. Zwei Aufgaben in einer
+	// Messung: Sie ist der Bezugsrahmen der Kastenmaß-Overlays (Streifen,
+	// Maßlinien, Radius-Fahne) UND der Prüfstein, gegen den `masse` antritt.
+	// Rahmen und Specimen fallen bei `center` zusammen, bei `fill` nicht mehr:
+	// Der Standard-Teaser bringt mit `max-width: 55.75rem` seine eigene Rinne mit
+	// und misst im 1280er Rahmen 892 px. Eine Maßlinie über den RAHMEN behauptete
+	// dort 1280 — und die 892 des Modells wären nirgends nachweisbar, obwohl sie
+	// genau hier stimmen.
+	let istBox = $state({ links: 0, oben: 0, breite: 0, hoehe: 0 });
+	// Und die Breite des RAHMENS — das ist die eingestellte Bühnenbreite, die
+	// Anzeige unten links. Sie ist bewusst nicht dieselbe Zahl wie oben: Beim
+	// Standard-Teaser steht der Rahmen auf 1280 und das Specimen auf 892, und
+	// genau diesen Unterschied soll man sehen können.
+	let rahmenIstBreite = $state(0);
 
 	// Drift: DEKLARIERTE Werte (getComputedStyle) gegen den Figma-Sollwert. Details
 	// zur Konservativität (keine Text-Boxen, ±1px, nach fonts.ready) in ./anatomy-measure.
@@ -110,6 +186,15 @@
 
 	function measureOverlays() {
 		if (!slotEl) return;
+		const wurzel = slotEl.firstElementChild;
+		if (rahmenEl) {
+			const f = rahmenEl.getBoundingClientRect();
+			rahmenIstBreite = f.width;
+			if (wurzel) {
+				const r = wurzel.getBoundingClientRect();
+				istBox = { links: r.left - f.left, oben: r.top - f.top, breite: r.width, hoehe: r.height };
+			}
+		}
 		const base = slotEl.getBoundingClientRect();
 		const rel = (r: DOMRect): Rect => ({
 			left: r.left - base.left,
@@ -179,6 +264,10 @@
 		// ändern sich trotzdem. Ohne das blieben Mount-Messungen mit 0-Breiten
 		// stehen und die Gap-Kopplung fiel stumm aus (live beobachteter Bug).
 		if (slotEl.firstElementChild) ro.observe(slotEl.firstElementChild);
+		// Und den Rahmen: Er trägt die eingestellte Breite. Ohne ihn bliebe die
+		// Nachmessung der Maßlinien beim Umschalten auf dem alten Stand stehen —
+		// also genau dann falsch, wenn es darauf ankommt.
+		if (rahmenEl) ro.observe(rahmenEl);
 		return () => ro.disconnect();
 	});
 
@@ -204,134 +293,242 @@
 	}
 	// Sync-Keys parallel zu spacing — die Abstände-Tabelle bekommt sie hereingereicht.
 	const spacingKeys = $derived(spacing.map((s, i) => rowKey(s, i)));
+
+	// ——— Kastenmaße: erst nachmessen, dann beschriften ———
+	// Bei `center` bleibt es beim Bisherigen: Das Specimen bringt seine Breite
+	// mit, `masse` beschreibt sie, und ein Komposit-Pattern darf sich mit
+	// `hoehe`/`breite` auch legitim auf ein KIND beziehen (Cell: 84 = Media) —
+	// nachmessen würde dort Richtiges wegwerfen. Bei `fill` gibt es diesen Fall
+	// nicht: Da hat das Specimen gar keine eigene Breite, und ein Wert, den der
+	// Rahmen gerade nicht hat, ist an ihm schlicht falsch.
+	function belegt(m: MasseValue | undefined, ist: number): boolean {
+		const soll = reineZahl(apx(m));
+		return soll != null && Math.abs(soll - ist) <= TOL;
+	}
+	const zeigeBreite = $derived(!!masse?.breite && (!istFill || belegt(masse.breite, istBox.breite)));
+	const zeigeHoehe = $derived(!!masse?.hoehe && (!istFill || belegt(masse.hoehe, istBox.hoehe)));
+
+	// Bezugsrahmen der Kastenmaß-Overlays. Bei `center` bleibt es bei `inset: 0`
+	// aus dem Stylesheet (Rahmen = Specimen, unverändert); bei `fill` legt die
+	// Messung sie auf das Specimen.
+	const masseBoxStil = $derived(
+		istFill
+			? `left:${istBox.links}px;top:${istBox.oben}px;width:${istBox.breite}px;height:${istBox.hoehe}px`
+			: undefined
+	);
+
+	// Was NICHT gezeichnet wird, verschwindet nicht stillschweigend — es bekommt
+	// einen Satz. Ein fehlendes Maß muss man merken können, sonst hat die Bühne
+	// den Wert nur versteckt statt ihn ehrlich einzuordnen.
+	const massText = (m: MasseValue) => {
+		const n = reineZahl(apx(m));
+		return n == null ? apx(m) : `${n}\u00a0px`;
+	};
+	const offeneMasse = $derived(
+		!istFill
+			? []
+			: [
+					...(masse?.breite && !zeigeBreite ? [`Breite (${massText(masse.breite)})`] : []),
+					...(masse?.hoehe && !zeigeHoehe ? [`Höhe (${massText(masse.hoehe)})`] : [])
+				]
+	);
 </script>
 
-<div class="anatomy-artboard spec-canvas ds-stage" class:is-dark={isDark}>
-	{#if showModeToggle}
+<div
+	class="anatomy-artboard spec-canvas ds-stage"
+	class:is-dark={isDark}
+	class:anatomy-artboard--fill={istFill}
+>
+	{#if showModeToggle || istFill}
 		<div class="anatomy-artboard__toolbar anatomy-artboard__toolbar--left">
-			<SegmentedControl
-				label="Ansicht"
-				options={[
-					{ value: 'parts', label: 'Bestandteile' },
-					{ value: 'measure', label: 'Measurements' }
-				]}
-				value={view}
-				onchange={(v) => switchView(v as 'parts' | 'measure')}
-			/>
+			{#if showModeToggle}
+				<SegmentedControl
+					label="Ansicht"
+					options={[
+						{ value: 'parts', label: 'Bestandteile' },
+						{ value: 'measure', label: 'Measurements' }
+					]}
+					value={view}
+					onchange={(v) => switchView(v as 'parts' | 'measure')}
+				/>
+			{/if}
+			<!-- Breiten-Leiste NUR bei `fill`: Bei `center` bringt das Specimen seine
+			     Breite selbst mit — ein Regler für die Bühnenbreite änderte dort nichts
+			     am Gezeigten und wäre ein Bedienelement ohne Wirkung. -->
+			{#if istFill}
+				<ViewportSelect
+					value={viewport}
+					extra={referenzPreset}
+					onchange={(v) => (viewport = v)}
+				/>
+			{/if}
 		</div>
 	{/if}
 	<div class="anatomy-artboard__toolbar">
 		<StageToggle {isDark} onlight={() => setTheme('light')} ondark={() => setTheme('dark')} />
 	</div>
-	<div class="specimen">
-		{#if view === 'parts'}
-			{#each cs as c, i}
-				<!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
-             Nutzer bekommen dieselbe Info über die Legende → role="presentation". -->
-				{#if c.anchor}
-					<span
-						role="presentation"
-						class="callout-dot callout-dot--anchored callout-dot--{c.anchor.side ?? 'top'}"
-						class:callout-dot--on={activeKey === `co-${c.nr}`}
-						style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null
-							? `top:${c.anchor.y}%;`
-							: ''}"
-						onmouseenter={() => (hovered = `co-${c.nr}`)}
-						onmouseleave={() => (hovered = null)}>{c.nr}</span
-					>
-				{:else}
-					<span
-						role="presentation"
-						class="callout-dot"
-						class:callout-dot--on={activeKey === `co-${c.nr}`}
-						style="--i:{i}"
-						onmouseenter={() => (hovered = `co-${c.nr}`)}
-						onmouseleave={() => (hovered = null)}>{c.nr}</span
-					>
-				{/if}
-			{/each}
-		{/if}
-
-		<div class="slot" bind:this={slotEl}>{@render preview?.()}</div>
-
-		{#if view === 'parts'}
-			<!-- Part-Outlines: live gemessene Flächen der Bestandteile (anchor.selector).
-			     Erscheinen beim Hover/Pin auf Legende oder Callout-Punkt. -->
-			<div class="overlays" aria-hidden="true">
-				{#each cs as c (c.nr)}
-					{#if partRects[c.nr]}
-						{@const r = partRects[c.nr]}
+	<!-- Scroll-Port: Breiten ÜBER der Bühnenbreite (Voreinstellung „Desktop" = 1280
+	     in einer ~650px-Spalte) bleiben so erscrollbar statt abgeschnitten — dasselbe
+	     Mittel wie im Playground. Innenabstand und die ihn spiegelnde negative
+	     Außenkante holen den Platz zurück, den Maßlinien, Callout-Punkte und
+	     Radius-Fahne AUSSERHALB des Rahmens brauchen; ohne ihn schnitte der Port
+	     genau die Beschriftungen ab, um die es hier geht. Bei `center` ist der Port
+	     ein gewöhnlicher Block ohne eigene Wirkung. -->
+	<div class="anatomy-artboard__scroll">
+		<div
+			class="specimen"
+			bind:this={rahmenEl}
+			style:width={istFill ? (rahmenBreite === null ? '100%' : `${rahmenBreite}px`) : undefined}
+		>
+			{#if view === 'parts'}
+				{#each cs as c, i}
+					<!-- Hover auf dem Punkt = reine Maus-Zugabe (Zwei-Wege-Highlight); Tastatur-
+	             Nutzer bekommen dieselbe Info über die Legende → role="presentation". -->
+					{#if c.anchor}
 						<span
-							class="part"
-							class:part--on={activeKey === `co-${c.nr}`}
-							style="left:{r.left - 4}px;top:{r.top - 4}px;width:{r.width + 8}px;height:{r.height +
-								8}px"
+							role="presentation"
+							class="callout-dot callout-dot--anchored callout-dot--{c.anchor.side ?? 'top'}"
+							class:callout-dot--on={activeKey === `co-${c.nr}`}
+							style="{c.anchor.x != null ? `left:${c.anchor.x}%;` : ''}{c.anchor.y != null
+								? `top:${c.anchor.y}%;`
+								: ''}"
+							onmouseenter={() => (hovered = `co-${c.nr}`)}
+							onmouseleave={() => (hovered = null)}>{c.nr}</span
 						>
-							<span class="part-tag">{c.nr}{c.lead ? ` · ${c.lead}` : ''}</span>
-						</span>
+					{:else}
+						<span
+							role="presentation"
+							class="callout-dot"
+							class:callout-dot--on={activeKey === `co-${c.nr}`}
+							style="--i:{i}"
+							onmouseenter={() => (hovered = `co-${c.nr}`)}
+							onmouseleave={() => (hovered = null)}>{c.nr}</span
+						>
 					{/if}
 				{/each}
-			</div>
-		{/if}
+			{/if}
 
-		{#if view === 'measure' && masse}
-			{#if padBox}
-				<!-- Innenabstand am Ort des Geschehens: vier schraffierte Streifen (grün).
-				     Leuchten auf, wenn die zugehörige Tabellenzeile aktiv ist. -->
-				<div class="pad-box" aria-hidden="true">
-					<span
-						class="pad-strip pad-strip--top"
-						class:strip--on={activeKey === 'pad-v'}
-						style="height:{padBox.t}px"
-					></span>
-					<span
-						class="pad-strip pad-strip--bottom"
-						class:strip--on={activeKey === 'pad-v'}
-						style="height:{padBox.b}px"
-					></span>
-					<span
-						class="pad-strip pad-strip--left"
-						class:strip--on={activeKey === 'pad-h'}
-						style="width:{padBox.l}px;top:{padBox.t}px;bottom:{padBox.b}px"
-					></span>
-					<span
-						class="pad-strip pad-strip--right"
-						class:strip--on={activeKey === 'pad-h'}
-						style="width:{padBox.r}px;top:{padBox.t}px;bottom:{padBox.b}px"
-					></span>
+			<div class="slot" bind:this={slotEl}>{@render preview?.()}</div>
+
+			{#if view === 'parts'}
+				<!-- Part-Outlines: live gemessene Flächen der Bestandteile (anchor.selector).
+				     Erscheinen beim Hover/Pin auf Legende oder Callout-Punkt. -->
+				<div class="overlays" aria-hidden="true">
+					{#each cs as c (c.nr)}
+						{#if partRects[c.nr]}
+							{@const r = partRects[c.nr]}
+							<span
+								class="part"
+								class:part--on={activeKey === `co-${c.nr}`}
+								style="left:{r.left - 4}px;top:{r.top - 4}px;width:{r.width + 8}px;height:{r.height +
+									8}px"
+							>
+								<span class="part-tag">{c.nr}{c.lead ? ` · ${c.lead}` : ''}</span>
+							</span>
+						{/if}
+					{/each}
 				</div>
 			{/if}
-			<!-- Gaps zwischen den Teilen: gelb schraffierte Streifen (live gemessen). -->
-			<div class="overlays" aria-hidden="true">
-				{#each spacing as s, i (i)}
-					{#if s.art === 'gap' && gapRects[i]}
-						{#each gapRects[i] as r, j (j)}
-							<span
-								class="gap-strip"
-								class:strip--on={activeKey === `gap-${i}`}
-								style="left:{r.left}px;top:{r.top}px;width:{r.width}px;height:{r.height}px"
-							></span>
-						{/each}
-					{/if}
-				{/each}
-			</div>
-			{#if masse.hoehe}<div class="dimension-line dimension-line--height" aria-hidden="true">
-					<span class="dimension-label" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
-				</div>{/if}
-			{#if masse.breite}<div class="dimension-line dimension-line--width" aria-hidden="true">
-					<span class="dimension-label" title="Breite">B&nbsp;{apx(masse.breite)}</span>
-				</div>{/if}
-			{#if masse.radius}<div class="radius-label" aria-hidden="true">
-					<span title="Eckenradius"
-						>r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
-								class="drift-mark"
-								title="Weicht ab — gerendert {drift.radius.ist}px">&nbsp;⚠</span
-							>{/if}</span
+
+			{#if view === 'measure' && masse}
+				<!-- Bezugsrahmen der Kastenmaße: Alles hier drin gehört ans SPECIMEN.
+				     Bei `center` deckt sich das mit dem Rahmen (`inset: 0`, unverändert),
+				     bei `fill` legt die Messung es auf die tatsächliche Specimen-Box. -->
+				<div class="masse-box" style={masseBoxStil}>
+				{#if padBox}
+					<!-- Innenabstand am Ort des Geschehens: vier schraffierte Streifen (grün).
+					     Leuchten auf, wenn die zugehörige Tabellenzeile aktiv ist. -->
+					<div class="pad-box" aria-hidden="true">
+						<span
+							class="pad-strip pad-strip--top"
+							class:strip--on={activeKey === 'pad-v'}
+							style="height:{padBox.t}px"
+						></span>
+						<span
+							class="pad-strip pad-strip--bottom"
+							class:strip--on={activeKey === 'pad-v'}
+							style="height:{padBox.b}px"
+						></span>
+						<span
+							class="pad-strip pad-strip--left"
+							class:strip--on={activeKey === 'pad-h'}
+							style="width:{padBox.l}px;top:{padBox.t}px;bottom:{padBox.b}px"
+						></span>
+						<span
+							class="pad-strip pad-strip--right"
+							class:strip--on={activeKey === 'pad-h'}
+							style="width:{padBox.r}px;top:{padBox.t}px;bottom:{padBox.b}px"
+						></span>
+					</div>
+				{/if}
+					<!-- Maßlinien nur, wenn das Specimen dieses Maß gerade wirklich hat (bei
+				     `fill` nachgemessen, bei `center` wie bisher unverändert gezeigt). -->
+				{#if zeigeHoehe && masse.hoehe}<div
+						class="dimension-line dimension-line--height"
+						aria-hidden="true"
 					>
-				</div>{/if}
-		{/if}
+						<span class="dimension-label" title="Höhe">H&nbsp;{apx(masse.hoehe)}</span>
+					</div>{/if}
+				{#if zeigeBreite && masse.breite}<div
+						class="dimension-line dimension-line--width"
+						aria-hidden="true"
+					>
+						<span
+							class="dimension-label"
+							title={istFill
+								? 'Referenzbreite — die Bühne steht genau auf diesem Maß'
+								: 'Breite'}>B&nbsp;{apx(masse.breite)}</span
+						>
+					</div>{/if}
+				{#if masse.radius}<div class="radius-label" aria-hidden="true">
+						<span title="Eckenradius"
+							>r&nbsp;{apx(masse.radius)}{#if drift.radius}<span
+									class="drift-mark"
+									title="Weicht ab — gerendert {drift.radius.ist}px">&nbsp;⚠</span
+								>{/if}</span
+						>
+					</div>{/if}
+				</div>
+
+				<!-- Gaps zwischen den Teilen: gelb schraffierte Streifen (live gemessen). -->
+				<div class="overlays" aria-hidden="true">
+					{#each spacing as s, i (i)}
+						{#if s.art === 'gap' && gapRects[i]}
+							{#each gapRects[i] as r, j (j)}
+								<span
+									class="gap-strip"
+									class:strip--on={activeKey === `gap-${i}`}
+									style="left:{r.left}px;top:{r.top}px;width:{r.width}px;height:{r.height}px"
+								></span>
+							{/each}
+						{/if}
+					{/each}
+				</div>
+			{/if}
+		</div>
 	</div>
+
+	{#if istFill}
+		<!-- Die Bühnenbreite steht sichtbar auf der Bühne: Ohne sie wäre „Frei" eine
+		     Zahl, die niemand kennt — und der Hinweis unten könnte sich auf nichts
+		     beziehen. Dieselbe Anzeige wie im Playground. -->
+		<span class="anatomy-artboard__breite">{Math.round(rahmenIstBreite)} px</span>
+	{/if}
 </div>
+
+{#if view === 'measure' && offeneMasse.length}
+	<!-- Kein stiller Ausfall: Was auf der Bühne nicht als Linie steht, steht hier
+	     als Satz — und der Satz sagt, wo man den Wert findet. Bewusst UNTER dem
+	     Artboard statt darauf: eine Einordnung ist kein Maß und soll auch nicht
+	     wie eines aussehen. -->
+	<p class="anatomy-hinweis">
+		Für diese Bühnenbreite nicht dokumentiert: {offeneMasse.join(' · ')}.
+		{#if referenzPreset && viewport !== 'referenz'}
+			Das Modell misst bei {referenzPreset.width}&nbsp;px — auf der Bühne unter „Breite"
+			einstellbar.
+		{/if}
+	</p>
+{/if}
 
 {#if view === 'parts' && cs.length}
 	<AnatomyLegend rows={cs} {activeKey} {pinned} onhover={(k) => (hovered = k)} onpress={press} />
@@ -380,10 +577,21 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
+		/* Beschriftungen der Leiste sitzen AUF der Bühne und müssen deshalb der
+		   Bühne folgen, nicht dem Seiten-Theme (ds-stage-raw-token-rule): Auf einer
+		   dunklen Doku-Seite bliebe der helle Artboard sonst mit hellgrauer Schrift
+		   zurück. Dasselbe Rezept wie --seg-* in global.css — die Rolle wird hier
+		   umgelenkt, die Kind-Komponente bleibt RAW-frei. */
+		--ds-text-muted: var(--z-ds-color-text-55);
 	}
 	.anatomy-artboard__toolbar--left {
 		right: auto;
 		left: var(--z-ds-space-8);
+		/* Platz für den Light/Dark-Schalter rechts freihalten und bei Enge lieber
+		   umbrechen als mit ihm kollidieren — der Kopfraum der Bühne (80px) trägt
+		   die zweite Zeile. */
+		max-width: calc(100% - 2 * var(--z-ds-space-8) - 76px);
+		flex-wrap: wrap;
 	}
 	.specimen {
 		/* Immer Originalgröße (1:1) — kein Zoom, damit Maße/Proportionen stimmen. */
@@ -391,6 +599,52 @@
 		width: max-content;
 		max-width: 100%; /* große Patterns (Teaser, Pager) laufen nicht aus dem Artboard */
 		margin: 6px auto 0;
+	}
+
+	/* ── align: 'fill' — der Rahmen gibt die Breite vor ───────────────────────
+	   Ein fill-Specimen hat keine eigene Breite (siehe $lib/spec/buehne.ts).
+	   `max-content` ließ es deshalb auf Inhaltsbreite zusammenfallen, während die
+	   Container-Query weiter gegen die volle Bühne auswertete: Desktop-Regeln auf
+	   Mobil-Breite. Die Breite kommt jetzt per style-Attribut (100% oder Npx), und
+	   der Rahmen ist selbst Query-Container — sonst antwortete das gescopte
+	   @container wieder mit der Bühnenbreite und die Voreinstellungen blieben
+	   folgenlos (derselbe Befund wie am .playground__frame). Der Rahmen ist dabei
+	   NIE inhaltsbreit, das Größen-Containment der Inline-Achse kostet also nichts;
+	   die Block-Achse bleibt frei, hohe Specimens wachsen ungekappt. */
+	.anatomy-artboard--fill .specimen {
+		max-width: none;
+		container-type: inline-size;
+	}
+	.anatomy-artboard--fill .anatomy-artboard__scroll {
+		/* Innenabstand = Platz für alles, was AUSSERHALB des Rahmens gezeichnet wird:
+		   Höhen-Maßlinie samt Beschriftung (-56px), Radius-Fahne (-44px),
+		   Callout-Punkte (-30px), Part-Tags (-22px). Die negative Außenkante gibt
+		   denselben Betrag wieder ab — sie holt ihn aus dem Innenabstand der Bühne
+		   (80/64/44), sodass die sichtbare Geometrie unverändert bleibt und nur die
+		   Clip-Kante nach außen rückt. */
+		margin: -36px -60px -44px;
+		padding: 36px 60px 44px;
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
+	/* Breiten-Anzeige unten links — Zwilling von .playground__width. */
+	.anatomy-artboard__breite {
+		position: absolute;
+		bottom: var(--z-ds-space-8);
+		left: var(--z-ds-space-8);
+		z-index: 6;
+		font-size: var(--ds-text-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--z-ds-color-text-55);
+		pointer-events: none;
+	}
+	/* Der Satz, der eine Maßlinie ersetzt: bewusst NICHT im Blueprint-Blau, damit
+	   ihn niemand für ein Maß hält — und unter der Bühne, wo die Doku spricht. */
+	.anatomy-hinweis {
+		margin: var(--z-ds-space-8) 0 0;
+		font-size: var(--ds-text-xs);
+		line-height: 1.5;
+		color: var(--ds-text-muted);
 	}
 	.slot {
 		position: relative;
@@ -476,6 +730,20 @@
 	.callout-dot--on {
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--measure) 32%, transparent);
 		z-index: 5;
+	}
+
+	/* Bezugsrahmen der Kastenmaße (Innenabstand-Streifen, Maßlinien, Radius-Fahne).
+	   Bei `center` deckt er sich mit dem Rahmen — `inset: 0`, exakt wie vorher, als
+	   die Overlays noch direkte Kinder von .specimen waren. Bei `fill` setzt die
+	   Messung left/top/width/height als Inline-Stil; `right`/`bottom` müssen dann
+	   weichen, sonst wäre die Box überbestimmt. */
+	.masse-box {
+		position: absolute;
+		inset: 0;
+	}
+	.anatomy-artboard--fill .masse-box {
+		right: auto;
+		bottom: auto;
 	}
 
 	/* Overlay-Ebene für Part-Outlines + Gap-Streifen (live gemessen) — fängt keine Maus. */

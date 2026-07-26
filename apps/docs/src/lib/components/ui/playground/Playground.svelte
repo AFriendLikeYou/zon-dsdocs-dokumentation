@@ -29,9 +29,11 @@
     (für Patterns wie Cell/Input, die im Einsatz nie frei schweben).
   - resizable: Drag-Handle am rechten Rand + px-Anzeige für breitenabhängige
     Patterns (impliziert die fill-Optik). Dazu eine Leiste mit festen Viewport-
-    Voreinstellungen (Frei · Mobil 560 · Tablet 768 · Desktop 1280) — die Werte
-    sind die real im Repo genutzten @media-Grenzen, nicht gegriffene Zahlen.
-    Freies Ziehen bleibt erhalten und setzt die Auswahl auf „Frei" zurück.
+    Voreinstellungen (Frei · Mobil 560 · Tablet 768 · Desktop 1280) aus dem Atom
+    `ui/viewport-select` — die Werte sind die real im Repo genutzten
+    @media-Grenzen, nicht gegriffene Zahlen, und die Anatomie-Bühne zeigt
+    dieselbe Leiste. Freies Ziehen bleibt erhalten und setzt die Auswahl auf
+    „Frei" zurück.
 
   Details: Selects rendern als SegmentedControl (size sm), Booleans als Switch; der
   Code-Block lässt geänderte Zeilen kurz aufleuchten (flash) und kappt lange
@@ -100,6 +102,7 @@
 	import { SegmentedControl } from '$components/ui/segmented-control';
 	import { Switch } from '$components/ui/switch';
 	import { ResizeHandle } from '$components/ui/resize-handle';
+	import { ViewportSelect, VIEWPORT_PRESETS } from '$components/ui/viewport-select';
 	import { ResetIcon } from '$lib/icons';
 
 	type Props = {
@@ -202,24 +205,10 @@
 	});
 
 	// ── Viewport-Voreinstellungen ─────────────────────────────────────────────
-	// Responsive-Verhalten prüft man an DEFINIERTEN Punkten, nicht nur freihändig.
-	// Die Werte sind KEINE Erfindung, sondern die Breakpoints, an denen dieses Repo
-	// tatsächlich umschaltet (grep über `@media` in static/*.css + src/lib/components):
-	//   560 px  — schmalste real genutzte Grenze (Detailregeln in ui/-Komponenten)
-	//   768 px  — DIE App-Grenze: +layout.svelte, layout/Sidebar, ui/grid/Grid;
-	//             static/global.css spiegelt sie als `max-width: 767px`
-	//   1280 px — größte real genutzte Grenze (breite Desktop-Stufe)
-	// „Frei" ist kein Breakpoint, sondern der Ausgangszustand (volle Breite) — und
-	// der Zustand, in den die Auswahl zurückfällt, sobald wieder gezogen wird.
-	// Es MUSS ein echtes Segment sein: SegmentedControl vergibt den Tabstop über
-	// `value === o.value`; ein Wert ohne passendes Segment machte die Gruppe
-	// unerreichbar für die Tastatur.
-	const VIEWPORT_PRESETS = [
-		{ value: 'frei', label: 'Frei', width: null },
-		{ value: 'mobil', label: 'Mobil', width: 560 },
-		{ value: 'tablet', label: 'Tablet', width: 768 },
-		{ value: 'desktop', label: 'Desktop', width: 1280 }
-	] as const;
+	// Die Stufen (Frei · Mobil 560 · Tablet 768 · Desktop 1280) und ihre Begründung
+	// liegen seit dem Anatomie-Umbau im Atom `ui/viewport-select` — die Anatomie
+	// zeigt DIESELBE Leiste, und zwei Kopien wären der Anfang zweier
+	// auseinanderlaufender Listen.
 	let viewport = $state<string>('frei');
 
 	function selectViewport(v: string) {
@@ -367,21 +356,11 @@
 		<!-- Viewport-Voreinstellungen: nur dort, wo die Bühne überhaupt in der Breite
 		     veränderbar ist. Dasselbe Bedienmuster wie die Varianten-Auswahl
 		     (SegmentedControl, size sm) — die Auswahl ist damit auch per Pfeiltasten
-		     bedienbar (Radiogroup). -->
+		     bedienbar (Radiogroup). Die Stufen kommen aus `ui/viewport-select`;
+		     dieselbe Leiste steht auf der Anatomie-Bühne. -->
 		{#if resizable}
 			<span class="playground__group">
-				<span class="playground__label">Breite</span>
-				<SegmentedControl
-					label="Vorschau-Breite"
-					options={VIEWPORT_PRESETS.map((p) => ({
-						value: p.value,
-						label: p.label,
-						title: p.width ? `${p.label} — ${p.width} px` : 'Volle Breite der Bühne'
-					}))}
-					value={viewport}
-					size="sm"
-					onchange={selectViewport}
-				/>
+				<ViewportSelect value={viewport} onchange={selectViewport} />
 			</span>
 		{/if}
 

@@ -1028,7 +1028,11 @@ function renderPage(model, { patternCss = null } = {}) {
 	if (hasAnatomy) {
 		design +=
 			`\n\t<h2 id="${SECTION_IDS.Anatomie}" class="section-anchor">Anatomie</h2>\n` +
-			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts}${anchorsProp}>\n` +
+			// `align` kommt aus derselben ausgelegten Zusage wie Playground und
+			// Beispiel-Block. Ohne sie stand das Specimen auf `width: max-content`:
+			// Das Karussell schrumpfte auf 221px, während die Container-Query weiter
+			// gegen die volle Bühne auswertete — Desktop-CSS auf Mobil-Breite.
+			`\t<Anatomy masse={${S}.masse} spacing={${S}.spacing} callouts={${S}.callouts} align={buehne}${anchorsProp}>\n` +
 			previewSlot +
 			`\t</Anatomy>\n`;
 	}

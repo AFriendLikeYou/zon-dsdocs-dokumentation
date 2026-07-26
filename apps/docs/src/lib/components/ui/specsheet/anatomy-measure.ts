@@ -82,6 +82,19 @@ export const num = (s?: string): number | null => {
 	return m ? Number(m[0]) : null;
 };
 
+/**
+ * Wie `num`, aber STRENG: nur ein Wert, der aus nichts als einer Zahl besteht,
+ * kommt zurück. `num` greift sich die erste Zahl aus einem Text und macht aus
+ * „343 (Wide) · Cover 84 (Small 72)" ein sauber aussehendes 343 — für eine
+ * Maßlinie, die anschließend behauptet, das Element sei 343 breit, ist das
+ * genau die falsche Großzügigkeit. Nachmessen kann man nur einen Zahlenwert;
+ * alles andere ist ein Satz und wird nicht als Maß gezeichnet.
+ */
+export const reineZahl = (s?: string): number | null => {
+	const t = s?.trim();
+	return t && /^\d+(?:\.\d+)?$/.test(t) ? Number(t) : null;
+};
+
 export function checkDrift(
 	key: string,
 	soll: number | null,

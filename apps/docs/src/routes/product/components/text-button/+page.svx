@@ -121,7 +121,7 @@ kategorie: Aktionen
 	{/if}
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
-	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} align={buehne} {calloutAnchors}>
 		{#snippet preview()}<button type="button" class="z-text-button">Mehr anzeigen</button>{/snippet}
 	</Anatomy>
 

@@ -4,6 +4,7 @@ import {
 	parsePad,
 	splitLabel,
 	num,
+	reineZahl,
 	checkDrift,
 	computeGapStrips,
 	type Drift,
@@ -68,6 +69,28 @@ describe('num', () => {
 	it('ohne Zahl / undefined → null', () => {
 		expect(num('abc')).toBeNull();
 		expect(num(undefined)).toBeNull();
+	});
+});
+
+describe('reineZahl', () => {
+	it('nimmt nur einen Wert, der aus nichts als einer Zahl besteht', () => {
+		expect(reineZahl('375')).toBe(375);
+		expect(reineZahl(' 892 ')).toBe(892);
+		expect(reineZahl('12.5')).toBe(12.5);
+	});
+	it('weist Sätze zurück, aus denen `num` noch eine Zahl klaubt', () => {
+		// Der Unterschied, um den es geht: `num` macht aus dieser Zelle-Angabe ein
+		// sauber aussehendes 343 — und eine Maßlinie, die anschließend behauptet,
+		// das Element sei 343 breit. Nachmessen kann man nur einen Zahlenwert.
+		expect(num('343 (Wide) · Cover 84 (Small 72)')).toBe(343);
+		expect(reineZahl('343 (Wide) · Cover 84 (Small 72)')).toBeNull();
+		expect(reineZahl('16px')).toBeNull();
+		expect(reineZahl('999 (voll)')).toBeNull();
+		expect(reineZahl('Anzeige 16 · sonst 0')).toBeNull();
+	});
+	it('leer / undefined → null', () => {
+		expect(reineZahl('')).toBeNull();
+		expect(reineZahl(undefined)).toBeNull();
 	});
 });
 

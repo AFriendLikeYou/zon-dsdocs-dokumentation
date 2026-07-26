@@ -77,6 +77,7 @@
 	import { TypeSpecimen } from '$components/ui/type-specimen';
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { VideoPlayer } from '$components/ui/videoplayer';
+	import { ViewportSelect } from '$components/ui/viewport-select';
 
 	import { CloseIcon, CopyIcon, PencilIcon, SearchIcon } from '$lib/icons';
 	import { A11Y_ITEMS } from '$data/a11y-issues';
@@ -107,6 +108,7 @@
 	let dichte = $state('komfortabel');
 	let spalten = $state(3);
 	let probenBreite = $state(220);
+	let probenViewport = $state('frei');
 	let buehneDunkel = $state(false);
 	let leisteOffen = $state(false);
 
@@ -380,6 +382,13 @@
 			onresize={zieheProbe}
 		/>
 	</div>
+{/snippet}
+
+{#snippet demoViewportSelect()}
+	<!-- Ohne Bühne drumherum: Der Baustein ist die Leiste, nicht ihre Wirkung.
+	     Was die gewählte Stufe mit einem Specimen macht, zeigen Playground und
+	     Anatomie — hier zählt die Optik der Pille samt Beschriftung. -->
+	<ViewportSelect value={probenViewport} onchange={(v) => (probenViewport = v)} />
 {/snippet}
 
 {#snippet demoStageToggle()}
@@ -908,7 +917,8 @@
 		tooltip: demoTooltip,
 		'type-specimen': demoTypeSpecimen,
 		'usage-block': demoUsageBlock,
-		videoplayer: demoVideoPlayer
+		videoplayer: demoVideoPlayer,
+		'viewport-select': demoViewportSelect
 	})}
 </div>
 

@@ -180,7 +180,15 @@ component?}[]`, `active` $bindable, `label`, `onchange`; tablist/tab/tabpanel +
    roving tabindex + Pfeiltasten/Home/End. NICHT die AnchorBar-Sprungnavigation,
    die bleibt Scrollspy-`<nav>`), `ui/resize-handle/` (Zieh-Griff für Breite/Höhe —
    `direction`, `onresize(delta)`, `label`, Tastatur-Schritte; Consumer hält min/max.
-   NICHT der DnD-Reorder-Griff IconGrip), `ui/round-button/` (kreisrunder, geblurter
+   NICHT der DnD-Reorder-Griff IconGrip),
+   `ui/viewport-select/` (die Breiten-Stufen einer Specimen-Bühne: Frei · Mobil 560 ·
+   Tablet 768 · Desktop 1280 — die real im Repo genutzten `@media`-Grenzen, nicht
+   gegriffene Zahlen. `value`, `onchange`, optional `extra` für EINE zusätzliche
+   Stufe des Consumers (die Anatomie reicht so die im Modell dokumentierte
+   Referenzbreite herein) plus die Helfer `VIEWPORT_PRESETS`/`viewportPresets`/
+   `viewportWidth`. Consumer: `ui/playground` + `ui/specsheet/Anatomy`. NICHT der
+   Zieh-Griff — der ist `ui/resize-handle/`, beide stehen im Playground nebeneinander),
+   `ui/round-button/` (kreisrunder, geblurter
    Overlay-Icon-Button — `label`, `icon`, `size`; für schwebende Medien-Aktionen.
    Eckig-inline → `ui/icon-action-button/`),
    `ui/button-group/` (bündelt ECHTE Button-Cluster als `role=group` — `attached`

@@ -584,7 +584,7 @@ z-carousel {
 	{/if}
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
-	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
+	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} align={buehne} {calloutAnchors}>
 		{#snippet preview()}<div class="z-carousel" style="--_z-carousel-slide-width: calc(320 / 892 * 100%)"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__tabpanel-control-wrapper"><fieldset class="z-carousel__dots-wrapper"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 3"></fieldset></div></div>{/snippet}
 	</Anatomy>
 

@@ -16,6 +16,15 @@ import { prepare, gotoStable } from './support/stabilize';
  * Beispiel-Block bekam es nur nie gereicht. Gemerkt hat das niemand: Es gab keine
  * Prüfung, die Geometrie MISST.
  *
+ * ZWEITER ANLASS, GLEICHE BAUART: Diese Prüfung deckte anfangs nur Beispiel-Bühne
+ * und Playground ab — und ließ die ANATOMIE aus, die dieselbe Zusage genauso
+ * ignorierte. Deren `.specimen` stand auf `width: max-content`, also schrumpfte
+ * das Karussell auf 221px (Accordion: 269px), während die Container-Query weiter
+ * gegen die 784px breite Bühne auswertete: Desktop-Regeln auf Mobil-Breite, „Slot
+ * 3" abgeschnitten. Eine Prüfung, die nur zwei von drei Bühnen misst, findet den
+ * Fehler in der dritten nicht — deshalb laufen R5a/R5b jetzt über BEIDE
+ * fill-Bühnen (`pruefeFuellung`).
+ *
  * WARUM E2E UND NICHT UNIT: Der Fehler saß in einer CSS-Regel
  * (`.example-block__instance:only-child`), nicht in der Verdrahtung. Ein
  * Unit-Test hätte höchstens prüfen können, ob die Prop durchgereicht wird — und
@@ -32,6 +41,7 @@ import { prepare, gotoStable } from './support/stabilize';
  *       schneiden sonst still ab.
  *   R4  `align: "fill"` ⇒ Instanzen STAPELN (keine zwei in einer Zeile)  ← Accordion
  *   R5  `align: "fill"` ⇒ Instanz nimmt die volle Bühnenbreite            ← Accordion
+ *       — auf der Beispiel-Bühne UND in der Anatomie                      ← Carousel
  *
  * Bewusst NICHT geprüft: dass `center`-Instanzen in EINER Zeile stehen. Ob sie
  * umbrechen, hängt legitim von ihrer Anzahl und der Fensterbreite ab — eine Regel
@@ -199,6 +209,47 @@ function inGleicherZeile(a: Kasten, b: Kasten): boolean {
 
 const px = (n: number) => `${Math.round(n)}px`;
 
+/**
+ * R5 für EINE fill-Bühne — Beispiel-Bühne und Anatomie messen sich gleich.
+ *
+ * ZWEI VERANTWORTLICHKEITEN, ZWEI MESSPUNKTE — die Trennung hat diese Prüfung
+ * beim ersten Lauf selbst erzwungen: Der Standard-Teaser bringt mit
+ * `max-width: min(100% - 2 * var(--z-gap), 55.75rem)` seine eigene Rinne mit und
+ * sitzt darum bei 702 statt 734px. Das ist kein Bühnen-Fehler, sondern
+ * originalgetreues Pattern-CSS. Also:
+ *   · Die HÜLLE verantwortet die Bühne → exakt volle Breite.
+ *   · Das SPECIMEN verantwortet die Komponente → darf sich einziehen, aber nicht
+ *     auf Spaltenmaß zusammenfallen.
+ *
+ * Warum als Funktion und nicht zweimal ausgeschrieben: Es ist EINE Regel über
+ * EINE Zusage. Zwei Kopien wären genau die Bauart, aus der der Anatomie-Befund
+ * entstanden ist — eine Stelle wird nachgezogen, die andere vergessen.
+ */
+function pruefeFuellung(slug: string, b: Buehne) {
+	for (const [i, h] of b.huellen.entries()) {
+		// R5a — die Bühne teilt volle Breite zu.
+		expect
+			.soft(
+				h.breite,
+				`${slug} · ${b.art} #${b.nr}, Instanz ${i + 1}: Hülle ist ${px(h.breite)} statt der vollen Bühnenbreite ${px(b.inhaltBreite)} — bei align: "fill" gibt die Bühne dem Specimen ihre Breite, sie lässt es nicht auf Inhaltsmaß schrumpfen`
+			)
+			.toBeGreaterThanOrEqual(b.inhaltBreite - 2);
+	}
+	for (const [i, s] of b.specimen.entries()) {
+		// R5b — und das Specimen nutzt sie auch. Der Schwellwert ist gemessen,
+		// nicht geraten: Heute liegen alle fill-Specimens bei 95–100 % der
+		// Bühnenbreite (Teaser 702/734 = 96 %, Anatomie 622/654 = 95 %), der
+		// Fehlerfall lag bei 221/654 = 34 % (Carousel-Anatomie) bzw. (734 − 12) / 2
+		// = 49 % („zwei in einer Zeile"). 60 % trennt beides mit Abstand.
+		expect
+			.soft(
+				s.breite / b.inhaltBreite,
+				`${slug} · ${b.art} #${b.nr}, Instanz ${i + 1}: Specimen ist nur ${px(s.breite)} auf ${px(b.inhaltBreite)} Bühne — bei align: "fill" darf es sich einziehen, aber nicht auf Inhaltsmaß zusammenfallen`
+			)
+			.toBeGreaterThan(0.6);
+	}
+}
+
 for (const { slug, align } of ZUSAGEN) {
 	test(`${slug} — Specimens liegen wie zugesagt (align: ${align})`, async ({ page }) => {
 		await prepare(page, 'light');
@@ -260,37 +311,19 @@ for (const { slug, align } of ZUSAGEN) {
 		// Containers. Auf der Beispiel-Bühne folgt daraus beides — volle Breite
 		// UND Stapeln, weil zwei volle Breiten nicht nebeneinander passen.
 		//
-		// ZWEI VERANTWORTLICHKEITEN, ZWEI MESSPUNKTE — die Trennung hat diese Prüfung
-		// beim ersten Lauf selbst erzwungen: Der Standard-Teaser bringt mit
-		// `max-width: min(100% - 2 * var(--z-gap), 55.75rem)` seine eigene Rinne mit
-		// und sitzt darum bei 702 statt 734px. Das ist kein Bühnen-Fehler, sondern
-		// originalgetreues Pattern-CSS. Also:
-		//   · Die HÜLLE verantwortet die Bühne → exakt volle Breite.
-		//   · Das SPECIMEN verantwortet die Komponente → darf sich einziehen, aber
-		//     nicht auf Spaltenmaß zusammenfallen.
+		// Die ANATOMIE-Bühne trägt dieselbe Zusage: Auch dort hat das Specimen
+		// keine eigene Breite, also muss der Rahmen sie geben. Sie ist bewusst
+		// beim gleichen Messpunkt-Paar wie die Beispiel-Bühne — die Hülle ist dort
+		// `.slot`, das Specimen dessen erstes Element (siehe `vermesse`).
+		//
+		// Warum die Anatomie hier NICHT auf gestapelte Instanzen geprüft wird: Sie
+		// zeigt genau EIN Specimen. Eine Stapel-Regel über eine einelementige Liste
+		// ist immer erfüllt und damit keine Prüfung, sondern Dekoration.
+		const fuellBuehnen = buehnen.filter((b) => b.art === 'Beispiel' || b.art === 'Anatomie');
+		for (const b of fuellBuehnen) pruefeFuellung(slug, b);
+
 		const beispiele = buehnen.filter((b) => b.art === 'Beispiel');
 		for (const b of beispiele) {
-			for (const [i, h] of b.huellen.entries()) {
-				// R5a — die Bühne teilt volle Breite zu.
-				expect
-					.soft(
-						h.breite,
-						`${slug} · Beispiel #${b.nr}, Instanz ${i + 1}: Hülle ist ${px(h.breite)} statt der vollen Bühnenbreite ${px(b.inhaltBreite)} — bei align: "fill" stapelt die Bühne, sie reiht nicht`
-					)
-					.toBeGreaterThanOrEqual(b.inhaltBreite - 2);
-			}
-			for (const [i, s] of b.specimen.entries()) {
-				// R5b — und das Specimen nutzt sie auch. Der Schwellwert ist gemessen,
-				// nicht geraten: Heute liegen alle fill-Specimens bei 96–100 % der
-				// Bühnenbreite (Teaser 702/734 = 96 %), der Fehlerfall „zwei in einer
-				// Zeile" bei (734 − 12) / 2 = 49 %. 60 % trennt beides mit Abstand.
-				expect
-					.soft(
-						s.breite / b.inhaltBreite,
-						`${slug} · Beispiel #${b.nr}, Instanz ${i + 1}: Specimen ist nur ${px(s.breite)} auf ${px(b.inhaltBreite)} Bühne — bei align: "fill" darf es sich einziehen, aber nicht auf Spaltenmaß zusammenfallen`
-					)
-					.toBeGreaterThan(0.6);
-			}
 			// R4 — der sichtbare Befund von damals: zwei Aufklapper nebeneinander.
 			for (let i = 0; i < b.specimen.length; i++) {
 				for (let j = i + 1; j < b.specimen.length; j++) {
