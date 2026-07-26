@@ -69,10 +69,30 @@ export type SpacingSpec = {
 	herkunft?: Herkunft;
 	/** Art des Abstands: 'padding' (Innenabstand einer Fläche) oder 'gap' (Lücke zwischen Teilen). */
 	art?: 'padding' | 'gap';
-	/** Nur bei art 'padding': welche Achse der Streifen visualisiert. */
+	/** Nur bei art 'padding': welche Achse der Streifen visualisiert. Ohne sie zeigt ein Selektor-Padding alle vier Seiten. */
 	richtung?: 'vertikal' | 'horizontal';
-	/** Nur bei art 'gap': CSS-Selektor (relativ zum Specimen-Root) des Flex-/Grid-Containers, dessen gap gezeigt wird. */
+	/**
+	 * CSS-Selektor relativ zum Specimen-Root. Bei art 'gap' der Flex-/Grid-Container,
+	 * dessen gap gezeigt wird; bei art 'padding' das Element, dessen Innenabstand
+	 * gezeigt wird (die Wurzel kommt aus `masse.padding`).
+	 */
 	selector?: string;
+	/** Nur bei art 'gap' mit selector: auf welcher Achse der gemeinte Zwischenraum liegt (Grid belegt beide). */
+	achse?: 'vertikal' | 'horizontal';
+	/** Erster Anker eines Abstands ZWISCHEN zwei benannten Elementen (mit `bis`; Alternative zu `selector`). */
+	von?: string;
+	/** Zweiter Anker (siehe `von`). */
+	bis?: string;
+	/** Breakpoint-Stufen: ab welcher Container-Breite welcher Wert gilt. */
+	stufen?: SpacingStufe[];
+};
+
+/** Eine Breakpoint-Stufe eines Abstands (siehe `SpacingSpec.stufen`). */
+export type SpacingStufe = {
+	/** Ab dieser Container-Breite (px, einschließlich) gilt der Wert; größte passende Stufe gewinnt. */
+	abBreite: number;
+	px: string;
+	token?: string;
 };
 
 /**

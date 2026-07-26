@@ -50,6 +50,9 @@
 		reineZahl,
 		checkDrift,
 		computeGapStrips,
+		paarZwischenraum,
+		padStreifen,
+		stufeFuer,
 		TOL,
 		type Rect,
 		type Drift
@@ -155,15 +158,18 @@
 	let viewport = $state('frei');
 	const rahmenBreite = $derived(viewportWidth(viewport, referenzPreset));
 
-	// ——— Live-Vermessung (Part-Outlines + Gap-Streifen) ———
-	// Anker mit `selector` und Gap-Einträge mit `selector` werden zur Laufzeit im
-	// Specimen gemessen (querySelector + getBoundingClientRect relativ zum Slot).
-	// Kein Raten, keine handgepflegten Prozentwerte — ResizeObserver hält die
-	// Overlays bei Reflows (Fonts, Fenster) aktuell.
+	// ——— Live-Vermessung (Part-Outlines + Abstands-Streifen) ———
+	// Anker mit `selector` und Abstands-Zeilen mit Anker (`selector` oder das Paar
+	// `von`/`bis`) werden zur Laufzeit im Specimen gemessen (querySelector +
+	// getBoundingClientRect relativ zum Slot). Kein Raten, keine handgepflegten
+	// Prozentwerte — ResizeObserver hält die Overlays bei Reflows (Fonts, Fenster)
+	// aktuell.
 	let slotEl = $state<HTMLDivElement>();
 	let rahmenEl = $state<HTMLDivElement>();
 	let partRects = $state<Record<number, Rect>>({});
-	let gapRects = $state<Record<number, Rect[]>>({});
+	// Streifen je Abstands-Zeile (Index in `spacing`). Ein leeres Array heißt
+	// „Anker gefunden, aber kein Zwischenraum" — eine Aussage, kein Ausfall.
+	let streifen = $state<Record<number, Rect[]>>({});
 
 	// Die Ist-Box des SPECIMENS, relativ zum Rahmen. Zwei Aufgaben in einer
 	// Messung: Sie ist der Bezugsrahmen der Kastenmaß-Overlays (Streifen,
@@ -187,9 +193,11 @@
 	function measureOverlays() {
 		if (!slotEl) return;
 		const wurzel = slotEl.firstElementChild;
+		let breiteRahmen = 0;
 		if (rahmenEl) {
 			const f = rahmenEl.getBoundingClientRect();
 			rahmenIstBreite = f.width;
+			breiteRahmen = f.width;
 			if (wurzel) {
 				const r = wurzel.getBoundingClientRect();
 				istBox = { links: r.left - f.left, oben: r.top - f.top, breite: r.width, hoehe: r.height };
@@ -211,23 +219,10 @@
 		}
 		partRects = parts;
 
-		const gaps: Record<number, Rect[]> = {};
-		spacing.forEach((s, i) => {
-			if (s.art !== 'gap' || !s.selector) return;
-			const cont = slotEl?.querySelector(s.selector);
-			if (!cont) return;
-			const kids = [...cont.children].map((k) => k.getBoundingClientRect());
-			const strips = computeGapStrips(kids, base);
-			if (strips.length) gaps[i] = strips;
-		});
-		gapRects = gaps;
-
-		// Drift: deklarierte Ist-Werte am Specimen-Root bzw. Gap-Container erheben.
-		// Nur eindeutig zuordenbare Werte prüfen: masse.hoehe/radius können sich bei
-		// Komposit-Patterns (Cell: 84 = Media-Kind) auf ein Kind beziehen — Radius
-		// deshalb nur, wenn der Root selbst sichtbar rundet; Höhe (einzige
-		// Box-Messung) gar nicht. Padding (Root) und Gap (expliziter selector)
-		// sind deklariert-vs-deklariert und bleiben scharf.
+		// Drift: Ist-Werte am Specimen-Root erheben. Nur eindeutig zuordenbare Werte
+		// prüfen: masse.hoehe/radius können sich bei Komposit-Patterns (Cell: 84 =
+		// Media-Kind) auf ein Kind beziehen — Radius deshalb nur, wenn der Root
+		// selbst sichtbar rundet; Höhe (einzige Box-Messung) gar nicht.
 		const root = slotEl.firstElementChild;
 		const d: Record<string, Drift> = {};
 		if (root instanceof HTMLElement) {
@@ -239,15 +234,88 @@
 			const radiusIst = parseFloat(st.borderTopLeftRadius);
 			if (radiusIst > 0) checkDrift('radius', num(apx(masse?.radius ?? undefined)), radiusIst, d);
 		}
+
+		// ——— Abstände: EINE Schleife für Streifen UND Sollwert-Prüfung ———
+		// Beides aus derselben Messung: Was gezeichnet wird, ist auch das, wogegen
+		// der Sollwert antritt. Zwei getrennte Durchgänge wären die Gelegenheit,
+		// dass Bild und Befund auseinanderlaufen.
+		const gemessen: Record<number, Rect[]> = {};
+		const sichtbar = (r: DOMRect) => r.width > 0 && r.height > 0;
 		spacing.forEach((s, i) => {
-			if (s.art !== 'gap' || !s.selector) return;
+			const key = `sp-${i}`;
+			// Der Sollwert ist der Wert, der auf DIESER Bühnenbreite gilt — bei
+			// breakpoint-abhängigen Abständen also die passende Stufe, sonst der
+			// Kopfwert der Zeile.
+			const soll = num(stufeFuer(s.stufen, breiteRahmen)?.px ?? s.px);
+
+			// (a) Abstand ZWISCHEN zwei benannten Elementen. Entsteht in der Regel
+			// als margin am Geschwisterelement und ist an keinem Container als `gap`
+			// ablesbar — hier zählt allein der gemessene Zwischenraum.
+			if (s.von && s.bis) {
+				const a = slotEl?.querySelector(s.von);
+				const b = slotEl?.querySelector(s.bis);
+				if (!a || !b) return;
+				const ra = a.getBoundingClientRect();
+				const rb = b.getBoundingClientRect();
+				if (!sichtbar(ra) || !sichtbar(rb)) return; // in dieser Variante nicht gezeigt
+				const z = paarZwischenraum(ra, rb, base);
+				// Beide Anker da, aber kein Zwischenraum (kollabierter Rand,
+				// überlappende Boxen): Zeile TROTZDEM koppeln, damit der Befund als
+				// „gerendert 0 px" sichtbar wird statt lautlos zu verschwinden.
+				gemessen[i] = z ? [z.streifen] : [];
+				checkDrift(key, soll, z?.abstand ?? 0, d);
+				return;
+			}
+
+			if (!s.selector) return;
+
+			// (b) Innenabstand eines benannten Elements (nicht der Wurzel — die kommt
+			// aus masse.padding). Mehrere Treffer bekommen alle ihren Streifen; der
+			// Sollwert tritt gegen den ersten an.
+			if (s.art === 'padding') {
+				const els = [...(slotEl?.querySelectorAll(s.selector) ?? [])].filter((el) =>
+					sichtbar(el.getBoundingClientRect())
+				);
+				if (!els.length) return;
+				const strips: Rect[] = [];
+				let erstes: { t: number; r: number; b: number; l: number } | null = null;
+				for (const el of els) {
+					const est = getComputedStyle(el);
+					const pad = {
+						t: parseFloat(est.paddingTop) || 0,
+						r: parseFloat(est.paddingRight) || 0,
+						b: parseFloat(est.paddingBottom) || 0,
+						l: parseFloat(est.paddingLeft) || 0
+					};
+					erstes ??= pad;
+					strips.push(...padStreifen(el.getBoundingClientRect(), pad, base, s.richtung));
+				}
+				gemessen[i] = strips;
+				if (erstes) checkDrift(key, soll, s.richtung === 'horizontal' ? erstes.l : erstes.t, d);
+				return;
+			}
+
+			// (c) `gap` eines Containers. Anders als (a)/(b) wird hier NICHT gekoppelt,
+			// wenn keine Streifen anfallen: Ein Container mit weniger als zwei
+			// sichtbaren Kindern (Karussell ohne Steuerung, Cell ohne Meta-Zeile) ist
+			// kein Befund, sondern diese Variante.
 			const cont = slotEl?.querySelector(s.selector);
 			if (!cont) return;
+			const kids = [...cont.children].map((k) => k.getBoundingClientRect());
+			const strips = computeGapStrips(kids, base, s.achse);
+			if (strips.length) gemessen[i] = strips;
+			// Der gap ist am Container DEKLARIERT — hier ist die Absicht ablesbar und
+			// belastbarer als der Zwischenraum (ein `space-between` spreizt ihn).
 			const cst = getComputedStyle(cont);
-			// gap deklariert am Container (column- oder row-gap, je nach Achse belegt).
-			const ist = parseFloat(cst.columnGap) || parseFloat(cst.rowGap);
-			if (Number.isFinite(ist)) checkDrift(`gap-${i}`, num(s.px), ist, d);
+			const ist =
+				s.achse === 'vertikal'
+					? parseFloat(cst.rowGap)
+					: s.achse === 'horizontal'
+						? parseFloat(cst.columnGap)
+						: parseFloat(cst.columnGap) || parseFloat(cst.rowGap);
+			if (Number.isFinite(ist)) checkDrift(key, soll, ist, d);
 		});
+		streifen = gemessen;
 		drift = d;
 	}
 
@@ -278,21 +346,41 @@
 		requestAnimationFrame(measureOverlays);
 	});
 
-	// Sync-Key je Abstände-Zeile: Padding-Zeilen koppeln an die Padding-Streifen
-	// (vertikal = oben/unten, horizontal = links/rechts), Gap-Zeilen an ihre
-	// gemessenen Streifen. Zeilen ohne Kopplung bleiben passiv (kein Hover-Köder).
+	// Sync-Key je Abstände-Zeile. Zwei Kopplungen, und die Reihenfolge ist die
+	// Aussage: Eine Zeile OHNE eigenen Anker beschreibt den Innenabstand der
+	// WURZEL und hängt an den vier Kantenstreifen aus `masse.padding` (vertikal =
+	// oben/unten, horizontal = links/rechts). Alles mit Anker (`selector` oder das
+	// Paar `von`/`bis`) hängt an den live gemessenen Streifen dieser Zeile.
+	// Zeilen ohne Kopplung bleiben passiv (kein Hover-Köder).
 	const padBox = $derived(parsePad(apx(masse?.padding ?? undefined)));
 	function rowKey(s: SpacingSpec, i: number): string | null {
-		if (s.art === 'padding' && padBox) {
+		if (s.art === 'padding' && !s.selector && padBox) {
 			if (s.richtung === 'vertikal') return 'pad-v';
 			if (s.richtung === 'horizontal') return 'pad-h';
 			return null;
 		}
-		if (s.art === 'gap' && gapRects[i]) return `gap-${i}`;
-		return null;
+		// Bewusst NICHT nach `art` gefragt: Ob ein Abstand als `gap`, als margin
+		// zwischen Geschwistern oder als Innenabstand eines Kindes entsteht, ist
+		// eine CSS-Frage — gemessen wird er so oder so, und was gemessen ist, wird
+		// auch gekoppelt. Genau diese Abfrage hat die Geschwister-Abstände zuvor
+		// stumm gestellt.
+		return streifen[i] ? `sp-${i}` : null;
 	}
 	// Sync-Keys parallel zu spacing — die Abstände-Tabelle bekommt sie hereingereicht.
 	const spacingKeys = $derived(spacing.map((s, i) => rowKey(s, i)));
+
+	// Was auf DIESER Bühnenbreite gilt — nur für Zeilen mit Breakpoint-Stufen und
+	// nur, wenn die geltende Stufe vom Kopfwert abweicht. Der Hinweis ist eine
+	// Einordnung, keine Warnung: Dass ein Abstand unter 768 px kleiner ist, steht
+	// so im Modell und ist kein Befund.
+	const stufenHinweise = $derived(
+		spacing.map((s) => {
+			const st = stufeFuer(s.stufen, rahmenIstBreite);
+			return !st || st.px === s.px
+				? null
+				: { px: st.px, token: st.token ?? null, breite: Math.round(rahmenIstBreite) };
+		})
+	);
 
 	// ——— Kastenmaße: erst nachmessen, dann beschriften ———
 	// Bei `center` bleibt es beim Bisherigen: Das Specimen bringt seine Breite
@@ -490,14 +578,20 @@
 					</div>{/if}
 				</div>
 
-				<!-- Gaps zwischen den Teilen: gelb schraffierte Streifen (live gemessen). -->
+				<!-- Abstände am Ort des Geschehens: schraffierte Streifen, live gemessen.
+				     Die Farbe folgt der Bedeutung (gelb = Zwischenraum, grün =
+				     Innenabstand), NICHT dem CSS-Mechanismus: Ob der Zwischenraum als
+				     `gap` eines Containers oder als margin zwischen zwei Geschwistern
+				     entsteht, sieht man ihm nicht an — und soll man auch nicht müssen. -->
 				<div class="overlays" aria-hidden="true">
 					{#each spacing as s, i (i)}
-						{#if s.art === 'gap' && gapRects[i]}
-							{#each gapRects[i] as r, j (j)}
+						{#if streifen[i]}
+							{#each streifen[i] as r, j (j)}
 								<span
-									class="gap-strip"
-									class:strip--on={activeKey === `gap-${i}`}
+									class:gap-strip={s.art !== 'padding'}
+									class:pad-strip={s.art === 'padding'}
+									class:pad-strip--gemessen={s.art === 'padding'}
+									class:strip--on={activeKey === `sp-${i}`}
 									style="left:{r.left}px;top:{r.top}px;width:{r.width}px;height:{r.height}px"
 								></span>
 							{/each}
@@ -538,6 +632,7 @@
 	<AnatomySpacingTable
 		{spacing}
 		keys={spacingKeys}
+		{stufenHinweise}
 		{drift}
 		{activeKey}
 		{pinned}
@@ -831,6 +926,11 @@
 	.pad-strip--right {
 		right: 0;
 		border-left: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
+	}
+	/* Innenabstand eines benannten KINDES (nicht der Wurzel): frei positioniert,
+	   deshalb keine feste Kante — die gestrichelte Linie läuft rundum. */
+	.pad-strip--gemessen {
+		border: 1px dashed color-mix(in srgb, var(--pad-line) 55%, transparent);
 	}
 	/* Gap-Streifen: gelbe Schraffur zwischen den Teilen. */
 	.gap-strip {

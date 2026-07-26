@@ -303,12 +303,43 @@
 				},
 				"richtung": {
 					"enum": ["vertikal", "horizontal"],
-					"description": "Nur bei art 'padding': welche Achse der Padding-Streifen zeigt. Optional."
+					"description": "Nur bei art 'padding': welche Achse der Padding-Streifen zeigt. Fehlt sie bei einem Selektor-Padding, werden alle vier Seiten gezeigt. Optional."
 				},
 				"selector": {
 					"type": "string",
-					"description": "Nur bei art 'gap': CSS-Selektor (relativ zum Specimen-Root) des Flex-/Grid-Containers, dessen gap visualisiert wird. Optional."
+					"description": "CSS-Selektor (relativ zum Specimen-Root). Bei art 'gap' der Flex-/Grid-Container, dessen gap visualisiert wird; bei art 'padding' das Element, dessen Innenabstand visualisiert wird (nicht die Wurzel — der Innenabstand der Wurzel kommt aus masse.padding). Optional."
+				},
+				"achse": {
+					"enum": ["vertikal", "horizontal"],
+					"description": "Nur bei art 'gap' mit selector: auf welcher Achse der gemeinte Zwischenraum liegt — 'horizontal' = zwischen nebeneinander liegenden Teilen (column-gap), 'vertikal' = zwischen gestapelten (row-gap). Nötig, wo ein Container BEIDE Achsen belegt (Grid) und jede Achse ihren eigenen Wert dokumentiert. Fehlt sie, zählen beide Achsen. Optional."
+				},
+				"von": {
+					"type": "string",
+					"description": "CSS-Selektor des ERSTEN der beiden Elemente, zwischen denen der Abstand liegt (mit `bis` zusammen; Alternative zu `selector`). Für Abstände, die als margin zwischen Geschwistern entstehen und deshalb an keinem Container als gap ablesbar sind. Der gezeigte Wert wird am gerenderten Specimen NACHGEMESSEN (Unterkante des einen bis Oberkante des anderen)."
+				},
+				"bis": {
+					"type": "string",
+					"description": "CSS-Selektor des ZWEITEN Elements (siehe `von`)."
+				},
+				"stufen": {
+					"type": "array",
+					"description": "Breakpoint-Stufen dieses Abstands: ab welcher Breite des umgebenden Containers welcher Wert gilt. Ohne sie wäre jede breakpoint-abhängige Angabe auf einer schmalen Bühne eine Abweichung — mit ihnen weiß die Bühne, welcher Wert hier zu erwarten ist, und beschriftet den Unterschied sachlich statt warnend. In Produktion ist die maßgebliche Breite die des Viewports, auf der Doku-Bühne die der Bühne (der Exporter übersetzt größenbasiertes @media zu @container).",
+					"items": { "$ref": "#/$defs/spacingStufe" }
 				}
+			}
+		},
+		"spacingStufe": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["abBreite", "px"],
+			"properties": {
+				"abBreite": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Ab dieser Container-Breite (px, einschließlich) gilt der Wert. Die Stufe mit der größten passenden Breite gewinnt; eine Stufe mit 0 ist der Grundwert."
+				},
+				"px": { "type": "string", "description": "Wert in px auf dieser Stufe." },
+				"token": { "type": "string", "description": "z-ds-Spacing-Token dieser Stufe." }
 			}
 		},
 		"callout": {

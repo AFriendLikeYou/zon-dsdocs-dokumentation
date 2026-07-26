@@ -10,9 +10,13 @@
 	import { Chip } from '$components/ui/chip';
 	import { HERKUNFT_LABEL, RICHTUNG_LABEL, type Drift } from './anatomy-measure';
 
+	/** Die auf der aktuellen Bühnenbreite geltende Stufe einer Zeile (siehe unten). */
+	type StufenHinweis = { px: string; token: string | null; breite: number };
+
 	let {
 		spacing,
 		keys,
+		stufenHinweise,
 		drift,
 		activeKey,
 		pinned,
@@ -23,6 +27,17 @@
 		spacing: SpacingSpec[];
 		// Sync-Key je Zeile (parallel zu spacing) oder null für passive Zeilen.
 		keys: (string | null)[];
+		/**
+		 * Je Zeile die Stufe, die auf der AKTUELLEN Bühnenbreite gilt — oder `null`,
+		 * wenn der Kopfwert gilt (bzw. die Zeile gar keine Stufen hat).
+		 *
+		 * Das ist bewusst KEIN Drift-Befund: Dass „Bild ↔ Textblock" unter 768 px
+		 * 16 statt 24 px misst, steht so im Modell und ist richtig. Vorher warnte
+		 * die Tabelle an dieser Stelle („⚠ gerendert 16 px") und behauptete damit
+		 * einen Fehler, wo eine dokumentierte Breakpoint-Abhängigkeit steht.
+		 * Deshalb eine eigene Prop neben `drift` statt eines Sonderfalls darin.
+		 */
+		stufenHinweise: (StufenHinweis | null)[];
 		/** Drift-Befunde je Key (Figma-Soll ≠ gerendertes Ist). */
 		drift: Record<string, Drift>;
 		/** Aktuell aktiver Sync-Key (Pin oder Hover). */
@@ -69,7 +84,20 @@
 						>{/if}
 				</span>
 				<span class="spacing-table__value">
-					{#if key && drift[key]}
+					{#if stufenHinweise[i]}
+						<!-- Auf DIESER Bühnenbreite gilt eine andere Stufe. Das ist KEIN
+						     Befund: Dass ein Abstand unterhalb eines Breakpoints kleiner
+						     ist, steht so im Modell. Deshalb sachlich statt warnend —
+						     vorher stand hier das Drift-Abzeichen und behauptete einen
+						     Fehler, wo eine dokumentierte Abhängigkeit steht. -->
+						<span
+							class="stufen-hinweis"
+							title="Auf dieser Bühnenbreite ({stufenHinweise[i]?.breite} px) gilt die Stufe {stufenHinweise[
+								i
+							]?.px}; der Kopfwert {s.px} gilt darüber."
+							>hier {stufenHinweise[i]?.px}</span
+						>
+					{:else if key && drift[key]}
 						<!-- Figma-Soll ≠ gerendertes Ist: Vertragsverletzung sichtbar machen. -->
 						<span
 							class="drift-badge"
@@ -180,6 +208,18 @@
 		color: var(--ds-text);
 		background: color-mix(in srgb, var(--z-ds-color-background-warning) 30%, transparent);
 		border: 1px solid color-mix(in srgb, var(--z-ds-color-background-warning) 60%, transparent);
+		border-radius: 999px;
+		padding: 1px 8px;
+		white-space: nowrap;
+	}
+	/* Breakpoint-Stufe: bewusst NEUTRAL statt warnend — hier stimmt alles, es gilt
+	   nur eine andere dokumentierte Stufe. Deshalb die ruhige Flächenfarbe der
+	   Bühne und kein Warnton wie beim Drift-Abzeichen darüber. */
+	.stufen-hinweis {
+		font-size: var(--ds-text-xs);
+		color: var(--ds-text-body);
+		background: var(--ds-surface-raised);
+		border: 1px solid var(--ds-border-soft);
 		border-radius: 999px;
 		padding: 1px 8px;
 		white-space: nowrap;
