@@ -103,8 +103,18 @@
 <section class="example-block">
 	<div class="example-block__stage spec-canvas ds-stage" class:example-block__stage--fill={fill}>
 		{#each instanzen as instanz, i (i)}
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			<div class="example-block__instance">{@html instanz}</div>
+			{#if instanz.trim()}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				<div class="example-block__instance">{@html instanz}</div>
+			{:else}
+				<!-- Ein Beispiel ohne Markup wäre sonst eine leere Fläche: Die Bühne
+				     hat eine Mindesthöhe, also sieht sie „schon irgendwie richtig" aus,
+				     und niemand merkt, dass eine Instanz fehlt. Lieber sichtbar falsch
+				     als unsichtbar falsch. -->
+				<p class="example-block__leer">
+					Instanz {i + 1} hat kein Markup ergeben — fehlt <code>render.template</code>?
+				</p>
+			{/if}
 		{/each}
 	</div>
 
@@ -175,10 +185,22 @@
 	.example-block__instance:only-child {
 		flex: 1 1 auto;
 	}
+	/* Fehlermeldung statt Leerfläche — bewusst in der Akzentfarbe der Bühne, damit
+	   sie beim Überfliegen auffällt und nicht als Beispieltext durchgeht. */
+	.example-block__leer {
+		flex: 1 1 auto;
+		margin: 0;
+		font-family: var(--ds-font-mono);
+		font-size: var(--ds-text-xs);
+		line-height: 1.5;
+		color: var(--z-ds-color-accent-100);
+	}
 
 	/* Volle-Breite-Specimens: die Bühne stapelt statt zu reihen. `:only-child` oben
 	   deckte nur den Einzelfall ab — ab der zweiten Instanz teilten sich beide die
-	   Zeile, und aus einer Aufklapper-Liste wurden zwei schmale Spalten. */
+	   Zeile, und aus einer Aufklapper-Liste wurden zwei schmale Spalten.
+	   Gegenprobe dazu: e2e/stage-geometry.spec.ts (nimmt man diese beiden Regeln
+	   heraus, meldet der Lauf exakt „269px, beide oben 1143px" zurück). */
 	.example-block__stage--fill {
 		flex-direction: column;
 		align-items: stretch;

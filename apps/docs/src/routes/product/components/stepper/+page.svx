@@ -15,13 +15,14 @@ kategorie: Formulare
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/stepper.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const calloutAnchors = [{"nr":1,"side":"bottom","x":50,"selector":".z-stepper"},{"nr":2,"side":"top","x":50,"selector":".z-stepper__val"},{"nr":3,"side":"right","y":50,"selector":".z-stepper__plus"}];
 	const playgroundControls = [{"key":"state","label":"Zustand","type":"select","default":"default","options":[{"value":"default","label":"Default"},{"value":"hover","label":"Hover","cssClass":"z-stepper--hover"},{"value":"focus","label":"Focus","cssClass":"z-stepper--focus"},{"value":"disabled","label":"Disabled","cssClass":"z-stepper--disabled"}]}] as PlaygroundControl[];
 	const playgroundTemplate = `<div class="z-stepper{classes}">
@@ -142,7 +143,7 @@ kategorie: Formulare
 
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
-	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={buehne} resizable={spec.playground?.resizable} />
 
 	{#if beispiele.length}
 		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
@@ -150,7 +151,7 @@ kategorie: Formulare
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
-				fill={spec.playground?.align === 'fill'}
+				fill={buehne === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}

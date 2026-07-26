@@ -927,7 +927,7 @@ function renderPage(model, { patternCss = null } = {}) {
 			: '') +
 		(hasSpecimenPg ? `\timport Specimen from '${pgSpecimen}';\n` : '') +
 		`\timport { generated } from './spec.generated';\n` +
-		`\timport { mergeSpec } from '${SPEC_MERGE_IMPORT}';\n` +
+		`\timport { mergeSpec, buehnenAlign } from '${SPEC_MERGE_IMPORT}';\n` +
 		`\timport content from '${CONTENT_IMPORT_BASE}/${kebabCase(model.name)}.json';\n` +
 		(hasEditorial ? `\timport type { ComponentSpec } from '$types/spec';\n` : '');
 
@@ -936,6 +936,12 @@ function renderPage(model, { patternCss = null } = {}) {
 		`\t// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)\n` +
 		`\t// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.\n` +
 		`\tconst ${S} = mergeSpec(generated, content);\n` +
+		// Bühnen-Zusage EINMAL auslegen und an alle Bühnen verteilen. Vorher stand
+		// der Vergleich `spec.playground?.align === 'fill'` je Consumer neu in der
+		// Vorlage — genau die Bauart, bei der ein neuer Consumer ihn vergisst (so
+		// entstand der Accordion-Befund). Gemessen wird das Ergebnis in
+		// e2e/stage-geometry.spec.ts.
+		`\tconst buehne = buehnenAlign(${S});\n` +
 		(anchors.length ? `\tconst calloutAnchors = ${JSON.stringify(anchors)};\n` : '') +
 		(hasTemplatePg
 			? `\tconst playgroundControls = ${JSON.stringify(pgControls)} as PlaygroundControl[];\n` +
@@ -992,7 +998,7 @@ function renderPage(model, { patternCss = null } = {}) {
 		} else {
 			const hintProp = pgHint ? ` hint=${JSON.stringify(pgHint)}` : '';
 			const darkProp = pgDarkKey ? ` darkKey=${JSON.stringify(pgDarkKey)}` : '';
-			design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} align={${S}.playground?.align} resizable={${S}.playground?.resizable} />\n`;
+			design += `\t<Playground controls={playgroundControls} template={playgroundTemplate}${hintProp}${darkProp} align={buehne} resizable={${S}.playground?.resizable} />\n`;
 		}
 	}
 	// Benannte Beispiele — laufzeit-gated (`{#if}`), damit die Generat-Struktur
@@ -1008,9 +1014,10 @@ function renderPage(model, { patternCss = null } = {}) {
 			`\t\t\t\ttitel={beispiel.titel}\n` +
 			`\t\t\t\tbeschreibung={beispiel.beschreibung}\n` +
 			// Volle-Breite-Specimens stapeln ihre Instanzen, statt sie zu reihen —
-			// dieselbe Quelle, aus der der Playground seine Bühne ableitet. Ohne das
-			// standen beim Accordion zwei Aufklapper nebeneinander statt untereinander.
-			`\t\t\t\tfill={spec.playground?.align === 'fill'}\n` +
+			// dieselbe ausgelegte Zusage, aus der auch der Playground seine Bühne
+			// nimmt. Ohne das standen beim Accordion zwei Aufklapper nebeneinander
+			// statt untereinander.
+			`\t\t\t\tfill={buehne === 'fill'}\n` +
 			`\t\t\t\tinstanzen={(beispiel.instanzen ?? [{}]).map((werte) =>\n` +
 			`\t\t\t\t\tinstantiate(playgroundTemplate, playgroundControls, werte)\n` +
 			`\t\t\t\t)}\n` +

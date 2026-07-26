@@ -16,13 +16,14 @@ kategorie: Medien
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/carousel.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-carousel__scroll-container"},{"nr":2,"side":"left","y":40,"selector":".z-carousel__slide"},{"nr":3,"side":"bottom","x":25,"selector":".z-carousel__dots-wrapper"},{"nr":4,"side":"bottom","x":75,"selector":".z-carousel__slide-control-wrapper"}];
 	const playgroundControls = [{"key":"ansicht","label":"Ansicht","type":"select","default":"mehrspaltig","options":[{"value":"mehrspaltig","label":"Mehrspaltig"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"auspraegung","label":"Ausprägung","type":"select","default":"redaktion","options":[{"value":"redaktion","label":"Redaktion"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Pfeile über der Spur","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay-Fortschritt","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"ohneSteuerung","label":"Ohne Steuerung","type":"toggle","cssClass":"z-carousel--no-controls"}] as PlaygroundControl[];
 	const playgroundTemplate = `<z-carousel class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
@@ -566,7 +567,7 @@ z-carousel {
 
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
-	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={buehne} resizable={spec.playground?.resizable} />
 
 	{#if beispiele.length}
 		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
@@ -574,7 +575,7 @@ z-carousel {
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
-				fill={spec.playground?.align === 'fill'}
+				fill={buehne === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}

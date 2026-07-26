@@ -15,13 +15,14 @@ kategorie: Inhalte
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/hero.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const calloutAnchors = [{"nr":1,"side":"left","y":25,"selector":".zon-teaser__media"},{"nr":2,"side":"left","y":68,"selector":".zon-teaser__kicker"},{"nr":3,"side":"right","y":76,"selector":".zon-teaser__title"},{"nr":4,"side":"right","y":88,"selector":".zon-teaser__summary"},{"nr":5,"side":"bottom","x":30,"selector":".zon-teaser__byline"}];
 	const playgroundControls = [{"key":"stil","label":"Stil","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"centered","label":"Centered","cssClass":"zon-teaser--is-centered"},{"value":"split","label":"Split","cssClass":"zon-teaser--split"},{"value":"longform","label":"Longform","cssClass":"zon-teaser--tiemann"}]},{"key":"panorama","label":"Panorama","type":"toggle","cssClass":"zon-teaser--is-panorama"}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="zon-teaser zon-teaser--wide zon-teaser--is-lead{classes}"{attrs}>
@@ -346,7 +347,7 @@ kategorie: Inhalte
 
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
-	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={buehne} resizable={spec.playground?.resizable} />
 
 	{#if beispiele.length}
 		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
@@ -354,7 +355,7 @@ kategorie: Inhalte
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
-				fill={spec.playground?.align === 'fill'}
+				fill={buehne === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}

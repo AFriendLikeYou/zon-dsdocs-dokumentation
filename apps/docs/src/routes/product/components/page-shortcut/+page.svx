@@ -15,13 +15,14 @@ kategorie: Aktionen
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/page-shortcut.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-page-shortcut"},{"nr":2,"side":"bottom","x":50}];
 	const playgroundControls = [] as PlaygroundControl[];
 	const playgroundTemplate = `<button type="button" class="z-page-shortcut{classes}"{attrs}>
@@ -75,7 +76,7 @@ kategorie: Aktionen
 
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
-	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." align={spec.playground?.align} resizable={spec.playground?.resizable} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} hint="Keine Varianten — ein Stil mit Hover-/Focus-State." align={buehne} resizable={spec.playground?.resizable} />
 
 	{#if beispiele.length}
 		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
@@ -83,7 +84,7 @@ kategorie: Aktionen
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
-				fill={spec.playground?.align === 'fill'}
+				fill={buehne === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}

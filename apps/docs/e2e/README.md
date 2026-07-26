@@ -1,16 +1,65 @@
 # E2E-Suiten (Playwright)
 
-Vier Suiten, ein Runner (`npm run test:e2e`, Config: `apps/docs/playwright.config.ts`):
+Ein Runner (`npm run test:e2e`, Config: `apps/docs/playwright.config.ts`):
 
-| Datei               | Was es prüft                                                                 |
-| ------------------- | ---------------------------------------------------------------------------- |
-| `cms-smoke.spec.ts` | CMS-Kernflüsse (Seite anlegen → Block editieren → speichern → Persistenz)    |
-| `mcp-smoke.spec.ts` | MCP-Endpoint `/api/mcp` (JSON-RPC: `search` + `get`)                         |
-| `llms-txt.spec.ts`  | `llms.txt` / `llms-full.txt`                                                 |
-| `visual.spec.ts`    | **Visuelle Regression** — Screenshot-Snapshots der Kernseiten, hell + dunkel |
-| `a11y.spec.ts`      | **A11y** — axe-core (wcag2a/2aa/21a/21aa) + Tastatur-Basisprüfung            |
+| Datei                    | Was es prüft                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `cms-smoke.spec.ts`      | CMS-Kernflüsse (Seite anlegen → Block editieren → speichern → Persistenz)    |
+| `mcp-smoke.spec.ts`      | MCP-Endpoint `/api/mcp` (JSON-RPC: `search` + `get`)                         |
+| `llms-txt.spec.ts`       | `llms.txt` / `llms-full.txt`                                                 |
+| `visual.spec.ts`         | **Visuelle Regression** — Screenshot-Snapshots der Kernseiten, hell + dunkel |
+| `a11y.spec.ts`           | **A11y** — axe-core (wcag2a/2aa/21a/21aa) + Tastatur-Basisprüfung            |
+| `stage-geometry.spec.ts` | **Bühnen-Geometrie** — liegen die Specimens so, wie das Modell zusagt? ↓     |
 
 Gemeinsame Bühne: `support/stabilize.ts`.
+
+## Bühnen-Geometrie (`stage-geometry.spec.ts`)
+
+Misst je Komponentenseite, **wo** die Specimens liegen — nicht, wie sie aussehen.
+Ein Test je Komponente, datengetrieben aus `packages/components/src/*/model.json`;
+eine neue Komponente ist automatisch mitgeprüft, ohne dass jemand einen Testfall
+pflegt.
+
+Anlass war ein Fehler, der monatelang unbemerkt blieb: Auf der Accordion-Seite
+standen zwei Aufklapper **nebeneinander** (je 269px), obwohl eine Liste gemeint
+war. Das Signal lag im Modell (`render.align: "fill"`), der Beispiel-Block bekam
+es nur nie gereicht.
+
+Fünf Regeln, bewusst wenige:
+
+| Regel | Was sie fängt                                                              |
+| ----- | -------------------------------------------------------------------------- |
+| R1    | Messumgebung — Bühne < 200px ⇒ laut abbrechen statt Unsinn zu messen        |
+| R2    | Kein Specimen ist 0×0 (verschwindet sonst lautlos)                          |
+| R3    | Nichts läuft aus der Bühne (Playground clippt, würde sonst still abschneiden) |
+| R4    | `align: "fill"` ⇒ Instanzen **stapeln**, keine zwei in einer Zeile          |
+| R5    | `align: "fill"` ⇒ Hülle nimmt volle Breite, Specimen fällt nicht zusammen   |
+
+**Warum E2E und nicht Unit:** Der Fehler saß in einer CSS-Regel
+(`.example-block__instance:only-child`). jsdom rechnet kein Layout —
+`getBoundingClientRect()` liefert dort durchweg Nullen. Ein Unit-Test hätte
+höchstens die Verdrahtung prüfen können und wäre grün geblieben. Was ohne Layout
+entscheidbar ist, steht dafür in `ExampleBlock.test.ts` (Modifier-Klasse, leere
+Instanz).
+
+**Warum keine Screenshots:** Der Fall war für Pixel-Vergleiche mit angelegt — nur
+gab es für die Accordion-Seite nie einen Snapshot, und ein Snapshot hätte auch
+nur gesagt „anders als gestern", nicht „anders als in der Anwendung". Die
+Geometrie-Assertion nennt den Grund: `Hülle ist 269px statt der vollen
+Bühnenbreite 734px`.
+
+**Gegenprobe (durchgeführt 2026-07-26):** Nimmt man die beiden
+`--fill`-Regeln aus `ExampleBlock.svelte` heraus (Stand vor `bcd3d32`), meldet der
+Lauf den Originalbefund Zahl für Zahl zurück — `269px`, `Instanz 1 und 2 stehen
+NEBENEINANDER (oben 1143px bzw. 1143px)`. Die übrigen 13 Komponenten bleiben grün.
+
+Die Assertions ab R2 sind `expect.soft`: Ein Lauf zeigt **alle** Befunde einer
+Seite, nicht nur den ersten. R1 bleibt hart — stimmt die Messumgebung nicht, ist
+alles Weitere Rauschen.
+
+**Nicht mitgeprüft:** die Katalog-Vorschau (`/product/components`). Ihre
+`.catalog-preview` ist ein 16:9-Daumennagel, der absichtlich beschneidet — dort
+wäre R3 kein Befund, sondern die Absicht.
 
 ## Lokal laufen lassen
 

@@ -15,13 +15,14 @@ kategorie: Inhalte
 	import { UsageBlock } from '$components/ui/usage-block';
 	import { Playground, instantiate, type PlaygroundControl } from '$components/ui/playground';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/cell.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const calloutAnchors = [{"nr":1,"side":"left","y":50,"selector":".z-cell__media"},{"nr":2,"side":"top","x":55,"selector":".z-cell__kicker"},{"nr":3,"side":"right","y":45,"selector":".z-cell__title"},{"nr":4,"side":"bottom","x":55,"selector":".z-cell__byline"}];
 	const playgroundControls = [{"key":"type","label":"Typ","type":"select","default":"article","options":[{"value":"pinned","label":"Pinned","cssClass":"z-cell--pinned"},{"value":"article","label":"Article","cssClass":"z-cell--article"},{"value":"headline","label":"Headline","cssClass":"z-cell--headline"},{"value":"artikel","label":"Artikel","cssClass":"z-cell--artikel"},{"value":"author","label":"Author","cssClass":"z-cell--author"},{"value":"podcast-series","label":"Podcast Series","cssClass":"z-cell--podcast-series"},{"value":"anzeige","label":"Anzeige","cssClass":"z-cell--anzeige"}]},{"key":"small","label":"Small","type":"toggle","cssClass":"z-cell--small"}] as PlaygroundControl[];
 	const playgroundTemplate = `<article class="z-cell{classes}">
@@ -314,7 +315,7 @@ kategorie: Inhalte
 
 {#snippet designTab()}
 	<h2 id="playground" class="section-anchor">Playground</h2>
-	<Playground controls={playgroundControls} template={playgroundTemplate} align={spec.playground?.align} resizable={spec.playground?.resizable} />
+	<Playground controls={playgroundControls} template={playgroundTemplate} align={buehne} resizable={spec.playground?.resizable} />
 
 	{#if beispiele.length}
 		<h2 id="beispiele" class="section-anchor">Beispiele</h2>
@@ -322,7 +323,7 @@ kategorie: Inhalte
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
-				fill={spec.playground?.align === 'fill'}
+				fill={buehne === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}

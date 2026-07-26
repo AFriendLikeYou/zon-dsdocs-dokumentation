@@ -15,13 +15,14 @@ kategorie: Aktionen
 	import { UsageBlock } from '$components/ui/usage-block';
 	import Specimen from './Specimen.svelte';
 	import { generated } from './spec.generated';
-	import { mergeSpec } from '$lib/spec';
+	import { mergeSpec, buehnenAlign } from '$lib/spec';
 	import content from '$content/components/button-group.json';
 	import type { ComponentSpec } from '$types/spec';
 	// Maschine (Figma-Export) + Mensch (Redaktion) zusammenführen. Klasse-②-Felder
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
+	const buehne = buehnenAlign(spec);
 	const editorial = content as Partial<ComponentSpec>;
 	const htmlBody = `<ul class="buttongroup"><li class="buttongroup-item buttongroup-item--active"><button class="buttongroup-button">Alle</button></li><li class="buttongroup-item"><button class="buttongroup-button">Politik</button></li><li class="buttongroup-item"><button class="buttongroup-button">Wirtschaft</button></li><li class="buttongroup-item"><button class="buttongroup-button">Kultur</button></li></ul>`;
 	const codeNote = editorial.codeNote ?? ``;

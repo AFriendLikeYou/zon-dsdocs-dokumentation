@@ -4,6 +4,7 @@
  * die Regel steht damit EINMAL im Repo statt vierzehnmal im Generat.
  */
 export { mergeSpec, setzePfadWert } from './merge';
+export { buehnenAlign, type BuehnenAlign } from './buehne';
 export {
 	MASCHINE_FELDER,
 	MENSCH_FELDER,
