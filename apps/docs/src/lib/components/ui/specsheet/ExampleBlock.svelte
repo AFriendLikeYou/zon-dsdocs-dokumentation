@@ -43,6 +43,7 @@
 		beschreibung = '',
 		instanzen = [],
 		lang = 'html',
+		fill = false,
 		codePersistKey = 'example-block:code'
 	}: {
 		/** Überschrift des Beispiels, z. B. „Semantik". */
@@ -53,6 +54,18 @@
 		instanzen?: string[];
 		/** Sprache für die Syntax-Hervorhebung des Code-Blocks. */
 		lang?: 'html' | 'css' | 'svelte';
+		/**
+		 * Specimen beansprucht die volle Breite (Aufklapper, Teaser, Eingabefeld) —
+		 * dann stehen mehrere Instanzen UNTEREINANDER statt nebeneinander.
+		 *
+		 * Ohne das Signal teilten sich zwei Instanzen die Flex-Zeile: Beim Accordion
+		 * standen zwei Aufklapper mit je 269px nebeneinander, obwohl eine Liste
+		 * gemeint ist. Für einen Button ist die Reihe dagegen richtig — es ist also
+		 * keine Regel, sondern eine Eigenschaft der Komponente. Sie kommt aus
+		 * `render.align === 'fill'` im Modell, derselben Quelle, aus der der
+		 * Playground seine Bühne ableitet (`spec.playground.align`).
+		 */
+		fill?: boolean;
 		/** sessionStorage-Schlüssel für „Code offen/zu"; Default: ein Schlüssel für alle Beispiele. */
 		codePersistKey?: string;
 	} = $props();
@@ -88,7 +101,7 @@
 </script>
 
 <section class="example-block">
-	<div class="example-block__stage spec-canvas ds-stage">
+	<div class="example-block__stage spec-canvas ds-stage" class:example-block__stage--fill={fill}>
 		{#each instanzen as instanz, i (i)}
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			<div class="example-block__instance">{@html instanz}</div>
@@ -161,6 +174,17 @@
 	}
 	.example-block__instance:only-child {
 		flex: 1 1 auto;
+	}
+
+	/* Volle-Breite-Specimens: die Bühne stapelt statt zu reihen. `:only-child` oben
+	   deckte nur den Einzelfall ab — ab der zweiten Instanz teilten sich beide die
+	   Zeile, und aus einer Aufklapper-Liste wurden zwei schmale Spalten. */
+	.example-block__stage--fill {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.example-block__stage--fill .example-block__instance {
+		flex: 0 0 auto;
 	}
 
 	/* Text + Code-Umschalter in EINER Zeile: der Titel trägt die Betonung, der

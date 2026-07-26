@@ -1007,6 +1007,10 @@ function renderPage(model, { patternCss = null } = {}) {
 			`\t\t\t<ExampleBlock\n` +
 			`\t\t\t\ttitel={beispiel.titel}\n` +
 			`\t\t\t\tbeschreibung={beispiel.beschreibung}\n` +
+			// Volle-Breite-Specimens stapeln ihre Instanzen, statt sie zu reihen —
+			// dieselbe Quelle, aus der der Playground seine Bühne ableitet. Ohne das
+			// standen beim Accordion zwei Aufklapper nebeneinander statt untereinander.
+			`\t\t\t\tfill={spec.playground?.align === 'fill'}\n` +
 			`\t\t\t\tinstanzen={(beispiel.instanzen ?? [{}]).map((werte) =>\n` +
 			`\t\t\t\t\tinstantiate(playgroundTemplate, playgroundControls, werte)\n` +
 			`\t\t\t\t)}\n` +

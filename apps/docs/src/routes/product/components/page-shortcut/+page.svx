@@ -83,6 +83,7 @@ kategorie: Aktionen
 			<ExampleBlock
 				titel={beispiel.titel}
 				beschreibung={beispiel.beschreibung}
+				fill={spec.playground?.align === 'fill'}
 				instanzen={(beispiel.instanzen ?? [{}]).map((werte) =>
 					instantiate(playgroundTemplate, playgroundControls, werte)
 				)}
