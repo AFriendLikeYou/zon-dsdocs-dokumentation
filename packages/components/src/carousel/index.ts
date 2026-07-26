@@ -1,15 +1,21 @@
 /**
  * Carousel — Paket-Barrel (`@zeit/components/carousel`).
  *
- * Ausgeliefert wird heute zweierlei: der kanonische Spec (`model.json` — Maße,
- * Tokens, Varianten, Zustände) und das unscoped Pattern-CSS. Das CSS wird BEWUSST
- * nicht von hier re-exportiert, sondern über den eigenen Subpath
- * `@zeit/components/carousel/pattern.css` eingebunden: Styles gehören in den
- * Stylesheet-Graph des Konsumenten, nicht in einen JS-Import.
+ * Wie bei allen Komponenten liegt hier NUR der kanonische Spec. Die beiden
+ * anderen Artefakte kommen über eigene Subpfade, damit jedes im richtigen Graph
+ * landet und niemand sie ungewollt mitzieht:
  *
- * Ein Custom Element gibt es hier noch nicht: PR 6 hat nur den Piloten
- * `accordion` gebracht (MIGRATIONSPLAN.md §3). Als Nächstes sind `toggle` und
- * `checkbox` vorgesehen (Formular-Verhalten), danach die Teaser.
+ *   import '@zeit/components/carousel/pattern.css';  // Aussehen → Stylesheet-Graph
+ *   import '@zeit/components/carousel/carousel';     // Verhalten → registriert <z-carousel>
+ *   import { spec } from '@zeit/components/carousel'; // Beschreibung
+ *
+ * Das Element wird BEWUSST nicht von hier re-exportiert: Der Sammel-Barrel
+ * `@zeit/components` zieht alle diese Dateien ein, und ein Import von `SPECS`
+ * (reine Daten) darf keine Custom Elements registrieren.
+ *
+ * Das CSS allein genügt für eine voll benutzbare Leiste — sie ist dann eine
+ * scrollbare Liste mit Scroll-Snap. Das Element ergänzt Vor/Zurück, Fortschritt,
+ * Tastatur und ARIA (siehe carousel.ts).
  */
 import spec from './model.json';
 

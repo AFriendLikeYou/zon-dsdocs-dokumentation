@@ -1,187 +1,188 @@
 {
-	"zweck": "Horizontal scrollende Slot-Leiste mit optionalen Controls (Progress-Indikatoren + Vor/Zurück-Pfeile). Slots sind Content-Container (im Produkt: Teaser, Bilder, Karten).",
+	"zweck": "Horizontal scrollende Leiste aus gleichrangigen Content-Slots. Ohne JavaScript ist sie eine Liste, die man wischen und mit der Tastatur bewegen kann; <z-carousel> ergänzt Vor/Zurück, Fortschritt und ARIA.",
 	"status": "ready_for_dev",
 	"beispiele": [
 		{
 			"titel": "Der Normalfall",
-			"beschreibung": "Mehrspaltige Leiste mit Scroll-Snap: Die Slots rasten an ihrem Anfang ein, Pfeile und Dots zeigen, dass es weitergeht. Am Anfang und Ende bleibt der jeweilige Pfeil sichtbar und disabled — verschwundene Pfeile sind kein Hinweis, sondern ein Rätsel.",
+			"beschreibung": "Mehrere Slots je Ansicht, die an ihrem Anfang einrasten. Punkte zeigen, wie viel noch kommt; die Pfeile bleiben am Anfang und Ende stehen und werden nur deaktiviert — ein verschwundener Pfeil ist kein Hinweis, sondern ein Rätsel. Die Bühne lässt sich in der Breite ziehen: Bei 768 px verdoppelt sich der Seitenrand, ab 980 px wächst er auf bis zu 54 px und die Kanten bekommen ihren Fader.",
 			"instanzen": [{}],
-			"abdeckt": [
-				"Small",
-				"Large",
-				"default (mehrspaltig, Snap)",
-				"standard",
-				"controls (Figma-Prop, default an)"
-			]
+			"abdeckt": ["Mehrspaltig", "Redaktion", "Unter der Spur"]
 		},
 		{
-			"titel": "Eine Slide je Ansicht",
-			"beschreibung": "Single nimmt Gap und Padding heraus und zeigt genau eine Slide — die Fassung für Bühnen-Slider, bei denen ein Motiv die ganze Breite bekommt.",
-			"instanzen": [
-				{
-					"viewMode": "single"
-				}
-			],
-			"abdeckt": ["single"]
+			"titel": "Eine Seite je Ansicht",
+			"beschreibung": "Single nimmt Gap und Seitenrand heraus und zeigt genau eine Seite — die Fassung für Bühnen-Slider, bei denen ein Motiv die volle Breite bekommt.",
+			"instanzen": [{ "ansicht": "single" }],
+			"abdeckt": ["Single"]
 		},
 		{
 			"titel": "Freies Weiterscrollen",
-			"beschreibung": "Continuous hebt das Einrasten auf: Die Leiste läuft flüssig weiter, statt Slot für Slot zu springen. Passend für lange Reihen, in denen die einzelne Position nichts bedeutet.",
-			"instanzen": [
-				{
-					"viewMode": "continuous"
-				}
-			],
-			"abdeckt": ["continuous"]
+			"beschreibung": "Continuous hebt das Einrasten auf: Die Leiste läuft flüssig weiter, statt Slot für Slot zu springen. Passend für lange Reihen, in denen die einzelne Position nichts bedeutet — der Unterschied zeigt sich beim Wischen, nicht im Standbild.",
+			"instanzen": [{ "ansicht": "continuous" }],
+			"abdeckt": ["Continuous"]
 		},
 		{
 			"titel": "Kiosk und Shop",
-			"beschreibung": "Zwei feste Slot-Breiten für kommerzielle Kontexte: Kiosk hält die Karten schmal (12,25 rem) für Angebotsleisten, Shop gibt Produktkacheln 20 rem und einen getönten Fader-Ton.",
-			"instanzen": [
-				{
-					"variant": "kiosk"
-				},
-				{
-					"variant": "shop"
-				}
-			],
-			"abdeckt": ["kiosk", "shop"]
+			"beschreibung": "Zwei feste Slot-Breiten für kommerzielle Kontexte: Kiosk hält die Karten schmal (12,25 rem) für Angebotsleisten, Shop gibt Produktkacheln 20 rem und tönt den Fader mit. Feste Breiten heißt: Der Slot wächst nicht mit der Fläche mit.",
+			"instanzen": [{ "auspraegung": "kiosk" }, { "auspraegung": "shop" }],
+			"abdeckt": ["Kiosk", "Shop"]
 		},
 		{
-			"titel": "Steuerung: über dem Rand, automatisch oder gar nicht",
-			"beschreibung": "Overlay legt die Pfeile über die Rand-Zonen statt darunter (ab 48 em erst beim Hover sichtbar). Autoplay wechselt selbsttätig weiter — nur zusammen mit dem Play/Pause-Button ausliefern. Ohne Controls bleibt eine reine Scroll-Leiste: dann sollten auch nicht mehr Slots dahinterstehen, als man erraten kann.",
-			"instanzen": [
-				{
-					"overlay": true
-				},
-				{
-					"autoplay": true
-				},
-				{
-					"noControls": true
-				}
-			],
-			"abdeckt": ["overlay-controls", "autoplay", "no-controls"]
+			"titel": "Steuerung über der Spur, im Fortschritt oder gar nicht",
+			"beschreibung": "Overlay legt die Pfeile in die Rand-Zonen über die Leiste statt darunter. Autoplay zeigt den Fortschritts-Zustand — den automatischen Wechsel selbst bringt <z-carousel> bewusst nicht mit, weil er ohne Pause-Steuerung nicht auslieferbar wäre. Ohne Steuerung bleibt eine reine Scroll-Leiste; dann sollten auch nicht mehr Slots dahinterstehen, als man erraten kann.",
+			"instanzen": [{ "overlay": true }, { "autoplay": true }, { "ohneSteuerung": true }],
+			"abdeckt": ["Overlay", "Autoplay", "Ohne Steuerung"]
 		}
 	],
 	"callouts": [
 		{
 			"nr": 1,
-			"text": "Scroll-Container — horizontale Flex-Leiste mit scroll-snap-type: x mandatory; Slots snappen an ihren Anfang (außer view-mode=continuous).",
+			"text": "Spur — horizontale Flex-Leiste mit scroll-snap-type: x mandatory und overflow-x: auto. Das ist der Grundzustand: ohne JavaScript scrollbar, per Tastatur erreichbar (das Element setzt tabindex=0).",
 			"art": "container"
 		},
 		{
 			"nr": 2,
-			"text": "Slot — Content-Container, role=\"tabpanel\" (im Produkt Teaser/Bild/Karte; z. B. im ZEITmagazin-Wochenmarkt ein woma-teaser mit Kicker, Titel, Byline und Merken-Button). Hier neutrale Platzhalterfläche; Slot-Breite calc(320/892·100%) (≥48em) bzw. calc(320/343·100%) (mobil).",
+			"text": "Slot — Content-Container mit role=tabpanel (im Produkt Teaser, Bild oder Karte). Breite calc(320/343·100%) schmal bzw. calc(320/892·100%) ab 48 em — beide ergeben an ihrer Referenzbreite exakt 320 px. Die Fläche hier ist ein Doku-Platzhalter.",
 			"art": "slot"
 		},
 		{
 			"nr": 3,
-			"text": "Progress-Indikatoren — Tab-Leiste: <fieldset role=\"tablist\">, jeder Dot ein <input type=\"radio\" role=\"tab\"> (appearance:none). Aktiv (aria-selected) Text-70 und breiter; inaktiv Background-20.",
+			"text": "Fortschritts-Punkte — <fieldset role=tablist> mit einem <input type=radio role=tab> je Seite. 16×16-Kasten mit 4 px transparentem Rand, sichtbar also 8 px; aktiv Text-70 und ab 48 em zur Kapsel verbreitert.",
 			"art": "instance"
 		},
 		{
 			"nr": 4,
-			"text": "Vor/Zurück-Pfeile — Round Icon Tiny, 30×30 (1.875rem), Radius 99. Am Anfang/Ende disabled (Icon opacity .6).",
+			"text": "Vor/Zurück — echte <button>, 30×30 (1,875 rem), Radius 50 %, Icon 14×14. Am Anfang und Ende bleiben sie stehen und werden deaktiviert (Icon opacity .6) statt zu verschwinden.",
 			"art": "instance"
 		}
 	],
 	"a11y": [
 		{
 			"label": "Rolle & Beschriftung",
-			"wert": "Wurzel role=\"group\" + aria-roledescription=\"Karussell\"; die beiden Steuer-Gruppen sind als \"Steuerelemente\" (Pfeile) und \"Seitensteuerung\" (Dots) beschriftet.",
+			"wert": "Wurzel role=\"group\" + aria-roledescription=\"Karussell\"; die beiden Steuer-Gruppen sind als \"Steuerelemente\" (Pfeile) und \"Seitensteuerung\" (Punkte) beschriftet.",
 			"status": "pass"
 		},
 		{
-			"label": "Tabs-Muster (Dots ↔ Slides)",
-			"wert": "Dots sind role=\"tab\" in einer <fieldset role=\"tablist\">; jeder Slot ist ein role=\"tabpanel\", über aria-labelledby/aria-controls mit seinem Dot verknüpft. Der aktive Dot trägt aria-selected=\"true\".",
+			"label": "Ohne JavaScript bedienbar",
+			"wert": "Die Spur bleibt eine scrollbare Liste mit Scroll-Snap — Inhalt ist erreichbar, Wischen und Trackpad funktionieren. Die Steuerungszeilen tragen hidden und erscheinen erst, wenn das Element sie verdrahtet hat: lieber keine Knöpfe als tote.",
 			"status": "pass"
 		},
 		{
-			"label": "Slide-Wechsel wird angesagt",
-			"wert": "Der Scroll-Container ist eine Live-Region (aria-live=\"polite\", aria-atomic=\"false\") — Screenreader melden die neu sichtbare Seite.",
+			"label": "Tastatur",
+			"wert": "Die Spur ist eine benannte Fokus-Station (tabindex=\"0\"); ← und → blättern seitenweise, Pos1 und Ende springen an die Enden. Das ist unsere Ergänzung — die Produktion setzt tabindex=\"-1\", womit ein scrollbarer Bereich in Chrome für die Tastatur geschlossen ist.",
 			"status": "pass"
 		},
 		{
-			"label": "Verborgene Slides",
-			"wert": "Nicht sichtbare Slots sind inert + aria-hidden=\"true\" — nicht fokussierbar und für Screenreader übersprungen.",
+			"label": "Tabs-Muster (Punkte ↔ Slots)",
+			"wert": "Punkte sind role=\"tab\" in einem <fieldset role=\"tablist\">, jeder Slot ein role=\"tabpanel\". Das Element verbindet beide Seiten (aria-controls / aria-labelledby), setzt aria-selected und vergibt jeder Instanz eine eigene Radio-Gruppe.",
 			"status": "pass"
 		},
 		{
-			"label": "Pfeil-Buttons",
-			"wert": "Vor/Zurück sind echte <button> mit aria-label \"Vorige/Nächste Seite\"; am Anfang/Ende disabled (pointer-events aus, Icon gedimmt).",
+			"label": "Seitenwechsel wird angesagt",
+			"wert": "Der Scroll-Container ist eine Live-Region (aria-live=\"polite\", aria-atomic=\"false\").",
+			"status": "pass"
+		},
+		{
+			"label": "Alle Slots bleiben erreichbar",
+			"wert": "Anders als die Produktion sperrt <z-carousel> nicht sichtbare Slots NICHT per inert/aria-hidden aus. Bei mehrspaltiger Ansicht hängt das an einer Sichtbarkeitsschätzung — liegt sie daneben, ist Inhalt unerreichbar.",
 			"status": "pass"
 		},
 		{
 			"label": "Fokus sichtbar",
-			"wert": "Pfeile und Dots haben :focus-visible-Ringe (--z-ds-color-focus-100, 2px; Dots mit -2px Offset nach innen).",
+			"wert": "Pfeile (Offset +2), Punkte (−2) und die Spur (−2) haben :focus-visible-Ringe in --z-ds-color-focus-100.",
 			"status": "pass"
 		},
 		{
-			"label": "Scroll-Snap",
-			"wert": "scroll-snap-type: x mandatory hält Slots ausgerichtet; view-mode=continuous löst das Snapping.",
+			"label": "Enden statt Sackgassen",
+			"wert": "Am Anfang und Ende wird der jeweilige Pfeil deaktiviert und der Fader auf dieser Seite verschwindet — beides sagt dasselbe, sichtbar und programmatisch.",
 			"status": "pass"
 		},
 		{
 			"label": "Reduzierte Bewegung",
-			"wert": "scroll-behavior: smooth nur bei prefers-reduced-motion: no-preference (aus CSS belegt).",
+			"wert": "scroll-behavior: smooth steht unter prefers-reduced-motion: no-preference, und das Element überstimmt es bei reduce zusätzlich mit behavior=\"auto\" — dann springt die Leiste ohne Zwischenbild.",
 			"status": "pass"
 		},
 		{
-			"label": "Autoplay-Pause",
-			"wert": "Autoplay hat einen echten Play/Pause-Button (playcontrol-button) — Nutzer:innen können anhalten.",
-			"status": "pass"
+			"label": "Autoplay",
+			"wert": "Nicht Teil von <z-carousel>. Die Auslieferung kennt ihn mit Play/Pause-Knopf; wer ihn nachbaut, braucht Pause-Steuerung, Stopp bei Fokus und Hover sowie prefers-reduced-motion.",
+			"status": "warn"
 		}
 	],
 	"tastatur": [
 		{
 			"taste": "Tab",
-			"aktion": "Springt zwischen den Steuer-Gruppen: Pfeil-Buttons, Dot-Leiste (ein Tabstopp) und — bei Autoplay — Play/Pause-Button."
+			"aktion": "Erreicht nacheinander die Spur, die beiden Pfeile und die Punkt-Leiste (ein Tabstopp)."
 		},
 		{
 			"taste": "Pfeil ← / →",
-			"aktion": "Wechselt innerhalb der Dot-Leiste (Radio-/Tablist-Gruppe) zwischen den Seiten; die gewählte Seite wird angezeigt."
+			"aktion": "Auf der Spur: eine Seite zurück bzw. weiter. In der Punkt-Leiste wechselt die Radio-Gruppe und die Leiste blättert mit."
+		},
+		{
+			"taste": "Pos1 / Ende",
+			"aktion": "Auf der Spur: an den Anfang bzw. ans Ende der Leiste."
 		},
 		{
 			"taste": "Enter / Leertaste",
-			"aktion": "Aktiviert den fokussierten Pfeil- bzw. Play/Pause-Button."
+			"aktion": "Aktiviert den fokussierten Pfeil."
 		}
 	],
 	"doDont": {
 		"do": [
-			"Scroll-Snap belassen (scroll-snap-type: x mandatory) — Slots rasten sauber ein; im CSS Standard.",
-			"Autoplay nur mit dem vorhandenen Play/Pause-Button (playcontrol-button) einsetzen — die CSS bringt ihn mit.",
-			"Am Anfang/Ende die Pfeile disabled zeigen (die CSS hat den Zustand) statt sie zu verstecken."
+			"Scroll-Snap belassen — die Slots rasten sauber ein, ohne dass jemand zielen muss.",
+			"Am Anfang und Ende die Pfeile deaktiviert stehen lassen statt sie auszublenden.",
+			"Die Steuerung im Markup mit hidden anlegen und dem Element überlassen — so gibt es ohne JavaScript keine toten Knöpfe.",
+			"Nur gleichrangige Inhalte hineinlegen: Was hinter dem Rand liegt, wird seltener gesehen."
 		],
 		"dont": [
-			"Autoplay nicht ohne die Pause-Steuerung ausliefern — Nutzer:innen müssen anhalten können.",
-			"Nicht als reine Liste missbrauchen: verdeckte Inhalte hinter dem Rand sind schlechter auffindbar als eine sichtbare Liste.",
-			"Pfeile und Dots nicht gleichzeitig entfernen (no-controls) und trotzdem viele Slots zeigen — dann fehlt jeder Weiter-Hinweis."
+			"Nicht als Ersatz für eine Liste benutzen, wenn Vergleichen oder Suchen der Zweck ist.",
+			"Keine einzeln wichtigen Inhalte hinter den Rand schieben.",
+			"Autoplay nicht ohne Pause-Steuerung nachbauen — Nutzer:innen müssen anhalten können.",
+			"Steuerung nicht ganz entfernen und trotzdem viele Slots zeigen — dann fehlt jeder Weiter-Hinweis."
 		]
 	},
 	"verwendung": {
 		"nutzen": [
-			"Für gleichrangige, gut überblickbare Content-Slots, bei denen horizontales Blättern Platz spart (Teaser-Leisten, Bild-/Produktkacheln).",
-			"Wenn eine kompakte Vorschau vieler Elemente gewünscht ist und Reihenfolge/Blättern erwartbar sind."
+			"Teaser-, Bild- oder Produktleisten, bei denen horizontales Blättern Platz spart.",
+			"Kompakte Vorschau vieler gleichrangiger Elemente, bei denen Blättern erwartbar ist."
 		],
 		"nichtNutzen": [
-			"Nicht für Inhalte, die vollständig sichtbar sein müssen oder gesucht/verglichen werden — dafür eine Liste/Grid.",
-			"Nicht für kritische, einzeln wichtige Elemente, die hinter dem Rand verschwinden könnten."
+			"Inhalte, die vollständig sichtbar sein müssen oder verglichen werden — dafür Liste oder Raster.",
+			"Einzelne, kritische Elemente, die hinter dem Rand verschwinden könnten."
 		]
 	},
-	"verwandt": ["cell", "button"],
-	"version": "Figma-Node 630:630 · CSS zon-carousel",
+	"faq": [
+		{
+			"frage": "Wo sind die Figma-Varianten „Wide“ und „Middle“ geblieben?",
+			"antwort": "„Size = Small/Wide“ ist kein Modifier, sondern der Breakpoint: Gemessen misst dieselbe Komponente bei 375 px Fläche einen Rand von 16 px und eine Spur von 343 px, bei 1280 px einen Rand von 54 px und eine Spur von 892 px — exakt die beiden Figma-Varianten. Sie steht deshalb als @media in der pattern.css; im Playground sieht man sie, indem man die Bühne breiter zieht. „Slot Size = Large/Middle/Small“ dagegen hat gar keine Entsprechung im Code: Die Werte 236 und 184 kommen im ausgelieferten CSS nicht vor. Diese Achse ist eine reine Figma-Angelegenheit und wird hier als Divergenz dokumentiert, nicht als Variante erfunden."
+		},
+		{
+			"frage": "Warum sehe ich ohne JavaScript keine Pfeile?",
+			"antwort": "Weil sie ohne JavaScript nichts täten. Die beiden Steuerungszeilen stehen mit hidden im Markup; <z-carousel> nimmt es weg, sobald es etwas zu blättern gibt — und lässt es stehen, wenn ohnehin alles nebeneinander passt. Bedienbar ist die Leiste trotzdem: wischen, Trackpad, und mit der Tastatur über die fokussierbare Spur."
+		},
+		{
+			"frage": "Bringt <z-carousel> Autoplay mit?",
+			"antwort": "Nein, bewusst nicht. Die Klasse z-carousel--autoplay zeigt nur den Fortschritts-Zustand, den die Auslieferung dafür benutzt. Ein automatisch weiterlaufendes Karussell braucht Pause-Steuerung, Stopp bei Fokus und Hover und eine Antwort auf prefers-reduced-motion — halb gebaut wäre es schlechter als gar nicht."
+		},
+		{
+			"frage": "Wie breit wird ein Slot?",
+			"antwort": "Relativ zur Spur: calc(320/343·100%) schmal, calc(320/892·100%) ab 48 em. Beide Brüche sind so gewählt, dass an ihrer Referenzbreite exakt 320 px herauskommen — dazwischen wächst der Slot mit. Feste Breiten gibt es nur bei Kiosk (12,25 rem) und Shop (20 rem), volle Breite bei Single."
+		},
+		{
+			"frage": "Heißt die Komponente im Frontend auch z-carousel?",
+			"antwort": "Nein. Ausgeliefert wird sie als <zon-carousel> mit zon-carousel__*-Klassen. Deshalb taucht sie in Inventuren des z-*-Namensraums nicht auf, obwohl sie auf zeit.de auf jeder Startseite mehrfach läuft. Das dokumentierte Aussehen stammt 1:1 aus diesem ausgelieferten CSS; nur der Präfix ist hier der des Designsystems."
+		}
+	],
+	"verwandt": ["cell", "button", "icon-button"],
+	"version": "Figma-Node 630:630 · CSS zon-carousel (gemessen 2026-07-26)",
 	"variantInfo": {
-		"Small": "Kompakte Sektionsbreite (375). Kein Fader.",
-		"Wide": "Breite Sektion (1000) mit 54px-Rand und Fader an den Kanten (nur Wide).",
-		"Large": "Slot 320² (Sektionshöhe 366).",
-		"Middle": "Slot 236² (Sektionshöhe 282).",
-		"single": "Eine Slide je Ansicht, ohne Gap/Padding — z. B. Hero/Bühnen-Slider.",
-		"continuous": "Freies Weiterscrollen ohne Snap — lange, flüssige Leisten.",
-		"kiosk": "Feste schmale Slot-Breite (12.25rem) für Kiosk-/Angebotsleisten.",
-		"shop": "Breite Slots (20rem) für Produkt-/Shop-Kacheln; getönter Fader-Ton.",
-		"overlay-controls": "Pfeile über den Rand-Zonen statt darunter; ≥48em erst auf hover sichtbar.",
-		"autoplay": "Automatischer Wechsel mit Fortschritts-Dot und Play/Pause-Steuerung.",
-		"no-controls": "Reine Scroll-Leiste ohne Pfeile/Dots (Figma-Prop Controls=false)."
+		"Mehrspaltig": "Der Normalfall: mehrere Slots je Ansicht, Einrasten an ihrem Anfang.",
+		"Single": "Eine Seite je Ansicht, ohne Gap und ohne Rand — für Bühnen-Slider.",
+		"Continuous": "Freies Weiterscrollen ohne Einrasten; für lange Reihen, in denen die einzelne Position nichts bedeutet.",
+		"Redaktion": "Slot-Breite relativ zur Spur (an der Referenzbreite exakt 320 px).",
+		"Kiosk": "Feste schmale Slots (12,25 rem) für Angebotsleisten.",
+		"Shop": "Breite Slots (20 rem) für Produktkacheln, mit getöntem Fader.",
+		"Unter der Spur": "Punkte links, Pfeile rechts — beide in derselben Zeile unter der Leiste.",
+		"Overlay": "Pfeile liegen in den Rand-Zonen über der Spur.",
+		"Autoplay": "Zustandsbild des automatischen Wechsels: der aktive Punkt wird zur Kapsel. Die Auslieferung animiert darin einen Fortschritt und stellt einen Play/Pause-Knopf daneben; <z-carousel> bringt den Wechsel bewusst nicht mit.",
+		"Ohne Steuerung": "Reine Scroll-Leiste ohne Pfeile und Punkte (Figma-Prop Controls = false)."
 	}
 }

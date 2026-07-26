@@ -70,17 +70,14 @@ const THIN_STUB_KEYS = new Set(['status', 'zweck', 'verwandt']);
  * Gültige Codes: siehe die `gaps.push({ code, … })`-Stellen weiter unten.
  */
 const AUSNAHMEN = {
-	carousel: {
-		'beispiele-unvollstaendig':
-			'Offen bleiben die zwei Figma-Größenachsen „Wide" (Size) und „Middle" (Slot Size). Beide ' +
-			'sind auf einer Beispiel-Bühne NICHT zeigbar: `z-carousel--wide` setzt exakt den Wert, ' +
-			'den die flach portierte pattern.css schon in der Basis führt (54px Inline-Rand) — ' +
-			'die Klasse ist dort ein No-op. Und `--middle`/`--slot-small` wirken als `max-width` ' +
-			'(236/184px) auf Slots, die auf der Bühne ~121px breit sind, also nie. Ein Beispiel ' +
-			'zeigte drei identische Karussells unter einem Text, der Unterschiede behauptet — ' +
-			'schlechter als keins. Schließt sich, wenn die Breakpoint-Fassung des Originals im ' +
-			'Pattern ankommt.'
-	},
+	// carousel · beispiele-unvollstaendig ist am 2026-07-26 ENTFALLEN. Die Ausnahme
+	// deckte die zwei Figma-Größenachsen „Wide" (Size) und „Middle" (Slot Size), die
+	// als Modifier-Klassen nichts taten. Die Nachmessung an der Auslieferung hat
+	// beide aufgelöst: „Size" ist der BREAKPOINT (Rand 16 → 32 → 54 px, gemessen bei
+	// 375/800/1280) und steht jetzt als @media in der pattern.css; „Slot Size" hat
+	// im Code gar keine Entsprechung (236 und 184 kommen im ausgelieferten CSS nicht
+	// vor) und ist als Divergenz dokumentiert statt als erfundene Klasse. Damit sind
+	// alle verbliebenen Varianten-Werte durch Beispiele gedeckt.
 	cell: {
 		'zustaende-duenn':
 			'Weder das importierte Figma-Set noch die portierte pattern.css kennt für die Zelle ' +

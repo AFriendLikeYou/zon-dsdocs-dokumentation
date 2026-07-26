@@ -57,6 +57,27 @@ kommen im Web nur **vier** Klassenfamilien an —
 prüfbar** — nicht weil Referenzen fehlen, sondern weil sie im Web gar nicht ausgeliefert
 werden. Sie leben offenbar in Figma und/oder in den Apps.
 
+> **Nachtrag 2026-07-26 (beim Neu-Dokumentieren des Carousels):** Für `z-carousel`
+> stimmt der Befund nur dem Namen nach. Das **Karussell läuft sehr wohl im Web** —
+> auf `zeit.de/index` allein zehn Instanzen, dazu ein eigenes Bundle
+> `web.core/standalone/zon-carousel.*.css` (9.108 Bytes) und ein Custom Element
+> `<zon-carousel>` mit `zon-carousel__*`-Klassen. Es fiel aus der Inventur, **weil
+> die über den `z-*`-Namensraum zählt** — dieselbe Blindstelle betrifft
+> vermutlich weitere Komponenten (`zon-teaser__*` war ja schon aufgefallen).
+> Die Doku des Carousels ist deshalb jetzt aus dem ausgelieferten CSS portiert und
+> live nachgemessen (375 / 800 / 1280 px). **Empfehlung: die Inventur auf `zon-*`
+> ausweiten**, bevor die Frage „Web hat eigene Implementierung?" beantwortet wird —
+> beim Carousel ist die Antwort nämlich „gleiche Implementierung, anderer Präfix".
+>
+> Ein `produktion`-Referenzblock ist trotzdem NICHT entstanden, und zwar aus einem
+> strukturellen Grund: `masse` ist EIN Satz Werte je Komponente, `check-figma-drift`
+> hält ihn gegen die Figma-**Default**-Variante (Size=Small → 375 breit, Rand 16),
+> `check-prod-drift` misst dagegen fest bei Viewport 1280 (→ 1000 breit, Rand 54).
+> Beide Enden sind korrekt und beide sind derselbe Wert zu verschiedenen
+> Bildschirmbreiten — mit einem einzigen `masse`-Satz kann nur einer der beiden
+> Checks grün sein. Das ist eine echte Lücke im Modell (breakpoint-abhängige Maße),
+> keine Nachlässigkeit.
+
 **Zu klären:**
 
 1. Ist das so gewollt (ZDS = Figma-/App-Wahrheit, Web hat eigene Implementierung) oder

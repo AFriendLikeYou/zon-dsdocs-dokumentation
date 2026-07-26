@@ -4,9 +4,9 @@
 	"status": "ready_for_dev",
 	"kategorie": "Medien",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=623-555&focus-id=630-630",
-	"aktualisiertAm": "2026-07-07",
+	"aktualisiertAm": "2026-07-26",
 	"dokumentiertAm": "2026-07-07",
-	"zweck": "Horizontal scrollende Slot-Leiste mit optionalen Controls (Progress-Indikatoren + Vor/Zurück-Pfeile). Slots sind Content-Container (im Produkt: Teaser, Bilder, Karten).",
+	"zweck": "Horizontal scrollende Leiste aus gleichrangigen Content-Slots. Ohne JavaScript ist sie eine Liste, die man wischen und mit der Tastatur bewegen kann; <z-carousel> ergänzt Vor/Zurück, Fortschritt und ARIA.",
 	"masse": {
 		"breite": {
 			"px": "375",
@@ -17,19 +17,19 @@
 			"herkunft": "gemessen"
 		},
 		"padding": {
-			"px": "16 horizontal",
-			"token": "--z-ds-space-m (nur Small; Wide = 54px / 3.375rem, in Figma ohne Token)",
+			"px": "0 · 16",
+			"token": "--z-ds-space-m",
 			"herkunft": "gemessen"
 		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4 (Wert identisch; Bindung in Figma nicht gesetzt)",
-			"herkunft": "gemessen"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "abgeleitet"
 		}
 	},
 	"spacing": [
 		{
-			"label": "Sektion → Track/Controls",
+			"label": "Spur ↔ Steuerungszeile",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
 			"herkunft": "gemessen",
@@ -37,58 +37,67 @@
 			"selector": ".z-carousel"
 		},
 		{
-			"label": "Slot-Gap im Track",
+			"label": "Abstand zwischen den Slots",
 			"px": "16 px",
-			"token": "--z-ds-space-m (Wert identisch; Bindung nur am Root gesetzt)",
+			"token": "--z-ds-space-m",
 			"herkunft": "gemessen",
 			"art": "gap",
 			"selector": ".z-carousel__scroll-container"
 		},
 		{
-			"label": "Slot-interner Gap",
+			"label": "Seitenrand — schmal (< 48 em)",
+			"px": "16 px",
+			"token": "--z-ds-space-m",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Seitenrand — mittel (≥ 48 em)",
+			"px": "32 px",
+			"token": "--z-ds-space-xl",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Seitenrand — Maximum (≥ 61,25 em)",
+			"px": "54 px",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Abstand Zurück-Pfeil ↔ Weiter-Pfeil",
 			"px": "12 px",
 			"token": "--z-ds-space-s",
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Progress-Punkte-Gap",
-			"px": "6 px",
-			"token": "--z-ds-space-xxs",
-			"herkunft": "gemessen",
-			"art": "gap",
-			"selector": ".z-carousel__dots-wrapper"
-		},
-		{
-			"label": "Pfeil-Buttons-Gap",
-			"px": "12 px",
-			"token": "--z-ds-space-s",
+			"label": "Abstand zwischen den Fortschritts-Punkten",
+			"px": "8 px",
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Round-Icon-Padding",
-			"px": "6 px",
+			"label": "Slot-interner Gap (Figma)",
+			"px": "12 px",
+			"token": "--z-ds-space-s",
 			"herkunft": "gemessen"
 		}
 	],
 	"callouts": [
 		{
 			"nr": 1,
-			"text": "Scroll-Container — horizontale Flex-Leiste mit scroll-snap-type: x mandatory; Slots snappen an ihren Anfang (außer view-mode=continuous).",
+			"text": "Spur — horizontale Flex-Leiste mit scroll-snap-type: x mandatory und overflow-x: auto. Das ist der Grundzustand: ohne JavaScript scrollbar, per Tastatur erreichbar (das Element setzt tabindex=0).",
 			"art": "container"
 		},
 		{
 			"nr": 2,
-			"text": "Slot — Content-Container (im Produkt Teaser/Bild/Karte); hier neutrale Platzhalterfläche, Slot-Breite calc(320/892·100%) (≥48em) bzw. calc(320/343·100%) (mobil).",
+			"text": "Slot — Content-Container mit role=tabpanel (im Produkt Teaser, Bild oder Karte). Breite calc(320/343·100%) schmal bzw. calc(320/892·100%) ab 48 em — beide ergeben an ihrer Referenzbreite exakt 320 px. Die Fläche hier ist ein Doku-Platzhalter.",
 			"art": "slot"
 		},
 		{
 			"nr": 3,
-			"text": "Progress-Indikatoren — Radio-artige Dots (appearance:none, :checked). Aktiv Text-70, breiter; inaktiv Background-20.",
+			"text": "Fortschritts-Punkte — <fieldset role=tablist> mit einem <input type=radio role=tab> je Seite. 16×16-Kasten mit 4 px transparentem Rand, sichtbar also 8 px; aktiv Text-70 und ab 48 em zur Kapsel verbreitert.",
 			"art": "instance"
 		},
 		{
 			"nr": 4,
-			"text": "Vor/Zurück-Pfeile — Round Icon Tiny, 30×30 (1.875rem), Radius 99. Am Anfang/Ende disabled (Icon opacity .6).",
+			"text": "Vor/Zurück — echte <button>, 30×30 (1,875 rem), Radius 50 %, Icon 14×14. Am Anfang und Ende bleiben sie stehen und werden deaktiviert (Icon opacity .6) statt zu verschwinden.",
 			"art": "instance"
 		}
 	],
@@ -98,63 +107,63 @@
 			"items": [
 				{
 					"name": "--z-ds-color-background-0",
-					"hinweis": "Fläche / Fader-Zielfarbe",
+					"hinweis": "Zielfarbe des Faders an den Rand-Zonen (ab 48 em)",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"hinweis": "Slot-Platzhalter, Pfeil-Fläche (default)",
+					"hinweis": "Pfeil-Fläche (Ruhe), Slot-Platzhalter, getönter Fader bei Shop",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-background-20",
-					"hinweis": "Dot inaktiv, Pfeil-Fläche (hover)",
+					"hinweis": "Punkt inaktiv, Pfeil-Fläche bei Hover, Autoplay-Kapsel",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"hinweis": "Pfeil-Icon, Dot aktiv",
+					"hinweis": "Pfeil-Icon, aktiver Punkt",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"hinweis": "Slot-Label",
+					"hinweis": "Beschriftung im Doku-Platzhalter",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"hinweis": "#8b8b8d · Dot hover",
-					"swatch": "#8b8b8d"
+					"hinweis": "Punkt bei Hover/Active/Fokus",
+					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"hinweis": "Fokus-Ring (2px outline)",
-					"swatch": "#1a63d6"
+					"hinweis": "Fokus-Ring (2 px) an Pfeilen, Punkten und der Spur",
+					"swatch": "#005fcc"
 				}
 			]
 		},
 		{
-			"kategorie": "Spacing",
+			"kategorie": "Abstand",
 			"items": [
 				{
 					"name": "--z-ds-space-m",
-					"hinweis": "16px · Row-Gap, Slot-Gap"
+					"hinweis": "16px · Zeilen- und Slot-Abstand, schmaler Seitenrand"
+				},
+				{
+					"name": "--z-ds-space-xl",
+					"hinweis": "32px · Seitenrand ab 48 em (Produktion: --z-gap)"
 				},
 				{
 					"name": "--z-ds-space-s",
-					"hinweis": "12px · Slot-intern, Pfeil-Abstand"
+					"hinweis": "12px · Abstand der beiden Pfeile"
 				},
 				{
 					"name": "--z-ds-space-xs",
-					"hinweis": "8px · Play-Button-Abstand"
-				},
-				{
-					"name": "--z-ds-space-xxs",
-					"hinweis": "6px · Progress-Punkte-Gap"
+					"hinweis": "8px · Abstand des Play/Pause-Knopfs (nur Auslieferung)"
 				},
 				{
 					"name": "--z-ds-space-l",
-					"hinweis": "margin-bottom (Sektion)"
+					"hinweis": "24px · Außenabstand nach unten"
 				}
 			]
 		},
@@ -163,36 +172,36 @@
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"hinweis": "4px · Slot"
+					"hinweis": "4px · Slot (Figma; im ausgelieferten CSS trägt ihn der Inhalt)"
 				}
 			]
 		},
 		{
-			"kategorie": "Maße (aus CSS, 1rem=16px)",
+			"kategorie": "Maße (aus CSS, 1rem = 16px)",
 			"items": [
 				{
-					"name": "Button-Größe",
-					"hinweis": "1.875rem = 30px (≙ gemessen 30×30)"
+					"name": "Pfeil-Knopf",
+					"hinweis": "1.875rem = 30px, Radius 50% — gemessen 30×30"
 				},
 				{
-					"name": "Icon-Größe",
-					"hinweis": "0.875rem = 14px"
+					"name": "Icon",
+					"hinweis": "0.875rem = 14px, Strichstärke 1,5"
 				},
 				{
-					"name": "Padding-inline (Wide, ≥61.25em)",
-					"hinweis": "3.375rem = 54px (≙ gemessenes Wide-Padding)"
+					"name": "Seitenrand (Maximum)",
+					"hinweis": "clamp(1rem, 50% − 55.75rem/2, 3.375rem) — bei 1000px Fläche exakt 54px, Mitte exakt 892px"
 				},
 				{
-					"name": "Slot-Breite (≥48em)",
-					"hinweis": "calc(320 / 892 · 100%) — mobil calc(320 / 343 · 100%)"
+					"name": "Slot-Breite",
+					"hinweis": "calc(320/343·100%) schmal · calc(320/892·100%) ab 48em · 12.25rem Kiosk · 20rem Shop · 100% Single"
 				},
 				{
-					"name": "Sektionshöhe (je Slot Size)",
-					"hinweis": "230 (Slot S) · 282 (Slot M) · 366 (Slot L)"
+					"name": "Fortschritts-Punkt",
+					"hinweis": "1rem Kasten mit 0.25rem transparentem Rand (sichtbar 8px); aktiv 1.5rem ab 48em, Autoplay 1.875rem"
 				},
 				{
-					"name": "Dot",
-					"hinweis": "1rem = 16px (aktiv 1.5rem; Autoplay 1.875rem)"
+					"name": "Sektionshöhe je Slot-Größe (nur Figma)",
+					"hinweis": "230 (184er Slot) · 282 (236er) · 366 (320er) — im ausgelieferten CSS gibt es dazu keine Entsprechung"
 				}
 			]
 		}
@@ -207,144 +216,100 @@
 		],
 		"elemente": [
 			{
-				"teil": "Fläche",
-				"tokensProZustand": {
-					"default": "--z-ds-color-background-0"
-				},
-				"hinweis": "gemessen #ffffff · zugleich Fader-Zielfarbe (nur Size=Wide)."
-			},
-			{
 				"teil": "Slot-Platzhalter",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-10"
 				},
-				"hinweis": "gemessen #eeeeee; im Produkt Content-Slot (Bild/Teaser)."
+				"hinweis": "Doku-Platzhalter — im Produkt steht hier Inhalt (Teaser, Bild, Karte)."
 			},
 			{
-				"teil": "Slot-Label",
-				"tokensProZustand": {
-					"default": "--z-ds-color-text-55"
-				},
-				"hinweis": "gemessen #69696c, Tablet Gothic Regular 16."
-			},
-			{
-				"teil": "Pfeil-Button — Fläche",
+				"teil": "Pfeil — Fläche",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-10",
 					"hover": "--z-ds-color-background-20",
 					"disabled": "--z-ds-color-background-10"
 				},
-				"hinweis": "hover deckt auch :active/:focus-visible. disabled = wie default, Icon opacity .6."
+				"hinweis": "hover deckt auch :active und :focus-visible. Deaktiviert bleibt die Fläche gleich — gedimmt wird das Icon."
 			},
 			{
-				"teil": "Pfeil-Button — Icon",
+				"teil": "Pfeil — Icon",
 				"tokensProZustand": {
 					"default": "--z-ds-color-text-70",
 					"disabled": "--z-ds-color-text-70"
 				},
-				"hinweis": "disabled: SVG opacity .6 (Farb-Token bleibt, wird gedimmt)."
+				"hinweis": "Deaktiviert: SVG opacity .6, das Token bleibt."
 			},
 			{
-				"teil": "Progress-Dot",
+				"teil": "Fortschritts-Punkt",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-20",
 					"checked": "--z-ds-color-text-70",
 					"hover": "--z-ds-color-text-40"
 				},
-				"hinweis": "hover deckt :active/:focus-visible. Autoplay: aktiver Dot Background-20 mit animiertem Text-70-Fortschritt (::after, hier nicht flach abgebildet)."
+				"hinweis": "hover deckt :active und :focus-visible. Bei Autoplay wird der aktive Punkt zur Kapsel in Background-20."
 			},
 			{
 				"teil": "Fokus-Ring",
 				"tokensProZustand": {
 					"focus": "--z-ds-color-focus-100"
 				},
-				"hinweis": "2px solid, outline-offset 2px (Buttons) bzw. -2px (Dots) bei :focus-visible."
+				"hinweis": "2px solid; Offset +2 an den Pfeilen, −2 an Punkten und an der Spur."
 			}
 		]
 	},
 	"varianten": [
 		{
-			"prop": "Size (Figma)",
+			"prop": "Ansicht (Attribut view-mode)",
 			"werte": [
 				{
-					"label": "Small",
+					"label": "Mehrspaltig",
 					"default": true
 				},
 				{
-					"label": "Wide",
-					"cssClass": "z-carousel--wide"
-				}
-			]
-		},
-		{
-			"prop": "Slot Size (Figma)",
-			"werte": [
-				{
-					"label": "Large",
-					"default": true
-				},
-				{
-					"label": "Middle",
-					"cssClass": "z-carousel--middle"
-				},
-				{
-					"label": "Small",
-					"cssClass": "z-carousel--slot-small"
-				}
-			]
-		},
-		{
-			"prop": "View Mode (Web-Attribut view-mode)",
-			"werte": [
-				{
-					"label": "default (mehrspaltig, Snap)",
-					"default": true
-				},
-				{
-					"label": "single",
+					"label": "Single",
 					"cssClass": "z-carousel--single"
 				},
 				{
-					"label": "continuous",
+					"label": "Continuous",
 					"cssClass": "z-carousel--continuous"
 				}
 			]
 		},
 		{
-			"prop": "Variant (Web-Attribut variant)",
+			"prop": "Ausprägung (Attribut variant)",
 			"werte": [
 				{
-					"label": "standard",
+					"label": "Redaktion",
 					"default": true
 				},
 				{
-					"label": "kiosk",
+					"label": "Kiosk",
 					"cssClass": "z-carousel--kiosk"
 				},
 				{
-					"label": "shop",
+					"label": "Shop",
 					"cssClass": "z-carousel--shop"
 				}
 			]
 		},
 		{
-			"prop": "Controls / Steuerung (Web-Attribute)",
+			"prop": "Steuerung",
 			"werte": [
 				{
-					"label": "controls (Figma-Prop, default an)",
+					"label": "Unter der Spur",
 					"default": true
 				},
 				{
-					"label": "no-controls",
-					"cssClass": "z-carousel--no-controls"
-				},
-				{
-					"label": "overlay-controls",
+					"label": "Overlay",
 					"cssClass": "z-carousel--overlay-controls"
 				},
 				{
-					"label": "autoplay",
+					"label": "Autoplay",
 					"cssClass": "z-carousel--autoplay"
+				},
+				{
+					"label": "Ohne Steuerung",
+					"cssClass": "z-carousel--no-controls"
 				}
 			]
 		}
@@ -355,71 +320,98 @@
 			"vorhanden": true
 		},
 		{
-			"label": "hover (Pfeile/Dots)"
+			"label": "hover (Pfeile/Punkte)"
 		},
 		{
 			"label": "focus-visible"
 		},
 		{
-			"label": "disabled (Pfeile am Rand)"
+			"label": "disabled (Pfeil am Ende)"
 		},
 		{
-			"label": "checked (aktiver Dot)"
+			"label": "checked (aktiver Punkt)"
 		}
 	],
 	"a11y": [
 		{
-			"label": "Pfeil-Buttons",
-			"wert": "Vor/Zurück sind echte <button> — am Anfang/Ende disabled (pointer-events aus, Icon gedimmt).",
+			"label": "Rolle & Beschriftung",
+			"wert": "Wurzel role=group + aria-roledescription=Karussell; die Steuer-Gruppen sind als \"Steuerelemente\" und \"Seitensteuerung\" beschriftet.",
 			"status": "pass"
 		},
 		{
-			"label": "Progress-Indikatoren",
-			"wert": "Dots sind Radio-artige <input> (appearance:none, :checked) — als radiogroup mit Beschriftung je Slot umsetzen.",
-			"status": "warn"
+			"label": "Ohne JavaScript",
+			"wert": "Die Spur bleibt eine scrollbare Liste mit Scroll-Snap. Die Steuerungszeilen tragen hidden und erscheinen erst mit dem Element — keine toten Knöpfe.",
+			"status": "pass"
+		},
+		{
+			"label": "Tastatur",
+			"wert": "Die Spur ist eine Fokus-Station (tabindex=0, unsere Ergänzung); ← → blättern seitenweise, Pos1/Ende springen an die Enden.",
+			"status": "pass"
 		},
 		{
 			"label": "Fokus sichtbar",
-			"wert": "Pfeile und Dots haben :focus-visible-Ringe (--z-ds-color-focus-100, 2px).",
-			"status": "pass"
-		},
-		{
-			"label": "Scroll-Snap",
-			"wert": "scroll-snap-type: x mandatory hält Slots ausgerichtet; view-mode=continuous löst das Snapping.",
+			"wert": "Pfeile, Punkte und die Spur haben :focus-visible-Ringe in --z-ds-color-focus-100.",
 			"status": "pass"
 		},
 		{
 			"label": "Reduzierte Bewegung",
-			"wert": "scroll-behavior: smooth nur bei prefers-reduced-motion: no-preference (aus CSS belegt).",
-			"status": "pass"
-		},
-		{
-			"label": "Autoplay-Pause",
-			"wert": "Autoplay hat einen echten Play/Pause-Button (playcontrol-button) — Nutzer:innen können anhalten.",
+			"wert": "scroll-behavior: smooth steht unter prefers-reduced-motion: no-preference; bei reduce springt die Leiste ohne Zwischenbild.",
 			"status": "pass"
 		}
 	],
 	"tastatur": [
 		{
 			"taste": "Tab",
-			"aktion": "Fokussiert Pfeil-Buttons, Progress-Dots und (bei Autoplay) den Play/Pause-Button."
+			"aktion": "Erreicht die Spur, die Pfeile und die Punkt-Leiste (ein Tabstopp)."
+		},
+		{
+			"taste": "Pfeil ← / →",
+			"aktion": "Auf der Spur: eine Seite zurück bzw. weiter. In der Punkt-Leiste: die Radio-Gruppe wechselt und blättert mit."
+		},
+		{
+			"taste": "Pos1 / Ende",
+			"aktion": "Auf der Spur: an den Anfang bzw. ans Ende der Leiste."
 		},
 		{
 			"taste": "Enter / Leertaste",
-			"aktion": "Aktiviert den fokussierten Pfeil- bzw. Play/Pause-Button."
+			"aktion": "Aktiviert den fokussierten Pfeil."
 		}
 	],
+	"doDont": {
+		"do": [
+			"Scroll-Snap belassen — die Slots rasten sauber ein, ohne dass jemand zielen muss.",
+			"Am Anfang und Ende die Pfeile deaktiviert stehen lassen statt sie auszublenden.",
+			"Nur gleichrangige Inhalte hineinlegen: Was hinter dem Rand liegt, wird seltener gesehen."
+		],
+		"dont": [
+			"Nicht als Ersatz für eine Liste benutzen, wenn Vergleichen oder Suchen der Zweck ist.",
+			"Keine einzeln wichtigen Inhalte hinter den Rand schieben.",
+			"Steuerung nicht ganz entfernen und trotzdem viele Slots zeigen — dann fehlt jeder Weiter-Hinweis."
+		]
+	},
+	"verwendung": {
+		"nutzen": [
+			"Teaser-, Bild- oder Produktleisten, bei denen horizontales Blättern Platz spart.",
+			"Kompakte Vorschau vieler gleichrangiger Elemente, bei denen Blättern erwartbar ist."
+		],
+		"nichtNutzen": [
+			"Inhalte, die vollständig sichtbar sein müssen oder verglichen werden — dafür Liste oder Raster.",
+			"Einzelne, kritische Elemente, die hinter dem Rand verschwinden könnten."
+		]
+	},
 	"render": {
+		"resizable": true,
+		"align": "fill",
 		"controls": [
 			{
-				"key": "viewMode",
-				"label": "View Mode",
+				"key": "ansicht",
+				"label": "Ansicht",
 				"type": "select",
-				"default": "standard",
+				"default": "mehrspaltig",
 				"options": [
 					{
-						"value": "standard",
-						"label": "Standard"
+						"value": "mehrspaltig",
+						"label": "Mehrspaltig"
 					},
 					{
 						"value": "single",
@@ -434,14 +426,14 @@
 				]
 			},
 			{
-				"key": "variant",
-				"label": "Variant",
+				"key": "auspraegung",
+				"label": "Ausprägung",
 				"type": "select",
-				"default": "standard",
+				"default": "redaktion",
 				"options": [
 					{
-						"value": "standard",
-						"label": "Standard"
+						"value": "redaktion",
+						"label": "Redaktion"
 					},
 					{
 						"value": "kiosk",
@@ -457,26 +449,26 @@
 			},
 			{
 				"key": "overlay",
-				"label": "Overlay-Pfeile",
+				"label": "Pfeile über der Spur",
 				"type": "toggle",
 				"cssClass": "z-carousel--overlay-controls"
 			},
 			{
 				"key": "autoplay",
-				"label": "Autoplay",
+				"label": "Autoplay-Fortschritt",
 				"type": "toggle",
 				"cssClass": "z-carousel--autoplay"
 			},
 			{
-				"key": "noControls",
-				"label": "Ohne Controls",
+				"key": "ohneSteuerung",
+				"label": "Ohne Steuerung",
 				"type": "toggle",
 				"cssClass": "z-carousel--no-controls"
 			}
 		],
-		"template": "<div class=\"z-carousel{classes}\"{attrs} role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>",
+		"template": "<z-carousel class=\"z-carousel{classes}\"{attrs} role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>",
 		"cssFile": "./pattern.css",
-		"preview": "<div class=\"z-carousel\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div><div class=\"z-carousel__dots-wrapper\" role=\"radiogroup\" aria-label=\"Slide-Auswahl\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Slide 1\" checked><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Slide 2\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Slide 3\"></div></div>",
+		"preview": "<div class=\"z-carousel\" style=\"--_z-carousel-slide-width: calc(320 / 892 * 100%)\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div><div class=\"z-carousel__tabpanel-control-wrapper\"><fieldset class=\"z-carousel__dots-wrapper\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 1\" checked><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 2\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"pv-carousel\" aria-label=\"Seite 3\"></fieldset></div></div>",
 		"calloutAnchors": [
 			{
 				"nr": 1,
@@ -493,87 +485,86 @@
 			{
 				"nr": 3,
 				"side": "bottom",
-				"x": 40,
+				"x": 25,
 				"selector": ".z-carousel__dots-wrapper"
 			},
 			{
 				"nr": 4,
-				"side": "right",
-				"y": 60
-			}
-		],
-		"matrix": [
-			{
-				"label": "Standard · mit Controls",
-				"html": "<div class=\"z-carousel\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div><div class=\"z-carousel__dots-wrapper\" role=\"radiogroup\" aria-label=\"Slides\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"m1\" aria-label=\"1\" checked><input class=\"z-carousel__dot\" type=\"radio\" name=\"m1\" aria-label=\"2\"><input class=\"z-carousel__dot\" type=\"radio\" name=\"m1\" aria-label=\"3\"></div></div>"
-			},
-			{
-				"label": "Single",
-				"html": "<div class=\"z-carousel z-carousel--single\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div></div></div>"
-			},
-			{
-				"label": "Kiosk (schmale Slots)",
-				"html": "<div class=\"z-carousel z-carousel--kiosk\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div></div>"
-			},
-			{
-				"label": "Ohne Controls",
-				"html": "<div class=\"z-carousel z-carousel--no-controls\"><div class=\"z-carousel__scroll-container\"><div class=\"z-carousel__slide\">Slot 1</div><div class=\"z-carousel__slide\">Slot 2</div><div class=\"z-carousel__slide\">Slot 3</div></div></div>"
+				"side": "bottom",
+				"x": 75,
+				"selector": ".z-carousel__slide-control-wrapper"
 			}
 		],
 		"props": [
 			{
-				"name": "view-mode",
-				"typ": "\"default\" | \"single\" | \"continuous\"",
-				"default": "\"default\"",
-				"beschreibung": "single = eine Slide je Ansicht (kein Gap/Padding); continuous = freies Scrollen ohne Snap.",
-				"erlaubteWerte": [
-					"single",
-					"continuous"
-				]
-			},
-			{
-				"name": "variant",
-				"typ": "\"kiosk\" | \"shop\" | \"merkl\"",
+				"name": "z-carousel--single",
+				"typ": "Modifier-Klasse",
 				"default": "—",
-				"beschreibung": "kiosk = feste schmale Slot-Breite (12.25rem); shop = breite Slots (20rem), getönter Fader.",
-				"erlaubteWerte": [
-					"kiosk",
-					"shop"
-				]
+				"beschreibung": "Eine Seite je Ansicht, ohne Gap und ohne Seitenrand (Auslieferung: view-mode=\"single\")."
 			},
 			{
-				"name": "overlay-controls",
-				"typ": "boolean-Attribut",
-				"default": "false",
-				"beschreibung": "Pfeile liegen über den linken/rechten Rand-Zonen (Overlay) statt in der Control-Zeile; ≥48em auf hover eingeblendet."
+				"name": "z-carousel--continuous",
+				"typ": "Modifier-Klasse",
+				"default": "—",
+				"beschreibung": "Hebt das Einrasten auf — die Leiste läuft frei weiter (Auslieferung: view-mode=\"continuous\")."
 			},
 			{
-				"name": "autoplay",
-				"typ": "boolean-Attribut",
-				"default": "false",
-				"beschreibung": "Automatischer Wechsel; aktiver Dot zeigt einen animierten Fortschritt. Play/Pause-Button steuert die Wiedergabe."
+				"name": "z-carousel--kiosk / --shop",
+				"typ": "Modifier-Klasse",
+				"default": "—",
+				"beschreibung": "Feste Slot-Breite 12.25rem bzw. 20rem; Shop tönt zusätzlich den Fader (Auslieferung: variant=\"kiosk\"/\"shop\")."
 			},
 			{
-				"name": "controls",
-				"typ": "boolean (Figma-Prop)",
-				"default": "true",
-				"beschreibung": "Blendet die Slider-Controls (Progress-Dots + Pfeile) ein/aus."
+				"name": "z-carousel--overlay-controls",
+				"typ": "Modifier-Klasse",
+				"default": "—",
+				"beschreibung": "Die Pfeile liegen in den Rand-Zonen über der Spur statt darunter."
+			},
+			{
+				"name": "z-carousel--autoplay",
+				"typ": "Modifier-Klasse",
+				"default": "—",
+				"beschreibung": "Zeigt den Fortschritts-Zustand des automatischen Wechsels (breite Kapsel). Der Wechsel selbst ist nicht Teil von <z-carousel>."
+			},
+			{
+				"name": "z-carousel--no-controls",
+				"typ": "Modifier-Klasse",
+				"default": "—",
+				"beschreibung": "Blendet beide Steuerungszeilen aus — reine Scroll-Leiste (Figma-Prop Controls = false)."
+			},
+			{
+				"name": "hidden (auf den Steuerungszeilen)",
+				"typ": "Attribut",
+				"default": "gesetzt",
+				"beschreibung": "Im Markup gesetzt, vom Element entfernt, sobald es etwas zu blättern gibt. So stehen ohne JavaScript keine toten Knöpfe da."
+			},
+			{
+				"name": "seite",
+				"typ": "number (Property, nur lesen)",
+				"default": "0",
+				"beschreibung": "Index der Seite, die gerade an der Inhaltskante steht — aus der Scroll-Position abgeleitet, nicht gemerkt."
+			},
+			{
+				"name": "zeigeSeite(index)",
+				"typ": "Methode",
+				"default": "—",
+				"beschreibung": "Blättert zu einer Seite; der Index wird geklemmt. weiter() und zurueck() sind die Kurzformen."
 			}
 		],
-		"repoNote": "Erst-Import aus Figma (❖ ZDS, node 630:630) + zeit.de-CSS (zon-carousel). Slots sind hier neutrale Doku-Platzhalterflächen — im Produkt Content (Teaser/Bild/Karte). Web-Varianten sind Attribute am Custom-Element <zon-carousel> (view-mode/variant/overlay-controls/autoplay); im Playground als flache Modifier-Klassen gespiegelt (der Doku-Renderer setzt keine benannten Attributwerte).",
-		"version": "Figma-Node 630:630 · CSS zon-carousel",
+		"codeNote": "Ausgeliefertes Markup. Ohne <z-carousel> und ohne JavaScript bleibt derselbe Baum eine scrollbare Liste mit Scroll-Snap — nur die beiden Steuerungszeilen bleiben dann verborgen (hidden), weil sie ohne Skript nichts täten.",
+		"repoNote": "Quellen: Figma ❖ ZDS, Component-Set 630:630 (6 Varianten, gemessen) UND das ausgelieferte CSS zon-carousel.56f111d6….css, live nachgemessen an zeit.de/index bei 375, 800 und 1280 px (2026-07-26). ZWEI Befunde prägen diese Doku: (1) Figmas Achse „Size“ (Small/Wide) ist KEIN Modifier, sondern der Breakpoint — 375/Rand 16/Spur 343 und 1000/Rand 54/Spur 892 sind exakt die gemessenen Enden derselben Kette; sie steht deshalb als @media in der pattern.css. (2) Figmas Achse „Slot Size“ (Large 320 / Middle 236 / Small 184) hat KEINE Entsprechung im Code: 236 und 184 kommen im ausgelieferten CSS nirgends vor. Beide Achsen sind darum keine Varianten mehr. Im Web heißt die Komponente zon-carousel (nicht z-carousel) — die Klassenfamilie steht damit außerhalb des z-*-Namensraums, den die Prod-Drift-Inventur zählt. Slots sind hier neutrale Doku-Platzhalter; im Produkt steht dort Inhalt. Die Katalog-Vorschau (render.preview) pinnt die Slot-Breite auf den ≥48em-Wert: Eine Karte ist rund 150 px breit, dort greift sonst die schmale Stufe und man sähe genau EINEN Slot — kein erkennbares Karussell. Der Wert ist der echte aus dem ausgelieferten CSS, nur nicht aus der Kartenbreite abgeleitet.",
+		"version": "Figma-Node 630:630 · CSS zon-carousel (gemessen 2026-07-26)",
 		"variantInfo": {
-			"Small": "Kompakte Sektionsbreite (375). Kein Fader.",
-			"Wide": "Breite Sektion (1000) mit 54px-Rand und Fader an den Kanten (nur Wide).",
-			"Large": "Slot 320² (Sektionshöhe 366).",
-			"Middle": "Slot 236² (Sektionshöhe 282).",
-			"single": "Eine Slide je Ansicht, ohne Gap/Padding — z. B. Hero/Bühnen-Slider.",
-			"continuous": "Freies Weiterscrollen ohne Snap — lange, flüssige Leisten.",
-			"kiosk": "Feste schmale Slot-Breite (12.25rem) für Kiosk-/Angebotsleisten.",
-			"shop": "Breite Slots (20rem) für Produkt-/Shop-Kacheln; getönter Fader-Ton.",
-			"overlay-controls": "Pfeile über den Rand-Zonen statt darunter; ≥48em erst auf hover sichtbar.",
-			"autoplay": "Automatischer Wechsel mit Fortschritts-Dot und Play/Pause-Steuerung.",
-			"no-controls": "Reine Scroll-Leiste ohne Pfeile/Dots (Figma-Prop Controls=false)."
+			"Mehrspaltig": "Der Normalfall: mehrere Slots je Ansicht, Einrasten an ihrem Anfang.",
+			"Single": "Eine Seite je Ansicht, ohne Gap und ohne Rand — für Bühnen-Slider.",
+			"Continuous": "Freies Weiterscrollen ohne Einrasten; für lange Reihen, in denen die einzelne Position nichts bedeutet.",
+			"Redaktion": "Slot-Breite relativ zur Spur (an der Referenzbreite exakt 320 px).",
+			"Kiosk": "Feste schmale Slots (12,25 rem) für Angebotsleisten.",
+			"Shop": "Breite Slots (20 rem) für Produktkacheln, mit getöntem Fader.",
+			"Unter der Spur": "Punkte links, Pfeile rechts — beide in derselben Zeile unter der Leiste.",
+			"Overlay": "Pfeile liegen in den Rand-Zonen über der Spur.",
+			"Autoplay": "Zustandsbild des automatischen Wechsels: der aktive Punkt wird zur Kapsel. Die Auslieferung animiert darin einen Fortschritt und stellt einen Play/Pause-Knopf daneben; <z-carousel> bringt den Wechsel bewusst nicht mit.",
+			"Ohne Steuerung": "Reine Scroll-Leiste ohne Pfeile und Punkte (Figma-Prop Controls = false)."
 		}
 	},
 	"code": {
@@ -582,6 +573,13 @@
 				"format": "html-css",
 				"dateien": [
 					"pattern.css"
+				],
+				"status": "kanonisch"
+			},
+			{
+				"format": "web-component",
+				"dateien": [
+					"carousel.ts"
 				],
 				"status": "kanonisch"
 			}

@@ -17,11 +17,13 @@
 		"./*/pattern.css": "./src/*/pattern.css",
 		"./*/model.json": "./src/*/model.json",
 		"./accordion/accordion": "./src/accordion/accordion.ts",
+		"./carousel/carousel": "./src/carousel/carousel.ts",
 		"./package.json": "./package.json"
 	},
 	"types": "./src/index.ts",
 	"sideEffects": [
 		"*.css",
-		"./src/accordion/accordion.ts"
+		"./src/accordion/accordion.ts",
+		"./src/carousel/carousel.ts"
 	]
 }

@@ -2,7 +2,7 @@
 title: Carousel
 status: ready_for_dev
 figma: https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=623-555&focus-id=630-630
-aktualisiert_am: 2026-07-07
+aktualisiert_am: 2026-07-26
 kategorie: Medien
 ---
 
@@ -10,6 +10,7 @@ kategorie: Medien
 
 <script lang="ts">
 	import { Tabs } from '$components/ui/tab';
+	import '@zeit/components/carousel/carousel';
 	import { ComponentHero, Anatomy, ExampleBlock, SpecimenGrid, StateList, DoDontList, FaqList, WordingList, RelatedComponents, A11yList, KeyboardList, GetComponent, PropsTable, MeasureTable, ColorRoleTable, TokenTable } from '$components/ui/specsheet';
 	import { CodeBlock } from '$components/ui/code-block';
 	import { UsageBlock } from '$components/ui/usage-block';
@@ -22,71 +23,206 @@ kategorie: Medien
 	// (Redaktion) gewinnen wie bisher; Klasse-①-Werte (Maße, Tokens, Varianten …)
 	// nur über einen begründeten content.overrides-Eintrag — siehe $lib/spec.
 	const spec = mergeSpec(generated, content);
-	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-carousel__scroll-container"},{"nr":2,"side":"left","y":40,"selector":".z-carousel__slide"},{"nr":3,"side":"bottom","x":40,"selector":".z-carousel__dots-wrapper"},{"nr":4,"side":"right","y":60}];
-	const playgroundControls = [{"key":"viewMode","label":"View Mode","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"variant","label":"Variant","type":"select","default":"standard","options":[{"value":"standard","label":"Standard"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Overlay-Pfeile","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"noControls","label":"Ohne Controls","type":"toggle","cssClass":"z-carousel--no-controls"}] as PlaygroundControl[];
-	const playgroundTemplate = `<div class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
-  <div class="z-carousel__scroll-container" tabindex="-1" aria-live="polite">
-    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-1" aria-labelledby="pg-c-tab-1">Slot 1</div>
-    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-2" aria-labelledby="pg-c-tab-2">Slot 2</div>
-    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-3" aria-labelledby="pg-c-tab-3">Slot 3</div>
-    <div class="z-carousel__slide" role="tabpanel" id="pg-c-panel-4" aria-labelledby="pg-c-tab-4">Slot 4</div>
-  </div>
-  <div class="z-carousel__slide-control-wrapper" role="group" aria-label="Steuerelemente">
-    <button class="z-carousel__direction-button z-carousel__direction-button--previous" aria-label="Vorige Seite" disabled><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 4 7l5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-    <button class="z-carousel__direction-button z-carousel__direction-button--next" aria-label="Nächste Seite"><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M5 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-  </div>
-  <div class="z-carousel__tabpanel-control-wrapper" role="group" aria-label="Seitensteuerung">
-    <fieldset class="z-carousel__dots-wrapper" role="tablist" aria-label="Seite auswählen">
-      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-1" aria-controls="pg-c-panel-1" aria-label="Seite 1" aria-selected="true" checked>
-      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-2" aria-controls="pg-c-panel-2" aria-label="Seite 2" aria-selected="false">
-      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-3" aria-controls="pg-c-panel-3" aria-label="Seite 3" aria-selected="false">
-      <input class="z-carousel__dot" type="radio" name="pg-carousel" role="tab" id="pg-c-tab-4" aria-controls="pg-c-panel-4" aria-label="Seite 4" aria-selected="false">
-    </fieldset>
-  </div>
-</div>`;
+	const calloutAnchors = [{"nr":1,"side":"top","x":50,"selector":".z-carousel__scroll-container"},{"nr":2,"side":"left","y":40,"selector":".z-carousel__slide"},{"nr":3,"side":"bottom","x":25,"selector":".z-carousel__dots-wrapper"},{"nr":4,"side":"bottom","x":75,"selector":".z-carousel__slide-control-wrapper"}];
+	const playgroundControls = [{"key":"ansicht","label":"Ansicht","type":"select","default":"mehrspaltig","options":[{"value":"mehrspaltig","label":"Mehrspaltig"},{"value":"single","label":"Single","cssClass":"z-carousel--single"},{"value":"continuous","label":"Continuous","cssClass":"z-carousel--continuous"}]},{"key":"auspraegung","label":"Ausprägung","type":"select","default":"redaktion","options":[{"value":"redaktion","label":"Redaktion"},{"value":"kiosk","label":"Kiosk","cssClass":"z-carousel--kiosk"},{"value":"shop","label":"Shop","cssClass":"z-carousel--shop"}]},{"key":"overlay","label":"Pfeile über der Spur","type":"toggle","cssClass":"z-carousel--overlay-controls"},{"key":"autoplay","label":"Autoplay-Fortschritt","type":"toggle","cssClass":"z-carousel--autoplay"},{"key":"ohneSteuerung","label":"Ohne Steuerung","type":"toggle","cssClass":"z-carousel--no-controls"}] as PlaygroundControl[];
+	const playgroundTemplate = `<z-carousel class="z-carousel{classes}"{attrs} role="group" aria-roledescription="Karussell" aria-label="Beispiel-Karussell">
+	<div class="z-carousel__scroll-container" tabindex="-1" aria-live="polite" aria-atomic="false">
+		<div class="z-carousel__slide">Slot 1</div>
+		<div class="z-carousel__slide">Slot 2</div>
+		<div class="z-carousel__slide">Slot 3</div>
+		<div class="z-carousel__slide">Slot 4</div>
+		<div class="z-carousel__slide">Slot 5</div>
+	</div>
+	<div class="z-carousel__slide-control-wrapper" role="group" aria-label="Steuerelemente" hidden>
+		<button class="z-carousel__direction-button z-carousel__direction-button--previous" aria-label="Vorige Seite" disabled><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 1 1 7l6 6M1 7h12"></path></svg></button>
+		<button class="z-carousel__direction-button z-carousel__direction-button--next" aria-label="Nächste Seite"><svg class="z-carousel__direction-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 1 6 6-6 6m6-6H1"></path></svg></button>
+	</div>
+	<div class="z-carousel__tabpanel-control-wrapper" role="group" aria-label="Seitensteuerung" hidden>
+		<fieldset class="z-carousel__dots-wrapper" role="tablist" aria-label="Anzuzeigende Seite auswählen">
+			<input class="z-carousel__dot" type="radio" role="tab" aria-label="Seite 1" checked>
+			<input class="z-carousel__dot" type="radio" role="tab" aria-label="Seite 2">
+			<input class="z-carousel__dot" type="radio" role="tab" aria-label="Seite 3">
+			<input class="z-carousel__dot" type="radio" role="tab" aria-label="Seite 4">
+			<input class="z-carousel__dot" type="radio" role="tab" aria-label="Seite 5">
+		</fieldset>
+	</div>
+</z-carousel>`;
 	const editorial = content as Partial<ComponentSpec>;
 	const beispiele = editorial.beispiele ?? [];
 	const abgedeckteVarianten = new Set(beispiele.flatMap((b) => b.abdeckt ?? []));
-	const htmlBody = `<div class="z-carousel"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__dots-wrapper" role="radiogroup" aria-label="Slide-Auswahl"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 3"></div></div>`;
-	const codeNote = editorial.codeNote ?? ``;
+	const htmlBody = `<div class="z-carousel" style="--_z-carousel-slide-width: calc(320 / 892 * 100%)"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__tabpanel-control-wrapper"><fieldset class="z-carousel__dots-wrapper"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 3"></fieldset></div></div>`;
+	const codeNote = editorial.codeNote ?? `Ausgeliefertes Markup. Ohne <z-carousel> und ohne JavaScript bleibt derselbe Baum eine scrollbare Liste mit Scroll-Snap — nur die beiden Steuerungszeilen bleiben dann verborgen (hidden), weil sie ohne Skript nichts täten.`;
 	const htmlCode = codeNote ? `<!-- ${codeNote} -->\n${htmlBody}` : htmlBody;
-	const patternCssCode = `/* z-carousel — Karussell (zon-carousel), originalgetreu aus dem zeit.de-CSS
-   portiert. Unscoped Pattern-CSS auf den echten --z-ds-Tokens.
+	const patternCssCode = `/* z-carousel — Karussell. Originalgetreu portiert aus dem ausgelieferten Bundle
+   static.zeit.de/p/zeit.web/css/web.core/standalone/zon-carousel.56f111d6….css
+   (9.108 Bytes, vollständig gelesen 2026-07-26) und live nachgemessen an
+   zeit.de/index bei 375, 800 und 1280 px Viewport. Echte --z-ds-Tokens.
 
-   WICHTIG — flache Desktop-Repräsentation:
-   Das Original ist ein Custom-Element (<zon-carousel>) mit attribut-getriebenen
-   Varianten (view-mode / variant / overlay-controls / autoplay) und einer Menge
-   Verhalten in @media-Breakpoints, @keyframes (Autoplay-Fortschritt), :has()-Logik
-   und ::before/::after-Fadern. Der Exporter erlaubt in pattern.css NUR flache
-   Regeln (keine At-Rules). Deshalb hier:
-     - Custom-Element-Selektor zon-carousel → als Klasse .z-carousel abgebildet
-       (der Exporter/Scoper verkraftet keine reine Element-Bühne zuverlässig; die
-       Web-Varianten sind ohnehin Attribute → hier als Modifier-Klassen gespiegelt).
-     - Der ≥48em-Desktop-Stand ist die kanonische Repräsentation (padding-inline
-       3.375rem=54px im Wide-Modus, Slide-Breite calc(320/892)).
-   Was NICHT flach abbildbar ist (Breakpoints, Autoplay-@keyframes, :has-Fader,
-   ::before/::after-Verläufe), steht als Doku in der model.json (variantInfo,
-   tokens/hinweise) — nicht hier. */
+   NAMEN. Produktion adressiert das Custom Element direkt (\`zon-carousel\`) und
+   benennt die Teile \`zon-carousel__*\`. Hier steht \`.z-carousel\` als KLASSE auf
+   der Wurzel — genau wie in der Produktion, wo das Element zusätzlich
+   \`class="zon-carousel"\` trägt. Der Grund ist die Adoptionsstrategie: Mit einer
+   Klasse funktioniert das Pattern auch als reines \`<div class="z-carousel">\`,
+   ganz ohne Custom Element. \`<z-carousel class="z-carousel">\` ist dieselbe
+   Darstellung plus Verhalten.
 
-/* Root-Grid: left | middle | right (Padding-Spalten = Fader-/Overlay-Zonen). */
+   WAS SICH GEGENÜBER DER VORIGEN FASSUNG GEÄNDERT HAT — und warum:
+
+   1) DIE GRÖSSEN-ACHSE „Small/Wide" IST EIN BREAKPOINT, KEIN MODIFIER.
+      Die alte Fassung führte 54 px Inline-Rand in der Basis UND eine Klasse
+      \`--wide\`, die denselben Wert nochmal setzte: ein No-op. Belegt ist etwas
+      anderes — der Rand hat drei Stufen, alle nachgemessen:
+        · < 48em      16 px  (Produktion: \`var(--z-gap)\` = 1rem)
+        · ≥ 48em      32 px  (\`var(--z-gap)\` = 2rem)
+        · ≥ 61.25em   bis 54 px (clamp, siehe unten)
+      Figmas Varianten „Size=Small" (375 breit, Rand 16, Track 343) und
+      „Size=Wide" (1000 breit, Rand 54, Track 892) sind exakt die Enden dieser
+      Kette: bei Viewport 375 misst die echte Instanz \`16px 343px 16px\`, bei
+      1280 misst sie \`54px 892px 54px\` — beides live abgelesen. Figma modelliert
+      also zwei Bildschirmbreiten, nicht zwei Varianten. Deshalb steht das jetzt
+      als \`@media\` hier (mobile-first, wie die Produktion) und nicht als Klasse.
+      Dasselbe Muster wie beim \`hero\` (siehe dessen pattern.css).
+
+   2) DIE ACHSE „Slot Size" (Large/Middle/Small) HAT KEINE CODE-ENTSPRECHUNG.
+      Figma zeichnet Slots zu 320², 236² und 184². Im ausgelieferten CSS kommen
+      236 und 184 NICHT vor — die einzigen Slot-Breiten sind
+      \`calc(320/343·100%)\`, \`calc(320/892·100%)\`, \`33%\` (bei genau 3 Slots),
+      \`12.25rem\` (kiosk), \`20rem\` (shop) und \`100%\` (single). Die alte Fassung
+      erfand dafür \`--middle\`/\`--slot-small\` als \`max-width\`. Das ist ersatzlos
+      entfallen; die Divergenz steht als solche in der model.json.
+
+   3) BEM-NAMEN GERADEGEZOGEN. Die alte Fassung schrieb
+      \`__direction-button-previous\` (ein Bindestrich), das Template dagegen
+      \`--previous\` — die Regel griff nie. Jetzt beide Seiten wie im Original.
+
+   4) DIE AUTOPLAY-WEICHE \`--stopped\` IST ENTFALLEN. Sie schaltete im Original
+      zwischen Play- und Pause-Ikone um. Da \`<z-carousel>\` kein Autoplay
+      mitbringt (Begründung im Kopf von carousel.ts), setzte diese Klasse hier
+      niemand — eine Regel auf einen Zustand, den es nicht gibt, ist genau die
+      Sorte No-op, die diese Datei gerade losgeworden ist. Der Play/Pause-Knopf
+      behält sein Aussehen, seine Ikone steht sichtbar im Markup.
+
+   BEWUSSTE ABWEICHUNGEN vom Original — jede einzeln begründet:
+
+   a) \`mix-blend-mode\` auf Pfeilen und Punkten fällt weg. Das Original speist es
+      aus einer ZON-Seitenvariablen (Wert: multiply hell, screen dunkel), die
+      KEIN ZDS-Token ist — sie steht nicht in packages/tokens/vendor/styles-zds.css.
+      Außerhalb von zeit.de wäre die Variable leer und die Deklaration ungültig;
+      hier stünde also nur der Name eines Tokens, das es nicht gibt.
+   b) Die Autoplay-Fortschrittsanimation (\`@keyframes fill-dot\` + \`::after\`)
+      fehlt: Der Exporter lehnt \`@keyframes\` in pattern.css bewusst ab (der Name
+      wäre global). Der aktive Dot zeigt hier den Endzustand, nicht den Lauf.
+   c) \`.z-carousel__slide\` bekommt eine sichtbare Platzhalterfläche, quadratisch
+      und bei 20rem gedeckelt. Im Original ist der Slot ein reiner Wrapper ohne
+      eigenes Aussehen — die Doku braucht etwas zu zeigen. Quadratisch ist
+      belegt (Figma: 320², 236², 184²), die Deckelung ist Figmas größter Slot.
+   d) Der Scroll-Container bekommt einen Fokus-Ring. Das Element macht ihn
+      tastaturerreichbar (Produktion setzt \`tabindex="-1"\`, siehe carousel.ts);
+      wer ihn fokussieren kann, muss das auch sehen. Die Outline ist dieselbe,
+      die dasselbe Bundle für Pfeile und Dots schon führt.
+
+   Das Verhalten (Blättern, Fortschritt, Tastatur) steht NICHT hier, sondern in
+   carousel.ts. Ohne JavaScript bleibt die Leiste eine scrollbare Liste mit
+   Scroll-Snap — das kann CSS allein, und genau das ist der Grundzustand. */
+
+/* Ohne Klasse bleibt ein unbekanntes Element inline — die eine Zeile verhindert,
+   dass ein vergessenes \`class="z-carousel"\` den Aufbau in den Textfluss kippt.
+   \`.z-carousel\` unten gewinnt über die höhere Spezifität. */
+z-carousel {
+	display: block;
+}
+
+/* Wurzel-Grid: left | middle | right. Die beiden Rand-Spalten sind zugleich die
+   Zonen für Fader und Overlay-Pfeile — deshalb Spalten und nicht \`padding\`. */
 .z-carousel {
-	--_z-carousel-padding-inline: 54px; /* ≥61.25em: 3.375rem; ≥48em Wide-Wert */
+	--_z-carousel-padding-inline: var(--z-ds-space-m);
 	--_z-carousel-button-bg: var(--z-ds-color-background-10);
 	--_z-carousel-button-bg-hover: var(--z-ds-color-background-20);
 	--_z-carousel-button-fg: var(--z-ds-color-text-70);
-	--_z-carousel-slide-gap: var(--z-ds-space-m);
-	--_z-carousel-slide-width: calc(320 / 892 * 100%); /* ≥48em; mobil calc(320/343) */
-	--_z-carousel-button-size: 1.875rem; /* 30px */
+	--_z-carousel-button-gradient-color: var(--z-ds-color-background-0);
+	--_z-carousel-button-size: 1.875rem; /* 30px — gemessen 30×30 */
 	--_z-carousel-icon-size: 0.875rem; /* 14px */
+	--_z-carousel-slide-gap: var(--z-ds-space-m);
+	--_z-carousel-slide-width: calc(320 / 343 * 100%);
 	display: grid;
 	grid-template-areas: 'left middle right';
 	grid-template-columns: var(--_z-carousel-padding-inline) 1fr var(--_z-carousel-padding-inline);
-	margin-bottom: var(--z-ds-space-l);
 	row-gap: var(--z-ds-space-m);
-	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	/* Im normalen Fluss redundant, in einem Flex- oder Grid-Elternteil aber der
+	   Unterschied zwischen „so breit wie die Slots" und „so breit wie die Spalte":
+	   Ein Grid mit \`1fr\`-Mittelspalte schrumpft dort sonst auf seine max-content-
+	   Breite, und die Rand-Zonen — die ja gerade die Breite abbilden — stimmten
+	   nicht mehr. Die Produktion legt das Karussell immer über die volle
+	   Inhaltsspalte; das hier ist dieselbe Aussage eine Ebene höher. */
+	width: 100%;
+	/* Das Original deklariert im 61.25em-Block zusätzlich \`--z-ds-space-xl\`,
+	   diese Zeile steht dort aber SPÄTER in der Datei und gewinnt bei gleicher
+	   Spezifität. Gemessen sind darum 24 px auf allen Breiten — der xl-Wert ist
+	   im ausgelieferten Bundle toter Code. Hier steht, was ankommt. */
+	margin-bottom: var(--z-ds-space-l);
 }
 
-/* Scroll-Container: horizontale Flex-Leiste mit Scroll-Snap. */
+/* Ab 48em: Der Slot bezieht sich auf die breite Spur (892 statt 343) und die
+   Rand-Zonen bekommen ihren Fader. Beides gemessen. */
+@media screen and (min-width: 48em) {
+	.z-carousel {
+		/* Produktion: \`var(--z-gap)\`, das ab 48em von 1rem auf 2rem springt
+		   (web.site/base/custom-properties). --z-ds-space-xl ist derselbe Wert
+		   als ZDS-Token. */
+		--_z-carousel-padding-inline: var(--z-ds-space-xl);
+		--_z-carousel-slide-width: calc(320 / 892 * 100%);
+	}
+
+	/* Fader an den Kanten: verläuft von der Flächenfarbe nach transparent und
+	   macht sichtbar, dass die Leiste weitergeht. In Figma existiert er
+	   ausschließlich in den „Wide"-Varianten — dieselbe Aussage wie diese
+	   Grenze. \`pointer-events: none\`, damit er nichts abfängt. */
+	.z-carousel:not(.z-carousel--single)::before,
+	.z-carousel:not(.z-carousel--single)::after {
+		content: '';
+		pointer-events: none;
+		z-index: 9;
+	}
+
+	/* Der Verlauf kommt nur, wo es auch weitergeht: Ist der Pfeil dieser Seite
+	   disabled, ist das Ende erreicht und der Fader bliebe eine Behauptung. */
+	.z-carousel:not(:has(.z-carousel__direction-button--previous:disabled))::before,
+	.z-carousel:not(:has(.z-carousel__direction-button--next:disabled))::after {
+		background: linear-gradient(
+			270deg,
+			rgba(255, 255, 255, 0) 0%,
+			var(--_z-carousel-button-gradient-color) 100%
+		);
+	}
+
+	.z-carousel::before {
+		grid-area: 1 / left;
+	}
+
+	.z-carousel::after {
+		grid-area: 1 / right;
+		transform: rotate(180deg);
+	}
+}
+
+/* Ab 61.25em zentriert sich die Spur auf die Inhaltsbreite: Der Rand wächst mit
+   der Fläche, bis die mittlere Spalte 55.75rem (892 px) misst — dann steht er
+   bei 3.375rem (54 px). Genau dieser Endwert ist Figmas „Wide": bei 1000 px
+   Fläche ergibt clamp() exakt 54, die Mitte exakt 892. (55.75rem ist ZONs
+   \`--z-ds-content-width\`; kein ZDS-Token, deshalb als Wert.) */
+@media screen and (min-width: 61.25em) {
+	.z-carousel {
+		--_z-carousel-padding-inline: clamp(
+			var(--z-ds-space-m),
+			calc(50% - 55.75rem / 2),
+			3.375rem
+		);
+	}
+}
+
+/* Scroll-Container: horizontale Flex-Leiste mit Scroll-Snap. Das ist der
+   Grundzustand ohne JavaScript — eine Liste, die man wischen und (dank
+   tabindex, siehe carousel.ts) auch mit der Tastatur bewegen kann. */
 .z-carousel__scroll-container {
 	display: flex;
 	gap: var(--_z-carousel-slide-gap);
@@ -96,7 +232,23 @@ kategorie: Medien
 	position: relative;
 	scroll-padding-left: var(--_z-carousel-padding-inline);
 	scroll-snap-type: x mandatory;
-	scroll-behavior: smooth; /* Original: nur bei prefers-reduced-motion: no-preference */
+}
+
+/* Weiches Scrollen nur, wenn niemand widerspricht — so steht es im Original,
+   und so verlangt es der Bewegungs-Leitfaden. Bei \`reduce\` springt die Leiste
+   ohne Zwischenbild. */
+@media screen and (prefers-reduced-motion: no-preference) {
+	.z-carousel__scroll-container {
+		scroll-behavior: smooth;
+	}
+}
+
+/* Abweichung (d): sichtbarer Fokus, weil das Element den Container
+   tastaturerreichbar macht. Offset nach innen — außen läge der Ring unter der
+   Kante der Rand-Spalten. */
+.z-carousel__scroll-container:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
 }
 
 .z-carousel__scroll-container > * {
@@ -104,9 +256,14 @@ kategorie: Medien
 	scroll-snap-align: start;
 }
 
-/* Content-Slot (im Produkt: Teaser/Bild). Hier neutrale Doku-Platzhalterfläche. */
+/* Abweichung (c): Doku-Platzhalter. Quadratisch ist aus Figma belegt (320², 236²,
+   184²), die Fläche selbst ist unsere Zutat — im Produkt steht hier ein Teaser,
+   dessen Höhe der Inhalt bestimmt. Die Deckelung bei 20rem ist Figmas größter
+   Slot: Ohne sie wüchse der Platzhalter auf einer breiten Bühne mit der Breite
+   mit und ein einzelner Slot füllte die ganze Seite. */
 .z-carousel__slide {
 	aspect-ratio: 1 / 1;
+	max-height: 20rem;
 	border-radius: var(--z-ds-border-radius-4);
 	background-color: var(--z-ds-color-background-10);
 	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
@@ -117,7 +274,7 @@ kategorie: Medien
 	color: var(--z-ds-color-text-55);
 }
 
-/* Controls-Zeile (Pfeile) rechts unter dem Track. */
+/* Controls-Zeile (Pfeile) rechts unter der Spur. */
 .z-carousel__slide-control-wrapper {
 	grid-area: 2 / middle;
 	justify-self: end;
@@ -139,6 +296,12 @@ kategorie: Medien
 	background: var(--_z-carousel-button-bg-hover);
 }
 
+.z-carousel__direction-button:not(:disabled) {
+	pointer-events: all;
+}
+
+/* Am Ende bleibt der Pfeil STEHEN und wird nur gedimmt — ein verschwundener
+   Pfeil ist kein Hinweis, sondern ein Rätsel. */
 .z-carousel__direction-button:disabled {
 	background: var(--_z-carousel-button-bg);
 	cursor: default;
@@ -153,28 +316,53 @@ kategorie: Medien
 	outline-offset: 2px;
 }
 
-.z-carousel__direction-button-previous {
+.z-carousel__direction-button--previous {
 	margin-right: var(--z-ds-space-s);
 }
 
 .z-carousel__direction-icon {
 	display: block;
 	height: var(--_z-carousel-icon-size);
-	width: var(--_z-carousel-icon-size);
 	margin: auto;
+	width: var(--_z-carousel-icon-size);
 }
 
-/* Progress-Indikatoren (Radio-artige Dots). */
+/* Fortschritts-Zeile (Dots) links unter der Spur — dieselbe Grid-Zelle wie die
+   Pfeile, nur an der anderen Kante. \`:not([hidden])\` ist die Weiche, über die
+   das Element die Steuerung freigibt: Im Markup steht \`hidden\`, ohne
+   JavaScript bleibt die Zeile also weg statt tot dazustehen. */
+.z-carousel__tabpanel-control-wrapper:not([hidden]) {
+	align-items: center;
+	display: flex;
+	grid-area: 2 / middle;
+	max-width: min-content;
+}
+
+/* Wo eine Dot-Leiste läuft, verschwindet die native Scrollleiste — sonst stünde
+   die Position doppelt da. */
+.z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container {
+	overflow-x: scroll;
+	-webkit-overflow-scrolling: touch;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container::-webkit-scrollbar {
+	display: none;
+}
+
+/* Die Dots sind Radios: 16×16 Kasten mit 4px transparentem Rand, sichtbar ist
+   über \`background-clip: content-box\` also ein 8er-Punkt. Der Abstand zwischen
+   ihnen entsteht aus genau diesen Rändern (4+4 = 8) — deshalb hat die Leiste
+   KEIN \`gap\`. (Figma zeichnet 6 px; die Auslieferung ergibt 8.) */
 .z-carousel__dots-wrapper {
 	border: none;
 	display: flex;
-	gap: var(--z-ds-space-xxs);
 	margin: 0;
-	max-width: 7.5rem;
+	max-width: 7rem;
 	min-width: 0;
 	overflow: hidden;
 	padding: 0;
-	align-items: center;
 	scroll-snap-type: x mandatory;
 }
 
@@ -188,18 +376,17 @@ kategorie: Medien
 	cursor: pointer;
 	flex: 0 0 auto;
 	height: 1rem;
-	width: 1rem;
 	scroll-snap-align: start;
 	transition:
 		background-color 0.2s,
 		border-width 0.2s linear,
 		width 0.2s linear;
+	width: 1rem;
 }
 
 .z-carousel__dot:checked {
 	background-color: var(--z-ds-color-text-70);
 	outline: none;
-	width: 1.5rem; /* ≥48em, view-mode≠single */
 }
 
 .z-carousel__dot:hover,
@@ -214,7 +401,40 @@ kategorie: Medien
 	outline-offset: -2px;
 }
 
-/* Play/Pause-Steuerung (nur bei Autoplay sichtbar). */
+/* Viele Seiten, gleiche Leistenbreite: Der Punkt schrumpft über den Rand, nicht
+   über die Kastengröße — so bleibt das Snap-Raster gleich. */
+.z-carousel__dot[data-size='s'] {
+	border-width: 0.3125rem;
+}
+
+.z-carousel__dot[data-size='xs'] {
+	border-width: 0.40625rem;
+}
+
+/* ZWEITER 48em-Block — und der steht mit Absicht HIER, nach den Punkt-Regeln,
+   genau wie im ausgelieferten CSS. Beide Deklarationen unten treten gegen
+   gleichspezifische Basis-Regeln an (\`max-width: 7rem\`, \`width: 1rem\`); wer
+   gewinnt, entscheidet die Reihenfolge. Stünden sie oben im ersten 48em-Block,
+   überschriebe die Basis sie stillschweigend wieder — dieselbe Falle, in die
+   das Original beim \`margin-bottom\` selbst getappt ist (siehe oben). Der
+   Zusatz-\`.z-carousel\` vor der Punktleiste ist ebenfalls original: er hebt die
+   Spezifität über die Basis-Regel. */
+@media screen and (min-width: 48em) {
+	/* Der aktive Punkt wird zur Kapsel — erst ab 48em und nur mehrspaltig. */
+	.z-carousel:not(.z-carousel--single) .z-carousel__dot:checked {
+		width: 1.5rem;
+	}
+
+	.z-carousel .z-carousel__dots-wrapper {
+		max-width: 7.5rem;
+	}
+}
+
+/* Play/Pause — die Steuerung, die die Auslieferung bei \`[autoplay]\` einhängt.
+   Das Aussehen steht hier, damit der CSS-Weg vollständig bleibt; im Markup
+   dieser Doku kommt der Knopf NICHT vor, weil \`<z-carousel>\` kein Autoplay
+   mitbringt (Begründung im Kopf von carousel.ts) — und ein Knopf ohne Funktion
+   ist schlechter als keiner. */
 .z-carousel__playcontrol-button {
 	background: var(--z-ds-color-background-10);
 	border: none;
@@ -223,8 +443,8 @@ kategorie: Medien
 	cursor: pointer;
 	flex: 0 0 auto;
 	height: var(--_z-carousel-button-size);
-	width: var(--_z-carousel-button-size);
 	margin-right: var(--z-ds-space-xs);
+	width: var(--_z-carousel-button-size);
 }
 
 .z-carousel__playcontrol-button:hover,
@@ -233,84 +453,100 @@ kategorie: Medien
 	background: var(--z-ds-color-background-20);
 }
 
+.z-carousel__playcontrol-button:focus-visible {
+	outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
+}
+
+/* Die Auslieferung legt BEIDE Ikonen ein und blendet über eine Zustandsklasse
+   genau eine ein. Diese Weiche fällt hier weg — ohne Autoplay gibt es keinen
+   Lauf-Zustand, den sie abfragen könnte, und eine Regel auf eine Klasse, die
+   nie gesetzt wird, wäre genau die Sorte No-op, die diese Datei gerade
+   losgeworden ist. Wer den Knopf baut, legt eine Ikone ein. */
 .z-carousel__playcontrol-icon {
 	display: block;
 	height: var(--_z-carousel-icon-size);
-	width: var(--_z-carousel-icon-size);
 	margin: auto;
+	width: var(--_z-carousel-icon-size);
 }
-
-/* Hinweis Faithfulness: die BEM-Element-Modifier heißen im zeit.de-Original
-   __direction-button--previous / --next. Hier bewusst mit EINEM Bindestrich
-   (__direction-button-previous) geschrieben, damit der Drift-Check sie nicht als
-   Komponenten-Varianten „previous"/„next" fehlinterpretiert. Rein doku-technisch. */
 
 /* ---- Varianten-Modifier ---- */
+/* Alle vier spiegeln Attribute des Original-Elements (\`view-mode\`, \`variant\`,
+   \`overlay-controls\`, \`autoplay\`) als Klasse: Der Doku-Renderer setzt keine
+   benannten Attributwerte, und als Klasse funktionieren sie auch im reinen
+   CSS-Weg. */
 
-/* Size (Figma): Small = Default (schmaler Rand). Wide = breiter Rand + Fader-Zone. */
-.z-carousel--wide {
-	--_z-carousel-padding-inline: 54px;
-}
-
-/* Slot Size (Figma): Large = Default (320²). Middle 236², Small 184². */
-.z-carousel--middle .z-carousel__slide {
-	max-width: 236px;
-}
-.z-carousel--slot-small .z-carousel__slide {
-	max-width: 184px;
-}
-
-/* ---- Web-Varianten (flach gespiegelt aus den Attributen) ---- */
-
-/* view-mode=single: eine Slide je Ansicht, kein Gap, kein Padding. */
+/* view-mode=single: eine Seite je Ansicht, ohne Gap und ohne Rand. */
 .z-carousel--single {
 	--_z-carousel-slide-width: 100%;
 	--_z-carousel-slide-gap: 0;
+}
+
+.z-carousel--single .z-carousel__scroll-container {
 	--_z-carousel-padding-inline: 0;
 }
 
-/* view-mode=continuous: kein Scroll-Snap (freies Weiterscrollen). */
+/* view-mode=continuous: freies Weiterscrollen ohne Einrasten. */
 .z-carousel--continuous .z-carousel__scroll-container > * {
 	scroll-snap-align: none;
 }
 
-/* overlay-controls: Pfeile über den Rand-Zonen statt in der Control-Zeile. */
-.z-carousel--overlay-controls .z-carousel__direction-button-previous {
-	grid-area: 1 / left;
-	align-self: center;
-	z-index: 10;
+/* overlay-controls: Die Pfeile liegen in den Rand-Spalten über der Spur. */
+.z-carousel--overlay-controls .z-carousel__slide-control-wrapper {
+	display: contents;
 }
-.z-carousel--overlay-controls .z-carousel__direction-button-next {
-	grid-area: 1 / right;
-	align-self: center;
+
+.z-carousel--overlay-controls .z-carousel__direction-button,
+.z-carousel--overlay-controls .z-carousel__tabpanel-control-wrapper {
 	z-index: 10;
 }
 
-/* variant=kiosk: feste, schmale Slot-Breite (12.25rem). */
+.z-carousel--overlay-controls .z-carousel__direction-button {
+	margin: auto;
+	transition: opacity 100ms ease;
+}
+
+.z-carousel--overlay-controls .z-carousel__direction-button--previous {
+	grid-area: 1 / left;
+}
+
+.z-carousel--overlay-controls .z-carousel__direction-button--next {
+	grid-area: 1 / right;
+}
+
+/* variant=kiosk: feste schmale Slot-Breite (12.25rem = 196px). */
 .z-carousel--kiosk {
 	--_z-carousel-slide-width: 12.25rem;
 }
 
-/* variant=shop: feste, breite Slot-Breite (20rem), getönter Fader-Ton. */
+/* variant=shop: breite Slots (20rem) und ein getönter Fader-Ton. */
 .z-carousel--shop {
 	--_z-carousel-slide-width: 20rem;
+	--_z-carousel-button-gradient-color: var(--z-ds-color-background-10);
 }
 
-/* autoplay: aktiver Fortschritts-Dot breiter (Original: animiertes ::after). */
+/* autoplay: Der aktive Punkt wird zur breiten Kapsel. Im Original läuft darin
+   ein animierter Fortschritt (Abweichung b) — hier steht sein Endzustand. */
+.z-carousel--autoplay .z-carousel__dots-wrapper {
+	max-width: 7.875rem;
+}
+
 .z-carousel--autoplay .z-carousel__dot:checked {
 	background-color: var(--z-ds-color-background-20);
 	width: 1.875rem;
 }
 
-/* Controls (Figma-Prop): Steuerungszeile aus-/einblenden. */
+/* Figma-Prop \`Controls = false\`: Steuerung ganz weg. Produktion erreicht
+   dasselbe über das \`hidden\`-Attribut, das ihr Element setzt — als Klasse ist
+   es auch ohne JavaScript erreichbar. */
 .z-carousel--no-controls .z-carousel__slide-control-wrapper,
-.z-carousel--no-controls .z-carousel__dots-wrapper {
+.z-carousel--no-controls .z-carousel__tabpanel-control-wrapper:not([hidden]) {
 	display: none;
 }
 `;
-	const variantItems = [{"label":"Small","html":"<div class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Kompakte Sektionsbreite (375). Kein Fader."},{"label":"Wide","html":"<div class=\"z-carousel z-carousel--wide\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Breite Sektion (1000) mit 54px-Rand und Fader an den Kanten (nur Wide)."},{"label":"Large","html":"<div class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Slot 320² (Sektionshöhe 366)."},{"label":"Middle","html":"<div class=\"z-carousel z-carousel--middle\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Slot 236² (Sektionshöhe 282)."},{"label":"Small","html":"<div class=\"z-carousel z-carousel--slot-small\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Kompakte Sektionsbreite (375). Kein Fader."},{"label":"default (mehrspaltig, Snap)","html":"<div class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>"},{"label":"single","html":"<div class=\"z-carousel z-carousel--single\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Eine Slide je Ansicht, ohne Gap/Padding — z. B. Hero/Bühnen-Slider."},{"label":"continuous","html":"<div class=\"z-carousel z-carousel--continuous\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Freies Weiterscrollen ohne Snap — lange, flüssige Leisten."},{"label":"standard","html":"<div class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>"},{"label":"kiosk","html":"<div class=\"z-carousel z-carousel--kiosk\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Feste schmale Slot-Breite (12.25rem) für Kiosk-/Angebotsleisten."},{"label":"shop","html":"<div class=\"z-carousel z-carousel--shop\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Breite Slots (20rem) für Produkt-/Shop-Kacheln; getönter Fader-Ton."},{"label":"controls (Figma-Prop, default an)","html":"<div class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>"},{"label":"no-controls","html":"<div class=\"z-carousel z-carousel--no-controls\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Reine Scroll-Leiste ohne Pfeile/Dots (Figma-Prop Controls=false)."},{"label":"overlay-controls","html":"<div class=\"z-carousel z-carousel--overlay-controls\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Pfeile über den Rand-Zonen statt darunter; ≥48em erst auf hover sichtbar."},{"label":"autoplay","html":"<div class=\"z-carousel z-carousel--autoplay\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n  <div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\">\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-1\" aria-labelledby=\"pg-c-tab-1\">Slot 1</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-2\" aria-labelledby=\"pg-c-tab-2\">Slot 2</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-3\" aria-labelledby=\"pg-c-tab-3\">Slot 3</div>\n    <div class=\"z-carousel__slide\" role=\"tabpanel\" id=\"pg-c-panel-4\" aria-labelledby=\"pg-c-tab-4\">Slot 4</div>\n  </div>\n  <div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\">\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M9 2 4 7l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n    <button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" aria-hidden=\"true\"><path d=\"M5 2l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>\n  </div>\n  <div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\">\n    <fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Seite auswählen\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-1\" aria-controls=\"pg-c-panel-1\" aria-label=\"Seite 1\" aria-selected=\"true\" checked>\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-2\" aria-controls=\"pg-c-panel-2\" aria-label=\"Seite 2\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-3\" aria-controls=\"pg-c-panel-3\" aria-label=\"Seite 3\" aria-selected=\"false\">\n      <input class=\"z-carousel__dot\" type=\"radio\" name=\"pg-carousel\" role=\"tab\" id=\"pg-c-tab-4\" aria-controls=\"pg-c-panel-4\" aria-label=\"Seite 4\" aria-selected=\"false\">\n    </fieldset>\n  </div>\n</div>","note":"Automatischer Wechsel mit Fortschritts-Dot und Play/Pause-Steuerung."}];
+	const variantItems = [{"label":"Mehrspaltig","html":"<z-carousel class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Der Normalfall: mehrere Slots je Ansicht, Einrasten an ihrem Anfang."},{"label":"Single","html":"<z-carousel class=\"z-carousel z-carousel--single\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Eine Seite je Ansicht, ohne Gap und ohne Rand — für Bühnen-Slider."},{"label":"Continuous","html":"<z-carousel class=\"z-carousel z-carousel--continuous\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Freies Weiterscrollen ohne Einrasten; für lange Reihen, in denen die einzelne Position nichts bedeutet."},{"label":"Redaktion","html":"<z-carousel class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Slot-Breite relativ zur Spur (an der Referenzbreite exakt 320 px)."},{"label":"Kiosk","html":"<z-carousel class=\"z-carousel z-carousel--kiosk\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Feste schmale Slots (12,25 rem) für Angebotsleisten."},{"label":"Shop","html":"<z-carousel class=\"z-carousel z-carousel--shop\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Breite Slots (20 rem) für Produktkacheln, mit getöntem Fader."},{"label":"Unter der Spur","html":"<z-carousel class=\"z-carousel\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Punkte links, Pfeile rechts — beide in derselben Zeile unter der Leiste."},{"label":"Overlay","html":"<z-carousel class=\"z-carousel z-carousel--overlay-controls\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Pfeile liegen in den Rand-Zonen über der Spur."},{"label":"Autoplay","html":"<z-carousel class=\"z-carousel z-carousel--autoplay\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Zustandsbild des automatischen Wechsels: der aktive Punkt wird zur Kapsel. Die Auslieferung animiert darin einen Fortschritt und stellt einen Play/Pause-Knopf daneben; <z-carousel> bringt den Wechsel bewusst nicht mit."},{"label":"Ohne Steuerung","html":"<z-carousel class=\"z-carousel z-carousel--no-controls\" role=\"group\" aria-roledescription=\"Karussell\" aria-label=\"Beispiel-Karussell\">\n\t<div class=\"z-carousel__scroll-container\" tabindex=\"-1\" aria-live=\"polite\" aria-atomic=\"false\">\n\t\t<div class=\"z-carousel__slide\">Slot 1</div>\n\t\t<div class=\"z-carousel__slide\">Slot 2</div>\n\t\t<div class=\"z-carousel__slide\">Slot 3</div>\n\t\t<div class=\"z-carousel__slide\">Slot 4</div>\n\t\t<div class=\"z-carousel__slide\">Slot 5</div>\n\t</div>\n\t<div class=\"z-carousel__slide-control-wrapper\" role=\"group\" aria-label=\"Steuerelemente\" hidden>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--previous\" aria-label=\"Vorige Seite\" disabled><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M7 1 1 7l6 6M1 7h12\"></path></svg></button>\n\t\t<button class=\"z-carousel__direction-button z-carousel__direction-button--next\" aria-label=\"Nächste Seite\"><svg class=\"z-carousel__direction-icon\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"m7 1 6 6-6 6m6-6H1\"></path></svg></button>\n\t</div>\n\t<div class=\"z-carousel__tabpanel-control-wrapper\" role=\"group\" aria-label=\"Seitensteuerung\" hidden>\n\t\t<fieldset class=\"z-carousel__dots-wrapper\" role=\"tablist\" aria-label=\"Anzuzeigende Seite auswählen\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 1\" checked>\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 2\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 3\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 4\">\n\t\t\t<input class=\"z-carousel__dot\" type=\"radio\" role=\"tab\" aria-label=\"Seite 5\">\n\t\t</fieldset>\n\t</div>\n</z-carousel>","note":"Reine Scroll-Leiste ohne Pfeile und Punkte (Figma-Prop Controls = false)."}];
 	const offeneVariantItems = variantItems.filter((it) => !abgedeckteVarianten.has(it.label));
-	const propsData = [{"name":"view-mode","typ":"\"default\" | \"single\" | \"continuous\"","default":"\"default\"","beschreibung":"single = eine Slide je Ansicht (kein Gap/Padding); continuous = freies Scrollen ohne Snap.","erlaubteWerte":["single","continuous"]},{"name":"variant","typ":"\"kiosk\" | \"shop\" | \"merkl\"","default":"—","beschreibung":"kiosk = feste schmale Slot-Breite (12.25rem); shop = breite Slots (20rem), getönter Fader.","erlaubteWerte":["kiosk","shop"]},{"name":"overlay-controls","typ":"boolean-Attribut","default":"false","beschreibung":"Pfeile liegen über den linken/rechten Rand-Zonen (Overlay) statt in der Control-Zeile; ≥48em auf hover eingeblendet."},{"name":"autoplay","typ":"boolean-Attribut","default":"false","beschreibung":"Automatischer Wechsel; aktiver Dot zeigt einen animierten Fortschritt. Play/Pause-Button steuert die Wiedergabe."},{"name":"controls","typ":"boolean (Figma-Prop)","default":"true","beschreibung":"Blendet die Slider-Controls (Progress-Dots + Pfeile) ein/aus."}];
+	const propsData = [{"name":"z-carousel--single","typ":"Modifier-Klasse","default":"—","beschreibung":"Eine Seite je Ansicht, ohne Gap und ohne Seitenrand (Auslieferung: view-mode=\"single\")."},{"name":"z-carousel--continuous","typ":"Modifier-Klasse","default":"—","beschreibung":"Hebt das Einrasten auf — die Leiste läuft frei weiter (Auslieferung: view-mode=\"continuous\")."},{"name":"z-carousel--kiosk / --shop","typ":"Modifier-Klasse","default":"—","beschreibung":"Feste Slot-Breite 12.25rem bzw. 20rem; Shop tönt zusätzlich den Fader (Auslieferung: variant=\"kiosk\"/\"shop\")."},{"name":"z-carousel--overlay-controls","typ":"Modifier-Klasse","default":"—","beschreibung":"Die Pfeile liegen in den Rand-Zonen über der Spur statt darunter."},{"name":"z-carousel--autoplay","typ":"Modifier-Klasse","default":"—","beschreibung":"Zeigt den Fortschritts-Zustand des automatischen Wechsels (breite Kapsel). Der Wechsel selbst ist nicht Teil von <z-carousel>."},{"name":"z-carousel--no-controls","typ":"Modifier-Klasse","default":"—","beschreibung":"Blendet beide Steuerungszeilen aus — reine Scroll-Leiste (Figma-Prop Controls = false)."},{"name":"hidden (auf den Steuerungszeilen)","typ":"Attribut","default":"gesetzt","beschreibung":"Im Markup gesetzt, vom Element entfernt, sobald es etwas zu blättern gibt. So stehen ohne JavaScript keine toten Knöpfe da."},{"name":"seite","typ":"number (Property, nur lesen)","default":"0","beschreibung":"Index der Seite, die gerade an der Inhaltskante steht — aus der Scroll-Position abgeleitet, nicht gemerkt."},{"name":"zeigeSeite(index)","typ":"Methode","default":"—","beschreibung":"Blättert zu einer Seite; der Index wird geklemmt. weiter() und zurueck() sind die Kurzformen."}];
 </script>
 
 <svelte:head>
@@ -348,7 +584,7 @@ kategorie: Medien
 
 	<h2 id="anatomie" class="section-anchor">Anatomie</h2>
 	<Anatomy masse={spec.masse} spacing={spec.spacing} callouts={spec.callouts} {calloutAnchors}>
-		{#snippet preview()}<div class="z-carousel"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__dots-wrapper" role="radiogroup" aria-label="Slide-Auswahl"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Slide 3"></div></div>{/snippet}
+		{#snippet preview()}<div class="z-carousel" style="--_z-carousel-slide-width: calc(320 / 892 * 100%)"><div class="z-carousel__scroll-container"><div class="z-carousel__slide">Slot 1</div><div class="z-carousel__slide">Slot 2</div><div class="z-carousel__slide">Slot 3</div></div><div class="z-carousel__tabpanel-control-wrapper"><fieldset class="z-carousel__dots-wrapper"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 1" checked><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 2"><input class="z-carousel__dot" type="radio" name="pv-carousel" aria-label="Seite 3"></fieldset></div></div>{/snippet}
 	</Anatomy>
 
 	{#if spec.verwendung?.nutzen?.length || spec.verwendung?.nichtNutzen?.length}
@@ -369,7 +605,7 @@ kategorie: Medien
 	{/if}
 
 	<h2 id="zustaende" class="section-anchor">Zustände</h2>
-	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover (Pfeile/Dots)"},{"label":"focus-visible"},{"label":"disabled (Pfeile am Rand)"},{"label":"checked (aktiver Dot)"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
+	<StateList states={[{"label":"default","vorhanden":true},{"label":"hover (Pfeile/Punkte)"},{"label":"focus-visible"},{"label":"disabled (Pfeil am Ende)"},{"label":"checked (aktiver Punkt)"}]} hint="Statisch nicht darstellbar (reine Pseudoklassen) — im Playground per Interaktion sichtbar." />
 
 	{#if spec.doDont?.do?.length || spec.doDont?.dont?.length}
 		<h2 id="do-dont" class="section-anchor">Do & Don't</h2>
@@ -431,22 +667,73 @@ kategorie: Medien
 {/snippet}
 
 <style>
+:global(.spec-canvas z-carousel),
+:global(.pg-preview z-carousel) {
+  display: block;
+}
 :global(.spec-canvas .z-carousel),
 :global(.pg-preview .z-carousel) {
-  --_z-carousel-padding-inline: 54px; 
+  --_z-carousel-padding-inline: var(--z-ds-space-m);
 	--_z-carousel-button-bg: var(--z-ds-color-background-10);
 	--_z-carousel-button-bg-hover: var(--z-ds-color-background-20);
 	--_z-carousel-button-fg: var(--z-ds-color-text-70);
-	--_z-carousel-slide-gap: var(--z-ds-space-m);
-	--_z-carousel-slide-width: calc(320 / 892 * 100%); 
+	--_z-carousel-button-gradient-color: var(--z-ds-color-background-0);
 	--_z-carousel-button-size: 1.875rem; 
 	--_z-carousel-icon-size: 0.875rem; 
+	--_z-carousel-slide-gap: var(--z-ds-space-m);
+	--_z-carousel-slide-width: calc(320 / 343 * 100%);
 	display: grid;
 	grid-template-areas: 'left middle right';
 	grid-template-columns: var(--_z-carousel-padding-inline) 1fr var(--_z-carousel-padding-inline);
-	margin-bottom: var(--z-ds-space-l);
 	row-gap: var(--z-ds-space-m);
-	font-family: 'Tablet Gothic', 'ZEIT Sans', system-ui, sans-serif;
+	
+	width: 100%;
+	
+	margin-bottom: var(--z-ds-space-l);
+}
+@container (min-width: 48em) {
+  :global(.spec-canvas .z-carousel),
+  :global(.pg-preview .z-carousel) {
+    --_z-carousel-padding-inline: var(--z-ds-space-xl);
+  		--_z-carousel-slide-width: calc(320 / 892 * 100%);
+  }
+  :global(.spec-canvas .z-carousel:not(.z-carousel--single)::before),
+  :global(.pg-preview .z-carousel:not(.z-carousel--single)::before),
+  :global(.spec-canvas .z-carousel:not(.z-carousel--single)::after),
+  :global(.pg-preview .z-carousel:not(.z-carousel--single)::after) {
+    content: '';
+  		pointer-events: none;
+  		z-index: 9;
+  }
+  :global(.spec-canvas .z-carousel:not(:has(.z-carousel__direction-button--previous:disabled))::before),
+  :global(.pg-preview .z-carousel:not(:has(.z-carousel__direction-button--previous:disabled))::before),
+  :global(.spec-canvas .z-carousel:not(:has(.z-carousel__direction-button--next:disabled))::after),
+  :global(.pg-preview .z-carousel:not(:has(.z-carousel__direction-button--next:disabled))::after) {
+    background: linear-gradient(
+  			270deg,
+  			rgba(255, 255, 255, 0) 0%,
+  			var(--_z-carousel-button-gradient-color) 100%
+  		);
+  }
+  :global(.spec-canvas .z-carousel::before),
+  :global(.pg-preview .z-carousel::before) {
+    grid-area: 1 / left;
+  }
+  :global(.spec-canvas .z-carousel::after),
+  :global(.pg-preview .z-carousel::after) {
+    grid-area: 1 / right;
+  		transform: rotate(180deg);
+  }
+}
+@container (min-width: 61.25em) {
+  :global(.spec-canvas .z-carousel),
+  :global(.pg-preview .z-carousel) {
+    --_z-carousel-padding-inline: clamp(
+  			var(--z-ds-space-m),
+  			calc(50% - 55.75rem / 2),
+  			3.375rem
+  		);
+  }
 }
 :global(.spec-canvas .z-carousel__scroll-container),
 :global(.pg-preview .z-carousel__scroll-container) {
@@ -458,7 +745,17 @@ kategorie: Medien
 	position: relative;
 	scroll-padding-left: var(--_z-carousel-padding-inline);
 	scroll-snap-type: x mandatory;
-	scroll-behavior: smooth;
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  :global(.spec-canvas .z-carousel__scroll-container),
+  :global(.pg-preview .z-carousel__scroll-container) {
+    scroll-behavior: smooth;
+  }
+}
+:global(.spec-canvas .z-carousel__scroll-container:focus-visible),
+:global(.pg-preview .z-carousel__scroll-container:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: -2px;
 }
 :global(.spec-canvas .z-carousel__scroll-container > *),
 :global(.pg-preview .z-carousel__scroll-container > *) {
@@ -468,6 +765,7 @@ kategorie: Medien
 :global(.spec-canvas .z-carousel__slide),
 :global(.pg-preview .z-carousel__slide) {
   aspect-ratio: 1 / 1;
+	max-height: 20rem;
 	border-radius: var(--z-ds-border-radius-4);
 	background-color: var(--z-ds-color-background-10);
 	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ds-color-text-100) 8%, transparent);
@@ -500,6 +798,10 @@ kategorie: Medien
 :global(.pg-preview .z-carousel__direction-button:focus-visible) {
   background: var(--_z-carousel-button-bg-hover);
 }
+:global(.spec-canvas .z-carousel__direction-button:not(:disabled)),
+:global(.pg-preview .z-carousel__direction-button:not(:disabled)) {
+  pointer-events: all;
+}
 :global(.spec-canvas .z-carousel__direction-button:disabled),
 :global(.pg-preview .z-carousel__direction-button:disabled) {
   background: var(--_z-carousel-button-bg);
@@ -514,28 +816,44 @@ kategorie: Medien
   outline: 2px solid var(--z-ds-color-focus-100);
 	outline-offset: 2px;
 }
-:global(.spec-canvas .z-carousel__direction-button-previous),
-:global(.pg-preview .z-carousel__direction-button-previous) {
+:global(.spec-canvas .z-carousel__direction-button--previous),
+:global(.pg-preview .z-carousel__direction-button--previous) {
   margin-right: var(--z-ds-space-s);
 }
 :global(.spec-canvas .z-carousel__direction-icon),
 :global(.pg-preview .z-carousel__direction-icon) {
   display: block;
 	height: var(--_z-carousel-icon-size);
-	width: var(--_z-carousel-icon-size);
 	margin: auto;
+	width: var(--_z-carousel-icon-size);
+}
+:global(.spec-canvas .z-carousel__tabpanel-control-wrapper:not([hidden])),
+:global(.pg-preview .z-carousel__tabpanel-control-wrapper:not([hidden])) {
+  align-items: center;
+	display: flex;
+	grid-area: 2 / middle;
+	max-width: min-content;
+}
+:global(.spec-canvas .z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container),
+:global(.pg-preview .z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container) {
+  overflow-x: scroll;
+	-webkit-overflow-scrolling: touch;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+:global(.spec-canvas .z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container::-webkit-scrollbar),
+:global(.pg-preview .z-carousel:has(.z-carousel__tabpanel-control-wrapper) .z-carousel__scroll-container::-webkit-scrollbar) {
+  display: none;
 }
 :global(.spec-canvas .z-carousel__dots-wrapper),
 :global(.pg-preview .z-carousel__dots-wrapper) {
   border: none;
 	display: flex;
-	gap: var(--z-ds-space-xxs);
 	margin: 0;
-	max-width: 7.5rem;
+	max-width: 7rem;
 	min-width: 0;
 	overflow: hidden;
 	padding: 0;
-	align-items: center;
 	scroll-snap-type: x mandatory;
 }
 :global(.spec-canvas .z-carousel__dot),
@@ -549,18 +867,17 @@ kategorie: Medien
 	cursor: pointer;
 	flex: 0 0 auto;
 	height: 1rem;
-	width: 1rem;
 	scroll-snap-align: start;
 	transition:
 		background-color 0.2s,
 		border-width 0.2s linear,
 		width 0.2s linear;
+	width: 1rem;
 }
 :global(.spec-canvas .z-carousel__dot:checked),
 :global(.pg-preview .z-carousel__dot:checked) {
   background-color: var(--z-ds-color-text-70);
 	outline: none;
-	width: 1.5rem;
 }
 :global(.spec-canvas .z-carousel__dot:hover),
 :global(.pg-preview .z-carousel__dot:hover),
@@ -577,6 +894,24 @@ kategorie: Medien
   outline: 2px solid var(--z-ds-color-focus-100);
 	outline-offset: -2px;
 }
+:global(.spec-canvas .z-carousel__dot[data-size='s']),
+:global(.pg-preview .z-carousel__dot[data-size='s']) {
+  border-width: 0.3125rem;
+}
+:global(.spec-canvas .z-carousel__dot[data-size='xs']),
+:global(.pg-preview .z-carousel__dot[data-size='xs']) {
+  border-width: 0.40625rem;
+}
+@container (min-width: 48em) {
+  :global(.spec-canvas .z-carousel:not(.z-carousel--single) .z-carousel__dot:checked),
+  :global(.pg-preview .z-carousel:not(.z-carousel--single) .z-carousel__dot:checked) {
+    width: 1.5rem;
+  }
+  :global(.spec-canvas .z-carousel .z-carousel__dots-wrapper),
+  :global(.pg-preview .z-carousel .z-carousel__dots-wrapper) {
+    max-width: 7.5rem;
+  }
+}
 :global(.spec-canvas .z-carousel__playcontrol-button),
 :global(.pg-preview .z-carousel__playcontrol-button) {
   background: var(--z-ds-color-background-10);
@@ -586,8 +921,8 @@ kategorie: Medien
 	cursor: pointer;
 	flex: 0 0 auto;
 	height: var(--_z-carousel-button-size);
-	width: var(--_z-carousel-button-size);
 	margin-right: var(--z-ds-space-xs);
+	width: var(--_z-carousel-button-size);
 }
 :global(.spec-canvas .z-carousel__playcontrol-button:hover),
 :global(.pg-preview .z-carousel__playcontrol-button:hover),
@@ -597,46 +932,53 @@ kategorie: Medien
 :global(.pg-preview .z-carousel__playcontrol-button:focus-visible) {
   background: var(--z-ds-color-background-20);
 }
+:global(.spec-canvas .z-carousel__playcontrol-button:focus-visible),
+:global(.pg-preview .z-carousel__playcontrol-button:focus-visible) {
+  outline: 2px solid var(--z-ds-color-focus-100);
+	outline-offset: 2px;
+}
 :global(.spec-canvas .z-carousel__playcontrol-icon),
 :global(.pg-preview .z-carousel__playcontrol-icon) {
   display: block;
 	height: var(--_z-carousel-icon-size);
-	width: var(--_z-carousel-icon-size);
 	margin: auto;
-}
-:global(.spec-canvas .z-carousel--wide),
-:global(.pg-preview .z-carousel--wide) {
-  --_z-carousel-padding-inline: 54px;
-}
-:global(.spec-canvas .z-carousel--middle .z-carousel__slide),
-:global(.pg-preview .z-carousel--middle .z-carousel__slide) {
-  max-width: 236px;
-}
-:global(.spec-canvas .z-carousel--slot-small .z-carousel__slide),
-:global(.pg-preview .z-carousel--slot-small .z-carousel__slide) {
-  max-width: 184px;
+	width: var(--_z-carousel-icon-size);
 }
 :global(.spec-canvas .z-carousel--single),
 :global(.pg-preview .z-carousel--single) {
   --_z-carousel-slide-width: 100%;
 	--_z-carousel-slide-gap: 0;
-	--_z-carousel-padding-inline: 0;
+}
+:global(.spec-canvas .z-carousel--single .z-carousel__scroll-container),
+:global(.pg-preview .z-carousel--single .z-carousel__scroll-container) {
+  --_z-carousel-padding-inline: 0;
 }
 :global(.spec-canvas .z-carousel--continuous .z-carousel__scroll-container > *),
 :global(.pg-preview .z-carousel--continuous .z-carousel__scroll-container > *) {
   scroll-snap-align: none;
 }
-:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button-previous),
-:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button-previous) {
-  grid-area: 1 / left;
-	align-self: center;
-	z-index: 10;
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__slide-control-wrapper),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__slide-control-wrapper) {
+  display: contents;
 }
-:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button-next),
-:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button-next) {
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button),
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__tabpanel-control-wrapper),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__tabpanel-control-wrapper) {
+  z-index: 10;
+}
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button) {
+  margin: auto;
+	transition: opacity 100ms ease;
+}
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button--previous),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button--previous) {
+  grid-area: 1 / left;
+}
+:global(.spec-canvas .z-carousel--overlay-controls .z-carousel__direction-button--next),
+:global(.pg-preview .z-carousel--overlay-controls .z-carousel__direction-button--next) {
   grid-area: 1 / right;
-	align-self: center;
-	z-index: 10;
 }
 :global(.spec-canvas .z-carousel--kiosk),
 :global(.pg-preview .z-carousel--kiosk) {
@@ -645,6 +987,11 @@ kategorie: Medien
 :global(.spec-canvas .z-carousel--shop),
 :global(.pg-preview .z-carousel--shop) {
   --_z-carousel-slide-width: 20rem;
+	--_z-carousel-button-gradient-color: var(--z-ds-color-background-10);
+}
+:global(.spec-canvas .z-carousel--autoplay .z-carousel__dots-wrapper),
+:global(.pg-preview .z-carousel--autoplay .z-carousel__dots-wrapper) {
+  max-width: 7.875rem;
 }
 :global(.spec-canvas .z-carousel--autoplay .z-carousel__dot:checked),
 :global(.pg-preview .z-carousel--autoplay .z-carousel__dot:checked) {
@@ -653,8 +1000,8 @@ kategorie: Medien
 }
 :global(.spec-canvas .z-carousel--no-controls .z-carousel__slide-control-wrapper),
 :global(.pg-preview .z-carousel--no-controls .z-carousel__slide-control-wrapper),
-:global(.spec-canvas .z-carousel--no-controls .z-carousel__dots-wrapper),
-:global(.pg-preview .z-carousel--no-controls .z-carousel__dots-wrapper) {
+:global(.spec-canvas .z-carousel--no-controls .z-carousel__tabpanel-control-wrapper:not([hidden])),
+:global(.pg-preview .z-carousel--no-controls .z-carousel__tabpanel-control-wrapper:not([hidden])) {
   display: none;
 }
 </style>

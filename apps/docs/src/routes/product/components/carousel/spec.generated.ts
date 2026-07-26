@@ -7,7 +7,7 @@ export const generated = {
 	"name": "Carousel",
 	"kategorie": "Medien",
 	"figma": "https://www.figma.com/design/noSbKhOFRaqQh8eyCEqgim/%E2%9D%96-ZDS?node-id=623-555&focus-id=630-630",
-	"aktualisiertAm": "2026-07-07",
+	"aktualisiertAm": "2026-07-26",
 	"dokumentiertAm": "2026-07-07",
 	"masse": {
 		"breite": {
@@ -19,19 +19,19 @@ export const generated = {
 			"herkunft": "gemessen"
 		},
 		"padding": {
-			"px": "16 horizontal",
-			"token": "--z-ds-space-m (nur Small; Wide = 54px / 3.375rem, in Figma ohne Token)",
+			"px": "0 · 16",
+			"token": "--z-ds-space-m",
 			"herkunft": "gemessen"
 		},
 		"radius": {
 			"px": "4",
-			"token": "--z-ds-border-radius-4 (Wert identisch; Bindung in Figma nicht gesetzt)",
-			"herkunft": "gemessen"
+			"token": "--z-ds-border-radius-4",
+			"herkunft": "abgeleitet"
 		}
 	},
 	"spacing": [
 		{
-			"label": "Sektion → Track/Controls",
+			"label": "Spur ↔ Steuerungszeile",
 			"px": "16 px",
 			"token": "--z-ds-space-m",
 			"herkunft": "gemessen",
@@ -39,36 +39,45 @@ export const generated = {
 			"selector": ".z-carousel"
 		},
 		{
-			"label": "Slot-Gap im Track",
+			"label": "Abstand zwischen den Slots",
 			"px": "16 px",
-			"token": "--z-ds-space-m (Wert identisch; Bindung nur am Root gesetzt)",
+			"token": "--z-ds-space-m",
 			"herkunft": "gemessen",
 			"art": "gap",
 			"selector": ".z-carousel__scroll-container"
 		},
 		{
-			"label": "Slot-interner Gap",
+			"label": "Seitenrand — schmal (< 48 em)",
+			"px": "16 px",
+			"token": "--z-ds-space-m",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Seitenrand — mittel (≥ 48 em)",
+			"px": "32 px",
+			"token": "--z-ds-space-xl",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Seitenrand — Maximum (≥ 61,25 em)",
+			"px": "54 px",
+			"herkunft": "gemessen"
+		},
+		{
+			"label": "Abstand Zurück-Pfeil ↔ Weiter-Pfeil",
 			"px": "12 px",
 			"token": "--z-ds-space-s",
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Progress-Punkte-Gap",
-			"px": "6 px",
-			"token": "--z-ds-space-xxs",
-			"herkunft": "gemessen",
-			"art": "gap",
-			"selector": ".z-carousel__dots-wrapper"
-		},
-		{
-			"label": "Pfeil-Buttons-Gap",
-			"px": "12 px",
-			"token": "--z-ds-space-s",
+			"label": "Abstand zwischen den Fortschritts-Punkten",
+			"px": "8 px",
 			"herkunft": "gemessen"
 		},
 		{
-			"label": "Round-Icon-Padding",
-			"px": "6 px",
+			"label": "Slot-interner Gap (Figma)",
+			"px": "12 px",
+			"token": "--z-ds-space-s",
 			"herkunft": "gemessen"
 		}
 	],
@@ -78,63 +87,63 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-color-background-0",
-					"hinweis": "Fläche / Fader-Zielfarbe",
+					"hinweis": "Zielfarbe des Faders an den Rand-Zonen (ab 48 em)",
 					"swatch": "#ffffff"
 				},
 				{
 					"name": "--z-ds-color-background-10",
-					"hinweis": "Slot-Platzhalter, Pfeil-Fläche (default)",
+					"hinweis": "Pfeil-Fläche (Ruhe), Slot-Platzhalter, getönter Fader bei Shop",
 					"swatch": "#eeeeee"
 				},
 				{
 					"name": "--z-ds-color-background-20",
-					"hinweis": "Dot inaktiv, Pfeil-Fläche (hover)",
+					"hinweis": "Punkt inaktiv, Pfeil-Fläche bei Hover, Autoplay-Kapsel",
 					"swatch": "#dfdfe1"
 				},
 				{
 					"name": "--z-ds-color-text-70",
-					"hinweis": "Pfeil-Icon, Dot aktiv",
+					"hinweis": "Pfeil-Icon, aktiver Punkt",
 					"swatch": "#444444"
 				},
 				{
 					"name": "--z-ds-color-text-55",
-					"hinweis": "Slot-Label",
+					"hinweis": "Beschriftung im Doku-Platzhalter",
 					"swatch": "#69696c"
 				},
 				{
 					"name": "--z-ds-color-text-40",
-					"hinweis": "#8b8b8d · Dot hover",
-					"swatch": "#8b8b8d"
+					"hinweis": "Punkt bei Hover/Active/Fokus",
+					"swatch": "#999999"
 				},
 				{
 					"name": "--z-ds-color-focus-100",
-					"hinweis": "Fokus-Ring (2px outline)",
-					"swatch": "#1a63d6"
+					"hinweis": "Fokus-Ring (2 px) an Pfeilen, Punkten und der Spur",
+					"swatch": "#005fcc"
 				}
 			]
 		},
 		{
-			"kategorie": "Spacing",
+			"kategorie": "Abstand",
 			"items": [
 				{
 					"name": "--z-ds-space-m",
-					"hinweis": "16px · Row-Gap, Slot-Gap"
+					"hinweis": "16px · Zeilen- und Slot-Abstand, schmaler Seitenrand"
+				},
+				{
+					"name": "--z-ds-space-xl",
+					"hinweis": "32px · Seitenrand ab 48 em (Produktion: --z-gap)"
 				},
 				{
 					"name": "--z-ds-space-s",
-					"hinweis": "12px · Slot-intern, Pfeil-Abstand"
+					"hinweis": "12px · Abstand der beiden Pfeile"
 				},
 				{
 					"name": "--z-ds-space-xs",
-					"hinweis": "8px · Play-Button-Abstand"
-				},
-				{
-					"name": "--z-ds-space-xxs",
-					"hinweis": "6px · Progress-Punkte-Gap"
+					"hinweis": "8px · Abstand des Play/Pause-Knopfs (nur Auslieferung)"
 				},
 				{
 					"name": "--z-ds-space-l",
-					"hinweis": "margin-bottom (Sektion)"
+					"hinweis": "24px · Außenabstand nach unten"
 				}
 			]
 		},
@@ -143,36 +152,36 @@ export const generated = {
 			"items": [
 				{
 					"name": "--z-ds-border-radius-4",
-					"hinweis": "4px · Slot"
+					"hinweis": "4px · Slot (Figma; im ausgelieferten CSS trägt ihn der Inhalt)"
 				}
 			]
 		},
 		{
-			"kategorie": "Maße (aus CSS, 1rem=16px)",
+			"kategorie": "Maße (aus CSS, 1rem = 16px)",
 			"items": [
 				{
-					"name": "Button-Größe",
-					"hinweis": "1.875rem = 30px (≙ gemessen 30×30)"
+					"name": "Pfeil-Knopf",
+					"hinweis": "1.875rem = 30px, Radius 50% — gemessen 30×30"
 				},
 				{
-					"name": "Icon-Größe",
-					"hinweis": "0.875rem = 14px"
+					"name": "Icon",
+					"hinweis": "0.875rem = 14px, Strichstärke 1,5"
 				},
 				{
-					"name": "Padding-inline (Wide, ≥61.25em)",
-					"hinweis": "3.375rem = 54px (≙ gemessenes Wide-Padding)"
+					"name": "Seitenrand (Maximum)",
+					"hinweis": "clamp(1rem, 50% − 55.75rem/2, 3.375rem) — bei 1000px Fläche exakt 54px, Mitte exakt 892px"
 				},
 				{
-					"name": "Slot-Breite (≥48em)",
-					"hinweis": "calc(320 / 892 · 100%) — mobil calc(320 / 343 · 100%)"
+					"name": "Slot-Breite",
+					"hinweis": "calc(320/343·100%) schmal · calc(320/892·100%) ab 48em · 12.25rem Kiosk · 20rem Shop · 100% Single"
 				},
 				{
-					"name": "Sektionshöhe (je Slot Size)",
-					"hinweis": "230 (Slot S) · 282 (Slot M) · 366 (Slot L)"
+					"name": "Fortschritts-Punkt",
+					"hinweis": "1rem Kasten mit 0.25rem transparentem Rand (sichtbar 8px); aktiv 1.5rem ab 48em, Autoplay 1.875rem"
 				},
 				{
-					"name": "Dot",
-					"hinweis": "1rem = 16px (aktiv 1.5rem; Autoplay 1.875rem)"
+					"name": "Sektionshöhe je Slot-Größe (nur Figma)",
+					"hinweis": "230 (184er Slot) · 282 (236er) · 366 (320er) — im ausgelieferten CSS gibt es dazu keine Entsprechung"
 				}
 			]
 		}
@@ -187,144 +196,100 @@ export const generated = {
 		],
 		"elemente": [
 			{
-				"teil": "Fläche",
-				"tokensProZustand": {
-					"default": "--z-ds-color-background-0"
-				},
-				"hinweis": "gemessen #ffffff · zugleich Fader-Zielfarbe (nur Size=Wide)."
-			},
-			{
 				"teil": "Slot-Platzhalter",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-10"
 				},
-				"hinweis": "gemessen #eeeeee; im Produkt Content-Slot (Bild/Teaser)."
+				"hinweis": "Doku-Platzhalter — im Produkt steht hier Inhalt (Teaser, Bild, Karte)."
 			},
 			{
-				"teil": "Slot-Label",
-				"tokensProZustand": {
-					"default": "--z-ds-color-text-55"
-				},
-				"hinweis": "gemessen #69696c, Tablet Gothic Regular 16."
-			},
-			{
-				"teil": "Pfeil-Button — Fläche",
+				"teil": "Pfeil — Fläche",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-10",
 					"hover": "--z-ds-color-background-20",
 					"disabled": "--z-ds-color-background-10"
 				},
-				"hinweis": "hover deckt auch :active/:focus-visible. disabled = wie default, Icon opacity .6."
+				"hinweis": "hover deckt auch :active und :focus-visible. Deaktiviert bleibt die Fläche gleich — gedimmt wird das Icon."
 			},
 			{
-				"teil": "Pfeil-Button — Icon",
+				"teil": "Pfeil — Icon",
 				"tokensProZustand": {
 					"default": "--z-ds-color-text-70",
 					"disabled": "--z-ds-color-text-70"
 				},
-				"hinweis": "disabled: SVG opacity .6 (Farb-Token bleibt, wird gedimmt)."
+				"hinweis": "Deaktiviert: SVG opacity .6, das Token bleibt."
 			},
 			{
-				"teil": "Progress-Dot",
+				"teil": "Fortschritts-Punkt",
 				"tokensProZustand": {
 					"default": "--z-ds-color-background-20",
 					"checked": "--z-ds-color-text-70",
 					"hover": "--z-ds-color-text-40"
 				},
-				"hinweis": "hover deckt :active/:focus-visible. Autoplay: aktiver Dot Background-20 mit animiertem Text-70-Fortschritt (::after, hier nicht flach abgebildet)."
+				"hinweis": "hover deckt :active und :focus-visible. Bei Autoplay wird der aktive Punkt zur Kapsel in Background-20."
 			},
 			{
 				"teil": "Fokus-Ring",
 				"tokensProZustand": {
 					"focus": "--z-ds-color-focus-100"
 				},
-				"hinweis": "2px solid, outline-offset 2px (Buttons) bzw. -2px (Dots) bei :focus-visible."
+				"hinweis": "2px solid; Offset +2 an den Pfeilen, −2 an Punkten und an der Spur."
 			}
 		]
 	},
 	"varianten": [
 		{
-			"prop": "Size (Figma)",
+			"prop": "Ansicht (Attribut view-mode)",
 			"werte": [
 				{
-					"label": "Small",
+					"label": "Mehrspaltig",
 					"default": true
 				},
 				{
-					"label": "Wide",
-					"cssClass": "z-carousel--wide"
-				}
-			]
-		},
-		{
-			"prop": "Slot Size (Figma)",
-			"werte": [
-				{
-					"label": "Large",
-					"default": true
-				},
-				{
-					"label": "Middle",
-					"cssClass": "z-carousel--middle"
-				},
-				{
-					"label": "Small",
-					"cssClass": "z-carousel--slot-small"
-				}
-			]
-		},
-		{
-			"prop": "View Mode (Web-Attribut view-mode)",
-			"werte": [
-				{
-					"label": "default (mehrspaltig, Snap)",
-					"default": true
-				},
-				{
-					"label": "single",
+					"label": "Single",
 					"cssClass": "z-carousel--single"
 				},
 				{
-					"label": "continuous",
+					"label": "Continuous",
 					"cssClass": "z-carousel--continuous"
 				}
 			]
 		},
 		{
-			"prop": "Variant (Web-Attribut variant)",
+			"prop": "Ausprägung (Attribut variant)",
 			"werte": [
 				{
-					"label": "standard",
+					"label": "Redaktion",
 					"default": true
 				},
 				{
-					"label": "kiosk",
+					"label": "Kiosk",
 					"cssClass": "z-carousel--kiosk"
 				},
 				{
-					"label": "shop",
+					"label": "Shop",
 					"cssClass": "z-carousel--shop"
 				}
 			]
 		},
 		{
-			"prop": "Controls / Steuerung (Web-Attribute)",
+			"prop": "Steuerung",
 			"werte": [
 				{
-					"label": "controls (Figma-Prop, default an)",
+					"label": "Unter der Spur",
 					"default": true
 				},
 				{
-					"label": "no-controls",
-					"cssClass": "z-carousel--no-controls"
-				},
-				{
-					"label": "overlay-controls",
+					"label": "Overlay",
 					"cssClass": "z-carousel--overlay-controls"
 				},
 				{
-					"label": "autoplay",
+					"label": "Autoplay",
 					"cssClass": "z-carousel--autoplay"
+				},
+				{
+					"label": "Ohne Steuerung",
+					"cssClass": "z-carousel--no-controls"
 				}
 			]
 		}
@@ -335,24 +300,35 @@ export const generated = {
 			"vorhanden": true
 		},
 		{
-			"label": "hover (Pfeile/Dots)"
+			"label": "hover (Pfeile/Punkte)"
 		},
 		{
 			"label": "focus-visible"
 		},
 		{
-			"label": "disabled (Pfeile am Rand)"
+			"label": "disabled (Pfeil am Ende)"
 		},
 		{
-			"label": "checked (aktiver Dot)"
+			"label": "checked (aktiver Punkt)"
 		}
 	],
+	"playground": {
+		"align": "fill",
+		"resizable": true
+	},
 	"code": {
 		"artefakte": [
 			{
 				"format": "html-css",
 				"dateien": [
 					"pattern.css"
+				],
+				"status": "kanonisch"
+			},
+			{
+				"format": "web-component",
+				"dateien": [
+					"carousel.ts"
 				],
 				"status": "kanonisch"
 			}
