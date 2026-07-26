@@ -153,6 +153,51 @@ zweite hartkodierte Stelle oben.
 
 ---
 
+## ⚠️ Mit den Devs abklären: ~70 SSR-Fetches beim Kaltstart — und was das für einen Adapter-Wechsel bedeutet
+
+**Befund (2026-07-26, bei einem probeweisen Wechsel auf `adapter-node`.**
+Der Wechsel wurde zurückgenommen, der Befund gilt unabhängig davon.)
+
+`apps/docs/src/routes/+layout.server.ts` lädt Icons und Brand-Logos, indem es
+**pro Datei einen HTTP-Fetch auf die eigene Seite** absetzt (`/downloads/icons/…`,
+65 Icons plus Brand-Assets). Ein Modul-Cache greift ab dem zweiten Request — der
+**erste** SSR-Request einer Server-Instanz macht die Runde aber vollständig.
+
+**Das Merkwürdige daran:** Die Dateien liegen als Workspace-Paket `@zeit/icons`
+auf der Platte. Der Server holt sich über das Netz, was er direkt lesen könnte.
+Historisch erklärbar (vor dem Monorepo lagen sie in `static/`), heute nicht mehr.
+
+**Warum es jetzt auffiel.** Unter `adapter-node` leitet SvelteKit die Herkunft
+für relative Fetches aus dem Request ab und rät ohne gesetzte `ORIGIN`-Variable
+auf HTTPS. Ergebnis: `ERR_SSL_WRONG_VERSION_NUMBER`, und zwar mit einem
+besonders unangenehmen Fehlerbild —
+
+| | ohne `ORIGIN` |
+| --- | --- |
+| `/api/registry`, `/api/mcp` | **200** |
+| `/styles-zds.css`, `/downloads/icons/*` | **200** |
+| **jede HTML-Seite** | **500** |
+
+Das sieht nach „irgendwas mit dem Rendering" aus, nicht nach fehlender
+Konfiguration. Mit `ORIGIN=http://…` gesetzt: alles 200, verifiziert.
+
+**Unter Vercel ist das heute unauffällig** — die Plattform setzt die Herkunft
+selbst. Es bleibt aber eine Netzwerkabhängigkeit für etwas, das ein Dateizugriff
+wäre.
+
+**Zu klären:**
+
+1. Bleibt es bei Vercel? Falls ja, ist der Punkt Kosmetik — dann lohnt trotzdem
+   der Blick auf den Kaltstart (65+ Fetches vor dem ersten Byte HTML).
+2. Falls ein Wechsel ansteht (Node, Container, was auch immer): **Diese Stelle
+   zuerst aufräumen**, dann den Adapter tauschen. Umgekehrt debuggt man einen
+   SSL-Fehler, der keiner ist.
+3. Der saubere Weg wäre, die SVGs zur Build-Zeit aus dem Paket zu importieren
+   statt sie zur Laufzeit zu holen — dann verschwindet die `ORIGIN`-Abhängigkeit
+   für diesen Pfad vollständig und der Kaltstart wird schneller.
+
+---
+
 ## PLAN-OPUS — 4 Arbeitspakete ✅ (2026-07-04)
 
 Astryx-Benchmark-Lücken geschlossen; je ein Commit, Gate grün, Preview verifiziert.
