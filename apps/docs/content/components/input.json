@@ -1,6 +1,37 @@
 {
 	"zweck": "Einzeiliges Texteingabefeld für Formulare. Zustände Default, Active, Filled, Error und Disabled; optional mit führendem Icon, Dropdown-Chevron oder Clear-Button.",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Freitext mit führendem Icon",
+			"beschreibung": "Das führende Icon benennt die Art der Eingabe, bevor jemand tippt — der Klassiker ist die Suche. Es ersetzt kein Label: das steht weiterhin über dem Feld.",
+			"instanzen": [
+				{
+					"lead": true
+				}
+			],
+			"abdeckt": ["Leading Icon"]
+		},
+		{
+			"titel": "Auswahl statt Freitext",
+			"beschreibung": "Der Chevron rechts kündigt an, dass hier ausgewählt und nicht frei geschrieben wird (Auswahl- bzw. Combobox-Trigger). Bei wenigen festen Optionen ist ein Radio oder Select die bessere Wahl.",
+			"instanzen": [
+				{
+					"dropdown": true
+				}
+			],
+			"abdeckt": ["Dropdown"]
+		},
+		{
+			"titel": "Fehler zeigen heißt Fehler erklären",
+			"beschreibung": "Der rote Rahmen markiert nur die Stelle. Was falsch ist und wie es richtig geht, gehört als Fehlertext unter das Feld — die Farbe allein trägt die Information nicht.",
+			"instanzen": [
+				{
+					"state": "error"
+				}
+			]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

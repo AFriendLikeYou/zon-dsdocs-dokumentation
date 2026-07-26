@@ -52,6 +52,18 @@ for (const t of ASSET_TARGETS) {
 			`   ⚠️  ${t.label}: Override(s) ohne passende SVG-Datei: ${unknownOverrides.join(', ')}`
 		);
 	}
+
+	// Null gefundene SVGs wären zwar auch als Listen-Drift aufgefallen (leere
+	// Ableitung ≠ befüllte Datei) — aber erst mittelbar und mit irreführender
+	// Meldung („npm run gen:icons ausführen"), obwohl das Problem der Quellordner
+	// ist. Siehe tooling/lib/korpus.mjs.
+	if (entries.length === 0) {
+		drift++;
+		console.warn(
+			`   ⚠️  ${t.label}: 0 SVGs unter ${path.relative(root, t.svgDir)}/ — der Quellordner ist` +
+				' leer oder falsch. Ohne Quelle prüft dieser Vergleich nichts.'
+		);
+	}
 }
 
 // Auslieferungs-Spiegel: packages/icons/svg → static/downloads/icons (siehe sync-icons.mjs).

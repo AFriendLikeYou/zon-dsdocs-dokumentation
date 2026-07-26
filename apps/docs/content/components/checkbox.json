@@ -1,6 +1,21 @@
 {
 	"zweck": "Auswahlkästchen für eine An/Aus-Entscheidung oder Mehrfachauswahl. Zwei Achsen: ausgewählt (checked) und Interaktionszustand (Default, Hover, Focus, Disabled).",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Die beiden Antworten",
+			"beschreibung": "Angehakt heißt: trifft zu. Beide Zustände müssen sich auch ohne Farbwahrnehmung unterscheiden lassen — deshalb trägt der ausgewählte Zustand den Haken und nicht nur die dunkle Füllung.",
+			"instanzen": [
+				{
+					"checked": false
+				},
+				{
+					"checked": true
+				}
+			],
+			"abdeckt": ["Unchecked", "Checked"]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

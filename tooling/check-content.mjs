@@ -32,7 +32,8 @@ import path from 'node:path';
 // content-validation.mjs — derselbe Code prüft im Spec-Editor-Save. Kein Duplikat.
 import { validateContentRaw } from './content-validation.mjs';
 import { pfadWert } from './zeit-de-exporter/feldklassen.mjs';
-import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
+import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR, relToRoot } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 
 /** Die Redaktion liegt in der Doku-App (seit PR 5) … */
 const contentDir = CONTENT_COMPONENTS_DIR;
@@ -47,6 +48,19 @@ const slugs = fs.existsSync(contentDir)
 			.map((e) => e.name.replace(/\.json$/, ''))
 			.sort()
 	: [];
+
+// Ein leeres Verzeichnis ist hier kein „nichts zu tun", sondern ein verrutschter
+// Pfad: `checked = 0` und trotzdem „✓ nur bekannte Editorial-Keys" wäre eine
+// Aussage über die leere Menge.
+if (
+	korpusLeer({
+		check: 'Content-Check',
+		korpus: `Redaktionsdateien unter ${relToRoot(contentDir)}/`,
+		anzahl: slugs.length,
+		behebung: 'CONTENT_COMPONENTS_DIR in tooling/lib/paths.mjs bzw. den Ordner prüfen.'
+	})
+)
+	process.exit(strict ? 1 : 0);
 
 let problems = 0;
 let checked = 0;
@@ -182,6 +196,16 @@ const modelSlugs = fs.existsSync(pkgDir)
 			.map((e) => e.name)
 			.sort()
 	: [];
+
+if (
+	korpusLeer({
+		check: 'Schema-Check (model.json)',
+		korpus: `model.json unter ${relToRoot(pkgDir)}/`,
+		anzahl: modelSlugs.length,
+		behebung: 'PKG_COMPONENTS_DIR in tooling/lib/paths.mjs bzw. den Paket-Ordner prüfen.'
+	})
+)
+	process.exit(strict ? 1 : 0);
 
 for (const slug of modelSlugs) {
 	let issues;

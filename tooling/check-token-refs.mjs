@@ -47,6 +47,7 @@ import {
 	STATIC_DIR,
 	TOKENS_VENDOR_DIR
 } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 
 const strict = process.argv.includes('--strict');
 
@@ -170,7 +171,15 @@ export function diffTokens(canonical, refs, pinned) {
 
 // ── fs-Sammlung (getrennt von der Logik) ─────────────────────────────────────
 
-/** Rekursiv Dateien unter `dir` einsammeln, deren Basename `pred` erfüllt. */
+/**
+ * Rekursiv Dateien unter `dir` einsammeln, deren Basename `pred` erfüllt.
+ *
+ * Ein fehlendes Verzeichnis liefert hier bewusst eine leere Liste (die Funktion
+ * ist reine Sammlung, keine Instanz für Befunde) — dass ein Scan-Ort überhaupt
+ * existiert, prüft `main()` vorab explizit. Ohne diese Vorprüfung wäre ein
+ * verrutschter Pfad der stillste aller Fehler: keine Referenzen gefunden ⇒ keine
+ * unbekannten Referenzen ⇒ grün.
+ */
 function walkFiles(dir, pred, acc = []) {
 	if (!fs.existsSync(dir)) return acc;
 	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -185,6 +194,25 @@ function walkFiles(dir, pred, acc = []) {
 const rel = (p) => path.relative(REPO_ROOT, p);
 
 function main() {
+	// 0) Existieren die Scan-Orte überhaupt? Jeder von ihnen ist mit PR 3 einmal
+	//    umgezogen; der nächste Umzug darf nicht damit enden, dass hier lautlos
+	//    nichts mehr eingesammelt wird.
+	const scanOrte = [
+		['authored CSS', STATIC_DIR],
+		['Komponenten-Paket', PKG_COMPONENTS_DIR],
+		['Routen', ROUTES_DIR],
+		['App-Quellen', SRC_DIR]
+	].filter(([, dir]) => !fs.existsSync(dir));
+	if (scanOrte.length) {
+		console.warn('\n⚠️  Token-Refs nicht prüfbar: Scan-Ort(e) existieren nicht:');
+		for (const [label, dir] of scanOrte) console.warn(`   • ${label}: ${rel(dir)}`);
+		console.warn(
+			'   Ohne sie fände der Check keine Referenzen — und wäre genau deshalb grün.' +
+				'\n   → Pfade in tooling/lib/paths.mjs prüfen.\n'
+		);
+		process.exit(strict ? 1 : 0);
+	}
+
 	// 1) Kanonische Menge aus der durchgereichten Paket-Kopie (@zeit/tokens).
 	const canonical = new Set(collectDefinedTokens(fs.readFileSync(DEFINITION_PATH, 'utf8')));
 
@@ -238,6 +266,25 @@ function main() {
 		const full = path.join(DATA_DIR, rp);
 		if (fs.existsSync(full)) addRefs(collectTsTokens(fs.readFileSync(full, 'utf8')), full);
 	}
+
+	// 2f) Plausibilitätsboden: Die Orte gibt es, aber nichts drin? Dann stimmt die
+	//     Sammel-Logik nicht mehr (Dateiendungen, Marker, Regex) — auch das darf
+	//     nicht als „alles sauber" durchgehen.
+	if (
+		korpusLeer({
+			check: 'Token-Refs',
+			korpus: '--z-ds-Referenzen im Repo',
+			anzahl: refs.length,
+			behebung: 'Sammel-Logik in check-token-refs.mjs prüfen (Endungen, Marker, Regex).'
+		}) ||
+		korpusLeer({
+			check: 'Token-Refs',
+			korpus: `kanonische --z-ds-Definitionen in ${DEFINITION_REL}`,
+			anzahl: canonical.size,
+			behebung: 'npm run copy:zds — die durchgereichte Upstream-Kopie ist leer.'
+		})
+	)
+		process.exit(strict ? 1 : 0);
 
 	// 3) Abgleich.
 	const { unknownRefs, unknownPinned } = diffTokens(canonical, refs, pinned);

@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DATA_DIR, PKG_COMPONENTS_DIR, ROUTES_DIR } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 
 const routesDir = ROUTES_DIR;
 const navFile = path.join(DATA_DIR, 'navigation.ts');
@@ -60,6 +61,17 @@ function collectRoutes(dir) {
 }
 
 const routes = collectRoutes(routesDir).sort();
+
+// Keine Route gefunden heißt nicht „alles verlinkt", sondern „am falschen Ort gesucht".
+if (
+	korpusLeer({
+		check: 'Nav-Check',
+		korpus: 'Routen (+page.svelte|svx)',
+		anzahl: routes.length,
+		behebung: 'ROUTES_DIR in tooling/lib/paths.mjs gegen den echten Routen-Ordner prüfen.'
+	})
+)
+	process.exit(strict ? 1 : 0);
 
 // Exakte href-Werte aus navigation.ts (NICHT Substring — sonst bestehen Landing-Pages
 // wie /brand/marke fälschlich, weil sie Präfix längerer Hrefs sind).

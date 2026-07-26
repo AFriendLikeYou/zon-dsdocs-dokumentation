@@ -67,7 +67,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PKG_COMPONENTS_DIR, REPO_ROOT, TOKENS_VENDOR_DIR } from './lib/paths.mjs';
+import { PKG_COMPONENTS_DIR, REPO_ROOT, TOKENS_VENDOR_DIR, relToRoot } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 import { parsePxListe, massePx, erwartungAufKanten, vergleiche } from './check-prod-drift.mjs';
 import { buildDraft, knownTokens } from './zeit-de-exporter/draft.mjs';
 
@@ -217,6 +218,21 @@ function ladeTokens() {
 
 async function main() {
 	const komponenten = ladeKomponenten();
+
+	// Wie beim Prod-Drift-Check: Ein fehlender Paket-Ordner liefert eine leere Liste
+	// und läse sich als „keine Komponente mit figma-Link" — also wie ein legitimer
+	// Zustand. Der Unterschied zwischen „nichts zu prüfen" und „nicht geprüft" ist
+	// genau der, den dieser Check sonst selbst so laut macht (siehe FIGMA_TOKEN).
+	if (
+		korpusLeer({
+			check: 'Figma-Drift-Check',
+			korpus: `model.json unter ${relToRoot(componentsDir)}/`,
+			anzahl: komponenten.length,
+			behebung: 'PKG_COMPONENTS_DIR in tooling/lib/paths.mjs bzw. den Paket-Ordner prüfen.'
+		})
+	)
+		process.exit(strict ? 1 : 0);
+
 	const mitFigma = komponenten.filter((k) => typeof k.model?.figma === 'string' && k.model.figma);
 
 	const ergebnis = {

@@ -1,6 +1,14 @@
 {
 	"zweck": "Löst eine Aktion ohne sichtbares Label aus — kompakt und ikonografisch. Da kein Text sichtbar ist, braucht jeder Icon Button ein aria-label, das die Aktion beschreibt.",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Aktion ohne Label",
+			"beschreibung": "Es gibt nur eine Ausprägung — die Bedeutung trägt allein das Icon. Deshalb ist das aria-label kein Zusatz, sondern der einzige Ort, an dem die Aktion benannt wird: „Favorit hinzufügen“, nicht „Stern“.",
+			"instanzen": [{}],
+			"abdeckt": ["Default"]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

@@ -1,6 +1,69 @@
 {
 	"zweck": "Horizontal scrollende Slot-Leiste mit optionalen Controls (Progress-Indikatoren + Vor/Zurück-Pfeile). Slots sind Content-Container (im Produkt: Teaser, Bilder, Karten).",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Der Normalfall",
+			"beschreibung": "Mehrspaltige Leiste mit Scroll-Snap: Die Slots rasten an ihrem Anfang ein, Pfeile und Dots zeigen, dass es weitergeht. Am Anfang und Ende bleibt der jeweilige Pfeil sichtbar und disabled — verschwundene Pfeile sind kein Hinweis, sondern ein Rätsel.",
+			"instanzen": [{}],
+			"abdeckt": [
+				"Small",
+				"Large",
+				"default (mehrspaltig, Snap)",
+				"standard",
+				"controls (Figma-Prop, default an)"
+			]
+		},
+		{
+			"titel": "Eine Slide je Ansicht",
+			"beschreibung": "Single nimmt Gap und Padding heraus und zeigt genau eine Slide — die Fassung für Bühnen-Slider, bei denen ein Motiv die ganze Breite bekommt.",
+			"instanzen": [
+				{
+					"viewMode": "single"
+				}
+			],
+			"abdeckt": ["single"]
+		},
+		{
+			"titel": "Freies Weiterscrollen",
+			"beschreibung": "Continuous hebt das Einrasten auf: Die Leiste läuft flüssig weiter, statt Slot für Slot zu springen. Passend für lange Reihen, in denen die einzelne Position nichts bedeutet.",
+			"instanzen": [
+				{
+					"viewMode": "continuous"
+				}
+			],
+			"abdeckt": ["continuous"]
+		},
+		{
+			"titel": "Kiosk und Shop",
+			"beschreibung": "Zwei feste Slot-Breiten für kommerzielle Kontexte: Kiosk hält die Karten schmal (12,25 rem) für Angebotsleisten, Shop gibt Produktkacheln 20 rem und einen getönten Fader-Ton.",
+			"instanzen": [
+				{
+					"variant": "kiosk"
+				},
+				{
+					"variant": "shop"
+				}
+			],
+			"abdeckt": ["kiosk", "shop"]
+		},
+		{
+			"titel": "Steuerung: über dem Rand, automatisch oder gar nicht",
+			"beschreibung": "Overlay legt die Pfeile über die Rand-Zonen statt darunter (ab 48 em erst beim Hover sichtbar). Autoplay wechselt selbsttätig weiter — nur zusammen mit dem Play/Pause-Button ausliefern. Ohne Controls bleibt eine reine Scroll-Leiste: dann sollten auch nicht mehr Slots dahinterstehen, als man erraten kann.",
+			"instanzen": [
+				{
+					"overlay": true
+				},
+				{
+					"autoplay": true
+				},
+				{
+					"noControls": true
+				}
+			],
+			"abdeckt": ["overlay-controls", "autoplay", "no-controls"]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

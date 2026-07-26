@@ -19,6 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DATA_DIR, STATIC_DIR } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 
 const strict = process.argv.includes('--strict');
 
@@ -49,6 +50,26 @@ for (const file of cssFiles) {
 		usedIn.get(token).add(file);
 	}
 }
+
+// Beide Seiten des Vergleichs müssen etwas enthalten. Sonst ist „alle genutzten
+// Tokens sind dokumentiert" eine Aussage über die leere Menge — formal wahr,
+// praktisch eine Lüge (der Fall, wenn STATIC_DIR verrutscht oder das Site-CSS
+// nicht mehr dort liegt, wo gesucht wird).
+if (
+	korpusLeer({
+		check: 'Token-Check',
+		korpus: `--z-ds-Nutzungen im authored Site-CSS (${cssFiles.length} Datei(en) gescannt)`,
+		anzahl: usedIn.size,
+		behebung: 'STATIC_DIR in tooling/lib/paths.mjs bzw. den Ort des Site-CSS prüfen.'
+	}) ||
+	korpusLeer({
+		check: 'Token-Check',
+		korpus: 'dokumentierte Tokens in foundation-tokens.ts',
+		anzahl: documented.size,
+		behebung: 'apps/docs/src/lib/data/foundation-tokens.ts prüfen — die Handliste ist leer.'
+	})
+)
+	process.exit(strict ? 1 : 0);
 
 const undocumented = [...usedIn.keys()].filter((t) => !documented.has(t)).sort();
 const usedSet = new Set(usedIn.keys());

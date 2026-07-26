@@ -5,6 +5,9 @@ import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript-eslint';
+// Die ECHTE Svelte-Config — nicht die Annäherung, die sich svelte-eslint-parser
+// sonst selbst zusammensucht (siehe parserOptions.svelteConfig unten).
+import svelteConfig from './svelte.config.js';
 // Die .gitignore liegt im Repo-Root (die App ist mit PR 3 nach apps/docs gezogen,
 // das Ignore-Regelwerk bleibt eins fürs ganze Monorepo).
 const gitignorePath = fileURLToPath(new URL('../../.gitignore', import.meta.url));
@@ -50,7 +53,15 @@ export default ts.config(
 
 		languageOptions: {
 			parserOptions: {
-				parser: ts.parser
+				parser: ts.parser,
+				// svelte-eslint-parser sucht sich sonst die nächste svelte.config.js und
+				// liest sie STATISCH aus (lib/svelte-config/parser.js) — dabei überleben
+				// nur `compilerOptions.runes` und `kit.files`, Funktionen fallen weg.
+				// Damit käme das `onwarn` aus svelte.config.js nie bei
+				// `svelte/valid-compile` an. Hier wird das echte Config-Objekt
+				// durchgereicht (die Option hat Vorrang vor der Dateisuche), also gilt
+				// dieselbe Warn-Filterung für Build UND Lint. Siehe svelte.config.js.
+				svelteConfig
 			}
 		},
 		rules: {

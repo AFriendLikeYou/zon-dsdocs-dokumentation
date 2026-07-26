@@ -914,9 +914,53 @@ Inhalte pflegen/erweitern. Reihenfolge:
 
 ---
 
+## ADR-033 — Einzelne begründete Ausnahmen statt eines weichgestellten Gates
+
+**Kontext:** Sieben der acht Drift-Checks liefen mit `--strict`. Der achte,
+`check-doc-coverage`, lief warn-only — wegen genau einer Lücke bei `cell`. Der Effekt
+war nicht, dass diese eine Lücke geduldet wurde, sondern dass **alle** Lücken geduldet
+wurden: Zwischenzeitlich waren es acht von vierzehn Komponenten, ohne dass irgendwo
+etwas rot geworden wäre. Ein Gate mit Sammel-Ausnahme misst nicht mehr, es beruhigt.
+
+**Entscheidung:** Der Check läuft scharf; wo eine Lücke bleibt, steht sie **einzeln**
+in einer `AUSNAHMEN`-Tabelle im Check selbst — je Komponente, je **Befund-Code**
+(`zustaende-duenn`, `beispiele-unvollstaendig`, …), mit Begründung im Klartext.
+
+Drei Eigenschaften machen den Unterschied zum stillen Zustand:
+
+1. **Sie ist sichtbar.** Jede greifende Ausnahme wird bei JEDEM Lauf mit Grund
+   ausgegeben, nicht verschluckt. Wer den Check liest, sieht, was nicht geprüft wurde.
+2. **Sie ist eng.** Sie deckt einen Befund an einer Komponente — nicht den Check.
+   Jeder neue, andere Befund an derselben Komponente wird weiterhin rot.
+3. **Sie verfällt.** Fehlt der Befund, den eine Ausnahme decken sollte, meldet der
+   Check die Ausnahme selbst als Problem. Dieselbe Idee wie `maschinenwert` beim
+   Override (ADR-031): Ein Eintrag, der nicht mitbekommt, dass er überflüssig wurde,
+   verdeckt beim nächsten Mal etwas anderes.
+
+**Warum im Check und nicht im Modell:** Eine Ausnahme ist eine Aussage über die
+DOKUMENTATIONS-Regel, nicht über die Komponente. Im `model.json` wäre sie ein
+Maschinenfeld ohne Maschine, in der `content.json` redaktioneller Text, der auf keiner
+Seite erscheint. Im Check steht sie neben der Regel, die sie aussetzt.
+
+**Der zweite Teil derselben Regel: leerer Korpus ist ein Befund** (`tooling/lib/korpus.mjs`).
+Jeder Check sammelt erst einen Korpus ein und vergleicht ihn dann. Ist der Korpus leer,
+meldet er heute „✓ alle 0 geprüft" — eine wahre Aussage über die leere Menge und eine
+falsche über den Zustand des Repos. Genau so war `check-zds-sync` bis PR 1 grün,
+ausgerechnet wenn seine Datenquelle fehlte. Alle acht Gate-Checks plus die beiden
+nächtlichen prüfen jetzt vorab, dass sie überhaupt etwas zu prüfen haben.
+
+**Kosten:** Vier Ausnahmen bleiben (`cell`/`hero`: nur ein Zustand in der Quelle;
+`carousel`/`text-button`: Varianten, die eine Beispiel-Bühne nicht zeigen kann).
+Jede nennt, was sie schließen würde. Das ist mehr Text als ein fehlendes Flag — und
+der einzige Unterschied zwischen einer Entscheidung und einem vergessenen Zustand.
+
+---
+
 ## Offene Punkte / nächste Schritte
 
 - [ ] Schritt 2–4 des Workflows (CONTRIBUTING, sync-Action, Webhook).
+- [ ] Dunkle Beispiel-Bühne für `ExampleBlock` (wie `darkKey` im Playground) — dann
+      lässt sich die Ausnahme `text-button · beispiele-unvollstaendig` schließen.
 - [ ] Optional: Anatomie-Artboard zusätzlich theme-adaptiv (Dark-Variante).
 - [ ] Optional: A11y-Kontrast/Touch-Target automatisch berechnen statt im Modell behaupten.
 - [ ] Optional: Props/Code aus Code Connect statt aus Render-Config.

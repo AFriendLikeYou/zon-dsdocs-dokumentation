@@ -346,6 +346,11 @@
 				"default": "article",
 				"options": [
 					{
+						"value": "pinned",
+						"label": "Pinned",
+						"cssClass": "z-cell--pinned"
+					},
+					{
 						"value": "article",
 						"label": "Article",
 						"cssClass": "z-cell--article"
@@ -359,6 +364,21 @@
 						"value": "artikel",
 						"label": "Artikel",
 						"cssClass": "z-cell--artikel"
+					},
+					{
+						"value": "author",
+						"label": "Author",
+						"cssClass": "z-cell--author"
+					},
+					{
+						"value": "podcast-series",
+						"label": "Podcast Series",
+						"cssClass": "z-cell--podcast-series"
+					},
+					{
+						"value": "anzeige",
+						"label": "Anzeige",
+						"cssClass": "z-cell--anzeige"
 					}
 				]
 			},

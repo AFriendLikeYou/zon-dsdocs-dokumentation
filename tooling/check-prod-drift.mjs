@@ -45,7 +45,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR, REPO_ROOT } from './lib/paths.mjs';
+import { CONTENT_COMPONENTS_DIR, PKG_COMPONENTS_DIR, REPO_ROOT, relToRoot } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 import { setzePfadWert } from './zeit-de-exporter/feldklassen.mjs';
 
 // Der `produktion`-Block steht im model.json — und das liegt seit PR 4 im Paket.
@@ -305,6 +306,22 @@ async function erzwingeZustand(page, selektor, zustand) {
 
 async function main() {
 	const komponenten = ladeKomponenten();
+
+	// `ladeKomponenten()` liefert bei fehlendem Ordner eine leere Liste. Ohne diese
+	// Prüfung liefe der Check in die harmlos klingende Meldung „keine Komponente mit
+	// produktion-Block" — dieselbe Ausgabe wie bei einem korrekt leeren Repo, aber
+	// aus einem ganz anderen Grund. Ein verrutschter Pfad darf nicht wie Absicht
+	// aussehen.
+	if (
+		korpusLeer({
+			check: 'Prod-Drift-Check',
+			korpus: `model.json unter ${relToRoot(componentsDir)}/`,
+			anzahl: komponenten.length,
+			behebung: 'PKG_COMPONENTS_DIR in tooling/lib/paths.mjs bzw. den Paket-Ordner prüfen.'
+		})
+	)
+		process.exit(strict ? 1 : 0);
+
 	const mitBlock = komponenten.filter((k) => k.model?.produktion?.referenzen?.length);
 	const nichtPruefbar = komponenten
 		.filter((k) => !k.model?.produktion?.referenzen?.length)

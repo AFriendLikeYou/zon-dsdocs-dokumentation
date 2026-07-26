@@ -1,17 +1,22 @@
 # CI-Gate — spiegelt das lokale „Gate vor fertig" (CLAUDE.md):
 #   npm run check (svelte-check + Drift-Checks) · lint · vitest · build
 #
-# Drift-Checks: 7 von 8 laufen mit `--strict` und blockieren bei Befund (nav,
-# tokens, assets, component-drift, content, zds-sync, token-refs). Einzige
-# Ausnahme ist check-doc-coverage — es meldet aktuell 1 bewusste Lücke
-# (`cell`: nur 1 Zustand dokumentiert) und bleibt daher im Warn-Modus.
-# Aufrüst-Pfad: sobald die Lücke gefüllt ist, auch dort `--strict` ergänzen.
+# Drift-Checks: ALLE ACHT laufen seit PR 8 mit `--strict` und blockieren bei
+# Befund (nav, tokens, assets, component-drift, content, doc-coverage, zds-sync,
+# token-refs). Die frühere Sammel-Ausnahme (`check-doc-coverage` im Warn-Modus
+# wegen einer Lücke bei `cell`) ist ersetzt durch EINZELNE, begründete Ausnahmen
+# in der AUSNAHMEN-Tabelle von tooling/check-doc-coverage.mjs — sichtbar bei
+# jedem Lauf und selbst geprüft: eine Ausnahme ohne Befund bricht den Check.
 #
-# `npm run lint` läuft mit `--max-warnings 27` als Ratsche: 0 Fehler, und die
-# Warnungszahl darf nicht über den Status quo wachsen. Die 27 verbleibenden
-# Warnungen sind fast alle `custom_element_props_identifier` aus den Icon-/
-# Row-Komponenten (`{...rest}`-Spread) — irrelevant, weil hier nichts als
-# Custom Element kompiliert wird. Wer sie abbaut, zieht die Zahl mit nach unten.
+# `npm run lint` läuft mit `--max-warnings 0`. Die früheren 27 Warnungen waren
+# EIN Befund in 27 Dateien: eslint-plugin-svelte kompiliert für `valid-compile`
+# hart mit `customElement: true` und meldet darum jedes `$props()` mit
+# Rest-Element — in einer App, die keine Svelte-Custom-Elements baut, ist das
+# konstruktionsbedingt unerfüllbar. Gefiltert wird jetzt an der Quelle (`onwarn`
+# in apps/docs/svelte.config.js, in ESLint durchgereicht über
+# parserOptions.svelteConfig) — nicht per eslint-disable, und nur diese eine
+# Warnung: a11y_*, css_unused_selector & Co. schlagen weiter durch. Ein Test hält
+# die Voraussetzung fest (apps/docs/svelte.config.test.ts).
 name: CI
 
 on:

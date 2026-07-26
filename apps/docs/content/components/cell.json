@@ -1,6 +1,68 @@
 {
 	"zweck": "Teaser-Zelle für Content-Listen und Navigations-Menüs. Ein gemeinsames Grundgerüst (Fläche · Spitzmarke · Titel · Byline · Meta) in mehreren Typen — Article, Headline, Artikel, Author, Podcast Series, Anzeige und Pinned — jeweils als Wide oder Small.",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Die drei Listen-Typen",
+			"beschreibung": "Dasselbe Grundgerüst, drei redaktionelle Absichten: Artikel ist der vollständige Teaser mit Bild, Spitzmarke, Titel und Byline. Article ist die eintreffende Schlagzeile — hier gehört möglichst ein Zeitstempel dazu. Headline reduziert auf den Titel und setzt eine Trennlinie darüber.",
+			"instanzen": [
+				{
+					"type": "artikel"
+				},
+				{
+					"type": "article"
+				},
+				{
+					"type": "headline"
+				}
+			],
+			"abdeckt": ["Artikel", "Article", "Headline", "Wide"]
+		},
+		{
+			"titel": "Im Navigationsmenü",
+			"beschreibung": "Pinned steht für regelmäßig aktualisierte oder empfohlene Inhalte im Menü — Dashboards, Karten, Center-Pages. Der Platz ist knapp: Spitzmarke und Titel kurz halten, sonst bricht die Zeile.",
+			"instanzen": [
+				{
+					"type": "pinned"
+				}
+			],
+			"abdeckt": ["Pinned"]
+		},
+		{
+			"titel": "Menschen und Serien",
+			"beschreibung": "Author zeigt statt eines Motivs einen runden Avatar; die Spitzmarke entfällt, die Byline bleibt (im Produkt: Name und Funktion). Podcast Series stellt das farbige Cover daneben. Beide teilen dieselbe Zelle — was sie unterscheidet, ist welche Bestandteile sichtbar bleiben.",
+			"instanzen": [
+				{
+					"type": "author"
+				},
+				{
+					"type": "podcast-series"
+				}
+			],
+			"abdeckt": ["Author", "Podcast Series"]
+		},
+		{
+			"titel": "Werblicher Platz",
+			"beschreibung": "Anzeige sitzt auf getönter Fläche und ersetzt die redaktionelle Spitzmarke durch ein Versal-Label. Die Tönung ist die Kennzeichnung — sie darf nicht wegfallen, nur weil das Umfeld schon hell ist.",
+			"instanzen": [
+				{
+					"type": "anzeige"
+				}
+			],
+			"abdeckt": ["Anzeige"]
+		},
+		{
+			"titel": "Kompakte Fassung",
+			"beschreibung": "Small verkleinert Titel und Fläche, ohne den Aufbau zu ändern — für dichte Spalten. Der Typ bleibt frei wählbar; die Größe ist eine zweite, unabhängige Achse.",
+			"instanzen": [
+				{
+					"type": "artikel",
+					"small": true
+				}
+			],
+			"abdeckt": ["Small"]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,

@@ -114,7 +114,8 @@
 				}
 			],
 			"abdeckt": [
-				"Standard"
+				"Standard",
+				"Aus"
 			]
 		},
 		{
@@ -139,6 +140,18 @@
 			],
 			"abdeckt": [
 				"Longform"
+			]
+		},
+		{
+			"titel": "Auf farbiger Fläche",
+			"beschreibung": "Split setzt den Aufmacher auf eine Farbfläche — im Produkt die Themenfarbe des Artikels, hier der Schwarz-Fallback; Überschrift und Zusammenfassung kippen dafür auf Weiß. Weil die Farbe von außen kommt, gehört der Kontrast gegen die konkrete Themenfarbe geprüft, nicht gegen dieses Beispiel.",
+			"instanzen": [
+				{
+					"stil": "split"
+				}
+			],
+			"abdeckt": [
+				"Split"
 			]
 		},
 		{

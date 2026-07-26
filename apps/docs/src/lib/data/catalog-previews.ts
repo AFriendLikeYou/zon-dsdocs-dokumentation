@@ -324,14 +324,36 @@ function neutralisiereLinks(html: string): string {
 
 function buildPreview(slug: string, model: ModelWithRender): CatalogPreview | null {
 	const render = model.render ?? {};
-	// 1) Markup — ZWEI Wege, beide im Spec der Komponente (MIGRATIONSPLAN §4,
-	//    Ausnahme 1): `render.preview` ist die ausdrücklich kuratierte Standbild-
-	//    Fassung, sonst wird `render.template` mit den Control-Defaults
-	//    instanziiert. Ein dritter Weg — die Handliste STATIC_HTML in dieser Datei —
-	//    ist entfallen: Ihr einziger Eintrag (button-group) war seit dem Einzug von
-	//    `render.preview` unerreichbar und driftete dabei still auseinander (drei
-	//    Segmente hier, vier im Spec). Genau die Divergenz, gegen die der Umbau
-	//    antritt — eine zweite Liste neben dem Spec veraltet, und niemand merkt es.
+	// 1) Markup — ZWEI Wege, beide im Spec der Komponente. Ein dritter Weg — die
+	//    Handliste STATIC_HTML in dieser Datei — ist in PR 6 entfallen: Ihr einziger
+	//    Eintrag (button-group) war seit dem Einzug von `render.preview` unerreichbar
+	//    und driftete dabei still auseinander (drei Segmente hier, vier im Spec).
+	//    Genau die Divergenz, gegen die der Umbau antritt.
+	//
+	//    DIE VERBLIEBENEN ZWEI SIND KEIN REST, SONDERN EINE REGEL (geprüft in PR 8):
+	//
+	//      `render.template` + Control-Defaults  →  die NEUTRALE Fassung. Genau der
+	//        Zustand, mit dem der Playground startet. Der Fallback, wenn eine
+	//        Komponente nichts zu kuratieren hat.
+	//      `render.preview`                      →  das KURATIERTE STANDBILD: der
+	//        Zustand, in dem die Komponente am meisten über sich sagt. Ein
+	//        angehaktes Kästchen, ein eingeschalteter Schalter, ein gefülltes
+	//        Eingabefeld, der Primary-Button — die leere Grundstellung zeigt auf
+	//        einer 300-px-Karte nichts.
+	//
+	//    Empirie statt Vermutung: Von den 9 Modellen mit `preview` weichen 8
+	//    INHALTLICH von ihrer Default-Instanziierung ab (anderer Zustand, andere
+	//    Beispieltexte, schlankeres Markup). Die Zweiteilung ist also besetzt, nicht
+	//    übrig geblieben.
+	//
+	//    Und `preview` ist ohnehin mehr als eine Katalog-Vorschau: Dieselbe Fassung
+	//    speist die Anatomie-Bühne der Component-Seite und — als einziges
+	//    platzhalterfreies Markup — den HTML-Code-Block im Develop-Tab (siehe
+	//    `renderPage` in tooling/zeit-de-exporter/export.mjs). Das `template` kann
+	//    das nicht ersetzen: Es trägt `{classes}`/`{attrs}` und wäre als Code-Beispiel
+	//    schlicht falsch. Deshalb bleibt auch der eine Fall, dessen `preview` zufällig
+	//    zeichengleich zur Default-Instanziierung ist (icon-button), kein toter
+	//    Eintrag — er ist dort die Quelle des Code-Blocks.
 	let html = '';
 	if (render.preview) {
 		html = render.preview;

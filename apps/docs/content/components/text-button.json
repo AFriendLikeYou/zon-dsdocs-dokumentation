@@ -1,6 +1,40 @@
 {
 	"zweck": "Dezenter, flächenloser Text-Button für sekundäre Aktionen — mit Größen- und Betonungs-Modifiern sowie einer On-Image-Variante für Flächen auf Bildern.",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Die nachrangige Aktion",
+			"beschreibung": "Ohne Fläche, ohne Rahmen: Der Text Button steht neben einer wichtigeren Aktion und nimmt ihr nichts weg. Das Label benennt die Aktion konkret — „Mehr anzeigen“ statt „Mehr“.",
+			"instanzen": [{}],
+			"abdeckt": ["Default"]
+		},
+		{
+			"titel": "Dichte oder Prominenz",
+			"beschreibung": "Slim spart 2 px Höhe je Seite und ist für dichte Layouts gedacht — Listen, Toolbars, Teaser-Zeilen. Large geht den umgekehrten Weg (Label 16 statt 14), wenn die Aktion mehr Gewicht verträgt.",
+			"instanzen": [
+				{
+					"size": "slim"
+				},
+				{
+					"size": "large"
+				}
+			],
+			"abdeckt": ["Slim", "Large"]
+		},
+		{
+			"titel": "Betont und aktiv",
+			"beschreibung": "Bold betont das Label innerhalb einer Gruppe gleichrangiger Aktionen. Active ist kein Hover, sondern ein bleibender Zustand: der gerade ausgewählte Eintrag, hinterlegt mit Background-10.",
+			"instanzen": [
+				{
+					"bold": true
+				},
+				{
+					"active": true
+				}
+			],
+			"abdeckt": ["Bold", "Active"]
+		}
+	],
 	"verwandt": [
 		"button",
 		"icon-button"

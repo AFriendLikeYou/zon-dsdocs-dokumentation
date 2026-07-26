@@ -30,7 +30,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { COMPONENTS_DIR, DATA_DIR, PKG_COMPONENTS_DIR } from './lib/paths.mjs';
+import { COMPONENTS_DIR, DATA_DIR, PKG_COMPONENTS_DIR, relToRoot } from './lib/paths.mjs';
+import { korpusLeer } from './lib/korpus.mjs';
 
 /** Wo die Doku-Seiten liegen (Routen) … */
 const routesDir = COMPONENTS_DIR;
@@ -169,6 +170,20 @@ const dirsIn = (base) =>
 const allDirs = dirsIn(routesDir);
 const slugs = dirsIn(pkgDir).filter((s) => fs.existsSync(path.join(pkgDir, s, 'model.json')));
 
+// `dirsIn` schluckt ein fehlendes Verzeichnis bewusst (leeres Array) — damit der
+// inverse Check A auch dann läuft, wenn eine Seite noch nicht existiert. Genau
+// deshalb muss der leere Fall HIER auffallen: sonst meldete der Check „0
+// Component(s), konsistent" und wäre grün, ohne je ein Modell gesehen zu haben.
+if (
+	korpusLeer({
+		check: 'Component-Drift-Check',
+		korpus: `model.json unter ${relToRoot(pkgDir)}/`,
+		anzahl: slugs.length,
+		behebung: 'PKG_COMPONENTS_DIR in tooling/lib/paths.mjs bzw. den Paket-Ordner prüfen.'
+	})
+)
+	process.exit(strict ? 1 : 0);
+
 // Geplante Stubs (PLANNED_COMPONENTS in navigation.ts) haben BEWUSST kein
 // model.json — die sollen hier nicht bei jedem Lauf als Drift rauschen.
 const navSrc = fs.readFileSync(path.join(DATA_DIR, 'navigation.ts'), 'utf8');
@@ -217,7 +232,15 @@ for (const slug of slugs) {
 	try {
 		model = JSON.parse(fs.readFileSync(path.join(pkgDir, slug, 'model.json'), 'utf8'));
 	} catch {
-		console.warn(`   ⚠️  ${slug}: model.json nicht lesbar/parsebar — übersprungen.`);
+		// Ein übersprungenes Modell ist ein NICHT geprüftes Modell — das zählt als
+		// Befund, auch wenn die Ursache (kaputtes JSON) erst check-content im Detail
+		// benennt. Vorher lief der Check hier weiter und blieb grün: Wer die Warnung
+		// im Log übersah, hielt eine ungeprüfte Komponente für geprüft.
+		drift++;
+		console.warn(
+			`\n⚠️  „${slug}": model.json nicht lesbar/parsebar — nicht auf Drift prüfbar.` +
+				'\n   → JSON reparieren; die genaue Fehlerstelle nennt check-content.'
+		);
 		continue;
 	}
 	// pattern.css aus dem Paket (Registry-Schema) in den Vergleichs-Korpus aufnehmen.

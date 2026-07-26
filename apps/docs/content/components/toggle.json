@@ -1,6 +1,21 @@
 {
 	"zweck": "Umschalter für eine sofort wirksame Ein/Aus-Einstellung (Web-Variante). Track wechselt die Farbe, der weiße Thumb wandert. iOS nutzt das native Plattform-Control.",
 	"status": "ready_for_dev",
+	"beispiele": [
+		{
+			"titel": "Sofort wirksam",
+			"beschreibung": "Der Umschalter ist kein Formularfeld: Was er umlegt, greift unmittelbar — ohne Speichern-Schritt. Track-Farbe und Thumb-Position zeigen den Zustand; die Zustandsansage selbst gehört ins aria-checked, nicht allein in die Farbe.",
+			"instanzen": [
+				{
+					"on": false
+				},
+				{
+					"on": true
+				}
+			],
+			"abdeckt": ["Off", "On"]
+		}
+	],
 	"callouts": [
 		{
 			"nr": 1,
